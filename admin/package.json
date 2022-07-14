@@ -1,6 +1,7 @@
 {
-  "name": "fuse-react-app",
-  "version": "8.0.0",
+  "name": "99ventures",
+  "version": "1.0.0",
+  "author": "Sourabh Das (sourabh.das@codeclouds.in)",
   "private": true,
   "dependencies": {
     "@emotion/cache": "11.7.1",
