@@ -1,0 +1,4 @@
+.env
+backend/.env
+backend/public/uploads/*
+frontend/.env

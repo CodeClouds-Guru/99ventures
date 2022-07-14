@@ -1,0 +1,76 @@
+version: '3'
+services:
+  mysqldb:
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+    ports:
+      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - backend
+
+  phpmyadmin:
+    depends_on:
+      - mysqldb
+    image: phpmyadmin/phpmyadmin
+    container_name: phpadmin_container
+    environment:
+      PMA_HOST: mysqldb
+    links:
+      - mysqldb:mysqldb
+    ports:
+      - 8080:80
+    restart: always
+    networks:
+      - backend
+  
+  backend:
+    depends_on:
+      - mysqldb
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    environment:
+      - DB_HOST=mysqldb
+      - DB_USER=$MYSQLDB_USER
+      - DB_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+      - DB_NAME=$MYSQLDB_DATABASE
+      - DB_PORT=$MYSQLDB_DOCKER_PORT
+      - CLIENT_ORIGIN=$CLIENT_ORIGIN
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./backend:/usr/src/backend
+      - /usr/src/backend/node_modules
+  admin:
+    depends_on:
+      - backend
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.dev
+      args:
+        - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
+    ports:
+      - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+    volumes:
+      - ./admin:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    networks:
+      - frontend  
+
+volumes: 
+  db:
+  
+networks:
+  backend:
+  frontend:
