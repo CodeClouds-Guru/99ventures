@@ -62,6 +62,8 @@ services:
         - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     ports:
       - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+    environment: 
+      - CLIENT_API_BASE_URL=$CLIENT_API_BASE_URL
     volumes:
       - ./admin:/usr/src/frontend
       - /usr/src/frontend/node_modules

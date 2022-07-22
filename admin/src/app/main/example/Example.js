@@ -18,6 +18,7 @@ const Root = styled(FusePageSimple)(({ theme }) => ({
 
 function ExamplePage(props) {
   const { t } = useTranslation('examplePage');
+  console.log(process.env);
 
   return (
     <Root
