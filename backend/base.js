@@ -62,7 +62,7 @@ function chainRoutes(app) {
 module.exports = function () {
   const app = init()
   setup(app)
-  connectDB(app)
+  // connectDB(app)
   chainMiddlewares(app)
   chainRoutes(app)
   return app
