@@ -52,7 +52,6 @@ module.exports = {
         type: Sequelize.TIME
       },
       deleted_at: {
-        allowNull: false,
         type: Sequelize.TIME
       }
     });
