@@ -1,4 +1,5 @@
 .env
+dbdiagram.txt
 backend/.env
 backend/public/uploads/*
 frontend/.env

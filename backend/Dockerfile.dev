@@ -1,8 +1,7 @@
 FROM node:17
 WORKDIR /usr/src/backend
 COPY package*.json ./
-RUN npm install
-RUN npm install sequelize-cli --save-dev
+RUN npm install nodemon sequelize-cli --save-dev
 COPY . .
 EXPOSE 4000
 CMD [ "npm", "run", "dev" ]

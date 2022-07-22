@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const path = require('path')
 const fileUpload = require('express-fileupload')
+const db = require('./config/database')
 
 function init() {
   const app = express()
@@ -29,6 +30,15 @@ function setup(app) {
   )
 }
 
+function connectDB(app) {
+  try {
+    db.authenticate()
+    console.log('Connected to DB')
+  } catch (e) {
+    console.error('Unable to connect to DB', e)
+  }
+}
+
 function chainMiddlewares(app) {
   const Middlewares = require('./middlewares')
   Object.values(Middlewares).forEach((element) => {
@@ -52,6 +62,7 @@ function chainRoutes(app) {
 module.exports = function () {
   const app = init()
   setup(app)
+  connectDB(app)
   chainMiddlewares(app)
   chainRoutes(app)
   return app
