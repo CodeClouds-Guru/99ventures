@@ -1,32 +1,38 @@
-'use strict'
+'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('companies', {
+    await queryInterface.createTable('users', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.BIGINT
+        type: Sequelize.INTEGER
       },
-      company_type_id: {
-        type: Sequelize.BIGINT,
-        allowNull:false,        
-      },
-      name: {
+      first_name: {
         type: Sequelize.STRING,
-        allowNull:false,
+        allowNull: false
       },
-      slug: {
+      last_name: {
         type: Sequelize.STRING,
-        allowNull:true,
+        allowNull: false
       },
-      logo: {
+      username: {
         type: Sequelize.STRING,
-        allowNull:true,
+        allowNull: false
       },
-      status: {
-        type: Sequelize.TINYINT,
-        defaultValue:1
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      avatar: {
+        type: Sequelize.STRING
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      phone_no: {
+        type: Sequelize.STRING
       },
       created_by: {
         type: Sequelize.BIGINT
@@ -38,6 +44,7 @@ module.exports = {
         type: Sequelize.BIGINT
       },
       created_at: {
+        allowNull: false,
         type: Sequelize.TIME
       },
       updated_at: {
@@ -48,9 +55,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TIME
       }
-    })
+    });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('companies')
-  },
-}
+    await queryInterface.dropTable('users');
+  }
+};
