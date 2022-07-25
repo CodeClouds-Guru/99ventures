@@ -1,5 +1,7 @@
 const express = require('express')
 const router = express.Router()
+const AuthControllerClass = require('../controllers/backend/AuthController')
+const AuthController = new AuthControllerClass()
 router.get('/', (req, res) => {
   res.status(200).json({
     status: true,
@@ -7,12 +9,9 @@ router.get('/', (req, res) => {
   })
 })
 
-router.get('/test', (req, res) => {
-  res.status(200).json({
-    status: true,
-    message: 'API route is working from test',
-  })
-})
+router.post('/signup', AuthController.signup)
+router.post('/login', AuthController.login)
+
 module.exports = {
   prefix: '/api',
   router,

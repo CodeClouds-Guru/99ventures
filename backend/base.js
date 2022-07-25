@@ -65,5 +65,13 @@ module.exports = function () {
   // connectDB(app)
   chainMiddlewares(app)
   chainRoutes(app)
+  app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).json({
+      status: false,
+      errors: ['Oops! Something went wrong'],
+      trace: err.stack,
+    })
+  })
   return app
 }

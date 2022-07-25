@@ -46,6 +46,7 @@ services:
       - DB_NAME=$MYSQLDB_DATABASE
       - DB_PORT=$MYSQLDB_DOCKER_PORT
       - CLIENT_ORIGIN=$CLIENT_ORIGIN
+      - APP_SECRET=$NODE_APP_SECRET
     networks:
       - backend
       - frontend
