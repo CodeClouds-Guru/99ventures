@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const sequelizePaginate = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class Role extends Model {
     /**
@@ -21,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Role",
+      modelName: "role",
       timestamps: true,
       paranoid: true,
       createdAt: "created_at", // alias createdAt as created_date
@@ -29,5 +30,21 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: "deleted_at",
     }
   );
+  Role.fields = {
+    id: {
+      field_name: "id",
+      db_name: "id",
+      type: "text",
+      placeholder: "Id",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+  };
+  sequelizePaginate.paginate(Role);
   return Role;
 };
