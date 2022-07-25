@@ -38,6 +38,7 @@ module.exports = {
         type: Sequelize.BIGINT
       },
       created_at: {
+        allowNull: false,
         type: Sequelize.TIME
       },
       updated_at: {
@@ -45,7 +46,6 @@ module.exports = {
         type: Sequelize.TIME
       },
       deleted_at: {
-        allowNull: false,
         type: Sequelize.TIME
       }
     })
