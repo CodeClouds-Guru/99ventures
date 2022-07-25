@@ -1,23 +1,18 @@
-const express = require("express");
-const router = express.Router();
-const DynamicRouteController = require("../controllers/DynamicRouteController");
-router.get("/", (req, res) => {
-  res.status(200).json({
-    status: true,
-    message: "API route is working",
-  });
-});
+const express = require('express')
+const router = express.Router()
+const AuthControllerClass = require('../controllers/backend/AuthController')
+const AuthController = new AuthControllerClass()
+const DynamicRouteController = require('../controllers/DynamicRouteController')
+router.get('/', (req, res) => {
+  res.json({ message: 'API working' })
+})
 
-router.get("/test", (req, res) => {
-  res.status(200).json({
-    status: true,
-    message: "API route is working from test",
-  });
-});
+router.post('/signup', AuthController.signup)
+router.post('/login', AuthController.login)
 
-router.all("/:module/:action?/:id?", DynamicRouteController.handle);
+router.all('/:module/:action?/:id?', DynamicRouteController.handle)
 
 module.exports = {
-  prefix: "/api",
+  prefix: '/api',
   router,
-};
+}

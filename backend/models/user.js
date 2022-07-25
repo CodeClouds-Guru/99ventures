@@ -1,6 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
-const sequelizePaginate = require("sequelize-paginate");
+'use strict'
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -27,96 +26,96 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "user",
+      modelName: 'user',
       timestamps: true,
       paranoid: true,
-      createdAt: "created_at", // alias createdAt as created_date
-      updatedAt: "updated_at",
-      deletedAt: "deleted_at",
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'users',
     }
-  );
+  )
 
   User.fields = {
     id: {
-      field_name: "id",
-      db_name: "id",
-      type: "text",
-      placeholder: "Id",
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
       listing: false,
       show_in_form: false,
       sort: true,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     first_name: {
-      field_name: "first_name",
-      db_name: "first_name",
-      type: "text",
-      placeholder: "First Name",
+      field_name: 'first_name',
+      db_name: 'first_name',
+      type: 'text',
+      placeholder: 'First Name',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     last_name: {
-      field_name: "last_name",
-      db_name: "last_name",
-      type: "text",
-      placeholder: "Last Name",
+      field_name: 'last_name',
+      db_name: 'last_name',
+      type: 'text',
+      placeholder: 'Last Name',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     email: {
-      field_name: "email",
-      db_name: "email",
-      type: "text",
-      placeholder: "Email",
+      field_name: 'email',
+      db_name: 'email',
+      type: 'text',
+      placeholder: 'Email',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     username: {
-      field_name: "username",
-      db_name: "username",
-      type: "text",
-      placeholder: "Username",
+      field_name: 'username',
+      db_name: 'username',
+      type: 'text',
+      placeholder: 'Username',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     created_at: {
-      field_name: "created_at",
-      db_name: "created_at",
-      type: "text",
-      placeholder: "Created At",
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created At',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
-    
-  };
-  sequelizePaginate.paginate(User);
-  return User;
-};
+  }
+  sequelizePaginate.paginate(User)
+  return User
+}
