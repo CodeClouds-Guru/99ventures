@@ -44,15 +44,14 @@ module.exports = {
         type: Sequelize.BIGINT
       },
       created_at: {
-        allowNull: false,
-        type: Sequelize.TIME
+        type: 'TIMESTAMP',
+        allowNull: false
       },
       updated_at: {
-        allowNull: false,
-        type: Sequelize.TIME
+        type: 'TIMESTAMP',
       },
       deleted_at: {
-        type: Sequelize.TIME
+        type: 'TIMESTAMP',
       }
     });
   },
