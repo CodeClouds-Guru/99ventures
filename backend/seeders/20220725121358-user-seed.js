@@ -1,5 +1,6 @@
-"use strict";
-const users = [
+const bcrypt = require("bcryptjs");
+("use strict");
+let users = [
   {
     first_name: "Arindam",
     last_name: "Samanta",
@@ -11,7 +12,7 @@ const users = [
     created_by: 1,
     updated_by: null,
     deleted_by: null,
-    created_at: new Date()
+    created_at: new Date(),
   },
   {
     first_name: "Mritunjay",
@@ -24,7 +25,7 @@ const users = [
     created_by: 1,
     updated_by: null,
     deleted_by: null,
-    created_at: new Date()
+    created_at: new Date(),
   },
   {
     first_name: "Sourav",
@@ -37,7 +38,7 @@ const users = [
     created_by: 1,
     updated_by: null,
     deleted_by: null,
-    created_at: new Date()
+    created_at: new Date(),
   },
   {
     first_name: "Sourabh",
@@ -50,7 +51,7 @@ const users = [
     created_by: 1,
     updated_by: null,
     deleted_by: null,
-    created_at: new Date()
+    created_at: new Date(),
   },
   {
     first_name: "Nandita",
@@ -63,7 +64,7 @@ const users = [
     created_by: 1,
     updated_by: null,
     deleted_by: null,
-    created_at: new Date()
+    created_at: new Date(),
   },
 ];
 module.exports = {
@@ -77,6 +78,13 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
+    const salt = await bcrypt.genSalt(10);
+    users = users.map(async (user) => {
+      const password = await bcrypt.hash(user.password, salt);
+      user.password = password;
+      return user;
+    });
+    users = await Promise.all(users);
     await queryInterface.bulkInsert("users", users);
   },
 
