@@ -1,10 +1,11 @@
+const baseURL = 'http://localhost:4000/api/';
 const jwtServiceConfig = {
-  signIn: 'api/auth/sign-in',
-  signUp: 'api/auth/sign-up',
-  accessToken: 'api/auth/access-token',
-  updateUser: 'api/auth/user/update',
-  forgotPassword: 'api/auth/forgot-password',
-  setPassword: 'api/auth/set-password',
+  signIn: baseURL + 'login',
+  signUp: baseURL + 'sign-up',
+  accessToken: baseURL + 'refresh-token',
+  updateUser: baseURL + 'user/update',
+  forgotPassword: baseURL + 'forgot-password',
+  setPassword: baseURL + 'set-password',
 };
 
 export default jwtServiceConfig;
