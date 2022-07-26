@@ -22,12 +22,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "permission",
+      modelName: "Permission",
       timestamps: true,
       paranoid: true,
       createdAt: "created_at", // alias createdAt as created_date
       updatedAt: "updated_at",
       deletedAt: "deleted_at",
+      tableName: "permissions"
     }
   );
   Permission.fields = {
@@ -43,6 +44,45 @@ module.exports = (sequelize, DataTypes) => {
       value: "",
       width: "50",
       searchable: false,
+    },
+    name: {
+      field_name: "name",
+      db_name: "name",
+      type: "text",
+      placeholder: "Name",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    slug: {
+      field_name: "slug",
+      db_name: "slug",
+      type: "text",
+      placeholder: "Slug",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    created_at: {
+      field_name: "created_at",
+      db_name: "created_at",
+      type: "text",
+      placeholder: "Created At",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
     },
   };
   sequelizePaginate.paginate(Permission);
