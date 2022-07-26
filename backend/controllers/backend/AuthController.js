@@ -84,6 +84,7 @@ class AuthController {
         status: false,
         errors: error.details.map((err) => err.message),
       })
+      return
     }
     const user = await User.findOne({ where: { email: value.email } })
     if (!user) {
@@ -91,6 +92,7 @@ class AuthController {
         status: false,
         errors: 'Sorry! this email is not registered with us',
       })
+      return
     }
     const isMatch = await bcrypt.compare(value.password, user.password)
     if (!isMatch) {
@@ -98,6 +100,7 @@ class AuthController {
         status: false,
         message: 'Invalid Credentials',
       })
+      return
     }
     const token = generateToken({
       user: {
