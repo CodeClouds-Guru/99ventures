@@ -1,5 +1,6 @@
 'use strict'
 const { Model } = require('sequelize')
+const sequelizePaginate = require('sequelize-paginate')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -26,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'user',
+      modelName: 'User',
       timestamps: true,
       paranoid: true,
       createdAt: 'created_at', // alias createdAt as created_date

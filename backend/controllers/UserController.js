@@ -1,8 +1,8 @@
-const Controller = require("./Controller");
+const Controller = require('./Controller')
 class UserController extends Controller {
   constructor() {
-    super('user');
+    super('User')
   }
 }
 
-module.exports = new UserController();
+module.exports = new UserController()
