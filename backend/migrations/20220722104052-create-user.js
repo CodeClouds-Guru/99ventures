@@ -1,61 +1,66 @@
-'use strict';
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable("users", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       first_name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       last_name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       username: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       password: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       phone_no: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       created_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       updated_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       created_at: {
-        type: 'TIMESTAMP',
-        allowNull: false
+        type: "TIMESTAMP",
+        allowNull: false,
       },
       updated_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
       },
       deleted_at: {
-        type: 'TIMESTAMP',
-      }
+        type: "TIMESTAMP",
+      },
     });
+    await queryInterface.addConstraint('users', {
+      fields: ['email'],
+      type: 'unique',
+      name: 'users_email_unique'
+    });;
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
-  }
+    await queryInterface.dropTable("users");
+  },
 };
