@@ -14,10 +14,16 @@ module.exports = (sequelize, DataTypes) => {
   }
   User.init(
     {
-      first_name: DataTypes.STRING,
+      first_name: { type: DataTypes.STRING },
       last_name: DataTypes.STRING,
       username: DataTypes.STRING,
-      email: DataTypes.STRING,
+      email: {
+        type: DataTypes.STRING,
+        unique: {
+          args: true,
+          msg: "Email address already in use!",
+        },
+      },
       avatar: DataTypes.STRING,
       password: DataTypes.STRING,
       phone_no: DataTypes.STRING,
@@ -123,7 +129,7 @@ module.exports = (sequelize, DataTypes) => {
     "username",
     "email",
     "avatar",
-    "password"
+    "password",
   ];
   sequelizePaginate.paginate(User);
   return User;
