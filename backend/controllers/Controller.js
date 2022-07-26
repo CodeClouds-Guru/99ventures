@@ -84,7 +84,27 @@ class Controller {
   }
 
   async delete(req, res) {
-    return {};
+    try {
+      let model = await this.model.findByPk(req.params.id);
+      await model.destroy();
+      return {
+        message: "Record has been deleted successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async restore(req, res) {
+    let id = req.params.id;
+    try {
+      await this.model.restore({where:{id}});
+      return {
+        message: "Record has been restored successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
