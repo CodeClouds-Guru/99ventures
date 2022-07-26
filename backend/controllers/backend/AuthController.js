@@ -113,6 +113,28 @@ class AuthController {
       access_token: token,
     })
   }
+
+  async profile(req, res) {
+    res.status(200).json({ status: true, user: req.user })
+  }
+
+  async logout(req, res) {
+    res.status(200).json({ status: true })
+  }
+
+  async refreshToken(req, res) {
+    const user = req.user
+    const token = generateToken({
+      user: {
+        id: user.id,
+      },
+    })
+    res.status(200).json({
+      status: true,
+      token,
+      user,
+    })
+  }
 }
 
 module.exports = AuthController
