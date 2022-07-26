@@ -11,7 +11,7 @@ class Controller {
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },
-      fields: this.model.fields
+      fields: this.model.fields,
     };
   }
 
@@ -48,16 +48,39 @@ class Controller {
   }
 
   async store(req, res) {
-    return {};
+    let request_data = req.body;
+    try {
+      let model = await this.model.create(request_data);
+      return {
+        message: "Record has been created successfully",
+        result: model,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async show(req, res) {
-    let model = await this.model.findByPk(req.params.id);
-    return model;
+    try {
+      let model = await this.model.findByPk(req.params.id);
+      let fields = this.model.fields;
+      return { result: model, fields };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async update(req, res) {
-    return {};
+    let id = req.params.id;
+    let request_data = req.body;
+    try {
+      let model = await this.model.update(request_data, { where: { id } });
+      return {
+        message: "Record has been updated successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async delete(req, res) {
