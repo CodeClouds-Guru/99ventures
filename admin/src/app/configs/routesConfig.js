@@ -7,15 +7,15 @@ import ForgotPasswordConfig from '../main/forgot-password/ForgotPasswordConfig';
 import SetPasswordConfig from '../main/set-password/SetPasswordConfig';
 import SignOutConfig from '../main/sign-out/SignOutConfig';
 import Error404Page from '../main/404/Error404Page';
-import ExampleConfig from '../main/example/ExampleConfig';
+import DashboardConfig from '../main/dashboard/DashboardConfig';
 
-const routeConfigs = [ExampleConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig];
+const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig];
 
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs, settingsConfig.defaultAuth),
   {
     path: '/',
-    element: <Navigate to="/example" />,
+    element: <Navigate to="/dashboard" />,
     auth: settingsConfig.defaultAuth,
   },
   {

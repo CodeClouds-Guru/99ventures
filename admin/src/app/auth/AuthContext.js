@@ -15,7 +15,7 @@ function AuthProvider({ children }) {
 
   useEffect(() => {
     jwtService.on('onAutoLogin', () => {
-      dispatch(showMessage({ message: 'Signing in with JWT' }));
+      dispatch(showMessage({ message: null }));
 
       /**
        * Sign in and retrieve user data with stored token
@@ -23,7 +23,7 @@ function AuthProvider({ children }) {
       jwtService
         .signInWithToken()
         .then((user) => {
-          success(user, 'Signed in with JWT');
+          success(user, null);
         })
         .catch((error) => {
           pass(error.message);
@@ -31,11 +31,11 @@ function AuthProvider({ children }) {
     });
 
     jwtService.on('onLogin', (user) => {
-      success(user, 'Signed in');
+      success(user, null);
     });
 
     jwtService.on('onLogout', () => {
-      pass('Signed out');
+      pass(null);
 
       dispatch(logoutUser());
     });

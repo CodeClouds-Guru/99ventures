@@ -22,7 +22,7 @@ import axios from 'axios';
  */
 axios.defaults.baseURL = "http://localhost:4000/api/";
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 const emotionCacheOptions = {
   rtl: {
