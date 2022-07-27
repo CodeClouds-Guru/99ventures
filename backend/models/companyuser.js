@@ -2,8 +2,9 @@
 const {
   Model
 } = require('sequelize');
+const sequelizePaginate = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
-  class GroupRole extends Model {
+  class CompanyUser extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,15 +14,17 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  GroupRole.init({
-    group_id: DataTypes.BIGINT,
-    role_id: DataTypes.BIGINT
+  CompanyUser.init({
+    company_id: DataTypes.BIGINT,
+    user_id: DataTypes.BIGINT,
+    group_id: DataTypes.BIGINT
   }, {
     sequelize,
-    modelName: 'GroupRole',
+    modelName: 'CompanyUser',
     timestamps: false,
     paranoid: false,
-    tableName: 'group_role'
+    tableName: 'company_user'
   });
-  return GroupRole;
+  sequelizePaginate.paginate(Group);
+  return CompanyUser;
 };

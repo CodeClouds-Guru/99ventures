@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
+    tableName: "invitations",
   });
   return Invitation;
 };
