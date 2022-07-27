@@ -1,6 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -12,6 +13,20 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
+  User.validate = function (req) {
+    const schema = Joi.object({
+      first_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      username: Joi.string().alphanum().min(3).max(30).required(),
+      password: Joi.string()
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .required(),
+      phone_no: Joi.string().required(),
+      email: Joi.string().email().required(),
+    });
+    return schema.validate(req.body);
+  };
+
   User.init(
     {
       first_name: { type: DataTypes.STRING },
@@ -131,6 +146,7 @@ module.exports = (sequelize, DataTypes) => {
     "avatar",
     "password",
   ];
+  User;
   sequelizePaginate.paginate(User);
   return User;
 };

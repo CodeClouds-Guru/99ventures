@@ -49,6 +49,14 @@ class Controller {
 
   async store(req, res) {
     let request_data = req.body;
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      res.status(401).json({
+        status: false,
+        errors: error.details.map((err) => err.message),
+      })
+      return
+    }
     try {
       let model = await this.model.create(request_data);
       return {
