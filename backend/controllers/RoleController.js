@@ -1,7 +1,7 @@
 const Controller = require("./Controller");
 class RoleController extends Controller {
   constructor() {
-    super('role');
+    super('Role');
   }
 }
 
