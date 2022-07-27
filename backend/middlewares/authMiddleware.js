@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Company } = require('../models')
 const jwt = require('jsonwebtoken')
 
 module.exports = async function (req, res, next) {
@@ -14,8 +14,14 @@ module.exports = async function (req, res, next) {
       where: {
         id: decoded_user.id,
       },
+      include: [
+        {
+          model: Company,
+        },
+      ],
     })
     if (user) {
+      console.log(user)
       req.user = user
       next()
     } else {
