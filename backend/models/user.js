@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: "created_at", // alias createdAt as created_date
       updatedAt: "updated_at",
       deletedAt: "deleted_at",
-      tableName: "users",
+      tableName: "users",      
     }
   );
 
@@ -138,15 +138,6 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
   };
-  User.fillable = [
-    "first_name",
-    "last_name",
-    "username",
-    "email",
-    "avatar",
-    "password",
-  ];
-  User;
   sequelizePaginate.paginate(User);
   return User;
 };
