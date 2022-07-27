@@ -25,6 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: false,
     tableName: 'company_user'
   });
-  sequelizePaginate.paginate(Group);
+  sequelizePaginate.paginate(CompanyUser);
   return CompanyUser;
 };
