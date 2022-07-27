@@ -1,6 +1,8 @@
 "use strict";
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
+const Joi = require("joi");
+const { stringToSlug } = require("../helpers/global");
 module.exports = (sequelize, DataTypes) => {
   class Permission extends Model {
     /**
@@ -28,9 +30,23 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: "created_at", // alias createdAt as created_date
       updatedAt: "updated_at",
       deletedAt: "deleted_at",
-      tableName: "permissions"
+      tableName: "permissions",
+      hooks: {
+        beforeCreate: (permission, options) => {
+          permission.slug = stringToSlug(permission.name);
+        },
+        beforeUpdate: (permission, options) => {
+          permission.slug = stringToSlug(permission.name);
+        },
+      },
     }
   );
+  Permission.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required(),
+    });
+    return schema.validate(req.body);
+  };
   Permission.fields = {
     id: {
       field_name: "id",
