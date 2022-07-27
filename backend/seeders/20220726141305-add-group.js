@@ -26,7 +26,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-     await queryInterface.bulkInsert("groups", users);
+     await queryInterface.bulkInsert("groups", groups);
   },
 
   async down (queryInterface, Sequelize) {

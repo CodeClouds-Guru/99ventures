@@ -28,7 +28,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-     await queryInterface.bulkInsert("permissions", users);
+     await queryInterface.bulkInsert("permissions", roles);
   },
 
   async down (queryInterface, Sequelize) {
