@@ -51,11 +51,10 @@ class Controller {
     let request_data = req.body;
     const { error, value } = this.model.validate(req);
     if (error) {
-      res.status(401).json({
-        status: false,
-        errors: error.details.map((err) => err.message),
-      })
-      return
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
     }
     try {
       let model = await this.model.create(request_data);
@@ -81,6 +80,13 @@ class Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
+    }
     try {
       let model = await this.model.update(request_data, { where: { id } });
       return {
@@ -106,7 +112,7 @@ class Controller {
   async restore(req, res) {
     let id = req.params.id;
     try {
-      await this.model.restore({where:{id}});
+      await this.model.restore({ where: { id } });
       return {
         message: "Record has been restored successfully",
       };

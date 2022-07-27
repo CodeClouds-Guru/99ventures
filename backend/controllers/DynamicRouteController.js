@@ -13,9 +13,10 @@ class DynamicRouteController {
       let result = await controller[action](req, res);
       res.json({ results: result });
     } catch (error) {
-      res.status(500).json({
+      let statusCode = error.statusCode || 500;
+      res.status(statusCode).json({
         message: error.message,
-        trace: error.stack,
+        errors:error.data
       });
     }
   }
