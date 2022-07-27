@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
+      tableName: "companies",
     }
   )
   return Company

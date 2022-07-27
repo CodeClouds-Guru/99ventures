@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'CompanyType',
     timestamps: false,
+    tableName:"company_types"
   });
   return CompanyType;
 };
