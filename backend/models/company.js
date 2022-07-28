@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
       Company.belongsTo(models.CompanyType, {
         foreignKey: 'company_type_id',
       })
+
+      Company.hasMany(models.CompanyPortal, {
+        foreignKey: 'company_id',
+      })
     }
   }
   Company.validate = function (req) {
