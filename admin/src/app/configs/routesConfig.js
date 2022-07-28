@@ -8,8 +8,9 @@ import SetPasswordConfig from '../main/set-password/SetPasswordConfig';
 import SignOutConfig from '../main/sign-out/SignOutConfig';
 import Error404Page from '../main/404/Error404Page';
 import ExampleConfig from '../main/example/ExampleConfig';
+import CRUDConfig from '../main/crud/CRUDConfig';
 
-const routeConfigs = [ExampleConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig];
+const routeConfigs = [CRUDConfig,ExampleConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig];
 
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs, settingsConfig.defaultAuth),
