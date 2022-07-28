@@ -1,6 +1,7 @@
 'use strict'
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class Group extends Model {
     /**
@@ -17,6 +18,13 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   }
+  Group.validate = function (req) {
+    const schema = Joi.object({
+                        name: Joi.string().required()
+
+    });
+    return schema.validate(req.body);
+  };
   Group.init(
     {
       name: DataTypes.STRING,
