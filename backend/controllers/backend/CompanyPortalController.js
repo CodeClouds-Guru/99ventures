@@ -1,8 +1,8 @@
 const Controller = require('./Controller')
-class UserController extends Controller {
+class CompanyPortalController extends Controller {
   constructor() {
     super('CompanyPortal')
   }
 }
 
-module.exports = new UserController()
+module.exports = new CompanyPortalController()

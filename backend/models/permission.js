@@ -14,6 +14,13 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
+  Permission.validate = function (req) {
+    const schema = Joi.object({
+                        name: Joi.string().required()
+
+    });
+    return schema.validate(req.body);
+  };
   Permission.init(
     {
       name: DataTypes.STRING,

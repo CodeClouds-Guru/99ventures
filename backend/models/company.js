@@ -1,5 +1,7 @@
 'use strict'
 const { Model } = require('sequelize')
+const sequelizePaginate = require("sequelize-paginate");
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class Company extends Model {
     /**
@@ -21,14 +23,17 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   }
+  Company.validate = function (req) {
+    const schema = Joi.object({
+      company_type_id: Joi.number().required(),
+      name: Joi.string().required(),
+      status: Joi.number()
+
+    });
+    return schema.validate(req.body);
+  };
   Company.init(
     {
-      id: {
-        allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-        type: DataTypes.UUID,
-      },
       company_type_id: DataTypes.INTEGER,
       name: DataTypes.STRING,
       slug: {
