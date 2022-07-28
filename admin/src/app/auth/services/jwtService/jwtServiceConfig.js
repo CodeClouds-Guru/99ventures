@@ -6,6 +6,7 @@ const jwtServiceConfig = {
   forgotPassword: 'forgot-password',
   setPassword: 'set-password',
   logout: 'logout',
+  companies: 'companies',
 };
 
 export default jwtServiceConfig;
