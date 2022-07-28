@@ -57,7 +57,8 @@ class Controller {
       throw errorObj;
     }
     try {
-      let model = await this.model.create(request_data);
+      request_data.created_by = req.user.id;
+      let model = await this.model.create(request_data, { silent: true });
       return {
         message: "Record has been created successfully",
         result: model,
@@ -88,6 +89,7 @@ class Controller {
       throw errorObj;
     }
     try {
+      request_data.updated_by = req.user.id;
       let model = await this.model.update(request_data, { where: { id } });
       return {
         message: "Record has been updated successfully",
@@ -101,6 +103,11 @@ class Controller {
     try {
       let model = await this.model.findByPk(req.params.id);
       await model.destroy();
+      if (model) {
+        model.deleted_by = req.user.id;
+        await model.save();
+      }
+
       return {
         message: "Record has been deleted successfully",
       };
@@ -113,6 +120,9 @@ class Controller {
     let id = req.params.id;
     try {
       await this.model.restore({ where: { id } });
+      let model = await this.model.findByPk(id);
+      model.deleted_by = null;
+      await model.save();
       return {
         message: "Record has been restored successfully",
       };
