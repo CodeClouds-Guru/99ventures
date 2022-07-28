@@ -3,6 +3,7 @@ const {
   Model
 } = require('sequelize');
 const sequelizePaginate = require("sequelize-paginate");
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class CompanyPortal extends Model {
     /**
@@ -14,6 +15,17 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
+  CompanyPortal.validate = function (req) {
+    const schema = Joi.object({
+                        name: Joi.string().required(),
+                        company_id: Joi.required(),
+                        domain: Joi.string(),
+                        downtime_message: Joi.string(),
+                        status: Joi.number()
+
+    });
+    return schema.validate(req.body);
+  };
   CompanyPortal.init({
     company_id: DataTypes.BIGINT,
     domain: DataTypes.STRING,
