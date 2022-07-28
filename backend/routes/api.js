@@ -3,7 +3,7 @@ const router = express.Router()
 const AuthMiddleware = require('../middlewares/authMiddleware')
 const AuthControllerClass = require('../controllers/backend/AuthController')
 const AuthController = new AuthControllerClass()
-const DynamicRouteController = require('../controllers/DynamicRouteController')
+const DynamicRouteController = require('../controllers/backend/DynamicRouteController')
 router.get('/', (req, res) => {
   res.json({ message: 'API working' })
 })
