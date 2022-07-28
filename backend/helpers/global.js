@@ -42,13 +42,6 @@ exports.generateToken = (params) => {
   return jwt.sign(params, process.env.APP_SECRET, { expiresIn: 100000 })
 }
 
-exports.generateSlug = (value) => {
-  let str = value.trim()
-  str = str.toLowerCase()
-  str = str.split(' ').join('-')
-  return str
-}
-
 // exports.downloadImageFromLink = (url, image_path) =>
 //   axios({
 //     url,
@@ -63,20 +56,21 @@ exports.generateSlug = (value) => {
 //       })
 //   )
 
-exports.stringToSlug  = (str) => {
-  str = str.replace(/^\s+|\s+$/g, ''); // trim
-  str = str.toLowerCase();
+exports.stringToSlug = (str) => {
+  str = str.replace(/^\s+|\s+$/g, '') // trim
+  str = str.toLowerCase()
 
   // remove accents, swap ñ for n, etc
-  var from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;";
-  var to   = "aaaaeeeeiiiioooouuuunc------";
-  for (var i=0, l=from.length ; i<l ; i++) {
-      str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+  var from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:;'
+  var to = 'aaaaeeeeiiiioooouuuunc------'
+  for (var i = 0, l = from.length; i < l; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
   }
 
-  str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-      .replace(/\s+/g, '-') // collapse whitespace and replace by -
-      .replace(/-+/g, '-'); // collapse dashes
+  str = str
+    .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, '-') // collapse whitespace and replace by -
+    .replace(/-+/g, '-') // collapse dashes
 
-  return str;
+  return str
 }
