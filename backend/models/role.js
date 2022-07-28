@@ -1,8 +1,8 @@
-"use strict";
-const { Model } = require("sequelize");
-const sequelizePaginate = require("sequelize-paginate");
-const Joi = require("joi");
-const { stringToSlug } = require("../helpers/global");
+'use strict'
+const { Model } = require('sequelize')
+const sequelizePaginate = require('sequelize-paginate')
+const Joi = require('joi')
+const { stringToSlug } = require('../helpers/global')
 module.exports = (sequelize, DataTypes) => {
   class Role extends Model {
     /**
@@ -11,7 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Role.belongsToMany(models.Permission, {
+        as: 'permissions',
+        through: 'permission_role',
+        foreignKey: 'role_id',
+        otherKey: 'permission_id',
+      })
     }
   }
   Role.init(
@@ -24,83 +29,83 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Role",
+      modelName: 'Role',
       timestamps: true,
       paranoid: true,
-      createdAt: "created_at", // alias createdAt as created_date
-      updatedAt: "updated_at",
-      deletedAt: "deleted_at",
-      tableName: "roles",
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'roles',
       hooks: {
         beforeCreate: (role, options) => {
-          role.slug = stringToSlug(role.name);
+          role.slug = stringToSlug(role.name)
         },
         beforeUpdate: (role, options) => {
-          role.slug = stringToSlug(role.name);
+          role.slug = stringToSlug(role.name)
         },
       },
     }
-  );
+  )
   Role.validate = function (req) {
     const schema = Joi.object({
       name: Joi.string().required(),
-    });
-    return schema.validate(req.body);
-  };
+    })
+    return schema.validate(req.body)
+  }
   Role.fields = {
     id: {
-      field_name: "id",
-      db_name: "id",
-      type: "text",
-      placeholder: "Id",
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
       listing: false,
       show_in_form: false,
       sort: true,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     name: {
-      field_name: "name",
-      db_name: "name",
-      type: "text",
-      placeholder: "Name",
+      field_name: 'name',
+      db_name: 'name',
+      type: 'text',
+      placeholder: 'Name',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     slug: {
-      field_name: "slug",
-      db_name: "slug",
-      type: "text",
-      placeholder: "Slug",
+      field_name: 'slug',
+      db_name: 'slug',
+      type: 'text',
+      placeholder: 'Slug',
       listing: true,
       show_in_form: false,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     created_at: {
-      field_name: "created_at",
-      db_name: "created_at",
-      type: "text",
-      placeholder: "Created At",
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created At',
       listing: true,
       show_in_form: false,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
-  };
-  sequelizePaginate.paginate(Role);
-  return Role;
-};
+  }
+  sequelizePaginate.paginate(Role)
+  return Role
+}
