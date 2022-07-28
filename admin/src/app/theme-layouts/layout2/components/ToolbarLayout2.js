@@ -8,13 +8,13 @@ import { useSelector } from 'react-redux';
 import { selectFuseCurrentLayoutConfig, selectToolbarTheme } from 'app/store/fuse/settingsSlice';
 import AdjustFontSize from '../../shared-components/AdjustFontSize';
 import FullScreenToggle from '../../shared-components/FullScreenToggle';
-import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
+// import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
 import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
 import NavigationShortcuts from '../../shared-components/NavigationShortcuts';
-import NavigationSearch from '../../shared-components/NavigationSearch';
+// import NavigationSearch from '../../shared-components/NavigationSearch';
 import NavbarToggleButton from '../../shared-components/NavbarToggleButton';
 import UserMenu from '../../shared-components/UserMenu';
-import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
+// import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from '../../shared-components/chatPanel/ChatPanelToggleButton';
 
 function ToolbarLayout2(props) {
@@ -43,19 +43,19 @@ function ToolbarLayout2(props) {
           </div>
 
           <div className="flex items-center px-8 h-full overflow-x-auto">
-            <LanguageSwitcher />
+            {/* <LanguageSwitcher /> */}
 
             <AdjustFontSize />
 
             <FullScreenToggle />
 
-            <NavigationSearch />
+            {/* <NavigationSearch /> */}
 
             <Hidden lgUp>
               <ChatPanelToggleButton />
             </Hidden>
 
-            <QuickPanelToggleButton />
+            {/* <QuickPanelToggleButton /> */}
 
             <NotificationPanelToggleButton />
 

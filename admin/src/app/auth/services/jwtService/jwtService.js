@@ -1,6 +1,7 @@
 import FuseUtils from '@fuse/utils/FuseUtils';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
+import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
 
 /* eslint-disable camelcase */
@@ -119,6 +120,8 @@ class JwtService extends FuseUtils.EventEmitter {
   };
 
   logout = () => {
+    axios
+      .post(jwtServiceConfig.logout);
     this.setSession(null);
     this.emit('onLogout', 'Logged out');
   };

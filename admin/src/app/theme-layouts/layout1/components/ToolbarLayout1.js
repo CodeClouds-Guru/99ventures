@@ -9,13 +9,13 @@ import { selectFuseCurrentLayoutConfig, selectToolbarTheme } from 'app/store/fus
 import { selectFuseNavbar } from 'app/store/fuse/navbarSlice';
 import AdjustFontSize from '../../shared-components/AdjustFontSize';
 import FullScreenToggle from '../../shared-components/FullScreenToggle';
-import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
+// import LanguageSwitcher from '../../shared-components/LanguageSwitcher';
 import NotificationPanelToggleButton from '../../shared-components/notificationPanel/NotificationPanelToggleButton';
 import NavigationShortcuts from '../../shared-components/NavigationShortcuts';
-import NavigationSearch from '../../shared-components/NavigationSearch';
+// import NavigationSearch from '../../shared-components/NavigationSearch';
 import NavbarToggleButton from '../../shared-components/NavbarToggleButton';
 import UserMenu from '../../shared-components/UserMenu';
-import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
+// import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from '../../shared-components/chatPanel/ChatPanelToggleButton';
 
 function ToolbarLayout1(props) {
@@ -44,8 +44,8 @@ function ToolbarLayout1(props) {
                 <Hidden lgDown>
                   {(config.navbar.style === 'style-3' ||
                     config.navbar.style === 'style-3-dense') && (
-                    <NavbarToggleButton className="w-40 h-40 p-0 mx-0" />
-                  )}
+                      <NavbarToggleButton className="w-40 h-40 p-0 mx-0" />
+                    )}
 
                   {config.navbar.style === 'style-1' && !navbar.open && (
                     <NavbarToggleButton className="w-40 h-40 p-0 mx-0" />
@@ -64,19 +64,19 @@ function ToolbarLayout1(props) {
           </div>
 
           <div className="flex items-center px-8 h-full overflow-x-auto">
-            <LanguageSwitcher />
+            {/* <LanguageSwitcher /> */}
 
             <AdjustFontSize />
 
             <FullScreenToggle />
 
-            <NavigationSearch />
+            {/* <NavigationSearch /> */}
 
             <Hidden lgUp>
               <ChatPanelToggleButton />
             </Hidden>
 
-            <QuickPanelToggleButton />
+            {/* <QuickPanelToggleButton /> */}
 
             <NotificationPanelToggleButton />
 
