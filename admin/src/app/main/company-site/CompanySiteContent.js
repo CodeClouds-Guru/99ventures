@@ -8,14 +8,14 @@ import axios from 'axios';
 function CompanySiteContent() {
     const [isCompanies, setCompanies] = useState([]);
     useEffect(() => {
-        axios.post(jwtServiceConfig.companies).then((response) => {
+        axios.get(jwtServiceConfig.companies).then((response) => {
             if (response.data.status) {
                 setCompanies(response.data.companies);
             } else {
                 reject(response.data.error);
             }
         });
-    });
+    }, []);
     const [value, setValue] = useState(0);
     console.log(isCompanies);
     const handleChange = (event, newValue) => {
@@ -26,7 +26,7 @@ function CompanySiteContent() {
         <Box
             sx={{
                 flexGrow: 1,
-                maxWidth: { xs: 320, sm: 480, lg: '100%', xl: '100%' },
+                maxWidth: { xs: '100%' },
                 bgcolor: 'background.paper',
             }}
         >
