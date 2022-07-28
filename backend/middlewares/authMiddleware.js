@@ -14,14 +14,13 @@ module.exports = async function (req, res, next) {
       where: {
         id: decoded_user.id,
       },
-      include: [
-        {
-          model: Company,
-        },
-      ],
+      // include: [
+      //   {
+      //     model: Company,
+      //   },
+      // ],
     })
     if (user) {
-      console.log(user)
       req.user = user
       next()
     } else {

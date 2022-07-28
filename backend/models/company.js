@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         through: 'company_user',
         foreignKey: 'company_id',
         otherKey: 'user_id',
+        timestamps: false,
       })
 
       Company.belongsTo(models.CompanyType, {
@@ -51,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
+      tableName: 'companies',
     }
   )
   return Company
