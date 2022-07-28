@@ -1,7 +1,6 @@
 import { styled } from '@mui/material/styles';
-// import { useTranslation } from 'react-i18next';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import DemoContent from '@fuse/core/DemoContent';
+import CompanySiteContent from './CompanySiteContent';
 
 const Root = styled(FusePageSimple)(({ theme }) => ({
     '& .FusePageSimple-header': {
@@ -16,20 +15,18 @@ const Root = styled(FusePageSimple)(({ theme }) => ({
     '& .FusePageSimple-sidebarContent': {},
 }));
 
-function DashboardPage(props) {
-    // const { t } = useTranslation('dashboardPage');
+function CompanySitePage(props) {
 
     return (
         <Root
             header={
                 <div className="p-24">
-                    {/* <h4>{t('TITLE')}</h4> */}
-                    <h4>Dashboard</h4>
+                    <h4>COMPANY AND SITE SELECTION</h4>
                 </div>
             }
             content={
                 <div className="p-24">
-                    <DemoContent />
+                    <CompanySiteContent />
                 </div>
             }
             scroll="content"
@@ -37,4 +34,4 @@ function DashboardPage(props) {
     );
 }
 
-export default DashboardPage;
+export default CompanySitePage;
