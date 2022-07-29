@@ -1,55 +1,114 @@
 import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import jwtServiceConfig from '../../auth/services/jwtService/jwtServiceConfig';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 function CompanySiteContent() {
-    const [isCompanies, setCompanies] = useState([]);
-    useEffect(() => {
+    const [companies, setCompanies] = useState([]);
+    const [value, setValue] = useState(0);
+
+    const a11yProps = (index) => {
+        return {
+            id: `simple-tab-${index}`,
+            'aria-controls': `simple-tabpanel-${index}`,
+        };
+    }
+    const CompaniesElement = () => {
+
+        let compElem = companies.map((company, key) => {
+            return <Tab label={company.name} {...a11yProps(key)} key={`company-${key}`} />
+        })
+        return compElem;
+    }
+
+    const getCompanies = () => {
         axios.get(jwtServiceConfig.companies).then((response) => {
             if (response.data.status) {
                 setCompanies(response.data.companies);
+                setValue(0);
             } else {
-                reject(response.data.error);
+                console.log('Error');
             }
         });
+    }
+
+    const portalBoxElement = (company) => {
+        company.CompanyPortals.map((portal, key) => {
+            return <Box sx={{ p: 3 }} key={`portal-${key}`}>
+                <Typography>
+                    <Link to={`/dashboard/${company.id}/${portal.id}`}>{portal.name}</Link>
+                </Typography>
+            </Box>
+        })
+    }
+
+    useEffect(() => {
+        getCompanies();
     }, []);
-    const [value, setValue] = useState(0);
-    console.log(isCompanies);
+
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
-    return (
-        <Box
-            sx={{
-                flexGrow: 1,
-                maxWidth: { xs: '100%' },
-                bgcolor: 'background.paper',
-            }}
-        >
-            <Tabs
-                value={value}
-                onChange={handleChange}
-                variant="scrollable"
-                scrollButtons
-                aria-label="visible arrows tabs example"
-                sx={{
-                    [`& .${tabsClasses.scrollButtons}`]: {
-                        '&.Mui-disabled': { opacity: 0.3 },
-                    },
-                }}
+    const TabPanel = (props) => {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}
             >
-                <Tab label="Item One" />
-                <Tab label="Item Two" />
-                <Tab label="Item Three" />
-                <Tab label="Item Four" />
-                <Tab label="Item Five" />
-                <Tab label="Item Six" />
-                <Tab label="Item Seven" />
-            </Tabs>
+                {value === index && (
+                    <Box sx={{ p: 3 }}>
+                        <Typography>{children}</Typography>
+                    </Box>
+                )}
+            </div>
+        );
+    }
+
+    TabPanel.propTypes = {
+        children: PropTypes.node,
+        index: PropTypes.number.isRequired,
+        value: PropTypes.number.isRequired,
+    };
+
+    return (
+        <Box sx={{ width: '100%' }}>
+            <Box
+                sx={{ borderBottom: 1, borderColor: 'divider' }}
+            >
+                <Tabs
+                    value={value}
+                    onChange={handleChange}
+                    variant="scrollable"
+                    scrollButtons
+                    aria-label="visible arrows tabs example"
+                    sx={{
+                        [`& .${tabsClasses.scrollButtons}`]: {
+                            '&.Mui-disabled': { opacity: 0.3 },
+                        },
+                    }}
+                >
+                    {CompaniesElement()}
+                </Tabs>
+            </Box>
+            {
+                companies.map((company, k) => {
+                    // return <TabPanel value={value} index={k} key={`company-${k}`}>
+                    //     {portalBoxElement(company)}
+                    // </TabPanel>
+                    return TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`)
+                })
+            }
         </Box>
     );
 }
