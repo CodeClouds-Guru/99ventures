@@ -13,7 +13,12 @@ router.post('/login', AuthController.login)
 router.get('/profile', [AuthMiddleware], AuthController.profile)
 router.post('/logout', [AuthMiddleware], AuthController.logout)
 router.get('/refresh-token', [AuthMiddleware], AuthController.refreshToken)
-router.all('/:module/:action?/:id?',[AuthMiddleware], DynamicRouteController.handle)
+router.get('/companies', [AuthMiddleware], AuthController.getCompanyAndSites)
+router.all(
+  '/:module/:action?/:id?',
+  [AuthMiddleware],
+  DynamicRouteController.handle
+)
 
 module.exports = {
   prefix: '/api',

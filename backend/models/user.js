@@ -4,11 +4,6 @@ const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       User.belongsToMany(models.Company, {
         through: 'company_user',
@@ -142,6 +137,7 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
   }
+
   sequelizePaginate.paginate(User)
   return User
 }

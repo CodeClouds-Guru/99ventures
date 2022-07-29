@@ -1,31 +1,19 @@
 'use strict'
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
-const Joi = require("joi");
+
 module.exports = (sequelize, DataTypes) => {
-  class Group extends Model {
+  class Module extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Group.belongsToMany(models.Role, {
-        as: 'roles',
-        through: 'group_role',
-        foreignKey: 'group_id',
-        otherKey: 'role_id',
-      })
+      // define association here
     }
   }
-  Group.validate = function (req) {
-    const schema = Joi.object({
-                        name: Joi.string().required()
-
-    });
-    return schema.validate(req.body);
-  };
-  Group.init(
+  Module.init(
     {
       name: DataTypes.STRING,
       created_by: DataTypes.BIGINT,
@@ -35,16 +23,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Group',
+      modelName: 'Module',
       timestamps: true,
       paranoid: true,
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
-      tableName: 'groups',
+      tableName: 'module',
     }
   )
-  Group.fields = {
+
+  Module.fields = {
     id: {
       field_name: 'id',
       db_name: 'id',
@@ -85,7 +74,6 @@ module.exports = (sequelize, DataTypes) => {
       searchable: true,
     },
   }
-  sequelizePaginate.paginate(Group)
-
-  return Group
+  sequelizePaginate.paginate(Module)
+  return Module
 }

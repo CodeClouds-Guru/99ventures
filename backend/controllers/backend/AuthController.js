@@ -12,6 +12,7 @@ class AuthController {
   AuthController() {
     this.signup = this.signup.bind(this)
     this.validate = this.validate.bind(this)
+    this.getCompanyAndSites = this.getCompanyAndSites.bind(this)
   }
 
   async signup(req, res) {
@@ -135,6 +136,19 @@ class AuthController {
       token,
       user,
       companies,
+    })
+  }
+
+  async getCompanyAndSites(req, res) {
+    const user = await User.findOne({
+      where: {
+        id: req.user.id,
+      },
+      include: [{ all: true, nested: true }],
+    })
+    res.status(200).json({
+      status: true,
+      companies: 'Companies' in user && user.Companies ? user.Companies : [],
     })
   }
 }
