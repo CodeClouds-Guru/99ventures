@@ -10,7 +10,7 @@ import Error404Page from '../main/404/Error404Page';
 import DashboardConfig from '../main/dashboard/DashboardConfig';
 import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
-const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig, CompanySiteConfig,CRUDConfig];
+const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig, CompanySiteConfig, CRUDConfig];
 
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs, settingsConfig.defaultAuth),
@@ -22,6 +22,12 @@ const routes = [
   {
     path: '/dashboard/:id/:id2',
     element: <Navigate to="/dashboard" />,
+    auth: settingsConfig.defaultAuth,
+  },
+  {
+    path: '/company-site',
+    element: <Navigate to="/company-site" />,
+    auth: settingsConfig.defaultAuth,
   },
   {
     path: 'loading',
