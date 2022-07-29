@@ -1,5 +1,6 @@
 import Input from '@mui/material/Input';
 import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +8,7 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { selectUsersSearchText, setUsersSearchText } from '../store/usersSlice';
 import reducer from '../store';
 import withReducer from 'app/store/withReducer';
+import { Link } from 'react-router-dom';
 
 function ListHeader(props) {
   const dispatch = useDispatch();
@@ -45,6 +47,21 @@ function ListHeader(props) {
             onChange={(ev) => dispatch(setUsersSearchText(ev))}
           />
         </Paper>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+        >
+          <Button
+            className=""
+            component={Link}
+            to="/apps/e-commerce/products/new"
+            variant="contained"
+            color="secondary"
+            startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
+          >
+            Add
+          </Button>
+        </motion.div>
       </div>
     </div>
   );

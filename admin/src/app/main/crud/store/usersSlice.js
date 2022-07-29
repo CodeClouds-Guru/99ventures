@@ -1,9 +1,15 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const getUsers = createAsyncThunk('crud/getUsers', async () => {
-  const response = await axios.get('/users');
-  const data = await response.data.results.result.data;
+export const getUsers = createAsyncThunk('crud/getUsers', async (params) => {
+
+  let apiURL = '/users?v=1';
+  if(params && params.searchText){
+    apiURL +='&search='+params.searchText
+  }
+
+  const response = await axios.get(apiURL);
+  const data = await response.data.results;
 
   return data;
 });
@@ -24,7 +30,10 @@ export const { selectAll: selectUsers, selectById: selectUserById } = usersAdapt
 );
 const initialState = {
   searchText: '',
-  users:[]
+  users:[],
+  fields:null,
+  pages:1,
+  totalRecords:0
 }
 
 const usersSlice = createSlice({
@@ -40,7 +49,10 @@ const usersSlice = createSlice({
   },
   extraReducers: {
     [getUsers.fulfilled]: (state, action) =>{
-      state.users = action.payload
+      state.users = action.payload.result.data;
+      state.fields = action.payload.fields;
+      state.pages = action.payload.result.pages;
+      state.totalRecords = action.payload.result.total;
     },
     // [removeOrders.fulfilled]: (state, action) => ordersAdapter.removeMany(state, action.payload),
   },

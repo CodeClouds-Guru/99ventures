@@ -9,7 +9,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
@@ -21,6 +21,7 @@ function ListTable(props) {
   const dispatch = useDispatch();
   const users = useSelector((state)=>state.crud.users.users);
   const searchText = useSelector((state)=>state.crud.users.searchText);
+  const fields = useSelector((state)=>state.crud.users.fields);
 
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
@@ -38,12 +39,17 @@ function ListTable(props) {
 
   useEffect(() => {
     if (searchText.length !== 0) {
-      setData(FuseUtils.filterArrayByString(users, searchText));
+      // setData(FuseUtils.filterArrayByString(users, searchText));      
       setPage(0);
     } else {
-      setData(users);
+      // setData(users);
     }
-  }, [users, searchText]);
+    dispatch(getUsers({searchText})).then(() => setLoading(false));
+  }, [searchText]);
+
+  useEffect(()=>{
+    setData(users);
+  },[users])
 
   function handleRequestSort(event, property) {
     const id = property;
@@ -166,9 +172,9 @@ function ListTable(props) {
             )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((n) => {
-                console.log(n);
                 const isSelected = selected.indexOf(n.id) !== -1;
                 return (
+                  
                   <TableRow
                     className="h-72 cursor-pointer"
                     hover
@@ -186,23 +192,15 @@ function ListTable(props) {
                         onChange={(event) => handleCheck(event, n.id)}
                       />
                     </TableCell>
-
-                    <TableCell className="p-4 md:p-16" component="th" scope="row">
-                      {n.id}
-                    </TableCell>
-
-                    <TableCell className="p-4 md:p-16 truncate" component="th" scope="row">
-                      {`${n.first_name} ${n.last_name}`}
-                    </TableCell>
-
-                    <TableCell className="p-4 md:p-16" component="th" scope="row" >
-                      
-                      {n.email}
-                    </TableCell>
-                    <TableCell className="p-4 md:p-16" component="th" scope="row" >                      
-                      {n.username}
-                    </TableCell>
-                    
+                    {Object.values(fields)
+                    .filter(field=>field.listing===true)
+                    .map((field,i)=>{
+                      return <Fragment key={i}>
+                        <TableCell className="p-4 md:p-16" component="th" scope="row">
+                          {n[field.field_name]}
+                        </TableCell>
+                      </Fragment>
+                    })}
                   </TableRow>
                 );
               })}
