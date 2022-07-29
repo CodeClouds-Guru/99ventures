@@ -106,7 +106,7 @@ function CompanySiteContent() {
                     // return <TabPanel value={value} index={k} key={`company-${k}`}>
                     //     {portalBoxElement(company)}
                     // </TabPanel>
-                    { TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`) }
+                    return TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`)
                 })
             }
         </Box>
