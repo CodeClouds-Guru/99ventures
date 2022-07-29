@@ -64,7 +64,6 @@ function CompanySiteContent() {
 
         return (
             <div
-
                 role="tabpanel"
                 hidden={value !== index}
                 id={`simple-tabpanel-${index}`}
@@ -73,7 +72,6 @@ function CompanySiteContent() {
             >
                 {value === index && (
                     <Box sx={{ p: 3 }} style={tabBodyCss}>
-                        {/* <Typography>{children}</Typography> */}
                         {portalBoxElement(companies[index])}
                     </Box>
                 )}
