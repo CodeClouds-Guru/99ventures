@@ -38,7 +38,7 @@ function CompanySiteContent() {
     }
 
     const portalBoxElement = (company) => {
-        company.CompanyPortals.map((portal, key) => {
+        return company.CompanyPortals.map((portal, key) => {
             return <Box sx={{ p: 3 }} key={`portal-${key}`}>
                 <Typography>
                     <Link to={`/dashboard/${company.id}/${portal.id}`}>{portal.name}</Link>
@@ -103,10 +103,10 @@ function CompanySiteContent() {
             </Box>
             {
                 companies.map((company, k) => {
-                    // return <TabPanel value={value} index={k} key={`company-${k}`}>
-                    //     {portalBoxElement(company)}
-                    // </TabPanel>
-                    return TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`)
+                    return <TabPanel value={value} index={k} key={`company-${k}`}>
+                        {portalBoxElement(company)}
+                    </TabPanel>
+                    // return TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`)
                 })
             }
         </Box>
