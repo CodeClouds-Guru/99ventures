@@ -72,6 +72,7 @@ class JwtService extends FuseUtils.EventEmitter {
         .then((response) => {
           if (response.data.user) {
             response.data.user.role = ['admin'];
+            response.data.user.shortcuts = [];
             this.setSession(response.data.access_token);
             resolve(response.data.user);
             this.emit('onLogin', response.data.user);
@@ -89,6 +90,7 @@ class JwtService extends FuseUtils.EventEmitter {
         .then((response) => {
           if (response.data.user) {
             response.data.user.role = ['admin'];
+            response.data.user.shortcuts = [];
             this.setSession(response.data.access_token);
             resolve(response.data.user);
           } else {

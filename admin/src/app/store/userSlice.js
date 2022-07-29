@@ -108,6 +108,7 @@ export const { userLoggedOut } = userSlice.actions;
 
 export const selectUser = ({ user }) => user;
 
-export const selectUserShortcuts = ({ user }) => user.data.shortcuts;
+export const selectUserShortcuts = ({ user }) => user.shortcuts;
+//  user.data.shortcuts;
 
 export default userSlice.reducer;
