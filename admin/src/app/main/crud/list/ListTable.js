@@ -22,6 +22,7 @@ function ListTable(props) {
   const users = useSelector((state)=>state.crud.users.users);
   const searchText = useSelector((state)=>state.crud.users.searchText);
   const fields = useSelector((state)=>state.crud.users.fields);
+  const totalRecords = useSelector((state)=>state.crud.users.totalRecords);
 
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
@@ -33,21 +34,30 @@ function ListTable(props) {
     id: null,
   });
 
-  useEffect(() => {
-    dispatch(getUsers()).then(() => setLoading(false));
-  }, [dispatch]);
+  // useEffect(() => {
+  //   console.log('Triggered 1')
+  //   dispatch(getUsers()).then(() => setLoading(false));
+  // }, [dispatch]);
+
+  
 
   useEffect(() => {
+    let params = {
+      search:searchText,
+      page:page+1,
+      show:rowsPerPage
+    }
     if (searchText.length !== 0) {
       // setData(FuseUtils.filterArrayByString(users, searchText));      
-      setPage(0);
+      setPage(1);
     } else {
       // setData(users);
     }
-    dispatch(getUsers({searchText})).then(() => setLoading(false));
-  }, [searchText]);
+    dispatch(getUsers(params)).then(() => setLoading(false));
+  }, [searchText,page,rowsPerPage]);
 
   useEffect(()=>{
+    console.log('Triggered 3')
     setData(users);
   },[users])
 
@@ -106,6 +116,7 @@ function ListTable(props) {
   }
 
   function handleChangeRowsPerPage(event) {
+    setPage(0);
     setRowsPerPage(event.target.value);
   }
 
@@ -170,7 +181,7 @@ function ListTable(props) {
               ],
               [order.direction]
             )
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((n) => {
                 const isSelected = selected.indexOf(n.id) !== -1;
                 return (
@@ -211,7 +222,7 @@ function ListTable(props) {
       <TablePagination
         className="shrink-0 border-t-1"
         component="div"
-        count={data.length}
+        count={totalRecords}
         rowsPerPage={rowsPerPage}
         page={page}
         backIconButtonProps={{
@@ -222,6 +233,7 @@ function ListTable(props) {
         }}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[2,5,10,20]}
       />
     </div>
   );

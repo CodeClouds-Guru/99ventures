@@ -4,8 +4,9 @@ import axios from 'axios';
 export const getUsers = createAsyncThunk('crud/getUsers', async (params) => {
 
   let apiURL = '/users?v=1';
-  if(params && params.searchText){
-    apiURL +='&search='+params.searchText
+  if(params){
+    let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
+    apiURL +='&'+queryString
   }
 
   const response = await axios.get(apiURL);
