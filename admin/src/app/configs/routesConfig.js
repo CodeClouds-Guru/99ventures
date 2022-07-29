@@ -20,6 +20,10 @@ const routes = [
     auth: settingsConfig.defaultAuth,
   },
   {
+    path: '/dashboard/:id/:id2',
+    element: <Navigate to="/dashboard" />,
+  },
+  {
     path: 'loading',
     element: <FuseLoading />,
   },

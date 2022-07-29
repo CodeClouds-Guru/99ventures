@@ -19,11 +19,11 @@ function CompanySitePage(props) {
 
     return (
         <Root
-            header={
-                <div className="p-24" style={{ width: '100%' }}>
-                    <h4>COMPANY AND SITE SELECTION</h4>
-                </div>
-            }
+            // header={
+            //     <div className="p-24" style={{ width: '100%' }}>
+            //         <h4>COMPANY AND SITE SELECTION</h4>
+            //     </div>
+            // }
             content={
                 <div className="p-24" style={{ width: '100%' }}>
                     <CompanySiteContent />
