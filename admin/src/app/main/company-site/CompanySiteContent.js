@@ -55,6 +55,10 @@ function CompanySiteContent() {
         setValue(newValue);
     };
 
+    const tabBodyCss = {
+        display: 'flex',
+
+    }
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
 
@@ -67,8 +71,8 @@ function CompanySiteContent() {
                 {...other}
             >
                 {value === index && (
-                    <Box sx={{ p: 3 }}>
-                        <Typography>{children}</Typography>
+                    <Box sx={{ p: 3 }} style={tabBodyCss}>
+                        {portalBoxElement(companies[index])}
                     </Box>
                 )}
             </div>
@@ -103,10 +107,8 @@ function CompanySiteContent() {
             </Box>
             {
                 companies.map((company, k) => {
-                    return <TabPanel value={value} index={k} key={`company-${k}`}>
-                        {portalBoxElement(company)}
-                    </TabPanel>
-                    // return TabPanel(portalBoxElement(company), `company-${k}`, `company-${k}`)
+                    return <TabPanel value={value} index={k} key={`company-${k}`} />
+
                 })
             }
         </Box>
