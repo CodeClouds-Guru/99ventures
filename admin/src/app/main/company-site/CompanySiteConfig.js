@@ -1,5 +1,6 @@
 // import CompanySite from './CompanySite';
 import { React, lazy } from 'react';
+import settingsConfig from 'app/configs/settingsConfig';
 
 const CompanySite = lazy(() => import('./CompanySite'));
 
@@ -13,6 +14,7 @@ const CompanySiteConfig = {
         {
             path: 'company-site',
             element: <CompanySite />,
+            auth: settingsConfig.defaultAuth
         },
     ],
 };
