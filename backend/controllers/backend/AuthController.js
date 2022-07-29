@@ -133,7 +133,7 @@ class AuthController {
     })
     res.status(200).json({
       status: true,
-      token,
+      access_token: token,
       user,
       companies,
     })
@@ -149,6 +149,81 @@ class AuthController {
     res.status(200).json({
       status: true,
       companies: 'Companies' in user && user.Companies ? user.Companies : [],
+    })
+  }
+  //forgot password
+  async forgotPassword(req, res) {
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+    })
+    const { error, value } = schema.validate(req.body)
+    if (error) {
+      res.status(401).json({
+        status: false,
+        errors: error.details.map((err) => err.message),
+      })
+      return
+    }
+    //user details
+    const user = await User.findOne({ where: { email: value.email } })
+    if (!user) {
+      res.status(401).json({
+        status: false,
+        errors: 'Sorry! this email is not registered with us',
+      })
+      return
+    }
+    let reset_obj = { id: user.id, email: user.email }
+    reset_obj = JSON.stringify(reset_obj)
+    let base64data = Buffer.from(reset_obj, 'utf8')
+    let base64String = base64data.toString('base64')
+    res.status(200).json({
+      status: true,
+      reset_link:
+        process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
+      message: 'Reset password mail has been sent to your email',
+    })
+  }
+  //reset password
+  async resetPassword(req, res) {
+    const schema = Joi.object({
+      hash: Joi.string().required(),
+      password: Joi.string()
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+        .required(),
+    })
+
+    const { error, value } = schema.validate(req.body)
+    let hash_obj = Buffer.from(value.hash, 'base64')
+    hash_obj = hash_obj.toString('utf8')
+    hash_obj = JSON.parse(hash_obj)
+
+    if (error) {
+      res.status(401).json({
+        status: false,
+        errors: error.details.map((err) => err.message),
+      })
+      return
+    }
+    //user details
+    const user = await User.findOne({ where: { id: hash_obj.id } })
+    if (!user) {
+      res.status(401).json({
+        status: false,
+        errors: 'Sorry! this email is not registered with us',
+      })
+      return
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const password = await bcrypt.hash(value.password, salt)
+    let update_user = await User.update(
+      { password: password },
+      { where: { id: hash_obj.id } }
+    )
+    res.status(200).json({
+      status: true,
+      message: 'Password updated',
     })
   }
 }

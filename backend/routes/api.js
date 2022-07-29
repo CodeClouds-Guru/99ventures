@@ -14,6 +14,8 @@ router.get('/profile', [AuthMiddleware], AuthController.profile)
 router.post('/logout', [AuthMiddleware], AuthController.logout)
 router.get('/refresh-token', [AuthMiddleware], AuthController.refreshToken)
 router.get('/companies', [AuthMiddleware], AuthController.getCompanyAndSites)
+router.post('/forgot-password', AuthController.forgotPassword)
+router.post('/reset-password', AuthController.resetPassword)
 router.all(
   '/:module/:action?/:id?',
   [AuthMiddleware],
