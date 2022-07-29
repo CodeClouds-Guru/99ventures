@@ -2,8 +2,8 @@ import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/too
 import axios from 'axios';
 
 export const getUsers = createAsyncThunk('crud/getUsers', async () => {
-  const response = await axios.get('/api/users');
-  const data = await response.data;
+  const response = await axios.get('/users');
+  const data = await response.data.results.result.data;
 
   return data;
 });
@@ -20,14 +20,16 @@ export const getUsers = createAsyncThunk('crud/getUsers', async () => {
 const usersAdapter = createEntityAdapter({});
 
 export const { selectAll: selectUsers, selectById: selectUserById } = usersAdapter.getSelectors(
-  (state) => state.app.users
+  (state) => state.crud.users
 );
+const initialState = {
+  searchText: '',
+  users:[]
+}
 
 const usersSlice = createSlice({
   name: 'app/users',
-  initialState: usersAdapter.getInitialState({
-    searchText: '',
-  }),
+  initialState,
   reducers: {
     setUsersSearchText: {
       reducer: (state, action) => {
@@ -37,13 +39,16 @@ const usersSlice = createSlice({
     },
   },
   extraReducers: {
-    [getUsers.fulfilled]: usersAdapter.setAll,
+    [getUsers.fulfilled]: (state, action) =>{
+      state.users = action.payload
+    },
     // [removeOrders.fulfilled]: (state, action) => ordersAdapter.removeMany(state, action.payload),
   },
 });
 
 export const { setUsersSearchText } = usersSlice.actions;
 
-export const selectUsersSearchText = (data) => console.log('data',data);
+export const selectUsersSearchText = ({crud}) => crud.users.searchText;
+
 
 export default usersSlice.reducer;

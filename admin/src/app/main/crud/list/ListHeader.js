@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { selectUsersSearchText, setUsersSearchText } from '../store/usersSlice';
+import reducer from '../store';
+import withReducer from 'app/store/withReducer';
 
 function ListHeader(props) {
   const dispatch = useDispatch();
@@ -19,7 +21,7 @@ function ListHeader(props) {
         delay={300}
         className="flex text-24 md:text-32 font-extrabold tracking-tight"
       >
-        Orders
+        Users
       </Typography>
 
       <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
@@ -47,5 +49,4 @@ function ListHeader(props) {
     </div>
   );
 }
-
-export default ListHeader;
+export default withReducer('crud', reducer)(ListHeader);
