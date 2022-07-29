@@ -3,7 +3,7 @@ const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
 
 module.exports = (sequelize, DataTypes) => {
-  class Module extends Model {
+  class Action extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Module.init(
+  Action.init(
     {
       name: DataTypes.STRING,
       slug: DataTypes.STRING,
@@ -24,17 +24,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Module',
+      modelName: 'Action',
       timestamps: true,
       paranoid: true,
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
-      tableName: 'modules',
+      tableName: 'actions',
     }
   )
 
-  Module.fields = {
+  Action.fields = {
     id: {
       field_name: 'id',
       db_name: 'id',
@@ -75,6 +75,6 @@ module.exports = (sequelize, DataTypes) => {
       searchable: true,
     },
   }
-  sequelizePaginate.paginate(Module)
-  return Module
+  sequelizePaginate.paginate(Action)
+  return Action
 }
