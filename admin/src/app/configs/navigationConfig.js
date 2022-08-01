@@ -23,6 +23,14 @@ const navigationConfig = [
     icon: 'heroicons-outline:users',
     url: 'app/roles',
   },
+  {
+    id: 'app-permissions',
+    title: 'Permissions',
+    translate: 'Permissions',
+    type: 'item',
+    icon: 'heroicons-outline:users',
+    url: 'app/permissions',
+  },
 ];
 
 export default navigationConfig;
