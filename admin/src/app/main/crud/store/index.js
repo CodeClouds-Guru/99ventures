@@ -1,8 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import users from './usersSlice';
+import modules from './modulesSlice';
 
 const reducer = combineReducers({
-  users
+  modules
 });
 
 export default reducer;

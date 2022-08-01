@@ -14,19 +14,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
 // import OrdersStatus from '../order/OrdersStatus';
-import { getUsers, selectUsers, selectUsersSearchText } from '../store/usersSlice';
+import { getModules} from '../store/modulesSlice';
 import ListTableHead from './ListTableHead';
+import { useParams } from 'react-router-dom';
 
 function ListTable(props) {
   const dispatch = useDispatch();
-  const users = useSelector((state)=>state.crud.users.users);
-  const searchText = useSelector((state)=>state.crud.users.searchText);
-  const fields = useSelector((state)=>state.crud.users.fields);
-  const totalRecords = useSelector((state)=>state.crud.users.totalRecords);
+  const {module} = useParams();
+  const modules = useSelector((state)=>state.crud.modules.data);
+  const searchText = useSelector((state)=>state.crud.modules.searchText);
+  const fields = useSelector((state)=>state.crud.modules.fields);
+  const totalRecords = useSelector((state)=>state.crud.modules.totalRecords);
 
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
-  const [data, setData] = useState(users);
+  const [data, setData] = useState(modules);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
@@ -45,21 +47,22 @@ function ListTable(props) {
     let params = {
       search:searchText,
       page:page+1,
-      show:rowsPerPage
+      show:rowsPerPage,
+      module
     }
     if (searchText.length !== 0) {
       // setData(FuseUtils.filterArrayByString(users, searchText));      
-      setPage(1);
+      // setPage(1);
     } else {
       // setData(users);
     }
-    dispatch(getUsers(params)).then(() => setLoading(false));
-  }, [searchText,page,rowsPerPage]);
+    dispatch(getModules(params)).then(() => setLoading(false));
+  }, [searchText,page,rowsPerPage,module]);
 
   useEffect(()=>{
     console.log('Triggered 3')
-    setData(users);
-  },[users])
+    setData(modules);
+  },[modules])
 
   function handleRequestSort(event, property) {
     const id = property;

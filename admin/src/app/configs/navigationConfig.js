@@ -8,12 +8,20 @@ const navigationConfig = [
     url: 'example',
   },
   {
-    id: 'app-user',
+    id: 'app-users',
     title: 'Users',
     translate: 'Users',
     type: 'item',
     icon: 'heroicons-outline:users',
-    url: 'app/user',
+    url: 'app/users',
+  },
+  {
+    id: 'app-roles',
+    title: 'Roles',
+    translate: 'Roles',
+    type: 'item',
+    icon: 'heroicons-outline:users',
+    url: 'app/roles',
   },
 ];
 

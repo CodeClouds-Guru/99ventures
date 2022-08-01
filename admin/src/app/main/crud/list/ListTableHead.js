@@ -52,7 +52,7 @@ function ListTableHead(props) {
   const { selectedOrderIds } = props;
   const numSelected = selectedOrderIds.length;
 
-  const fields = useSelector((state)=>state.crud.users.fields);
+  const fields = useSelector((state)=>state.crud.modules.fields);
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
