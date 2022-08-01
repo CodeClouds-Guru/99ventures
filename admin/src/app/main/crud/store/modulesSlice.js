@@ -1,9 +1,9 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const getUsers = createAsyncThunk('crud/getUsers', async (params) => {
-
-  let apiURL = '/users?v=1';
+export const getModules = createAsyncThunk('crud/getModules', async (params) => {
+  let module = (params && params.module) ?? 'users'
+  let apiURL = `${module}/?v=1`;
   if(params){
     let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
     apiURL +='&'+queryString
@@ -31,26 +31,29 @@ export const { selectAll: selectUsers, selectById: selectUserById } = usersAdapt
 );
 const initialState = {
   searchText: '',
-  users:[],
+  data:[],
   fields:null,
   pages:1,
   totalRecords:0
 }
 
-const usersSlice = createSlice({
-  name: 'app/users',
+const modulesSlice = createSlice({
+  name: 'app/modules',
   initialState,
   reducers: {
-    setUsersSearchText: {
+    setModulesSearchText: {
       reducer: (state, action) => {
         state.searchText = action.payload;
       },
       prepare: (event) => ({ payload: event.target.value || '' }),
     },
+    resetModule(state){
+      state.searchText = '';
+    }
   },
   extraReducers: {
-    [getUsers.fulfilled]: (state, action) =>{
-      state.users = action.payload.result.data;
+    [getModules.fulfilled]: (state, action) =>{
+      state.data = action.payload.result.data;
       state.fields = action.payload.fields;
       state.pages = action.payload.result.pages;
       state.totalRecords = action.payload.result.total;
@@ -59,9 +62,9 @@ const usersSlice = createSlice({
   },
 });
 
-export const { setUsersSearchText } = usersSlice.actions;
+export const { setModulesSearchText,resetModule } = modulesSlice.actions;
 
-// export const selectUsersSearchText = ({crud}) => crud.users.searchText;
+export const selectModulesSearchText = ({crud}) => crud.modules.searchText;
 
 
-export default usersSlice.reducer;
+export default modulesSlice.reducer;

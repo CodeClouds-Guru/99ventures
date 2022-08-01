@@ -52,7 +52,7 @@ function ListTableHead(props) {
   const { selectedOrderIds } = props;
   const numSelected = selectedOrderIds.length;
 
-  const fields = useSelector((state)=>state.crud.users.fields);
+  const fields = useSelector((state)=>state.crud.modules.fields);
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
@@ -154,7 +154,7 @@ function ListTableHead(props) {
                   <TableSortLabel
                     active={props.order.id === row.id}
                     direction={props.order.direction}
-                    onClick={createSortHandler(row.id)}
+                    onClick={createSortHandler(row.field_name)}
                     className="font-semibold"
                   >
                     {row.placeholder}

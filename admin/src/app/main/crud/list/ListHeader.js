@@ -5,14 +5,15 @@ import Typography from '@mui/material/Typography';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { selectUsersSearchText, setUsersSearchText } from '../store/usersSlice';
+import { selectModulesSearchText, setModulesSearchText } from '../store/modulesSlice';
 import reducer from '../store';
 import withReducer from 'app/store/withReducer';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 function ListHeader(props) {
   const dispatch = useDispatch();
-  const searchText = useSelector(selectUsersSearchText);
+  const searchText = useSelector(selectModulesSearchText);
+  const { module } = useParams(); 
 
   return (
     <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
@@ -21,9 +22,9 @@ function ListHeader(props) {
         initial={{ x: -20 }}
         animate={{ x: 0, transition: { delay: 0.2 } }}
         delay={300}
-        className="flex text-24 md:text-32 font-extrabold tracking-tight"
+        className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
       >
-        Users
+        {module}
       </Typography>
 
       <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
@@ -36,15 +37,15 @@ function ListHeader(props) {
           <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
           <Input
-            placeholder="Search orders"
+            placeholder={`Search ${module}`}
             className="flex flex-1"
             disableUnderline
             fullWidth
             value={searchText}
             inputProps={{
-              'aria-label': 'Search Orders',
+              'aria-label': `Search ${module}`,
             }}
-            onChange={(ev) => dispatch(setUsersSearchText(ev))}
+            onChange={(ev) => dispatch(setModulesSearchText(ev))}
           />
         </Paper>
         <motion.div

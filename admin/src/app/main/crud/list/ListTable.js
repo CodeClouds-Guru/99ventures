@@ -14,42 +14,68 @@ import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
 // import OrdersStatus from '../order/OrdersStatus';
-import { getUsers, selectUsers, selectUsersSearchText } from '../store/usersSlice';
+import { getModules} from '../store/modulesSlice';
 import ListTableHead from './ListTableHead';
+import { useParams } from 'react-router-dom';
+import moment from 'moment';
+import { resetModule } from '../store/modulesSlice';
 
 function ListTable(props) {
   const dispatch = useDispatch();
-  const users = useSelector((state)=>state.crud.users.users);
-  const searchText = useSelector((state)=>state.crud.users.searchText);
-  const fields = useSelector((state)=>state.crud.users.fields);
+  const {module} = useParams();
+  const modules = useSelector((state)=>state.crud.modules.data);
+  const searchText = useSelector((state)=>state.crud.modules.searchText);
+  const fields = useSelector((state)=>state.crud.modules.fields);
+  const totalRecords = useSelector((state)=>state.crud.modules.totalRecords);
 
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
-  const [data, setData] = useState(users);
+  const [data, setData] = useState(modules);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
-    direction: 'asc',
-    id: null,
+    direction: 'desc',
+    id: 'id',
   });
 
-  useEffect(() => {
-    dispatch(getUsers()).then(() => setLoading(false));
-  }, [dispatch]);
+  // useEffect(() => {
+  //   console.log('Triggered 1')
+  //   dispatch(getUsers()).then(() => setLoading(false));
+  // }, [dispatch]);
+
+  useEffect(()=>{
+    dispatch(resetModule());
+    setOrder({
+      direction:'desc',
+      id:'id',
+    });
+    setPage(0);
+    
+  },[module])
 
   useEffect(() => {
+    let params = {
+      search:searchText,
+      page:page+1,
+      show:rowsPerPage,
+      sort:order.id,
+      sort_order:order.direction,
+      module
+    }
     if (searchText.length !== 0) {
       // setData(FuseUtils.filterArrayByString(users, searchText));      
-      setPage(0);
+      // setPage(1);
     } else {
       // setData(users);
     }
-    dispatch(getUsers({searchText})).then(() => setLoading(false));
-  }, [searchText]);
+    dispatch(getModules(params)).then(() => setLoading(false));
+  }, [searchText,page,rowsPerPage,module,order]);
 
   useEffect(()=>{
-    setData(users);
-  },[users])
+    setData(modules);
+  },[modules])
+
+
 
   function handleRequestSort(event, property) {
     const id = property;
@@ -106,7 +132,15 @@ function ListTable(props) {
   }
 
   function handleChangeRowsPerPage(event) {
+    setPage(0);
     setRowsPerPage(event.target.value);
+  }
+
+  const processFieldValue = (value,fieldConfig)=>{
+    if(fieldConfig.field_name === 'created_at'){
+      value = moment(value).format('DD-MMM-YYYY')
+    }
+    return value;
   }
 
   if (loading) {
@@ -125,7 +159,7 @@ function ListTable(props) {
         className="flex flex-1 items-center justify-center h-full"
       >
         <Typography color="text.secondary" variant="h5">
-          There are no orders!
+          There are no {module}!
         </Typography>
       </motion.div>
     );
@@ -145,32 +179,7 @@ function ListTable(props) {
           />
 
           <TableBody>
-            {_.orderBy(
-              data,
-              [
-                (o) => {
-                  switch (order.id) {
-                    case 'id': {
-                      return parseInt(o.id, 10);
-                    }
-                    case 'customer': {
-                      return o.customer.firstName;
-                    }
-                    case 'payment': {
-                      return o.payment.method;
-                    }
-                    case 'status': {
-                      return o.status[0].name;
-                    }
-                    default: {
-                      return o[order.id];
-                    }
-                  }
-                },
-              ],
-              [order.direction]
-            )
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            {data
               .map((n) => {
                 const isSelected = selected.indexOf(n.id) !== -1;
                 return (
@@ -197,7 +206,7 @@ function ListTable(props) {
                     .map((field,i)=>{
                       return <Fragment key={i}>
                         <TableCell className="p-4 md:p-16" component="th" scope="row">
-                          {n[field.field_name]}
+                          {processFieldValue(n[field.field_name],field)}
                         </TableCell>
                       </Fragment>
                     })}
@@ -208,10 +217,10 @@ function ListTable(props) {
         </Table>
       </FuseScrollbars>
 
-      <TablePagination
+      {totalRecords>0 && <TablePagination
         className="shrink-0 border-t-1"
         component="div"
-        count={data.length}
+        count={totalRecords}
         rowsPerPage={rowsPerPage}
         page={page}
         backIconButtonProps={{
@@ -222,7 +231,8 @@ function ListTable(props) {
         }}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+        rowsPerPageOptions={[2,5,10,20]}
+      />}
     </div>
   );
 }
