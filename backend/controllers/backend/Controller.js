@@ -101,13 +101,15 @@ class Controller {
 
   async delete(req, res) {
     try {
-      let model = await this.model.findByPk(req.params.id);
-      await model.destroy();
-      if (model) {
-        model.deleted_by = req.user.id;
-        await model.save();
+      let modelIds = req.body.orderIds ?? [];
+      let models = await this.model.findAll({ where: { id: modelIds } });
+      await this.model.destroy({ where: { id: modelIds } });
+      if(models){
+        models.forEach( async model => {
+          model.deleted_by = req.user.id;
+          await model.save();
+        });
       }
-
       return {
         message: "Record has been deleted successfully",
       };
@@ -117,12 +119,16 @@ class Controller {
   }
 
   async restore(req, res) {
-    let id = req.params.id;
-    try {
-      await this.model.restore({ where: { id } });
-      let model = await this.model.findByPk(id);
-      model.deleted_by = null;
-      await model.save();
+    let modelIds = req.body.orderIds ?? [];
+    try {      
+      await this.model.restore({ where: { id:modelIds } });
+      let models = await this.model.findAll({ where: { id: modelIds } });
+      if(models){
+        models.forEach( async model => {
+          model.deleted_by = null;
+          await model.save();
+        });
+      }
       return {
         message: "Record has been restored successfully",
       };
