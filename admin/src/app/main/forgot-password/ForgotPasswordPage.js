@@ -34,14 +34,15 @@ function ForgotPasswordPage() {
   const { isValid, dirtyFields, errors } = formState;
 
   useEffect(() => {
-    setValue('email', '', { shouldDirty: true, shouldValidate: true });
+    setValue('email', '', { shouldDirty: true, shouldValidate: false });
   }, [setValue]);
 
   function onSubmit({ email }) {
     jwtService
       .sentResetPasswordLink(email)
-      .then((user) => {
+      .then((response) => {
         // No need to do anything, user data will be set at app/auth/AuthContext
+        setValue('email', '', { shouldDirty: true, shouldValidate: false });
       })
       .catch((_errors) => {
         _errors.forEach((error) => {

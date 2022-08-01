@@ -16,7 +16,9 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
+import { Navigate } from 'react-router-dom';
 
+// const navigate = useNavigate();
 /**
  * Form Validation Schema
  */
@@ -26,16 +28,15 @@ const schema = yup.object().shape({
         .required('Please enter your new password.')
         .min(8, 'Password is too short - should be 8 chars minimum.'),
     passwordConfirm: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match'),
-    acceptTermsConditions: yup.boolean().oneOf([true], 'The terms and conditions must be accepted.'),
 });
 
 const defaultValues = {
-    hashKey: '',
+    hash: '',
     password: '',
     passwordConfirm: '',
 };
 
-function SetPasswordPage() {
+function ResetPasswordPage() {
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -46,16 +47,20 @@ function SetPasswordPage() {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        setValue('hashKey', params.get('key'), { shouldDirty: true, shouldValidate: true });
-        setValue('password', '', { shouldDirty: true, shouldValidate: true });
-        setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: true });
+        setValue('hash', params.get('hash'));
+        setValue('password', '', { shouldDirty: true, shouldValidate: false });
+        setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: false });
+        // console.log(params.get('hash'), hash);
     }, [setValue]);
 
-    function onSubmit({ email, password }) {
+    const onSubmit = ({ hash, password }) => {
+        // if (hash && password && passwordConfirm) {
         jwtService
-            .setPassword({ hashKey, password, passwordConfirm })
-            .then((user) => {
+            .resetPassword({ hash, password })
+            .then((response) => {
                 // No need to do anything, user data will be set at app/auth/AuthContext
+                // navigate('sign-in');
+                // <Navigate to="sign-in" />
             })
             .catch((_errors) => {
                 _errors.forEach((error) => {
@@ -64,7 +69,11 @@ function SetPasswordPage() {
                         message: error.message,
                     });
                 });
+                // console.error(_errors);
             });
+        // } else {
+        //     console.error('error');
+        // }
     }
 
     return (
@@ -215,4 +224,4 @@ function SetPasswordPage() {
     );
 }
 
-export default SetPasswordPage;
+export default ResetPasswordPage;

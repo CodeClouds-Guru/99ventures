@@ -1,7 +1,7 @@
-import SetPasswordPage from './SetPasswordPage';
+import ResetPasswordPage from './ResetPasswordPage';
 import authRoles from '../../auth/authRoles';
 
-const SetPasswordConfig = {
+const ResetPasswordConfig = {
   settings: {
     layout: {
       config: {
@@ -26,10 +26,10 @@ const SetPasswordConfig = {
   auth: authRoles.onlyGuest,
   routes: [
     {
-      path: 'set-password',
-      element: <SetPasswordPage />,
+      path: 'reset-password',
+      element: <ResetPasswordPage />,
     },
   ],
 };
 
-export default SetPasswordConfig;
+export default ResetPasswordConfig;

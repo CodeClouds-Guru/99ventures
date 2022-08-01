@@ -31,7 +31,7 @@ const schema = yup.object().shape({
 const defaultValues = {
   email: '',
   password: '',
-  remember: true,
+  // remember: true,
 };
 
 function SignInPage() {
@@ -44,8 +44,8 @@ function SignInPage() {
   const { isValid, dirtyFields, errors } = formState;
 
   useEffect(() => {
-    setValue('email', '', { shouldDirty: true, shouldValidate: true });
-    setValue('password', '', { shouldDirty: true, shouldValidate: true });
+    setValue('email', '', { shouldDirty: true, shouldValidate: false });
+    setValue('password', '', { shouldDirty: true, shouldValidate: false });
   }, [setValue]);
 
   function onSubmit({ email, password }) {
@@ -124,7 +124,7 @@ function SignInPage() {
             />
 
             <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between">
-              <Controller
+              {/* <Controller
                 name="remember"
                 control={control}
                 render={({ field }) => (
@@ -135,7 +135,7 @@ function SignInPage() {
                     />
                   </FormControl>
                 )}
-              />
+              /> */}
 
               <Link className="text-md font-medium" to="/forgot-password">
                 Forgot password?

@@ -4,13 +4,13 @@ import { Navigate } from 'react-router-dom';
 import settingsConfig from 'app/configs/settingsConfig';
 import SignInConfig from '../main/sign-in/SignInConfig';
 import ForgotPasswordConfig from '../main/forgot-password/ForgotPasswordConfig';
-import SetPasswordConfig from '../main/set-password/SetPasswordConfig';
+import ResetPasswordConfig from '../main/reset-password/ResetPasswordConfig';
 import SignOutConfig from '../main/sign-out/SignOutConfig';
 import Error404Page from '../main/404/Error404Page';
 import DashboardConfig from '../main/dashboard/DashboardConfig';
 import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
-const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, SetPasswordConfig, CompanySiteConfig, CRUDConfig];
+const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, ResetPasswordConfig, CompanySiteConfig, CRUDConfig];
 
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs, settingsConfig.defaultAuth),
@@ -24,11 +24,11 @@ const routes = [
     element: <Navigate to="/dashboard" />,
     auth: settingsConfig.defaultAuth,
   },
-  {
-    path: '/company-site',
-    element: <Navigate to="/company-site" />,
-    auth: settingsConfig.defaultAuth,
-  },
+  // {
+  //   path: '/company-site',
+  //   element: <Navigate to="/company-site" />,
+  //   auth: settingsConfig.defaultAuth,
+  // },
   {
     path: 'loading',
     element: <FuseLoading />,
