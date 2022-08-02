@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import _ from '@lodash';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { removeProduct, saveProduct } from '../store/moduleSlice';
+import { removeProduct, saveModule } from '../store/moduleSlice';
 
 function CreateEditHeader(props) {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ function CreateEditHeader(props) {
   const {module} = useParams();
 
   function handleSaveProduct() {
-    dispatch(saveProduct(getValues()));
+    dispatch(saveModule(getValues()));
   }
 
   function handleRemoveProduct() {
@@ -102,14 +102,14 @@ function CreateEditHeader(props) {
         >
           Remove
         </Button> */}
-        <Button
+        {/* <Button
           className="whitespace-nowrap mx-4"
           variant="contained"
           color="secondary"
           onClick={handleSaveProduct}
         >
           Save
-        </Button>
+        </Button> */}
       </motion.div>
     </div>
   );
