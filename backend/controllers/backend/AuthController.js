@@ -52,14 +52,25 @@ class AuthController {
           errors: ['User Already Exists'],
         })
       }
+      let hash_obj = '';
+      if(value.invitation == '1')
+      {
+        hash_obj = Buffer.from(value.token, 'base64')
+        hash_obj = hash_obj.toString('utf8')
+        hash_obj = JSON.parse(hash_obj)
+        if(new Date(hash_obj.expired_at) < new Date()){
+          return res.status(400).json({
+            status: false,
+            errors: ['This link has been expired'],
+          })
+        }
+      }
       const salt = await bcrypt.genSalt(10)
       const password = await bcrypt.hash(value.password, salt)
       let new_user = [];
       if(value.invitation == '1')
       {
-        let hash_obj = Buffer.from(value.token, 'base64')
-        hash_obj = hash_obj.toString('utf8')
-        hash_obj = JSON.parse(hash_obj)
+        
         
         let update_user = await User.update({
           first_name:value.first_name,

@@ -47,7 +47,8 @@ class InvitationController extends Controller {
             username: value.username,
             email: value.email,
             password: '2222',
-            status: 0
+            status: 0,
+            created_by: user.id
         })
         
 
