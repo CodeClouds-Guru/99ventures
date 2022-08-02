@@ -19,11 +19,11 @@ const routes = [
     element: <Navigate to="/dashboard" />,
     auth: settingsConfig.defaultAuth,
   },
-  {
-    path: '/dashboard/:id/:id2',
-    element: <Navigate to="/dashboard" />,
-    auth: settingsConfig.defaultAuth,
-  },
+  // {
+  //   path: '/dashboard/:id/:id2',
+  //   element: <Navigate to="/dashboard" />,
+  //   auth: settingsConfig.defaultAuth,
+  // },
   // {
   //   path: '/company-site',
   //   element: <Navigate to="/company-site" />,

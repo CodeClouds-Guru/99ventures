@@ -1,22 +1,19 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
-
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 /**
  * Form Validation Schema
  */
@@ -35,6 +32,7 @@ const defaultValues = {
 };
 
 function SignInPage() {
+  const dispatch = useDispatch();
   const { control, formState, handleSubmit, setError, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
@@ -48,19 +46,20 @@ function SignInPage() {
     setValue('password', '', { shouldDirty: true, shouldValidate: false });
   }, [setValue]);
 
-  function onSubmit({ email, password }) {
+  const onSubmit = ({ email, password }) => {
     jwtService
       .signInWithEmailAndPassword(email, password)
-      .then((user) => {
+      .then((response) => {
         // No need to do anything, user data will be set at app/auth/AuthContext
       })
       .catch((_errors) => {
-        _errors.forEach((error) => {
-          setError(error.type, {
-            type: 'manual',
-            message: error.message,
-          });
-        });
+        // _errors.forEach((error) => {
+        //   setError(error.type, {
+        //     type: 'manual',
+        //     message: error.message,
+        //   });
+        // });
+        dispatch(showMessage({ variant: 'error', message: _errors.response.data.message }));
       });
   }
 

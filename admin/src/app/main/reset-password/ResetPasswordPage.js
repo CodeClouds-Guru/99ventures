@@ -1,24 +1,20 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
-import { Navigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { useNavigate } from 'react-router-dom';
 
-// const navigate = useNavigate();
 /**
  * Form Validation Schema
  */
@@ -37,6 +33,8 @@ const defaultValues = {
 };
 
 function ResetPasswordPage() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -50,30 +48,29 @@ function ResetPasswordPage() {
         setValue('hash', params.get('hash'));
         setValue('password', '', { shouldDirty: true, shouldValidate: false });
         setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: false });
-        // console.log(params.get('hash'), hash);
     }, [setValue]);
 
-    const onSubmit = ({ hash, password }) => {
-        // if (hash && password && passwordConfirm) {
-        jwtService
-            .resetPassword({ hash, password })
-            .then((response) => {
-                // No need to do anything, user data will be set at app/auth/AuthContext
-                // navigate('sign-in');
-                // <Navigate to="sign-in" />
-            })
-            .catch((_errors) => {
-                _errors.forEach((error) => {
-                    setError(error.type, {
-                        type: 'manual',
-                        message: error.message,
+    const onSubmit = ({ hash, password, passwordConfirm }) => {
+        if (hash && password && passwordConfirm) {
+            jwtService
+                .resetPassword({ hash, password })
+                .then((response) => {
+                    // No need to do anything, user data will be set at app/auth/AuthContext
+                    dispatch(showMessage({ variant: 'success', message: response.message }));
+                    navigate('/sign-in');
+
+                })
+                .catch((_errors) => {
+                    _errors.forEach((error) => {
+                        setError(error.type, {
+                            type: 'manual',
+                            message: error.message,
+                        });
                     });
                 });
-                // console.error(_errors);
-            });
-        // } else {
-        //     console.error('error');
-        // }
+        } else {
+            console.error('parameter missing');
+        }
     }
 
     return (

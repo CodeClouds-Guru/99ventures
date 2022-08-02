@@ -12,6 +12,8 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 /**
  * Form Validation Schema
@@ -25,6 +27,8 @@ const defaultValues = {
 };
 
 function ForgotPasswordPage() {
+  const dispatch = useDispatch();
+
   const { control, formState, handleSubmit, setError, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
@@ -42,15 +46,17 @@ function ForgotPasswordPage() {
       .sentResetPasswordLink(email)
       .then((response) => {
         // No need to do anything, user data will be set at app/auth/AuthContext
+        dispatch(showMessage({ variant: 'success', message: response.message }));
         setValue('email', '', { shouldDirty: true, shouldValidate: false });
       })
       .catch((_errors) => {
-        _errors.forEach((error) => {
-          setError(error.type, {
-            type: 'manual',
-            message: error.message,
-          });
-        });
+        // _errors.forEach((error) => {
+        //   setError(error.type, {
+        //     type: 'manual',
+        //     message: error.message,
+        //   });
+        // });
+        console.error(_errors);
       });
   }
 
