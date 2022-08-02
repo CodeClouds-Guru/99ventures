@@ -8,7 +8,7 @@ class InvitationController extends Controller {
   constructor() {
     super('Invitation')
   }
-
+  //send invitation
   async sendInvitation(req, res){
     // res.status(401).json({
     //     data:req.headers
@@ -23,9 +23,10 @@ class InvitationController extends Controller {
     })
     const { error, value } = schema.validate(req.body)
     if (error) {
+        let error_msg = error.details.map((err) => err.message);
         res.status(401).json({
             status: false,
-            errors: error.details.map((err) => err.message),
+            errors: error_msg.join(','),
         })
         return
     }
@@ -80,6 +81,7 @@ class InvitationController extends Controller {
         })
     }
   }
+  
 }
 
 module.exports = new InvitationController()

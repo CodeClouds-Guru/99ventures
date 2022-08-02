@@ -31,9 +31,10 @@ class AuthController {
     })
     const { error, value } = schema.validate(req.body)
     if (error) {
+      let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error.details.map((err) => err.message),
+        errors: error_msg.join(','),
       })
     }
 
@@ -49,7 +50,7 @@ class AuthController {
       if ((existing_user.length > 0 && value.invitation =='') || (value.invitation == 1 && existing_user.length > 0 && existing_user[0].status == '1')) {
         return res.status(400).json({
           status: false,
-          errors: ['User Already Exists'],
+          errors: 'User Already Exists',
         })
       }
       let hash_obj = '';
@@ -61,7 +62,7 @@ class AuthController {
         if(new Date(hash_obj.expired_at) < new Date()){
           return res.status(400).json({
             status: false,
-            errors: ['This link has been expired'],
+            errors: 'This link has been expired',
           })
         }
       }
@@ -107,7 +108,7 @@ class AuthController {
       console.log(err.message)
       res.status(500).json({
         status: false,
-        message: 'unable to save data',
+        message: 'Unable to save data',
       })
     }
   }
@@ -121,9 +122,10 @@ class AuthController {
     })
     const { error, value } = schema.validate(req.body)
     if (error) {
+      let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error.details.map((err) => err.message),
+        errors: error_msg.join(','),
       })
       return
     }
@@ -198,9 +200,10 @@ class AuthController {
     })
     const { error, value } = schema.validate(req.body)
     if (error) {
+      let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error.details.map((err) => err.message),
+        errors: error_msg.join(','),
       })
       return
     }
@@ -239,9 +242,10 @@ class AuthController {
     hash_obj = JSON.parse(hash_obj)
 
     if (error) {
+      let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error.details.map((err) => err.message),
+        errors: error_msg.join(','),
       })
       return
     }
