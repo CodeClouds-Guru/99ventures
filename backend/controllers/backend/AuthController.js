@@ -224,7 +224,7 @@ class AuthController {
       status: true,
       reset_link:
         process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
-        errors: 'Reset password mail has been sent to your email',
+        message: 'Reset password mail has been sent to your email',
     })
   }
   //reset password
@@ -267,7 +267,7 @@ class AuthController {
     )
     res.status(200).json({
       status: true,
-      errors: 'Password updated',
+      message: 'Password updated',
     })
   }
 }
