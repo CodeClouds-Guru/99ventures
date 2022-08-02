@@ -154,7 +154,7 @@ function ListTableHead(props) {
                   <TableSortLabel
                     active={props.order.id === row.id}
                     direction={props.order.direction}
-                    onClick={createSortHandler(row.id)}
+                    onClick={createSortHandler(row.field_name)}
                     className="font-semibold"
                   >
                     {row.placeholder}

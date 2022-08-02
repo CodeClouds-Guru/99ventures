@@ -37,8 +37,8 @@ const initialState = {
   totalRecords:0
 }
 
-const usersSlice = createSlice({
-  name: 'app/users',
+const modulesSlice = createSlice({
+  name: 'app/modules',
   initialState,
   reducers: {
     setModulesSearchText: {
@@ -47,6 +47,9 @@ const usersSlice = createSlice({
       },
       prepare: (event) => ({ payload: event.target.value || '' }),
     },
+    resetModule(state){
+      state.searchText = '';
+    }
   },
   extraReducers: {
     [getModules.fulfilled]: (state, action) =>{
@@ -59,9 +62,9 @@ const usersSlice = createSlice({
   },
 });
 
-export const { setModulesSearchText } = usersSlice.actions;
+export const { setModulesSearchText,resetModule } = modulesSlice.actions;
 
 export const selectModulesSearchText = ({crud}) => crud.modules.searchText;
 
 
-export default usersSlice.reducer;
+export default modulesSlice.reducer;

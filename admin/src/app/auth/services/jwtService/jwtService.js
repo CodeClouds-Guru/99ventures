@@ -3,6 +3,7 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
+// import { showMessage, hideMessage } from 'app/store/fuse/messageSlice';
 
 /* eslint-disable camelcase */
 
@@ -79,6 +80,8 @@ class JwtService extends FuseUtils.EventEmitter {
           } else {
             reject(response.data.error);
           }
+        }).catch((error) => {
+          reject(error);
         });
     });
   };
@@ -150,14 +153,18 @@ class JwtService extends FuseUtils.EventEmitter {
     return axios.post(jwtServiceConfig.forgotPassword, {
       email,
     }).then((response) => {
+      // showMessage({ message: 'Reset password link has been sent to your email' });
       return response.data;
     }).catch((error) => {
       return error.response.data;
     });
   };
 
-  setPassword = (data) => {
-    return axios.post(jwtServiceConfig.forgotPassword, data).then((response) => {
+  resetPassword = ({ hash, password }) => {
+    return axios.post(jwtServiceConfig.resetPassword, {
+      hash,
+      password,
+    }).then((response) => {
       return response.data;
     }).catch((error) => {
       return error.response.data;
