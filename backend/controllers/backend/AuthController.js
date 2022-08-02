@@ -133,7 +133,7 @@ class AuthController {
     if (!user) {
       res.status(401).json({
         status: false,
-        errors: 'Sorry! this email is not registered with us',
+        errors: 'Email is not registered',
       })
       return
     }
