@@ -15,6 +15,12 @@ class Controller {
     };
   }
 
+  async fields(req, res){
+    return {
+      fields: this.model.fields,
+    };
+  }
+
   getQueryOptions(req) {
     let page = req.query.page || 1;
     let show = parseInt(req.query.show) || 10; // per page record

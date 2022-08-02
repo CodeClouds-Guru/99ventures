@@ -117,8 +117,8 @@ function ListTableHead(props) {
                 <MenuList>
                   <MenuItem
                     onClick={() => {
-                      dispatch(removeModules({orderIds:selectedOrderIds,module}));
-                      props.onMenuItemClick();
+                      dispatch(removeModules({orderIds:selectedOrderIds,module})).then(()=>props.onMenuItemClick());
+                      
                       closeSelectedOrdersMenu();
                     }}
                   >
