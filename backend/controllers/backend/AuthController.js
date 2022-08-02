@@ -5,6 +5,7 @@
 
 const Joi = require('joi')
 const { User } = require('../../models/index')
+const { Invitation } = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
 
@@ -25,6 +26,8 @@ class AuthController {
         .required(),
       phone_no: Joi.string().required(),
       email: Joi.string().email().required(),
+      invitation: Joi.number(),
+      token: Joi.string()
     })
     const { error, value } = schema.validate(req.body)
     if (error) {
@@ -35,13 +38,15 @@ class AuthController {
     }
 
     try {
+      
       let existing_user = await User.findAll({
         limit: 1,
         where: {
-          email: value.email,
+          email: value.email
         },
       })
-      if (existing_user.length > 0) {
+      
+      if ((existing_user.length > 0 && value.invitation =='') || (value.invitation == 1 && existing_user.length > 0 && existing_user[0].status == '1')) {
         return res.status(400).json({
           status: false,
           errors: ['User Already Exists'],
@@ -49,10 +54,34 @@ class AuthController {
       }
       const salt = await bcrypt.genSalt(10)
       const password = await bcrypt.hash(value.password, salt)
-      let new_user = await User.create({
-        ...value,
-        password,
-      })
+      let new_user = [];
+      if(value.invitation == '1')
+      {
+        let hash_obj = Buffer.from(value.token, 'base64')
+        hash_obj = hash_obj.toString('utf8')
+        hash_obj = JSON.parse(hash_obj)
+        
+        let update_user = await User.update({
+          first_name:value.first_name,
+          last_name:value.last_name,
+          username:value.username,
+          password:password,
+          phone_no:value.phone_no,
+          status:1,
+        },{
+          where: { id: hash_obj.id }
+        })
+        new_user = await User.findOne({where: {id:hash_obj.id}});
+
+        //update invitation accepted time
+        let update_invitation = await Invitation.update({accepted_on:new Date()},{where:{id:hash_obj.invitation_id}})
+        
+      }else{
+        new_user = await User.create({
+          ...value,
+          password,
+        })
+      }
       const token = generateToken({
         user: {
           id: new_user.id,
@@ -61,7 +90,7 @@ class AuthController {
       res.status(200).json({
         status: true,
         user: new_user,
-        access_token: token,
+        access_token: token
       })
     } catch (err) {
       console.log(err.message)

@@ -18,13 +18,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       expired_at: {
-        type: Sequelize.TIME
+        type: 'TIMESTAMP'
       },
       email_sent_at: {
-        type: Sequelize.TIME
+        type: 'TIMESTAMP'
       },
       accepted_on: {
-        type: Sequelize.TIME
+        type: 'TIMESTAMP'
       },
       created_by: {
         type: Sequelize.BIGINT

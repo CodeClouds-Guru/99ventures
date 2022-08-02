@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate')
+const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class Invitation extends Model {
     /**
@@ -17,9 +19,9 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.BIGINT,
     email: DataTypes.STRING,
     token: DataTypes.STRING,
-    expired_at: DataTypes.TIME,
-    email_sent_at: DataTypes.TIME,
-    accepted_on: DataTypes.TIME,
+    expired_at: 'TIMESTAMP',
+    email_sent_at: 'TIMESTAMP',
+    accepted_on: 'TIMESTAMP',
     created_by: DataTypes.BIGINT
   }, {
     sequelize,
@@ -29,5 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updated_at',
     tableName: "invitations",
   });
+  Invitation.validate = function (req) {
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+    })
+    return schema.validate(req.body)
+  }
   return Invitation;
 };
