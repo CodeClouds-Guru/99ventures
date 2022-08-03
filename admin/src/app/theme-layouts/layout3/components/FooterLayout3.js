@@ -18,7 +18,7 @@ function FooterLayout3(props) {
         style={{ backgroundColor: footerTheme.palette.background.paper }}
       >
         <Toolbar className="container min-h-48 md:min-h-64 px-8 sm:px-12 lg:px-20 py-0 flex items-center overflow-x-auto">
-          Footer
+          &#xA9; 99 Ventures. All rights reserved.
         </Toolbar>
       </AppBar>
     </ThemeProvider>
