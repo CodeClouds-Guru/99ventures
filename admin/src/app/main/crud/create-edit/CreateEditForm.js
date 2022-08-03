@@ -9,7 +9,7 @@ import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
 
 const schema = yup.object({
-  email: yup.string().required(),
+  // email: yup.string().required(),
 }).required();
 
 function CreateEditForm(props) {
@@ -49,6 +49,7 @@ function CreateEditForm(props) {
   }
 
   const onSubmit = async data => {
+    console.log(data);
     await dispatch(saveModule({...data,module}));
     navigate(`/app/${module}`);
   };
