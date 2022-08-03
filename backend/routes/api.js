@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const AuthMiddleware = require('../middlewares/authMiddleware')
+const checkPermissionMiddleware = require('../middlewares/CheckPermissionMiddleware')
 const AuthControllerClass = require('../controllers/backend/AuthController')
 const AuthController = new AuthControllerClass()
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController')
@@ -18,7 +19,7 @@ router.post('/forgot-password', AuthController.forgotPassword)
 router.post('/reset-password', AuthController.resetPassword)
 router.all(
   '/:module/:action?/:id?',
-  [AuthMiddleware],
+  [AuthMiddleware, checkPermissionMiddleware],
   DynamicRouteController.handle
 )
 

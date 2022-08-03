@@ -2,7 +2,10 @@
  * @description Middleware to check permissions of the user who sent the request. Request without enough privilage will result 403 error
  * @author Sourabh (CodeClouds)
  */
-
+const db = require('../models/index')
+const { QueryTypes, Op } = require('sequelize')
+const { Group } = db
+const role = require('../models/role')
 // const rules = require("../config/acl");
 const extraActionsThatRequiresSamePermission = {
   deleteParmanently: 'delete',
@@ -35,7 +38,7 @@ function checkPermission(permissions, module, action) {
   return false
 }
 
-module.exports = function (req, res, next) {
+module.exports = async function (req, res, next) {
   const user = req.user
   const company_id = 1
   let partial_path = req.originalUrl.replace('api/', '').split('?').shift()
@@ -43,10 +46,22 @@ module.exports = function (req, res, next) {
   if (typeof action === 'undefined') {
     action = 'list'
   }
-  const companies = user.getCompanies({
+  const companies = await db.sequelize.query(
+    'SELECT * FROM company_user WHERE company_id = ? AND user_id = ?',
+    {
+      replacements: [company_id, user.id],
+      type: QueryTypes.SELECT,
+    }
+  )
+  const group_ids = companies.map((item) => item.group_id)
+
+  const group_role_permissions = await Group.findAll({
     where: {
-      company_id,
+      id: {
+        [Op.in]: group_ids,
+      },
     },
+    include: { all: true },
   })
-  res.send(companies)
+  res.send(group_role_permissions)
 }

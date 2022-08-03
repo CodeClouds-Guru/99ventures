@@ -1,7 +1,7 @@
 'use strict'
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
-const Joi = require("joi");
+const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class Group extends Model {
     /**
@@ -10,21 +10,23 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Group.belongsToMany(models.Role, {
-        as: 'roles',
-        through: 'group_role',
-        foreignKey: 'group_id',
-        otherKey: 'role_id',
-      })
+      Group.belongsToMany(
+        models.Role,
+        {
+          through: 'group_role',
+          foreignKey: 'group_id',
+          otherKey: 'role_id',
+        },
+        { created_at: false, updated_at: false }
+      )
     }
   }
   Group.validate = function (req) {
     const schema = Joi.object({
-                        name: Joi.string().required()
-
-    });
-    return schema.validate(req.body);
-  };
+      name: Joi.string().required(),
+    })
+    return schema.validate(req.body)
+  }
   Group.init(
     {
       name: DataTypes.STRING,
