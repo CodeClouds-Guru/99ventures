@@ -1,21 +1,19 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Form Validation Schema
@@ -26,16 +24,17 @@ const schema = yup.object().shape({
         .required('Please enter your new password.')
         .min(8, 'Password is too short - should be 8 chars minimum.'),
     passwordConfirm: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match'),
-    acceptTermsConditions: yup.boolean().oneOf([true], 'The terms and conditions must be accepted.'),
 });
 
 const defaultValues = {
-    hashKey: '',
+    hash: '',
     password: '',
     passwordConfirm: '',
 };
 
-function SetPasswordPage() {
+function ResetPasswordPage() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -46,25 +45,27 @@ function SetPasswordPage() {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        setValue('hashKey', params.get('key'), { shouldDirty: true, shouldValidate: true });
-        setValue('password', '', { shouldDirty: true, shouldValidate: true });
-        setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: true });
+        setValue('hash', params.get('hash'));
+        setValue('password', '', { shouldDirty: true, shouldValidate: false });
+        setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: false });
     }, [setValue]);
 
-    function onSubmit({ email, password }) {
-        jwtService
-            .setPassword({ hashKey, password, passwordConfirm })
-            .then((user) => {
-                // No need to do anything, user data will be set at app/auth/AuthContext
-            })
-            .catch((_errors) => {
-                _errors.forEach((error) => {
-                    setError(error.type, {
-                        type: 'manual',
-                        message: error.message,
-                    });
+    const onSubmit = ({ hash, password, passwordConfirm }) => {
+        if (hash && password && passwordConfirm) {
+            jwtService
+                .resetPassword({ hash, password })
+                .then((response) => {
+                    // No need to do anything, user data will be set at app/auth/AuthContext
+                    dispatch(showMessage({ variant: 'success', message: response.message }));
+                    navigate('/sign-in');
+
+                })
+                .catch((_errors) => {
+                    dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
                 });
-            });
+        } else {
+            console.error('parameter missing');
+        }
     }
 
     return (
@@ -215,4 +216,4 @@ function SetPasswordPage() {
     );
 }
 
-export default SetPasswordPage;
+export default ResetPasswordPage;

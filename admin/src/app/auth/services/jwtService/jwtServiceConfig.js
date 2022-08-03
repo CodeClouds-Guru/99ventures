@@ -4,7 +4,7 @@ const jwtServiceConfig = {
   accessToken: 'refresh-token',
   updateUser: 'user/update',
   forgotPassword: 'forgot-password',
-  setPassword: 'set-password',
+  resetPassword: 'reset-password',
   logout: 'logout',
   companies: 'companies',
 };

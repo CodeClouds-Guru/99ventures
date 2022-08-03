@@ -1,4 +1,4 @@
-/* eslint import/no-extraneous-dependencies: off */
+
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import history from '@history';
 import _ from '@lodash';
@@ -11,6 +11,7 @@ export const setUser = createAsyncThunk('user/setUser', async (user, { dispatch,
   /*
     You can redirect the logged-in user to a specific route depending on his role
     */
+  // console.log('us', user);
   if (user.loginRedirectUrl) {
     settingsConfig.loginRedirectUrl = user.loginRedirectUrl; // for example 'apps/academy'
   }
@@ -50,7 +51,6 @@ export const updateUserShortcuts = createAsyncThunk(
 
 export const logoutUser = () => async (dispatch, getState) => {
   const { user } = getState();
-
   if (!user.role || user.role.length === 0) {
     // is guest
     return null;
@@ -82,13 +82,13 @@ export const updateUserData = (user) => async (dispatch, getState) => {
 };
 
 const initialState = {
-  role: [], // guest
-  data: {
-    displayName: 'John Doe',
-    photoURL: 'assets/images/avatars/brian-hughes.jpg',
-    email: 'johndoe@withinpixels.com',
-    shortcuts: ['apps.calendar', 'apps.mailbox', 'apps.contacts', 'apps.tasks'],
-  },
+  // role: [], // guest
+  // data:  {
+  //   displayName: 'John Doe',
+  //   photoURL: 'assets/images/avatars/brian-hughes.jpg',
+  //   email: 'johndoe@withinpixels.com',
+  //   shortcuts: ['apps.calendar', 'apps.mailbox', 'apps.contacts', 'apps.tasks'],
+  // },
 };
 
 const userSlice = createSlice({

@@ -1,28 +1,35 @@
-import i18next from 'i18next';
-import ar from './navigation-i18n/ar';
-import en from './navigation-i18n/en';
-import tr from './navigation-i18n/tr';
-
-i18next.addResourceBundle('en', 'navigation', en);
-i18next.addResourceBundle('tr', 'navigation', tr);
-i18next.addResourceBundle('ar', 'navigation', ar);
-
 const navigationConfig = [
   {
-    id: 'example-component',
-    title: 'Example',
-    translate: 'EXAMPLE',
+    id: 'dashboard',
+    title: 'Dashboard',
+    translate: 'Dashboard',
     type: 'item',
     icon: 'heroicons-outline:star',
     url: 'example',
   },
   {
-    id: 'app-user',
+    id: 'app-users',
     title: 'Users',
     translate: 'Users',
     type: 'item',
-    icon: 'heroicons-outline:star',
-    url: 'app/user',
+    icon: 'heroicons-outline:users',
+    url: 'app/users',
+  },
+  {
+    id: 'app-roles',
+    title: 'Roles',
+    translate: 'Roles',
+    type: 'item',
+    icon: 'heroicons-outline:users',
+    url: 'app/roles',
+  },
+  {
+    id: 'app-permissions',
+    title: 'Permissions',
+    translate: 'Permissions',
+    type: 'item',
+    icon: 'heroicons-outline:users',
+    url: 'app/permissions',
   },
 ];
 

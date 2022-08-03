@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Tooltip from '@mui/material/Tooltip';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Box } from '@mui/system';
 import TableHead from '@mui/material/TableHead';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -51,6 +51,8 @@ const rows = [
 function ListTableHead(props) {
   const { selectedOrderIds } = props;
   const numSelected = selectedOrderIds.length;
+
+  const fields = useSelector((state)=>state.crud.modules.fields);
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
@@ -128,7 +130,7 @@ function ListTableHead(props) {
             </Box>
           )}
         </TableCell>
-        {rows.map((row) => {
+        {Object.values(fields).filter(field=>field.listing===true).map((row) => {
           return (
             <TableCell
               sx={{
@@ -138,12 +140,12 @@ function ListTableHead(props) {
                     : lighten(theme.palette.background.default, 0.02),
               }}
               className="p-4 md:p-16"
-              key={row.id}
-              align={row.align}
+              key={row.field_name}
+              align={row.align ?? 'left'}
               padding={row.disablePadding ? 'none' : 'normal'}
               sortDirection={props.order.id === row.id ? props.order.direction : false}
             >
-              {row.sort && (
+              {row.listing && (
                 <Tooltip
                   title="Sort"
                   placement={row.align === 'right' ? 'bottom-end' : 'bottom-start'}
@@ -152,10 +154,10 @@ function ListTableHead(props) {
                   <TableSortLabel
                     active={props.order.id === row.id}
                     direction={props.order.direction}
-                    onClick={createSortHandler(row.id)}
+                    onClick={createSortHandler(row.field_name)}
                     className="font-semibold"
                   >
-                    {row.label}
+                    {row.placeholder}
                   </TableSortLabel>
                 </Tooltip>
               )}
