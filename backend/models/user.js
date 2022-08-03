@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
         get() {
           const rawValue = this.getDataValue('avatar');
           const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000'
-          return rawValue ? '' : `${publicURL}/demo-user.png`;
+          return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
         }
       },
       password: DataTypes.STRING,

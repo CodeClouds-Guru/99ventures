@@ -19,11 +19,8 @@ router.get('/refresh-token', [AuthMiddleware], AuthController.refreshToken)
 router.get('/companies', [AuthMiddleware], AuthController.getCompanyAndSites)
 router.post('/forgot-password', AuthController.forgotPassword)
 router.post('/reset-password', AuthController.resetPassword)
-router.post(
-  '/send-invitation',
-  [AuthMiddleware],
-  InvitationController.sendInvitation
-)
+router.post('/send-invitation', [AuthMiddleware], InvitationController.sendInvitation)
+router.get('/resend-invitation/:id', [AuthMiddleware], InvitationController.resendInvitation)
 router.all(
   '/:module/:action?/:id?',
   [AuthMiddleware, checkPermissionMiddleware],

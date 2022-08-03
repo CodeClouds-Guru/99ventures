@@ -10,9 +10,6 @@ class InvitationController extends Controller {
   }
   //send invitation
   async sendInvitation(req, res){
-    // res.status(401).json({
-    //     data:req.headers
-    // })
     const schema = Joi.object({
         email: Joi.string().email().required(),
         first_name: Joi.string().required(),
@@ -77,11 +74,39 @@ class InvitationController extends Controller {
         res.status(200).json({
             status: true,
             link:process.env.CLIENT_ORIGIN + '/sign-up?token=' + token,
-            email: value.email
+            email: value.email,
+            message:'Invitation sent'
         })
     }
   }
-  
+  //re-send invitation
+  async resendInvitation(req,res){
+    let id = req.params.id; 
+    let invitation = await Invitation.findOne({ where: { id: id } })
+    
+    let hash_obj = Buffer.from(invitation.token, 'base64')
+    hash_obj = hash_obj.toString('utf8')
+    hash_obj = JSON.parse(hash_obj)
+    var expired_at = new Date();
+    // add a day
+    expired_at.setDate(expired_at.getDate() + 1);
+    hash_obj.expired_at = expired_at;
+
+    //create new token
+    let token = JSON.stringify(hash_obj)
+    let base64data = Buffer.from(token, 'utf8')
+    token = base64data.toString('base64')
+    //update expiry time
+   
+    let update_invitation = await Invitation.update({expired_at:expired_at,token:token},{where:{id:id}})
+    
+    res.status(200).json({
+        status: true,
+        link:process.env.CLIENT_ORIGIN + '/sign-up?token=' + token,
+        email: invitation.email,
+        message:'Invitation sent'
+    })
+  }
 }
 
 module.exports = new InvitationController()

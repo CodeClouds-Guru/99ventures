@@ -117,7 +117,7 @@ function ListTable(props) {
   }
 
   function handleClick(item) {
-    props.navigate(`/apps/e-commerce/orders/${item.id}`);
+    props.navigate(`/app/${module}/${item.id}`);
   }
 
   function handleCheck(event, id) {
