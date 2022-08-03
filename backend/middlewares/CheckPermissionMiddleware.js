@@ -4,8 +4,7 @@
  */
 const db = require('../models/index')
 const { QueryTypes, Op } = require('sequelize')
-const { Group } = db
-const role = require('../models/role')
+const { Group, Role } = db
 // const rules = require("../config/acl");
 const extraActionsThatRequiresSamePermission = {
   deleteParmanently: 'delete',
@@ -61,7 +60,7 @@ module.exports = async function (req, res, next) {
         [Op.in]: group_ids,
       },
     },
-    include: { all: true },
+    include: Role,
   })
   res.send(group_role_permissions)
 }

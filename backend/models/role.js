@@ -12,10 +12,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Role.belongsToMany(models.Permission, {
-        as: 'permissions',
         through: 'permission_role',
         foreignKey: 'role_id',
         otherKey: 'permission_id',
+      })
+      Role.belongsToMany(models.Group, {
+        through: 'group_role',
+        foreignKey: 'role_id',
+        otherKey: 'group_id',
       })
     }
   }

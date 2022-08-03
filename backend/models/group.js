@@ -4,21 +4,12 @@ const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class Group extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      Group.belongsToMany(
-        models.Role,
-        {
-          through: 'group_role',
-          foreignKey: 'group_id',
-          otherKey: 'role_id',
-        },
-        { created_at: false, updated_at: false }
-      )
+      Group.belongsToMany(models.Role, {
+        through: 'group_role',
+        foreignKey: 'group_id',
+        otherKey: 'role_id',
+      })
     }
   }
   Group.validate = function (req) {
@@ -40,9 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       modelName: 'Group',
       timestamps: true,
       paranoid: true,
-      createdAt: 'created_at', // alias createdAt as created_date
-      updatedAt: 'updated_at',
-      deletedAt: 'deleted_at',
+      // createdAt: 'created_at', // alias createdAt as created_date
+      // updatedAt: 'updated_at',
+      // deletedAt: 'deleted_at',
+      underscored: true,
       tableName: 'groups',
     }
   )
