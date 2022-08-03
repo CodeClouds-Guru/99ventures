@@ -14,14 +14,14 @@ module.exports = (sequelize, DataTypes) => {
   }
   User.validate = function (req) {
     const schema = Joi.object({
-      first_name: Joi.string().required(),
-      last_name: Joi.string().required(),
-      username: Joi.string().alphanum().min(3).max(30).required(),
+      first_name: Joi.string().required().label('First Name'),
+      last_name: Joi.string().required().label('Last Name'),
+      email: Joi.string().email().required().label('Email'),
+      username: Joi.string().alphanum().min(3).max(30).required().label('Username'),
       password: Joi.string()
         .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
-      phone_no: Joi.string().required(),
-      email: Joi.string().email().required(),
+      phone_no: Joi.string().required().label('Phone No'),
     })
     return schema.validate(req.body)
   }
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       avatar: {
-        type:DataTypes.STRING,
+        type: DataTypes.STRING,
         get() {
           const rawValue = this.getDataValue('avatar');
           const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000'

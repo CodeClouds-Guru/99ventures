@@ -19,6 +19,7 @@ import { getModule, newProduct, resetProduct, selectModule, getModuleFields } fr
 import reducer from '../store';
 import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
+import Alert from '@mui/material/Alert';
 
 /**
  * Form Validation Schema
@@ -34,6 +35,7 @@ function CreateEdit(props) {
   const dispatch = useDispatch();
   const moduleData = useSelector(selectModule);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const errors = useSelector(state=>state.crud.module.errors)
 
   const routeParams = useParams();
   const { module } = routeParams;
@@ -129,6 +131,7 @@ function CreateEdit(props) {
       content={
         <>
           <div className="p-16 sm:p-24 max-w-3xl">
+            {errors && <Alert severity="error">{errors[0]}</Alert>}
             <CreateEditForm />
           </div>
         </>

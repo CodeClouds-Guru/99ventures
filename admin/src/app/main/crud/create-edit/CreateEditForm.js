@@ -36,7 +36,6 @@ function CreateEditForm(props) {
               {...field}
               className="mt-8 mb-16"
               error={!!errors.name}
-              required
               helperText={errors?.name?.message}
               label={fieldConfig.placeholder}
               autoFocus
@@ -52,8 +51,10 @@ function CreateEditForm(props) {
 
   const onSubmit = async data => {
     if (moduleId == 'create') {
-      await dispatch(saveModule({ ...data, module }));
-      navigate(`/app/${module}`);
+      let res = await dispatch(saveModule({ ...data, module }));
+      if (!res.error) {
+        navigate(`/app/${module}`);
+      }
     } else {
       await dispatch(updateModule({ ...data, module, moduleId }));
     }
