@@ -50,13 +50,7 @@ function ForgotPasswordPage() {
         setValue('email', '', { shouldDirty: true, shouldValidate: false });
       })
       .catch((_errors) => {
-        // _errors.forEach((error) => {
-        //   setError(error.type, {
-        //     type: 'manual',
-        //     message: error.message,
-        //   });
-        // });
-        console.error(_errors);
+        dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
       });
   }
 

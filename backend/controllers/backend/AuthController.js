@@ -108,7 +108,7 @@ class AuthController {
       console.log(err.message)
       res.status(500).json({
         status: false,
-        message: 'Unable to save data',
+        errors: 'Unable to save data',
       })
     }
   }
@@ -133,7 +133,7 @@ class AuthController {
     if (!user) {
       res.status(401).json({
         status: false,
-        errors: 'Sorry! this email is not registered with us',
+        errors: 'Email is not registered',
       })
       return
     }
@@ -141,7 +141,7 @@ class AuthController {
     if (!isMatch) {
       res.status(401).json({
         status: false,
-        message: 'Invalid Credentials',
+        errors: 'Invalid Credentials',
       })
       return
     }
@@ -224,7 +224,7 @@ class AuthController {
       status: true,
       reset_link:
         process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
-      message: 'Reset password mail has been sent to your email',
+        message: 'Reset password mail has been sent to your email',
     })
   }
   //reset password
