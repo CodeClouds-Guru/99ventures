@@ -15,7 +15,8 @@ import { Box } from '@mui/system';
 import TableHead from '@mui/material/TableHead';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { darken, lighten } from '@mui/material/styles';
-// import { removeOrders } from '../store/ordersSlice';
+import { removeModules } from '../store/modulesSlice';
+import { useParams } from 'react-router-dom';
 
 const rows = [
   {
@@ -57,6 +58,7 @@ function ListTableHead(props) {
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
   const dispatch = useDispatch();
+  const {module} = useParams();
 
   const createSortHandler = (property) => (event) => {
     props.onRequestSort(event, property);
@@ -115,8 +117,8 @@ function ListTableHead(props) {
                 <MenuList>
                   <MenuItem
                     onClick={() => {
-                      dispatch(removeOrders(selectedOrderIds));
-                      props.onMenuItemClick();
+                      dispatch(removeModules({orderIds:selectedOrderIds,module})).then(()=>props.onMenuItemClick());
+                      
                       closeSelectedOrdersMenu();
                     }}
                   >

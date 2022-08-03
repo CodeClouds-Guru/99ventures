@@ -4,15 +4,15 @@ const navigationConfig = [
     title: 'Dashboard',
     translate: 'Dashboard',
     type: 'item',
-    icon: 'heroicons-outline:star',
-    url: 'example',
+    icon: 'heroicons-outline:home',
+    url: 'dashboard',
   },
   {
     id: 'app-users',
     title: 'Users',
     translate: 'Users',
     type: 'item',
-    icon: 'heroicons-outline:users',
+    icon: 'heroicons-outline:user-circle',
     url: 'app/users',
   },
   {
@@ -28,7 +28,7 @@ const navigationConfig = [
     title: 'Permissions',
     translate: 'Permissions',
     type: 'item',
-    icon: 'heroicons-outline:users',
+    icon: 'heroicons-outline:shield-check',
     url: 'app/permissions',
   },
 ];
