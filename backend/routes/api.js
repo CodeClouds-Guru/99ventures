@@ -23,10 +23,7 @@ router.post('/send-invitation', [AuthMiddleware], InvitationController.sendInvit
 router.get('/resend-invitation/:id', [AuthMiddleware], InvitationController.resendInvitation)
 router.all(
   '/:module/:action?/:id?',
-  [
-    AuthMiddleware,
-    // checkPermissionMiddleware
-  ],
+  [AuthMiddleware, checkPermissionMiddleware],
   DynamicRouteController.handle
 )
 
