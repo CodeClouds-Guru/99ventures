@@ -46,10 +46,15 @@ function ForgotPasswordPage() {
       .sentResetPasswordLink(email)
       .then((response) => {
         // No need to do anything, user data will be set at app/auth/AuthContext
-        dispatch(showMessage({ variant: 'success', message: response.message }));
-        setValue('email', '', { shouldDirty: true, shouldValidate: false });
+        if (response.status) {
+          dispatch(showMessage({ variant: 'success', message: response.message }));
+          setValue('email', '', { shouldDirty: true, shouldValidate: false });
+        } else {
+          dispatch(showMessage({ variant: 'error', message: response.errors }));
+        }
       })
       .catch((_errors) => {
+        console.log(_errors);
         dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
       });
   }
