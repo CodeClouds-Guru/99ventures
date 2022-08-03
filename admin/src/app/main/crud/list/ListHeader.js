@@ -55,7 +55,7 @@ function ListHeader(props) {
           <Button
             className=""
             component={Link}
-            to="/apps/e-commerce/products/new"
+            to={`/app/${module}/create`}
             variant="contained"
             color="secondary"
             startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}

@@ -37,6 +37,7 @@ function ListTable(props) {
     direction: 'desc',
     id: 'id',
   });
+  const [moduleDeleted, setModuleDeleted] = useState(false);
 
   // useEffect(() => {
   //   console.log('Triggered 1')
@@ -53,7 +54,7 @@ function ListTable(props) {
     
   },[module])
 
-  useEffect(() => {
+  const fetchModules = ()=>{
     let params = {
       search:searchText,
       page:page+1,
@@ -69,11 +70,21 @@ function ListTable(props) {
       // setData(users);
     }
     dispatch(getModules(params)).then(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchModules();
   }, [searchText,page,rowsPerPage,module,order]);
 
   useEffect(()=>{
     setData(modules);
   },[modules])
+
+  useEffect(() => {
+    if(moduleDeleted){
+      fetchModules();
+    }
+  }, [moduleDeleted]);
 
 
 
@@ -97,10 +108,12 @@ function ListTable(props) {
       return;
     }
     setSelected([]);
+    setModuleDeleted(false);
   }
 
   function handleDeselect() {
     setSelected([]);
+    setModuleDeleted(true);
   }
 
   function handleClick(item) {
@@ -123,8 +136,9 @@ function ListTable(props) {
         selected.slice(selectedIndex + 1)
       );
     }
-
+    
     setSelected(newSelected);
+    setModuleDeleted(false);
   }
 
   function handleChangePage(event, value) {
