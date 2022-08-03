@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const AuthMiddleware = require('../middlewares/authMiddleware')
+const checkPermissionMiddleware = require('../middlewares/CheckPermissionMiddleware')
 const AuthControllerClass = require('../controllers/backend/AuthController')
 const AuthController = new AuthControllerClass()
 const InvitationController = require('../controllers/backend/InvitationController')
@@ -22,7 +23,10 @@ router.post('/send-invitation', [AuthMiddleware], InvitationController.sendInvit
 router.get('/resend-invitation/:id', [AuthMiddleware], InvitationController.resendInvitation)
 router.all(
   '/:module/:action?/:id?',
-  [AuthMiddleware],
+  [
+    AuthMiddleware,
+    // checkPermissionMiddleware
+  ],
   DynamicRouteController.handle
 )
 

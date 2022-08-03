@@ -12,10 +12,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Role.belongsToMany(models.Permission, {
-        as: 'permissions',
         through: 'permission_role',
         foreignKey: 'role_id',
         otherKey: 'permission_id',
+      })
+      Role.belongsToMany(models.Group, {
+        through: 'group_role',
+        foreignKey: 'role_id',
+        otherKey: 'group_id',
       })
     }
   }
@@ -96,7 +100,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'created_at',
       db_name: 'created_at',
       type: 'text',
-      placeholder: 'Created At',
+      placeholder: 'Created at',
       listing: true,
       show_in_form: false,
       sort: true,

@@ -59,7 +59,7 @@ function SignInPage() {
         //     message: error.message,
         //   });
         // });
-        dispatch(showMessage({ variant: 'error', message: _errors.response.data.message }));
+        dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
       });
   }
 

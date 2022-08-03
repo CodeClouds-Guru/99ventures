@@ -15,14 +15,15 @@ export const getModules = createAsyncThunk('crud/getModules', async (params) => 
   return data;
 });
 
-// export const removeOrders = createAsyncThunk(
-//   'eCommerceApp/orders/removeOrders',
-//   async (orderIds, { dispatch, getState }) => {
-//     await axios.delete('/api/ecommerce/orders', { data: orderIds });
+export const removeModules = createAsyncThunk(
+  'crud/removeModules',
+  async (params, { dispatch, getState }) => {
+    const {module,orderIds} = params
+    await axios.delete(`${module}/delete`, { data: {orderIds} });
 
-//     return orderIds;
-//   }
-// );
+    return orderIds;
+  }
+);
 
 const usersAdapter = createEntityAdapter({});
 
@@ -34,7 +35,7 @@ const initialState = {
   data:[],
   fields:null,
   pages:1,
-  totalRecords:0
+  totalRecords:0,
 }
 
 const modulesSlice = createSlice({

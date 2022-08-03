@@ -8,13 +8,13 @@ module.exports = {
     const types = ['all', 'group', 'owner']
     let permissions = cartesian(
       types,
-      modules.map((item) => item.name),
-      actions.map((item) => item.name)
+      modules.map((item) => item.slug),
+      actions.map((item) => item.slug)
     )
     permissions = permissions.map((item) => {
       return {
-        name: item.join('-'),
-        slug: item.join(' '),
+        slug: item.join('-'),
+        name: item.join(' '),
         created_by: 1,
         created_at: new Date(),
       }

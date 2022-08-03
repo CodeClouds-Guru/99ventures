@@ -2,8 +2,8 @@
 const roles = [
   {
     id: 1,
-    name: 'super-admin',
-    slug: 'Super Admin',
+    slug: 'super-admin',
+    name: 'Super Admin',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -11,8 +11,8 @@ const roles = [
   },
   {
     id: 2,
-    name: 'admin',
-    slug: 'Admin',
+    slug: 'admin',
+    name: 'Admin',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -20,8 +20,8 @@ const roles = [
   },
   {
     id: 3,
-    name: 'member',
-    slug: 'Member',
+    slug: 'member',
+    name: 'Member',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -35,7 +35,7 @@ module.exports = {
      *
      * Example:
      * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
+     *   slug : 'John Doe',
      *   isBetaMember: false
      * }], {});
      */

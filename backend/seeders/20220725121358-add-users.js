@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-;('use strict')
+  ; ('use strict')
 let users = [
   {
     id: 1,
@@ -7,7 +7,7 @@ let users = [
     last_name: 'Das',
     username: 'sourabh_cc',
     email: 'sourabh.das@codeclouds.in',
-    avatar: 'https://i.pravatar.cc/300',
+    avatar: '',
     password: '123456',
     phone_no: '1234567890',
     created_by: 1,
@@ -21,7 +21,7 @@ let users = [
     last_name: 'Samanta',
     username: 'arindam_cc',
     email: 'arindam.samanta@codeclouds.com',
-    avatar: 'https://i.pravatar.cc/300',
+    avatar: '',
     password: '123456',
     phone_no: '1234567890',
     created_by: 1,
@@ -35,7 +35,7 @@ let users = [
     last_name: 'Patra',
     username: 'mritunjay_cc',
     email: 'mritunjay.patra@codeclouds.in',
-    avatar: 'https://i.pravatar.cc/300',
+    avatar: '',
     password: '123456',
     phone_no: '1234567890',
     created_by: 1,
@@ -49,7 +49,7 @@ let users = [
     last_name: 'Tapadar',
     username: 'tapa_cc',
     email: 'sourav.tapadar@codeclouds.in',
-    avatar: 'https://i.pravatar.cc/300',
+    avatar: '',
     password: '123456',
     phone_no: '1234567890',
     created_by: 1,
@@ -63,7 +63,7 @@ let users = [
     last_name: 'Bardhan',
     username: 'nandita_cc',
     email: 'nandita.bardhan@codeclouds.in',
-    avatar: 'https://i.pravatar.cc/300',
+    avatar: '',
     password: '123456',
     phone_no: '1234567890',
     created_by: 1,

@@ -56,17 +56,15 @@ function ResetPasswordPage() {
                 .resetPassword({ hash, password })
                 .then((response) => {
                     // No need to do anything, user data will be set at app/auth/AuthContext
-                    dispatch(showMessage({ variant: 'success', message: response.message }));
-                    navigate('/sign-in');
-
+                    if (response.status) {
+                        dispatch(showMessage({ variant: 'success', message: response.message }));
+                        navigate('/sign-in');
+                    } else {
+                        dispatch(showMessage({ variant: 'error', message: response.errors }));
+                    }
                 })
                 .catch((_errors) => {
-                    _errors.forEach((error) => {
-                        setError(error.type, {
-                            type: 'manual',
-                            message: error.message,
-                        });
-                    });
+                    dispatch(showMessage({ variant: 'error', message: _errors.response.errors }));
                 });
         } else {
             console.error('parameter missing');
