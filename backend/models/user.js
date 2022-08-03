@@ -175,3 +175,34 @@ module.exports = (sequelize, DataTypes) => {
   sequelizePaginate.paginate(User)
   return User
 }
+
+
+
+// Select Field Example
+/*
+select_field: {
+  field_name: 'select_field',
+  db_name: 'select_field',
+  type: 'select',
+  options:[
+    {
+      key:'OptionKey1',
+      value:'Option Value1',
+      label:'Option Label'
+    },
+    {
+      key:'OptionKey2',
+      value:'Option Value2',
+      label:'Option Label2'
+    }
+  ],
+  placeholder: 'Select Field',
+  listing: false,
+  show_in_form: true,
+  sort: true,
+  required: true,
+  value: '',
+  width: '50',
+  searchable: true,
+},
+*/

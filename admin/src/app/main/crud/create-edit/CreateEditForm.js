@@ -4,6 +4,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { saveModule, updateModule, selectModule } from "../store/moduleSlice"
+import MenuItem from '@mui/material/MenuItem';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
@@ -22,28 +26,89 @@ function CreateEditForm(props) {
   });
   const { module, moduleId } = useParams()
 
-  const processFormFields = (fieldConfig, defaultVal) => {
+  const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
     switch (fieldType) {
+      case "date":
+        return <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label={fieldConfig.placeholder}
+            {...field}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
+      case "custom":
+        return <input type="text" {...field} />
+      case "select":
+        let fieldOptions = fieldConfig.options || []
+        return <TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
+          select
+        >{fieldOptions.map((option) => (
+          <MenuItem key={option.key} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}</TextField>
+      case "textarea":
+        return (<TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={fieldConfig.rows ?? 5}
+        />)
+      case "number":
+        return (<TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
+          type="number"
+        />)
+      case "password":
+        return <TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
+          type="password"
+        />
       case "text":
       default:
-        return (<Controller
-          name={fieldConfig.field_name}
-          control={control}
-          defaultValue={defaultVal}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              className="mt-8 mb-16"
-              error={!!errors.name}
-              helperText={errors?.name?.message}
-              label={fieldConfig.placeholder}
-              autoFocus
-              id={fieldConfig.field_name}
-              variant="outlined"
-              fullWidth
-            />
-          )}
+        return (<TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
         />)
 
     }
@@ -68,7 +133,14 @@ function CreateEditForm(props) {
           .map(mField => {
             let defaultVal = moduleData && moduleData[mField.field_name] ? moduleData[mField.field_name] : ''
             return <div key={mField.field_name}>
-              {processFormFields(mField, defaultVal)}
+              <Controller
+                name={mField.field_name}
+                control={control}
+                defaultValue={defaultVal}
+                render={({ field }) => (
+                  processFormFields(field, mField)
+                )}
+              />
             </div>
           }
           )}
