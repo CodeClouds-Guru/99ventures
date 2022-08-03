@@ -4,37 +4,38 @@
  */
 const db = require('../models/index')
 const { QueryTypes, Op } = require('sequelize')
-const { Group, Role } = db
-// const rules = require("../config/acl");
-const extraActionsThatRequiresSamePermission = {
-  deleteParmanently: 'delete',
-  restore: 'delete',
-  change: 'update',
-  fetchDropdownOptions: 'list',
-}
+const { Group, Role, Permission } = db
 
 function checkPermission(permissions, module, action) {
   for (let permission of permissions) {
     if (
       ['deleteParmanently', 'restore'].indexOf(action) > -1 &&
-      permission.indexOf(`${module}-delete`) > -1
+      checkCombination(module, 'delete', permission)
     ) {
       return true
     } else if (
       ['change'].indexOf(action) > -1 &&
-      permission.indexOf(`${module}-update`) > -1
+      checkCombination(module, 'update', permission)
     ) {
       return true
     } else if (
       ['fetchDropdownOptions'].indexOf(action) > -1 &&
-      permission.indexOf(`${module}-list`) > -1
+      checkCombination(module, 'list', permission)
     ) {
       return true
-    } else if (permission.indexOf(`${module}-${action}`) > -1) {
+    } else if (checkCombination(module, action, permission)) {
       return true
     }
   }
   return false
+}
+
+function checkCombination(module, action, permission) {
+  return (
+    permission.indexOf(`all-${module}-${action}`) > -1 ||
+    permission.indexOf(`group-${module}-${action}`) > -1 ||
+    permission.indexOf(`owner-${module}-${action}`) > -1
+  )
 }
 
 module.exports = async function (req, res, next) {
@@ -42,7 +43,7 @@ module.exports = async function (req, res, next) {
   const company_id = 1
   let partial_path = req.originalUrl.replace('api/', '').split('?').shift()
   var [, module, action] = partial_path.split('/')
-  if (typeof action === 'undefined') {
+  if (typeof action === 'undefined' || action.trim().length === 0) {
     action = 'list'
   }
   const companies = await db.sequelize.query(
@@ -60,7 +61,44 @@ module.exports = async function (req, res, next) {
         [Op.in]: group_ids,
       },
     },
-    include: Role,
+    include: [
+      {
+        model: Role,
+        through: {
+          attributes: ['group_id', 'role_id'],
+        },
+        include: [
+          {
+            model: Permission,
+            through: {
+              attributes: ['role_id', 'permission_id'],
+            },
+          },
+        ],
+      },
+    ],
   })
-  res.send(group_role_permissions)
+  let permissions = []
+  const roles = []
+  if (group_role_permissions.length > 0) {
+    group_role_permissions[0].Roles.forEach((element) => {
+      roles.push({
+        id: element.id,
+        slug: element.slug,
+        name: element.name,
+      })
+      element.Permissions.forEach((perm) => permissions.push(perm.slug))
+    })
+  }
+  permissions = [...new Set(permissions)]
+  req.user.roles = roles
+  req.user.permissions = permissions
+  if (checkPermission(permissions, module, action)) {
+    next()
+  } else {
+    res.status(403).json({
+      status: false,
+      errors: 'You are not authorize to access this section',
+    })
+  }
 }

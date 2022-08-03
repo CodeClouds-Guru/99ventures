@@ -26,10 +26,7 @@ router.post(
 )
 router.all(
   '/:module/:action?/:id?',
-  [
-    AuthMiddleware,
-    // checkPermissionMiddleware
-  ],
+  [AuthMiddleware, checkPermissionMiddleware],
   DynamicRouteController.handle
 )
 
