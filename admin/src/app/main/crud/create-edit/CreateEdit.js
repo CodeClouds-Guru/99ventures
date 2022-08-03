@@ -15,7 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-import { getProduct, newProduct, resetProduct, selectProduct, getModuleFields } from '../store/moduleSlice';
+import { getModule, newProduct, resetProduct, selectModule, getModuleFields } from '../store/moduleSlice';
 import reducer from '../store';
 import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
@@ -32,13 +32,14 @@ const schema = yup.object().shape({
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
-  const product = useSelector(selectProduct);
+  const moduleData = useSelector(selectModule);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   const routeParams = useParams();
+  const { module } = routeParams;
   const [tabValue, setTabValue] = useState(0);
   const [noProduct, setNoProduct] = useState(false);
-  
+
 
   useDeepCompareEffect(() => {
     function updateProductState() {
@@ -48,12 +49,12 @@ function CreateEdit(props) {
         /**
          * Create New Product data
          */
-        dispatch(getModuleFields({module:routeParams.module}));
+        dispatch(getModuleFields({ module }));
       } else {
         /**
          * Get Product data
          */
-        dispatch(getProduct(productId)).then((action) => {
+        dispatch(getModule({ moduleId, module })).then((action) => {
           /**
            * If the requested product is not exist show message
            */
@@ -67,7 +68,7 @@ function CreateEdit(props) {
     updateProductState();
   }, [dispatch, routeParams]);
 
-  
+
 
   useEffect(() => {
     return () => {
@@ -97,7 +98,7 @@ function CreateEdit(props) {
         className="flex flex-col flex-1 items-center justify-center h-full"
       >
         <Typography color="text.secondary" variant="h5">
-          There is no such product!
+          There is no such {module}!
         </Typography>
         <Button
           className="mt-24"
@@ -123,17 +124,17 @@ function CreateEdit(props) {
   // }
 
   return (
-      <FusePageCarded
-        header={<CreateEditHeader />}
-        content={
-          <>
-            <div className="p-16 sm:p-24 max-w-3xl">
-              <CreateEditForm/>
-            </div>
-          </>
-        }
-        scroll={isMobile ? 'normal' : 'content'}
-      />
+    <FusePageCarded
+      header={<CreateEditHeader />}
+      content={
+        <>
+          <div className="p-16 sm:p-24 max-w-3xl">
+            <CreateEditForm />
+          </div>
+        </>
+      }
+      scroll={isMobile ? 'normal' : 'content'}
+    />
   );
 }
 

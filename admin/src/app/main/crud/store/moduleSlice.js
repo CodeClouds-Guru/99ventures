@@ -9,9 +9,9 @@ export const getModuleFields = createAsyncThunk('crud/getModuleFields', async ({
     return data === undefined ? null : data;
 });
 
-export const getProduct = createAsyncThunk('crud/getModule', async (productId) => {
-    const response = await axios.get(`/api/ecommerce/products/${productId}`);
-    const data = await response.data;
+export const getModule = createAsyncThunk('crud/getModule', async ({ module, moduleId }) => {
+    const response = await axios.get(`/${module}/show/${moduleId}`);
+    const data = await response.data.results;
 
     return data === undefined ? null : data;
 });
@@ -29,9 +29,19 @@ export const removeProduct = createAsyncThunk(
 export const saveModule = createAsyncThunk(
     'crud/saveModule',
     async (moduleData, { dispatch, getState }) => {
-        const{module,...restData} = moduleData
+        const { module, ...restData } = moduleData
         const response = await axios.post(`${module}/store`, restData);
         const data = await response.data.results;
+        return data;
+    }
+);
+
+export const updateModule = createAsyncThunk(
+    'crud/updateModule',
+    async (moduleData, { dispatch, getState }) => {
+        const { module,moduleId, ...restData } = moduleData
+        const response = await axios.post(`${module}/update/${moduleId}`, restData);
+        const data = await response.data;
         return data;
     }
 );
@@ -74,8 +84,14 @@ const productSlice = createSlice({
         },
     },
     extraReducers: {
-        [getProduct.fulfilled]: (state, action) => action.payload,
+        [getModule.fulfilled]: (state, action) => {
+            state.data = action.payload.result;
+            state.fields = action.payload.fields;
+        },
         [saveModule.fulfilled]: (state, action) => {
+            return state
+        },
+        [updateModule.fulfilled]: (state, action) => {
             return state
         },
         [removeProduct.fulfilled]: (state, action) => null,
@@ -88,5 +104,7 @@ const productSlice = createSlice({
 export const { newProduct, resetProduct } = productSlice.actions;
 
 export const selectProduct = ({ crud }) => crud.module;
+
+export const selectModule = (state) => state.crud.module.data;
 
 export default productSlice.reducer;
