@@ -38,7 +38,14 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'Email address already in use!',
         },
       },
-      avatar: DataTypes.STRING,
+      avatar: {
+        type:DataTypes.STRING,
+        get() {
+          const rawValue = this.getDataValue('avatar');
+          const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000'
+          return rawValue ? '' : `${publicURL}/demo-user.png`;
+        }
+      },
       password: DataTypes.STRING,
       phone_no: DataTypes.STRING,
       status: DataTypes.TINYINT,
