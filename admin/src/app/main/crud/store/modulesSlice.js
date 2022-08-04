@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const getModules = createAsyncThunk('crud/getModules', async (params) => {
   let module = (params && params.module) ?? 'users'
-  let apiURL = `${module}/?v=1`;
+  let apiURL = `${module}/list?v=1`;
   if(params){
     let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
     apiURL +='&'+queryString
