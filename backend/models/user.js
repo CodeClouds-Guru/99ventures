@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       username: Joi.string().min(3).max(30).required().label('Username'),
       password: Joi.string().allow('').optional(),
       phone_no: Joi.string().required().label('Phone No'),
+      group_ids: Joi.array().optional(),
     })
     return schema.validate(req.body)
   }
