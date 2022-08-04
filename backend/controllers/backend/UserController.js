@@ -14,7 +14,7 @@ class UserController extends Controller {
       let fields = this.model.fields;
       //group options
       if(model){
-        model.password = '';
+        // model.password = '';
         let groups = await Group.findAll({attributes: ['id', 'name']});
         fields.groups.options = groups.map(group=>{
           return {
