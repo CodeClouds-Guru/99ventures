@@ -10,8 +10,8 @@ class UserController extends Controller {
   //override the edit function
   async edit(req, res) {
     try {
-      let model = await User.findByPk(req.params.id);
-      let fields = User.fields;
+      let model = await this.model.findByPk(req.params.id);
+      let fields = this.model.fields;
       //group options
       fields.groups.options = await Group.findAll({attributes: ['id', 'name']});
       return { result: model, fields };
