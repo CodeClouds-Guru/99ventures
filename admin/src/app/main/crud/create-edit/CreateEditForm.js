@@ -10,12 +10,33 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { showMessage } from 'app/store/fuse/messageSlice';
 
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import ListItemText from '@mui/material/ListItemText';
+import Select from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
+
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
 
 const schema = yup.object({
   // email: yup.string().required(),
 }).required();
+
+
+// For Multi Select
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250
+    }
+  }
+};
+
 
 function CreateEditForm(props) {
   const fields = useSelector(state => state.crud.module.fields);
@@ -29,6 +50,7 @@ function CreateEditForm(props) {
 
   const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
+    let fieldOptions = fieldConfig.options || []
     switch (fieldType) {
       case "date":
         return <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -41,9 +63,26 @@ function CreateEditForm(props) {
       case "custom":
         return <input type="text" {...field} />
       case "multi-select":
-        return <input type="text" {...field} />
+        return <FormControl sx={{ m: 1, ml: 0, width: 300 }}>
+          <InputLabel id={`${fieldConfig.field_name}-label`}>{fieldConfig.placeholder}</InputLabel>
+          <Select
+            labelId={`${fieldConfig.field_name}-label`}
+            id={`${fieldConfig.field_name}`}
+            multiple
+            {...field}
+            input={<OutlinedInput label={fieldConfig.placeholder} />}
+            renderValue={(selected) => selected.join(', ')}
+            MenuProps={MenuProps}
+          >
+            {fieldOptions.map((option) => (
+              <MenuItem key={option.key} value={option.value}>
+                <Checkbox checked={field.value.indexOf(option.value) > -1} />
+                <ListItemText primary={option.key} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       case "select":
-        let fieldOptions = fieldConfig.options || []
         return <TextField
           {...field}
           className="mt-8 mb-16"
@@ -138,7 +177,7 @@ function CreateEditForm(props) {
       <form onSubmit={handleSubmit(onSubmit)}>
         {Object.values(fields).filter(f => f.show_in_form)
           .map(mField => {
-            let defaultVal = moduleData && moduleData[mField.field_name] ? moduleData[mField.field_name] : ''
+            let defaultVal = moduleData && moduleData[mField.field_name] ? moduleData[mField.field_name] : ['select', 'multi-select'].includes(mField.type) ? [] : ''
             return <div key={mField.field_name}>
               <Controller
                 name={mField.field_name}
