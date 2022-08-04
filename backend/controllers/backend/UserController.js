@@ -13,7 +13,14 @@ class UserController extends Controller {
       let model = await this.model.findByPk(req.params.id);
       let fields = this.model.fields;
       //group options
-      fields.groups.options = await Group.findAll({attributes: ['id', 'name']});
+      let groups = await Group.findAll({attributes: ['id', 'name']});
+      fields.groups.options = groups.map(group=>{
+        return {
+          key:group.name,
+          value:group.id,
+          label:group.name
+        }
+      })
       return { result: model, fields };
     } catch (error) {
       throw error;
