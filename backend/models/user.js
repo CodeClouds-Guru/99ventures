@@ -64,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'users',
     }
   )
-
+  User.extra_fields = ['groups'];
   User.fields = {
     id: {
       field_name: 'id',
@@ -143,7 +143,7 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
-      options: []
+      options: [],
     },
     password: {
       field_name: 'password',

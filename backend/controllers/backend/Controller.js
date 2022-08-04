@@ -16,7 +16,7 @@ class Controller {
   }
 
   // This is end point for all fields
-  async add(req, res){
+  async add(req, res) {
     return {
       fields: this.model.fields,
     };
@@ -29,7 +29,8 @@ class Controller {
     let sort_field = req.query.sort || "id";
     let sort_order = req.query.sort_order || "desc";
     let fields = this.model.fields;
-    let attributes = Object.keys(fields);
+    let extra_fields = this.model.extra_fields || []
+    let attributes = Object.keys(fields).filter(attr => extra_fields.indexOf(attr) == -1);
     let searchable_fields = [...attributes].filter((key) => {
       if (fields[key] && fields[key]["searchable"]) {
         return true;
@@ -111,8 +112,8 @@ class Controller {
       let modelIds = req.body.orderIds ?? [];
       let models = await this.model.findAll({ where: { id: modelIds } });
       await this.model.destroy({ where: { id: modelIds } });
-      if(models){
-        models.forEach( async model => {
+      if (models) {
+        models.forEach(async model => {
           model.deleted_by = req.user.id;
           await model.save();
         });
@@ -127,11 +128,11 @@ class Controller {
 
   async restore(req, res) {
     let modelIds = req.body.orderIds ?? [];
-    try {      
-      await this.model.restore({ where: { id:modelIds } });
+    try {
+      await this.model.restore({ where: { id: modelIds } });
       let models = await this.model.findAll({ where: { id: modelIds } });
-      if(models){
-        models.forEach( async model => {
+      if (models) {
+        models.forEach(async model => {
           model.deleted_by = null;
           await model.save();
         });
