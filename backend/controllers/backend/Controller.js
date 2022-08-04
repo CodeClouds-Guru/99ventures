@@ -15,7 +15,8 @@ class Controller {
     };
   }
 
-  async fields(req, res){
+  // This is end point for all fields
+  async add(req, res){
     return {
       fields: this.model.fields,
     };
@@ -53,7 +54,7 @@ class Controller {
     return options;
   }
 
-  async store(req, res) {
+  async save(req, res) {
     let request_data = req.body;
     const { error, value } = this.model.validate(req);
     if (error) {
@@ -74,7 +75,7 @@ class Controller {
     }
   }
 
-  async show(req, res) {
+  async edit(req, res) {
     try {
       let model = await this.model.findByPk(req.params.id);
       let fields = this.model.fields;

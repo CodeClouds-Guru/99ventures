@@ -15,7 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-import { getModule, newProduct, resetProduct, selectModule, getModuleFields } from '../store/moduleSlice';
+import { getModule, resetModule, selectModule, getModuleFields } from '../store/moduleSlice';
 import reducer from '../store';
 import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
@@ -77,7 +77,7 @@ function CreateEdit(props) {
       /**
        * Reset Product on component unload
        */
-      dispatch(resetProduct());
+      dispatch(resetModule());
       setNoProduct(false);
     };
   }, [dispatch]);

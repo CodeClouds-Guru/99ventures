@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
@@ -119,9 +120,13 @@ function CreateEditForm(props) {
       let res = await dispatch(saveModule({ ...data, module }));
       if (!res.error) {
         navigate(`/app/${module}`);
+        dispatch(showMessage({ variant: 'success', message: 'Record created successfully' }));
       }
     } else {
-      await dispatch(updateModule({ ...data, module, moduleId }));
+      let res = await dispatch(updateModule({ ...data, module, moduleId }));
+      if(!res.error){
+        dispatch(showMessage({ variant: 'success', message: 'Record updated successfully' }));
+      }
     }
 
   };

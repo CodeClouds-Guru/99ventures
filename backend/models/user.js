@@ -17,10 +17,8 @@ module.exports = (sequelize, DataTypes) => {
       first_name: Joi.string().required().label('First Name'),
       last_name: Joi.string().required().label('Last Name'),
       email: Joi.string().email().required().label('Email'),
-      username: Joi.string().alphanum().min(3).max(30).required().label('Username'),
-      password: Joi.string()
-        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-        .required(),
+      username: Joi.string().min(3).max(30).required().label('Username'),
+      password: Joi.string().allow('').optional(),
       phone_no: Joi.string().required().label('Phone No'),
     })
     return schema.validate(req.body)
