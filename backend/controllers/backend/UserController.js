@@ -13,15 +13,28 @@ class UserController extends Controller {
       let model = await this.model.findByPk(req.params.id);
       let fields = this.model.fields;
       //group options
-      let groups = await Group.findAll({attributes: ['id', 'name']});
-      fields.groups.options = groups.map(group=>{
-        return {
-          key:group.name,
-          value:group.id,
-          label:group.name
-        }
-      })
-      return { result: model, fields };
+      if(model){
+        model.password = '';
+        let groups = await Group.findAll({attributes: ['id', 'name']});
+        fields.groups.options = groups.map(group=>{
+          return {
+            key:group.name,
+            value:group.id,
+            label:group.name
+          }
+        })
+        res.status(200).json({
+          status: true,
+          result: model,
+          fields,
+          message:'User details'
+        })
+      }else{
+        res.status(404).json({
+          status: false,
+          errors: "User not found",
+        })
+      }
     } catch (error) {
       throw error;
     }
@@ -56,12 +69,12 @@ class UserController extends Controller {
       await this.model.update(request_data, { where: { id } });
       
       //update user group
-      if(typeof request_data.group_ids !== 'undefined'){
+      if(typeof request_data.groups !== 'undefined'){
         //delete previous record
         await CompanyUser.destroy({ where: { user_id: id, company_id: request_data.company_id} });
-        if(request_data.group_ids.length > 0){
+        if(request_data.groups.length > 0){
           let all_groups = [];
-          for(const val of request_data.group_ids) {
+          for(const val of request_data.groups) {
               all_groups.push({
                 user_id: id, 
                 company_id: request_data.company_id,
