@@ -24,6 +24,8 @@ module.exports = (sequelize, DataTypes) => {
     return schema.validate(req.body)
   }
 
+  
+
   User.init(
     {
       first_name: { type: DataTypes.STRING },
@@ -128,6 +130,20 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
+    },
+    groups: {
+      field_name: 'groups',
+      db_name: 'groups',
+      type: 'select',
+      placeholder: 'Groups',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+      options: []
     },
     password: {
       field_name: 'password',

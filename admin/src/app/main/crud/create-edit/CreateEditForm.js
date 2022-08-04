@@ -40,6 +40,8 @@ function CreateEditForm(props) {
         </LocalizationProvider>
       case "custom":
         return <input type="text" {...field} />
+      case "multi-select":
+        return <input type="text" {...field} />
       case "select":
         let fieldOptions = fieldConfig.options || []
         return <TextField
@@ -124,7 +126,7 @@ function CreateEditForm(props) {
       }
     } else {
       let res = await dispatch(updateModule({ ...data, module, moduleId }));
-      if(!res.error){
+      if (!res.error) {
         dispatch(showMessage({ variant: 'success', message: 'Record updated successfully' }));
       }
     }
