@@ -21,78 +21,50 @@ import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 
-/**
- * Form Validation Schema
- */
-const schema = yup.object().shape({
-  name: yup
-    .string()
-    .required('You must enter a product name')
-    .min(5, 'The product name must be at least 5 characters'),
-});
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
   const moduleData = useSelector(selectModule);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-  const errors = useSelector(state=>state.crud.module.errors)
+  const errors = useSelector(state => state.crud.module.errors)
 
   const routeParams = useParams();
   const { module } = routeParams;
   const [tabValue, setTabValue] = useState(0);
-  const [noProduct, setNoProduct] = useState(false);
+  const [noModule, setNoModule] = useState(false);
 
 
-  useDeepCompareEffect(() => {
-    function updateProductState() {
+  useEffect(() => {
+    function updateModuleState() {
       const { moduleId } = routeParams;
-
       if (moduleId === 'create') {
-        /**
-         * Create New Product data
-         */
         dispatch(getModuleFields({ module }));
       } else {
-        /**
-         * Get Product data
-         */
         dispatch(getModule({ moduleId, module })).then((action) => {
-          /**
-           * If the requested product is not exist show message
-           */
           if (!action.payload) {
-            setNoProduct(true);
+            setNoModule(true);
           }
         });
       }
     }
-
-    updateProductState();
+    updateModuleState();
   }, [dispatch, routeParams]);
 
 
 
   useEffect(() => {
-    return () => {
-      /**
-       * Reset Product on component unload
-       */
+    return () => {      
       dispatch(resetModule());
-      setNoProduct(false);
+      setNoModule(false);
     };
   }, [dispatch]);
 
-  /**
-   * Tab Change
-   */
-  function handleTabChange(event, value) {
-    setTabValue(value);
-  }
+  
 
   /**
-   * Show Message if the requested products is not exists
+   * Show Message if the requested module is not exists
    */
-  if (noProduct) {
+  if (noModule) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -106,24 +78,23 @@ function CreateEdit(props) {
           className="mt-24"
           component={Link}
           variant="outlined"
-          to="/apps/e-commerce/products"
+          to={`/app/${module}`}
           color="inherit"
         >
-          Go to Products Page
+          Go to {module} Page
         </Button>
       </motion.div>
     );
   }
 
   /**
-   * Wait while product data is loading and form is setted
+   * Wait while product data is loading and form is settled
    */
-  // if (
-  //   _.isEmpty(form) ||
-  //   (product && routeParams.moduleId !== product.id && routeParams.moduleId !== 'create')
-  // ) {
-  //   return <FuseLoading />;
-  // }
+  if (
+    (moduleData && routeParams.moduleId != moduleData.id && routeParams.moduleId !== 'create')
+  ) {
+    return <FuseLoading />;
+  }
 
   return (
     <FusePageCarded
@@ -131,7 +102,7 @@ function CreateEdit(props) {
       content={
         <>
           <div className="p-16 sm:p-24 max-w-3xl">
-            {errors && <Alert severity="error">{errors[0]}</Alert>}
+            {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm />
           </div>
         </>
