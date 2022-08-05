@@ -7,6 +7,8 @@ class UserController extends Controller {
     super('User')
   }
 
+  //override store function
+  
   //override the edit function
   async edit(req, res) {
     try {
@@ -27,12 +29,12 @@ class UserController extends Controller {
         group_ids = group_ids.map(group=>{
           return group.id
         })
-        // model.groups = group_ids
+        // model['groups'] = group_ids;
+        model.setDataValue('groups',group_ids)
         model.password = ''
         return {
           status: true,
           result: model,
-          groups:group_ids,
           fields,
           message:'User details'
         }
@@ -57,10 +59,7 @@ class UserController extends Controller {
       throw errorObj;
     }
     if(!req.headers.company_id){
-      const errorObj = new Error("Validation failed.");
-      errorObj.statusCode = 401;
-      errorObj.data = "Company id is required";
-      throw errorObj;
+      this.throwCustomError('Company id is required',401);
     }
     try {
       request_data.updated_by = req.user.id;
