@@ -16,13 +16,14 @@ import FormControl from '@mui/material/FormControl';
 import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
+import Button from '@mui/material/Button';
+
+import { motion } from 'framer-motion';
 
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
 
-const schema = yup.object({
-  // email: yup.string().required(),
-}).required();
+const schema = yup.object({}).required();
 
 
 // For Multi Select
@@ -196,7 +197,28 @@ function CreateEditForm(props) {
             </div>
           }
           )}
-        <input type="submit" style={{ "padding": "5px", border: "1px solid" }} value={'Save'} />
+        <motion.div
+          className="flex"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+        >
+          <Button
+            className="whitespace-nowrap mx-4 mt-5"
+            variant="contained"
+            color="secondary"
+            type="submit"
+          >
+            Save
+          </Button>
+          <Button
+            className="whitespace-nowrap mx-4 mt-5"
+            variant="contained"
+            color="error"
+            onClick={()=>navigate(`/app/${module}`)}
+          >
+            Cancel
+          </Button>
+        </motion.div>
       </form>
     </div>
   );

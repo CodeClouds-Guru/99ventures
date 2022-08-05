@@ -11,12 +11,6 @@ import { removeProduct, saveModule } from '../store/moduleSlice';
 
 function CreateEditHeader(props) {
   const dispatch = useDispatch();
-  // const methods = useFormContext();
-  // const { formState, watch, getValues } = methods;
-  // const { isValid, dirtyFields } = formState;
-  // const featuredImageId = watch('featuredImageId');
-  // const images = watch('images');
-  // const name = watch('name');
   const theme = useTheme();
   const navigate = useNavigate();
   const {module,moduleId} = useParams();
