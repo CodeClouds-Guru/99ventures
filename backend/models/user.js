@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       username: Joi.string().min(3).max(30).required().label('Username'),
       password: Joi.string().allow('').optional(),
       phone_no: Joi.string().required().label('Phone No'),
-      group_ids: Joi.array().optional(),
+      groups: Joi.array().optional(),
     })
     return schema.validate(req.body)
   }
@@ -132,20 +132,6 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    groups: {
-      field_name: 'groups',
-      db_name: 'groups',
-      type: 'select',
-      placeholder: 'Groups',
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: false,
-      options: [],
-    },
     password: {
       field_name: 'password',
       db_name: 'password',
@@ -184,6 +170,20 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    groups: {
+      field_name: 'groups',
+      db_name: 'groups',
+      type: 'multi-select',
+      placeholder: 'Groups',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+      options: [],
     },
   }
 
