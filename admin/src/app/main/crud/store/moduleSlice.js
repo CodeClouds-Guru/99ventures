@@ -31,7 +31,12 @@ export const saveModule = createAsyncThunk(
     async (moduleData, { dispatch, getState, rejectWithValue }) => {
         const { module, ...restData } = moduleData
         try {
-            const response = await axios.post(`${module}/save`, restData);
+            const response = await axios.post(`${module}/save`, restData, {
+                // Need to removed
+                headers: {
+                    "company_id": "1"
+                }
+            });
             const data = await response.data.results;
             return data;
         } catch (error) {
@@ -45,7 +50,12 @@ export const updateModule = createAsyncThunk(
     async (moduleData, { dispatch, getState, rejectWithValue }) => {
         const { module, moduleId, ...restData } = moduleData;
         try {
-            const response = await axios.post(`${module}/update/${moduleId}`, restData);
+            const response = await axios.post(`${module}/update/${moduleId}`, restData, {
+                // Need to removed
+                headers: {
+                    "company_id": "1"
+                }
+            });
             const data = await response.data;
             return data;
         } catch (error) {

@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 
 
-import List from './list/List';
+import List from './ListPage';
 import CreateEdit from './create-edit/CreateEdit';
 
 
