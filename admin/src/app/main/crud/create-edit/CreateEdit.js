@@ -102,7 +102,7 @@ function CreateEdit(props) {
       content={
         <>
           <div className="p-16 sm:p-24 max-w-3xl">
-            {errors && <Alert severity="error">{errors[0]}</Alert>}
+            {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm />
           </div>
         </>

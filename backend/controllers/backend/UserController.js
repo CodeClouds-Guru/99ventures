@@ -51,16 +51,11 @@ class UserController extends Controller {
     let request_data = req.body;
     const { error, value } = this.model.validate(req);
     if (error) {
-      const errorObj = new Error("Validation failed.");
-      errorObj.statusCode = 422;
-      errorObj.data = error.details.map((err) => err.message);
-      throw errorObj;
+      let message = error.details.map((err) => err.message).join(', ');
+      this.throwCustomError(message,422);
     }
     if(!req.headers.company_id){
-      const errorObj = new Error("Validation failed.");
-      errorObj.statusCode = 401;
-      errorObj.data = "Company id is required";
-      throw errorObj;
+      this.throwCustomError('Company id is required',401);
     }
     try {
       request_data.updated_by = req.user.id;
