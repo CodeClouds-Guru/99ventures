@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         otherKey: 'company_id',
       })
+      User.belongsToMany(models.Group, {
+        through: 'company_user',
+        foreignKey: 'user_id',
+        otherKey: 'group_id',
+      })
     }
   }
   User.validate = function (req) {

@@ -13,8 +13,7 @@ class UserController extends Controller {
       let model = await this.model.findByPk(req.params.id);
       let fields = this.model.fields;
       //group options
-      if (model) {
-        // model.password = '';
+      if(model){
         let groups = await Group.findAll({ attributes: ['id', 'name'] });
         fields.groups.options = groups.map(group => {
           return {
@@ -23,9 +22,19 @@ class UserController extends Controller {
             label: group.name
           }
         })
+        let company_id = req.headers.company_id ?? 1;
+        let group_ids = await model.getGroups()
+        group_ids = group_ids.map(group=>{
+          return group.id
+        })
+        // model.groups = group_ids
+        model.password = ''
         return {
+          status: true,
           result: model,
+          groups:group_ids,
           fields,
+          message:'User details'
         }
       } else {
         this.throwCustomError('User not found',404);
@@ -47,12 +56,18 @@ class UserController extends Controller {
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
     }
+    if(!req.headers.company_id){
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 401;
+      errorObj.data = "Company id is required";
+      throw errorObj;
+    }
     try {
       request_data.updated_by = req.user.id;
       /****
        * 
        */
-      request_data.company_id = 1;
+      request_data.company_id = req.headers.company_id;
       //unset blank password key
       if (typeof request_data.password !== 'undefined' && request_data.password == '') {
         delete request_data.password;
