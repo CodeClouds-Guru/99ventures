@@ -3,7 +3,6 @@ import i18next from 'i18next';
 
 import List from './list/List';
 import CreateEdit from './create-edit/CreateEdit';
-import View from './View';
 
 
 
@@ -17,10 +16,6 @@ const CRUDConfig = {
     {
         path: 'app/:module/:moduleId',
         element: <CreateEdit />,
-    },
-    {
-        path: 'app/:module/view/:id',
-        element: <View />,
     },
     {
       path: 'app/:module',

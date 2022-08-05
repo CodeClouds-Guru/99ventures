@@ -16,7 +16,8 @@ class DynamicRouteController {
       let statusCode = error.statusCode || 500;
       res.status(statusCode).json({
         message: error.message,
-        errors:error.data
+        errors: error.data,
+        trace: error.stack,
       });
     }
   }

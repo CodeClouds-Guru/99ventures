@@ -3,7 +3,7 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
-// import { showMessage, hideMessage } from 'app/store/fuse/messageSlice';
+import settingsConfig from 'app/configs/settingsConfig';
 
 /* eslint-disable camelcase */
 
@@ -72,8 +72,9 @@ class JwtService extends FuseUtils.EventEmitter {
         })
         .then((response) => {
           if (response.data.user) {
-            response.data.user.role = ['admin'];
-            response.data.user.shortcuts = [];
+            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
+            response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
+            response.data.user.companies = 'companies' in response.data ? response.data.companies : [];
             this.setSession(response.data.access_token);
             resolve(response.data.user);
             this.emit('onLogin', response.data.user);
@@ -92,8 +93,9 @@ class JwtService extends FuseUtils.EventEmitter {
         .get(jwtServiceConfig.accessToken)
         .then((response) => {
           if (response.data.user) {
-            response.data.user.role = ['admin'];
-            response.data.user.shortcuts = [];
+            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
+            response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
+            response.data.user.companies = 'companies' in response.data ? response.data.companies : [];
             this.setSession(response.data.access_token);
             resolve(response.data.user);
           } else {

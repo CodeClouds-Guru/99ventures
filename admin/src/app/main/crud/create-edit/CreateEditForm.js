@@ -51,6 +51,12 @@ function CreateEditForm(props) {
   const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
     let fieldOptions = fieldConfig.options || []
+    let renderVal = (selected) => {
+      let selectedOptions = fieldOptions
+        .filter(fo => selected.includes(fo.value))
+        .map(op => op.key);
+      return selectedOptions.join(', ');
+    }
     switch (fieldType) {
       case "date":
         return <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -71,7 +77,7 @@ function CreateEditForm(props) {
             multiple
             {...field}
             input={<OutlinedInput label={fieldConfig.placeholder} />}
-            renderValue={(selected) => selected.join(', ')}
+            renderValue={renderVal}
             MenuProps={MenuProps}
           >
             {fieldOptions.map((option) => (
