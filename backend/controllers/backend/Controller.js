@@ -144,6 +144,13 @@ class Controller {
       throw error;
     }
   }
+
+  throwCustomError(message,status = 422) {
+    const errorObj = new Error("Request failed.");
+    errorObj.statusCode = status;
+    errorObj.data = message;
+    throw errorObj;
+  }
 }
 
 module.exports = Controller;
