@@ -18,18 +18,47 @@ import { darken, lighten } from '@mui/material/styles';
 import { removeModules } from '../store/modulesSlice';
 import { useParams } from 'react-router-dom';
 
-
+const rows = [
+  {
+    id: 'id',
+    align: 'left',
+    disablePadding: false,
+    label: 'ID',
+    sort: true,
+  },
+  {
+    id: 'name',
+    align: 'left',
+    disablePadding: false,
+    label: 'Name',
+    sort: true,
+  },
+  {
+    id: 'email',
+    align: 'left',
+    disablePadding: false,
+    label: 'Email',
+    sort: true,
+  },
+  {
+    id: 'username',
+    align: 'left',
+    disablePadding: false,
+    label: 'User Name',
+    sort: true,
+  }
+];
 
 function ListTableHead(props) {
   const { selectedOrderIds } = props;
   const numSelected = selectedOrderIds.length;
 
-  const fields = props.fields;
+  const fields = useSelector((state)=>state.crud.modules.fields);
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
   const dispatch = useDispatch();
-  const {module} = props;
+  const {module} = useParams();
 
   const createSortHandler = (property) => (event) => {
     props.onRequestSort(event, property);
@@ -88,7 +117,8 @@ function ListTableHead(props) {
                 <MenuList>
                   <MenuItem
                     onClick={() => {
-                      props.onMenuItemClick(selectedOrderIds);
+                      dispatch(removeModules({orderIds:selectedOrderIds,module})).then(()=>props.onMenuItemClick());
+                      
                       closeSelectedOrdersMenu();
                     }}
                   >

@@ -109,7 +109,7 @@ class Controller {
 
   async delete(req, res) {
     try {
-      let modelIds = req.body.orderIds ?? [];
+      let modelIds = req.body.modelIds ?? [];
       let models = await this.model.findAll({ where: { id: modelIds } });
       await this.model.destroy({ where: { id: modelIds } });
       if (models) {
