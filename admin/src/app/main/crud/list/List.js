@@ -30,6 +30,11 @@ function List(props) {
   const dispatch = useDispatch();
   const navigate = useNavigate()
   const { module } = props;
+  const searchable = props.searchable ?? true;
+  const editable = props.editable ?? true;
+  const where = props.where ?? {};
+  const customAddURL = props.customAddURL ?? `/app/${module}/create`;
+
   const [modules, setModules] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [fields, setFields] = useState({});
@@ -44,18 +49,7 @@ function List(props) {
     direction: 'desc',
     id: 'id',
   });
-  const [moduleDeleted, setModuleDeleted] = useState(false);
-  
-
-  // useEffect(() => {
-  //   dispatch(resetModule());
-  //   setOrder({
-  //     direction: 'desc',
-  //     id: 'id',
-  //   });
-  //   setPage(0);
-
-  // }, [module])
+  const [moduleDeleted, setModuleDeleted] = useState(false); 
 
   const resetModulesListConfig = () => {
     setSearchText('');
@@ -74,7 +68,8 @@ function List(props) {
       show: rowsPerPage,
       sort: order.id,
       sort_order: order.direction,
-      module
+      module,
+      where
     }
 
     axios.get(`/${module}`, { params }).then(res => {
@@ -148,7 +143,7 @@ function List(props) {
   }
 
   function handleClick(item) {
-    props.navigate(`/app/${module}/${item.id}`);
+    editable ? props.navigate(`/app/${module}/${item.id}`): '';
   }
 
   function handleCheck(event, id) {
@@ -217,7 +212,7 @@ function List(props) {
         </Typography>
 
         <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
-          <Paper
+          {searchable && <Paper
             component={motion.div}
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
@@ -236,7 +231,7 @@ function List(props) {
               }}
               onChange={(ev) => setSearchText(ev.target.value)}
             />
-          </Paper>
+          </Paper>}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
@@ -244,7 +239,7 @@ function List(props) {
             <Button
               className=""
               component={Link}
-              to={`/app/${module}/create`}
+              to={customAddURL}
               variant="contained"
               color="secondary"
               startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
