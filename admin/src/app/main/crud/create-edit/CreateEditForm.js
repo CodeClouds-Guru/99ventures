@@ -179,6 +179,9 @@ function CreateEditForm(props) {
 
   };
 
+  
+
+
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -196,7 +199,8 @@ function CreateEditForm(props) {
               />
             </div>
           }
-          )}
+          )}      
+
         <motion.div
           className="flex"
           initial={{ opacity: 0, x: 20 }}
@@ -214,7 +218,7 @@ function CreateEditForm(props) {
             className="whitespace-nowrap mx-4 mt-5"
             variant="contained"
             color="error"
-            onClick={()=>navigate(`/app/${module}`)}
+            onClick={() => navigate(`/app/${module}`)}
           >
             Cancel
           </Button>

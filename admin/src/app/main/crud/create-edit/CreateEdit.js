@@ -20,6 +20,7 @@ import reducer from '../store';
 import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
+import PermissionGrid from './components/PermissionGrid';
 
 
 function CreateEdit(props) {
@@ -105,6 +106,7 @@ function CreateEdit(props) {
             {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm />
           </div>
+          {module === 'roles' ? <PermissionGrid role={{}}/> : ''}
         </>
       }
       scroll={isMobile ? 'normal' : 'content'}
