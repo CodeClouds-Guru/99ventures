@@ -11,110 +11,94 @@ import TableCell from '@mui/material/TableCell';
 const PermissionGrid = (props) => {
     let columns = [
         {
-            id: 'module',
-            label: 'Module',
+            slug: 'module',
+            name: 'Module',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'list',
-            label: 'List',
+            slug: 'list',
+            name: 'List',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'add',
-            label: 'Add',
+            slug: 'add',
+            name: 'Add',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'save',
-            label: 'Save',
+            slug: 'save',
+            name: 'Save',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'edit',
-            label: 'Edit',
+            slug: 'edit',
+            name: 'Edit',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'update',
-            label: 'Update',
+            slug: 'update',
+            name: 'Update',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'view',
-            label: 'View',
+            slug: 'view',
+            name: 'View',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'delete',
-            label: 'Delete',
+            slug: 'delete',
+            name: 'Delete',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'destroy',
-            label: 'Destroy',
+            slug: 'destroy',
+            name: 'Destroy',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'import',
-            label: 'Import',
+            slug: 'import',
+            name: 'Import',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'export',
-            label: 'Export',
+            slug: 'export',
+            name: 'Export',
             minWidth: 170,
             align: 'left'
         },
         {
-            id: 'navigation',
-            label: 'Navigation',
+            slug: 'navigation',
+            name: 'Navigation',
             minWidth: 170,
             align: 'left'
         },
     ]
     let rows = [
         {
-            moduleName: "Users",
-            moduleId: "users"
+            name: "Users",
+            slug: "users"
         },
         {
-            moduleName: "Roles",
-            moduleId: "roles"
+            name: "Roles",
+            slug: "roles"
         },
         {
-            moduleName: "Permissions",
-            moduleId: "permissions"
+            name: "Permissions",
+            slug: "permissions"
         },
         {
-            moduleName: "Groups",
-            moduleId: "groups"
-        },
-        {
-            moduleName: "Users",
-            moduleId: "users"
-        },
-        {
-            moduleName: "Roles",
-            moduleId: "roles"
-        },
-        {
-            moduleName: "Permissions",
-            moduleId: "permissions"
-        },
-        {
-            moduleName: "Groups",
-            moduleId: "groups"
+            name: "Groups",
+            slug: "groups"
         }
     ]
     const types = ['all', 'group', 'owner']
@@ -128,11 +112,11 @@ const PermissionGrid = (props) => {
                             <TableRow>
                                 {columns.map((column) => (
                                     <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}
+                                        key={column.slug}
+                                        align={column.align ?? 'left'}
+                                        style={{ minWidth: column.minWidth ?? '170' }}
                                     >
-                                        {column.label}
+                                        {column.name}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -141,17 +125,20 @@ const PermissionGrid = (props) => {
                             {rows
                                 .map((row) => {
                                     return (
-                                        <TableRow hover role="checkbox" tabIndex={-1} key={row.moduleId}>
+                                        <TableRow hover role="checkbox" tabIndex={-1} key={row.slug}>
                                             {columns.map((column, index) => {
                                                 return index === 0 ?
-                                                    <TableCell key={column.id} align={column.align}>
-                                                        {row.moduleName}
+                                                    <TableCell key={column.slug} align={column.align}>
+                                                        {row.name}
                                                     </TableCell>
                                                     :
                                                     (
-                                                        <TableCell key={column.id} align={column.align}>
+                                                        <TableCell key={column.slug} align={column.align}>
                                                             {types.map(type => {
-                                                                return <span style={{display:"block"}} className="capitalize"><input type="checkbox" /> {type}</span>
+                                                                let name =`${type}-${row.slug}-${column.slug}`;
+                                                                return <span style={{display:"block"}} className="capitalize" key={name}>
+                                                                    <input type="checkbox" id={name} value={name} onChange={(e)=>console.log(e.target.value,e.target.checked)}  /> {type}
+                                                                </span>
                                                             })}
                                                         </TableCell>
                                                     );
