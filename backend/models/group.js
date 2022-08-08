@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Group.belongsToMany(models.Role, {
         through: 'group_role',
+        timestamps: false,
         foreignKey: 'group_id',
         otherKey: 'role_id',
       })
@@ -45,6 +46,8 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'groups',
     }
   )
+  Group.extra_fields = ['roles']
+
   Group.fields = {
     id: {
       field_name: 'id',
