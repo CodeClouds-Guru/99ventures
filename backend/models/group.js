@@ -45,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'groups',
     }
   )
+  Group.extra_fields = ['roles'];
   Group.fields = {
     id: {
       field_name: 'id',
