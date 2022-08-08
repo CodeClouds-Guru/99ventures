@@ -24,6 +24,14 @@ const navigationConfig = [
     url: 'app/roles',
   },
   {
+    id: 'app-groups',
+    title: 'Groups',
+    translate: 'Groups',
+    type: 'item',
+    icon: 'heroicons-outline:user-group',
+    url: 'app/groups',
+  },
+  {
     id: 'app-permissions',
     title: 'Permissions',
     translate: 'Permissions',
