@@ -150,6 +150,13 @@ class JwtService extends FuseUtils.EventEmitter {
     }
   };
 
+  getCompanySiteId = () => {
+    return {
+      company_id: window.localStorage.getItem('jwt_company_id'),
+      site_id: window.localStorage.getItem('jwt_site_id')
+    };
+  }
+
   logout = () => {
     axios
       .post(jwtServiceConfig.logout);

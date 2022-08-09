@@ -28,14 +28,9 @@ function CompanySiteContent() {
         };
     }
     const setCompanySiteId = (companyId, SiteId) => {
-        jwtService
-        .setCompanySiteId(companyId, SiteId)
-        .then(() => {
-            navigate("/dashboard")
-        })
-        .catch((error) => {
-            dispatch(showMessage({ message: error.message }));
-        });
+        jwtService.setCompanySiteId(companyId, SiteId);
+        navigate("/dashboard")
+        
     }
     const CompaniesElement = () => {
 
