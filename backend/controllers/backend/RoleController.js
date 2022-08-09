@@ -87,6 +87,7 @@ class RoleController extends Controller {
       //update role permission table
       await queryInterface.bulkInsert('permission_role',permissions);
     }
+    return true;
   }
 }
 
