@@ -47,7 +47,7 @@ function CreateEditForm(props) {
   const { handleSubmit, reset, control, formState: { errors } } = useForm({
     resolver: yupResolver(schema)
   });
-  const { module, moduleId } = useParams()
+  const { module, moduleId } = useParams();
 
   const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
@@ -167,7 +167,7 @@ function CreateEditForm(props) {
     if (moduleId == 'create') {
       let res = await dispatch(saveModule({ ...data, module }));
       if (!res.error) {
-        navigate(`/app/${module}`);
+        props.moduleOnSave(res.payload.result.id);
         dispatch(showMessage({ variant: 'success', message: 'Record created successfully' }));
       }
     } else {

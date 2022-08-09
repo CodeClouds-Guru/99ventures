@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import TableContainer from '@mui/material/TableContainer';
@@ -7,101 +7,51 @@ import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+import Button from '@mui/material/Button';
+import axios from "axios";
+import { motion } from 'framer-motion';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { useDispatch } from 'react-redux';
 
 const PermissionGrid = (props) => {
-    let columns = [
-        {
-            slug: 'module',
-            name: 'Module',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'list',
-            name: 'List',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'add',
-            name: 'Add',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'save',
-            name: 'Save',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'edit',
-            name: 'Edit',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'update',
-            name: 'Update',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'view',
-            name: 'View',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'delete',
-            name: 'Delete',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'destroy',
-            name: 'Destroy',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'import',
-            name: 'Import',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'export',
-            name: 'Export',
-            minWidth: 170,
-            align: 'left'
-        },
-        {
-            slug: 'navigation',
-            name: 'Navigation',
-            minWidth: 170,
-            align: 'left'
-        },
-    ]
-    let rows = [
-        {
-            name: "Users",
-            slug: "users"
-        },
-        {
-            name: "Roles",
-            slug: "roles"
-        },
-        {
-            name: "Permissions",
-            slug: "permissions"
-        },
-        {
-            name: "Groups",
-            slug: "groups"
+    let dispatch = useDispatch();
+    let [actions, setActions] = useState([{
+        slug: 'module',
+        name: 'Module',
+        minWidth: 170,
+        align: 'left'
+    },]);
+    let [modules, setModules] = useState([]);
+    let [rolePermissions, setRolePermissions] = useState([])
+
+    useEffect(() => {
+        axios.get(`/roles/edit/${props.roleId}`).then(res => {
+            setActions((prevState) => [...prevState, ...res.data.results.actions]);
+            setModules(res.data.results.modules);
+            let rolPermissionsResp = res.data.results.role_permissions.map(rolePermission => rolePermission.slug);
+            setRolePermissions(rolPermissionsResp);
+        })
+    }, []);
+
+    const types = ['all', 'group', 'owner'];
+    const checkboxOnChange = (e) => {
+        if (e.target.checked) {
+            setRolePermissions(prevState => [...prevState, e.target.value]);
+        } else {
+            setRolePermissions(prevState => {
+                return prevState.filter(el => el !== e.target.value);
+            });
         }
-    ]
-    const types = ['all', 'group', 'owner']
+    }
+    const applyPermissionsHandler = () => {
+        console.log(rolePermissions);
+        axios.post(`/roles/update/${props.roleId}`, { requestType: 'apply-permission', role_permissions: rolePermissions })
+            .then(res => {
+                dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
+            }).catch(err => {
+                dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+            })
+    }
     return (
         <div className="p-16">
             <Typography variant="subtitle1" className="mb-5">Permissions</Typography>
@@ -110,34 +60,36 @@ const PermissionGrid = (props) => {
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
-                                {columns.map((column) => (
+                                {actions.map((action) => (
                                     <TableCell
-                                        key={column.slug}
-                                        align={column.align ?? 'left'}
-                                        style={{ minWidth: column.minWidth ?? '170' }}
+                                        key={action.slug}
+                                        align={action.align ?? 'left'}
+                                        style={{ minWidth: action.minWidth ?? '170' }}
                                     >
-                                        {column.name}
+                                        {action.name}
                                     </TableCell>
                                 ))}
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows
+                            {modules
                                 .map((row) => {
                                     return (
                                         <TableRow hover role="checkbox" tabIndex={-1} key={row.slug}>
-                                            {columns.map((column, index) => {
+                                            {actions.map((action, index) => {
+                                                let tableCellKey = `${row.slug}-${action.slug}`;
                                                 return index === 0 ?
-                                                    <TableCell key={column.slug} align={column.align}>
+                                                    <TableCell key={tableCellKey} align={action.align}>
                                                         {row.name}
                                                     </TableCell>
                                                     :
                                                     (
-                                                        <TableCell key={column.slug} align={column.align}>
+                                                        <TableCell key={tableCellKey} align={action.align}>
                                                             {types.map(type => {
-                                                                let name =`${type}-${row.slug}-${column.slug}`;
-                                                                return <span style={{display:"block"}} className="capitalize" key={name}>
-                                                                    <input type="checkbox" id={name} value={name} onChange={(e)=>console.log(e.target.value,e.target.checked)}  /> {type}
+                                                                let name = `${type}-${row.slug}-${action.slug}`;
+                                                                let checked = rolePermissions.includes(name);
+                                                                return <span style={{ display: "block" }} className="capitalize" key={name}>
+                                                                    <input type="checkbox" id={name} checked={checked} value={name} onChange={checkboxOnChange} /> {type}
                                                                 </span>
                                                             })}
                                                         </TableCell>
@@ -151,6 +103,20 @@ const PermissionGrid = (props) => {
                     </Table>
                 </TableContainer>
             </Paper>
+            <motion.div
+                className="flex mt-16"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+            >
+                <Button
+                    className="whitespace-nowrap mx-4 mt-5"
+                    variant="contained"
+                    color="secondary"
+                    onClick={applyPermissionsHandler}
+                >
+                    Apply Permissions to Role
+                </Button>
+            </motion.div>
         </div>
     )
 }
