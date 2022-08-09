@@ -7,7 +7,23 @@ const CompanySite = lazy(() => import('./CompanySite'));
 const CompanySiteConfig = {
     settings: {
         layout: {
-            config: {},
+            config: {
+                navbar: {
+                  display: false,
+                },
+                toolbar: {
+                  display: false,
+                },
+                footer: {
+                  display: true,
+                },
+                leftSidePanel: {
+                  display: false,
+                },
+                rightSidePanel: {
+                  display: false,
+                },
+              },
         },
     },
     routes: [

@@ -54,18 +54,13 @@ class GroupController extends Controller {
   async update(req, res) {
     try {
       let id = req.params.id
-      let request_data = req.body
-      if ('roles' in request_data) {
-        const group = await Group.findByPk(id)
-        if (group) {
-          await group.setRoles(request_data.roles)
-        }
-        return {
-          message: 'Roles associated to this group has been updated',
-        }
-      } else {
-        return await super.update(req, res)
+      const roles = req.body.roles
+      delete req.body.roles
+      const group = await Group.findByPk(id)
+      if (group) {
+        await group.setRoles(roles)
       }
+      return await super.update(req, res)
     } catch (e) {
       throw e
     }

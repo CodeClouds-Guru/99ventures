@@ -53,10 +53,7 @@ function ForgotPasswordPage() {
           dispatch(showMessage({ variant: 'error', message: response.errors }));
         }
       })
-      .catch((_errors) => {
-        console.log(_errors);
-        dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
-      });
+      .catch(() => { });
   }
 
   return (
