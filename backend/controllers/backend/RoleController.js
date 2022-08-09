@@ -54,24 +54,7 @@ class RoleController extends Controller {
     let role_details = await this.model.findByPk(req.params.id);
     if(role_details){
       if(req.body.requestType =='apply-permission'){
-        let permission_slugs = req.body.role_permissions;
-        //get permossion ids
-        if(permission_slugs.length){
-          let permissions = await Permission.findAll({
-            attributes: ['id'],
-            where: {slug: permission_slugs}
-          })
-          permissions = permissions.map(permission => {
-            return {
-              permission_id: permission.id,
-              role_id: req.params.id
-            }
-          })
-          //delete previous record
-          await PermissionRole.destroy({ where: { role_id: req.params.id } });
-          //update role permission table
-          await queryInterface.bulkInsert('permission_role',permissions);
-        }
+        let update_role_permission = await this.updateRolePermission(req);
 
       }else{
         let response = await super.update(req)
@@ -81,6 +64,28 @@ class RoleController extends Controller {
       };
     }else{
       this.throwCustomError('Role not found',404);
+    }
+  }
+
+  //update role and permissions
+  async updateRolePermission(req,res){
+    let permission_slugs = req.body.role_permissions;
+    //get permossion ids
+    if(permission_slugs.length){
+      let permissions = await Permission.findAll({
+        attributes: ['id'],
+        where: {slug: permission_slugs}
+      })
+      permissions = permissions.map(permission => {
+        return {
+          permission_id: permission.id,
+          role_id: req.params.id
+        }
+      })
+      //delete previous record
+      await PermissionRole.destroy({ where: { role_id: req.params.id } });
+      //update role permission table
+      await queryInterface.bulkInsert('permission_role',permissions);
     }
   }
 }
