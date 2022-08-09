@@ -13,6 +13,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { useNavigate } from "react-router-dom";
+import jwtService from '../../auth/services/jwtService/jwtService';
 
 
 function CompanySiteContent() {
@@ -25,6 +26,16 @@ function CompanySiteContent() {
             id: `simple-tab-${index}`,
             'aria-controls': `simple-tabpanel-${index}`,
         };
+    }
+    const setCompanySiteId = (companyId, SiteId) => {
+        jwtService
+        .setCompanySiteId(companyId, SiteId)
+        .then(() => {
+            navigate("/dashboard")
+        })
+        .catch((error) => {
+            dispatch(showMessage({ message: error.message }));
+        });
     }
     const CompaniesElement = () => {
 
@@ -63,7 +74,7 @@ function CompanySiteContent() {
               </Typography>
             </CardContent>
             <CardActions sx={{alignItems: 'center'}}>
-                <Button variant="contained" endIcon={<SendIcon />} onClick={() => navigate("/dashboard") }>
+                <Button variant="contained" endIcon={<SendIcon />} onClick={() => setCompanySiteId(company.id, portal.id) }>
                     Configure
                 </Button>
             </CardActions>

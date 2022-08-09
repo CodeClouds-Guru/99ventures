@@ -133,10 +133,28 @@ class JwtService extends FuseUtils.EventEmitter {
     }
   };
 
+  setCompanySiteId = (companyId, siteId) => {
+    if (companyId) {
+      localStorage.setItem('jwt_company_id', companyId);
+      axios.defaults.headers.common.company_id = companyId;
+    } else {
+      localStorage.removeItem('jwt_company_id');
+      delete axios.defaults.headers.common.company_id;
+    }
+    if (siteId) {
+      localStorage.setItem('jwt_site_id', siteId);
+      axios.defaults.headers.common.site_id = siteId;
+    } else {
+      localStorage.removeItem('jwt_site_id');
+      delete axios.defaults.headers.common.site_id;
+    }
+  };
+
   logout = () => {
     axios
       .post(jwtServiceConfig.logout);
     this.setSession(null);
+    this.setCompanySiteId(null, null);
     this.emit('onLogout', 'Logged out');
   };
 
