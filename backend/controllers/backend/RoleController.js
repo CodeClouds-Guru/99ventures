@@ -1,5 +1,6 @@
 const Controller = require("./Controller");
-const { Action, Module, PermissionRole } = require('../../models/index')
+const { Action, Module, PermissionRole, Permission, sequelize } = require('../../models/index')
+const queryInterface = sequelize.getQueryInterface()
 class RoleController extends Controller {
   constructor() {
     super('Role');
@@ -46,6 +47,40 @@ class RoleController extends Controller {
       }
     } catch (error) {
       throw error;
+    }
+  }
+  //override role update function
+  async update(req,res){
+    let role_details = await this.model.findByPk(req.params.id);
+    if(role_details){
+      if(req.body.requestType =='apply-permission'){
+        let permission_slugs = req.body.role_permissions;
+        //get permossion ids
+        if(permission_slugs.length){
+          let permissions = await Permission.findAll({
+            attributes: ['id'],
+            where: {slug: permission_slugs}
+          })
+          permissions = permissions.map(permission => {
+            return {
+              permission_id: permission.id,
+              role_id: req.params.id
+            }
+          })
+          //delete previous record
+          await PermissionRole.destroy({ where: { role_id: req.params.id } });
+          //update role permission table
+          await queryInterface.bulkInsert('permission_role',permissions);
+        }
+
+      }else{
+        let response = await super.update(req)
+      }
+      return {
+        message: "Record has been updated successfully",
+      };
+    }else{
+      this.throwCustomError('Role not found',404);
     }
   }
 }
