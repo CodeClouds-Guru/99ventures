@@ -17,26 +17,14 @@ export const getModule = createAsyncThunk('crud/getModule', async ({ module, mod
 });
 
 
-export const removeProduct = createAsyncThunk(
-    'eCommerceApp/product/removeProduct',
-    async (val, { dispatch, getState }) => {
-        const { id } = getState().eCommerceApp.product;
-        await axios.delete(`/api/ecommerce/products/${id}`);
-        return id;
-    }
-);
+
 
 export const saveModule = createAsyncThunk(
     'crud/saveModule',
     async (moduleData, { dispatch, getState, rejectWithValue }) => {
         const { module, ...restData } = moduleData
         try {
-            const response = await axios.post(`${module}/save`, restData, {
-                // Need to removed
-                headers: {
-                    "company_id": "1"
-                }
-            });
+            const response = await axios.post(`${module}/save`, restData);
             const data = await response.data.results;
             return data;
         } catch (error) {
@@ -94,7 +82,6 @@ const moduleSlice = createSlice({
         [updateModule.rejected]: (state, action) => {
             state.errors = action.payload.errors
         },
-        [removeProduct.fulfilled]: (state, action) => null,
         [getModuleFields.fulfilled]: (state, action) => {
             state.fields = action.payload.fields
         }

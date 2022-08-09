@@ -14,15 +14,15 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { useDispatch } from 'react-redux';
 
 const PermissionGrid = (props) => {
-    let dispatch = useDispatch();
-    let [actions, setActions] = useState([{
+    const dispatch = useDispatch();
+    const [actions, setActions] = useState([{
         slug: 'module',
         name: 'Module',
         minWidth: 170,
         align: 'left'
     },]);
-    let [modules, setModules] = useState([]);
-    let [rolePermissions, setRolePermissions] = useState([])
+    const [modules, setModules] = useState([]);
+    const [rolePermissions, setRolePermissions] = useState([])
 
     useEffect(() => {
         axios.get(`/roles/edit/${props.roleId}`).then(res => {
@@ -44,7 +44,6 @@ const PermissionGrid = (props) => {
         }
     }
     const applyPermissionsHandler = () => {
-        console.log(rolePermissions);
         axios.post(`/roles/update/${props.roleId}`, { requestType: 'apply-permission', role_permissions: rolePermissions })
             .then(res => {
                 dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
