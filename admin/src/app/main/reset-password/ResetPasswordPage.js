@@ -63,9 +63,7 @@ function ResetPasswordPage() {
                         dispatch(showMessage({ variant: 'error', message: response.errors }));
                     }
                 })
-                .catch((_errors) => {
-                    dispatch(showMessage({ variant: 'error', message: _errors.response.errors }));
-                });
+                .catch(() => { });
         } else {
             console.error('parameter missing');
         }

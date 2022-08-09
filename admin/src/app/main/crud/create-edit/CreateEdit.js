@@ -9,7 +9,7 @@ import withReducer from 'app/store/withReducer';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import _ from '@lodash';
 import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,10 +20,12 @@ import reducer from '../store';
 import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
+import PermissionGrid from './components/PermissionGrid';
 
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const moduleData = useSelector(selectModule);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
   const errors = useSelector(state => state.crud.module.errors)
@@ -33,10 +35,11 @@ function CreateEdit(props) {
   const [tabValue, setTabValue] = useState(0);
   const [noModule, setNoModule] = useState(false);
 
+  const { moduleId } = routeParams;
 
   useEffect(() => {
     function updateModuleState() {
-      const { moduleId } = routeParams;
+
       if (moduleId === 'create') {
         dispatch(getModuleFields({ module }));
       } else {
@@ -53,13 +56,13 @@ function CreateEdit(props) {
 
 
   useEffect(() => {
-    return () => {      
+    return () => {
       dispatch(resetModule());
       setNoModule(false);
     };
   }, [dispatch]);
 
-  
+
 
   /**
    * Show Message if the requested module is not exists
@@ -96,6 +99,15 @@ function CreateEdit(props) {
     return <FuseLoading />;
   }
 
+  let moduleOnSaveHandler = (genModuleId)=>{
+    let url = `/app/${module}`;
+    if(['roles'].includes(module)){
+      url = `/app/${module}/${genModuleId}`;
+    }
+    navigate(url);
+  }
+
+
   return (
     <FusePageCarded
       header={<CreateEditHeader />}
@@ -103,8 +115,9 @@ function CreateEdit(props) {
         <>
           <div className="p-16 sm:p-24 max-w-3xl">
             {errors && <Alert severity="error">{errors}</Alert>}
-            <CreateEditForm />
+            <CreateEditForm moduleOnSave={moduleOnSaveHandler}/>
           </div>
+          {(module === 'roles' && moduleId !== 'create') ? <PermissionGrid roleId={moduleId} /> : ''}
         </>
       }
       scroll={isMobile ? 'normal' : 'content'}

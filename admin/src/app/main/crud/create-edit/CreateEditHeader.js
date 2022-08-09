@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import _ from '@lodash';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { removeProduct, saveModule } from '../store/moduleSlice';
+import { saveModule } from '../store/moduleSlice';
 
 function CreateEditHeader(props) {
   const dispatch = useDispatch();
