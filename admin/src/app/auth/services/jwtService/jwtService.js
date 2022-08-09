@@ -3,7 +3,7 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
-import settingsConfig from 'app/configs/settingsConfig';
+// import settingsConfig from 'app/configs/settingsConfig';
 
 /* eslint-disable camelcase */
 
@@ -25,6 +25,11 @@ class JwtService extends FuseUtils.EventEmitter {
             this.emit('onAutoLogout', null);
             this.setSession(null);
           }
+          if (err.response.status === 401) {
+            let msg = err.response.data ? err.response.data.errors : err.message;
+            // console.log(msg);
+            this.emit('onForbidden', msg);
+          }
           throw err;
         });
       }
@@ -45,7 +50,7 @@ class JwtService extends FuseUtils.EventEmitter {
       this.emit('onAutoLogin', true);
     } else {
       this.setSession(null);
-      this.emit('onAutoLogout', 'access_token expired');
+      this.emit('onAutoLogout', null);
     }
   };
 
@@ -100,12 +105,14 @@ class JwtService extends FuseUtils.EventEmitter {
             resolve(response.data.user);
           } else {
             this.logout();
-            reject(new Error('Failed to login with token.'));
+            // reject(new Error('Failed to login with token.'));
+            reject(new Error(null));
           }
         })
         .catch((error) => {
           this.logout();
-          reject(new Error('Failed to login with token.'));
+          // reject(new Error('Failed to login with token.'));
+          reject(new Error(null));
         });
     });
   };
@@ -155,7 +162,6 @@ class JwtService extends FuseUtils.EventEmitter {
     return axios.post(jwtServiceConfig.forgotPassword, {
       email,
     }).then((response) => {
-      // showMessage({ message: 'Reset password link has been sent to your email' });
       return response.data;
     }).catch((error) => {
       return error.response.data;

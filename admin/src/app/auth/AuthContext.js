@@ -39,8 +39,8 @@ function AuthProvider({ children }) {
       dispatch(logoutUser());
     });
 
-    jwtService.on('onAutoLogout', (message) => {
-      pass(message);
+    jwtService.on('onAutoLogout', () => {
+      pass(null);
 
       dispatch(logoutUser());
     });
@@ -48,6 +48,10 @@ function AuthProvider({ children }) {
     jwtService.on('onNoAccessToken', () => {
       pass();
     });
+
+    jwtService.on('onForbidden', (message) => {
+      dispatch(showMessage({ variant: 'error', message: message }));
+    })
 
     jwtService.init();
 
