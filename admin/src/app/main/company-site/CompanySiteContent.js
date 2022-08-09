@@ -6,11 +6,19 @@ import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import jwtServiceConfig from '../../auth/services/jwtService/jwtServiceConfig';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Button from '@mui/material/Button';
+import SendIcon from '@mui/icons-material/Send';
+import { useNavigate } from "react-router-dom";
+
 
 function CompanySiteContent() {
     const [companies, setCompanies] = useState([]);
     const [value, setValue] = useState(0);
+    const navigate = useNavigate();
 
     const a11yProps = (index) => {
         return {
@@ -39,11 +47,27 @@ function CompanySiteContent() {
 
     const portalBoxElement = (company) => {
         return company.CompanyPortals.map((portal, key) => {
-            return <Box sx={{ p: 3 }} key={`portal-${key}`}>
-                <Typography>
-                    <Link to={`/dashboard/${company.id}/${portal.id}`}>{portal.name}</Link>
-                </Typography>
-            </Box>
+            return <Card sx={{ maxWidth: 345 }} key={`portal-${key}`}>
+            <CardMedia
+              component="img"
+              height="140"
+              image="/material-ui-static/images/cards/contemplative-reptile.jpg"
+              alt="green iguana"
+            />
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div">
+              {portal.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {portal.domain}
+              </Typography>
+            </CardContent>
+            <CardActions sx={{alignItems: 'center'}}>
+                <Button variant="contained" endIcon={<SendIcon />} onClick={() => navigate("/dashboard") }>
+                    Configure
+                </Button>
+            </CardActions>
+          </Card>
         })
     }
 
@@ -71,8 +95,8 @@ function CompanySiteContent() {
                 {...other}
             >
                 {value === index && (
-                    <Box sx={{ p: 3 }} style={tabBodyCss}>
-                        {portalBoxElement(companies[index])}
+                    <Box sx={{marginTop: '4rem'}} style={tabBodyCss}>
+                        <Typography>{portalBoxElement(companies[index])}</Typography>
                     </Box>
                 )}
             </div>
@@ -86,15 +110,15 @@ function CompanySiteContent() {
     };
 
     return (
-        <Box sx={{ width: '100%' }}>
+        <Box>
             <Box
-                sx={{ borderBottom: 1, borderColor: 'divider' }}
+                sx={{ borderBottom: 1, borderColor: 'divider'}}
             >
                 <Tabs
                     value={value}
                     onChange={handleChange}
                     variant="scrollable"
-                    scrollButtons
+                    scrollButtons={false}
                     aria-label="visible arrows tabs example"
                     sx={{
                         [`& .${tabsClasses.scrollButtons}`]: {
