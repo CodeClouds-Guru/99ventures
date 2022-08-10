@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Permission.belongsToMany(models.Role, {
+        through: 'permission_role',
+        timestamps: false,
+        foreignKey: 'permission_id',
+        otherKey: 'role_id',
+      })
     }
   }
   Permission.validate = function (req) {
