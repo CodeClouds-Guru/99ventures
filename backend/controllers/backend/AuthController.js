@@ -5,9 +5,10 @@
 
 const Joi = require('joi')
 const { User } = require('../../models/index')
-const { Invitation } = require('../../models/index')
+const { Invitation, GroupRole, PermissionRole, Role, Permission } = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
+const permission = require('../../models/permission')
 
 class AuthController {
   AuthController() {
@@ -156,10 +157,31 @@ class AuthController {
       },
     })
     const companies = await user.getCompanies()
+    //user roles
+    let roles = await GroupRole.findAll({attributes: ['group_id','role_id'],where: {group_id:companies[0].company_user.group_id}})
+    roles = roles.map(role => {
+      return role.role_id
+    })
+    //user permissions based on the role
+    let permissions = await Role.findAll({
+      where: { id: roles},
+      include: { 
+        model: Permission, 
+        required: true,
+        attributes:['name','id','slug']
+      },
+    });
+    permissions = permissions.map(permission => {
+      return permission.Permissions.map(all_permission => {
+            return all_permission.slug
+      })
+    })
+    permissions = [].concat.apply([], permissions);
     res.status(200).json({
       status: true,
       user: user,
       companies,
+      permissions,
       access_token: token,
     })
   }
