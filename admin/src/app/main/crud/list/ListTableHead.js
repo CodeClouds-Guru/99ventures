@@ -25,11 +25,12 @@ function ListTableHead(props) {
   const numSelected = selectedOrderIds.length;
 
   const fields = props.fields;
+  const deletable = props.deletable ?? true;
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
 
   const dispatch = useDispatch();
-  const {module} = props;
+  const { module } = props;
 
   const createSortHandler = (property) => (event) => {
     props.onRequestSort(event, property);
@@ -56,11 +57,11 @@ function ListTableHead(props) {
               darken(theme.palette.background.paper, theme.palette.mode === 'light' ? 0.02 : 0.2),
           }}
         >
-          <Checkbox
+          {deletable && <Checkbox
             indeterminate={numSelected > 0 && numSelected < props.rowCount}
             checked={props.rowCount !== 0 && numSelected === props.rowCount}
             onChange={props.onSelectAllClick}
-          />
+          />}
           {numSelected > 0 && (
             <Box
               className="flex items-center justify-center absolute w-64 top-0 ltr:left-0 rtl:right-0 mx-56 h-64 z-10 border-b-1"
@@ -102,7 +103,7 @@ function ListTableHead(props) {
             </Box>
           )}
         </TableCell>
-        {Object.values(fields).filter(field=>field.listing===true).map((row) => {
+        {Object.values(fields).filter(field => field.listing === true).map((row) => {
           return (
             <TableCell
               sx={{
