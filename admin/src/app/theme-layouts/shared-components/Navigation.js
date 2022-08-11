@@ -1,16 +1,32 @@
 import FuseNavigation from '@fuse/core/FuseNavigation';
 import clsx from 'clsx';
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectNavigation } from 'app/store/fuse/navigationSlice';
+import { selectNavigation, removeNavigationItem, resetNavigation } from 'app/store/fuse/navigationSlice';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { navbarCloseMobile } from 'app/store/fuse/navbarSlice';
 
 function Navigation(props) {
   const navigation = useSelector(selectNavigation);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const userPermissions = useSelector(state => state.user.permissions);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    navigation.filter(n => !['dashboard'].includes(n.id))
+      .map(nav => {
+        let permissions = [
+          `all-${nav.id}-list`,
+          `group-${nav.id}-list`,
+          `owner-${nav.id}-list`
+        ];
+        let allowedPermissions = permissions.filter(p => userPermissions.includes(p));
+        if (allowedPermissions.length == 0) {
+          dispatch(removeNavigationItem(nav.id));
+        }
+      })
+  }, [])
 
   return useMemo(() => {
     function handleItemClick(item) {

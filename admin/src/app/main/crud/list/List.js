@@ -23,7 +23,7 @@ import Paper from '@mui/material/Paper';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Input from '@mui/material/Input';
 import Button from '@mui/material/Button';
-import { Link, useParams,useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 
 function List(props) {
@@ -32,6 +32,8 @@ function List(props) {
   const { module } = props;
   const searchable = props.searchable ?? true;
   const editable = props.editable ?? true;
+  const addable = props.addable ?? true;
+  const deletable = props.deletable ?? true;
   const where = props.where ?? {};
   const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
@@ -49,7 +51,7 @@ function List(props) {
     direction: 'desc',
     id: 'id',
   });
-  const [moduleDeleted, setModuleDeleted] = useState(false); 
+  const [moduleDeleted, setModuleDeleted] = useState(false);
 
   const resetModulesListConfig = () => {
     setSearchText('');
@@ -81,7 +83,7 @@ function List(props) {
       if (error && error.response.data && error.response.data.errors) {
         message = error.response.data.errors
       }
-      dispatch(showMessage({ variant: 'error', message}));
+      dispatch(showMessage({ variant: 'error', message }));
       navigate('/dashboard');
     })
   }
@@ -143,7 +145,7 @@ function List(props) {
   }
 
   function handleClick(item) {
-    editable ? props.navigate(`/app/${module}/${item.id}`): '';
+    editable ? props.navigate(`/app/${module}/${item.id}`) : '';
   }
 
   function handleCheck(event, id) {
@@ -232,7 +234,7 @@ function List(props) {
               onChange={(ev) => setSearchText(ev.target.value)}
             />
           </Paper>}
-          <motion.div
+          {addable && <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
           >
@@ -246,7 +248,7 @@ function List(props) {
             >
               Add
             </Button>
-          </motion.div>
+          </motion.div>}
         </div>
       </div>
 
@@ -291,11 +293,11 @@ function List(props) {
                         onClick={(event) => handleClick(n)}
                       >
                         <TableCell className="w-40 md:w-64 text-center" padding="none">
-                          <Checkbox
+                          {deletable && <Checkbox
                             checked={isSelected}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => handleCheck(event, n.id)}
-                          />
+                          />}
                         </TableCell>
                         {Object.values(fields)
                           .filter(field => field.listing === true)

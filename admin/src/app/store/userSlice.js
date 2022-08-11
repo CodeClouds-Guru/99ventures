@@ -109,6 +109,8 @@ export const { userLoggedOut } = userSlice.actions;
 
 export const selectUser = ({ user }) => user;
 
+export const selectUserPermissions = ({ user }) => user.permissions;
+
 export const selectUserShortcuts = ({ user }) => user.shortcuts;
 //  user.data.shortcuts;
 
