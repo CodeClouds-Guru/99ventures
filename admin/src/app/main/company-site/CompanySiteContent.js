@@ -13,7 +13,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { useNavigate } from "react-router-dom";
-import jwtService from '../../auth/services/jwtService/jwtService';
+import jwtService from '../../auth/services/jwtService';
 
 
 function CompanySiteContent() {
@@ -29,8 +29,7 @@ function CompanySiteContent() {
     }
     const setCompanySiteId = (companyId, SiteId) => {
         jwtService.setCompanySiteId(companyId, SiteId);
-        navigate("/dashboard")
-        
+        navigate("/dashboard");
     }
     const CompaniesElement = () => {
 
@@ -45,6 +44,9 @@ function CompanySiteContent() {
             if (response.data.status) {
                 setCompanies(response.data.companies);
                 setValue(0);
+                if (response.data.companies.length === 1 && response.data.companies[0].CompanyPortals.length === 1) {
+                    setCompanySiteId(response.data.companies[0].id, response.data.companies[0].CompanyPortals[0].id);
+                }
             } else {
                 console.log('Error');
             }
@@ -54,28 +56,35 @@ function CompanySiteContent() {
     const portalBoxElement = (company) => {
         return company.CompanyPortals.map((portal, key) => {
             return <Card sx={{ maxWidth: 345 }} key={`portal-${key}`}>
-            <CardMedia
-              component="img"
-              height="140"
-              image="/material-ui-static/images/cards/contemplative-reptile.jpg"
-              alt="green iguana"
-            />
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-              {portal.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {portal.domain}
-              </Typography>
-            </CardContent>
-            <CardActions sx={{alignItems: 'center'}}>
-                <Button variant="contained" endIcon={<SendIcon />} onClick={() => setCompanySiteId(company.id, portal.id) }>
-                    Configure
-                </Button>
-            </CardActions>
-          </Card>
+                <CardMedia
+                    component="img"
+                    height="140"
+                    image="/material-ui-static/images/cards/contemplative-reptile.jpg"
+                    alt="green iguana"
+                />
+                <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                        {portal.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {portal.domain}
+                    </Typography>
+                </CardContent>
+                <CardActions sx={{ alignItems: 'center' }}>
+                    <Button variant="contained" endIcon={<SendIcon />} onClick={() => setCompanySiteId(company.id, portal.id)}>
+                        Configure
+                    </Button>
+                </CardActions>
+            </Card>
         })
     }
+
+    // const companyRedirection = (companies) => {
+    //     if (companies.length === 1 && companies.CompanyPortals.length === 1) {
+    //         jwtService.setCompanySiteId(companies[0].id, companies[0].CompanyPortals[0].id);
+    //         window.location.href = '/dashboard';
+    //     }
+    // }
 
     useEffect(() => {
         getCompanies();
@@ -101,8 +110,8 @@ function CompanySiteContent() {
                 {...other}
             >
                 {value === index && (
-                    <Box sx={{marginTop: '4rem'}} style={tabBodyCss}>
-                        <Typography>{portalBoxElement(companies[index])}</Typography>
+                    <Box sx={{ marginTop: '4rem' }} style={tabBodyCss}>
+                        {portalBoxElement(companies[index])}
                     </Box>
                 )}
             </div>
@@ -118,7 +127,7 @@ function CompanySiteContent() {
     return (
         <Box>
             <Box
-                sx={{ borderBottom: 1, borderColor: 'divider'}}
+                sx={{ borderBottom: 1, borderColor: 'divider' }}
             >
                 <Tabs
                     value={value}

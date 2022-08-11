@@ -17,6 +17,7 @@ import NavbarToggleButton from '../../shared-components/NavbarToggleButton';
 import UserMenu from '../../shared-components/UserMenu';
 // import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from '../../shared-components/chatPanel/ChatPanelToggleButton';
+import ChangeCompanySite from '../../shared-components/ChangeCompanySite';
 
 function ToolbarLayout1(props) {
   const config = useSelector(selectFuseCurrentLayoutConfig);
@@ -65,6 +66,8 @@ function ToolbarLayout1(props) {
 
           <div className="flex items-center px-8 h-full overflow-x-auto">
             {/* <LanguageSwitcher /> */}
+
+            <ChangeCompanySite />
 
             <AdjustFontSize />
 

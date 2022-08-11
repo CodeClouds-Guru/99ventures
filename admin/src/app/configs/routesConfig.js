@@ -1,6 +1,7 @@
 import FuseUtils from '@fuse/utils';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { Navigate } from 'react-router-dom';
+import jwtService from '../auth/services/jwtService';
 import settingsConfig from 'app/configs/settingsConfig';
 import SignInConfig from '../main/sign-in/SignInConfig';
 import ForgotPasswordConfig from '../main/forgot-password/ForgotPasswordConfig';
@@ -12,6 +13,17 @@ import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
 const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, ResetPasswordConfig, CompanySiteConfig, CRUDConfig];
 
+/*
+* This is to redirect to company-site selection screen if company and site ID is not set
+*/
+const companySiteId = jwtService.getCompanySiteId();
+if ((!companySiteId.company_id && !companySiteId.site_id && window.location.pathname !== '/company-site')) {
+  window.location.href = '/company-site';
+}
+
+/*
+* This is main route configs for the app
+*/
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs, settingsConfig.defaultAuth),
   {
