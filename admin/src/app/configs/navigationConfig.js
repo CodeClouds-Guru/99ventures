@@ -8,7 +8,7 @@ const navigationConfig = [
     url: 'dashboard',
   },
   {
-    id: 'app-users',
+    id: 'users',
     title: 'Users',
     translate: 'Users',
     type: 'item',
@@ -16,7 +16,7 @@ const navigationConfig = [
     url: 'app/users',
   },
   {
-    id: 'app-roles',
+    id: 'roles',
     title: 'Roles',
     translate: 'Roles',
     type: 'item',
@@ -24,7 +24,7 @@ const navigationConfig = [
     url: 'app/roles',
   },
   {
-    id: 'app-groups',
+    id: 'groups',
     title: 'Groups',
     translate: 'Groups',
     type: 'item',
@@ -32,7 +32,7 @@ const navigationConfig = [
     url: 'app/groups',
   },
   {
-    id: 'app-permissions',
+    id: 'permissions',
     title: 'Permissions',
     translate: 'Permissions',
     type: 'item',

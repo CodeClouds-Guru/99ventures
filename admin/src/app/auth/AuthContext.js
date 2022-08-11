@@ -5,6 +5,7 @@ import FuseSplashScreen from '@fuse/core/FuseSplashScreen';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { logoutUser, setUser } from 'app/store/userSlice';
 import jwtService from './services/jwtService';
+import {resetNavigation } from 'app/store/fuse/navigationSlice';
 
 const AuthContext = React.createContext();
 
@@ -59,7 +60,7 @@ function AuthProvider({ children }) {
       if (message) {
         dispatch(showMessage({ message }));
       }
-
+      dispatch(resetNavigation());
       Promise.all([
         dispatch(setUser(user)),
         // You can receive data in here before app initialization
