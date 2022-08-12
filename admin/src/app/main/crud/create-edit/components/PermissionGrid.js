@@ -12,7 +12,6 @@ import axios from "axios";
 import { motion } from 'framer-motion';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useDispatch } from 'react-redux';
-import { openDialog } from 'app/store/fuse/dialogSlice';
 import AlertDialog from 'app/shared-components/AlertDialog';
 
 const PermissionGrid = (props) => {
