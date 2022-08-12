@@ -186,7 +186,7 @@ class AuthController {
 
   async refreshToken(req, res) {
     const user = req.user
-    const companies = await user.getCompanies()
+    const companies = await user.getCompanies({ include: ['CompanyPortals'] })
     const token = generateToken({
       user: {
         id: user.id,
