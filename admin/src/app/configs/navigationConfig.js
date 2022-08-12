@@ -31,14 +31,14 @@ const navigationConfig = [
     icon: 'heroicons-outline:user-group',
     url: 'app/groups',
   },
-  {
-    id: 'permissions',
-    title: 'Permissions',
-    translate: 'Permissions',
-    type: 'item',
-    icon: 'heroicons-outline:shield-check',
-    url: 'app/permissions',
-  },
+  // {
+  //   id: 'permissions',
+  //   title: 'Permissions',
+  //   translate: 'Permissions',
+  //   type: 'item',
+  //   icon: 'heroicons-outline:shield-check',
+  //   url: 'app/permissions',
+  // },
 ];
 
 export default navigationConfig;
