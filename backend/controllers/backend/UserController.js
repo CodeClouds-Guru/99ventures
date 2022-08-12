@@ -1,14 +1,74 @@
 const Controller = require('./Controller')
 const { Group } = require('../../models/index')
-const { CompanyUser } = require('../../models/index')
+const { CompanyUser,Invitation } = require('../../models/index')
+const { InvitationCont} = require("../../controllers/backend/InvitationController")
 const bcrypt = require('bcryptjs')
 class UserController extends Controller {
   constructor() {
     super('User')
   }
-
+  //override add function
+  async add(req, res) {
+    let response = await super.add(req);
+    let fields = response.fields
+    let groups = await Group.findAll({ attributes: ['id', 'name'] });
+    fields.groups.options = groups.map(group => {
+      return {
+        key: group.name,
+        value: group.id,
+        label: group.name
+      }
+    })
+    return {
+          status: true,
+          fields,
+    }
+  }
   //override store function
-  
+  async save(req,res){
+    let response = await super.save(req)
+    let new_user = response.result
+    //get company id
+    let company_id = req.headers.company_id ?? 1;
+    let user = req.user
+  //update user group
+  if (typeof req.body.groups !== 'undefined') {
+    if (req.body.groups.length > 0) {
+      let all_groups = [];
+      for (const val of req.body.groups) {
+        all_groups.push({
+          user_id: new_user.id,
+          company_id: company_id,
+          group_id: val
+        })
+      }
+      //bulck create company users
+      await CompanyUser.bulkCreate(all_groups);
+    }
+  }
+  var expired_at = new Date();
+  // add a day
+  expired_at.setDate(expired_at.getDate() + 1);
+  //save invitation
+  let new_invitation = await Invitation.create({
+      user_id: new_user.id,
+      email: new_user.email,
+      expired_at: expired_at,
+      created_by: user.id
+  })
+  let token = { id: new_user.id, email: new_user.email,invitation_id: new_invitation.id,expired_at:expired_at}
+  token = JSON.stringify(token)
+  let base64data = Buffer.from(token, 'utf8')
+  token = base64data.toString('base64')
+  //update token
+  let update_token = await Invitation.update({token:token},{where:{id:new_invitation.id}})
+
+    return {
+      message: response.message,
+      result: response.result,
+      link:process.env.CLIENT_ORIGIN + '/sign-up?token=' + token
+    }
+  }
   //override the edit function
   async edit(req, res) {
     try {
