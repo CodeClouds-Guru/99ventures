@@ -18,11 +18,21 @@ import UserMenu from '../../shared-components/UserMenu';
 // import QuickPanelToggleButton from '../../shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from '../../shared-components/chatPanel/ChatPanelToggleButton';
 import ChangeCompanySite from '../../shared-components/ChangeCompanySite';
+import { selectUser } from 'app/store/userSlice';
 
 function ToolbarLayout1(props) {
   const config = useSelector(selectFuseCurrentLayoutConfig);
   const navbar = useSelector(selectFuseNavbar);
   const toolbarTheme = useSelector(selectToolbarTheme);
+  const user = useSelector(selectUser);
+
+  const changeCompanySite = () => {
+    if (user.companies.length > 1 || user.companies[0].CompanyPortals.length > 1) {
+      return (
+        <ChangeCompanySite />
+      );
+    }
+  }
 
   return (
     <ThemeProvider theme={toolbarTheme}>
@@ -67,7 +77,7 @@ function ToolbarLayout1(props) {
           <div className="flex items-center px-8 h-full overflow-x-auto">
             {/* <LanguageSwitcher /> */}
 
-            <ChangeCompanySite />
+            {changeCompanySite()}
 
             <AdjustFontSize />
 
@@ -75,13 +85,13 @@ function ToolbarLayout1(props) {
 
             {/* <NavigationSearch /> */}
 
-            <Hidden lgUp>
+            {/* <Hidden lgUp>
               <ChatPanelToggleButton />
-            </Hidden>
+            </Hidden> */}
 
             {/* <QuickPanelToggleButton /> */}
 
-            <NotificationPanelToggleButton />
+            {/* <NotificationPanelToggleButton /> */}
 
             <UserMenu />
           </div>

@@ -55,11 +55,11 @@ function CompanySiteContent() {
 
     const portalBoxElement = (company) => {
         return company.CompanyPortals.map((portal, key) => {
-            return <Card sx={{ maxWidth: 345 }} key={`portal-${key}`}>
+            return <Card sx={{ maxWidth: 345, marginLeft: 1 }} key={`portal-${key}`}>
                 <CardMedia
                     component="img"
                     height="140"
-                    image="/material-ui-static/images/cards/contemplative-reptile.jpg"
+                    image="/material-ui-static/images/cards/cc.jpg"
                     alt="green iguana"
                 />
                 <CardContent>
@@ -78,13 +78,6 @@ function CompanySiteContent() {
             </Card>
         })
     }
-
-    // const companyRedirection = (companies) => {
-    //     if (companies.length === 1 && companies.CompanyPortals.length === 1) {
-    //         jwtService.setCompanySiteId(companies[0].id, companies[0].CompanyPortals[0].id);
-    //         window.location.href = '/dashboard';
-    //     }
-    // }
 
     useEffect(() => {
         getCompanies();
