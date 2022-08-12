@@ -12,6 +12,7 @@ import axios from "axios";
 import { motion } from 'framer-motion';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useDispatch } from 'react-redux';
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 const PermissionGrid = (props) => {
     const dispatch = useDispatch();
@@ -22,7 +23,8 @@ const PermissionGrid = (props) => {
         align: 'left'
     },]);
     const [modules, setModules] = useState([]);
-    const [rolePermissions, setRolePermissions] = useState([])
+    const [rolePermissions, setRolePermissions] = useState([]);
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
     useEffect(() => {
         axios.get(`/roles/edit/${props.roleId}`).then(res => {
@@ -44,15 +46,29 @@ const PermissionGrid = (props) => {
         }
     }
     const applyPermissionsHandler = () => {
+        setOpenAlertDialog(true);
+    }
+    const onConfirmAlertDialogHandle = () => {
         axios.post(`/roles/update/${props.roleId}`, { requestType: 'apply-permission', role_permissions: rolePermissions })
             .then(res => {
                 dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
+                setOpenAlertDialog(false);
             }).catch(err => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+                setOpenAlertDialog(false);
             })
     }
+    const onCloseAlertDialogHandle = () => {
+        setOpenAlertDialog(false);
+    }
+
     return (
         <div className="p-16">
+            <AlertDialog
+                open={openAlertDialog}
+                onConfirm={onConfirmAlertDialogHandle}
+                onClose={onCloseAlertDialogHandle}
+            />
             <Typography variant="subtitle1" className="mb-5">Permissions</Typography>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
                 <TableContainer sx={{ maxHeight: 440 }}>
