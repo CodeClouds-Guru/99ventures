@@ -17,6 +17,7 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { darken, lighten } from '@mui/material/styles';
 import { removeModules } from '../store/modulesSlice';
 import { useParams } from 'react-router-dom';
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 
 
@@ -28,6 +29,7 @@ function ListTableHead(props) {
   const deletable = props.deletable ?? true;
 
   const [selectedOrdersMenu, setSelectedOrdersMenu] = useState(null);
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
   const dispatch = useDispatch();
   const { module } = props;
@@ -41,6 +43,16 @@ function ListTableHead(props) {
   }
 
   function closeSelectedOrdersMenu() {
+    setSelectedOrdersMenu(null);
+  }
+
+  const onCloseAlertDialogHandle = ()=>{
+    setOpenAlertDialog(false);
+  }
+
+  const onConfirmAlertDialogHandle = ()=>{
+    props.onMenuItemClick(selectedOrderIds);
+    setOpenAlertDialog(false);
     setSelectedOrdersMenu(null);
   }
 
@@ -89,8 +101,9 @@ function ListTableHead(props) {
                 <MenuList>
                   <MenuItem
                     onClick={() => {
-                      props.onMenuItemClick(selectedOrderIds);
-                      closeSelectedOrdersMenu();
+                      // props.onMenuItemClick(selectedOrderIds);
+                      // closeSelectedOrdersMenu();
+                      setOpenAlertDialog(true);
                     }}
                   >
                     <ListItemIcon className="min-w-40">
@@ -100,6 +113,11 @@ function ListTableHead(props) {
                   </MenuItem>
                 </MenuList>
               </Menu>
+              <AlertDialog
+                open={openAlertDialog}
+                onConfirm={onConfirmAlertDialogHandle}
+                onClose={onCloseAlertDialogHandle}
+              />
             </Box>
           )}
         </TableCell>
