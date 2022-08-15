@@ -25,10 +25,12 @@ import Input from '@mui/material/Input';
 import Button from '@mui/material/Button';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import { selectUser } from 'app/store/userSlice';
 
 function List(props) {
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const user = useSelector(selectUser);
   const { module } = props;
   const searchable = props.searchable ?? true;
   const editable = props.editable ?? true;
@@ -145,7 +147,24 @@ function List(props) {
   }
 
   function handleClick(item) {
-    editable ? props.navigate(`/app/${module}/${item.id}`) : '';
+    editable ? handelNavigate(item) : '';
+  }
+
+  function handelNavigate(item) {
+    if (module === 'users' && item.id == user.id) {
+      dispatch(showMessage({ variant: 'error', message: 'You are not allowed to edit this user' }));
+      return '';
+    } else {
+      props.navigate(`/app/${module}/${item.id}`);
+    }
+  }
+
+  function isDeletable(item){
+    if ((module === 'users' && item.id == user.id) || !deletable) {
+      return false;
+    }else{
+      return true;
+    }
   }
 
   function handleCheck(event, id) {
@@ -293,7 +312,7 @@ function List(props) {
                         onClick={(event) => handleClick(n)}
                       >
                         <TableCell className="w-40 md:w-64 text-center" padding="none">
-                          {deletable && <Checkbox
+                          {isDeletable(n) && <Checkbox
                             checked={isSelected}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => handleCheck(event, n.id)}
