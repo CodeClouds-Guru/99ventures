@@ -11,7 +11,10 @@ const {
   PermissionRole,
   Role,
   Permission,
+  Group,
+  Company,
 } = require('../../models/index')
+const { QueryTypes, Op } = require('sequelize')
 const db = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
@@ -178,34 +181,58 @@ class AuthController {
   }
 
   async profile(req, res) {
+    var groups = []
+    var roles = []
+    var permissions = []
+    let user = req.user
+    const company = await Company.findByPk(req.header('company_id'))
     const companies = await db.sequelize.query(
-      'SELECT * FROM company_user WHERE company_id = ? AND user_id = ?',
+      'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
       {
-        replacements: [req.header, req.user.id],
+        replacements: [req.header('company_id'), req.user.id],
         type: QueryTypes.SELECT,
       }
     )
-    let roles = await GroupRole.findAll({
-      attributes: ['group_id', 'role_id'],
-      where: { group_id: companies[0].company_user.group_id },
-    })
-    roles = roles.map((role) => {
-      return role.role_id
-    })
-    //user permissions based on the role
-    let permissions = await Role.findAll({
-      where: { id: roles },
-      include: {
-        model: Permission,
-        required: true,
-        attributes: ['name', 'id', 'slug'],
-      },
-    })
-    permissions = permissions.map((permission) => {
-      return permission.Permissions.map((all_permission) => {
-        return all_permission.slug
+    if (companies && companies.length > 0) {
+      const group = await Group.findOne({
+        where: {
+          id: companies[0].group_id,
+        },
+        include: [
+          {
+            model: Role,
+            through: {
+              attributes: ['group_id', 'role_id'],
+            },
+            include: [
+              {
+                model: Permission,
+                through: {
+                  attributes: ['role_id', 'permission_id'],
+                },
+              },
+            ],
+          },
+        ],
       })
-    })
+      groups = [group]
+      group.Roles.forEach((r) => {
+        roles.push({
+          id: r.id,
+          name: r.name,
+          slug: r.slug,
+        })
+        r.Permissions.forEach((p) => {
+          permissions.push(p.slug)
+        })
+      })
+      permissions = [...new Set(permissions)]
+    }
+    user.setDataValue('permissions', permissions)
+    user.setDataValue('roles', roles)
+    user.setDataValue('groups', groups)
+    user.setDataValue('companies', [company])
+    res.send({ status: true, user })
   }
 
   async logout(req, res) {
