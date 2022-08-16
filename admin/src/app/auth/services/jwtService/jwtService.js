@@ -98,6 +98,9 @@ class JwtService extends FuseUtils.EventEmitter {
         .get(jwtServiceConfig.accessToken)
         .then((response) => {
           if (response.data.user) {
+            if (localStorage.getItem('company_id') && localStorage.getItem('site_id')) {
+              this.getProfile();
+            }
             response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
             response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
             response.data.user.companies = 'companies' in response.data ? response.data.companies : [];
@@ -116,6 +119,30 @@ class JwtService extends FuseUtils.EventEmitter {
         });
     });
   };
+
+  getProfile = () => {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(jwtServiceConfig.profile)
+        .then((response) => {
+          console.log(response);
+          if (response.data.user) {
+            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
+            response.data.user.permissions = 'permissions' in response.data.user ? response.data.user.permissions : [];
+            resolve(response.data.user);
+          } else {
+            this.logout();
+            // reject(new Error('Failed to login with token.'));
+            reject(new Error(null));
+          }
+        })
+        .catch((error) => {
+          this.logout();
+          // reject(new Error('Failed to login with token.'));
+          reject(new Error(null));
+        });
+    });
+  }
 
   updateUserData = (user) => {
     return axios.post(jwtServiceConfig.updateUser, {

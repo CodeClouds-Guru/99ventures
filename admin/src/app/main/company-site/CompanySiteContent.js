@@ -29,6 +29,7 @@ function CompanySiteContent() {
     }
     const setCompanySiteId = (companyId, SiteId) => {
         jwtService.setCompanySiteId(companyId, SiteId);
+        jwtService.getProfile();
         navigate("/dashboard");
     }
     const CompaniesElement = () => {

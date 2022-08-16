@@ -7,6 +7,7 @@ const jwtServiceConfig = {
   resetPassword: 'reset-password',
   logout: 'logout',
   companies: 'companies',
+  profile: 'profile',
 };
 
 export default jwtServiceConfig;
