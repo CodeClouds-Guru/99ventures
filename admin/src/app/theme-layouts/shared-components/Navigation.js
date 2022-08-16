@@ -17,9 +17,9 @@ function Navigation(props) {
     navigation.filter(n => !['dashboard'].includes(n.id))
       .map(nav => {
         let permissions = [
-          `all-${nav.id}-list`,
-          `group-${nav.id}-list`,
-          `owner-${nav.id}-list`
+          `all-${nav.id}-navigation`,
+          `group-${nav.id}-navigation`,
+          `owner-${nav.id}-navigation`
         ];
         let allowedPermissions = permissions.filter(p => userPermissions.includes(p));
         if (allowedPermissions.length == 0) {
