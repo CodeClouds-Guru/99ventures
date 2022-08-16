@@ -12,6 +12,7 @@ const {
   Role,
   Permission,
 } = require('../../models/index')
+const db = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
 const permission = require('../../models/permission')
@@ -177,7 +178,34 @@ class AuthController {
   }
 
   async profile(req, res) {
-    res.status(200).json({ status: true, user: req.user })
+    const companies = await db.sequelize.query(
+      'SELECT * FROM company_user WHERE company_id = ? AND user_id = ?',
+      {
+        replacements: [req.header, req.user.id],
+        type: QueryTypes.SELECT,
+      }
+    )
+    let roles = await GroupRole.findAll({
+      attributes: ['group_id', 'role_id'],
+      where: { group_id: companies[0].company_user.group_id },
+    })
+    roles = roles.map((role) => {
+      return role.role_id
+    })
+    //user permissions based on the role
+    let permissions = await Role.findAll({
+      where: { id: roles },
+      include: {
+        model: Permission,
+        required: true,
+        attributes: ['name', 'id', 'slug'],
+      },
+    })
+    permissions = permissions.map((permission) => {
+      return permission.Permissions.map((all_permission) => {
+        return all_permission.slug
+      })
+    })
   }
 
   async logout(req, res) {
