@@ -38,7 +38,7 @@ function UserMenu(props) {
             {user.first_name + ' ' + user.last_name}
           </Typography>
           <Typography className="text-11 font-medium capitalize" color="text.secondary">
-            {companySiteId.company_id && companySiteId.site_id ? user.role.toString() : ''}
+            {companySiteId.company_id && companySiteId.site_id ? user.role.toString().split('-').join(' ') : ''}
             {(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
           </Typography>
         </div>

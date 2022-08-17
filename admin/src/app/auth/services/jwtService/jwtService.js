@@ -134,7 +134,6 @@ class JwtService extends FuseUtils.EventEmitter {
 
   getProfile = () => {
     return new Promise((resolve, reject) => {
-      console.log('axios headers', axios.defaults.headers.common)
       axios
         .get(jwtServiceConfig.profile)
         .then((response) => {

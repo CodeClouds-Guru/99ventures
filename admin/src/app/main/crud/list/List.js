@@ -152,17 +152,17 @@ function List(props) {
 
   function handelNavigate(item) {
     if (module === 'users' && item.id == user.id) {
-      dispatch(showMessage({ variant: 'error', message: 'You are not allowed to edit this user' }));
+      dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
       return '';
     } else {
       props.navigate(`/app/${module}/${item.id}`);
     }
   }
 
-  function isDeletable(item){
+  function isDeletable(item) {
     if ((module === 'users' && item.id == user.id) || !deletable) {
       return false;
-    }else{
+    } else {
       return true;
     }
   }
