@@ -19,6 +19,7 @@ const db = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
 const permission = require('../../models/permission')
+const UserResources = require('../../resources/UserResources')
 
 class AuthController {
   constructor() {
@@ -148,6 +149,13 @@ class AuthController {
       return
     }
     const user = await User.findOne({ where: { email: value.email } })
+
+    //////////////Debosmita///////////////
+    const userResourcesObj = new UserResources(user)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    // console.log('---------------', userResourcesData)
+    //////////////Debosmita///////////////
+
     if (!user) {
       res.status(401).json({
         status: false,
@@ -174,8 +182,9 @@ class AuthController {
     user.setDataValue('permissions', permissions)
     res.status(200).json({
       status: true,
-      user: user,
+      user: userResourcesData,
       companies,
+      // userResourcesData,
       access_token: token,
     })
   }
@@ -186,6 +195,13 @@ class AuthController {
     var permissions = []
     let user = req.user
     const header_company_id = req.header('company_id') || 0
+
+    //////////////Debosmita///////////////
+    const userResourcesObj = new UserResources(user, header_company_id)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    // console.log('---------------', userResourcesData)
+    //////////////Debosmita///////////////
+
     const company = await user.getCompanies({
       include: ['CompanyPortals'],
     })
@@ -235,7 +251,7 @@ class AuthController {
     user.setDataValue('roles', roles)
     user.setDataValue('groups', groups)
     user.setDataValue('companies', company)
-    res.send({ status: true, user })
+    res.send({ status: true, userResourcesData })
   }
 
   async logout(req, res) {
@@ -250,12 +266,17 @@ class AuthController {
         id: user.id,
       },
     })
+    //////////////Debosmita///////////////
+    const userResourcesObj = new UserResources(user)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    // console.log('---------------', userResourcesData)
+    //////////////Debosmita///////////////
     let permissions = await this.getUserPermissions(user.id)
     user.setDataValue('permissions', permissions)
     res.status(200).json({
       status: true,
       access_token: token,
-      user,
+      userResourcesData,
       companies,
     })
   }
