@@ -26,7 +26,7 @@ function Navigation(props) {
           dispatch(removeNavigationItem(nav.id));
         }
       })
-  }, [])
+  }, [userPermissions])
 
   return useMemo(() => {
     function handleItemClick(item) {
