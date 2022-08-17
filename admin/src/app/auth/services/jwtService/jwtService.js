@@ -110,14 +110,15 @@ class JwtService extends FuseUtils.EventEmitter {
         .then((response) => {
           const companySiteId = this.getCompanySiteId();
           if (response.data.user) {
-            // if (companySiteId.company_id && companySiteId.site_id) {
-            //   this.getProfile();
-            // } else {
             this.loginDataSet(response);
             this.setSession(response.data.access_token);
             resolve(response.data.user);
-            this.emit('onLogin', response.data.user);
-            // }
+            if (companySiteId.company_id && companySiteId.site_id) {
+              this.setCompanySiteId(companySiteId.company_id, companySiteId.site_id)
+              this.getProfile();
+            } else {
+              this.emit('onLogin', response.data.user);
+            }
           } else {
             this.logout();
             reject(new Error(null));
@@ -133,6 +134,7 @@ class JwtService extends FuseUtils.EventEmitter {
 
   getProfile = () => {
     return new Promise((resolve, reject) => {
+      console.log('axios headers', axios.defaults.headers.common)
       axios
         .get(jwtServiceConfig.profile)
         .then((response) => {
@@ -187,8 +189,8 @@ class JwtService extends FuseUtils.EventEmitter {
 
   getCompanySiteId = () => {
     return {
-      company_id: window.localStorage.getItem('jwt_company_id'),
-      site_id: window.localStorage.getItem('jwt_site_id')
+      company_id: localStorage.getItem('jwt_company_id'),
+      site_id: localStorage.getItem('jwt_site_id')
     };
   }
 
