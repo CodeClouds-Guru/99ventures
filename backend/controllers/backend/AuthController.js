@@ -234,7 +234,7 @@ class AuthController {
     user.setDataValue('permissions', permissions)
     user.setDataValue('roles', roles)
     user.setDataValue('groups', groups)
-    user.setDataValue('companies', [company])
+    user.setDataValue('companies', company)
     res.send({ status: true, user })
   }
 
