@@ -27,7 +27,6 @@ class JwtService extends FuseUtils.EventEmitter {
           }
           if (err.response.status === 401) {
             let msg = err.response.data ? err.response.data.errors : err.message;
-            // console.log(msg);
             this.emit('onForbidden', msg);
           }
           throw err;
@@ -68,6 +67,20 @@ class JwtService extends FuseUtils.EventEmitter {
     });
   };
 
+  loginDataSet = (response) => {
+    response.data.user.role = 'roles' in response.data.user ? response.data.user.roles.map((item) => { return item.slug }) : ['admin', 'staff'];
+    response.data.user.permissions = 'permissions' in response.data.user ? response.data.user.permissions : [];
+    response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
+    // response.data.user.companies = ('companies' in response.data || 'companies' in response.data.user) ? response.data.companies : [];
+    if ('companies' in response.data) {
+      response.data.user.companies = response.data.companies;
+    } else if ('companies' in response.data.user) {
+      response.data.user.companies = response.data.user.companies;
+    } else {
+      response.data.user.companies = [];
+    }
+  }
+
   signInWithEmailAndPassword = (email, password) => {
     return new Promise((resolve, reject) => {
       axios
@@ -77,9 +90,7 @@ class JwtService extends FuseUtils.EventEmitter {
         })
         .then((response) => {
           if (response.data.user) {
-            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
-            response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
-            response.data.user.companies = 'companies' in response.data ? response.data.companies : [];
+            this.loginDataSet(response);
             this.setSession(response.data.access_token);
             resolve(response.data.user);
             this.emit('onLogin', response.data.user);
@@ -97,18 +108,18 @@ class JwtService extends FuseUtils.EventEmitter {
       axios
         .get(jwtServiceConfig.accessToken)
         .then((response) => {
+          const companySiteId = this.getCompanySiteId();
           if (response.data.user) {
-            if (localStorage.getItem('company_id') && localStorage.getItem('site_id')) {
-              this.getProfile();
-            }
-            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
-            response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
-            response.data.user.companies = 'companies' in response.data ? response.data.companies : [];
+            // if (companySiteId.company_id && companySiteId.site_id) {
+            //   this.getProfile();
+            // } else {
+            this.loginDataSet(response);
             this.setSession(response.data.access_token);
             resolve(response.data.user);
+            this.emit('onLogin', response.data.user);
+            // }
           } else {
             this.logout();
-            // reject(new Error('Failed to login with token.'));
             reject(new Error(null));
           }
         })
@@ -125,20 +136,17 @@ class JwtService extends FuseUtils.EventEmitter {
       axios
         .get(jwtServiceConfig.profile)
         .then((response) => {
-          console.log(response);
+          // console.log('response', response);
           if (response.data.user) {
-            response.data.user.role = 'roles' in response.data.user ? response.data.user.roles : ['admin'];
-            response.data.user.permissions = 'permissions' in response.data.user ? response.data.user.permissions : [];
+            this.loginDataSet(response);
             resolve(response.data.user);
+            this.emit('onLogin', response.data.user);
           } else {
             this.logout();
-            // reject(new Error('Failed to login with token.'));
-            reject(new Error(null));
           }
         })
         .catch((error) => {
           this.logout();
-          // reject(new Error('Failed to login with token.'));
           reject(new Error(null));
         });
     });

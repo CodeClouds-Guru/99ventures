@@ -38,12 +38,7 @@ export const updateModule = createAsyncThunk(
     async (moduleData, { dispatch, getState, rejectWithValue }) => {
         const { module, moduleId, ...restData } = moduleData;
         try {
-            const response = await axios.post(`${module}/update/${moduleId}`, restData, {
-                // Need to removed
-                headers: {
-                    "company_id": "1"
-                }
-            });
+            const response = await axios.post(`${module}/update/${moduleId}`, restData);
             const data = await response.data;
             return data;
         } catch (error) {

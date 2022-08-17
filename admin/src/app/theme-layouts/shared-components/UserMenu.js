@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { Link, NavLink } from 'react-router-dom';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { selectUser } from 'app/store/userSlice';
+import jwtService from 'src/app/auth/services/jwtService';
 
 function UserMenu(props) {
   const user = useSelector(selectUser);
@@ -23,7 +24,8 @@ function UserMenu(props) {
   const userMenuClose = () => {
     setUserMenu(null);
   };
-
+  const companySiteId = jwtService.getCompanySiteId();
+  const userRole = user.role.toString();
   return (
     <>
       <Button
@@ -36,7 +38,7 @@ function UserMenu(props) {
             {user.first_name + ' ' + user.last_name}
           </Typography>
           <Typography className="text-11 font-medium capitalize" color="text.secondary">
-            {user.role.toString()}
+            {companySiteId.company_id && companySiteId.site_id ? user.role.toString() : ''}
             {(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
           </Typography>
         </div>
