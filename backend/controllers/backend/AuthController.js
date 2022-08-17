@@ -185,7 +185,10 @@ class AuthController {
     var roles = []
     var permissions = []
     let user = req.user
-    const company = await Company.findByPk(req.header('company_id'))
+    console.log('ss')
+    const company = await Company.findByPk(req.header('company_id'), {
+      include: ['CompanyPortals'],
+    })
     const companies = await db.sequelize.query(
       'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
       {
