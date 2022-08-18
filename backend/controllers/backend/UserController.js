@@ -12,7 +12,7 @@ class UserController extends Controller {
   async list(req,res){
     let permissions = await AuthController.getUserPermissions(req.user.id)
     const options = this.getQueryOptions(req);
-    let company_id = req.headers.company_id ?? 1;
+    let company_id = req.headers.company_id;
     // return options;
     if(permissions.indexOf("all-users-list") !== -1){
 
