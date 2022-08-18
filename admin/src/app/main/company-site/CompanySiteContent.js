@@ -14,12 +14,15 @@ import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { useNavigate } from "react-router-dom";
 import jwtService from '../../auth/services/jwtService';
-
+import { setUser } from 'app/store/userSlice';
+import { useDispatch } from 'react-redux';
+import { resetNavigation } from 'app/store/fuse/navigationSlice';
 
 function CompanySiteContent() {
     const [companies, setCompanies] = useState([]);
     const [value, setValue] = useState(0);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const a11yProps = (index) => {
         return {
@@ -29,7 +32,11 @@ function CompanySiteContent() {
     }
     const setCompanySiteId = (companyId, SiteId) => {
         jwtService.setCompanySiteId(companyId, SiteId);
-        jwtService.getProfile();
+        jwtService.getProfile()
+            .then(user => {
+                dispatch(resetNavigation());
+                dispatch(setUser(user));
+            })
         navigate("/dashboard");
     }
     const CompaniesElement = () => {

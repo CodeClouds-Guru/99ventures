@@ -3,7 +3,6 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
-// import settingsConfig from 'app/configs/settingsConfig';
 
 /* eslint-disable camelcase */
 
@@ -112,10 +111,10 @@ class JwtService extends FuseUtils.EventEmitter {
           if (response.data.user) {
             this.loginDataSet(response);
             this.setSession(response.data.access_token);
-            resolve(response.data.user);
+            // resolve(response.data.user);
             if (companySiteId.company_id && companySiteId.site_id) {
               this.setCompanySiteId(companySiteId.company_id, companySiteId.site_id)
-              this.getProfile();
+              this.getProfile().then(user=>resolve(user));
             } else {
               this.emit('onLogin', response.data.user);
             }
@@ -137,11 +136,9 @@ class JwtService extends FuseUtils.EventEmitter {
       axios
         .get(jwtServiceConfig.profile)
         .then((response) => {
-          // console.log('response', response);
           if (response.data.user) {
             this.loginDataSet(response);
             resolve(response.data.user);
-            this.emit('onLogin', response.data.user);
           } else {
             this.logout();
           }

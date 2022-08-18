@@ -13,6 +13,9 @@ import { motion } from 'framer-motion';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useDispatch } from 'react-redux';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import jwtService from 'src/app/auth/services/jwtService';
+import { setUser } from 'app/store/userSlice';
+import { resetNavigation } from 'app/store/fuse/navigationSlice';
 
 const PermissionGrid = (props) => {
     const dispatch = useDispatch();
@@ -52,6 +55,11 @@ const PermissionGrid = (props) => {
         axios.post(`/roles/update/${props.roleId}`, { requestType: 'apply-permission', role_permissions: rolePermissions })
             .then(res => {
                 dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
+                jwtService.getProfile()
+                    .then(user => {
+                        dispatch(resetNavigation());
+                        dispatch(setUser(user));
+                    })
                 setOpenAlertDialog(false);
             }).catch(err => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
