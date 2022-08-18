@@ -1,0 +1,49 @@
+version: '3'
+
+networks:
+  99Bridge:
+
+services:
+  backend:
+    container_name: '99-live-node'
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $LIVE_NODE_LOCAL_PORT:$LIVE_NODE_DOCKER_PORT
+    environment:
+      - DB_HOST=mysqldb
+      - DB_USER=$LIVE_MYSQLDB_USER
+      - DB_PASSWORD=$LIVE_MYSQLDB_ROOT_PASSWORD
+      - DB_NAME=$LIVE_MYSQLDB_DATABASE
+      - DB_PORT=$LIVE_MYSQLDB_DOCKER_PORT
+      - CLIENT_ORIGIN=$LIVE_CLIENT_ORIGIN
+      - APP_SECRET=$LIVE_NODE_APP_SECRET
+      - PORT=$LIVE_NODE_DOCKER_PORT
+    networks:
+      - 99Bridge
+    volumes:
+      - ./backend:/usr/src/backend
+      - /usr/src/backend/node_modules
+
+  admin:
+    depends_on:
+      - backend
+    container_name: '99-live-react'
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
+    ports:
+      - 80:80
+      - 443:443
+    environment: 
+      - CLIENT_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
+    volumes:
+      - ./admin:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    networks:
+      - 99Bridge  

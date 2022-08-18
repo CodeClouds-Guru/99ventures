@@ -47,6 +47,7 @@ services:
       - DB_PORT=$MYSQLDB_DOCKER_PORT
       - CLIENT_ORIGIN=$CLIENT_ORIGIN
       - APP_SECRET=$NODE_APP_SECRET
+      - PORT=$NODE_DOCKER_PORT
     networks:
       - backend
       - frontend

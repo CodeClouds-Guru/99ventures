@@ -1,12 +1,25 @@
-FROM node:17 as builder
-WORKDIR /usr/src/frontend
-COPY package*.json ./
+FROM node:17 as build
+LABEL version="1.0"
+LABEL description="Base image for react app"
+LABEL maintainer = ["sourabh.das@codeclouds.in"]
+
+WORKDIR /app
+
+COPY ["package.json", "./"]
+
 RUN npm install --legacy-peer-deps
-RUN mkdir node_modules/.cache && chmod -R 777 node_modules/.cache
-COPY . .
+
+COPY . ./
+
+
 RUN npm run build
 
-FROM nginx:latest
-EXPOSE 3000
+
+# production environment
+FROM nginx:1.19.10-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 80
+EXPOSE 443
+CMD ["nginx", "-g", "daemon off;"]
