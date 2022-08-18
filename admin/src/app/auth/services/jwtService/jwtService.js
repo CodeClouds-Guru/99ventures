@@ -3,7 +3,6 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import { reject } from 'lodash';
 import jwtServiceConfig from './jwtServiceConfig';
-// import settingsConfig from 'app/configs/settingsConfig';
 
 /* eslint-disable camelcase */
 
@@ -137,11 +136,9 @@ class JwtService extends FuseUtils.EventEmitter {
       axios
         .get(jwtServiceConfig.profile)
         .then((response) => {
-          // console.log('response', response);
           if (response.data.user) {
             this.loginDataSet(response);
             resolve(response.data.user);
-            this.emit('onLogin', response.data.user);
           } else {
             this.logout();
           }
