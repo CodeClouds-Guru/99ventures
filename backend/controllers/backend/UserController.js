@@ -1,11 +1,55 @@
 const Controller = require('./Controller')
 const { Group } = require('../../models/index')
-const { CompanyUser,Invitation } = require('../../models/index')
-const { InvitationCont} = require("../../controllers/backend/InvitationController")
+const { CompanyUser,Invitation,Company } = require('../../models/index')
+const AuthControllerClass = require('../backend/AuthController')
+const AuthController = new AuthControllerClass()
 const bcrypt = require('bcryptjs')
 class UserController extends Controller {
   constructor() {
     super('User')
+  }
+  //override list function
+  async list(req,res){
+    let permissions = await AuthController.getUserPermissions(req.user.id)
+    const options = this.getQueryOptions(req);
+    let company_id = req.headers.company_id ?? 1;
+    // return options;
+    if(permissions.indexOf("all-users-list") !== -1){
+
+    }
+    if(permissions.indexOf("group-users-list") !== -1)
+    {
+      options.include = [
+        {
+          model: Company,
+          where: {
+            id:company_id
+          },
+          attributes:['id']
+        }
+      ];
+    } 
+    else if(permissions.indexOf("owner-users-list") !== -1)
+    {
+      if(options.where != undefined){
+        options.where.id = req.user.id
+      }else{
+        options.where = {id:req.user.id}
+      }
+    }
+   // const { docs, pages, total } = await this.model.paginate(options);
+    let page = req.query.page || 1;
+    let limit = parseInt(req.query.show) || 10; // per page record
+    let offset = (page - 1) * limit
+    options.limit = limit
+    options.offset = offset
+    let result = await this.model.findAndCountAll(options)
+    let pages = Math.ceil(result.count / limit)
+    
+    return {
+      result: { data: result.rows, pages, total:result.count },
+      fields: this.model.fields,
+    };
   }
   //override add function
   async add(req, res) {

@@ -375,7 +375,8 @@ class AuthController {
         return all_permission.slug
       })
     })
-    permissions = [].concat.apply([], permissions)
+    // permissions = [].concat.apply([], permissions)
+    permissions = permissions.flat()
     return permissions
   }
 }
