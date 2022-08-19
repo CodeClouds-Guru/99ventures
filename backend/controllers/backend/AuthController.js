@@ -251,7 +251,7 @@ class AuthController {
     user.setDataValue('roles', roles)
     user.setDataValue('groups', groups)
     user.setDataValue('companies', company)
-    res.send({ status: true, userResourcesData })
+    res.send({ status: true, user: userResourcesData })
   }
 
   async logout(req, res) {
@@ -276,7 +276,7 @@ class AuthController {
     res.status(200).json({
       status: true,
       access_token: token,
-      userResourcesData,
+      user: userResourcesData,
       companies,
     })
   }

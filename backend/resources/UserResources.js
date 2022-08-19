@@ -25,7 +25,6 @@ module.exports = class UserResources {
         var company = []
         var companies = []
         let user = this.user
-        return user
         // console.log('======================',this.company_id)
         if (this.company_id !== 0) {
             // company = await Company.findByPk(this.company_id, {
