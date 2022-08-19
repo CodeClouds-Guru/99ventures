@@ -1,27 +1,18 @@
-'use strict'
+// 'use strict'
 
-const { User } = require('../models/index')
 const {
-    Invitation,
-    GroupRole,
-    PermissionRole,
     Role,
     Permission,
     Group,
-    Company,
 } = require('../models/index')
-const bcrypt = require('bcryptjs')
-const { generateToken } = require('../helpers/global')
-const permission = require('../models/permission')
-const { QueryTypes, Op } = require('sequelize')
+const { QueryTypes } = require('sequelize')
 const db = require('../models/index')
 
 
-let UserResources = class {
+module.exports = class UserResources {
     constructor(user, company_id = 0) {
         this.user = user
         this.company_id = company_id
-        this.response = {}
     }
     //for testing
     async getUserFormattedData() {
@@ -34,6 +25,7 @@ let UserResources = class {
         var company = []
         var companies = []
         let user = this.user
+        return user
         // console.log('======================',this.company_id)
         if (this.company_id !== 0) {
             // company = await Company.findByPk(this.company_id, {
@@ -109,4 +101,4 @@ let UserResources = class {
 
 }
 
-module.exports = UserResources;
+// module.exports = UserResources;
