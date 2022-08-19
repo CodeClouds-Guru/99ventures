@@ -20,18 +20,15 @@ module.exports = class UserResources {
             return this.response;
         }
         var groups = []
-        var roles = ['admin']
         var permissions = []
         var company = []
         var companies = []
         let user = this.user
-        // console.log('======================',this.company_id)
-        if (this.company_id !== 0) {
-            // company = await Company.findByPk(this.company_id, {
-            //     include: ['CompanyPortals'],
-            // })
+        company = await user.getCompanies({ include: ['CompanyPortals'], })
 
-            company = await user.getCompanies({ include: ['CompanyPortals'], })
+        if (this.company_id !== 0) {
+            var roles = [{ 'id': 1, 'name': 'Admin', 'slug': 'admin' }]
+            // company = await user.getCompanies({ include: ['CompanyPortals'], })
             companies = await db.sequelize.query(
                 'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
                 {
@@ -78,6 +75,7 @@ module.exports = class UserResources {
                 })
                 permissions = [...new Set(permissions)]
             }
+            user.setDataValue('roles', roles)
         } else {
             // company = JSON.stringify(await Company.findAll({ include: ['CompanyPortals'] }))
             company = await user.getCompanies({ include: ['CompanyPortals'], })
@@ -91,7 +89,7 @@ module.exports = class UserResources {
 
 
         user.setDataValue('permissions', permissions)
-        user.setDataValue('roles', roles)
+        
         user.setDataValue('groups', groups)
         user.setDataValue('companies', company)
         // console.log('---------------', company)
