@@ -20,8 +20,7 @@ import axios from 'axios';
 /**
  * Axios HTTP Request defaults
  */
-console.log(process.env);
-axios.defaults.baseURL = "http://localhost/api/";
+axios.defaults.baseURL = process.env.NODE_ENV==="production" ? "http://localhost/api/" : 'http://localhost:4000/api/';
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 

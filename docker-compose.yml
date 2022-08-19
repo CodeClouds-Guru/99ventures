@@ -53,6 +53,6 @@ services:
     image: dockette/adminer:full-php5
     restart: always
     ports:
-      - 8080:8080
+      - 9000:8080
     networks:
       - 99Bridge 
