@@ -67,10 +67,9 @@ class JwtService extends FuseUtils.EventEmitter {
   };
 
   loginDataSet = (response) => {
-    response.data.user.role = 'roles' in response.data.user ? response.data.user.roles.map((item) => { return item.slug }) : ['admin', 'staff'];
+    response.data.user.role = 'roles' in response.data.user ? response.data.user.roles.map((item) => { return item.slug }) : ['user'];
     response.data.user.permissions = 'permissions' in response.data.user ? response.data.user.permissions : [];
     response.data.user.shortcuts = 'shortcuts' in response.data.user ? response.data.user.shortcuts : [];
-    // response.data.user.companies = ('companies' in response.data || 'companies' in response.data.user) ? response.data.companies : [];
     if ('companies' in response.data) {
       response.data.user.companies = response.data.companies;
     } else if ('companies' in response.data.user) {
@@ -111,10 +110,9 @@ class JwtService extends FuseUtils.EventEmitter {
           if (response.data.user) {
             this.loginDataSet(response);
             this.setSession(response.data.access_token);
-            // resolve(response.data.user);
             if (companySiteId.company_id && companySiteId.site_id) {
               this.setCompanySiteId(companySiteId.company_id, companySiteId.site_id)
-              this.getProfile().then(user=>resolve(user));
+              this.getProfile().then(user => resolve(user));
             } else {
               this.emit('onLogin', response.data.user);
             }
@@ -188,6 +186,14 @@ class JwtService extends FuseUtils.EventEmitter {
       company_id: localStorage.getItem('jwt_company_id'),
       site_id: localStorage.getItem('jwt_site_id')
     };
+  }
+
+  /**
+   * Check compnaie ID and site ID existency
+   */
+  checkCompanySiteId = () => {
+    const companySiteId = this.getCompanySiteId();
+    return companySiteId.company_id && companySiteId.site_id ? true : false;
   }
 
   logout = () => {

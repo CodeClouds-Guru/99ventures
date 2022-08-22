@@ -11,13 +11,12 @@ import Error404Page from '../main/404/Error404Page';
 import DashboardConfig from '../main/dashboard/DashboardConfig';
 import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
-const routeConfigs = [DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, ResetPasswordConfig, CompanySiteConfig, CRUDConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
 */
-const companySiteId = jwtService.getCompanySiteId();
-if (localStorage.getItem('jwt_access_token') && !companySiteId.company_id && !companySiteId.site_id && window.location.pathname !== '/company-site') {
+if (localStorage.getItem('jwt_access_token') && !jwtService.checkCompanySiteId() && window.location.pathname !== '/company-site') {
   window.location.href = '/company-site';
 }
 

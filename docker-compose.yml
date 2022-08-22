@@ -32,6 +32,7 @@ services:
     depends_on:
       - backend
     container_name: '99-live-react'
+    restart: always
     build:
       context: ./admin
       dockerfile: Dockerfile
@@ -47,3 +48,11 @@ services:
       - /usr/src/frontend/node_modules
     networks:
       - 99Bridge  
+
+  adminer:
+    image: dockette/adminer:full-php5
+    restart: always
+    ports:
+      - 9000:8080
+    networks:
+      - 99Bridge 

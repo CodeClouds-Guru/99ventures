@@ -19,6 +19,9 @@ import { useDispatch } from 'react-redux';
 import { resetNavigation } from 'app/store/fuse/navigationSlice';
 
 function CompanySiteContent() {
+    useEffect(() => {
+        getCompanies();
+    }, []);
     const [companies, setCompanies] = useState([]);
     const [value, setValue] = useState(0);
     const navigate = useNavigate();
@@ -87,9 +90,6 @@ function CompanySiteContent() {
         })
     }
 
-    useEffect(() => {
-        getCompanies();
-    }, []);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
