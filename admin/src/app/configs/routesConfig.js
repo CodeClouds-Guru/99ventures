@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import jwtService from '../auth/services/jwtService';
 import settingsConfig from 'app/configs/settingsConfig';
 import SignInConfig from '../main/sign-in/SignInConfig';
+import SignUpConfig from '../main/sign-up/SignUpConfig';
 import ForgotPasswordConfig from '../main/forgot-password/ForgotPasswordConfig';
 import ResetPasswordConfig from '../main/reset-password/ResetPasswordConfig';
 import SignOutConfig from '../main/sign-out/SignOutConfig';
@@ -11,7 +12,7 @@ import Error404Page from '../main/404/Error404Page';
 import DashboardConfig from '../main/dashboard/DashboardConfig';
 import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set

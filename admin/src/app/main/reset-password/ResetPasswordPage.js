@@ -65,7 +65,7 @@ function ResetPasswordPage() {
                 })
                 .catch(() => { });
         } else {
-            console.error('parameter missing');
+            dispatch(showMessage({ variant: 'error', message: 'Please fill all fields' }));
         }
     }
 
@@ -187,7 +187,7 @@ function ResetPasswordPage() {
                 <div className="z-10 relative w-full max-w-2xl">
                     <div className="text-7xl font-bold leading-none text-gray-100">
                         <div>Welcome to</div>
-                        <div>99 Venture</div>
+                        <div>99 Ventures</div>
                     </div>
                     <div className="mt-24 text-lg tracking-tight leading-6 text-gray-400">
                         Fuse helps developers to build organized and well coded dashboards full of beautiful and

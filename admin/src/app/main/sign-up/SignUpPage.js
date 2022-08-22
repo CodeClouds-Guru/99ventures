@@ -15,13 +15,14 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import FormHelperText from '@mui/material/FormHelperText';
 import jwtService from '../../auth/services/jwtService';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 /**
  * Form Validation Schema
  */
 const schema = yup.object().shape({
-  displayName: yup.string().required('You must enter display name'),
-  email: yup.string().email('You must enter a valid email').required('You must enter a email'),
   password: yup
     .string()
     .required('Please enter your password.')
@@ -31,15 +32,21 @@ const schema = yup.object().shape({
 });
 
 const defaultValues = {
-  displayName: '',
-  email: '',
+  token: '',
   password: '',
   passwordConfirm: '',
   acceptTermsConditions: false,
+  firstName: '',
+  lastName: '',
+  creatorName: '',
+  companyName: '',
 };
 
 function SignUpPage() {
-  const { control, formState, handleSubmit, reset } = useForm({
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { control, formState, handleSubmit, reset, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
     resolver: yupResolver(schema),
@@ -47,24 +54,54 @@ function SignUpPage() {
 
   const { isValid, dirtyFields, errors, setError } = formState;
 
-  function onSubmit({ displayName, password, email }) {
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setValue('token', params.get('token'));
+    setValue('password', '', { shouldDirty: true, shouldValidate: false });
+    setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: false });
+    // getUserDetails();
+  }, [setValue]);
+
+  const getUserDetails = () => {
     jwtService
-      .createUser({
-        displayName,
-        password,
-        email,
-      })
-      .then((user) => {
-        // No need to do anything, registered user data will be set at app/auth/AuthContext
-      })
-      .catch((_errors) => {
-        _errors.forEach((error) => {
-          setError(error.type, {
-            type: 'manual',
-            message: error.message,
-          });
-        });
-      });
+      .userDetails({ token: token })
+      .then((response) => {
+        if (response.status) {
+          setValue('firstName', response.data.firstName);
+          setValue('lastName', response.data.lastName);
+          setValue('creatorName', response.data.creatorName);
+          setValue('companyName', response.data.companyName);
+        } else {
+          dispatch(showMessage({ variant: 'error', message: response.message }));
+        }
+      }).catch((error) => {
+        dispatch(showMessage({ variant: 'error', message: error.message }));
+      }).finally(() => {
+        setValue('token', '', { shouldDirty: true, shouldValidate: false });
+      }
+      );
+  }
+  function onSubmit({ token, password, passwordConfirm, acceptTermsConditions }) {
+    if (token && password && passwordConfirm && acceptTermsConditions) {
+      jwtService
+        .updateUserData({
+          token, password,
+        })
+        .then((response) => {
+          // No need to do anything, registered user data will be set at app/auth/AuthContext
+          console.log(response);
+          if (response.status) {
+            dispatch(showMessage({ variant: 'success', message: response.message }));
+            navigate('/sign-in');
+          } else {
+            dispatch(showMessage({ variant: 'error', message: response.errors }));
+          }
+        })
+        .catch(() => { });
+    } else {
+      dispatch(showMessage({ variant: 'error', message: 'Please fill all fields' }));
+    }
   }
 
   return (
@@ -76,7 +113,13 @@ function SignUpPage() {
           <Typography className="mt-32 text-4xl font-extrabold tracking-tight leading-tight">
             Sign up
           </Typography>
-          <div className="flex items-baseline mt-2 font-medium">
+          <Typography className=" flex mt-10 text-3xl font-bold tracking-tight leading-tight">
+            You have been invited to join the team
+          </Typography>
+          <Typography className="mt-10 font-medium tracking-tight leading-tight">
+            Please set your password and log into your account
+          </Typography>
+          <div className="flex items-baseline mt-5 font-medium">
             <Typography>Already have an account?</Typography>
             <Link className="ml-4" to="/sign-in">
               Sign in
@@ -89,7 +132,7 @@ function SignUpPage() {
             className="flex flex-col justify-center w-full mt-32"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Controller
+            {/* <Controller
               name="displayName"
               control={control}
               render={({ field }) => (
@@ -124,7 +167,7 @@ function SignUpPage() {
                   fullWidth
                 />
               )}
-            />
+            /> */}
 
             <Controller
               name="password"
@@ -242,7 +285,7 @@ function SignUpPage() {
         <div className="z-10 relative w-full max-w-2xl">
           <div className="text-7xl font-bold leading-none text-gray-100">
             <div>Welcome to</div>
-            <div>our community</div>
+            <div>99 Ventures</div>
           </div>
           <div className="mt-24 text-lg tracking-tight leading-6 text-gray-400">
             Fuse helps developers to build organized and well coded dashboards full of beautiful and
