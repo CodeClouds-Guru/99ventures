@@ -19,6 +19,7 @@ const db = require('../../models/index')
 const bcrypt = require('bcryptjs')
 const { generateToken } = require('../../helpers/global')
 const permission = require('../../models/permission')
+const UserResources = require('../../resources/UserResources')
 
 class AuthController {
   constructor() {
@@ -169,11 +170,17 @@ class AuthController {
     })
 
     const companies = await user.getCompanies({ include: ['CompanyPortals'] })
-    let permissions = await this.getUserPermissions(user.id)
-    user.setDataValue('permissions', permissions)
+    // let permissions = await this.getUserPermissions(user.id)
+    // user.setDataValue('permissions', permissions)
+
+    /**************************************/
+    const userResourcesObj = new UserResources(user)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    /**************************************/
+
     res.status(200).json({
       status: true,
-      user: user,
+      user: userResourcesData,
       companies,
       access_token: token,
     })
@@ -185,56 +192,62 @@ class AuthController {
     var permissions = []
     let user = req.user
     const header_company_id = req.header('company_id') || 0
-    const company = await user.getCompanies({
-      include: ['CompanyPortals'],
-    })
-    const companies = await db.sequelize.query(
-      'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
-      {
-        replacements: [header_company_id, req.user.id],
-        type: QueryTypes.SELECT,
-      }
-    )
-    if (companies && companies.length > 0) {
-      const group = await Group.findOne({
-        where: {
-          id: companies[0].group_id,
-        },
-        include: [
-          {
-            model: Role,
-            through: {
-              attributes: ['group_id', 'role_id'],
-            },
-            include: [
-              {
-                model: Permission,
-                through: {
-                  attributes: ['role_id', 'permission_id'],
-                },
-              },
-            ],
-          },
-        ],
-      })
-      groups = [group]
-      group.Roles.forEach((r) => {
-        roles.push({
-          id: r.id,
-          name: r.name,
-          slug: r.slug,
-        })
-        r.Permissions.forEach((p) => {
-          permissions.push(p.slug)
-        })
-      })
-      permissions = [...new Set(permissions)]
-    }
-    user.setDataValue('permissions', permissions)
-    user.setDataValue('roles', roles)
-    user.setDataValue('groups', groups)
-    user.setDataValue('companies', company)
-    res.send({ status: true, user })
+    // const company = await user.getCompanies({
+    //   include: ['CompanyPortals'],
+    // })
+    // const companies = await db.sequelize.query(
+    //   'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
+    //   {
+    //     replacements: [header_company_id, req.user.id],
+    //     type: QueryTypes.SELECT,
+    //   }
+    // )
+    // if (companies && companies.length > 0) {
+    //   const group = await Group.findOne({
+    //     where: {
+    //       id: companies[0].group_id,
+    //     },
+    //     include: [
+    //       {
+    //         model: Role,
+    //         through: {
+    //           attributes: ['group_id', 'role_id'],
+    //         },
+    //         include: [
+    //           {
+    //             model: Permission,
+    //             through: {
+    //               attributes: ['role_id', 'permission_id'],
+    //             },
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   })
+    //   groups = [group]
+    //   group.Roles.forEach((r) => {
+    //     roles.push({
+    //       id: r.id,
+    //       name: r.name,
+    //       slug: r.slug,
+    //     })
+    //     r.Permissions.forEach((p) => {
+    //       permissions.push(p.slug)
+    //     })
+    //   })
+    //   permissions = [...new Set(permissions)]
+    // }
+    // user.setDataValue('permissions', permissions)
+    // user.setDataValue('roles', roles)
+    // user.setDataValue('groups', groups)
+    // user.setDataValue('companies', company)
+
+    /**************************************/
+    const userResourcesObj = new UserResources(user)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    /**************************************/
+
+    res.send({ status: true, user: userResourcesData })
   }
 
   async logout(req, res) {
@@ -243,18 +256,25 @@ class AuthController {
 
   async refreshToken(req, res) {
     const user = req.user
-    const companies = await user.getCompanies({ include: ['CompanyPortals'] })
+    // const companies = await user.getCompanies({ include: ['CompanyPortals'] })
+
     const token = generateToken({
       user: {
         id: user.id,
       },
     })
-    let permissions = await this.getUserPermissions(user.id)
-    user.setDataValue('permissions', permissions)
+    // let permissions = await this.getUserPermissions(user.id)
+    // user.setDataValue('permissions', permissions)
+
+    /**************************************/
+    const userResourcesObj = new UserResources(user)
+    const userResourcesData = await userResourcesObj.getUserFormattedData();
+    /**************************************/
+
     res.status(200).json({
       status: true,
       access_token: token,
-      user,
+      user: userResourcesData,
       companies,
     })
   }

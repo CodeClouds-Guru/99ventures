@@ -17,11 +17,11 @@ module.exports = (sequelize, DataTypes) => {
   }
   CompanyPortal.validate = function (req) {
     const schema = Joi.object({
-                        name: Joi.string().required(),
-                        company_id: Joi.required(),
-                        domain: Joi.string(),
-                        downtime_message: Joi.string(),
-                        status: Joi.number()
+      name: Joi.string().required(),
+      company_id: Joi.required(),
+      domain: Joi.string(),
+      downtime_message: Joi.string(),
+      status: Joi.number()
 
     });
     return schema.validate(req.body);
