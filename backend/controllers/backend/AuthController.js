@@ -101,6 +101,7 @@ class AuthController {
           }
         )
         new_user = await User.findOne({ where: { id: hash_obj.id } })
+
         //update invitation accepted time
         let update_invitation = await Invitation.update(
           { accepted_on: new Date() },
@@ -256,7 +257,7 @@ class AuthController {
 
   async refreshToken(req, res) {
     const user = req.user
-    // const companies = await user.getCompanies({ include: ['CompanyPortals'] })
+    const companies = await user.getCompanies({ include: ['CompanyPortals'] })
 
     const token = generateToken({
       user: {
