@@ -118,16 +118,18 @@ class InvitationController extends Controller {
         status: false,
         errors: error_msg.join(','),
       })
+      return
     }
     //check invitation expiry time
     var hash_obj = Buffer.from(value.token, 'base64')
     hash_obj = hash_obj.toString('utf8')
     hash_obj = JSON.parse(hash_obj)
     if (new Date(hash_obj.expired_at) < new Date()) {
-        return res.status(400).json({
+        res.status(400).json({
         status: false,
         errors: 'This link has been expired',
         })
+        return
     }
     //get user details
     var user = await User.findOne({ where: { id: hash_obj.id } })
