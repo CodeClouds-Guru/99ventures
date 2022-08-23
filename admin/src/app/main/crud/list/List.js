@@ -77,6 +77,7 @@ function List(props) {
     }
 
     axios.get(`/${module}`, { params }).then(res => {
+      setFields(res.data.results.fields);
       setModules(res.data.results.result.data);
       setTotalRecords(res.data.results.result.total)
       setLoading(false);
@@ -96,9 +97,6 @@ function List(props) {
 
   useEffect(() => {
     resetModulesListConfig();
-    axios.get(`/${module}/add`).then(res => {
-      setFields(res.data.results.fields);
-    })
   }, [module]);
 
   useEffect(() => {
