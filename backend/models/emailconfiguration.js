@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const Joi = require('joi')
+
 module.exports = (sequelize, DataTypes) => {
   class EmailConfiguration extends Model {
     /**
@@ -12,6 +14,21 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
+  }
+  EmailConfiguration.validate = function (req) {
+    const schema = Joi.object({
+      from_name: Joi.string().required().label('From Name'),
+      from_email: Joi.string().required().label('From Email'),
+      email_username: Joi.string().required().label('Email Username'),
+      email_server_host: Joi.string().required().label('Server Host'),
+      email_server_port: Joi.string().required().label('Server Port'),
+      ssl_required: Joi.string().required().label('SSL'),
+      site_name_visible: Joi.string().required().label('Site Name Visible'),
+      site_name_text: Joi.string().required().label('Site Name'),
+      password: Joi.string().required().label('Password'),
+      
+    })
+    return schema.validate(req.body)
   }
   EmailConfiguration.init({
     from_name: DataTypes.STRING,

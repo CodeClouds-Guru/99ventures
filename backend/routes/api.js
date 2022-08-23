@@ -5,6 +5,7 @@ const checkPermissionMiddleware = require('../middlewares/CheckPermissionMiddlew
 const AuthControllerClass = require('../controllers/backend/AuthController')
 const AuthController = new AuthControllerClass()
 const InvitationController = require('../controllers/backend/InvitationController')
+const EmailConfigurationController = require('../controllers/backend/EmailConfigurationController')
 // const InvitationController = new InvitationControllerClass()
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController')
 router.get('/', (req, res) => {
@@ -32,6 +33,16 @@ router.get(
 router.post(
   '/invitation-details',
   InvitationController.invitationDetails
+)
+router.get(
+  '/email-configuration',
+  [AuthMiddleware],
+  EmailConfigurationController.emailConfiguration
+)
+router.post(
+  '/save-email-configuration',
+  [AuthMiddleware],
+  EmailConfigurationController.updateEmailConfiguration
 )
 router.all(
   '/:module/:action?/:id?',
