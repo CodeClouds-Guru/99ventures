@@ -29,6 +29,10 @@ router.get(
   [AuthMiddleware],
   InvitationController.resendInvitation
 )
+router.post(
+  '/invitation-details',
+  InvitationController.invitationDetails
+)
 router.all(
   '/:module/:action?/:id?',
   [AuthMiddleware, checkPermissionMiddleware],

@@ -70,6 +70,8 @@ class UserController extends Controller {
   }
   //override store function
   async save(req,res){
+    const salt = await bcrypt.genSalt(10)
+    req.body.password = await bcrypt.hash(req.body.password, salt)
     let response = await super.save(req)
     let new_user = response.result
     //get company id
@@ -100,7 +102,7 @@ class UserController extends Controller {
       expired_at: expired_at,
       created_by: user.id
   })
-  let token = { id: new_user.id, email: new_user.email,invitation_id: new_invitation.id,expired_at:expired_at}
+  let token = { id: new_user.id, email: new_user.email,invitation_id: new_invitation.id,expired_at:expired_at,company_id:company_id}
   token = JSON.stringify(token)
   let base64data = Buffer.from(token, 'utf8')
   token = base64data.toString('base64')

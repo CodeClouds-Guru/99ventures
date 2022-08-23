@@ -1,8 +1,7 @@
 const Controller = require('./Controller')
-const { User } = require('../../models/index')
-const { Invitation } = require('../../models/index')
-const { CompanyUser } = require('../../models/index')
+const { User, Invitation, CompanyUser, Company} = require('../../models/index')
 const Joi = require('joi')
+const { concat } = require('lodash')
 
 class InvitationController extends Controller {
   constructor() {
@@ -106,6 +105,43 @@ class InvitationController extends Controller {
         email: invitation.email,
         message:'Invitation sent'
     })
+  }
+  //invitation details
+  async invitationDetails(req,res){
+    const schema = Joi.object({
+        token: Joi.string().required(),
+    })
+    const { error, value } = schema.validate(req.body)
+    if (error) {
+      let error_msg = error.details.map((err) => err.message)
+      res.status(401).json({
+        status: false,
+        errors: error_msg.join(','),
+      })
+    }
+    //check invitation expiry time
+    var hash_obj = Buffer.from(value.token, 'base64')
+    hash_obj = hash_obj.toString('utf8')
+    hash_obj = JSON.parse(hash_obj)
+    if (new Date(hash_obj.expired_at) < new Date()) {
+        return res.status(400).json({
+        status: false,
+        errors: 'This link has been expired',
+        })
+    }
+    //get user details
+    var user = await User.findOne({ where: { id: hash_obj.id } })
+    var creator_name = await User.findOne({ attributes:['first_name','last_name'], where: { id: user.created_by } })
+    var company_name = await Company.findOne({ attributes:['name'], where: { id: hash_obj.company_id } })
+    creator_name = creator_name.first_name.concat(' ').concat(creator_name.last_name);
+    user.setDataValue('company_id',hash_obj.company_id)
+    user.setDataValue('company_name',company_name.name)
+    user.setDataValue('creator_name',creator_name)
+    res.status(200).json({
+        status: true,
+        message: "You have been invited to ".concat(company_name.name).concat(" by ").concat(creator_name),
+        user: user,
+      })
   }
 }
 
