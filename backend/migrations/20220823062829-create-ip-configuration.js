@@ -1,15 +1,21 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('site_layouts', {
+    await queryInterface.createTable('ip_configurations', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      html: {
-        type: Sequelize.TEXT
+      company_portal_id: {
+        type: Sequelize.BIGINT
+      },
+      ip: {
+        type: Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.STRING
       },
       created_by: {
         type: Sequelize.BIGINT
@@ -33,6 +39,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('site_layouts');
+    await queryInterface.dropTable('ip_configurations');
   }
 };

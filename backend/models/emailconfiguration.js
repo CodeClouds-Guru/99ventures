@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class SiteLayout extends Model {
+  class EmailConfiguration extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,8 +13,17 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  SiteLayout.init({
-    html: DataTypes.TEXT,
+  EmailConfiguration.init({
+    from_name: DataTypes.STRING,
+    from_email: DataTypes.STRING,
+    email_username: DataTypes.STRING,
+    email_server_host: DataTypes.STRING,
+    email_server_port: DataTypes.STRING,
+    ssl_required: DataTypes.INTEGER,
+    site_name_visible: DataTypes.INTEGER,
+    site_name_text: DataTypes.STRING,
+    password: DataTypes.STRING,
+    company_portal_id: DataTypes.BIGINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -23,13 +32,13 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'SiteLayout',
+    modelName: 'EmailConfiguration',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'site_layouts',
+    tableName: 'email_configurations',
   });
-  return SiteLayout;
+  return EmailConfiguration;
 };

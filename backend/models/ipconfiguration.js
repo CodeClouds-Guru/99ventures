@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class SiteLayout extends Model {
+  class IpConfiguration extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,8 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  SiteLayout.init({
-    html: DataTypes.TEXT,
+  IpConfiguration.init({
+    company_portal_id: DataTypes.BIGINT,
+    ip: DataTypes.STRING,
+    status: DataTypes.STRING,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -23,13 +25,13 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'SiteLayout',
+    modelName: 'IpConfiguration',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'site_layouts',
+    tableName: 'ip_configurations',
   });
-  return SiteLayout;
+  return IpConfiguration;
 };

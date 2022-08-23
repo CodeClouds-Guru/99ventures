@@ -1,15 +1,15 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('site_layouts', {
+    await queryInterface.createTable('captcha_options', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      html: {
-        type: Sequelize.TEXT
+      name: {
+        type: Sequelize.STRING
       },
       created_by: {
         type: Sequelize.BIGINT
@@ -33,6 +33,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('site_layouts');
+    await queryInterface.dropTable('captcha_options');
   }
 };

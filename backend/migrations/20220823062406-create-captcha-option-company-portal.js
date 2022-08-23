@@ -1,15 +1,18 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('site_layouts', {
+    await queryInterface.createTable('captcha_option_company_portal', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      html: {
-        type: Sequelize.TEXT
+      company_portal_id: {
+        type: Sequelize.BIGINT
+      },
+      captcha_option_id: {
+        type: Sequelize.BIGINT
       },
       created_by: {
         type: Sequelize.BIGINT
@@ -33,6 +36,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('site_layouts');
+    await queryInterface.dropTable('captcha_option_company_portal');
   }
 };
