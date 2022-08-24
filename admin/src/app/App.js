@@ -20,7 +20,7 @@ import axios from 'axios';
 /**
  * Axios HTTP Request defaults
  */
-axios.defaults.baseURL = process.env.NODE_ENV === "production" ? "http://localhost/api/" : 'http://localhost:4000/api/';
+axios.defaults.baseURL = process.env.NODE_ENV === "production" ? "http://datas-loadb-1ocy1azn19w01-0bdf61bed23a4561.elb.us-east-2.amazonaws.com/api/" : 'http://localhost:4000/api/';
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
