@@ -70,7 +70,7 @@ function SignUpPage() {
           dispatch(showMessage({ variant: 'error', message: response.data.message }));
         }
       }).catch((error) => {
-        dispatch(showMessage({ variant: 'error', message: error.message }));
+        dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
       })
   }
 
@@ -89,7 +89,9 @@ function SignUpPage() {
             dispatch(showMessage({ variant: 'error', message: response.data.errors }));
           }
         })
-        .catch(() => { });
+        .catch((error) => {
+          dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+        });
     } else {
       dispatch(showMessage({ variant: 'error', message: 'Please fill all fields' }));
     }
