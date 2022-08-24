@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      CompanyPortal.belongsToMany(models.CaptchaOption, {
+        through: 'captcha_option_company_portal',
+        timestamps: false,
+        foreignKey: 'company_portal_id',
+        otherKey: 'captcha_option_id',
+      })
     }
   }
   CompanyPortal.validate = function (req) {

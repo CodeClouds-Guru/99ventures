@@ -4,6 +4,8 @@ const AuthMiddleware = require('../middlewares/authMiddleware')
 const checkPermissionMiddleware = require('../middlewares/CheckPermissionMiddleware')
 const AuthControllerClass = require('../controllers/backend/AuthController')
 const AuthController = new AuthControllerClass()
+const GeneralControllerClass = require('../controllers/backend/GeneralController')
+const GeneralController = new GeneralControllerClass()
 const InvitationController = require('../controllers/backend/InvitationController')
 const EmailConfigurationController = require('../controllers/backend/EmailConfigurationController')
 // const InvitationController = new InvitationControllerClass()
@@ -35,14 +37,13 @@ router.post(
   InvitationController.invitationDetails
 )
 router.get(
-  '/email-configuration',
+  '/get-general-tab-data/',
   [AuthMiddleware],
-  EmailConfigurationController.emailConfiguration
+  GeneralController.getGeneralTabData
 )
 router.post(
-  '/save-email-configuration',
-  [AuthMiddleware],
-  EmailConfigurationController.updateEmailConfiguration
+  '/save-general-tab-data',
+  GeneralController.saveGeneralTabData
 )
 router.all(
   '/:module/:action?/:id?',

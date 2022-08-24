@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class CaptchaOption extends Model {
+  class AutoResponder extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,16 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      CaptchaOption.belongsToMany(models.CompanyPortal, {
-        through: 'captcha_option_company_portal',
-        timestamps: false,
-        foreignKey: 'captcha_option_id',
-        otherKey: 'company_portal_id',
-      })
     }
   }
-  CaptchaOption.init({
+  AutoResponder.init({
     name: DataTypes.STRING,
+    body: DataTypes.TEXT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -29,13 +24,13 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'CaptchaOption',
+    modelName: 'AutoResponder',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'captcha_options',
+    tableName: 'auto_responders',
   });
-  return CaptchaOption;
+  return AutoResponder;
 };

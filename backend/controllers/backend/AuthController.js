@@ -31,29 +31,18 @@ class AuthController {
   }
 
   async signup(req, res) {
-    let schema = {};
-    if (req.body.invitation == 1) {
-      //validation schema for invitation
-      schema = Joi.object({
-        invitation: Joi.number(),
-        password: Joi.string()
-          .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-          .required(),
-        token: Joi.string().required(),
-      })
-    } else {
-      //validation schema for signup
-      schema = Joi.object({
-        first_name: Joi.string().required(),
-        last_name: Joi.string().required(),
-        username: Joi.string().alphanum().min(3).max(30).required(),
-        password: Joi.string()
-          .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-          .required(),
-        phone_no: Joi.string().required(),
-        email: Joi.string().email().required()
-      })
-    }
+    const schema = Joi.object({
+      first_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      username: Joi.string().alphanum().min(3).max(30).required(),
+      password: Joi.string()
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+        .required(),
+      phone_no: Joi.string().required(),
+      email: Joi.string().email().required(),
+      invitation: Joi.number(),
+      token: Joi.string(),
+    })
     const { error, value } = schema.validate(req.body)
     if (error) {
       let error_msg = error.details.map((err) => err.message)
@@ -61,46 +50,48 @@ class AuthController {
         status: false,
         errors: error_msg.join(','),
       })
-      return
     }
 
     try {
-      if (value.invitation != 1) {
-        let existing_user = await User.findAll({
-          limit: 1,
-          where: {
-            email: value.email,
-          },
-        })
+      let existing_user = await User.findAll({
+        limit: 1,
+        where: {
+          email: value.email,
+        },
+      })
 
-        if (
-          (existing_user.length > 0)
-        ) {
+      if (
+        (existing_user.length > 0 && value.invitation == '') ||
+        (value.invitation == 1 &&
+          existing_user.length > 0 &&
+          existing_user[0].status == '1')
+      ) {
+        return res.status(400).json({
+          status: false,
+          errors: 'User Already Exists',
+        })
+      }
+      let hash_obj = ''
+      if (value.invitation == '1') {
+        hash_obj = Buffer.from(value.token, 'base64')
+        hash_obj = hash_obj.toString('utf8')
+        hash_obj = JSON.parse(hash_obj)
+        if (new Date(hash_obj.expired_at) < new Date()) {
           return res.status(400).json({
             status: false,
-            errors: 'User Already Exists',
+            errors: 'This link has been expired',
           })
         }
       }
       const salt = await bcrypt.genSalt(10)
       const password = await bcrypt.hash(value.password, salt)
       let new_user = []
-      let hash_obj = ''
       if (value.invitation == '1') {
-        //user from invitation
-        hash_obj = Buffer.from(value.token, 'base64')
-        hash_obj = hash_obj.toString('utf8')
-        hash_obj = JSON.parse(hash_obj)
-        if (new Date(hash_obj.expired_at) < new Date()) {
-          res.status(400).json({
-            status: false,
-            errors: 'This link has been expired',
-          })
-          return
-        }
-        //update user details
         let update_user = await User.update(
           {
+            first_name: value.first_name,
+            last_name: value.last_name,
+            username: value.username,
             password: password,
             phone_no: value.phone_no,
             status: 1,
@@ -129,7 +120,6 @@ class AuthController {
       })
       res.status(200).json({
         status: true,
-        message: "Your account activated.",
         user: new_user,
         access_token: token,
       })
@@ -181,13 +171,9 @@ class AuthController {
     })
 
     const companies = await user.getCompanies({ include: ['CompanyPortals'] })
-    // let permissions = await this.getUserPermissions(user.id)
-    // user.setDataValue('permissions', permissions)
-
-    /**************************************/
+    
     const userResourcesObj = new UserResources(user)
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-    /**************************************/
 
     res.status(200).json({
       status: true,
@@ -203,61 +189,10 @@ class AuthController {
     var permissions = []
     let user = req.user
     const header_company_id = req.header('company_id') || 0
-    // const company = await user.getCompanies({
-    //   include: ['CompanyPortals'],
-    // })
-    // const companies = await db.sequelize.query(
-    //   'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
-    //   {
-    //     replacements: [header_company_id, req.user.id],
-    //     type: QueryTypes.SELECT,
-    //   }
-    // )
-    // if (companies && companies.length > 0) {
-    //   const group = await Group.findOne({
-    //     where: {
-    //       id: companies[0].group_id,
-    //     },
-    //     include: [
-    //       {
-    //         model: Role,
-    //         through: {
-    //           attributes: ['group_id', 'role_id'],
-    //         },
-    //         include: [
-    //           {
-    //             model: Permission,
-    //             through: {
-    //               attributes: ['role_id', 'permission_id'],
-    //             },
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   })
-    //   groups = [group]
-    //   group.Roles.forEach((r) => {
-    //     roles.push({
-    //       id: r.id,
-    //       name: r.name,
-    //       slug: r.slug,
-    //     })
-    //     r.Permissions.forEach((p) => {
-    //       permissions.push(p.slug)
-    //     })
-    //   })
-    //   permissions = [...new Set(permissions)]
-    // }
-    // user.setDataValue('permissions', permissions)
-    // user.setDataValue('roles', roles)
-    // user.setDataValue('groups', groups)
-    // user.setDataValue('companies', company)
 
-    /**************************************/
-    const userResourcesObj = new UserResources(user, header_company_id)
+    const userResourcesObj = new UserResources(user,header_company_id)
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-    /**************************************/
-
+    
     res.send({ status: true, user: userResourcesData })
   }
 
@@ -274,13 +209,9 @@ class AuthController {
         id: user.id,
       },
     })
-    // let permissions = await this.getUserPermissions(user.id)
-    // user.setDataValue('permissions', permissions)
-
-    /**************************************/
+    
     const userResourcesObj = new UserResources(user)
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-    /**************************************/
 
     res.status(200).json({
       status: true,
