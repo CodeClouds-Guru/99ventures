@@ -23,12 +23,13 @@ module.exports = class UserResources {
         var permissions = []
         var company = []
         var companies = []
+        var roles = []
         let user = this.user
 
         company = await user.getCompanies({ include: ['CompanyPortals'], })
 
         if (this.company_id !== 0) {
-            var roles = [{ 'id': 1, 'name': 'Admin', 'slug': 'admin' }]
+            // var roles = [{ 'id': 1, 'name': 'Admin', 'slug': 'admin' }]
             companies = await db.sequelize.query(
                 'SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1',
                 {
