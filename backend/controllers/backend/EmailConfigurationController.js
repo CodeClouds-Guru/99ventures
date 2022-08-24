@@ -6,7 +6,7 @@ class EmailConfigurationController extends Controller {
     super('EmailConfiguration')
   }
   //get email configuration details
-  async emailConfiguration(req,res){
+  async view(req,res){
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
     let email_details = await EmailConfiguration.findOne({where:{company_portal_id:site_id}})
@@ -16,7 +16,7 @@ class EmailConfigurationController extends Controller {
     })
   }
   //update email configuration 
-  async updateEmailConfiguration(req,res){
+  async save(req,res){
     let company_portal_id = req.headers.site_id;
     const { error, value } = EmailConfiguration.validate(req);
     if (error) {

@@ -37,6 +37,11 @@ router.post(
   InvitationController.invitationDetails
 )
 router.get(
+  '/emailconfigurations/view',
+  [AuthMiddleware],
+  EmailConfigurationController.view
+)
+router.get(
   '/get-general-tab-data/',
   [AuthMiddleware],
   GeneralController.getGeneralTabData
