@@ -10,6 +10,7 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
+// const { Invitation } = require('../models/index')
 // const axios = require('axios')
 
 exports.asset = (part_url = '') => {
@@ -74,6 +75,31 @@ exports.stringToSlug = (str) => {
 
   return str
 }
+//invitation helper
+var sendInvitation = async function(new_user,req) {
+  const { Invitation } = require('../models/index')
 
+  let user = req.user
+  let company_id = req.headers.company_id
+  var expired_at = new Date();
+  // add a day
+  expired_at.setDate(expired_at.getDate() + 1);
+  //save invitation
+  console.log('Invitation',Invitation)
+  let new_invitation = await Invitation.create({
+      user_id: new_user.id,
+      email: new_user.email,
+      expired_at: expired_at,
+      created_by: user.id
+  })
+  let token = { id: new_user.id, email: new_user.email,invitation_id: new_invitation.id,expired_at:expired_at,company_id:company_id}
+  token = JSON.stringify(token)
+  let base64data = Buffer.from(token, 'utf8')
+  token = base64data.toString('base64')
+  //update token
+  await Invitation.update({token:token},{where:{id:new_invitation.id}})
+  return token;
+}
+exports.sendInvitation = sendInvitation;
 exports.cartesian = (...a) =>
   a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())))

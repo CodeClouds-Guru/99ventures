@@ -4,9 +4,11 @@ const { CompanyUser,Invitation,Company } = require('../../models/index')
 const AuthControllerClass = require('../backend/AuthController')
 const AuthController = new AuthControllerClass()
 const bcrypt = require('bcryptjs')
+const { sendInvitation } = require('../../helpers/global')
 class UserController extends Controller {
   constructor() {
     super('User')
+    this.save = this.save.bind(this)
   }
   //override list function
   async list(req,res){
@@ -75,7 +77,7 @@ class UserController extends Controller {
     let response = await super.save(req)
     let new_user = response.result
     //get company id
-    let company_id = req.headers.company_id ?? 1;
+    let company_id = req.headers.company_id;
     let user = req.user
   //update user group
   if (typeof req.body.groups !== 'undefined') {
@@ -92,23 +94,7 @@ class UserController extends Controller {
       await CompanyUser.bulkCreate(all_groups);
     }
   }
-  var expired_at = new Date();
-  // add a day
-  expired_at.setDate(expired_at.getDate() + 1);
-  //save invitation
-  let new_invitation = await Invitation.create({
-      user_id: new_user.id,
-      email: new_user.email,
-      expired_at: expired_at,
-      created_by: user.id
-  })
-  let token = { id: new_user.id, email: new_user.email,invitation_id: new_invitation.id,expired_at:expired_at,company_id:company_id}
-  token = JSON.stringify(token)
-  let base64data = Buffer.from(token, 'utf8')
-  token = base64data.toString('base64')
-  //update token
-  let update_token = await Invitation.update({token:token},{where:{id:new_invitation.id}})
-
+  let token = await sendInvitation(new_user,req)
     return {
       message: response.message,
       result: response.result,
