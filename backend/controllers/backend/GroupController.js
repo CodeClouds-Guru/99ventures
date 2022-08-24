@@ -67,4 +67,4 @@ class GroupController extends Controller {
   }
 }
 
-module.exports = new GroupController()
+module.exports = GroupController

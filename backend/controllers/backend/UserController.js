@@ -6,7 +6,7 @@ const AuthController = new AuthControllerClass()
 const bcrypt = require('bcryptjs')
 const { sendInvitation } = require('../../helpers/global')
 const InvitationHelper = require('../../helpers/InvitationHelper')
-const {Op} = require('sequelize')
+const { Op } = require('sequelize')
 
 class UserController extends Controller {
   constructor() {
@@ -74,9 +74,11 @@ class UserController extends Controller {
     const salt = await bcrypt.genSalt(10)
     req.body.password = await bcrypt.hash(req.body.password, salt)
     //unique email checking
-    let check_email = await this.model.findOne({where:{email:req.body.email}})
-    if(check_email){
-      this.throwCustomError("Email already exist.",409);
+    let check_email = await this.model.findOne({
+      where: { email: req.body.email },
+    })
+    if (check_email) {
+      this.throwCustomError('Email already exist.', 409)
     }
     let response = await super.save(req)
     let new_user = response.result
@@ -156,9 +158,11 @@ class UserController extends Controller {
       this.throwCustomError('Company id is required', 401)
     }
     try {
-      let check_email = await this.model.findOne({where:{email:req.body.email,id: {[Op.ne]: id }}})
-      if(check_email){
-        this.throwCustomError("Email already exist.",409);
+      let check_email = await this.model.findOne({
+        where: { email: req.body.email, id: { [Op.ne]: id } },
+      })
+      if (check_email) {
+        this.throwCustomError('Email already exist.', 409)
       }
       request_data.updated_by = req.user.id
       /****
@@ -209,4 +213,4 @@ class UserController extends Controller {
   }
 }
 
-module.exports = new UserController()
+module.exports = UserController
