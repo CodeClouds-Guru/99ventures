@@ -8,6 +8,14 @@ const navigationConfig = [
     url: 'dashboard',
   },
   {
+    id: 'configuration',
+    title: 'Configuration',
+    translate: 'Configuration',
+    type: 'item',
+    icon: 'heroicons-outline:cog',
+    url: 'configuration',
+  },
+  {
     id: 'users',
     title: 'Users',
     translate: 'Users',

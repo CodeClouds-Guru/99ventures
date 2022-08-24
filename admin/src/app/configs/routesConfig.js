@@ -12,7 +12,9 @@ import Error404Page from '../main/404/Error404Page';
 import DashboardConfig from '../main/dashboard/DashboardConfig';
 import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig];
+import ConfigurationConfig from '../main/configuration/ConfigurationConfig';
+
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set

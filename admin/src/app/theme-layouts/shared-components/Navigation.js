@@ -14,7 +14,7 @@ function Navigation(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    navigation.filter(n => !['dashboard'].includes(n.id))
+    navigation.filter(n => !['dashboard', 'configuration'].includes(n.id))
       .map(nav => {
         let permissions = [
           `all-${nav.id}-navigation`,
