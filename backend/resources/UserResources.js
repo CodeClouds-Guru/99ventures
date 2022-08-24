@@ -23,6 +23,7 @@ module.exports = class UserResources {
         var permissions = []
         var company = []
         var companies = []
+        var roles = []
         let user = this.user
 
         company = await user.getCompanies({ include: ['CompanyPortals'], })
