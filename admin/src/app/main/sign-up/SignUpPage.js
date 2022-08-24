@@ -15,9 +15,10 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import FormHelperText from '@mui/material/FormHelperText';
 import jwtService from '../../auth/services/jwtService';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 /**
  * Form Validation Schema
@@ -32,70 +33,60 @@ const schema = yup.object().shape({
 });
 
 const defaultValues = {
-  token: '',
   password: '',
   passwordConfirm: '',
   acceptTermsConditions: false,
-  firstName: '',
-  lastName: '',
-  creatorName: '',
-  companyName: '',
 };
 
 function SignUpPage() {
+  const params = new URLSearchParams(window.location.search);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { control, formState, handleSubmit, reset, setValue } = useForm({
+  defaultValues.token = params.get('token');
+  const [creatorName, setCreatorName] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const { control, formState, handleSubmit, setError, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
     resolver: yupResolver(schema),
   });
 
-  const { isValid, dirtyFields, errors, setError } = formState;
-
+  const { isValid, dirtyFields, errors } = formState;
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setValue('token', params.get('token'));
     setValue('password', '', { shouldDirty: true, shouldValidate: false });
     setValue('passwordConfirm', '', { shouldDirty: true, shouldValidate: false });
-    // getUserDetails();
+    getInvitationDetails();
   }, [setValue]);
 
-  const getUserDetails = () => {
+  const getInvitationDetails = () => {
     jwtService
-      .userDetails({ token: token })
+      .invitationDetails({ token: defaultValues.token })
       .then((response) => {
-        if (response.status) {
-          setValue('firstName', response.data.firstName);
-          setValue('lastName', response.data.lastName);
-          setValue('creatorName', response.data.creatorName);
-          setValue('companyName', response.data.companyName);
+        if (response.data.status) {
+          setCreatorName(response.data.user.creator_name);
+          setCompanyName(response.data.user.company_name);
         } else {
-          dispatch(showMessage({ variant: 'error', message: response.message }));
+          dispatch(showMessage({ variant: 'error', message: response.data.message }));
         }
       }).catch((error) => {
         dispatch(showMessage({ variant: 'error', message: error.message }));
-      }).finally(() => {
-        setValue('token', '', { shouldDirty: true, shouldValidate: false });
-      }
-      );
+      })
   }
-  function onSubmit({ token, password, passwordConfirm, acceptTermsConditions }) {
+
+  const onSubmit = ({ token, password, passwordConfirm, acceptTermsConditions }) => {
     if (token && password && passwordConfirm && acceptTermsConditions) {
       jwtService
-        .updateUserData({
-          token, password,
+        .activateUserAccount({
+          token, password, invitation: 1
         })
         .then((response) => {
           // No need to do anything, registered user data will be set at app/auth/AuthContext
-          console.log(response);
           if (response.status) {
-            dispatch(showMessage({ variant: 'success', message: response.message }));
+            dispatch(showMessage({ variant: 'success', message: response.data.message }));
             navigate('/sign-in');
           } else {
-            dispatch(showMessage({ variant: 'error', message: response.errors }));
+            dispatch(showMessage({ variant: 'error', message: response.data.errors }));
           }
         })
         .catch(() => { });
@@ -114,7 +105,7 @@ function SignUpPage() {
             Sign up
           </Typography>
           <Typography className=" flex mt-10 text-3xl font-bold tracking-tight leading-tight">
-            You have been invited to join the team
+            You have been invited to 99 Ventures by {creatorName} of {companyName}
           </Typography>
           <Typography className="mt-10 font-medium tracking-tight leading-tight">
             Please set your password and log into your account
@@ -125,50 +116,12 @@ function SignUpPage() {
               Sign in
             </Link>
           </div>
-
           <form
             name="registerForm"
             noValidate
             className="flex flex-col justify-center w-full mt-32"
             onSubmit={handleSubmit(onSubmit)}
           >
-            {/* <Controller
-              name="displayName"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  className="mb-24"
-                  label="Display name"
-                  autoFocus
-                  type="name"
-                  error={!!errors.displayName}
-                  helperText={errors?.displayName?.message}
-                  variant="outlined"
-                  required
-                  fullWidth
-                />
-              )}
-            />
-
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  className="mb-24"
-                  label="Email"
-                  type="email"
-                  error={!!errors.email}
-                  helperText={errors?.email?.message}
-                  variant="outlined"
-                  required
-                  fullWidth
-                />
-              )}
-            /> */}
-
             <Controller
               name="password"
               control={control}
@@ -228,7 +181,7 @@ function SignUpPage() {
               type="submit"
               size="large"
             >
-              Create your free account
+              Activate your account
             </Button>
           </form>
         </div>

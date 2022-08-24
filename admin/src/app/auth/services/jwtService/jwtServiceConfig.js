@@ -1,9 +1,9 @@
 const jwtServiceConfig = {
   signIn: 'login',
-  signUp: 'sign-up',
+  signUp: 'signup',
   accessToken: 'refresh-token',
   updateUser: 'user/update',
-  userDetails: 'user/details',
+  invitationDetails: 'invitation-details',
   forgotPassword: 'forgot-password',
   resetPassword: 'reset-password',
   logout: 'logout',

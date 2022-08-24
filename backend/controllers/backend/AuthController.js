@@ -31,8 +31,8 @@ class AuthController {
   }
 
   async signup(req, res) {
-    let schema ={};
-    if(req.body.invitation == 1){
+    let schema = {};
+    if (req.body.invitation == 1) {
       //validation schema for invitation
       schema = Joi.object({
         invitation: Joi.number(),
@@ -41,7 +41,7 @@ class AuthController {
           .required(),
         token: Joi.string().required(),
       })
-    }else{
+    } else {
       //validation schema for signup
       schema = Joi.object({
         first_name: Joi.string().required(),
@@ -65,7 +65,7 @@ class AuthController {
     }
 
     try {
-      if(value.invitation != 1){
+      if (value.invitation != 1) {
         let existing_user = await User.findAll({
           limit: 1,
           where: {
@@ -116,7 +116,7 @@ class AuthController {
           { accepted_on: new Date() },
           { where: { id: hash_obj.invitation_id } }
         )
-      }else {
+      } else {
         new_user = await User.create({
           ...value,
           password,
@@ -253,7 +253,7 @@ class AuthController {
     // user.setDataValue('companies', company)
 
     /**************************************/
-    const userResourcesObj = new UserResources(user)
+    const userResourcesObj = new UserResources(user, header_company_id)
     const userResourcesData = await userResourcesObj.getUserFormattedData();
     /**************************************/
 
