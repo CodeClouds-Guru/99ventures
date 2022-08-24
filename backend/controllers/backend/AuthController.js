@@ -129,6 +129,7 @@ class AuthController {
       })
       res.status(200).json({
         status: true,
+        message: "Your account activated.",
         user: new_user,
         access_token: token,
       })
