@@ -5,4 +5,4 @@ class CompanyPortalController extends Controller {
   }
 }
 
-module.exports = new CompanyPortalController()
+module.exports = CompanyPortalController

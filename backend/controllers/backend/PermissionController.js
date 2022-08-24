@@ -1,8 +1,8 @@
-const Controller = require("./Controller");
+const Controller = require('./Controller')
 class PermissionController extends Controller {
   constructor() {
-    super('Permission');
+    super('Permission')
   }
 }
 
-module.exports = new PermissionController();
+module.exports = PermissionController
