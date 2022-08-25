@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       email_server_port: Joi.string().required().label('Server Port'),
       ssl_required: Joi.string().required().label('SSL'),
       site_name_visible: Joi.string().required().label('Site Name Visible'),
-      site_name_text: Joi.string().required().label('Site Name'),
-      password: Joi.string().required().label('Password'),
+      site_name_text: Joi.string().required().label('Site Name').optional(),
+      password: Joi.string().required().label('Password').optional(),
       company_portal_id: Joi.required(),
     })
     return schema.validate(req.body)
