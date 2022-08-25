@@ -8,7 +8,13 @@ class DynamicRouteController {
       var module = req.params.module
       var action = req.params.action || 'list'
       let moduleInSingular = pluralize.singular(module)
-      moduleInSingular = capitalizeFirstLetter(moduleInSingular)
+      let moduleSplits = moduleInSingular.split('-')
+      moduleInSingular = ''
+      moduleInSingular = moduleSplits.map((moduleSplit) => {
+        return moduleInSingular.concat(capitalizeFirstLetter(moduleSplit))
+      })
+      moduleInSingular = moduleInSingular.join('')
+      // moduleInSingular = capitalizeFirstLetter(moduleInSingular)
       var normalizedPath = require('path').join(__dirname, '')
       const controllers = {}
       require('fs')

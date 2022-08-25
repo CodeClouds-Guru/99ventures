@@ -93,6 +93,7 @@ module.exports = async function (req, res, next) {
   permissions = [...new Set(permissions)]
   req.user.roles = roles
   req.user.permissions = permissions
+  module = module.replace('-', '').trim()
   if (checkPermission(permissions, module, action)) {
     next()
   } else {
