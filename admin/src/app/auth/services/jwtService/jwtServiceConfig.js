@@ -9,6 +9,8 @@ const jwtServiceConfig = {
   logout: 'logout',
   companies: 'companies',
   profile: 'profile',
+  saveEmailConguration: 'emailconfigurations/save',
+  getEmailConguration: 'emailconfigurations/view'
 };
 
 export default jwtServiceConfig;

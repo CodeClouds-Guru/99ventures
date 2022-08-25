@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
+import axios from 'axios';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -24,31 +25,6 @@ import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig
 /**
  * Form Validation Schema
  */
-const schema = yup.object().shape({
-    fromName: yup
-        .string()
-        .required('Please enter From Name'),
-    fromEmail: yup
-        .string()
-        .required('Please enter From Email'),
-    emailUsername: yup
-        .string()
-        .required('Please enter Email Username'),
-    emailServerHost: yup
-        .string()
-        .required('Please enter server (host)'),
-    port: yup
-        .number()
-        .required('Please enter From-Email'),
-    // password: yup
-    //     .string()
-    //     .nullable()
-    //     .notRequired()
-    //     .when('password', {
-    //         is: (value) => value?.length,
-    //         then: (rule) => rule.min(8),
-    //     }),
-});
 
 const defaultValues = {
     fromName: '',
@@ -61,8 +37,40 @@ const defaultValues = {
     siteNameVisible: false,
 };
 
+const schema = yup.object().shape({
+    fromName: yup
+        .string()
+        .required('Please enter Name'),
+    fromEmail: yup
+        .string().email('Enter the valid email')
+        .required('Please enter the valid Email'),
+    emailUsername: yup
+        .string()
+        .required('Please enter Email Username'),
+    emailServerHost: yup
+        .string()
+        .matches("^(?!-)[A-Za-z0-9-]+([\\-\\.]{1}[a-z0-9]+)*\\.[A-Za-z]{2,6}$", 'Please enter valid server (host) name')
+        .required('Please enter valid server (host) name'),
+    port: yup
+        .number()
+        .test(
+            "maxDigits",
+            "Port must have 2 digits or more",
+            (number) => String(number).length >= 2
+        )
+        .typeError('Please insert the port number')
+        .required('Please insert the port number'),
+    // password: yup
+    //     .string()
+    //     .nullable()
+    //     .notRequired()
+    //     .test('empty-check',
+    //         'Password must be at least 8 characters',
+    //         password => password.length >= 8)
+});
+
 function EmailConfiguration() {
-    useEffect(() => { }, [])
+    const dispatch = useDispatch();
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -70,16 +78,73 @@ function EmailConfiguration() {
     });
 
     const { isValid, dirtyFields, errors } = formState;
+    useEffect(() => {
+        setValue('fromName', '', { shouldDirty: true, shouldValidate: false });
+        setValue('fromEmail', '', { shouldDirty: true, shouldValidate: false });
+        setValue('emailUsername', '', { shouldDirty: true, shouldValidate: false });
+        setValue('emailServerHost', '', { shouldDirty: true, shouldValidate: false });
+        setValue('port', '', { shouldDirty: true, shouldValidate: false });
+        getEmailConfiguration();
+    }, [setValue])
 
-    const onSubmit = () => { }
+    const getEmailConfiguration = () => {
+        axios.get(jwtServiceConfig.getEmailConguration)
+            .then((response) => {
+                console.log(response)
+                if (response.data.status) {
+                    let ssl_required = response.data.data.ssl_required === 1;
+                    let site_name_visible = response.data.data.site_name_visible === 1;
+                    setValue('fromName', response.data.data.from_name, { shouldDirty: false, shouldValidate: true });
+                    setValue('fromEmail', response.data.data.from_email, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailUsername', response.data.data.email_username, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailServerHost', response.data.data.email_server_host, { shouldDirty: false, shouldValidate: true });
+                    setValue('port', response.data.data.email_server_port, { shouldDirty: false, shouldValidate: true });
+                    setValue('password', response.data.data.password, { shouldDirty: false, shouldValidate: true });
+                    setValue(...defaultValues, 'sslRequired', ssl_required, { shouldDirty: false, shouldValidate: true });
+                    setValue(...defaultValues, 'siteNameVisible', site_name_visible, { shouldDirty: false, shouldValidate: true });
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
+
+    const onSubmit = ({ fromName, fromEmail, emailUsername, emailServerHost, port, sslRequired, siteNameVisible, password }) => {
+        let data = {
+            "from_name": fromName,
+            "from_email": fromEmail,
+            "email_username": emailUsername,
+            "email_server_host": emailServerHost,
+            "email_server_port": port,
+            "ssl_required": sslRequired ? 1 : 0,
+            "site_name_visible": siteNameVisible ? 1 : 0,
+            "password": password,
+        }
+
+        axios.post(jwtServiceConfig.saveEmailConguration, data)
+            .then((response) => {
+                if (response.data.status) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.message }))
+                    getEmailConfiguration();
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
+
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full sm:w-auto md:h-full md:w-full py-8 px-16 sm:p-48 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
                     <form
                         name="emailConfigurationForm"
                         noValidate
-                        className="flex flex-col justify-center w-full mt-32"
+                        className="flex flex-col justify-center w-full"
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <Controller
@@ -196,14 +261,14 @@ function EmailConfiguration() {
                                 <FormControl className="items-center" error={!!errors.sslRequired}>
                                     <FormControlLabel
                                         label="Requires a secure connection (SSL)"
-                                        control={<Checkbox size="small" {...field} />}
+                                        control={<Checkbox checked={false} {...field} />}
                                     />
                                     <FormHelperText>{errors?.sslRequired?.message}</FormHelperText>
 
                                 </FormControl>
                             )}
                         />
-
+                        {console.log(defaultValues)}
                         <Controller
                             name="siteNameVisible"
                             control={control}
@@ -211,14 +276,13 @@ function EmailConfiguration() {
                                 <FormControl className="items-center" error={!!errors.siteNameVisible}>
                                     <FormControlLabel
                                         label="Include site name at the begining of the subject"
-                                        control={<Checkbox size="small" {...field} />}
+                                        control={<Checkbox  {...field} />}
                                     />
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
                         />
-
-
+                        {/* <span className=""> */}
                         <Button
                             variant="contained"
                             color="secondary"
@@ -230,6 +294,7 @@ function EmailConfiguration() {
                         >
                             Save
                         </Button>
+                        {/* </span> */}
                     </form>
                 </div>
             </Paper>
