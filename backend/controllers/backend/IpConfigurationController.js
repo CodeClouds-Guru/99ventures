@@ -37,6 +37,7 @@ class IpConfigurationController extends Controller{
         //remove previous ip records
         await this.model.destroy({
             where: { company_portal_id: company_portal_id,status:'0' },
+            force: true
         })
 
         //store ip list
@@ -56,6 +57,7 @@ class IpConfigurationController extends Controller{
         //remove previous isp records
         await IspConfiguration.destroy({
             where: { company_portal_id: company_portal_id,status:0 },
+            force: true
         })
 
         //store isp list
