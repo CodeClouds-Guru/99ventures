@@ -9,7 +9,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       html: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       created_by: {
         type: Sequelize.BIGINT

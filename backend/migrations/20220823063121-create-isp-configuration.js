@@ -9,13 +9,16 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       company_portal_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       isp: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       created_by: {
         type: Sequelize.BIGINT

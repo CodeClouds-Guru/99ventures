@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     html: DataTypes.TEXT,
     status: DataTypes.STRING,
     parmalink: DataTypes.STRING,
-    is_hompage: DataTypes.TINYINT,
+    is_homepage: DataTypes.TINYINT,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
     part_url: DataTypes.STRING,

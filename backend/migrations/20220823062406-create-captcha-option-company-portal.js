@@ -9,19 +9,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       company_portal_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       captcha_option_id: {
-        type: Sequelize.BIGINT
-      },
-      created_by: {
-        type: Sequelize.BIGINT
-      },
-      updated_by: {
-        type: Sequelize.BIGINT
-      },
-      deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       created_at: {
         type: 'TIMESTAMP',

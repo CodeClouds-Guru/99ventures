@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import EmailConfiguration from './email-configuration/EmailConfiguration';
+import GeneralConfiguration from './general-configuration';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -19,7 +20,7 @@ function TabPanel(props) {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    <Typography component={'div'}>{children}</Typography>
                 </Box>
             )}
         </div>
@@ -61,7 +62,7 @@ function ConfigurationContent() {
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                General Configuration
+                <GeneralConfiguration />
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <EmailConfiguration />

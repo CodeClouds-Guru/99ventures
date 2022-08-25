@@ -9,13 +9,16 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       payment_method_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       company_portal_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       access_token: {
         type: Sequelize.STRING

@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   SiteLayout.init({
     html: DataTypes.TEXT,
+    name: DataTypes.TEXT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

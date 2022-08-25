@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      IpConfiguration.belongsTo(models.CompanyPortal, {
+        foreignKey: "company_portal_id",
+      });
     }
   }
   IpConfiguration.init({
