@@ -14,11 +14,11 @@ const {
 
 class GeneralController {
   constructor() {
-    this.view = this.view.bind(this);
-    this.save = this.save.bind(this);
+    this.getGeneralTabData = this.getGeneralTabData.bind(this);
+    this.saveGeneralTabData = this.saveGeneralTabData.bind(this);
   }
 
-  async view(req, res) {
+  async getGeneralTabData(req, res) {
     const site_id = req.header("site_id") || 1;
     const company_id = req.header("company_id") || 1;
     try {
@@ -58,7 +58,7 @@ class GeneralController {
     }
   }
 
-  async save(req, res) {
+  async saveGeneralTabData(req, res) {
     const site_id = req.header("site_id") || 1;
     const company_id = req.header("company_id") || 1;
 
