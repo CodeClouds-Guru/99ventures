@@ -16,7 +16,7 @@ class IpConfigurationController extends Controller{
         })
         let isp_list = await IspConfiguration.findAll({where:{status:0,company_portal_id:company_portal_id}})
         isp_list = isp_list.map((isp_result) => {
-            return ip_result.ip
+            return isp_result.isp
         })
 
         return {
