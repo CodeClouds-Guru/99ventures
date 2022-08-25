@@ -1,59 +1,65 @@
-'use strict';
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('pages', {
+    await queryInterface.createTable("pages", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       company_portal_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       html: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull: false,
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       parmalink: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
-      is_hompage: {
-        type: Sequelize.TINYINT
+      is_homepage: {
+        type: Sequelize.TINYINT,
+        allowNull: false,
+        default: 0,
       },
       slug: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       part_url: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       created_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       updated_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       created_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
         allowNull: false,
       },
       updated_at: {
-        type: 'TIMESTAMP'
+        type: "TIMESTAMP",
       },
       deleted_at: {
-        type: 'TIMESTAMP'
-      }
+        type: "TIMESTAMP",
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('pages');
-  }
+    await queryInterface.dropTable("pages");
+  },
 };

@@ -108,7 +108,7 @@ class GeneralController {
         )
         if (prevHomePageUpdate) {
           const currHomePageUpdate = await Page.update(
-            { is_hompage: 1 },
+            { is_homepage: 1 },
             { where: { company_portal_id: site_id, id: selectedHomePageId } }
           )
           if (currHomePageUpdate) {

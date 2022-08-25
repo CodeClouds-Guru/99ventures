@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class CaptchaOptionCompanyPortal extends Model {
     /**
@@ -13,24 +11,24 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  CaptchaOptionCompanyPortal.init({
-    company_portal_id: DataTypes.BIGINT,
-    captcha_option_id: DataTypes.BIGINT,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: 'TIMESTAMP',
-    updated_at: 'TIMESTAMP',
-    deleted_at: 'TIMESTAMP'
-  }, {
-    sequelize,
-    modelName: 'CaptchaOptionCompanyPortal',
-    timestamps: true,
-    paranoid: true,
-    createdAt: 'created_at', // alias createdAt as created_date
-    updatedAt: 'updated_at',
-    deletedAt: 'deleted_at',
-    tableName: 'captcha_option_company_portal',
-  });
+  CaptchaOptionCompanyPortal.init(
+    {
+      company_portal_id: DataTypes.BIGINT,
+      captcha_option_id: DataTypes.BIGINT,
+      created_at: "TIMESTAMP",
+      updated_at: "TIMESTAMP",
+      deleted_at: "TIMESTAMP",
+    },
+    {
+      sequelize,
+      modelName: "CaptchaOptionCompanyPortal",
+      timestamps: true,
+      paranoid: true,
+      createdAt: "created_at", // alias createdAt as created_date
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
+      tableName: "captcha_option_company_portal",
+    }
+  );
   return CaptchaOptionCompanyPortal;
 };

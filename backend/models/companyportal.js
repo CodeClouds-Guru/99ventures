@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'company_portal_id',
         otherKey: 'captcha_option_id',
       })
+      
     }
   }
   CompanyPortal.validate = function (req) {
