@@ -9,16 +9,20 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       ticket_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       member_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       message: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull: false,
       },
       user_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       created_at: {
         type: 'TIMESTAMP',

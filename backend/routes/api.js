@@ -11,6 +11,8 @@ const InvitationController = new InvitationControllerClass();
 const EmailConfigurationControllerClass = require("../controllers/backend/EmailConfigurationController");
 const EmailConfigurationController = new EmailConfigurationControllerClass();
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
+const IpConfigurationControllerClass = require("../controllers/backend/IpConfigurationController");
+const IpConfigurationController = new IpConfigurationControllerClass();
 router.get("/", (req, res) => {
   res.json({ message: "API working" });
 });
@@ -44,7 +46,12 @@ router.get(
   [AuthMiddleware],
   GeneralController.getGeneralTabData
 );
-router.post("/save-general-tab-data", GeneralController.saveGeneralTabData);
+router.post(
+  "/save-general-tab-data",
+  [AuthMiddleware],
+  GeneralController.saveGeneralTabData
+);
+router.get("/get-data", [AuthMiddleware], IpConfigurationController.getIpData);
 router.all(
   "/:module/:action?/:id?",
   [AuthMiddleware, checkPermissionMiddleware],
