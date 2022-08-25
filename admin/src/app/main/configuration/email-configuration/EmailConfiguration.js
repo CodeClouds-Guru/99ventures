@@ -60,17 +60,14 @@ const schema = yup.object().shape({
         )
         .typeError('Please insert the port number')
         .required('Please insert the port number'),
-    // password: yup
-    //     .string()
-    //     .nullable()
-    //     .notRequired()
-    //     .test('empty-check',
-    //         'Password must be at least 8 characters',
-    //         password => password.length >= 8)
 });
 
 function EmailConfiguration() {
     const dispatch = useDispatch();
+    // const [deVal, setDeVals] = useState({
+    //     fromName: ''
+    // })
+
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -80,6 +77,7 @@ function EmailConfiguration() {
     const { isValid, dirtyFields, errors } = formState;
     useEffect(() => {
         setValue('fromName', '', { shouldDirty: true, shouldValidate: false });
+        // setDeVals({ ...deVal, fromName: '' }, { shouldDirty: true, shouldValidate: false })
         setValue('fromEmail', '', { shouldDirty: true, shouldValidate: false });
         setValue('emailUsername', '', { shouldDirty: true, shouldValidate: false });
         setValue('emailServerHost', '', { shouldDirty: true, shouldValidate: false });
@@ -90,18 +88,17 @@ function EmailConfiguration() {
     const getEmailConfiguration = () => {
         axios.get(jwtServiceConfig.getEmailConguration)
             .then((response) => {
-                console.log(response)
                 if (response.data.status) {
-                    let ssl_required = response.data.data.ssl_required === 1;
-                    let site_name_visible = response.data.data.site_name_visible === 1;
                     setValue('fromName', response.data.data.from_name, { shouldDirty: false, shouldValidate: true });
+                    // setDeVals({ ...deVal, fromName: response.data.data.from_name })
+
                     setValue('fromEmail', response.data.data.from_email, { shouldDirty: false, shouldValidate: true });
                     setValue('emailUsername', response.data.data.email_username, { shouldDirty: false, shouldValidate: true });
                     setValue('emailServerHost', response.data.data.email_server_host, { shouldDirty: false, shouldValidate: true });
                     setValue('port', response.data.data.email_server_port, { shouldDirty: false, shouldValidate: true });
                     setValue('password', response.data.data.password, { shouldDirty: false, shouldValidate: true });
-                    setValue(...defaultValues, 'sslRequired', ssl_required, { shouldDirty: false, shouldValidate: true });
-                    setValue(...defaultValues, 'siteNameVisible', site_name_visible, { shouldDirty: false, shouldValidate: true });
+                    setValue('sslRequired', response.data.data.ssl_required === 1, { shouldDirty: false, shouldValidate: true });
+                    setValue('siteNameVisible', response.data.data.site_name_visible === 1, { shouldDirty: false, shouldValidate: true });
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.message }))
                 }
@@ -261,14 +258,14 @@ function EmailConfiguration() {
                                 <FormControl className="items-center" error={!!errors.sslRequired}>
                                     <FormControlLabel
                                         label="Requires a secure connection (SSL)"
-                                        control={<Checkbox checked={false} {...field} />}
+                                        control={<Checkbox {...field} />}
                                     />
                                     <FormHelperText>{errors?.sslRequired?.message}</FormHelperText>
 
                                 </FormControl>
                             )}
                         />
-                        {console.log(defaultValues)}
+
                         <Controller
                             name="siteNameVisible"
                             control={control}
