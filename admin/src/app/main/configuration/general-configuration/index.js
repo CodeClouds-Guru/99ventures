@@ -1,11 +1,22 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, ListItemText, CardContent} from '@mui/material';
+import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, ListItemText, CardContent, TextField, TextareaAutosize } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 600,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 const schema = yup.object().shape({
     home_page_id: yup
@@ -93,6 +104,9 @@ function GeneralConfiguration() {
 
     const onSubmit = () => { }
 
+    const handleClose = () => {
+        setToggleModal(false)
+    }
 
     return (
         <div>
@@ -101,13 +115,39 @@ function GeneralConfiguration() {
                 open={toggleModal}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
+                style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
             >
-                <Box sx={{ width: 200 }}>
-                    <h2 id="child-modal-title">Text in a child modal</h2>
-                    <p id="child-modal-description">
+                <Box sx={modalStyle}>
+                    <h2 id="child-modal-title">Autoresponder</h2>
+                    {/* <p id="child-modal-description">
                         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    </p>
-                    {/* <Button onClick={handleClose}>Close Child Modal</Button> */}
+                    </p> */}
+                    <div>
+                        <TextField
+                            Heading
+                            id="outlined-required"
+                            label="Required"
+                            defaultValue=""
+                            fullWidth 
+                        />
+                    </div>
+                    <div>
+                        <TextareaAutosize
+                            aria-label=""
+                            minRows={3}
+                            placeholder="Description"
+                            fullWidth 
+                        />
+                    </div>
+                    <div>
+                        <Button 
+                            variant="contained"
+                            component="label"
+                            className="ml-12"
+                            color="primary" 
+                            onClick={handleClose}
+                        >Close</Button>
+                    </div>
                 </Box>
             </Modal>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
