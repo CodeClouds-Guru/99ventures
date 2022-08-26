@@ -1,104 +1,195 @@
-const Controller = require('./Controller')
-const { IspConfiguration } = require('../../models/index')
+const Controller = require("./Controller");
+const { IspConfiguration, CompanyPortal } = require("../../models/index");
 
-class IpConfigurationController extends Controller{
-    constructor() {
-        super('IpConfiguration')
-        this.list = this.list.bind(this)
-        // this.save = this.save.bind(this)
-    }
-    //overide list function
-    async list(req,res){
-        let company_portal_id = req.headers.site_id
-        let ip_list = await this.model.findAll({where:{status:0,company_portal_id:company_portal_id}})
-        ip_list = ip_list.map((ip_result) => {
-            return ip_result.ip
-        })
-        let isp_list = await IspConfiguration.findAll({where:{status:0,company_portal_id:company_portal_id}})
-        isp_list = isp_list.map((isp_result) => {
-            return isp_result.isp
-        })
+class IpConfigurationController extends Controller {
+  constructor() {
+    super("IpConfiguration");
+    this.list = this.list.bind(this);
+    this.getIpDowntimeSettings = this.getIpDowntimeSettings.bind(this);
+    this.updateIpDowntimeData = this.updateIpDowntimeData.bind(this);
+  }
+  //overide list function
+  async list(req, res) {
+    let company_portal_id = req.headers.site_id;
+    let ip_list = await this.model.findAll({
+      where: { status: 0, company_portal_id: company_portal_id },
+    });
+    ip_list = ip_list.map((ip_result) => {
+      return ip_result.ip;
+    });
+    let isp_list = await IspConfiguration.findAll({
+      where: { status: 0, company_portal_id: company_portal_id },
+    });
+    isp_list = isp_list.map((isp_result) => {
+      return ip_result.ip;
+    });
 
+    return {
+      result: {
+        data: {
+          ips: ip_list,
+          isps: isp_list,
+        },
+      },
+    };
+  }
+  //override save function
+  async save(req, res) {
+    let company_portal_id = req.headers.site_id;
+    let ips = req.body.ips;
+    let isps = req.body.isps;
+
+    //remove previous ip records
+    await this.model.destroy({
+      where: { company_portal_id: company_portal_id, status: "0" },
+    });
+
+    //store ip list
+    if (ips) {
+      ips = ips.map((ip) => {
         return {
-            result: { 
-                data: {
-                    ips: ip_list,
-                    isps: isp_list
-                }
-            },
-        }
+          ip: ip,
+          company_portal_id: company_portal_id,
+          status: 0,
+          created_by: req.user.id,
+        };
+      });
+      //bulck create ip list
+      await this.model.bulkCreate(ips);
     }
-    //override save function
-    async save(req,res){
-        let company_portal_id = req.headers.site_id
-        let ips = req.body.ips;
-        let isps = req.body.isps;
 
+    //remove previous isp records
+    await IspConfiguration.destroy({
+      where: { company_portal_id: company_portal_id, status: 0 },
+    });
+
+    //store isp list
+    if (isps) {
+      isps = isps.map((isp) => {
+        return {
+          isp: isp,
+          company_portal_id: company_portal_id,
+          status: 0,
+          created_by: req.user.id,
+        };
+      });
+
+      //bulck create isp list
+      await IspConfiguration.bulkCreate(isps);
+    }
+    return {
+      message: "Record Updated",
+    };
+  }
+
+  /** Fetch ip downtime data **/
+  async getIpDowntimeSettings(req, res) {
+    try {
+      const site_id = req.header("site_id") || 1;
+      const company_id = req.header("company_id") || 1;
+      let ip_list = await this.model.findAll({
+        where: { status: 0, company_portal_id: site_id },
+        attributes: ["id", "ip"],
+      });
+      const downtime_text = await CompanyPortal.findOne({
+        where: { company_id: company_id },
+        attributes: ["downtime_message"],
+      });
+      return res.status(200).json({
+        status: true,
+        data: { ip_list, downtime_text },
+      });
+    } catch (err) {
+      console.log(err.message);
+      return res.status(500).json({
+        status: false,
+        errors: "Unable to get data",
+      });
+    }
+  }
+
+  /** Update ip downtime data **/
+  async updateIpDowntimeData(req, res) {
+    try {
+      const site_id = req.header("site_id") || 1;
+      const company_id = req.header("company_id") || 1;
+      const shutdown_checked = req.body.shutdown_checked || false;
+      const updated_downtime_text = req.body.updated_downtime_text || "";
+      const new_ip_list = req.body.new_ip_list || [];
+      const removed_ip_list = req.body.removed_ip_list || [];
+      let flag = false;
+
+      let comPorData = [];
+
+      if (updated_downtime_text !== "") {
+        // comPorData.push({ downtime_message: updated_downtime_text });
+        const downtime_text_update = await CompanyPortal.update(
+          { downtime_message: updated_downtime_text },
+          {
+            where: { id: site_id },
+          }
+        );
+        if (downtime_text_update) {
+          flag = true;
+        }
+      }
+      if (shutdown_checked) {
+        // comPorData.push({ status: 2 });
+        const shutdown_checked_update = await CompanyPortal.update(
+          { status: 2 },
+          {
+            where: { id: site_id },
+          }
+        );
+        if (shutdown_checked_update) {
+          flag = true;
+        }
+      }
+
+      if (new_ip_list.length > 0) {
         //remove previous ip records
         await this.model.destroy({
-            where: { company_portal_id: company_portal_id,status:'0' },
-            force: true
-        })
+          where: { company_portal_id: site_id, status: "0" },
+        });
 
-        //store ip list
-        if(ips){
-            ips = ips.map((ip) => {
-                return {
-                    ip:ip,
-                    company_portal_id: company_portal_id,
-                    status:0,
-                    created_by: req.user.id
-                }
-            })
-            //bulck create ip list
-            await this.model.bulkCreate(ips)
+        console.log(req.body.new_ip_list);
+        let data = [];
+        data = new_ip_list.map((ip) => {
+          return {
+            ip: ip,
+            company_portal_id: site_id,
+            status: 0,
+            created_by: 1,
+          };
+        });
+
+        const insertNewData = this.model.bulkCreate(data, {
+          updateOnDuplicate: ["ip"],
+        });
+        if (insertNewData) {
+          flag = true;
         }
+      }
 
-        //remove previous isp records
-        await IspConfiguration.destroy({
-            where: { company_portal_id: company_portal_id,status:0 },
-            force: true
-        })
-
-        //store isp list
-        if(isps){
-            isps = isps.map((isp) => {
-                return {
-                    isp:isp,
-                    company_portal_id: company_portal_id,
-                    status:0,
-                    created_by: req.user.id
-                }
-            })
-            
-            //bulck create isp list
-            await IspConfiguration.bulkCreate(isps)
-        }
-        return {
-            message: "Record Updated"
-          }
+      if (flag) {
+        return res.status(200).json({
+          status: true,
+          msg: "Data saved",
+        });
+      } else {
+        return res.status(500).json({
+          status: false,
+          errors: "Unable to save data",
+        });
+      }
+    } catch (err) {
+      console.log(err.message);
+      return res.status(500).json({
+        status: false,
+        errors: "Unable to get data",
+      });
     }
-    async getIpData(req, res) {
-        try {
-          const site_id = req.header("site_id") || 1;
-          const company_id = req.header("company_id") || 1;
-    
-          const getIpData = await IpConfiguration.findAll({
-            where: { status: "whitelisted" },
-            attributes: ["ip"],
-            include: ["CompanyPortal", {attributes: ['name']}],
-          });
-          return res.status(200).json({
-            status: true,
-            data: getIpData,
-          });
-        } catch (err) {
-          console.log(err.message);
-          return res.status(500).json({
-            status: false,
-            errors: "Unable to get data",
-          });
-        }
-    }
+  }
 }
-module.exports = IpConfigurationController
+
+module.exports = IpConfigurationController;
