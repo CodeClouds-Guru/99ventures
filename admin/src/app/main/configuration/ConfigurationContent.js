@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -6,6 +6,7 @@ import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
+import IpConfiguration from './ip-configuration/IpConfiguration';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -59,6 +60,7 @@ function ConfigurationContent() {
                     }}>
                     <Tab label="General Configuration" {...a11yProps(0)} />
                     <Tab label="Email Configuration" {...a11yProps(1)} />
+                    <Tab label="IP Configuration" {...a11yProps(2)} />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -66,6 +68,9 @@ function ConfigurationContent() {
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <EmailConfiguration />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+                <IpConfiguration />
             </TabPanel>
         </Box>
     );

@@ -5,19 +5,12 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
 import axios from 'axios';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import FormHelperText from '@mui/material/FormHelperText';
-import jwtService from '../../../auth/services/jwtService';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
@@ -33,8 +26,6 @@ const defaultValues = {
     emailServerHost: '',
     port: '',
     password: '',
-    sslRequired: false,
-    siteNameVisible: false,
 };
 
 const schema = yup.object().shape({
@@ -64,9 +55,8 @@ const schema = yup.object().shape({
 
 function EmailConfiguration() {
     const dispatch = useDispatch();
-    // const [deVal, setDeVals] = useState({
-    //     fromName: ''
-    // })
+    const [sslRequired, setSslRequired] = useState(false)
+    const [siteNameVisible, setSiteNameVisible] = useState(false)
 
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
@@ -77,7 +67,6 @@ function EmailConfiguration() {
     const { isValid, dirtyFields, errors } = formState;
     useEffect(() => {
         setValue('fromName', '', { shouldDirty: true, shouldValidate: false });
-        // setDeVals({ ...deVal, fromName: '' }, { shouldDirty: true, shouldValidate: false })
         setValue('fromEmail', '', { shouldDirty: true, shouldValidate: false });
         setValue('emailUsername', '', { shouldDirty: true, shouldValidate: false });
         setValue('emailServerHost', '', { shouldDirty: true, shouldValidate: false });
@@ -90,15 +79,13 @@ function EmailConfiguration() {
             .then((response) => {
                 if (response.data.status) {
                     setValue('fromName', response.data.data.from_name, { shouldDirty: false, shouldValidate: true });
-                    // setDeVals({ ...deVal, fromName: response.data.data.from_name })
-
                     setValue('fromEmail', response.data.data.from_email, { shouldDirty: false, shouldValidate: true });
                     setValue('emailUsername', response.data.data.email_username, { shouldDirty: false, shouldValidate: true });
                     setValue('emailServerHost', response.data.data.email_server_host, { shouldDirty: false, shouldValidate: true });
                     setValue('port', response.data.data.email_server_port, { shouldDirty: false, shouldValidate: true });
                     setValue('password', response.data.data.password, { shouldDirty: false, shouldValidate: true });
-                    setValue('sslRequired', response.data.data.ssl_required === 1, { shouldDirty: false, shouldValidate: true });
-                    setValue('siteNameVisible', response.data.data.site_name_visible === 1, { shouldDirty: false, shouldValidate: true });
+                    setSslRequired(response.data.data.ssl_required === 1);
+                    setSiteNameVisible(response.data.data.site_name_visible === 1);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.message }))
                 }
@@ -133,7 +120,14 @@ function EmailConfiguration() {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-
+    const selectSslRequired = (event) => {
+        console.log('ssl', event.target.checked)
+        setSslRequired(event.target.checked)
+    }
+    const selectSiteNameVisible = (event) => {
+        console.log('visible', event.target.checked)
+        setSiteNameVisible(event.target.checked)
+    }
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
@@ -255,10 +249,12 @@ function EmailConfiguration() {
                             name="sslRequired"
                             control={control}
                             render={({ field }) => (
-                                <FormControl className="items-center" error={!!errors.sslRequired}>
+                                <FormControl className="items-center">
                                     <FormControlLabel
                                         label="Requires a secure connection (SSL)"
-                                        control={<Checkbox {...field} />}
+                                        control={
+                                            <Checkbox checked={sslRequired} onChange={selectSslRequired} {...field} />
+                                        }
                                     />
                                     <FormHelperText>{errors?.sslRequired?.message}</FormHelperText>
 
@@ -270,28 +266,31 @@ function EmailConfiguration() {
                             name="siteNameVisible"
                             control={control}
                             render={({ field }) => (
-                                <FormControl className="items-center" error={!!errors.siteNameVisible}>
+                                <FormControl className="items-center">
                                     <FormControlLabel
                                         label="Include site name at the begining of the subject"
-                                        control={<Checkbox  {...field} />}
+                                        control={
+                                            <Checkbox checked={siteNameVisible} onChange={selectSiteNameVisible} {...field} />
+                                            // <input type="checkbox" checked={siteNameVisible} onChange={() => selectSiteNameVisible} {...field} />
+                                        }
                                     />
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
                         />
-                        {/* <span className=""> */}
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            className="w-1/2 mt-24"
-                            aria-label="Register"
-                            disabled={_.isEmpty(dirtyFields) || !isValid}
-                            type="submit"
-                            size="large"
-                        >
-                            Save
-                        </Button>
-                        {/* </span> */}
+                        <span className="flex items-center justify-center">
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                className="w-1/2 mt-24"
+                                aria-label="Register"
+                                disabled={_.isEmpty(dirtyFields) || !isValid}
+                                type="submit"
+                                size="large"
+                            >
+                                Save
+                            </Button>
+                        </span>
                     </form>
                 </div>
             </Paper>
