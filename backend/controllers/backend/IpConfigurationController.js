@@ -111,6 +111,7 @@ class IpConfigurationController extends Controller {
   /** Update ip downtime data **/
   async updateIpDowntimeData(req, res) {
     try {
+      console.log(req.body);
       const site_id = req.header("site_id") || 1;
       const company_id = req.header("company_id") || 1;
       const shutdown_checked = req.body.shutdown_checked || false;
@@ -120,28 +121,17 @@ class IpConfigurationController extends Controller {
       let flag = false;
 
       let comPorData = [];
-
       if (updated_downtime_text !== "") {
-        // comPorData.push({ downtime_message: updated_downtime_text });
-        const downtime_text_update = await CompanyPortal.update(
-          { downtime_message: updated_downtime_text },
-          {
-            where: { id: site_id },
-          }
-        );
-        if (downtime_text_update) {
-          flag = true;
-        }
+        comPorData.downtime_message = updated_downtime_text;
       }
       if (shutdown_checked) {
-        // comPorData.push({ status: 2 });
-        const shutdown_checked_update = await CompanyPortal.update(
-          { status: 2 },
-          {
-            where: { id: site_id },
-          }
-        );
-        if (shutdown_checked_update) {
+        comPorData.status = (shutdown_checked == true) ? 2 : 1;
+      }
+      if (comPorData) {
+        const company_portal_update = await CompanyPortal.update(comPorData, {
+          where: { id: site_id },
+        });
+        if (company_portal_update) {
           flag = true;
         }
       }

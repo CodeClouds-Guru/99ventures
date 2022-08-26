@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('company_portal_payment_methods', {
+    await queryInterface.createTable("company_portal_payment_methods", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       payment_method_id: {
         type: Sequelize.BIGINT,
@@ -21,39 +21,39 @@ module.exports = {
         allowNull: false,
       },
       access_token: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       secret: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       username: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       created_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       updated_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       created_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
         allowNull: false,
       },
       updated_at: {
-        type: 'TIMESTAMP'
+        type: "TIMESTAMP",
       },
       deleted_at: {
-        type: 'TIMESTAMP'
-      }
+        type: "TIMESTAMP",
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('company_portal_payment_methods');
-  }
+    await queryInterface.dropTable("company_portal_payment_methods");
+  },
 };

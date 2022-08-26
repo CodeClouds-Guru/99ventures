@@ -88,15 +88,10 @@ class GeneralController {
       const selectedHomePageId = req.body.selected_page_id || "";
       const selectedPageTemplate = req.body.selected_template_id || "";
       const selectedCaptchaId = req.body.selected_captcha_id || "";
-      // const autoResponseUpdateData = req.body.auto_response_update_data
-      //   ? JSON.parse(req.body.auto_response_update_data)
-      //   : []
+
       const autoResponseNewData = req.body.auto_response_new_data
         ? JSON.parse(req.body.auto_response_new_data)
         : [];
-      // const autoResponseDeleteData = req.body.auto_response_delete_data
-      //   ? JSON.parse(req.body.auto_response_delete_data)
-      //   : []
 
       let flag = false;
 
@@ -116,10 +111,6 @@ class GeneralController {
           }
         }
       }
-
-      // if (selectedPageTemplate !== '') {
-      //     const prevTemplate = await PageTemplate.findOne({ where: { company_portal_id: site_id } })
-      // }
 
       /** Code for Captcha option changed **/
       if (selectedCaptchaId !== "") {
@@ -169,25 +160,6 @@ class GeneralController {
           flag = true;
         }
       }
-
-      // if (autoResponseUpdateData && autoResponseUpdateData.length > 0) {
-      //   let data = []
-      //   autoResponseUpdateData.forEach((val, i) => {
-      //     data[i] = { id: val.id, name: val.name, body: val.body }
-      //   })
-      //   const updateData = AutoResponder.bulkCreate(data, {
-      //     updateOnDuplicate: ['name', 'body'],
-      //   })
-      //   if (updateData) {
-      //     flag = true
-      //   }
-      // }
-
-      // if (autoResponseDeleteData && autoResponseDeleteData.length > 0) {
-      //   await AutoResponder.destroy({
-      //     where: { id: autoResponseDeleteData },
-      //   })
-      // }
 
       if (flag) {
         return res.status(200).json({
