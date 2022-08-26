@@ -14,14 +14,15 @@ module.exports = {
       },
       html: {
         type: Sequelize.TEXT,
-        allowNull: false,
       },
       status: {
         type: Sequelize.STRING,
         allowNull: false,
+        default: "draft",
       },
       parmalink: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       is_homepage: {
         type: Sequelize.TINYINT,
@@ -30,14 +31,13 @@ module.exports = {
       },
       slug: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      part_url: {
-        type: Sequelize.STRING,
-      },
+
       created_by: {
         type: Sequelize.BIGINT,
       },
