@@ -51,7 +51,8 @@ router.post(
   [AuthMiddleware],
   GeneralController.saveGeneralTabData
 );
-router.get("/get-data", [AuthMiddleware], IpConfigurationController.getIpData);
+router.get("/ip-downtime-settings", [AuthMiddleware], IpConfigurationController.getIpDowntimeSettings);
+router.post("/ip-downtime-update", [AuthMiddleware], IpConfigurationController.updateIpDowntimeData);
 router.all(
   "/:module/:action?/:id?",
   [AuthMiddleware, checkPermissionMiddleware],
