@@ -89,11 +89,11 @@ class IpConfigurationController extends Controller {
       const company_id = req.header("company_id") || 1;
       let ip_list = await this.model.findAll({
         where: { status: 0, company_portal_id: site_id },
-        attributes: ["id", "ip"],
+        attributes: ["ip"],
       });
       const downtime_text = await CompanyPortal.findOne({
         where: { company_id: company_id },
-        attributes: ["downtime_message"],
+        attributes: ["downtime_message", "status"],
       });
       return res.status(200).json({
         status: true,
@@ -125,7 +125,7 @@ class IpConfigurationController extends Controller {
         comPorData.downtime_message = updated_downtime_text;
       }
       if (shutdown_checked) {
-        comPorData.status = (shutdown_checked == true) ? 2 : 1;
+        comPorData.status = shutdown_checked == true ? 2 : 1;
       }
       if (comPorData) {
         const company_portal_update = await CompanyPortal.update(comPorData, {
