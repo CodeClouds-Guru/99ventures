@@ -28,6 +28,7 @@ class AuthController {
     this.getCompanyAndSites = this.getCompanyAndSites.bind(this);
     this.login = this.login.bind(this);
     this.refreshToken = this.refreshToken.bind(this);
+    this.profileUpdate = this.profileUpdate.bind(this);
   }
 
   async signup(req, res) {
@@ -339,6 +340,55 @@ class AuthController {
     // permissions = [].concat.apply([], permissions)
     permissions = permissions.flat();
     return permissions;
+  }
+  //profile update 
+  async profileUpdate(req,res){
+    let user = req.user
+    const schema = Joi.object({
+      first_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      // username: Joi.string().alphanum().min(3).max(30).required(),
+      phone_no: Joi.string().required(),
+      email: Joi.string().email().required()
+    });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      let error_msg = error.details.map((err) => err.message);
+      res.status(401).json({
+        status: false,
+        errors: error_msg.join(","),
+      });
+      return
+    }
+    //check user email
+    let check_email = await User.findOne({
+      where: { email: value.email, id: { [Op.ne]: user.id } },
+    })
+    if (check_email) {
+      res.status(401).json({
+        status: false,
+        errors: "Email already exist.'",
+      });
+      return
+    }
+    //update details
+    try {
+      await User.update({
+          ...value
+        },
+        { where: { id:user.id } 
+      });
+      res.status(200).json({
+        status: true,
+        message: "Profile Updated.'",
+      });
+    } catch (error) {
+      throw error
+    }
+  }
+  //change avatar
+  async changeAvatar(req,res){
+
   }
 }
 
