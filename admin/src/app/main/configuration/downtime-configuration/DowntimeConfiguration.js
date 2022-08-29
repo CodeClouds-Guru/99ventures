@@ -5,6 +5,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 import * as yup from 'yup';
 import _ from '@lodash';
 import axios from 'axios';
@@ -16,23 +17,24 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
 
 const defaultValues = {
-    deniedIPs: '',
-    deniedISPs: '',
+    allowedIPs: '',
+    message: '',
 };
 
 
 const schema = yup.object().shape({
-    deniedIPs: yup
+    allowedIPs: yup
         .string()
         .required('Please enter valid IP(s)'),
-    deniedISPs: yup
+    message: yup
         .string()
-        .required('Please enter ISP(s)'),
+        .required('Please enter message'),
 });
 
-
-function IpConfiguration() {
+function DowntimeConfiguration() {
     const dispatch = useDispatch();
+    // const [allowedIPs, setAllowedIPs] = useState([])
+
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -41,28 +43,27 @@ function IpConfiguration() {
     const { isValid, dirtyFields, errors } = formState;
 
     const onSubmit = () => { }
-
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
                     <form
-                        name="IpConfigurationForm"
+                        name="downtimeConfigurationForm"
                         noValidate
                         className="flex flex-col justify-center w-full"
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <Controller
-                            name="deniedIPs"
+                            name="allowedIPs"
                             control={control}
                             render={({ field }) => (
                                 <TextField
                                     {...field}
                                     className="mb-24"
-                                    label="Denied IPs"
+                                    label="Allowed IPs"
                                     type="text"
-                                    error={!!errors.deniedIPs}
-                                    helperText={errors?.deniedIPs?.message}
+                                    error={!!errors.allowedIPs}
+                                    helperText={errors?.allowedIPs?.message}
                                     variant="outlined"
                                     required
                                     fullWidth
@@ -72,16 +73,16 @@ function IpConfiguration() {
                             )}
                         />
                         <Controller
-                            name="deniedISPs"
+                            name="message"
                             control={control}
                             render={({ field }) => (
                                 <TextField
                                     {...field}
                                     className="mb-24"
-                                    label="Denied ISPs"
+                                    label="Message"
                                     type="text"
-                                    error={!!errors.deniedISPs}
-                                    helperText={errors?.deniedISPs?.message}
+                                    error={!!errors.message}
+                                    helperText={errors?.message?.message}
                                     variant="outlined"
                                     required
                                     fullWidth
@@ -111,4 +112,4 @@ function IpConfiguration() {
     )
 }
 
-export default IpConfiguration;
+export default DowntimeConfiguration;

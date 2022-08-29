@@ -33,7 +33,7 @@ function UserMenu(props) {
         onClick={userMenuClick}
         color="inherit"
       >
-        <div className="hidden md:flex flex-col mx-4 items-end">
+        <div className="md:flex flex-col mx-4 items-end">
           <Typography component="span" className="font-semibold flex">
             {user.first_name + ' ' + user.last_name}
           </Typography>
