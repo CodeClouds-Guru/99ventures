@@ -2,6 +2,8 @@
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
+const FileHelper = require('../helpers/fileHelper')
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
@@ -47,8 +49,13 @@ module.exports = (sequelize, DataTypes) => {
       avatar: {
         type: DataTypes.STRING,
         get() {
-          const rawValue = this.getDataValue('avatar');
+          let rawValue = this.getDataValue('avatar');
           const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000'
+          if(rawValue){
+            const fileHelper = new FileHelper([],'users')
+            const file_name = fileHelper.generateSignedUrl(rawValue)
+            rawValue = file_name 
+          }
           return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
         }
       },
