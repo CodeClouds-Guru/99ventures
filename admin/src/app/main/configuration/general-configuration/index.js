@@ -1,11 +1,27 @@
+import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, ListItemText, CardContent} from '@mui/material';
+import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 600,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 const schema = yup.object().shape({
     home_page_id: yup
@@ -15,25 +31,49 @@ const schema = yup.object().shape({
         .string()
         .required('Please select a default layout'),
 });
+  
+const replyFormDefaultValues = {
+    heading: '',
+    messageBody: ''
+}
+
+const replyFormSchema =  yup.object().shape({
+    heading: yup.string().required('Please enter the heading'),
+    messageBody: yup.string().required('Please enter Message'),
+});
 
 function GeneralConfiguration() {
+    const dispatch = useDispatch();
     const [captchaOptions, setCaptchaOptions] = useState([])
     const [generalReplies, setGeneralReplies] = useState([])
     const [layoutOptions, setLayoutOptions] = useState([])
     const [pageOptions, setPageOptions] = useState([])
     const [toggleModal, setToggleModal] = useState(false);
 
+
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
         default_template_id: 0,
-        default_captcha_option_id: 0,
+        default_captcha_option_id: 0
+    });
+
+    const { 
+        control: generalFormControl, 
+        formState: {isValid, dirtyFields, errors}, 
+        handleSubmit, 
+        setError, 
+        setValue 
+    } = useForm({
+        mode: 'onChange',
+        defaultValues,
+        resolver: yupResolver(schema),
     });
     
     const selectHomePage = (event) => {
-            setDefaultValues({
-                ...defaultValues,
-                home_page_id: event.target.value,
-            })
+        setDefaultValues({
+            ...defaultValues,
+            home_page_id: event.target.value,
+        });
     }
     const selectLayoutOption = (event) => {
             setDefaultValues({
@@ -47,6 +87,10 @@ function GeneralConfiguration() {
                 default_captcha_option_id: event.target.value
             })
     }
+
+    useEffect(() => { 
+        fetchData();
+    }, [])
 
     const fetchData = () => {
         axios.get('/get-general-tab-data').then((response) => {
@@ -71,28 +115,110 @@ function GeneralConfiguration() {
         return options.map(option => <MenuItem value={option.id}>{option.name ?? ''}</MenuItem>)
     }
     
-
     const getReplies = (replies) => {
-        return replies.map(reply => <ListItem disablePadding>
-            <ListItemButton key={reply.id}>
-                <ListItemText primary={reply.name} />
-            </ListItemButton>
-        </ListItem>)
+        return replies.map((reply, indx) => {
+            return (
+                <React.Fragment key={ Math.random() }>
+                    <ListItem key={ Math.random() }  
+                        secondaryAction= {
+                            <IconButton key={ Math.random() } edge="end" aria-label="delete" onClick={()=> removeListItem(indx)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        }
+                    >
+                        <ListItemText key={ Math.random() } 
+                            primary={reply.name} 
+                            secondary={ 
+                                <Typography
+                                    key={ Math.random() }
+                                    variant="body2"
+                                    color="text.secondary"
+                                    noWrap
+                                >
+                                    {reply.body}
+                                </Typography>
+                            }
+                        />
+                    </ListItem>
+                    <Divider variant="inset" component="li" className="ml-12" key={ Math.random() }/>
+                </React.Fragment>
+            )
+        })
     }
 
-    useEffect(() => { 
-        fetchData();
-    }, [])
-    const { control, formState, handleSubmit, setError, setValue } = useForm({
+    /*const subString = (string) => {
+        if(string.length > 100) {
+            string = string.subString(0, 100) + '...';
+        }
+        return string;
+    }*/
+
+    const removeListItem = (itemKey) => {
+        generalReplies.splice(itemKey, 1);
+        setGeneralReplies([...generalReplies]);
+    }
+
+    // console.log(dirtyFields);
+    
+    /**
+     * General Config data post
+     */
+    const onSubmit = () => {
+        const responses = [];
+        generalReplies.map(rp => {
+            responses.push({
+                name: rp.name,
+                body: rp.body
+            });
+        });
+        const params = {
+            selected_page_id: defaultValues.home_page_id,
+            selected_template_id: defaultValues.default_template_id,
+            selected_captcha_id: defaultValues.default_captcha_option_id,
+            auto_response_new_data: responses
+        }
+        
+        axios.post('/save-general-tab-data', params)
+        .then((response) => {
+            if (response.data.status) {
+                dispatch(showMessage({ variant: 'success', message: response.data.msg }))
+            } else {
+                dispatch(showMessage({ variant: 'error', message: response.data.msg }))
+            }
+        })
+        .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+    }
+
+    
+    /**
+     * Modal Form validation 
+     */  
+    const { 
+        control: replyControl, 
+        formState: { isValid: isRPFValid, dirtyFields: dirtyRPFFields }, 
+        handleSubmit: handleReplySubmit,
+        reset: autoResponderFormReset
+    } = useForm({
         mode: 'onChange',
-        defaultValues,
-        resolver: yupResolver(schema),
-    });
+        defaultValues: replyFormDefaultValues,
+        resolver: yupResolver(replyFormSchema),
+    });  
+    
+    const onReplySubmit = ({heading, messageBody}) => {
+        setGeneralReplies([
+            ...generalReplies,
+            {
+                name: heading,
+                body: messageBody
+            }
+        ]);        
+        autoResponderFormReset({replyFormDefaultValues});
+    }
 
-    const { isValid, dirtyFields, errors } = formState;
-
-    const onSubmit = () => { }
-
+    const handleClose = () => {
+        setToggleModal(false);
+        autoResponderFormReset({replyFormDefaultValues});
+    }
 
     return (
         <div>
@@ -101,13 +227,71 @@ function GeneralConfiguration() {
                 open={toggleModal}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
+                style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
             >
-                <Box sx={{ width: 200 }}>
-                    <h2 id="child-modal-title">Text in a child modal</h2>
-                    <p id="child-modal-description">
+                <Box sx={modalStyle}>
+                    <h2 id="child-modal-title mb-24">Auto Responder</h2>
+                    {/* <p id="child-modal-description">
                         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    </p>
-                    {/* <Button onClick={handleClose}>Close Child Modal</Button> */}
+                    </p> */}
+                    <form
+                        name="AutoresponderForm"
+                        noValidate  
+                        className="flex flex-col justify-center w-full mt-32"
+                        onSubmit={handleReplySubmit(onReplySubmit)}
+                    >
+                        <Controller
+                            name="heading"
+                            control={replyControl}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    className="mb-24"
+                                    label="Heading"                            
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        
+                        <Controller
+                            name="messageBody"
+                            control={replyControl}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    id="outlined-multiline-static"
+                                    label="Message Body"
+                                    className="mb-24"
+                                    multiline
+                                    rows={4}
+                                    fullWidth
+                                    required
+                                />
+                            )}
+                        />
+                        <div className='flex justify-between'>
+                            <Button 
+                                variant="contained"
+                                component="label"
+                                className=""
+                                color="primary" 
+                                onClick={handleClose}
+                            >Close</Button>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                className=""
+                                aria-label="Add"
+                                disabled={_.isEmpty(dirtyRPFFields) || !isRPFValid}
+                                type="submit"
+                                size="large"
+                                >
+                                Add
+                            </Button>
+                        </div>
+                    </form>
                 </Box>
             </Modal>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
@@ -121,8 +305,8 @@ function GeneralConfiguration() {
                             onSubmit={handleSubmit(onSubmit)}
                         >
                             <Controller
-                                name="home_page"
-                                control={control}
+                                name="home_page_id"
+                                control={generalFormControl}
                                 render={({ field }) => (
                                     <Select
                                         {...field}
@@ -132,6 +316,7 @@ function GeneralConfiguration() {
                                         value={defaultValues.home_page_id}
                                         label="Homepage"
                                         onChange={selectHomePage}
+                                        required
                                     >
                                         {getFormattedOptions(pageOptions)}
                                     </Select>
@@ -139,8 +324,8 @@ function GeneralConfiguration() {
                             />
 
                             <Controller
-                                name="default_template"
-                                control={control}
+                                name="default_template_id"
+                                control={generalFormControl}
                                 render={({ field }) => (
                                     <Select
                                         {...field}
@@ -157,8 +342,8 @@ function GeneralConfiguration() {
                             />
 
                             <Controller
-                                name="captcha_option"
-                                control={control}
+                                name="default_captcha_option_id"
+                                control={generalFormControl}
                                 render={({ field }) => (
                                     <Select
                                         {...field}
