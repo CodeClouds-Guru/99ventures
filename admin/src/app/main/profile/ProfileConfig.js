@@ -1,21 +1,21 @@
-import ProfilePage from './ProfilePage';
-import authRoles from '../../auth/authRoles';
+import Profile from './Profile';
+import settingsConfig from 'app/configs/settingsConfig';
 
 const ProfileConfig = {
     settings: {
         layout: {
             config: {
                 navbar: {
-                    display: false,
+                    display: true,
                 },
                 toolbar: {
-                    display: false,
+                    display: true,
                 },
                 footer: {
-                    display: false,
+                    display: true,
                 },
                 leftSidePanel: {
-                    display: false,
+                    display: true,
                 },
                 rightSidePanel: {
                     display: false,
@@ -23,11 +23,12 @@ const ProfileConfig = {
             },
         },
     },
-    auth: authRoles.onlyGuest,
     routes: [
         {
             path: 'profile',
-            element: <ProfilePage />,
+            element: <Profile />,
+            auth: settingsConfig.defaultAuth
+
         },
     ],
 };
