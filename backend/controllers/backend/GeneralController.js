@@ -84,13 +84,12 @@ class GeneralController {
     const company_id = req.header("company_id") || 1;
 
     try {
-      const user_id = req.body.selected_page_id || 0;
       const selectedHomePageId = req.body.selected_page_id || "";
       const selectedPageTemplate = req.body.selected_template_id || "";
       const selectedCaptchaId = req.body.selected_captcha_id || "";
 
       const autoResponseNewData = req.body.auto_response_new_data
-        ? JSON.parse(req.body.auto_response_new_data)
+        ? req.body.auto_response_new_data
         : [];
 
       let flag = false;
@@ -121,19 +120,31 @@ class GeneralController {
           },
           include: [{ all: true, nested: true }],
         });
-        const prevCapOpId =
-          prevCompanyPortalCaptcha.CaptchaOptions[0]
-            .captcha_option_company_portal.captcha_option_id;
         console.log(prevCompanyPortalCaptcha.CaptchaOptions);
-        const updateCmporCaptcha = await CaptchaOptionCompanyPortal.update(
-          { captcha_option_id: selectedCaptchaId },
-          {
-            where: {
-              company_portal_id: site_id,
-              captcha_option_id: prevCapOpId,
-            },
-          }
-        );
+        const prevCapOpId =
+          prevCompanyPortalCaptcha.CaptchaOptions.length > 0
+            ? prevCompanyPortalCaptcha.CaptchaOptions[0]
+                .captcha_option_company_portal.captcha_option_id
+            : "";
+        let updateCmporCaptcha = false;
+        if (prevCapOpId !== "") {
+          updateCmporCaptcha = await CaptchaOptionCompanyPortal.update(
+            { captcha_option_id: selectedCaptchaId },
+            {
+              where: {
+                company_portal_id: site_id,
+                captcha_option_id: prevCapOpId,
+              },
+            }
+          );
+        } else {
+          updateCmporCaptcha = await CaptchaOptionCompanyPortal.create({
+            captcha_option_id: selectedCaptchaId,
+            company_portal_id: site_id,
+            created_by: req.user.id,
+          });
+        }
+
         if (updateCmporCaptcha) {
           flag = true;
         }
@@ -150,7 +161,7 @@ class GeneralController {
         });
         let data = [];
         autoResponseNewData.forEach((val, i) => {
-          data[i] = { name: val.name, body: val.body, created_by: user_id };
+          data[i] = { name: val.name, body: val.body, created_by: req.user.id };
         });
 
         const insertNewData = AutoResponder.bulkCreate(data, {

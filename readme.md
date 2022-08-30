@@ -53,3 +53,5 @@ docker tag admin:latest 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-
 docker login -u AWS -p $(aws ecr get-login-password --region us-east-2) 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-frontend-stg:latest
 docker push 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-frontend-stg
 ```
+
+aws ecs update-service --cluster "datasample-io" --service "datasample-io-BackendService-aM4V0zlxACGb" --force-new-deployment --region "us-east-2"

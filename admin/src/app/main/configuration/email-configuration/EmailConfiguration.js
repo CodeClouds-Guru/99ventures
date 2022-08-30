@@ -1,15 +1,9 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import TextField from '@mui/material/TextField';
+import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import axios from 'axios';
-import Paper from '@mui/material/Paper';
-import FormHelperText from '@mui/material/FormHelperText';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -121,11 +115,9 @@ function EmailConfiguration() {
             })
     }
     const selectSslRequired = (event) => {
-        console.log('ssl', event.target.checked)
         setSslRequired(event.target.checked)
     }
     const selectSiteNameVisible = (event) => {
-        console.log('visible', event.target.checked)
         setSiteNameVisible(event.target.checked)
     }
     return (
@@ -251,13 +243,12 @@ function EmailConfiguration() {
                             render={({ field }) => (
                                 <FormControl className="items-center">
                                     <FormControlLabel
-                                        label="Requires a secure connection (SSL)"
                                         control={
-                                            <Checkbox checked={sslRequired} onChange={selectSslRequired} {...field} />
+                                            <Checkbox checked={sslRequired} onChange={selectSslRequired} />
                                         }
+                                        label="Requires a secure connection (SSL)"
                                     />
                                     <FormHelperText>{errors?.sslRequired?.message}</FormHelperText>
-
                                 </FormControl>
                             )}
                         />
@@ -270,14 +261,14 @@ function EmailConfiguration() {
                                     <FormControlLabel
                                         label="Include site name at the begining of the subject"
                                         control={
-                                            <Checkbox checked={siteNameVisible} onChange={selectSiteNameVisible} {...field} />
-                                            // <input type="checkbox" checked={siteNameVisible} onChange={() => selectSiteNameVisible} {...field} />
+                                            <Checkbox checked={siteNameVisible} onChange={selectSiteNameVisible} />
                                         }
                                     />
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
                         />
+
                         <span className="flex items-center justify-center">
                             <Button
                                 variant="contained"

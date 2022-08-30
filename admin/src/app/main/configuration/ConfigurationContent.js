@@ -7,6 +7,7 @@ import Tab from '@mui/material/Tab';
 import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
+import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -58,9 +59,10 @@ function ConfigurationContent() {
                             '&.Mui-disabled': { opacity: 0.3 },
                         },
                     }}>
-                    <Tab label="General Configuration" {...a11yProps(0)} />
-                    <Tab label="Email Configuration" {...a11yProps(1)} />
-                    <Tab label="IP Configuration" {...a11yProps(2)} />
+                    <Tab label="General" {...a11yProps(0)} />
+                    <Tab label="Email" {...a11yProps(1)} />
+                    <Tab label="IP" {...a11yProps(2)} />
+                    <Tab label="Downtime" {...a11yProps(3)} />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -71,6 +73,9 @@ function ConfigurationContent() {
             </TabPanel>
             <TabPanel value={value} index={2}>
                 <IpConfiguration />
+            </TabPanel>
+            <TabPanel value={value} index={3}>
+                <DowntimeConfiguration />
             </TabPanel>
         </Box>
     );
