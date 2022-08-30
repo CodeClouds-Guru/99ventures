@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
   }
   User.validate = function (req) {
     const schema = Joi.object({
-      type: Joi.string().required().label('Type'),
       first_name: Joi.string().required().label('First Name'),
       last_name: Joi.string().required().label('Last Name'),
       email: Joi.string().email().required().label('Email'),

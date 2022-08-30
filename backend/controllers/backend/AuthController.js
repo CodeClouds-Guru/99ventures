@@ -347,6 +347,7 @@
     let user = req.user
     if(req.body.type = 'basic_details'){
       const schema = Joi.object({
+        type: Joi.string().required(),
         first_name: Joi.string().required(),
         last_name: Joi.string().required(),
         // username: Joi.string().alphanum().min(3).max(30).required(),
@@ -355,7 +356,7 @@
         avatar:Joi.optional()
       });
       const { error, value } = schema.validate(req.body);
-      delete value.type
+      
       if (error) {
         let error_msg = error.details.map((err) => err.message);
         res.status(401).json({
@@ -364,6 +365,7 @@
         });
         return
       }
+      delete value.type
       //check user email
       let check_email = await User.findOne({
         where: { email: value.email, id: { [Op.ne]: user.id } },
