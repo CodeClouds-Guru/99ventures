@@ -26,7 +26,6 @@ module.exports = class UserResources {
       companies = await CompanyUser.findAll({
         where: { company_id: this.company_id, user_id: user.id },
       });
-      console.log("from user resource", this.company_id, user.id, companies);
       if (companies && companies.length > 0) {
         const group = await Group.findOne({
           where: {
@@ -66,6 +65,7 @@ module.exports = class UserResources {
     } else {
       companies = await CompanyUser.findAll();
     }
+    console.log("from user resource", this.company_id, user.id, companies);
 
     user.setDataValue("permissions", permissions);
     user.setDataValue("groups", groups);
