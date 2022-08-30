@@ -90,7 +90,7 @@ class GeneralController {
       const selectedCaptchaId = req.body.selected_captcha_id || "";
 
       const autoResponseNewData = req.body.auto_response_new_data
-        ? JSON.parse(req.body.auto_response_new_data)
+        ? req.body.auto_response_new_data
         : [];
 
       let flag = false;
@@ -121,10 +121,11 @@ class GeneralController {
           },
           include: [{ all: true, nested: true }],
         });
+        // console.log(prevCompanyPortalCaptcha.CaptchaOptions[0].captcha_option_company_portal.captcha_option_id)
         const prevCapOpId =
           prevCompanyPortalCaptcha.CaptchaOptions[0]
             .captcha_option_company_portal.captcha_option_id;
-        console.log(prevCompanyPortalCaptcha.CaptchaOptions);
+        // console.log(prevCompanyPortalCaptcha.CaptchaOptions);
         const updateCmporCaptcha = await CaptchaOptionCompanyPortal.update(
           { captcha_option_id: selectedCaptchaId },
           {
