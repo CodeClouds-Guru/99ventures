@@ -20,6 +20,7 @@ const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../helpers/global");
 const permission = require("../../models/permission");
 const UserResources = require("../../resources/UserResources");
+const FileHelper = require('../../helpers/fileHelper')
 
 class AuthController {
   constructor() {
@@ -193,7 +194,6 @@ class AuthController {
 
     const userResourcesObj = new UserResources(user, header_company_id);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-
     res.send({ status: true, user: userResourcesData });
   }
 
@@ -349,7 +349,8 @@ class AuthController {
       last_name: Joi.string().required(),
       // username: Joi.string().alphanum().min(3).max(30).required(),
       phone_no: Joi.string().required(),
-      email: Joi.string().email().required()
+      email: Joi.string().email().required(),
+      avatar:Joi.optional()
     });
     const { error, value } = schema.validate(req.body);
     if (error) {
@@ -373,11 +374,26 @@ class AuthController {
     }
     //update details
     try {
+      //update basic details
       await User.update({
           ...value
         },
         { where: { id:user.id } 
       });
+
+      if(req.files){
+        let files = []
+        files[0] = req.files.avatar
+        console.log(files)
+        const fileHelper = new FileHelper(files,'users',req)
+        const file_name = await fileHelper.upload()
+        await User.update({
+              avatar:file_name.files[0].filename
+            },
+            { where: { id:user.id } 
+          });
+        
+      }
       res.status(200).json({
         status: true,
         message: "Profile Updated.'",
