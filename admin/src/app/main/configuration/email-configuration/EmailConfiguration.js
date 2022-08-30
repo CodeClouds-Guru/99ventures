@@ -121,11 +121,9 @@ function EmailConfiguration() {
             })
     }
     const selectSslRequired = (event) => {
-        console.log('ssl', event.target.checked)
         setSslRequired(event.target.checked)
     }
     const selectSiteNameVisible = (event) => {
-        console.log('visible', event.target.checked)
         setSiteNameVisible(event.target.checked)
     }
     return (
@@ -251,13 +249,12 @@ function EmailConfiguration() {
                             render={({ field }) => (
                                 <FormControl className="items-center">
                                     <FormControlLabel
-                                        label="Requires a secure connection (SSL)"
                                         control={
-                                            <Checkbox checked={sslRequired} onChange={selectSslRequired} {...field} />
+                                            <Checkbox checked={sslRequired} onChange={selectSslRequired} />
                                         }
+                                        label="Requires a secure connection (SSL)"
                                     />
                                     <FormHelperText>{errors?.sslRequired?.message}</FormHelperText>
-
                                 </FormControl>
                             )}
                         />
@@ -270,14 +267,14 @@ function EmailConfiguration() {
                                     <FormControlLabel
                                         label="Include site name at the begining of the subject"
                                         control={
-                                            <Checkbox checked={siteNameVisible} onChange={selectSiteNameVisible} {...field} />
-                                            // <input type="checkbox" checked={siteNameVisible} onChange={() => selectSiteNameVisible} {...field} />
+                                            <Checkbox checked={siteNameVisible} onChange={selectSiteNameVisible} />
                                         }
                                     />
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
                         />
+
                         <span className="flex items-center justify-center">
                             <Button
                                 variant="contained"
