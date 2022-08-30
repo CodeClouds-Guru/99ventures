@@ -1,10 +1,12 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, ListItemText, CardContent, TextField, TextareaAutosize } from '@mui/material';
+import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 const modalStyle = {
     position: 'absolute',
@@ -33,6 +35,7 @@ function GeneralConfiguration() {
     const [layoutOptions, setLayoutOptions] = useState([])
     const [pageOptions, setPageOptions] = useState([])
     const [toggleModal, setToggleModal] = useState(false);
+
 
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
@@ -84,16 +87,52 @@ function GeneralConfiguration() {
     
 
     const getReplies = (replies) => {
-        return replies.map(reply => <ListItem disablePadding>
-            <ListItemButton key={reply.id}>
-                <ListItemText primary={reply.name} />
-            </ListItemButton>
-        </ListItem>)
+        return replies.map((reply, indx) => {
+            // console.log(indx);
+            return (
+                <>
+                    <ListItem key={ indx } 
+                        secondaryAction= {
+                            <IconButton edge="end" aria-label="delete" onClick={()=> removeListItem(indx)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        }
+                    >
+                        <ListItemText 
+                            primary={reply.name} 
+                            secondary={ 
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    noWrap
+                                >
+                                    {reply.body}
+                                </Typography>
+                            }
+                        />           
+                    </ListItem>
+                    <Divider variant="inset" component="li" className="ml-12"/>
+                </>
+            )
+        })
+    }
+
+    /*const subString = (string) => {
+        if(string.length > 100) {
+            string = string.subString(0, 100) + '...';
+        }
+        return string;
+    }*/
+
+    const removeListItem = (itemKey) => {
+        generalReplies.splice(itemKey, 1);
+        setGeneralReplies([...generalReplies]);
     }
 
     useEffect(() => { 
         fetchData();
     }, [])
+    
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -102,10 +141,47 @@ function GeneralConfiguration() {
 
     const { isValid, dirtyFields, errors } = formState;
 
-    const onSubmit = () => { }
+    const onSubmit = ({home_page, default_template, captcha_option}) => { 
+        console.log('submit')
+    }
+
+    
+    /**
+     * Modal Form validation 
+     */
+    const replyFormSchema =  yup.object().shape({
+        heading: yup.string().required('Please enter the heading'),
+        messageBody: yup.string().required('Please enter Message'),
+    });
+    const replyFormDefaultValues = {
+        heading: '',
+        messageBody: ''
+    }
+    const { 
+        control: replyControl, 
+        formState: { isValid: isRPFValid, dirtyFields: dirtyRPFFields }, 
+        handleSubmit: handleReplySubmit,
+        resetField: resetRPField
+    } = useForm({
+        mode: 'onChange',
+        defaultValues: replyFormDefaultValues,
+        resolver: yupResolver(replyFormSchema),
+    });  
+    
+    const onReplySubmit = ({heading, messageBody}) => {
+        setGeneralReplies([
+            ...generalReplies,
+            {
+                name: heading,
+                body: messageBody
+            }
+        ])
+    }
 
     const handleClose = () => {
-        setToggleModal(false)
+        setToggleModal(false);
+        resetRPField("heading");
+        resetRPField("messageBody");
     }
 
     return (
@@ -118,36 +194,68 @@ function GeneralConfiguration() {
                 style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
             >
                 <Box sx={modalStyle}>
-                    <h2 id="child-modal-title">Autoresponder</h2>
+                    <h2 id="child-modal-title mb-24">Auto Responder</h2>
                     {/* <p id="child-modal-description">
                         Lorem ipsum, dolor sit amet consectetur adipisicing elit.
                     </p> */}
-                    <div>
-                        <TextField
-                            Heading
-                            id="outlined-required"
-                            label="Required"
-                            defaultValue=""
-                            fullWidth 
+                    <form
+                        name="AutoresponderForm"
+                        noValidate  
+                        className="flex flex-col justify-center w-full mt-32"
+                        onSubmit={handleReplySubmit(onReplySubmit)}
+                    >
+                        <Controller
+                            name="heading"
+                            control={replyControl}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    className="mb-24"
+                                    label="Heading"                            
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                />
+                            )}
                         />
-                    </div>
-                    <div>
-                        <TextareaAutosize
-                            aria-label=""
-                            minRows={3}
-                            placeholder="Description"
-                            fullWidth 
+                        
+                        <Controller
+                            name="messageBody"
+                            control={replyControl}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    id="outlined-multiline-static"
+                                    label="Message Body"
+                                    className="mb-24"
+                                    multiline
+                                    rows={4}
+                                    fullWidth
+                                    required
+                                />
+                            )}
                         />
-                    </div>
-                    <div>
-                        <Button 
-                            variant="contained"
-                            component="label"
-                            className="ml-12"
-                            color="primary" 
-                            onClick={handleClose}
-                        >Close</Button>
-                    </div>
+                        <div className='flex justify-between'>
+                            <Button 
+                                variant="contained"
+                                component="label"
+                                className=""
+                                color="primary" 
+                                onClick={handleClose}
+                            >Close</Button>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                className=""
+                                aria-label="Add"
+                                disabled={_.isEmpty(dirtyRPFFields) || !isRPFValid}
+                                type="submit"
+                                size="large"
+                                >
+                                Add
+                            </Button>
+                        </div>
+                    </form>
                 </Box>
             </Modal>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
@@ -239,6 +347,7 @@ function GeneralConfiguration() {
                                     className="w-1/2 mt-24"
                                     aria-label="Register"
                                     type="submit"
+                                    disabled={_.isEmpty(dirtyFields) || !isValid}
                                     size="large"
                                 >
                                     Save
