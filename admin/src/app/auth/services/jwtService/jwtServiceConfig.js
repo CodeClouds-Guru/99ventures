@@ -9,8 +9,12 @@ const jwtServiceConfig = {
   logout: 'logout',
   companies: 'companies',
   profile: 'profile',
+  getEmailConguration: 'emailconfigurations/view',
   saveEmailConguration: 'emailconfigurations/save',
-  getEmailConguration: 'emailconfigurations/view'
+  getIpConfiguration: 'ip-configurations',
+  saveIpConfiguration: 'ip-configurations/save',
+  getDowntimeConfiguration: 'ip-downtime-settings',
+  saveDowntimeConfiguration: 'ip-downtime-update',
 };
 
 export default jwtServiceConfig;

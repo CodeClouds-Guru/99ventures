@@ -93,6 +93,9 @@ class IpConfigurationController extends Controller {
         where: { status: 0, company_portal_id: site_id },
         attributes: ['ip'],
       })
+      ip_list = ip_list.map((ip_result) => {
+        return ip_result.ip
+      })
       const downtime_text = await CompanyPortal.findOne({
         where: { company_id: company_id },
         attributes: ['downtime_message', 'status'],
@@ -119,15 +122,14 @@ class IpConfigurationController extends Controller {
       const shutdown_checked = req.body.shutdown_checked || false
       const updated_downtime_text = req.body.updated_downtime_text || ''
       const new_ip_list = req.body.new_ip_list || []
-      const removed_ip_list = req.body.removed_ip_list || []
       let flag = false
 
       let comPorData = []
       if (updated_downtime_text !== '') {
         comPorData.downtime_message = updated_downtime_text
       }
-      if (shutdown_checked) {
-        comPorData.status = shutdown_checked == true ? 2 : 1
+      if (shutdown_checked !== '') {
+        comPorData.status = shutdown_checked == true ? 2 : 1;
       }
       if (comPorData) {
         const company_portal_update = await CompanyPortal.update(comPorData, {
@@ -166,7 +168,7 @@ class IpConfigurationController extends Controller {
       if (flag) {
         return res.status(200).json({
           status: true,
-          msg: 'Data saved',
+          message: 'Data saved',
         })
       } else {
         return res.status(500).json({
