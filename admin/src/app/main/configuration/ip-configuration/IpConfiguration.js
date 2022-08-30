@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import AddMore from 'app/shared-components/AddMore';
 import axios from 'axios';
+import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
 
 function IpConfiguration() {
     let [ips, setIps] = useState([]);
@@ -15,9 +16,9 @@ function IpConfiguration() {
         fetchData();
     }, [])
 
-    const submit = (e) => { 
+    const submit = (e) => {
         e.preventDefault();
-        axios.post('ip-configurations/save', {
+        axios.post(jwtServiceConfig.saveIpConfiguration, {
             ips,
             isps,
         }).then(res => {
@@ -38,8 +39,8 @@ function IpConfiguration() {
     }
 
     const fetchData = () => {
-        axios.get('ip-configurations').then(res => {
-            if(res.data.status) {
+        axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
+            if (res.data.status) {
                 setIps(res.data.ip_list)
                 setIsps(res.data.isp_list)
             } else {
@@ -60,7 +61,7 @@ function IpConfiguration() {
                             <CardHeader title="Denied IP List" />
                             <CardContent>
                                 <AddMore
-                                    data={ips} 
+                                    data={ips}
                                     placeholder="Enter IP"
                                     onChange={onIpChangeFromChild}
                                 />
@@ -71,7 +72,7 @@ function IpConfiguration() {
                             <CardHeader title="Denied ISP List" />
                             <CardContent>
                                 <AddMore
-                                    data={isps} 
+                                    data={isps}
                                     placeholder="Enter ISP"
                                     onChange={onIspChangeFromChild}
                                 />

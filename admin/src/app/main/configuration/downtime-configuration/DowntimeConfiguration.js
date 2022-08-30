@@ -13,7 +13,7 @@ import AddMore from 'app/shared-components/AddMore';
 function DowntimeConfiguration() {
     const dispatch = useDispatch();
     const [allowedIPs, setAllowedIPs] = useState([])
-    const [message, setMessage] = useState([])
+    const [message, setMessage] = useState("")
     const [shutdown, setShutdown] = useState(false)
 
     useEffect(() => {
@@ -22,19 +22,20 @@ function DowntimeConfiguration() {
     const onIpChangeFromChild = (val) => {
         setAllowedIPs(val);
     }
-    const onMessageChange = (val) => {
-        setMessage(val);
+    const onMessageChange = (event) => {
+        console.log(event.target.value)
+        setMessage(event.target.value);
     }
     const onShutdownCheck = (event) => {
         setShutdown(event.target.checked);
     }
 
     const getDowntime = () => {
-        axios.get('ip-downtime-settings').then(res => {
+        axios.get(jwtServiceConfig.getDowntimeConfiguration).then(res => {
             if (res.data.status) {
-                // setAllowedIPs(res.data.data.ip_list)
+                setAllowedIPs(res.data.data.ip_list)
                 setMessage(res.data.data.downtime_text.downtime_message)
-                setShutdown(res.data.data.downtime_text.status === 1)
+                setShutdown(res.data.data.downtime_text.status === 2)    // status 2 is checked
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.message }))
             }
@@ -46,15 +47,14 @@ function DowntimeConfiguration() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        axios.post('ip-downtime-update', {
+        axios.post(jwtServiceConfig.saveDowntimeConfiguration, {
             new_ip_list: allowedIPs,
             updated_downtime_text: message,
             shutdown_checked: shutdown,
         }).then(res => {
-            console.log(res)
-            return
             const variant = res.data.status ? 'success' : 'error';
             dispatch(showMessage({ variant, message: res.data.message }))
+            getDowntime() ? res.data.status : null
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong' }))
@@ -85,7 +85,8 @@ function DowntimeConfiguration() {
                             fullWidth
                             multiline
                             minRows={3}
-                            defaultValue={message}
+                            value={message}
+                            onChange={onMessageChange}
                         />
 
                         <FormControl className="items-center">

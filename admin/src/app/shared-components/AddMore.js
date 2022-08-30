@@ -8,7 +8,7 @@ export default function AddMore(props) {
 
     useEffect(() => {
         if (props.data) {
-            console.log(props, props.data)
+            // console.log(props, props.data)
             setDataset(props.data);
         }
         // handleData(props);
