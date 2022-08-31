@@ -8,6 +8,7 @@ import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
 import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
+import PaymentGateway from './payment-gateway';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -63,6 +64,7 @@ function ConfigurationContent() {
                     <Tab label="Email" {...a11yProps(1)} />
                     <Tab label="IP" {...a11yProps(2)} />
                     <Tab label="Downtime" {...a11yProps(3)} />
+                    <Tab label="Payment Gateway" {...a11yProps(4)} />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -76,6 +78,9 @@ function ConfigurationContent() {
             </TabPanel>
             <TabPanel value={value} index={3}>
                 <DowntimeConfiguration />
+            </TabPanel>
+            <TabPanel value={value} index={4}>
+                <PaymentGateway />
             </TabPanel>
         </Box>
     );
