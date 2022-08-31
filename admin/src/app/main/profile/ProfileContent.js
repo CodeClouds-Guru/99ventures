@@ -31,6 +31,23 @@ const Root = styled('div')(({ theme }) => ({
             borderRadius: '50%',
         },
     },
+    '& .custom-overlay': {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.3)',
+        zIndex: 99,
+        borderRadius: '50%',
+        textAlign: 'center',
+        margin: 'auto',
+    },
+    '& .image-edit': {
+        background: 'rgba(255,255,255,0.5)',
+        padding: '6px',
+        borderRadius: '50%',
+    }
 }));
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -87,9 +104,9 @@ function ProfileContent() {
     const removeAvatar = () => {
         if (avatar) {
             return (
-                <span className="flex justify-end items-end">
-                    <Tooltip title="Remove selected avatar" placement="right-end">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
+                <span className="pl-10">
+                    <Tooltip title="Remove selected avatar" placement="right">
+                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="error" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
                             feather:x
                         </FuseSvgIcon>
                     </Tooltip>
@@ -100,15 +117,27 @@ function ProfileContent() {
     const uploadIcon = () => {
         if (avatar) {
             return (
-                <span className="flex justify-center items-center">
+                <span className="pr-10">
                     <Tooltip title="Upload selected avatar" placement="left">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
+                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="success" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
                             feather:upload
                         </FuseSvgIcon>
                     </Tooltip>
                 </span>
             )
         }
+    }
+    const addOverlay = () => {
+        let element = document.getElementById('avatar-div');
+        element.classList.add('flex');
+        element.classList.add('custom-overlay');
+        element.classList.remove('hidden');
+    }
+    const removeOverlay = () => {
+        let element = document.getElementById('avatar-div');
+        element.classList.remove('custom-overlay');
+        element.classList.remove('flex');
+        element.classList.add('hidden');
     }
     const uploadAvatar = () => {
         let form_data = new FormData();
@@ -139,9 +168,15 @@ function ProfileContent() {
                         type="file"
                         onChange={(e) => selectedFile(e)}
                     />
-                    <label htmlFor="contained-button-file">
-                        {removeAvatar()}
+                    <label htmlFor="contained-button-file" onMouseEnter={addOverlay} onMouseLeave={removeOverlay}>
                         <IconButton onClick={openFileSelectDialog}>
+                            <div id="avatar-div" className="items-center justify-center hidden">
+                                <span className="image-edit">
+                                    <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
+                                        feather:camera
+                                    </FuseSvgIcon>
+                                </span>
+                            </div>
                             <Avatar
                                 sx={{
                                     backgroundColor: 'background.paper',
@@ -156,7 +191,10 @@ function ProfileContent() {
                                 {user.first_name + ' ' + user.last_name}
                             </Avatar>
                         </IconButton>
-                        {uploadIcon()}
+                        <div className="flex justify-center items-center mt-4">
+                            {uploadIcon()}
+                            {removeAvatar()}
+                        </div>
                     </label>
                 </div>
                 <Typography className="username text-14 whitespace-nowrap font-medium">
