@@ -26,6 +26,13 @@ module.exports = class UserResources {
       companies = await CompanyUser.findAll({
         where: { company_id: this.company_id, user_id: user.id },
       });
+      // companies = await db.sequelize.query(
+      //   "SELECT * FROM company_user WHERE company_id = ? AND user_id = ? LIMIT 1",
+      //   {
+      //     replacements: [this.company_id, user.id],
+      //     type: QueryTypes.SELECT,
+      //   }
+      // );
       if (companies && companies.length > 0) {
         const group = await Group.findOne({
           where: {
@@ -64,6 +71,12 @@ module.exports = class UserResources {
       user.setDataValue("roles", roles);
     } else {
       companies = await CompanyUser.findAll();
+      // companies = await db.sequelize.query(
+      //   "SELECT * FROM company_user WHERE 1",
+      //   {
+      //     type: QueryTypes.SELECT,
+      //   }
+      // );
     }
     console.log("from user resource", this.company_id, user.id, companies);
 

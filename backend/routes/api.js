@@ -13,6 +13,8 @@ const EmailConfigurationController = new EmailConfigurationControllerClass()
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController')
 const IpConfigurationControllerClass = require('../controllers/backend/IpConfigurationController')
 const IpConfigurationController = new IpConfigurationControllerClass()
+const PaymentMethodControllerClass = require('../controllers/backend/PaymentMethodController')
+const PaymentMethodController = new PaymentMethodControllerClass()
 router.get('/', (req, res) => {
   res.json({ message: 'API working' })
 })
@@ -71,6 +73,17 @@ router.post(
   '/ip-configurations/save',
   [AuthMiddleware],
   IpConfigurationController.save
+)
+
+router.get(
+  '/payment-methods',
+  [AuthMiddleware],
+  PaymentMethodController.list
+)
+router.post(
+  '/payment-methods/update',
+  [AuthMiddleware],
+  PaymentMethodController.update
 )
 
 router.all(
