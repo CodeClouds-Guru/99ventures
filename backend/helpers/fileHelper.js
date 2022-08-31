@@ -9,7 +9,6 @@ class FileHelper {
       this.company_id = req.headers.company_id
       this.site_id = req.headers.site_id
     }
-    console.log('comp_id',this.company_id)
     this.files = files
     this.model = model
     this.storage_path = ''
@@ -24,8 +23,9 @@ class FileHelper {
     this.getPath = this.getPath.bind(this)
     this.s3Connect = this.s3Connect.bind(this)
     this.generateSignedUrl = this.generateSignedUrl.bind(this)
+    this.deleteFile = this.deleteFile.bind(this)
   }
-    
+  //upload file to s3 bucket  
   async upload() {
     var path = await this.getPath(this.model)
     for (var key of Object.keys(this.files)) {
@@ -87,6 +87,15 @@ class FileHelper {
       Expires: 900, // S3 default is 900 seconds (15 minutes)
     });
     return signedUrl
+  }
+  //delete file
+  async deleteFile(key){
+    let s3 = this.s3Connect()
+    s3.deleteObject({
+      Key: key,
+      Bucket: process.env.AWS_S3_BUCKET_NAME
+    });
+    return true
   }
 }
 
