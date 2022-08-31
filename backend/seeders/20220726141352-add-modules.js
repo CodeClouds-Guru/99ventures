@@ -79,6 +79,30 @@ const modules = [
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
+  },
+  {
+    slug: 'generalconfigurations',
+    name: 'General Configurations',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'paymentconfigurations',
+    name: 'Payment Configurations',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'downtime',
+    name: 'Downtime',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
   }
 ]
 module.exports = {
