@@ -347,99 +347,125 @@
     let user = req.user
     if(req.body.type == 'basic_details'){
       delete req.body.type
-      const schema = Joi.object({
-        first_name: Joi.string().required(),
-        last_name: Joi.string().required(),
-        phone_no: Joi.string().required(),
-        avatar:Joi.optional()
-      });
-      const { error, value } = schema.validate(req.body);
-      if (error) {
-        let error_msg = error.details.map((err) => err.message);
-        res.status(401).json({
-          status: false,
-          errors: error_msg.join(","),
-        });
-        return
-      }
-      //update details
-      try {
-        //update basic details
-        await User.update({
-            ...value
-          },
-          { where: { id:user.id } 
-        });
-
-        res.status(200).json({
-          status: true,
-          message: "Profile Updated.'",
-        });
-      } catch (error) {
-        throw error
-      }
+      this.updateBasicDetails(req,res)
     }else if(req.body.type == 'change_avatar'){
       delete req.body.type
-      if(req.files){
-        let pre_avatar = user.avatar
-        let files = []
-        files[0] = req.files.avatar
-        const fileHelper = new FileHelper(files,'users',req)
-        const file_name = await fileHelper.upload()
-        await User.update({
-              avatar:file_name.files[0].filename
-            },
-            { where: { id:user.id } 
-          });
-        if(pre_avatar !=''){
-          let file_delete = await fileHelper.deleteFile(pre_avatar)
-        }
-        res.status(200).json({
-          status: true,
-          message: "Avatar Updated.'",
-        });
-      }else{
-        res.status(401).json({
-          status: false,
-          errors: "Avatar is required.",
-        });
-      }
+      this.changeAvatar(req,res)
     }else if(req.body.type == 'change_password'){
       delete req.body.type
-      const schema = Joi.object({
-        password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
-      });
-      const { error, value } = schema.validate(req.body);
-      if (error) {
-        let error_msg = error.details.map((err) => err.message);
-        res.status(401).json({
-          status: false,
-          errors: error_msg.join(","),
-        });
-        return
-      }
-      const salt = await bcrypt.genSalt(10)
-      const password = await bcrypt.hash(value.password, salt)
-      //update password
-      try {
-        //update basic details
-        await User.update({
-            password
-          },
-          { where: { id:user.id } 
-        });
-        res.status(200).json({
-          status: true,
-          message: "Password Updated.'",
-        });
-      } catch (error) {
-        throw error
-      }
+      this.changePassword(req,res)
     }else{
       res.status(401).json({
         status: false,
         errors: "Type is required.",
       });
+    }
+  }
+  //update user basic details
+  async updateBasicDetails(req,res){
+    let user = req.user
+    const schema = Joi.object({
+      first_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      phone_no: Joi.required(),
+      avatar:Joi.optional()
+    });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      let error_msg = error.details.map((err) => err.message);
+      res.status(401).json({
+        status: false,
+        errors: error_msg.join(","),
+      });
+      return
+    }
+    //update details
+    try {
+      //update basic details
+      await User.update({
+          ...value
+        },
+        { where: { id:user.id } 
+      });
+      this.profile(req,res)
+      // res.status(200).json({
+      //   status: true,
+      //   message: "Profile Updated.'",
+      // });
+    } catch (error) {
+      throw error
+    }
+  }
+  //change avatar 
+  async changeAvatar(req,res){
+    let user = req.user
+    if(req.files){
+      let pre_avatar = user.avatar
+      let files = []
+      files[0] = req.files.avatar
+      const fileHelper = new FileHelper(files,'users',req)
+      const file_name = await fileHelper.upload()
+      await User.update({
+            avatar:file_name.files[0].filename
+          },
+          { where: { id:user.id } 
+        });
+      if(pre_avatar !=''){
+        let file_delete = await fileHelper.deleteFile(pre_avatar)
+      }
+      this.profile(req,res)
+      // res.status(200).json({
+      //   status: true,
+      //   message: "Avatar Updated.'",
+      // });
+    }else{
+      res.status(401).json({
+        status: false,
+        errors: "Avatar is required.",
+      });
+    }
+  }
+  //change password
+  async changePassword(req,res){
+    let user = req.user
+    const schema = Joi.object({
+      old_password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
+      password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
+    });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      let error_msg = error.details.map((err) => err.message);
+      res.status(401).json({
+        status: false,
+        errors: error_msg.join(","),
+      });
+      return
+    }
+    const salt = await bcrypt.genSalt(10)
+    const password = await bcrypt.hash(value.password, salt)
+    //check old password
+    const isMatch = await bcrypt.compare(value.old_password, user.password)
+     if (!isMatch) {
+       res.status(401).json({
+         status: false,
+         errors: 'Old password does not match',
+       })
+       return
+     }
+    //update password
+    try {
+      //update basic details
+      await User.update({
+          password
+        },
+        { where: { id:user.id } 
+      });
+      res.status(200).json({
+        status: true,
+        message: "Password Updated.'",
+      });
+    } catch (error) {
+      throw error
     }
   }
  }
