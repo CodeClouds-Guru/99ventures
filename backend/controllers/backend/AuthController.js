@@ -30,6 +30,8 @@
      this.login = this.login.bind(this)
      this.refreshToken = this.refreshToken.bind(this)
      this.profileUpdate = this.profileUpdate.bind(this)
+     this.profile = this.profile.bind(this)
+     this.profileDetails = this.profileDetails.bind(this)
    }
  
    async signup(req, res) {
@@ -186,7 +188,11 @@
    }
  
    async profile(req, res) {
-     var groups = []
+     const userResourcesData = await this.profileDetails(req)
+     res.send({ status: true, user: userResourcesData })
+   }
+   async profileDetails(req){
+    var groups = []
      var roles = []
      var permissions = []
      let user = req.user
@@ -194,10 +200,8 @@
  
      const userResourcesObj = new UserResources(user, header_company_id)
      const userResourcesData = await userResourcesObj.getUserFormattedData()
- 
-     res.send({ status: true, user: userResourcesData })
+     return userResourcesData
    }
- 
    async logout(req, res) {
      res.status(200).json({ status: true })
    }
@@ -387,11 +391,12 @@
         },
         { where: { id:user.id } 
       });
-      this.profile(req,res)
-      // res.status(200).json({
-      //   status: true,
-      //   message: "Profile Updated.'",
-      // });
+      let profile_details = await this.profileDetails(req)
+      res.status(200).json({
+        status: true,
+        message: "Profile Updated.'",
+        user: profile_details
+      });
     } catch (error) {
       throw error
     }
@@ -413,11 +418,12 @@
       if(pre_avatar !=''){
         let file_delete = await fileHelper.deleteFile(pre_avatar)
       }
-      this.profile(req,res)
-      // res.status(200).json({
-      //   status: true,
-      //   message: "Avatar Updated.'",
-      // });
+      let profile_details = await this.profileDetails(req)
+      res.status(200).json({
+        status: true,
+        message: "Avatar Updated.'",
+        user: profile_details
+      });
     }else{
       res.status(401).json({
         status: false,
