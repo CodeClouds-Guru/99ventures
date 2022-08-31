@@ -350,7 +350,7 @@
       const schema = Joi.object({
         first_name: Joi.string().required(),
         last_name: Joi.string().required(),
-        phone_no: Joi.string().required(),
+        phone_no: Joi.required(),
         avatar:Joi.optional()
       });
       const { error, value } = schema.validate(req.body);
