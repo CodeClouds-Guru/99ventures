@@ -1,7 +1,4 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText, TextareaAutosize, Card, CardContent, CardHeader, Typography } from '@mui/material';
-import * as yup from 'yup';
+import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, Card, CardContent, CardHeader, Typography } from '@mui/material';
 import _ from '@lodash';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -23,7 +20,6 @@ function DowntimeConfiguration() {
         setAllowedIPs(val);
     }
     const onMessageChange = (event) => {
-        console.log(event.target.value)
         setMessage(event.target.value);
     }
     const onShutdownCheck = (event) => {
