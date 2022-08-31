@@ -391,11 +391,11 @@
         },
         { where: { id:user.id } 
       });
-      let profile_details = await this.profileDetails(req)
+      // let profile_details = await this.profileDetails(req)
       res.status(200).json({
         status: true,
-        message: "Profile Updated.'",
-        user: profile_details
+        message: "Profile Updated.",
+        // user: profile_details
       });
     } catch (error) {
       throw error
@@ -418,11 +418,11 @@
       if(pre_avatar !=''){
         let file_delete = await fileHelper.deleteFile(pre_avatar)
       }
-      let profile_details = await this.profileDetails(req)
+      // let profile_details = await this.profileDetails(req)
       res.status(200).json({
         status: true,
-        message: "Avatar Updated.'",
-        user: profile_details
+        message: "Avatar Updated.",
+        // user: profile_details
       });
     }else{
       res.status(401).json({
