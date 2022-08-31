@@ -377,7 +377,7 @@
     const { error, value } = schema.validate(req.body);
     if (error) {
       let error_msg = error.details.map((err) => err.message);
-      res.status(401).json({
+      res.status(422).json({
         status: false,
         errors: error_msg.join(","),
       });
@@ -425,7 +425,7 @@
         // user: profile_details
       });
     }else{
-      res.status(401).json({
+      res.status(422).json({
         status: false,
         errors: "Avatar is required.",
       });
@@ -452,7 +452,7 @@
     //check old password
     const isMatch = await bcrypt.compare(value.old_password, user.password)
      if (!isMatch) {
-       res.status(401).json({
+       res.status(422).json({
          status: false,
          errors: 'Old password does not match',
        })

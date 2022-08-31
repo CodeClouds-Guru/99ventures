@@ -3,14 +3,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button, TextField } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
-import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useEffect } from 'react';
 import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
-import { useDispatch } from 'react-redux';
+import jwtService from '../../../auth/services/jwtService/jwtService';
+import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-// import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectUser } from 'app/store/userSlice';
-import { setUser } from 'app/store/userSlice';
+import { selectUser, setUser } from 'app/store/userSlice';
 
 /**
  * Form Validation Schema
@@ -22,15 +21,14 @@ const schema = yup.object().shape({
     lastName: yup
         .string()
         .required('Please enter your last name'),
-    username: yup
-        .string()
-        .required('Please enter your username'),
+    phone: yup
+        .number('Insert numbers only')
+        .required('Please enter your phone no'),
 });
 
 const defaultValues = {
     firstName: '',
     lastName: '',
-    username: '',
     phone: '',
 };
 
@@ -46,11 +44,28 @@ function Account() {
     useEffect(() => {
         setValue('firstName', user.first_name, { shouldDirty: true, shouldValidate: false });
         setValue('lastName', user.last_name, { shouldDirty: true, shouldValidate: false });
-        setValue('username', user.username, { shouldDirty: true, shouldValidate: false });
         setValue('phone', user.phone_no, { shouldDirty: true, shouldValidate: false });
     }, [setValue]);
 
-    const onSubmit = () => { }
+    const onSubmit = ({ firstName, lastName, phone }) => {
+        axios.post(jwtServiceConfig.updateProfile, {
+            type: 'basic_details',
+            first_name: firstName,
+            last_name: lastName,
+            phone_no: phone
+        })
+            .then((response) => {
+                if (response.data.status) {
+                    jwtService.getProfile().then(user => dispatch(setUser(user)));
+                    dispatch(showMessage({ variant: 'success', message: response.data.message }));
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <div className="w-full mx-auto sm:mx-0">
@@ -89,24 +104,6 @@ function Account() {
                                 type="text"
                                 error={!!errors.lastName}
                                 helperText={errors?.lastName?.message}
-                                variant="outlined"
-                                required
-                                fullWidth
-                            />
-                        )}
-                    />
-
-                    <Controller
-                        name="username"
-                        control={control}
-                        render={({ field }) => (
-                            <TextField
-                                {...field}
-                                className="mb-24"
-                                label="Username"
-                                type="text"
-                                error={!!errors.username}
-                                helperText={errors?.username?.message}
                                 variant="outlined"
                                 required
                                 fullWidth

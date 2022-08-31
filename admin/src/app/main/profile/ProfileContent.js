@@ -2,9 +2,13 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Typography, Box, Tab, Tabs, Avatar, IconButton, Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { useSelector } from 'react-redux';
-import { selectUser } from 'app/store/userSlice';
+import { selectUser, setUser } from 'app/store/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import axios from 'axios';
+import jwtServiceConfig from '../../auth/services/jwtService/jwtServiceConfig';
+import jwtService from '../../auth/services/jwtService/jwtService';
 import Account from './account/Account';
 import Password from './password/Password';
 
@@ -63,6 +67,7 @@ function a11yProps(index) {
 }
 
 function ProfileContent() {
+    const dispatch = useDispatch();
     const user = useSelector(selectUser);
     const [tabValue, setTabValue] = useState(0);
     const [avatar, setAvatar] = useState('');
@@ -73,14 +78,18 @@ function ProfileContent() {
         document.getElementById('contained-button-file').click();
     }
     const selectedFile = (event) => {
-        event.target.files.length > 0 ? setAvatar(URL.createObjectURL(event.target.files[0])) : setAvatar('')
+        event.target.files.length > 0 ? setAvatar(event.target.files[0]) : setAvatar('')
+    }
+    const makeAvatarBlank = () => {
+        setAvatar('');
+        document.getElementById('contained-button-file').value = '';
     }
     const removeAvatar = () => {
         if (avatar) {
             return (
                 <span className="flex justify-end items-end">
                     <Tooltip title="Remove selected avatar" placement="right-end">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); setAvatar('') }}>
+                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
                             feather:x
                         </FuseSvgIcon>
                     </Tooltip>
@@ -93,7 +102,7 @@ function ProfileContent() {
             return (
                 <span className="flex justify-center items-center">
                     <Tooltip title="Upload selected avatar" placement="left">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); }}>
+                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
                             feather:upload
                         </FuseSvgIcon>
                     </Tooltip>
@@ -101,12 +110,30 @@ function ProfileContent() {
             )
         }
     }
+    const uploadAvatar = () => {
+        let form_data = new FormData();
+        form_data.append('type', 'change_avatar');
+        form_data.append('avatar', avatar);
+        axios.post(jwtServiceConfig.updateProfile, form_data)
+            .then((response) => {
+                if (response.data.status) {
+                    jwtService.getProfile().then(user => dispatch(setUser(user)));
+                    makeAvatarBlank();
+                    dispatch(showMessage({ variant: 'success', message: response.data.message }))
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
     return (
         <>
             <Root className="user relative flex flex-col items-center justify-center p-16 pb-14 shadow-0">
                 <div className="flex items-center justify-center mb-24">
                     <input
-                        accept="image/jpg, image/jpeg, image/png, image/gif, image/webp, image/JPG, image/JPEG, image/PNG, image/GIF, image/WEBP"
+                        accept="image/*"
                         className="hidden"
                         id="contained-button-file"
                         type="file"
@@ -123,7 +150,7 @@ function ProfileContent() {
                                     width: 150
                                 }}
                                 className="avatar text-50 font-bold edit-hover"
-                                src={!avatar ? user.avatar : avatar}
+                                src={!avatar ? user.avatar : URL.createObjectURL(avatar)}
                                 alt={user.first_name + ' ' + user.last_name}
                             >
                                 {user.first_name + ' ' + user.last_name}
