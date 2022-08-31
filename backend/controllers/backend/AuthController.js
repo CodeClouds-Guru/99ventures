@@ -345,35 +345,20 @@
    //profile update 
   async profileUpdate(req,res){
     let user = req.user
-    if(req.body.type = 'basic_details'){
+    if(req.body.type == 'basic_details'){
+      delete req.body.type
       const schema = Joi.object({
-        type: Joi.string().required(),
         first_name: Joi.string().required(),
         last_name: Joi.string().required(),
-        // username: Joi.string().alphanum().min(3).max(30).required(),
         phone_no: Joi.string().required(),
-        email: Joi.string().email().required(),
         avatar:Joi.optional()
       });
       const { error, value } = schema.validate(req.body);
-      
       if (error) {
         let error_msg = error.details.map((err) => err.message);
         res.status(401).json({
           status: false,
           errors: error_msg.join(","),
-        });
-        return
-      }
-      delete value.type
-      //check user email
-      let check_email = await User.findOne({
-        where: { email: value.email, id: { [Op.ne]: user.id } },
-      })
-      if (check_email) {
-        res.status(401).json({
-          status: false,
-          errors: "Email already exist.'",
         });
         return
       }
@@ -386,18 +371,6 @@
           { where: { id:user.id } 
         });
 
-        if(req.files){
-          let files = []
-          files[0] = req.files.avatar
-          console.log(files)
-          const fileHelper = new FileHelper(files,'users',req)
-          const file_name = await fileHelper.upload()
-          await User.update({
-                avatar:file_name.files[0].filename
-              },
-              { where: { id:user.id } 
-            });
-        }
         res.status(200).json({
           status: true,
           message: "Profile Updated.'",
@@ -405,6 +378,68 @@
       } catch (error) {
         throw error
       }
+    }else if(req.body.type == 'change_avatar'){
+      delete req.body.type
+      if(req.files){
+        let pre_avatar = user.avatar
+        let files = []
+        files[0] = req.files.avatar
+        const fileHelper = new FileHelper(files,'users',req)
+        const file_name = await fileHelper.upload()
+        await User.update({
+              avatar:file_name.files[0].filename
+            },
+            { where: { id:user.id } 
+          });
+        if(pre_avatar !=''){
+          let file_delete = await fileHelper.deleteFile(pre_avatar)
+        }
+        res.status(200).json({
+          status: true,
+          message: "Avatar Updated.'",
+        });
+      }else{
+        res.status(401).json({
+          status: false,
+          errors: "Avatar is required.",
+        });
+      }
+    }else if(req.body.type == 'change_password'){
+      delete req.body.type
+      const schema = Joi.object({
+        password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
+      });
+      const { error, value } = schema.validate(req.body);
+      if (error) {
+        let error_msg = error.details.map((err) => err.message);
+        res.status(401).json({
+          status: false,
+          errors: error_msg.join(","),
+        });
+        return
+      }
+      const salt = await bcrypt.genSalt(10)
+      const password = await bcrypt.hash(value.password, salt)
+      //update password
+      try {
+        //update basic details
+        await User.update({
+            password
+          },
+          { where: { id:user.id } 
+        });
+        res.status(200).json({
+          status: true,
+          message: "Password Updated.'",
+        });
+      } catch (error) {
+        throw error
+      }
+    }else{
+      res.status(401).json({
+        status: false,
+        errors: "Type is required.",
+      });
     }
   }
  }
