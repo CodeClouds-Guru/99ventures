@@ -8,7 +8,7 @@ import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
 import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
-import PaymentGateway from './payment-gateway';
+import PaymentGateway from './payment-gateway/PaymentGateway';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
