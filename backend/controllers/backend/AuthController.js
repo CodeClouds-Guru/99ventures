@@ -345,61 +345,66 @@
    //profile update 
   async profileUpdate(req,res){
     let user = req.user
-    const schema = Joi.object({
-      first_name: Joi.string().required(),
-      last_name: Joi.string().required(),
-      // username: Joi.string().alphanum().min(3).max(30).required(),
-      phone_no: Joi.string().required(),
-      email: Joi.string().email().required(),
-      avatar:Joi.optional()
-    });
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      let error_msg = error.details.map((err) => err.message);
-      res.status(401).json({
-        status: false,
-        errors: error_msg.join(","),
+    if(req.body.type = 'basic_details'){
+      const schema = Joi.object({
+        type: Joi.string().required(),
+        first_name: Joi.string().required(),
+        last_name: Joi.string().required(),
+        // username: Joi.string().alphanum().min(3).max(30).required(),
+        phone_no: Joi.string().required(),
+        email: Joi.string().email().required(),
+        avatar:Joi.optional()
       });
-      return
-    }
-    //check user email
-    let check_email = await User.findOne({
-      where: { email: value.email, id: { [Op.ne]: user.id } },
-    })
-    if (check_email) {
-      res.status(401).json({
-        status: false,
-        errors: "Email already exist.'",
-      });
-      return
-    }
-    //update details
-    try {
-      //update basic details
-      await User.update({
-          ...value
-        },
-        { where: { id:user.id } 
-      });
-
-      if(req.files){
-        let files = []
-        files[0] = req.files.avatar
-        console.log(files)
-        const fileHelper = new FileHelper(files,'users',req)
-        const file_name = await fileHelper.upload()
-        await User.update({
-              avatar:file_name.files[0].filename
-            },
-            { where: { id:user.id } 
-          });
+      const { error, value } = schema.validate(req.body);
+      
+      if (error) {
+        let error_msg = error.details.map((err) => err.message);
+        res.status(401).json({
+          status: false,
+          errors: error_msg.join(","),
+        });
+        return
       }
-      res.status(200).json({
-        status: true,
-        message: "Profile Updated.'",
-      });
-    } catch (error) {
-      throw error
+      delete value.type
+      //check user email
+      let check_email = await User.findOne({
+        where: { email: value.email, id: { [Op.ne]: user.id } },
+      })
+      if (check_email) {
+        res.status(401).json({
+          status: false,
+          errors: "Email already exist.'",
+        });
+        return
+      }
+      //update details
+      try {
+        //update basic details
+        await User.update({
+            ...value
+          },
+          { where: { id:user.id } 
+        });
+
+        if(req.files){
+          let files = []
+          files[0] = req.files.avatar
+          console.log(files)
+          const fileHelper = new FileHelper(files,'users',req)
+          const file_name = await fileHelper.upload()
+          await User.update({
+                avatar:file_name.files[0].filename
+              },
+              { where: { id:user.id } 
+            });
+        }
+        res.status(200).json({
+          status: true,
+          message: "Profile Updated.'",
+        });
+      } catch (error) {
+        throw error
+      }
     }
   }
  }
