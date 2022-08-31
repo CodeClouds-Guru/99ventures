@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class PaymentMethod extends Model {
     /**
@@ -11,25 +9,24 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      PaymentMethod.hasMany(models.PaymentMethodCredential, {
+        foreignKey: 'payment_method_id',
+        as: "credentials",
+      })
     }
   }
-  PaymentMethod.init({
-    name: DataTypes.STRING,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: 'TIMESTAMP',
-    updated_at: 'TIMESTAMP',
-    deleted_at: 'TIMESTAMP'
-  }, {
-    sequelize,
-    modelName: 'PaymentMethod',
-    timestamps: true,
-    paranoid: true,
-    createdAt: 'created_at', // alias createdAt as created_date
-    updatedAt: 'updated_at',
-    deletedAt: 'deleted_at',
-    tableName: 'payment_methods',
-  });
+  PaymentMethod.init(
+    {
+      name: DataTypes.STRING,
+      slug: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "PaymentMethod",
+      timestamps: false,
+      paranoid: true,
+      tableName: "payment_methods",
+    }
+  );
   return PaymentMethod;
 };

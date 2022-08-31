@@ -12,25 +12,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      created_by: {
-        type: Sequelize.BIGINT
-      },
-      updated_by: {
-        type: Sequelize.BIGINT
-      },
-      deleted_by: {
-        type: Sequelize.BIGINT
-      },
-      created_at: {
-        type: 'TIMESTAMP',
+      slug: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      updated_at: {
-        type: 'TIMESTAMP'
-      },
-      deleted_at: {
-        type: 'TIMESTAMP'
-      }
+      
     });
   },
   async down(queryInterface, Sequelize) {
