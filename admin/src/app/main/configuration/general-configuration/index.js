@@ -181,9 +181,9 @@ function GeneralConfiguration() {
         axios.post('/save-general-tab-data', params)
         .then((response) => {
             if (response.data.status) {
-                dispatch(showMessage({ variant: 'success', message: response.data.msg }))
+                dispatch(showMessage({ variant: 'success', message: response.data.message }))
             } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.msg }))
+                dispatch(showMessage({ variant: 'error', message: response.data.message }))
             }
         })
         .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));

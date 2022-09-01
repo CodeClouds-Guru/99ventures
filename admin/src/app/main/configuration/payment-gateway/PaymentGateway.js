@@ -1,12 +1,10 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import { Box, Tabs, Tab, Typography }from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PaymentCredentials from './PaymentCredentials';
 import axios from 'axios';
-
+import './TabStyle.css';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -83,7 +81,7 @@ const PaymentGateway = () => {
 			>
 				{
 					gateways.map((gateway, indx) => {
-						return <Tab key={ indx } label={ gateway.name } {...a11yProps(indx)} />
+						return <Tab key={ indx } label={ gateway.name } {...a11yProps(indx)} icon={<PlayArrowIcon />} iconPosition="start" />
 					})
 				}
 			</Tabs>

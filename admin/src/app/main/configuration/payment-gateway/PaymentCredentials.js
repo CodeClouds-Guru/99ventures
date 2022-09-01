@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Typography} from '@mui/material';
+import { Box, TextField, Typography, Divider } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -74,8 +74,11 @@ const PaymentCredentials = (props) => {
                 maxWidth: '100%',
             }}
         >
-            <Typography variant="h6">{ props.gateway }</Typography>            
-            <Typography variant="body2">Please add below details</Typography>
+            <div>
+                <Typography variant="h6">{ props.gateway }</Typography>            
+                <Typography variant="body2">Please add below details</Typography>
+            </div>
+            <Divider style={{ marginBottom: '4rem', marginTop: '1.5rem'}}/>
             <form
                 name="PaypalForm"
                 noValidate  
@@ -105,11 +108,10 @@ const PaymentCredentials = (props) => {
                 }
                 
 
-                <div className='flex justify-center'>
+                <div className='flex justify-end'>
                     <LoadingButton
                         variant="contained"
                         color="secondary"
-                        className="w-1/2"
                         aria-label="Save"                        
                         loading={loading}
                         type="submit"
