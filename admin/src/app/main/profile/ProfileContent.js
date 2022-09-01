@@ -9,6 +9,8 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import axios from 'axios';
 import jwtServiceConfig from '../../auth/services/jwtService/jwtServiceConfig';
 import jwtService from '../../auth/services/jwtService/jwtService';
+import ClearIcon from '@mui/icons-material/Clear';
+import UploadIcon from '@mui/icons-material/Upload';
 import Account from './account/Account';
 import Password from './password/Password';
 
@@ -106,9 +108,12 @@ function ProfileContent() {
             return (
                 <span className="pl-10">
                     <Tooltip title="Remove selected avatar" placement="right">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="error" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
+                        {/* <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="error" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
                             feather:x
-                        </FuseSvgIcon>
+                        </FuseSvgIcon> */}
+                        <IconButton aria-label="clear" color="error" onClick={(e) => { e.preventDefault(); makeAvatarBlank(); }}>
+                            <ClearIcon />
+                        </IconButton>
                     </Tooltip>
                 </span>
             )
@@ -119,9 +124,12 @@ function ProfileContent() {
             return (
                 <span className="pr-10">
                     <Tooltip title="Upload selected avatar" placement="left">
-                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="success" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
+                        {/* <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="success" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
                             feather:upload
-                        </FuseSvgIcon>
+                        </FuseSvgIcon> */}
+                        <IconButton aria-label="upload" color="success" onClick={(e) => { e.preventDefault(); uploadAvatar(); }}>
+                            <UploadIcon />
+                        </IconButton>
                     </Tooltip>
                 </span>
             )
