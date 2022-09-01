@@ -70,6 +70,7 @@ const PaymentGateway = () => {
 	return (
 		<Box
 			sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 'auto' }}
+			className="payment-gateway-vertical-tab"
 		>
 			<Tabs
 				orientation="vertical"
