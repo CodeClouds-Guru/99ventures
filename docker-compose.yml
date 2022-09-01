@@ -6,11 +6,11 @@ networks:
 services:
   backend:
     container_name: '99-live-node'
-    # image: $ECR_REPO_FOR_BACKEND
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    image: $ECR_REPO_FOR_BACKEND
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    # restart: unless-stopped
     env_file: ./.env
     ports:
       - 4000:4000
@@ -22,6 +22,9 @@ services:
       - DB_PORT=$LIVE_MYSQLDB_DOCKER_PORT
       - CLIENT_ORIGIN=$LIVE_CLIENT_ORIGIN
       - APP_SECRET=$LIVE_NODE_APP_SECRET
+      - AWS_S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+      - AWS_S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+      - AWS_S3_BUCKET_NAME=$S3_BUCKET_NAME
       - PORT=4000
     networks:
       - 99Bridge
@@ -30,17 +33,17 @@ services:
     depends_on:
       - backend
     container_name: '99-live-react'
-    # image: $ECR_REPO_FOR_ADMIN
-    restart: always
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
+    image: $ECR_REPO_FOR_ADMIN
+    # restart: always
+    # build:
+    #   context: ./admin
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - REACT_APP_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
     ports:
       - 80:80
       - 443:443
     environment: 
-      - CLIENT_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
+      - REACT_APP_API_BASE_URL=$LIVE_CLIENT_API_BASE_URL
     networks:
       - 99Bridge
