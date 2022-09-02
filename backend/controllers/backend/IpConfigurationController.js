@@ -152,7 +152,7 @@ class IpConfigurationController extends Controller {
           return {
             ip: ip,
             company_portal_id: site_id,
-            status: 0,
+            status: 1,
             created_by: 1,
           }
         })
