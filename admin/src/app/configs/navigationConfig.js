@@ -49,14 +49,14 @@ const navigationConfig = [
         url: 'app/groups',
         end: true,
       },
-      {
-        id: 'email-template',
-        title: 'Email Template',
-        type: 'item',
-        icon: 'heroicons-outline:mail',
-        url: 'app/email-template',
-        end: true,
-      },
+      // {
+      //   id: 'email-template',
+      //   title: 'Email Template',
+      //   type: 'item',
+      //   icon: 'heroicons-outline:mail',
+      //   url: 'app/email-template',
+      //   end: true,
+      // },
       // {
       //   id: 'permissions',
       //   title: 'Permissions',
