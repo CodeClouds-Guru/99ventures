@@ -8359,7 +8359,7 @@
     "loose-envify" "^1.1.0"
     "scheduler" "^0.22.0"
 
-"react-draft-wysiwyg@1.14.7":
+"react-draft-wysiwyg@^1.14.7":
   "integrity" "sha512-D4X8F/ourvQZuqHzCQ6Vs6Tnt6TbGH58kvHQxC+aZGq+45ko2EyatL6G5C/paMaNKDZq2JRe7yAzykneMLpNOg=="
   "resolved" "https://registry.npmjs.org/react-draft-wysiwyg/-/react-draft-wysiwyg-1.14.7.tgz"
   "version" "1.14.7"

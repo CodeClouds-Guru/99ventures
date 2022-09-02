@@ -20,8 +20,9 @@ import axios from 'axios';
 /**
  * Axios HTTP Request defaults
  */
-axios.defaults.baseURL = process.env.NODE_ENV === "production" ? "http://datas-loadb-16icz3rsivdw8-bdf77d8837c7d527.elb.us-east-2.amazonaws.com/api/" : 'http://localhost:4000/api/';
-console.log('built base url',axios.defaults.baseURL);
+//  datas-loadb-16icz3rsivdw8-bdf77d8837c7d527.elb.us-east-2.amazonaws.com
+axios.defaults.baseURL = process.env.NODE_ENV === "production" ? "http://3.13.149.9/api/" : 'http://localhost:4000/api/';
+console.log('built base url', axios.defaults.baseURL);
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 

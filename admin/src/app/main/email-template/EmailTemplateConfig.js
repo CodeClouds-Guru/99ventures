@@ -1,10 +1,11 @@
-import Profile from './Profile';
+import EmailTemplate from './EmailTemplate';
 import settingsConfig from 'app/configs/settingsConfig';
 
-const ProfileConfig = {
+const EmailTemplateConfig = {
     settings: {
         layout: {
             config: {
+
                 navbar: {
                     display: true,
                 },
@@ -25,11 +26,11 @@ const ProfileConfig = {
     },
     routes: [
         {
-            path: 'profile',
-            element: <Profile />,
+            path: 'app/email-template',
+            element: <EmailTemplate />,
             auth: settingsConfig.defaultAuth
         },
     ],
 };
 
-export default ProfileConfig;
+export default EmailTemplateConfig;
