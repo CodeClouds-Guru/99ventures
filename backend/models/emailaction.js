@@ -11,6 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      EmailAction.belongsToMany(models.EmailTemplate, {
+        through: 'email_action_email_template',
+        foreignKey: 'email_action_id',
+        otherKey: 'email_template_id',
+        timestamps: false,
+      })
     }
   }
   EmailAction.init({
