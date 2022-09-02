@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class EmailAction extends Model {
+  class EmailTemplateVariable extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,22 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      EmailAction.belongsToMany(models.EmailTemplate, {
-        through: 'email_action_email_template',
-        foreignKey: 'email_action_id',
-        otherKey: 'email_template_id',
-        timestamps: false,
-      })
     }
   }
-  EmailAction.init({
-    action: DataTypes.STRING
+  EmailTemplateVariable.init({
+    name: DataTypes.STRING,
+    code: DataTypes.STRING,
+    module: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'EmailAction',
+    modelName: 'EmailTemplateVariable',
     timestamps: false,
     paranoid: false,
-    tableName: 'email_actions',
+    tableName: 'email_template_variables',
   });
-  return EmailAction;
+  return EmailTemplateVariable;
 };

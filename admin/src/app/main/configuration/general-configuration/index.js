@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField } from '@mui/material';
+import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
@@ -9,7 +9,6 @@ import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-
 
 const modalStyle = {
     position: 'absolute',
@@ -181,9 +180,9 @@ function GeneralConfiguration() {
         axios.post('/save-general-tab-data', params)
         .then((response) => {
             if (response.data.status) {
-                dispatch(showMessage({ variant: 'success', message: response.data.msg }))
+                dispatch(showMessage({ variant: 'success', message: response.data.message }))
             } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.msg }))
+                dispatch(showMessage({ variant: 'error', message: response.data.message }))
             }
         })
         .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
@@ -308,18 +307,21 @@ function GeneralConfiguration() {
                                 name="home_page_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        labelId="home_page"
-                                        className="mb-24"
-                                        id="demo-simple-select"
-                                        value={defaultValues.home_page_id}
-                                        label="Homepage"
-                                        onChange={selectHomePage}
-                                        required
-                                    >
-                                        {getFormattedOptions(pageOptions)}
-                                    </Select>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="home_page">Homepage</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="home_page"
+                                            className="mb-24"
+                                            id="demo-simple-select"
+                                            value={defaultValues.home_page_id}
+                                            label="Homepage"
+                                            onChange={selectHomePage}
+                                            required
+                                        >
+                                            {getFormattedOptions(pageOptions)}
+                                        </Select>
+                                    </FormControl>
                                 )}
                             />
 
@@ -327,17 +329,20 @@ function GeneralConfiguration() {
                                 name="default_template_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        labelId="default_template"
-                                        className="mb-24"
-                                        id="demo-simple-select"
-                                        value={defaultValues.default_template_id}
-                                        label="Default Template"
-                                        onChange={selectLayoutOption}
-                                    >
-                                        {getFormattedOptions(layoutOptions)}
-                                    </Select>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="default_template">Default Template</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="default_template"
+                                            className="mb-24"
+                                            id="demo-simple-select"
+                                            value={defaultValues.default_template_id}
+                                            label="Default Template"
+                                            onChange={selectLayoutOption}
+                                        >
+                                            {getFormattedOptions(layoutOptions)}
+                                        </Select>
+                                    </FormControl>
                                 )}
                             />
 
@@ -345,17 +350,20 @@ function GeneralConfiguration() {
                                 name="default_captcha_option_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        labelId="captcha_option"
-                                        className="mb-24"
-                                        id="demo-simple-select"
-                                        value={defaultValues.default_captcha_option_id}
-                                        label="Captcha"
-                                        onChange={selectCaptchaOption}
-                                    >
-                                        {getFormattedOptions(captchaOptions)}
-                                    </Select>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="captcha_option">Captcha</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="captcha_option"
+                                            className="mb-24"
+                                            id="demo-simple-select"
+                                            value={defaultValues.default_captcha_option_id}
+                                            label="Captcha"
+                                            onChange={selectCaptchaOption}
+                                            >
+                                            {getFormattedOptions(captchaOptions)}
+                                        </Select>
+                                    </FormControl>
                                 )}
                             />
                             <Divider className="mb-24"/>
