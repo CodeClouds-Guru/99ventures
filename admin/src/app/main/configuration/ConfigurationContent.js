@@ -9,6 +9,7 @@ import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
 import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
 import PaymentGateway from './payment-gateway/PaymentGateway';
+import MetatagConfiguration from './metatags-configuration/MetatagConfiguration';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -65,6 +66,7 @@ function ConfigurationContent() {
                     <Tab label="IP" {...a11yProps(2)} />
                     <Tab label="Downtime" {...a11yProps(3)} />
                     <Tab label="Payment Gateway" {...a11yProps(4)} />
+                    <Tab label="Meta Tags Configuration" {...a11yProps(5)} />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -81,6 +83,9 @@ function ConfigurationContent() {
             </TabPanel>
             <TabPanel value={value} index={4}>
                 <PaymentGateway />
+            </TabPanel>
+            <TabPanel value={value} index={5}>
+                <MetatagConfiguration />
             </TabPanel>
         </Box>
     );

@@ -57,10 +57,10 @@ const PaymentGateway = () => {
 	const retrieveGateways = () => {
 		axios.get('payment-methods')
 		.then(response => {
-			if (response.data.status) {
+			if (response.data.status && response.data.payment_method_list.length > 0) {
 				setGateways([...response.data.payment_method_list])
 			} else {
-                console.log('Error');
+                console.log('Unable to get payment gateways');
             }
 		})
 		.catch(error => console.log(error))
