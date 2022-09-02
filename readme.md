@@ -43,12 +43,12 @@ npx sequelize db:seed:undo:all
 ## Deployment to ECS
 After setting up aws cli, create a docker context using environment variables, use that context then run the followings
 ```bash
-docker build -t backend ./backend
+docker buildx build --platform=linux/amd64 -t backend ./backend
 docker tag backend:latest 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-backend-stg:latest
 docker login -u AWS -p $(aws ecr get-login-password --region us-east-2) 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-backend-stg:latest
 docker push 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-backend-stg:latest
 
-docker build -t admin ./admin
+docker buildx build --platform=linux/amd64  -t admin ./admin
 docker tag admin:latest 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-frontend-stg:latest
 docker login -u AWS -p $(aws ecr get-login-password --region us-east-2) 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-frontend-stg:latest
 docker push 473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-frontend-stg
