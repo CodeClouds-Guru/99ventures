@@ -90,14 +90,14 @@ class IpConfigurationController extends Controller {
       const site_id = req.header('site_id') || 1
       const company_id = req.header('company_id') || 1
       let ip_list = await this.model.findAll({
-        where: { status: 0, company_portal_id: site_id },
+        where: { status: 1, company_portal_id: site_id },
         attributes: ['ip'],
       })
       ip_list = ip_list.map((ip_result) => {
         return ip_result.ip
       })
       const downtime_text = await CompanyPortal.findOne({
-        where: { company_id: company_id },
+        where: { id: site_id },
         attributes: ['downtime_message', 'status'],
       })
       return res.status(200).json({
