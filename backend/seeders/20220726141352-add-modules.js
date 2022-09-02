@@ -103,6 +103,14 @@ const modules = [
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
+  },
+  {
+    slug: 'emailtemplates',
+    name: 'Email Templates',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
   }
 ]
 module.exports = {

@@ -38,7 +38,7 @@ class FileHelper {
 
         // const uploadedImage = await s3.upload({
           const uploadedImage = await s3.putObject({
-            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Bucket: process.env.S3_BUCKET_NAME,
             Key: path.concat(new_filename),
             Body: blob,
         }).promise()
@@ -56,9 +56,9 @@ class FileHelper {
   //s3 bucket connection
   s3Connect(){
     let s3 =new AWS.S3({
-                accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-                region:process.env.AWS_DEFAULT_REGION,
+                accessKeyId: process.env.S3_ACCESS_KEY_ID,
+                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+                region:process.env.DEFAULT_REGION,
                 signatureVersion: "v4"
             })
     return s3
@@ -83,7 +83,7 @@ class FileHelper {
     let s3 = this.s3Connect()
     const signedUrl = s3.getSignedUrl("getObject", {
       Key: key,
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Bucket: process.env.S3_BUCKET_NAME,
       Expires: 900, // S3 default is 900 seconds (15 minutes)
     });
     return signedUrl
@@ -93,7 +93,7 @@ class FileHelper {
     let s3 = this.s3Connect()
     s3.deleteObject({
       Key: key,
-      Bucket: process.env.AWS_S3_BUCKET_NAME
+      Bucket: process.env.S3_BUCKET_NAME
     });
     return true
   }
