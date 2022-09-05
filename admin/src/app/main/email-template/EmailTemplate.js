@@ -1,30 +1,38 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { EditorState, convertToRaw } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { styled } from '@mui/material/styles';
+import FusePageSimple from '@fuse/core/FusePageSimple';
+import EmailTemplateContent from './EmailTemplateContent';
+import EmailTemplateHeader from './EmailTemplateHeader';
 
-// Hooks version of the Class below (done by me)
-const EmailTemplate = ({ input, meta }) => {
-    const [editorState, setEditorState] = useState(EditorState.createEmpty());
-    const onEditorStateChange = editorState => {
-        setEditorState(editorState)
-        return input.onChange(convertToRaw(editorState.getCurrentContent()))
-    }
+const Root = styled(FusePageSimple)(({ theme }) => ({
+    '& .FusePageSimple-header': {
+        backgroundColor: theme.palette.background.paper,
+        borderBottomWidth: 1,
+        borderStyle: 'solid',
+        borderColor: theme.palette.divider,
+    },
+    '& .FusePageSimple-toolbar': {},
+    '& .FusePageSimple-content': {},
+    '& .FusePageSimple-sidebarHeader': {},
+    '& .FusePageSimple-sidebarContent': {},
+}));
 
+function EmailTemplate(props) {
     return (
-        <div className="editor">
-            <Editor
-                editorState={editorState}
-                wrapperClassName="demo-wrapper"
-                editorClassName="demo-editor"
-                onEditorStateChange={onEditorStateChange}
-            />
-            {
-                console.log('editorState => ', convertToRaw(editorState.getCurrentContent()))
+        <Root
+            header={
+                // <div className="p-24" style={{ width: '100%' }}>
+                //     <h2>Email Template</h2>
+                // </div>
+                <EmailTemplateHeader />
             }
-        </div>
-    )
+            content={
+                <div className="p-24" style={{ width: '100%' }}>
+                    <EmailTemplateContent />
+                </div>
+            }
+            scroll="content"
+        />
+    );
 }
 
 export default EmailTemplate;
