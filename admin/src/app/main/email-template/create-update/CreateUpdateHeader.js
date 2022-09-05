@@ -27,7 +27,7 @@ function CreateUpdateHeader(props) {
                         className="flex items-center sm:mb-12"
                         component={Link}
                         role="button"
-                        to={`/app/email-template`}
+                        to={`/app/email-templates`}
                         color="inherit"
                     >
                         <FuseSvgIcon size={20}>
@@ -35,7 +35,7 @@ function CreateUpdateHeader(props) {
                                 ? 'heroicons-outline:arrow-sm-left'
                                 : 'heroicons-outline:arrow-sm-right'}
                         </FuseSvgIcon>
-                        <span className="flex mx-4 font-medium capitalize">Email Template</span>
+                        <span className="flex mx-4 font-medium capitalize">Email Templates</span>
                     </Typography>
                 </div>
                 <div className="flex items-center max-w-full">

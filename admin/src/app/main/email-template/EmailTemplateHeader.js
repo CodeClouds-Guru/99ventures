@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 function EmailTemplateHeader(props) {
-    const customAddURL = props.customAddURL ?? `/app/email-template/create`;
+    const customAddURL = props.customAddURL ?? `/app/email-templates/create`;
     console.log(customAddURL)
     return (
         <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
@@ -14,7 +14,7 @@ function EmailTemplateHeader(props) {
                 delay={300}
                 className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
             >
-                Email Template
+                Email Templates
             </Typography>
 
             <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">

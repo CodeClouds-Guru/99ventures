@@ -30,12 +30,12 @@ const EmailTemplateConfig = {
     },
     routes: [
         {
-            path: 'app/email-template',
+            path: 'app/email-templates',
             element: <EmailTemplate />,
             auth: settingsConfig.defaultAuth
         },
         {
-            path: 'app/email-template/:id',
+            path: 'app/email-templates/:id',
             element: <CreateUpdateForm />,
             auth: settingsConfig.defaultAuth
         },

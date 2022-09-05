@@ -50,11 +50,11 @@ const navigationConfig = [
         end: true,
       },
       {
-        id: 'email-template',
+        id: 'email-templates',
         title: 'Email Template',
         type: 'item',
         icon: 'heroicons-outline:mail',
-        url: 'app/email-template',
+        url: 'app/email-templates',
         end: true,
       },
       // {
