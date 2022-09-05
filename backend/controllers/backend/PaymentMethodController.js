@@ -2,20 +2,22 @@ const Controller = require("./Controller");
 const {
   CompanyPortal,
   PaymentMethodCredential,
+  PaymentMethod
 } = require("../../models/index");
 
 class PaymentMethodController extends Controller {
   constructor() {
     super("PaymentMethod");
     this.list = this.list.bind(this);
+    this.update = this.update.bind(this);
   }
 
   async list(req, res) {
     try {
       const site_id = req.header("site_id") || 1;
       const company_id = req.header("company_id") || 1;
-
-      let payment_method_list = await this.model.findAll({
+      // let payment_method = await PaymentMethodCredential.findAll();
+      let payment_method_list = await PaymentMethod.findAll({
         attributes: ["name", "slug"],
         include: {
           model: PaymentMethodCredential,
@@ -31,6 +33,7 @@ class PaymentMethodController extends Controller {
       return res.status(200).json({
         status: true,
         payment_method_list,
+        // payment_method,
       });
     } catch (err) {
       console.log(err.message);
@@ -77,3 +80,8 @@ class PaymentMethodController extends Controller {
 }
 
 module.exports = PaymentMethodController;
+
+
+
+
+// update payment_method_credentials set deleted_at = NULL where id > 0

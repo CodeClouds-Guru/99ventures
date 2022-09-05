@@ -1,5 +1,6 @@
 const Controller = require('./Controller')
-const { EmailAction,EmailTemplateVariable } = require('../../models/index')
+const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,sequelize } = require('../../models/index')
+const queryInterface = sequelize.getQueryInterface()
 
 class EmailTemplateController extends Controller {
   constructor() {
@@ -28,18 +29,57 @@ class EmailTemplateController extends Controller {
     }
   }
   //override add function
-    async add(req,res){
-        let response = await super.add(req)
-        let fields = response.fields
-        let email_actions = await EmailAction.findAll()
-        let email_template_variables = await EmailTemplateVariable.findAll()
-        fields.email_actions.options = email_actions
-        fields.email_template_variables.options = email_template_variables
-        return {
-        status: true,
-        fields,
-        }
+  async add(req,res){
+      let response = await super.add(req)
+      let fields = response.fields
+      let email_actions = await EmailAction.findAll()
+      let email_template_variables = await EmailTemplateVariable.findAll()
+      fields.email_actions.options = email_actions
+      fields.email_template_variables.options = email_template_variables
+      return {
+      status: true,
+      fields,
+      }
+  }
+  //override save function
+  async save(req,res){
+    req.body.company_portal_id = req.headers.site_id;
+    let response = await super.save(req)
+    //update email action
+    await queryInterface.bulkInsert('email_action_email_template', [{
+      email_action_id: req.body.email_actions,
+      email_template_id: response.result.id
+    }])
+      // EmailActionEmailTemplate.create({
+      //   email_action_id: req.body.email_actions,
+      //   email_template_id: response.result.id
+      // })
+    
+    return {
+      status: true,
+      message: "Email template added."
     }
+  }
+  //update email template
+  async update(req,res){
+    let id = req.params.id
+    req.body.company_portal_id = req.headers.site_id;
+    let response = await super.update(req)
+    //update email action
+      EmailActionEmailTemplate.update({
+        email_action_id: req.body.email_actions
+      },
+      {
+        where:{
+          email_template_id: id
+        }
+      })
+    
+    return {
+      status: true,
+      message: "Email template updated."
+    }
+  }
 }
 
 module.exports = EmailTemplateController

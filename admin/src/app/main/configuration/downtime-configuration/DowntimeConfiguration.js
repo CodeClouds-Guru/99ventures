@@ -64,11 +64,21 @@ function DowntimeConfiguration() {
                         <Card variant="outlined" className="mb-20">
                             <CardHeader title="Allowed IP List" />
                             <CardContent>
+                                {/* <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    className="w-1/2 mt-24"
+                                    aria-label="Add Mine"
+                                    size="small"
+                                >
+                                    Add Mine
+                                </Button> */}
                                 <AddMore
                                     data={allowedIPs}
                                     placeholder="Enter allowed IP(s)"
                                     onChange={onIpChangeFromChild}
                                     insertType="ip"
+                                    validationRegex="(\d{1,2}|(0|1)\d{2}|2[0-4]\d|25[0-5])\.(\d{1,2}|(0|1)\d{2}|2[0-4]\d|25[0-5])\.(\d{1,2}|(0|1)\d{2}|2[0-4]\d|25[0-5])\.(\d{1,2}|(0|1)\d{2}|2[0-4]\d|25[0-5])"
                                 />
                             </CardContent>
                         </Card>

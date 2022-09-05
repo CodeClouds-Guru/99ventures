@@ -1,45 +1,53 @@
 import { useState, useEffect } from 'react';
 import { Chip, Stack, TextField, FormHelperText, Typography } from '@mui/material';
 import InputMask from 'react-input-mask';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
+
 
 export default function AddMore(props) {
     let [dataset, setDataset] = useState(props.data);
     let [errorMsg, setErrorMsg] = useState('');
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (props.data) {
-            // console.log(props, props.data)
             setDataset(props.data);
         }
-        // handleData(props);
     }, [props.data])
-    // const handleData = (props) => {
-    //     if (props.data) {
-    //         console.log(props, props.data)
-    //         if (props.insertType === 'ip' && validateIP(props.data)) {
-    //             return;
-    //         }
-    //         setDataset(props.data);
-    //     }
-    // }
 
-    // const validateIP = (val) => {
-    //     return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(val) ? setErrorMsg('') : setErrorMsg('Please enter valid IP')
-    // }
     const handleDelete = (index) => {
         dataset.splice(index, 1)
         setDataset([...dataset])
         props.onChange(dataset);
     };
 
+    const validateInput = (input) => {
+        if (props.validationRegex) {
+            let reg = null;
+            try {
+                reg = new RegExp(props.validationRegex);
+            } catch(e) {
+                reg = null;
+            }
+            console.log(reg)
+            return reg && reg.test(input)
+        }
+        return true;
+    }
+
     const getText = (e) => {
         if (e.key === 'Enter') {
             const item = e.target.value;
             if (!dataset.includes(item)) {
-                dataset.push(item);
-                setDataset([...dataset])
-                props.onChange(dataset);
-                e.target.value = '';
+                if(validateInput(item)) {
+                    dataset.push(item);
+                    setDataset([...dataset])
+                    props.onChange(dataset);
+                    e.target.value = '';
+                } else {
+                    dispatch(showMessage({ variant: 'warning', message: 'Please enter a valid input' }))
+                }
             }
         }
     }
