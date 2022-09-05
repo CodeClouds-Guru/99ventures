@@ -20,9 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       value: {
         type: DataTypes.STRING,
         get() {
-          return this.getDataValue("value") === null
-            ? ""
-            : this.getDataValue("value");
+          return this.getDataValue("value") || "";
         },
       },
       created_by: DataTypes.BIGINT,
