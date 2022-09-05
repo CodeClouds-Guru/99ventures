@@ -15,13 +15,44 @@ const schema =  yup.object().shape({
     description: yup.string().required('Please enter meta description'),
 });
 
-function GeneralConfiguration() {
+function MetatagConfiguration() {
     const dispatch = useDispatch();
     const [ loading, setLoading ] = React.useState(false);
     const [defaultValues, setDefaultValues] = React.useState({
-        keywords: 'hello',
-        description: 'world'
+        keywords: '',
+        description: ''
     });
+
+    useEffect(() => { 
+        fetchData();
+    }, [])
+
+    const fetchData = () => {
+        axios.get('/meta-tags').then((response) => {
+            if (response.data.status) {
+                if(response.data.data.length){
+                    // console.log('sss')
+                    // const result = response.data.data;
+                    // const tagsData = {};
+                    // result.map(val => {
+                    //     const keyName = val.tag_name.toLowerCase();
+                    //     Object.assign(tagsData, 
+                    //         {
+                    //             [keyName]: val.tag_content
+                    //         }
+                    //     )
+                    // });
+                    // console.log(tagsData)
+                    // setDefaultValues({
+                    //     keywords: result[0]['Keywords'],
+                    //     description: result[1]['Description']
+                    // });
+                }
+            } else {
+                console.log('Error');
+            }
+        });
+    }
 
     const { 
         control, 
@@ -32,45 +63,29 @@ function GeneralConfiguration() {
         defaultValues,
         resolver: yupResolver(schema),
     });
-    
-    // console.log(dirtyFields)
-
-    // useEffect(() => { 
-    //     fetchData();
-    // }, [])
-
-    const fetchData = () => {
-        /*axios.get('/get-general-tab-data').then((response) => {
-            if (response.data.status) {
-                setDefaultValues({
-                    keywords: response.data.keywords,
-                    description: response.data.description,
-                })
-            } else {
-                console.log('Error');
-            }
-        });*/
-    }
 
 
     /**
      * General Config data post
      */
     const onSubmit = (data) => {
-        console.log(data)
-        setDefaultValues([
-            data
-        ]);
-
-        // axios.post('/save-general-tab-data', data)
-        // .then((response) => {
-        //     if (response.data.status) {
-        //         dispatch(showMessage({ variant: 'success', message: response.data.message }))
-        //     } else {
-        //         dispatch(showMessage({ variant: 'error', message: response.data.message }))
-        //     }
-        // })
-        // .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+        setDefaultValues(data);
+        const params = [{
+            content: data.keywords,
+            tag_name: 'Keywords'
+        },{
+            content: data.description,
+            tag_name: 'Description'
+        }];
+        axios.post('/meta-tags/update', {meta: params})
+        .then((response) => {
+            if (response.data.status) {
+                dispatch(showMessage({ variant: 'success', message: response.data.message }))
+            } else {
+                dispatch(showMessage({ variant: 'error', message: response.data.message }))
+            }
+        })
+        .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
     }    
     
     return (
@@ -101,6 +116,7 @@ function GeneralConfiguration() {
                                         multiline
                                         rows={4}
                                         fullWidth
+                                        
                                     />
                                 )}
                             />
@@ -118,6 +134,7 @@ function GeneralConfiguration() {
                                         multiline
                                         rows={4}
                                         fullWidth
+                                        
                                     />
                                 )}
                             />
@@ -144,4 +161,4 @@ function GeneralConfiguration() {
     )
 }
 
-export default GeneralConfiguration;
+export default MetatagConfiguration;
