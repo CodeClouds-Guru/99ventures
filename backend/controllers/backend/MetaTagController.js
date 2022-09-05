@@ -16,9 +16,18 @@ class MetaTagController extends Controller {
         where: { company_portal_id: site_id },
         attributes: ["id", "tag_name", "tag_content"],
       });
+      var data = [];
+
+      data = meta_tag_list.map((values) => {
+        return {
+          [values.tag_name]: values.tag_content,
+        };
+      });
+
+      console.log(data);
       return res.status(200).json({
         status: true,
-        meta_tag_list,
+        data,
       });
     } catch (err) {
       console.log(err.message);
