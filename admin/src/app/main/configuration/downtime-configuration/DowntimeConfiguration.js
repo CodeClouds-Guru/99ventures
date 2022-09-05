@@ -56,23 +56,35 @@ function DowntimeConfiguration() {
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong' }))
         });
     }
+
+    const addMyIP = () => {
+            fetch('https://geolocation-db.com/json/')
+            .then(resp => {
+                resp.json().then((data) => {
+                    if(data.IPv4.trim().length > 0 && !allowedIPs.includes(data.IPv4)) {
+                        setAllowedIPs([...allowedIPs, data.IPv4])
+                    }
+                })
+            }).catch((e) => {
+                console.error(e)
+                dispatch(showMessage({ variant: 'error', message: 'Unable to get your IP, Please check if you are behind any firewall' }))
+            });
+            
+    }
+
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
                     <div className="flex flex-col justify-center w-full">
                         <Card variant="outlined" className="mb-20">
-                            <CardHeader title="Allowed IP List" />
+                            <CardHeader
+                                title="Allowed IP List"
+                                action={
+                                    <Button size="small" variant="outlined" onClick={addMyIP}>Add Mine</Button>
+                                }
+                            />
                             <CardContent>
-                                {/* <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    className="w-1/2 mt-24"
-                                    aria-label="Add Mine"
-                                    size="small"
-                                >
-                                    Add Mine
-                                </Button> */}
                                 <AddMore
                                     data={allowedIPs}
                                     placeholder="Enter allowed IP(s)"
