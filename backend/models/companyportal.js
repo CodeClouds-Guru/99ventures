@@ -37,7 +37,12 @@ module.exports = (sequelize, DataTypes) => {
     company_id: DataTypes.BIGINT,
     domain: DataTypes.STRING,
     name: DataTypes.STRING,
-    downtime_message: DataTypes.TEXT,
+    downtime_message: {
+      type: DataTypes.TEXT,
+      get() {
+        return this.getDataValue("downtime_message") || "";
+      },
+    },
     status: DataTypes.INTEGER,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
