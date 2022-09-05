@@ -17,12 +17,13 @@ class MetaTagController extends Controller {
         attributes: ["id", "tag_name", "tag_content"],
       });
       var data = [];
-
+      var result = [];
       data = meta_tag_list.map((values) => {
         return {
           [values.tag_name]: values.tag_content,
         };
       });
+      data = Object.assign({}, ...data)
 
       console.log(data);
       return res.status(200).json({

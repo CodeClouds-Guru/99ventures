@@ -17,59 +17,50 @@ const schema =  yup.object().shape({
 
 function MetatagConfiguration() {
     const dispatch = useDispatch();
-    const [ loading, setLoading ] = React.useState(false);
-    const [defaultValues, setDefaultValues] = React.useState({
-        keywords: '',
-        description: ''
+    const [ loading, setLoading ] = useState(false);
+    
+    // const [ defaultValues, setDefaultValues ] = useState({
+    //     // keywords: '',
+    //     // description: ''
+    // });
+
+    const { 
+        control, 
+        formState: {isValid, dirtyFields, errors}, 
+        handleSubmit,
+        setValue
+    } = useForm({
+        mode: 'onChange',
+        defaultValues: {
+            keywords: '',
+            description: ''
+        },
+        resolver: yupResolver(schema),
     });
 
     useEffect(() => { 
+        setValue('keywords', '', { shouldDirty: true, shouldValidate: false });
+        setValue('description', '', { shouldDirty: true, shouldValidate: false });
         fetchData();
-    }, [])
+    }, [setValue])
 
     const fetchData = () => {
         axios.get('/meta-tags').then((response) => {
             if (response.data.status) {
-                if(response.data.data.length){
-                    // console.log('sss')
-                    // const result = response.data.data;
-                    // const tagsData = {};
-                    // result.map(val => {
-                    //     const keyName = val.tag_name.toLowerCase();
-                    //     Object.assign(tagsData, 
-                    //         {
-                    //             [keyName]: val.tag_content
-                    //         }
-                    //     )
-                    // });
-                    // console.log(tagsData)
-                    // setDefaultValues({
-                    //     keywords: result[0]['Keywords'],
-                    //     description: result[1]['Description']
-                    // });
-                }
+                const result = response.data.data;
+                setValue('keywords', result.Keywords, { shouldDirty: false, shouldValidate: true });
+                setValue('description', result.Description, { shouldDirty: false, shouldValidate: true });
             } else {
                 console.log('Error');
             }
         });
     }
 
-    const { 
-        control, 
-        formState: {isValid, dirtyFields, errors}, 
-        handleSubmit
-    } = useForm({
-        mode: 'onChange',
-        defaultValues,
-        resolver: yupResolver(schema),
-    });
-
 
     /**
-     * General Config data post
+     * Metatags data post
      */
     const onSubmit = (data) => {
-        setDefaultValues(data);
         const params = [{
             content: data.keywords,
             tag_name: 'Keywords'
@@ -77,9 +68,13 @@ function MetatagConfiguration() {
             content: data.description,
             tag_name: 'Description'
         }];
+        setLoading(true);
         axios.post('/meta-tags/update', {meta: params})
         .then((response) => {
             if (response.data.status) {
+                setLoading(false);
+                setValue('keywords', data.keywords)
+                setValue('description', data.description)
                 dispatch(showMessage({ variant: 'success', message: response.data.message }))
             } else {
                 dispatch(showMessage({ variant: 'error', message: response.data.message }))
@@ -116,7 +111,6 @@ function MetatagConfiguration() {
                                         multiline
                                         rows={4}
                                         fullWidth
-                                        
                                     />
                                 )}
                             />
