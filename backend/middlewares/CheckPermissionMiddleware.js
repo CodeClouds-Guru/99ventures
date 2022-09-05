@@ -40,12 +40,13 @@ function checkCombination(module, action, permission) {
 
 module.exports = async function (req, res, next) {
   const user = req.user
-  const company_id = 1
+  const company_id = req.headers.company_id ?? 1
   let partial_path = req.originalUrl.replace('api/', '').split('?').shift()
   var [, module, action] = partial_path.split('/')
   if (typeof action === 'undefined' || action.trim().length === 0) {
     action = 'list'
   }
+  console.log('-------------------',module,action)
   const companies = await db.sequelize.query(
     'SELECT * FROM company_user WHERE company_id = ? AND user_id = ?',
     {
@@ -54,6 +55,7 @@ module.exports = async function (req, res, next) {
     }
   )
   const group_ids = companies.map((item) => item.group_id)
+  console.log('-------------------',group_ids)
 
   const group_role_permissions = await Group.findAll({
     where: {
