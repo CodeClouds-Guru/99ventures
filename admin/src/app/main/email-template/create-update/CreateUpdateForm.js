@@ -24,9 +24,9 @@ const CreateUpdateForm = ({ input, meta }) => {
                     toolbarClassName="toolbar-class"
                     onEditorStateChange={onEditorStateChange}
                 />
-                {/* {
+                {
                     console.log('editorState => ', convertToRaw(editorState.getCurrentContent()))
-                } */}
+                }
             </div>
         </>
     )
