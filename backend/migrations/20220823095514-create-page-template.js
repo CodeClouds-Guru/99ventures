@@ -23,6 +23,7 @@ module.exports = {
       status: {
         type: Sequelize.STRING,
         allowNull: false,
+        comment: "pending, draft, published, archived"
       },
       name: {
         type: Sequelize.STRING,
