@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class EmailTemplate extends Model {
     /**
@@ -39,6 +40,16 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deleted_at',
     tableName: 'email_templates',
   });
+  //validation function
+  EmailTemplate.validate = function (req) {
+              const schema = Joi.object({
+                subject: Joi.string().required().label('Subject'),
+                body: Joi.string().required().label('Body'),
+                email_actions: Joi.required().label('Email Action'),
+                company_portal_id: Joi.required().label('Company portal')
+              })
+              return schema.validate(req.body)
+  }
   //declare fields
   EmailTemplate.extra_fields = ['email_actions','email_template_variables'];
   EmailTemplate.fields = {
