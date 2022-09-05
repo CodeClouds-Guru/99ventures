@@ -43,18 +43,22 @@ class MetaTagController extends Controller {
       const site_id = req.header("site_id") || 1;
       const company_id = req.header("company_id") || 1;
       const meta_update = req.body.meta || "";
+
+      await CompanyPortalMetaTag.destroy({
+        where: { company_portal_id: site_id },
+      });
+
       let data = [];
       data = meta_update.map((values) => {
         return {
           tag_content: values.content,
-          id: values.id,
+          tag_name: values.tag_name,
+          company_portal_id: site_id,
+          created_by: req.user.id,
         };
       });
       console.log(data);
-      const company_portal_meta = CompanyPortalMetaTag.bulkCreate(data, {
-        updateOnDuplicate: ["id", "tag_content"],
-        ignoreDuplicates: true,
-      });
+      const company_portal_meta = CompanyPortalMetaTag.bulkCreate(data);
 
       if (company_portal_meta) {
         return res.status(200).json({
