@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
               const schema = Joi.object({
                 subject: Joi.string().required().label('Subject'),
                 body: Joi.string().required().label('Body'),
-                email_actions: Joi.required().label('Email Action'),
+                email_actions: Joi.optional().allow('').label('Email Action'),
                 company_portal_id: Joi.required().label('Company portal')
               })
               return schema.validate(req.body)
