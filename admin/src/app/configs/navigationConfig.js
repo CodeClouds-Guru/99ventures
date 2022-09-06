@@ -51,7 +51,7 @@ const navigationConfig = [
       },
       {
         id: 'email-templates',
-        title: 'Email Template',
+        title: 'Email Templates',
         type: 'item',
         icon: 'heroicons-outline:mail',
         url: 'app/email-templates',

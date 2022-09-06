@@ -227,7 +227,7 @@ function List(props) {
           delay={300}
           className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
         >
-          {module}
+          {module.split('-').join(' ')}
         </Typography>
 
         <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
@@ -240,7 +240,7 @@ function List(props) {
             <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
             <Input
-              placeholder={`Search ${module}`}
+              placeholder={`Search ${module.split('-').join(' ')}`}
               className="flex flex-1"
               disableUnderline
               fullWidth
