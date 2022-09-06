@@ -21,7 +21,7 @@ import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
-
+import CreateUpdateForm from '../../email-template/create-update/CreateUpdateForm';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -99,23 +99,24 @@ function CreateEdit(props) {
     return <FuseLoading />;
   }
 
-  let moduleOnSaveHandler = (genModuleId)=>{
+  let moduleOnSaveHandler = (genModuleId) => {
     let url = `/app/${module}`;
-    if(['roles'].includes(module)){
+    if (['roles'].includes(module)) {
       url = `/app/${module}/${genModuleId}`;
     }
     navigate(url);
   }
 
+  const createForm = () => { }
 
   return (
     <FusePageCarded
       header={<CreateEditHeader />}
       content={
         <>
-          <div className="p-16 sm:p-24 max-w-3xl">
+          <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
             {errors && <Alert severity="error">{errors}</Alert>}
-            <CreateEditForm moduleOnSave={moduleOnSaveHandler}/>
+            {module === 'email-templates' ? <CreateUpdateForm moduleOnSave={moduleOnSaveHandler} /> : <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
           </div>
           {(module === 'roles' && moduleId !== 'create') ? <PermissionGrid roleId={moduleId} /> : ''}
         </>

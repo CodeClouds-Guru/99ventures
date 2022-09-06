@@ -16,6 +16,8 @@ const jwtServiceConfig = {
   saveDowntimeConfiguration: 'ip-downtime-update',
   profile: 'profile',
   updateProfile: 'profile-update',
+  saveEmailTemplates: 'email-templates/save',
+  updateEmailTemplates: 'email-templates/update',
 };
 
 export default jwtServiceConfig;
