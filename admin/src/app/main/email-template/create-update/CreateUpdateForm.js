@@ -9,37 +9,63 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import CreateUpdateFormHeader from './CreateUpdateFormHeader';
 
 const CreateUpdateForm = ({ input, meta }) => {
     const inputElement = useRef();
-    const moduleId = useParams().moduleId;
+    const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [subject, setSubject] = useState('');
-    const [action, setAction] = useState(10);
-    const [variable, setVariable] = useState(0);
-    const [insertedHtml, setInsertedHtml] = useState('');
+    const [actionOptions, setActionOptions] = useState([]);
+    const [variableOptions, setVariableOptions] = useState([]);
+    const [allData, setAllData] = useState({
+        subject: '',
+        action: '',
+        variable: '',
+        insertedHtml: '',
+    });
     const [errors, setErrors] = useState({})
-    // useEffect(() => {
-    // }, []);
+    useEffect(() => {
+        getFieldData()
+    }, []);
 
     const onChangeInEditor = (input) => {
-        setInsertedHtml(input);
+        setAllData(allData => ({
+            ...allData, insertedHtml: input
+        }));
     }
     const handleChangeAction = (event) => {
-        setAction(event.target.value)
+        setAllData(allData => ({
+            ...allData, action: event.target.value
+        }))
     }
-    const onSubmit = ({ subject }) => {
-        axios.post(jwtServiceConfig.saveEmailTemplates, {
-            subject: subject,
-            body: insertedHtml,
-            email_actions: 44,
-        })
+    const handleChangeVariable = (event) => {
+        setAllData(allData => ({
+            ...allData, variable: event.target.value
+        }))
+    }
+    console.log('editor 69', inputElement)
+    const getFieldData = () => {
+        axios.get(jwtServiceConfig.getEmailTemplatesFieldData)
             .then((response) => {
                 console.log(response)
+                if (response.data.results.status) {
+                    setActionOptions(response.data.results.fields.email_actions.options);
+                    setVariableOptions(response.data.results.fields.email_template_variables.options);
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
+    const onSubmit = () => {
+        axios.post(jwtServiceConfig.saveEmailTemplates, allData)
+            .then((response) => {
+                // console.log(response)
                 if (response.data.status) {
                     dispatch(showMessage({ variant: 'success', message: response.data.message }))
-                    getEmailConfiguration();
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.message }))
                 }
@@ -51,47 +77,71 @@ const CreateUpdateForm = ({ input, meta }) => {
 
     return (
         <>
-            <TextField
-                className="mb-24"
-                label="Subject"
-                type="text"
-                error={!!errors.subject}
-                helperText={errors?.subject?.message}
-                variant="outlined"
-                required
-                fullWidth
-                value={subject}
-            />
+            <CreateUpdateFormHeader moduleId={moduleId} />
+            <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
+                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
 
+                    <TextField
+                        className="mb-24"
+                        label="Subject"
+                        type="text"
+                        error={!!errors.subject}
+                        helperText={errors?.subject?.message}
+                        variant="outlined"
+                        required
+                        fullWidth
+                        value={allData.subject}
+                    />
 
-            <FormControl className="w-1/2">
-                <InputLabel id="demo-simple-select-label">Action</InputLabel>
-                <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={action}
-                    label="Action"
-                    onChange={handleChangeAction}
-                >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                </Select>
-            </FormControl>
-            <WYSIWYGEditor ref={inputElement} onChange={onChangeInEditor} />
-            <span className="flex items-center justify-center">
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    className="w-1/2 mt-24"
-                    aria-label="Save"
-                    type="submit"
-                    size="large"
-                    onClick={onSubmit}
-                >
-                    {moduleId === 'create' ? 'Save' : 'Update'}
-                </Button>
-            </span>
+                    <FormControl className="w-1/2 mb-24 pr-10">
+                        <InputLabel id="demo-simple-select-label">Action</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={allData.action}
+                            label="Action"
+                            onChange={handleChangeAction}
+                        >
+                            <MenuItem value="">Select an action</MenuItem>
+                            {actionOptions.map((value) => {
+                                return <MenuItem key={value.id} value={value.id}>{value.action}</MenuItem>
+                            })}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl className="w-1/2 mb-24">
+                        <InputLabel id="demo-simple-select-label">Variable</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={allData.variable}
+                            label="Variable"
+                            onChange={handleChangeVariable}
+                        >
+                            <MenuItem value="">Select a variable</MenuItem>
+                            {variableOptions.map((value) => {
+                                return <MenuItem key={value.id} value={value.code}>{value.name}</MenuItem>
+                            })}
+                        </Select>
+                    </FormControl>
+
+                    <WYSIWYGEditor ref={inputElement} onChange={onChangeInEditor} />
+                    <span className="flex items-center justify-center">
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            className="w-1/2 mt-24"
+                            aria-label="Save"
+                            type="submit"
+                            size="large"
+                            onClick={onSubmit}
+                        >
+                            {moduleId === 'create' ? 'Save' : 'Update'}
+                        </Button>
+                    </span>
+                </Paper>
+            </div>
+
         </>
     )
 }

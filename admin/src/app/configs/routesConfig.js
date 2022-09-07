@@ -14,10 +14,9 @@ import CRUDConfig from '../main/crud/CRUDConfig';
 import CompanySiteConfig from '../main/company-site/CompanySiteConfig';
 import ConfigurationConfig from '../main/configuration/ConfigurationConfig';
 import ProfileConfig from '../main/profile/ProfileConfig';
-// import EmailTemplateConfig from '../main/email-template/EmailTemplateConfig';
+import EmailTemplateConfig from '../main/email-template/EmailTemplateConfig';
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig];
-// EmailTemplateConfig
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig];
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
 */

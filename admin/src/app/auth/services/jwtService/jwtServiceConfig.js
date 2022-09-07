@@ -18,6 +18,7 @@ const jwtServiceConfig = {
   updateProfile: 'profile-update',
   saveEmailTemplates: 'email-templates/save',
   updateEmailTemplates: 'email-templates/update',
+  getEmailTemplatesFieldData: 'email-templates/add',
 };
 
 export default jwtServiceConfig;
