@@ -13,7 +13,7 @@ function CreateEditHeader(props) {
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigate = useNavigate();
-  const {module,moduleId} = useParams();
+  const { module, moduleId } = useParams();
 
   function handleSaveProduct() {
     dispatch(saveModule(getValues()));
@@ -44,7 +44,7 @@ function CreateEditHeader(props) {
                 ? 'heroicons-outline:arrow-sm-left'
                 : 'heroicons-outline:arrow-sm-right'}
             </FuseSvgIcon>
-            <span className="flex mx-4 font-medium capitalize">{module}</span>
+            <span className="flex mx-4 font-medium capitalize">{module.split('-').join(' ')}</span>
           </Typography>
         </motion.div>
 
