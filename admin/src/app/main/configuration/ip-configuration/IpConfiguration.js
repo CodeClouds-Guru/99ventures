@@ -7,14 +7,18 @@ import AddMore from 'app/shared-components/AddMore';
 import axios from 'axios';
 import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
 
-function IpConfiguration() {
+function IpConfiguration(props) {
     let [ips, setIps] = useState([]);
     let [isps, setIsps] = useState([]);
     const dispatch = useDispatch();
+    const [permission, setPermission] = useState(false);
 
     useEffect(() => {
         fetchData();
-    }, [])
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        );
+    }, [props.permission])
 
     const submit = (e) => {
         e.preventDefault();
@@ -61,6 +65,7 @@ function IpConfiguration() {
                             <CardHeader title="Denied IP List" />
                             <CardContent>
                                 <AddMore
+                                    permission={ permission }
                                     data={ips}
                                     placeholder="Enter IP"
                                     onChange={onIpChangeFromChild}
@@ -73,6 +78,7 @@ function IpConfiguration() {
                             <CardHeader title="Denied ISP List" />
                             <CardContent>
                                 <AddMore
+                                    permission={ permission }
                                     data={isps}
                                     placeholder="Enter ISP"
                                     onChange={onIspChangeFromChild}
@@ -81,18 +87,22 @@ function IpConfiguration() {
                             </CardContent>
                         </Card>
 
-                        <span className="flex items-center justify-center">
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                className="w-1/2 mt-24"
-                                aria-label="Save"
-                                size="large"
-                                onClick={submit}
-                            >
-                                Save
-                            </Button>
-                        </span>
+                        {
+                            permission ? 
+                                <span className="flex items-center justify-center">
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        className="w-1/2 mt-24"
+                                        aria-label="Save"
+                                        size="large"
+                                        onClick={submit}
+                                    >
+                                        Save
+                                    </Button>
+                                </span>
+                            : ''
+                        }
                     </div>
                 </div>
             </Paper>

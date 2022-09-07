@@ -16,6 +16,7 @@ import ConfigurationConfig from '../main/configuration/ConfigurationConfig';
 import ProfileConfig from '../main/profile/ProfileConfig';
 import EmailTemplateConfig from '../main/email-template/EmailTemplateConfig';
 
+
 const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig];
 
 /*

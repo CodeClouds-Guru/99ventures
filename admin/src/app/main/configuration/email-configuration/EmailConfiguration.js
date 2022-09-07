@@ -47,10 +47,17 @@ const schema = yup.object().shape({
         .required('Please insert the port number'),
 });
 
-function EmailConfiguration() {
+function EmailConfiguration(props) {
     const dispatch = useDispatch();
     const [sslRequired, setSslRequired] = useState(false)
     const [siteNameVisible, setSiteNameVisible] = useState(false)
+    const [permission, setPermission] = useState(false)
+
+    useEffect(() => {
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        );
+    }, [props.permission]);
 
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
@@ -144,6 +151,7 @@ function EmailConfiguration() {
                                     variant="outlined"
                                     required
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -162,6 +170,7 @@ function EmailConfiguration() {
                                     variant="outlined"
                                     required
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -180,6 +189,7 @@ function EmailConfiguration() {
                                     variant="outlined"
                                     required
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -198,6 +208,7 @@ function EmailConfiguration() {
                                     variant="outlined"
                                     required
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -216,6 +227,7 @@ function EmailConfiguration() {
                                     variant="outlined"
                                     required
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -233,6 +245,7 @@ function EmailConfiguration() {
                                     helperText={errors?.password?.message}
                                     variant="outlined"
                                     fullWidth
+                                    disabled={ !permission }
                                 />
                             )}
                         />
@@ -267,21 +280,25 @@ function EmailConfiguration() {
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
-                        />
-
-                        <span className="flex items-center justify-center">
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                className="w-1/2 mt-24"
-                                aria-label="Register"
-                                disabled={_.isEmpty(dirtyFields) || !isValid}
-                                type="submit"
-                                size="large"
-                            >
-                                Save
-                            </Button>
-                        </span>
+                        />  
+                        {
+                            permission ? 
+                                <span className="flex items-center justify-center">
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        className="w-1/2 mt-24"
+                                        aria-label="Register"
+                                        disabled={_.isEmpty(dirtyFields) || !isValid}
+                                        type="submit"
+                                        size="large"
+                                    >
+                                        Save
+                                    </Button>
+                                </span>
+                            : ''
+                        }
+                        
                     </form>
                 </div>
             </Paper>

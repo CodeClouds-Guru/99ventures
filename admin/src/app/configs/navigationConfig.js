@@ -16,6 +16,14 @@ const navigationConfig = [
     url: 'configuration',
   },
   {
+    id: 'scripts',
+    title: 'Scripts',
+    translate: 'Scripts',
+    type: 'item',
+    icon: 'heroicons-outline:code',
+    url: 'app/scripts',
+  },
+  {
     id: 'administration',
     title: 'Administration',
     translate: 'Administration',

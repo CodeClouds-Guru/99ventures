@@ -39,9 +39,11 @@ function a11yProps(index) {
 	};
 }
 
-const PaymentGateway = () => {
+const PaymentGateway = (props) => {
 	const [value, setValue] = React.useState(0);
 	const [gateways, setGateways] = React.useState([])
+	const hasPermission = props.permission;
+	
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
@@ -90,7 +92,7 @@ const PaymentGateway = () => {
 				gateways.map((gateway, indx) => {
 					return (
 						<TabPanel key={ indx } value={value} index={ indx } className="w-full">
-							<PaymentCredentials gateway={gateway.name} credentials={ gateway.credentials }/>
+							<PaymentCredentials gateway={gateway.name} credentials={ gateway.credentials } permission={hasPermission} />
 						</TabPanel>
 					)
 				})

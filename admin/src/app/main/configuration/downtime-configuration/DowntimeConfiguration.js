@@ -7,15 +7,20 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig';
 import AddMore from 'app/shared-components/AddMore';
 
-function DowntimeConfiguration() {
+function DowntimeConfiguration(props) {
     const dispatch = useDispatch();
     const [allowedIPs, setAllowedIPs] = useState([])
     const [message, setMessage] = useState("")
     const [shutdown, setShutdown] = useState(false)
+    const [permission, setPermission] = useState(false)
 
     useEffect(() => {
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        );
         getDowntime();
-    }, [])
+    }, [props.permission]);
+
     const onIpChangeFromChild = (val) => {
         setAllowedIPs(val);
     }
@@ -78,14 +83,20 @@ function DowntimeConfiguration() {
                 <div className="w-full mx-auto sm:mx-0">
                     <div className="flex flex-col justify-center w-full">
                         <Card variant="outlined" className="mb-20">
-                            <CardHeader
-                                title="Allowed IP List"
-                                action={
-                                    <Button size="small" variant="outlined" onClick={addMyIP}>Add Mine</Button>
-                                }
-                            />
+                            {
+                                permission ? 
+                                    <CardHeader
+                                        title="Allowed IP List"
+                                        action={
+                                            <Button size="small" variant="outlined" onClick={addMyIP}>Add Mine</Button>
+                                        }
+                                    />
+                                : ''
+                            }
+                            
                             <CardContent>
                                 <AddMore
+                                    permission={ permission }
                                     data={allowedIPs}
                                     placeholder="Enter allowed IP(s)"
                                     onChange={onIpChangeFromChild}
@@ -105,6 +116,7 @@ function DowntimeConfiguration() {
                             minRows={3}
                             value={message}
                             onChange={onMessageChange}
+                            disabled={ !permission }
                         />
 
                         <FormControl className="items-center">
@@ -118,18 +130,22 @@ function DowntimeConfiguration() {
                             />
                         </FormControl>
 
-                        <span className="flex items-center justify-center">
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                className="w-1/2 mt-24"
-                                aria-label="Save"
-                                onClick={onSubmit}
-                                size="large"
-                            >
-                                Save
-                            </Button>
-                        </span>
+                        { 
+                            permission ? 
+                                <span className="flex items-center justify-center">
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        className="w-1/2 mt-24"
+                                        aria-label="Save"
+                                        onClick={onSubmit}
+                                        size="large"
+                                    >
+                                        Save
+                                    </Button>
+                                </span>
+                            : ''
+                        }
                     </div>
                 </div>
             </Paper>

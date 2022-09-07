@@ -9,12 +9,14 @@ export default function AddMore(props) {
     let [dataset, setDataset] = useState(props.data);
     let [errorMsg, setErrorMsg] = useState('');
     const dispatch = useDispatch();
+    const [permisson, setPermission] = useState(false);
 
     useEffect(() => {
         if (props.data) {
             setDataset(props.data);
         }
-    }, [props.data])
+        setPermission(props.permission);
+    }, [props])
 
     const handleDelete = (index) => {
         dataset.splice(index, 1)
@@ -61,6 +63,7 @@ export default function AddMore(props) {
                     variant="outlined"
                     fullWidth
                     onKeyDown={getText}
+                    disabled={ !permisson }
                 />
                 <FormHelperText>
                     Press Enter to add
