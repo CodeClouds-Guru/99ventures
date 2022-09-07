@@ -41,15 +41,15 @@ const replyFormSchema =  yup.object().shape({
     messageBody: yup.string().required('Please enter Message'),
 });
 
-function GeneralConfiguration() {
+function GeneralConfiguration(props) {
     const dispatch = useDispatch();
     const [captchaOptions, setCaptchaOptions] = useState([])
     const [generalReplies, setGeneralReplies] = useState([])
     const [layoutOptions, setLayoutOptions] = useState([])
     const [pageOptions, setPageOptions] = useState([])
-    const [toggleModal, setToggleModal] = useState(false);
-
-
+    const [toggleModal, setToggleModal] = useState(false)
+    const [permission, setPermission] = useState(false)
+    
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
         default_template_id: 0,
@@ -88,8 +88,11 @@ function GeneralConfiguration() {
     }
 
     useEffect(() => { 
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        );
         fetchData();
-    }, [])
+    }, [props.permission])
 
     const fetchData = () => {
         axios.get('/get-general-tab-data').then((response) => {
@@ -318,6 +321,7 @@ function GeneralConfiguration() {
                                             label="Homepage"
                                             onChange={selectHomePage}
                                             required
+                                            disabled={ !permission }
                                         >
                                             {getFormattedOptions(pageOptions)}
                                         </Select>
@@ -338,7 +342,8 @@ function GeneralConfiguration() {
                                             id="demo-simple-select"
                                             value={defaultValues.default_template_id}
                                             label="Default Template"
-                                            onChange={selectLayoutOption}
+                                            onChange={selectLayoutOption}                                            
+                                            disabled={ !permission }
                                         >
                                             {getFormattedOptions(layoutOptions)}
                                         </Select>
@@ -360,6 +365,7 @@ function GeneralConfiguration() {
                                             value={defaultValues.default_captcha_option_id}
                                             label="Captcha"
                                             onChange={selectCaptchaOption}
+                                            disabled={ !permission }
                                             >
                                             {getFormattedOptions(captchaOptions)}
                                         </Select>
@@ -385,18 +391,23 @@ function GeneralConfiguration() {
                                     {getReplies(generalReplies)}
                                 </List>
                             </CardContent>
-                            <div className='flex items-center justify-center'> 
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    className="w-1/2 mt-24"
-                                    aria-label="Register"
-                                    type="submit"
-                                    size="large"
-                                >
-                                    Save
-                                </Button>
-                            </div>
+
+                            {
+                                (permission) ? 
+                                    <div className='flex items-center justify-center'> 
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            className="w-1/2 mt-24"
+                                            aria-label="Register"
+                                            type="submit"
+                                            size="large"
+                                        >
+                                            Save
+                                        </Button>
+                                    </div> 
+                                : ''
+                            }                            
                         </form>
                     </div>
                 </Paper>

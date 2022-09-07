@@ -12,19 +12,23 @@ const PaymentCredentials = (props) => {
     const dispatch = useDispatch();
     const [ loading, setLoading ] = React.useState(false);
     const [ credentials, setCredentials ] = React.useState(props.credentials);
-    // const credentials = props.credentials;
-
+    const [permission, setPermission] = React.useState(false);
+    
     const defaultValues = {};
     let validationFields = {};
-
     credentials.map(val => {
         defaultValues[val.slug] = val.value;
         Object.assign(validationFields, {
             [val.slug]: yup.string().required(`Please enter ${val.name}`)
         })
     });
-
     const validationSchema = yup.object().shape({ ...validationFields});
+
+    React.useEffect(() => { 
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        )
+    }, [props.permission])
 
     const { 
         control, 
@@ -36,9 +40,6 @@ const PaymentCredentials = (props) => {
         defaultValues: defaultValues,
         resolver: yupResolver(validationSchema),
     });
-
-    // console.log(errors)
-    // console.log(dirtyFields)
 
     const formSubmit = (data) => {
         console.log('data', data);
@@ -100,6 +101,7 @@ const PaymentCredentials = (props) => {
                                         id="fullWidth" 
                                         className="mb-24"
                                         required
+                                        disabled={ !permission }
                                     />
                                 )}
                             />
@@ -107,20 +109,23 @@ const PaymentCredentials = (props) => {
                     })
                 }
                 
-
-                <div className='flex justify-end'>
-                    <LoadingButton
-                        variant="contained"
-                        color="secondary"
-                        aria-label="Save"                        
-                        loading={loading}
-                        type="submit"
-                        size="large"
-                        disabled={ !Object.keys(dirtyFields).length || !isValid}
-                        >
-                        Save
-                    </LoadingButton>
-                </div>
+                {
+                    permission ? 
+                        <div className='flex justify-end'>
+                            <LoadingButton
+                                variant="contained"
+                                color="secondary"
+                                aria-label="Save"                        
+                                loading={loading}
+                                type="submit"
+                                size="large"
+                                disabled={ !Object.keys(dirtyFields).length || !isValid}
+                                >
+                                Save
+                            </LoadingButton>
+                        </div>
+                    : ''
+                }
             </form>
         </Box>
     );

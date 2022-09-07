@@ -80,6 +80,18 @@ class EmailTemplateController extends Controller {
       message: "Email template updated."
     }
   }
+  //override delete function
+  async delete(req,res){
+    let modelIds = req.body.modelIds ?? [];
+    let response = await super.update(req)
+    
+    //delete email action
+    EmailActionEmailTemplate.destroy({ where: { email_template_id: modelIds } })
+    return {
+      status: true,
+      message: "Email template deleted."
+    }
+  }
 }
 
 module.exports = EmailTemplateController

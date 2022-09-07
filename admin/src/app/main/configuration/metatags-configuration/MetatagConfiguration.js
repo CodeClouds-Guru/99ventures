@@ -15,14 +15,17 @@ const schema =  yup.object().shape({
     description: yup.string().required('Please enter meta description'),
 });
 
-function MetatagConfiguration() {
+function MetatagConfiguration(props) {
     const dispatch = useDispatch();
     const [ loading, setLoading ] = useState(false);
+    const [permission, setPermission] = useState(false);
     
-    // const [ defaultValues, setDefaultValues ] = useState({
-    //     // keywords: '',
-    //     // description: ''
-    // });
+
+    useEffect(() => { 
+        setPermission(
+            (props.permission('save') || props.permission('update'))
+        )
+    }, [props.permission])
 
     const { 
         control, 
@@ -111,6 +114,7 @@ function MetatagConfiguration() {
                                         multiline
                                         rows={4}
                                         fullWidth
+                                        disabled={ !permission }
                                     />
                                 )}
                             />
@@ -128,25 +132,29 @@ function MetatagConfiguration() {
                                         multiline
                                         rows={4}
                                         fullWidth
-                                        
+                                        disabled={ !permission }                                        
                                     />
                                 )}
                             />
                             
-                            <div className='flex items-center justify-center'> 
-                                <LoadingButton
-                                    variant="contained"
-                                    color="secondary"
-                                    className="w-1/2 mt-24"
-                                    aria-label="Register"
-                                    type="submit"
-                                    size="large"
-                                    loading={loading}
-                                    disabled={ !Object.keys(dirtyFields).length || !isValid}
-                                >
-                                    Save
-                                </LoadingButton>
-                            </div>
+                            {
+                                (permission) ? 
+                                    <div className='flex items-center justify-center'> 
+                                        <LoadingButton
+                                            variant="contained"
+                                            color="secondary"
+                                            className="w-1/2 mt-24"
+                                            aria-label="Register"
+                                            type="submit"
+                                            size="large"
+                                            loading={loading}
+                                            disabled={ !Object.keys(dirtyFields).length || !isValid}
+                                        >
+                                            Save
+                                        </LoadingButton>
+                                    </div>
+                                : ''
+                            }
                         </form>
                     </div>
                 </Paper>
