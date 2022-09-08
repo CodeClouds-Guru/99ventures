@@ -142,7 +142,7 @@ class IpConfigurationController extends Controller {
 
       if (new_ip_list.length > 0) {
         //remove previous ip records
-        await this.model.destroy({
+        await IpConfiguration.destroy({
           where: { company_portal_id: site_id, status: '0' },
         })
 
@@ -157,7 +157,7 @@ class IpConfigurationController extends Controller {
           }
         })
 
-        const insertNewData = this.model.bulkCreate(data, {
+        const insertNewData = await IpConfiguration.bulkCreate(data, {
           updateOnDuplicate: ['ip'],
         })
         if (insertNewData) {
