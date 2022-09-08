@@ -12,7 +12,7 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 import CreateUpdateFormHeader from './CreateUpdateFormHeader';
 
 const CreateUpdateForm = ({ input, meta }) => {
-    const inputElement = useRef();
+    const inputElement = useRef('');
     const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -24,27 +24,65 @@ const CreateUpdateForm = ({ input, meta }) => {
         variable: '',
         insertedHtml: '',
     });
-    const [errors, setErrors] = useState({})
+    const [errors, setErrors] = useState({
+        subject: '',
+        action: '',
+        variable: '',
+        insertedHtml: '',
+    })
     useEffect(() => {
         getFieldData()
     }, []);
-
+    const onSubjectChange = (event) => {
+        if (event.target.value) {
+            setAllData(allData => ({
+                ...allData, subject: event.target.value
+            }))
+            setErrors(errors => ({
+                ...errors, subject: ''
+            }))
+        } else {
+            setErrors(errors => ({
+                ...errors, subject: 'Please insert Subject'
+            }))
+        }
+    }
     const onChangeInEditor = (input) => {
-        setAllData(allData => ({
-            ...allData, insertedHtml: input
-        }));
+        if (input) {
+            setAllData(allData => ({
+                ...allData, insertedHtml: input
+            }));
+            setErrors(errors => ({
+                ...errors, insertedHtml: ''
+            }))
+        } else {
+            setErrors(errors => ({
+                ...errors, insertedHtml: 'Please insert email body'
+            }))
+        }
     }
     const handleChangeAction = (event) => {
-        setAllData(allData => ({
-            ...allData, action: event.target.value
-        }))
+        if (event.target.value) {
+            setAllData(allData => ({
+                ...allData, action: event.target.value
+            }))
+            setErrors(errors => ({
+                ...errors, action: ''
+            }))
+        } else {
+            setErrors(errors => ({
+                ...errors, action: 'Please insert Action'
+            }))
+        }
     }
     const handleChangeVariable = (event) => {
         setAllData(allData => ({
             ...allData, variable: event.target.value
         }))
     }
+
     console.log('editor', inputElement)
+
     const getFieldData = () => {
         axios.get(jwtServiceConfig.getEmailTemplatesFieldData)
             .then((response) => {
@@ -82,7 +120,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0">
                         <FormControl className="w-1/2 mb-24 pr-10">
-                            <InputLabel id="demo-simple-select-label">Action</InputLabel>
+                            <InputLabel id="demo-simple-select-label">Action*</InputLabel>
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
@@ -95,6 +133,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                                     return <MenuItem key={value.id} value={value.id}>{value.action}</MenuItem>
                                 })}
                             </Select>
+                            <FormHelperText error variant="standard">{errors.action}</FormHelperText>
                         </FormControl>
 
                         <FormControl className="w-1/2 mb-24">
@@ -108,24 +147,31 @@ const CreateUpdateForm = ({ input, meta }) => {
                             >
                                 <MenuItem value="">Select a variable</MenuItem>
                                 {variableOptions.map((value) => {
-                                    return <MenuItem key={value.id} value={value.code}>{value.name} - {value.code}</MenuItem>
+                                    return <MenuItem key={value.id} value={value.code}>{value.name}</MenuItem>
                                 })}
                             </Select>
                         </FormControl>
+                        <FormControl className="w-full mb-24">
+                            <TextField
+                                label="Subject"
+                                type="text"
+                                error={!!errors.subject}
+                                helperText={errors?.subject?.message}
+                                variant="outlined"
+                                required
+                                fullWidth
+                                value={allData.subject}
+                                onChange={onSubjectChange}
+                                ref={inputElement}
+                            />
+                            <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
+                        </FormControl>
 
-                        <TextField
-                            className="mb-24"
-                            label="Subject"
-                            type="text"
-                            error={!!errors.subject}
-                            helperText={errors?.subject?.message}
-                            variant="outlined"
-                            required
-                            fullWidth
-                            value={allData.subject}
-                        />
+                        <FormControl className="w-full mb-24">
+                            <WYSIWYGEditor ref={inputElement} onChange={onChangeInEditor} />
+                            <FormHelperText error variant="standard">{errors.insertedHtml}</FormHelperText>
+                        </FormControl>
 
-                        <WYSIWYGEditor id="email_body" ref={inputElement} onChange={onChangeInEditor} />
                         <span className="flex items-center justify-center">
                             <Button
                                 variant="contained"
