@@ -44,7 +44,7 @@ const CreateUpdateForm = ({ input, meta }) => {
             ...allData, variable: event.target.value
         }))
     }
-    console.log('editor 69', inputElement)
+    console.log('editor', inputElement)
     const getFieldData = () => {
         axios.get(jwtServiceConfig.getEmailTemplatesFieldData)
             .then((response) => {
@@ -80,65 +80,66 @@ const CreateUpdateForm = ({ input, meta }) => {
             <CreateUpdateFormHeader moduleId={moduleId} />
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                    <div className="w-full mx-auto sm:mx-0">
+                        <FormControl className="w-1/2 mb-24 pr-10">
+                            <InputLabel id="demo-simple-select-label">Action</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={allData.action}
+                                label="Action"
+                                onChange={handleChangeAction}
+                            >
+                                <MenuItem value="">Select an action</MenuItem>
+                                {actionOptions.map((value) => {
+                                    return <MenuItem key={value.id} value={value.id}>{value.action}</MenuItem>
+                                })}
+                            </Select>
+                        </FormControl>
 
-                    <TextField
-                        className="mb-24"
-                        label="Subject"
-                        type="text"
-                        error={!!errors.subject}
-                        helperText={errors?.subject?.message}
-                        variant="outlined"
-                        required
-                        fullWidth
-                        value={allData.subject}
-                    />
+                        <FormControl className="w-1/2 mb-24">
+                            <InputLabel id="demo-simple-select-label">Variable</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={allData.variable}
+                                label="Variable"
+                                onChange={handleChangeVariable}
+                            >
+                                <MenuItem value="">Select a variable</MenuItem>
+                                {variableOptions.map((value) => {
+                                    return <MenuItem key={value.id} value={value.code}>{value.name} - {value.code}</MenuItem>
+                                })}
+                            </Select>
+                        </FormControl>
 
-                    <FormControl className="w-1/2 mb-24 pr-10">
-                        <InputLabel id="demo-simple-select-label">Action</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={allData.action}
-                            label="Action"
-                            onChange={handleChangeAction}
-                        >
-                            <MenuItem value="">Select an action</MenuItem>
-                            {actionOptions.map((value) => {
-                                return <MenuItem key={value.id} value={value.id}>{value.action}</MenuItem>
-                            })}
-                        </Select>
-                    </FormControl>
+                        <TextField
+                            className="mb-24"
+                            label="Subject"
+                            type="text"
+                            error={!!errors.subject}
+                            helperText={errors?.subject?.message}
+                            variant="outlined"
+                            required
+                            fullWidth
+                            value={allData.subject}
+                        />
 
-                    <FormControl className="w-1/2 mb-24">
-                        <InputLabel id="demo-simple-select-label">Variable</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={allData.variable}
-                            label="Variable"
-                            onChange={handleChangeVariable}
-                        >
-                            <MenuItem value="">Select a variable</MenuItem>
-                            {variableOptions.map((value) => {
-                                return <MenuItem key={value.id} value={value.code}>{value.name}</MenuItem>
-                            })}
-                        </Select>
-                    </FormControl>
-
-                    <WYSIWYGEditor ref={inputElement} onChange={onChangeInEditor} />
-                    <span className="flex items-center justify-center">
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            className="w-1/2 mt-24"
-                            aria-label="Save"
-                            type="submit"
-                            size="large"
-                            onClick={onSubmit}
-                        >
-                            {moduleId === 'create' ? 'Save' : 'Update'}
-                        </Button>
-                    </span>
+                        <WYSIWYGEditor id="email_body" ref={inputElement} onChange={onChangeInEditor} />
+                        <span className="flex items-center justify-center">
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                className="w-1/2 mt-24"
+                                aria-label="Save"
+                                type="submit"
+                                size="large"
+                                onClick={onSubmit}
+                            >
+                                {moduleId === 'create' ? 'Save' : 'Update'}
+                            </Button>
+                        </span>
+                    </div>
                 </Paper>
             </div>
 
