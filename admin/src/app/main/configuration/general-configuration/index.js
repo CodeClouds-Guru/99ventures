@@ -9,6 +9,7 @@ import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
 const modalStyle = {
     position: 'absolute',
@@ -95,7 +96,7 @@ function GeneralConfiguration(props) {
     }, [props.permission])
 
     const fetchData = () => {
-        axios.get('/get-general-tab-data').then((response) => {
+        axios.get(jwtServiceConfig.getGeneralConfiguration).then((response) => {
             if (response.data.status) {
                 setCaptchaOptions([...response.data.captcha_options, {id: 0, name: 'Select Captcha Option'}])
                 setPageOptions([...response.data.page_options, {id: 0, name: 'Select Home Page'}])
@@ -159,8 +160,6 @@ function GeneralConfiguration(props) {
         generalReplies.splice(itemKey, 1);
         setGeneralReplies([...generalReplies]);
     }
-
-    // console.log(dirtyFields);
     
     /**
      * General Config data post
@@ -180,7 +179,7 @@ function GeneralConfiguration(props) {
             auto_response_new_data: responses
         }
         
-        axios.post('/save-general-tab-data', params)
+        axios.post(jwtServiceConfig.saveGeneralConfiguration, params)
         .then((response) => {
             if (response.data.status) {
                 dispatch(showMessage({ variant: 'success', message: response.data.message }))

@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
 const schema =  yup.object().shape({
     keywords: yup.string().required('Please enter the meta keywords'),
@@ -48,7 +48,7 @@ function MetatagConfiguration(props) {
     }, [setValue])
 
     const fetchData = () => {
-        axios.get('/meta-tags').then((response) => {
+        axios.get(jwtServiceConfig.getMetaTagsConfiguration).then((response) => {
             if (response.data.status) {
                 const result = response.data.data;
                 setValue('keywords', result.Keywords, { shouldDirty: false, shouldValidate: true });
@@ -72,7 +72,7 @@ function MetatagConfiguration(props) {
             tag_name: 'Description'
         }];
         setLoading(true);
-        axios.post('/meta-tags/update', {meta: params})
+        axios.post(jwtServiceConfig.saveMetaTagsConfiguration, {meta: params})
         .then((response) => {
             if (response.data.status) {
                 setLoading(false);

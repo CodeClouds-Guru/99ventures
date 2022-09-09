@@ -10,6 +10,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { confirmAccountPassword } from 'app/store/accountSlice';
 import { selectUser } from 'app/store/userSlice';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
 const modalStyle = {
     position: 'absolute',
@@ -89,10 +90,10 @@ const PaymentCredentials = (props) => {
         
         credentials.map((cr, indx) => {
             credentials[indx].value = data[cr.slug]
-        })
+        });
         
         setLoading(true)
-        axios.post('/payment-methods/update', {credentials: params})
+        axios.post(jwtServiceConfig.savePaymentMethodConfiguration, {credentials: params})
         .then((response) => {
             setLoading(false)
             if (response.data.status) {

@@ -4,6 +4,7 @@ import { Box, Tabs, Tab, Typography }from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PaymentCredentials from './PaymentCredentials';
 import { useSelector } from 'react-redux';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
 import axios from 'axios';
 import './TabStyle.css';
@@ -62,7 +63,7 @@ const PaymentGateway = (props) => {
 		const params = {
 			auth: confirmAccountStatus	// true|false
 		}
-		axios.get('payment-methods', {params})
+		axios.get(jwtServiceConfig.getPaymentMethodConfiguration, {params})
 		.then(response => {
 			if (response.data.status && response.data.payment_method_list.length > 0) {
 				setGateways(response.data.payment_method_list);

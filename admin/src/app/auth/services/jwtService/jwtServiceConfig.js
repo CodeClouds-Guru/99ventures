@@ -8,6 +8,8 @@ const jwtServiceConfig = {
   resetPassword: 'reset-password',
   logout: 'logout',
   companies: 'companies',
+  getGeneralConfiguration: 'get-general-tab-data',
+  saveGeneralConfiguration: 'save-general-tab-data',
   getEmailConguration: 'emailconfigurations/view',
   saveEmailConguration: 'emailconfigurations/save',
   getIpConfiguration: 'ip-configurations',
@@ -19,7 +21,11 @@ const jwtServiceConfig = {
   saveEmailTemplates: 'email-templates/save',
   updateEmailTemplates: 'email-templates/update',
   getEmailTemplatesFieldData: 'email-templates/add',
-  confirmAccountCheck: 'check-auth'
+  confirmAccountCheck: 'check-auth',
+  getMetaTagsConfiguration: 'meta-tags',
+  saveMetaTagsConfiguration: 'meta-tags/update',
+  getPaymentMethodConfiguration: 'payment-methods',
+  savePaymentMethodConfiguration: 'payment-methods/update'
 };
 
 export default jwtServiceConfig;
