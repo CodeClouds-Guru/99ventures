@@ -487,14 +487,14 @@ class AuthController {
     try {
       const password = req.body.password || "";
       if (!password) {
-        return res.status(401).json({
+        return res.status(422).json({
           status: false,
           errors: "Password missing",
         });
       }
       const user = await User.findOne({ where: { id: req.user.id } });
       if (!user) {
-        return res.status(401).json({
+        return res.status(422).json({
           status: false,
           errors: "User does not exists",
         });
@@ -502,7 +502,7 @@ class AuthController {
       // console.log(user)
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({
+        return res.status(422).json({
           status: false,
           errors: "Invalid Credentials",
         });

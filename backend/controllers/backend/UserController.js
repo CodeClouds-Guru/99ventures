@@ -32,6 +32,7 @@ class UserController extends Controller {
           },
           attributes: ["id"],
         },
+        // { all: true, nested: true , attributes: ["name"]},
       ];
     } else if (permissions.indexOf("owner-users-list") !== -1) {
       if (options.where != undefined) {
