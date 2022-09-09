@@ -21,9 +21,6 @@ const schema = yup.object().shape({
     lastName: yup
         .string()
         .required('Please enter your last name'),
-    phone: yup
-        .number('Insert numbers only')
-        .required('Please enter your phone no'),
 });
 
 const defaultValues = {
@@ -123,7 +120,6 @@ function Account() {
                                 error={!!errors.phone}
                                 helperText={errors?.phone?.message}
                                 variant="outlined"
-                                required
                                 fullWidth
                             />
                         )}

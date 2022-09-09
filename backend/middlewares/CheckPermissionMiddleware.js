@@ -46,7 +46,7 @@ module.exports = async function (req, res, next) {
   if (typeof action === 'undefined' || action.trim().length === 0) {
     action = 'list'
   }
-  console.log('-------------------',module,action)
+  // console.log('-------------------',module,action)
   const companies = await db.sequelize.query(
     'SELECT * FROM company_user WHERE company_id = ? AND user_id = ?',
     {
@@ -55,7 +55,7 @@ module.exports = async function (req, res, next) {
     }
   )
   const group_ids = companies.map((item) => item.group_id)
-  console.log('-------------------',group_ids)
+  // console.log('-------------------',group_ids)
 
   const group_role_permissions = await Group.findAll({
     where: {
