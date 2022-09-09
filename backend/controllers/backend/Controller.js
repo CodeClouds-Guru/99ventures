@@ -28,9 +28,12 @@ class Controller {
     var search = req.query.search || "";
     let sort_field = req.query.sort || "id";
     let sort_order = req.query.sort_order || "desc";
+    
     let fields = this.model.fields;
-    let extra_fields = this.model.extra_fields || []
-    let attributes = Object.keys(fields).filter(attr => extra_fields.indexOf(attr) == -1);
+    let extra_fields = this.model.extra_fields || [];
+    let attributes = Object.keys(fields).filter(
+      (attr) => extra_fields.indexOf(attr) == -1
+    );
     let searchable_fields = [...attributes].filter((key) => {
       if (fields[key] && fields[key]["searchable"]) {
         return true;
@@ -113,7 +116,7 @@ class Controller {
       let models = await this.model.findAll({ where: { id: modelIds } });
       await this.model.destroy({ where: { id: modelIds } });
       if (models) {
-        models.forEach(async model => {
+        models.forEach(async (model) => {
           model.deleted_by = req.user.id;
           await model.save();
         });
@@ -132,7 +135,7 @@ class Controller {
       await this.model.restore({ where: { id: modelIds } });
       let models = await this.model.findAll({ where: { id: modelIds } });
       if (models) {
-        models.forEach(async model => {
+        models.forEach(async (model) => {
           model.deleted_by = null;
           await model.save();
         });
@@ -145,7 +148,7 @@ class Controller {
     }
   }
 
-  throwCustomError(message,status = 422) {
+  throwCustomError(message, status = 422) {
     const errorObj = new Error("Request failed.");
     errorObj.statusCode = status;
     errorObj.data = message;

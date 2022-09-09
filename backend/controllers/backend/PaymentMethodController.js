@@ -16,7 +16,7 @@ class PaymentMethodController extends Controller {
     try {
       const site_id = req.header("site_id") || 1;
       const company_id = req.header("company_id") || 1;
-      const mask_auth = req.body.auth || false;
+      const mask_auth = req.query.auth || false;
       let payment_method_list = await PaymentMethod.findAll({
         attributes: ["name", "slug"],
         include: {
@@ -29,7 +29,7 @@ class PaymentMethodController extends Controller {
           },
         },
       });
-      if (mask_auth !== true) {
+      if (mask_auth === false) {
         for (let i = 0; i < payment_method_list.length; i++) {
           for (let j = 0; j < payment_method_list[i].credentials.length; j++) {
             let cred = payment_method_list[i].credentials[j].value;
@@ -68,7 +68,7 @@ class PaymentMethodController extends Controller {
           id: values.id,
         };
       });
-      console.log(data);
+      // console.log(data);
       const insertNewData = await PaymentMethodCredential.bulkCreate(data, {
         updateOnDuplicate: ["id", "value"],
         ignoreDuplicates: true,

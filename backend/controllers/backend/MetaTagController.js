@@ -25,7 +25,7 @@ class MetaTagController extends Controller {
       });
       data = Object.assign({}, ...data)
 
-      console.log(data);
+      // console.log(data);
       return res.status(200).json({
         status: true,
         data,
@@ -58,7 +58,7 @@ class MetaTagController extends Controller {
           created_by: req.user.id,
         };
       });
-      console.log(data);
+      // console.log(data);
       const company_portal_meta = CompanyPortalMetaTag.bulkCreate(data);
 
       if (company_portal_meta) {

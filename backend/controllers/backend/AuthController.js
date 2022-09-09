@@ -499,7 +499,7 @@ class AuthController {
           errors: "User does not exists",
         });
       }
-      console.log(user)
+      // console.log(user)
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({

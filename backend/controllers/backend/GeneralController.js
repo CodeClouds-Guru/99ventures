@@ -120,7 +120,7 @@ class GeneralController {
           },
           include: [{ all: true, nested: true }],
         });
-        console.log(prevCompanyPortalCaptcha.CaptchaOptions);
+        // console.log(prevCompanyPortalCaptcha.CaptchaOptions);
         const prevCapOpId =
           prevCompanyPortalCaptcha.CaptchaOptions.length > 0
             ? prevCompanyPortalCaptcha.CaptchaOptions[0]

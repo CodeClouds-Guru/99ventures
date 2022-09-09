@@ -116,7 +116,7 @@ class IpConfigurationController extends Controller {
   /** Update ip downtime data **/
   async updateIpDowntimeData(req, res) {
     try {
-      console.log(req.body)
+      // console.log(req.body)
       const site_id = req.header('site_id') || 1
       const company_id = req.header('company_id') || 1
       const shutdown_checked = req.body.shutdown_checked || false
@@ -146,7 +146,7 @@ class IpConfigurationController extends Controller {
           where: { company_portal_id: site_id, status: '0' },
         })
 
-        console.log(req.body.new_ip_list)
+        // console.log(req.body.new_ip_list)
         let data = []
         data = new_ip_list.map((ip) => {
           return {
