@@ -19,6 +19,7 @@ const jwtServiceConfig = {
   saveEmailTemplates: 'email-templates/save',
   updateEmailTemplates: 'email-templates/update',
   getEmailTemplatesFieldData: 'email-templates/add',
+  confirmAccountCheck: 'check-auth'
 };
 
 export default jwtServiceConfig;

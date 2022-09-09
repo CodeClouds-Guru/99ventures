@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Box, Tabs, Tab, Typography }from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PaymentCredentials from './PaymentCredentials';
+import { useSelector } from 'react-redux';
+
 import axios from 'axios';
 import './TabStyle.css';
 
@@ -40,27 +42,30 @@ function a11yProps(index) {
 }
 
 const PaymentGateway = (props) => {
+	const confirmAccountStatus = useSelector(state => state.account.confirm_account);
 	const [value, setValue] = React.useState(0);
 	const [gateways, setGateways] = React.useState([])
 	const hasPermission = props.permission;
-	
-
+	    
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
 
 	React.useEffect(() => {
 		retrieveGateways();
-	}, [])
+	}, [confirmAccountStatus])
 
 	/**
 	 * Retrieve list of payment gateways
 	 */
 	const retrieveGateways = () => {
-		axios.get('payment-methods')
+		const params = {
+			auth: confirmAccountStatus	// true|false
+		}
+		axios.get('payment-methods', {params})
 		.then(response => {
 			if (response.data.status && response.data.payment_method_list.length > 0) {
-				setGateways([...response.data.payment_method_list])
+				setGateways(response.data.payment_method_list);
 			} else {
                 console.log('Unable to get payment gateways');
             }
@@ -68,7 +73,6 @@ const PaymentGateway = (props) => {
 		.catch(error => console.log(error))
 	}
 	
-
 	return (
 		<Box
 			sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 'auto' }}

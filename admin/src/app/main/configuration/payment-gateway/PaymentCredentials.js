@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { confirmAccountPassword } from 'app/store/accountSlice';
+import { selectUser } from 'app/store/userSlice';
 
 const modalStyle = {
     position: 'absolute',
@@ -29,20 +30,19 @@ const modalValidationSchema = yup.object().shape({
 
 const PaymentCredentials = (props) => {
     const dispatch = useDispatch();
-    const confirmAccount = useSelector(state => state.account.confirm_account);
+    const confirmAccountStatus = useSelector(state => state.account.confirm_account);
+    const user = useSelector(selectUser);
     const [ loading, setLoading ] = React.useState(false);
     const [ credentials, setCredentials ] = React.useState(props.credentials);
     const [ permission, setPermission ] = React.useState(false);
     const [ toggleModal, setToggleModal ] = React.useState(false);
-    const [ showPopup, setShowPopup ] = React.useState('false');
-
-    console.log('confirmAccount',   confirmAccount)
-
+    
+    /**
+     * Default Value object creation and validation object creation
+     */
     const defaultValues = {};
     const validationFields = {};
-    const fieldsIcon = {};
     credentials.map(val => {
-        fieldsIcon[val.slug + '_password'] = false;
         defaultValues[val.slug] = val.value;
         Object.assign(validationFields, {
             [val.slug]: yup.string().required(`Please enter ${val.name}`)
@@ -50,18 +50,29 @@ const PaymentCredentials = (props) => {
     });
     const validationSchema = yup.object().shape({ ...validationFields});
 
-    
+    /**
+     * Props changed event listener
+     */
     React.useEffect(() => { 
-        setPermission(
-            (props.permission('save') || props.permission('update'))
-        )
-    }, [props.permission])
+        if(props.permission){
+            setPermission(
+                (props.permission('save') || props.permission('update'))
+            )
+        }
+        if(props.credentials) {
+            setCredentials(props.credentials);
+            props.credentials.map(val => {
+                setValue(val.slug, val.value, {shouldDirty: false, shouldValidate: true })
+            });
+        }
+    }, [props]);
+
 
     const { 
-        control, 
-        // register,
+        control,
         formState: { isValid, dirtyFields, errors }, 
-        handleSubmit
+        handleSubmit,
+        setValue
     } = useForm({
         mode: 'onChange',
         defaultValues: defaultValues,
@@ -69,7 +80,6 @@ const PaymentCredentials = (props) => {
     });
 
     const formSubmit = (data) => {
-        console.log('data', data);
         const params = credentials.map(cr => {
             return {
                 id: cr.id,
@@ -86,7 +96,7 @@ const PaymentCredentials = (props) => {
         .then((response) => {
             setLoading(false)
             if (response.data.status) {
-                setCredentials([...credentials]);
+                setCredentials(credentials);
                 dispatch(showMessage({ variant: 'success', message: response.data.message }))
             } else {
                 dispatch(showMessage({ variant: 'error', message: response.data.message }))
@@ -98,7 +108,8 @@ const PaymentCredentials = (props) => {
     const { 
         control: modalControl,
         formState: { isValid: isModalValid, dirtyFields: modalDirtyField }, 
-        handleSubmit: handleModalSubmit
+        handleSubmit: handleModalSubmit,
+        reset: modalFormReset
     } = useForm({
         mode: 'onChange',
         defaultValues: {
@@ -107,27 +118,42 @@ const PaymentCredentials = (props) => {
         resolver: yupResolver(modalValidationSchema),
     });
 
-    const onModalSubmit = () => {
-        console.log('Modal Submit');
-        dispatch(confirmAccountPassword())
+    /**
+     * Dispatched Action to verify Account Password
+     */
+    const onModalSubmit = (data) => {
+        dispatch(confirmAccountPassword(data));
     }
 
     /**
-     * Show / Hide Icon Variable Set
+     * Show / Hide Password Icon Variable Set
+     * @param confirmAccountStatus [true|false]
      */
-    const [values, setValues] = React.useState({
-        ...fieldsIcon
-    });
-    const handleClickShowPassword = (field) => {
-        setValues({
-            ...values,
-            [field]: !values[field],
-        });
-        setShowPopup('true');
-        setToggleModal(true);
-        console.log(showPopup)
-    };
+    const [showPassword, setShowPassword] = React.useState(confirmAccountStatus);   
 
+    const handleClickShowPassword = () => {
+        setShowPassword(true);
+        // If not confirmed account password, show Modal.
+        if(!confirmAccountStatus){
+            setToggleModal(true);
+        }
+    };
+    
+    /**
+     * Account status changed listener
+     */
+    React.useEffect(()=>{
+        if(confirmAccountStatus === true){
+            setToggleModal(false);
+        }
+    }, [confirmAccountStatus]);
+
+    const handleModalClose = () => {
+        setToggleModal(false);
+        setShowPassword(false);
+        modalFormReset({password: ''})
+    }
+    
     return (
         <>
             <Modal
@@ -138,10 +164,10 @@ const PaymentCredentials = (props) => {
                 style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
             >
                 <Box sx={modalStyle}>
-                    <h2 id="child-modal-title mb-24">Confirm Account</h2>
-                    {/* <p id="child-modal-description">
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    </p> */}
+                    <h2 id="child-modal-title">Hey, {user.first_name}!</h2>
+                    <p id="child-modal-description">
+                        Please confirm your account password
+                    </p>
                     <form
                         name="AutoresponderForm"
                         noValidate  
@@ -171,7 +197,7 @@ const PaymentCredentials = (props) => {
                                 component="label"
                                 className=""
                                 color="primary" 
-                                onClick={ ()=> setToggleModal(false) }
+                                onClick={ handleModalClose }
                             >Close</Button>
 
                             <LoadingButton
@@ -201,17 +227,15 @@ const PaymentCredentials = (props) => {
                     <Typography variant="body2">Please add below details</Typography>
                 </div>
                 <Divider style={{ marginBottom: '4rem', marginTop: '1.5rem'}}/>
-                <div>Show Auth Popup { showPopup }</div>
+                
                 <form
                     name="PaypalForm"
                     noValidate  
                     className="flex flex-col justify-center w-full mt-24"
                     onSubmit={handleSubmit(formSubmit)}
                 >
-                    
                     {
-                        credentials.map((el, indx) => {   
-                            const fieldTypeVal = values[el.slug+'_password'];           
+                        credentials.map((el, indx) => {
                             return (
                                 <Controller
                                     key={ indx }
@@ -224,19 +248,22 @@ const PaymentCredentials = (props) => {
                                             <OutlinedInput
                                                 {...field}
                                                 id={ el.slug }
-                                                type={ fieldTypeVal ? 'text' : 'password'}
+                                                type="text"
                                                 endAdornment={
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            onClick={() => handleClickShowPassword( el.slug+'_password' )}                                                        
-                                                            edge="end"
-                                                        >
-                                                        { fieldTypeVal ? <VisibilityOff /> : <Visibility />}
-                                                        </IconButton>
-                                                    </InputAdornment>
+                                                    el.value ? 
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                aria-label="toggle password visibility"
+                                                                onClick={() => handleClickShowPassword()}                                                        
+                                                                edge="end"
+                                                            >
+                                                            { !showPassword ? <VisibilityOff /> : ''}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    : ''
                                                 }
                                                 label={ el.name }
+                                                disabled={ !confirmAccountStatus }
                                             />
                                         </FormControl>
                                     )}
@@ -255,10 +282,11 @@ const PaymentCredentials = (props) => {
                                     loading={loading}
                                     type="submit"
                                     size="large"
-                                    disabled={ !Object.keys(dirtyFields).length || !isValid}
-                                    >
-                                    Save
+                                    disabled={ !confirmAccountStatus || !Object.keys(dirtyFields).length || !isValid }
+                                >
+                                Save
                                 </LoadingButton>
+                        
                             </div>
                         : ''
                     }
