@@ -49,6 +49,9 @@ function UserNavbarHeader(props) {
       <Typography className="email text-13 whitespace-nowrap font-medium" color="text.secondary">
         {user.email}
       </Typography>
+      <Typography className="email text-13 whitespace-nowrap font-medium capitalize" color="text.secondary">
+        {user.role.toString().split('-').join(' ')}
+      </Typography>
     </Root>
   );
 }
