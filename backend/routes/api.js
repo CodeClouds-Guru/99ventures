@@ -87,6 +87,9 @@ router.post(
 router.get("/meta-tags", [AuthMiddleware], MetaTagController.list);
 router.post("/meta-tags/update", [AuthMiddleware], MetaTagController.update);
 
+//check password
+router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
+
 router.all(
   "/:module/:action?/:id?",
   [AuthMiddleware, checkPermissionMiddleware],
