@@ -29,7 +29,14 @@ class PaymentMethodController extends Controller {
           },
         },
       });
-      if (mask_auth === false) {
+      console.log('==================',typeof mask_auth, mask_auth)
+      if (mask_auth === true || mask_auth === "true") {
+        return res.status(200).json({
+          status: true,
+          payment_method_list,
+        });
+      } else {
+        // if (mask_auth === "false" || mask_auth === false) {
         for (let i = 0; i < payment_method_list.length; i++) {
           for (let j = 0; j < payment_method_list[i].credentials.length; j++) {
             let cred = payment_method_list[i].credentials[j].value;
@@ -45,11 +52,11 @@ class PaymentMethodController extends Controller {
               cred.substring(0, count) + str;
           }
         }
+        return res.status(200).json({
+          status: true,
+          payment_method_list,
+        });
       }
-      return res.status(200).json({
-        status: true,
-        payment_method_list,
-      });
     } catch (err) {
       console.log(err.message);
       return res.status(500).json({
