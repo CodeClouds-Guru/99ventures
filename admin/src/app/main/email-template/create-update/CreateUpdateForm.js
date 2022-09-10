@@ -10,9 +10,16 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateUpdateFormHeader from './CreateUpdateFormHeader';
+import grapesjs from 'grapesjs'
+import 'grapesjs/dist/css/grapes.min.css'
+import 'grapesjs/dist/grapes.min.js'
+import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
+import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 
 const CreateUpdateForm = ({ input, meta }) => {
-    const inputElement = useRef('');
+    const inputElement = useRef('subject');
+    const textAreaElement = useRef('template');
+    const [currentFocusedElement, setCurrentFocusedElement] = useState('');
     const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -32,6 +39,52 @@ const CreateUpdateForm = ({ input, meta }) => {
     })
     useEffect(() => {
         getFieldData()
+        grapesjs.init({
+            container: '#gjs',
+            height: '700px',
+            width: '100%',
+            plugins: ['gjs-preset-webpage'],
+            storageManager: {
+              id: 'gjs-',
+              type: 'local',
+              autosave: true,
+              storeComponents: true,
+              storeStyles: true,
+              storeHtml: true,
+              storeCss: true,
+            },
+            deviceManager: {
+              devices:
+              [
+                {
+                  id: 'desktop',
+                  name: 'Desktop',
+                  width: '',
+                },
+                {
+                  id: 'tablet',
+                  name: 'Tablet',
+                  width: '768px',
+                  widthMedia: '992px',
+                },
+                {
+                  id: 'mobilePortrait',
+                  name: 'Mobile portrait',
+                  width: '320px',
+                  widthMedia: '575px',
+                },
+              ]
+            },
+            pluginsOpts: {
+              'grapesjs-preset-webpage': {
+                blocksBasicOpts: {
+                  blocks: ['column1', 'column2', 'column3', 'column3-7', 'text',     'link', 'image', 'video'],
+                  flexGrid: 1,
+                },
+                blocks: ['link-block', 'quote', 'text-basic'],
+              },
+            }
+          })
     }, []);
     const onSubjectChange = (event) => {
         if (event.target.value) {
@@ -79,14 +132,16 @@ const CreateUpdateForm = ({ input, meta }) => {
         setAllData(allData => ({
             ...allData, variable: event.target.value
         }))
+        if(currentFocusedElement === 'template') {
+            setAllData({...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}`})
+        } else if (currentFocusedElement === 'subject') {
+            setAllData({...allData, subject: `${allData.subject} ${event.target.value}`})
+        }
     }
-
-    console.log('editor', inputElement)
 
     const getFieldData = () => {
         axios.get(jwtServiceConfig.getEmailTemplatesFieldData)
             .then((response) => {
-                console.log(response)
                 if (response.data.results.status) {
                     setActionOptions(response.data.results.fields.email_actions.options);
                     setVariableOptions(response.data.results.fields.email_template_variables.options);
@@ -101,7 +156,6 @@ const CreateUpdateForm = ({ input, meta }) => {
     const onSubmit = () => {
         axios.post(jwtServiceConfig.saveEmailTemplates, allData)
             .then((response) => {
-                // console.log(response)
                 if (response.data.status) {
                     dispatch(showMessage({ variant: 'success', message: response.data.message }))
                 } else {
@@ -163,12 +217,18 @@ const CreateUpdateForm = ({ input, meta }) => {
                                 value={allData.subject}
                                 onChange={onSubjectChange}
                                 ref={inputElement}
+                                onFocus={() => setCurrentFocusedElement('subject')}
                             />
                             <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
                         </FormControl>
 
                         <FormControl className="w-full mb-24">
-                            <WYSIWYGEditor ref={inputElement} onChange={onChangeInEditor} />
+                            {/* <WYSIWYGEditor
+                                ref={textAreaElement}
+                                onChange={onChangeInEditor}
+                                onFocus={() => setCurrentFocusedElement('template')}
+                            /> */}
+                            <div id="gjs" />
                             <FormHelperText error variant="standard">{errors.insertedHtml}</FormHelperText>
                         </FormControl>
 
