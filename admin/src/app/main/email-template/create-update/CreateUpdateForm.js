@@ -38,7 +38,7 @@ const CreateUpdateForm = ({ input, meta }) => {
         insertedHtml: '',
     })
     useEffect(() => {
-        getFieldData()
+        getFieldData();
         grapesjs.init({
             container: '#gjs',
             height: '700px',
@@ -85,6 +85,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                 },
             }
         })
+        if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
     }, []);
     const dynamicErrorMsg = (fieldName, value) => {
         !value ? setErrors(errors => ({
@@ -162,6 +163,8 @@ const CreateUpdateForm = ({ input, meta }) => {
             .then((response) => {
                 console.log(response)
                 if (response.data.results.status) {
+                    moduleId === 'create'
+                        ? getSingleEmailTemplate(response.data.results.id) : getSingleEmailTemplate(moduleId);
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
@@ -171,7 +174,26 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-
+    const getSingleEmailTemplate = (id) => {
+        axios.get(jwtServiceConfig.getSingleEmailTemplate + `/${id}`)
+            .then((response) => {
+                if (response.data.results.result) {
+                    setAllData(allData => ({
+                        ...allData,
+                        action: response.data.results.result.EmailActions[0].id,
+                        subject: response.data.results.result.subject,
+                        insertedHtml: response.data.results.result.body,
+                        variable: ''
+                    }));
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
+    // console.log('get', allData)
     return (
         <>
             <CreateUpdateFormHeader moduleId={moduleId} />

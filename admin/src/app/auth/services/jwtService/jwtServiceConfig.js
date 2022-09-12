@@ -20,6 +20,7 @@ const jwtServiceConfig = {
   updateProfile: 'profile-update',
   saveEmailTemplates: 'email-templates/save',
   updateEmailTemplates: 'email-templates/update',
+  getSingleEmailTemplate: 'email-templates/edit',
   getEmailTemplatesFieldData: 'email-templates/add',
   confirmAccountCheck: 'check-auth',
   getMetaTagsConfiguration: 'meta-tags',
