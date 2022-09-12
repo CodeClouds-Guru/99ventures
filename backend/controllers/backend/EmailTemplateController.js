@@ -58,7 +58,8 @@ class EmailTemplateController extends Controller {
     
     return {
       status: true,
-      message: "Email template added."
+      message: "Email template added.",
+      id: response.result.id
     }
   }
   //update email template
