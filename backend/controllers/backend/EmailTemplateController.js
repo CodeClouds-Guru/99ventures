@@ -30,16 +30,17 @@ class EmailTemplateController extends Controller {
   }
   //override add function
   async add(req,res){
-      let response = await super.add(req)
-      let fields = response.fields
-      let email_actions = await EmailAction.findAll()
-      let email_template_variables = await EmailTemplateVariable.findAll()
-      fields.email_actions.options = email_actions
-      fields.email_template_variables.options = email_template_variables
-      return {
-      status: true,
-      fields,
-      }
+    let response = await super.add(req)
+    let fields = response.fields
+    let email_actions = await EmailAction.findAll()
+    let email_template_variables = await EmailTemplateVariable.findAll()
+    fields.email_actions.options = email_actions
+    fields.email_template_variables.options = email_template_variables
+    return {
+    status: true,
+    fields,
+    }
+      
   }
   //override save function
   async save(req,res){
@@ -90,6 +91,30 @@ class EmailTemplateController extends Controller {
     return {
       status: true,
       message: "Email template deleted."
+    }
+  }
+  //get a single email template by id
+  async edit(req,res){
+    try {
+      let response = await super.edit(req)
+      if(response.result){
+        let email_actions = await response.result.getEmailActions()
+        response.result.setDataValue('EmailActions',email_actions)
+        return response
+      }else{
+        this.throwCustomError("Email template not found.", 409);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+  //email parsing
+  async parse(req,res){
+    let user = req.user;
+    let email_template = await this.model.findOne({where:{'id':'1'}})
+    if(email_template){
+      var match_variables = email_template.body.matchAll(/{(.*?)}/ig);
+      return match_variables;
     }
   }
 }

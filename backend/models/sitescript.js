@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   SiteScript.init({
+    script_id:DataTypes.STRING,
     company_portal_id: DataTypes.BIGINT,
     name: DataTypes.STRING,
     script_html: DataTypes.TEXT,

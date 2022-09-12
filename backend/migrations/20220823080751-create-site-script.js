@@ -8,6 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      script_id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       company_portal_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
