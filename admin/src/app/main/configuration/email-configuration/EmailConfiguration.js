@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText } from '@mui/material';
+import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText, Typography, Divider } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import axios from 'axios';
@@ -131,6 +131,10 @@ function EmailConfiguration(props) {
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
+                    <Typography variant="h6">Email Configurations</Typography>
+                    <Typography variant="body2">Please add the below details</Typography>
+                    <Divider className="mb-32 mt-10" />
+
                     <form
                         name="emailConfigurationForm"
                         noValidate

@@ -1,5 +1,5 @@
 const Controller = require("./Controller");
-const { Group } = require("../../models/index");
+const { Group, Role } = require("../../models/index");
 const { CompanyUser, Invitation, Company } = require("../../models/index");
 const AuthControllerClass = require("../backend/AuthController");
 const AuthController = new AuthControllerClass();
@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const { sendInvitation } = require("../../helpers/global");
 const InvitationHelper = require("../../helpers/InvitationHelper");
 const { Op } = require("sequelize");
+const UserResources = require("../../resources/UserResources");
 
 class UserController extends Controller {
   constructor() {
@@ -21,8 +22,12 @@ class UserController extends Controller {
     let sort_field = req.query.sort || "id";
     let sort_order = req.query.sort_order || "asc";
     // return options;
-    if (permissions.indexOf("all-users-list") !== -1) {
-    }
+    let include_options = {
+      model: Group,
+      attributes: ["id"],
+      nested: false,
+      include: [{ model: Role, attributes: ["name"], required: true }],
+    };
     if (permissions.indexOf("group-users-list") !== -1) {
       options.include = [
         {
@@ -32,8 +37,8 @@ class UserController extends Controller {
           },
           attributes: ["id"],
         },
-        // { all: true, nested: true , attributes: ["name"]},
       ];
+      options.include.push(include_options);
     } else if (permissions.indexOf("owner-users-list") !== -1) {
       if (options.where != undefined) {
         options.where.id = req.user.id;
@@ -51,8 +56,33 @@ class UserController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
+    // result.rows[0].roles = "user_roles";
+
+    for (let i = 0; i < result.rows.length; i++) {
+      let user_roles = "";
+      for (let j = 0; j < result.rows[i].Groups.length; j++) {
+        for (let k = 0; k < result.rows[i].Groups[j].Roles.length; k++) {
+          if (user_roles === "") {
+            user_roles += result.rows[i].Groups[j].Roles[k].name;
+          } else {
+            let temp = user_roles;
+            temp = temp.split(",");
+            if (!temp.includes(result.rows[i].Groups[j].Roles[k].name)) {
+              user_roles += ", " + result.rows[i].Groups[j].Roles[k].name;
+            }
+          }
+        }
+      }
+      result.rows[i].setDataValue("roles", user_roles);
+    }
+
     return {
-      result: { data: result.rows, pages, total: result.count },
+      result: {
+        data: result.rows,
+        pages,
+        total: result.count,
+        test: result.rows[0].first_name,
+      },
       fields: this.model.fields,
     };
   }
