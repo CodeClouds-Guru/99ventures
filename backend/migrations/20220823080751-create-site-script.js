@@ -1,14 +1,14 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('site_scripts', {
+    await queryInterface.createTable('scripts', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      script_id: {
+      code: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -50,6 +50,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('site_scripts');
+    await queryInterface.dropTable('scripts');
   }
 };
