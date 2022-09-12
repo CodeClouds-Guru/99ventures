@@ -38,104 +38,95 @@ const CreateUpdateForm = ({ input, meta }) => {
         insertedHtml: '',
     })
     useEffect(() => {
-        getFieldData()
+        getFieldData();
         grapesjs.init({
             container: '#gjs',
             height: '700px',
             width: '100%',
             plugins: ['gjs-preset-webpage'],
             storageManager: {
-              id: 'gjs-',
-              type: 'local',
-              autosave: true,
-              storeComponents: true,
-              storeStyles: true,
-              storeHtml: true,
-              storeCss: true,
+                id: 'gjs-',
+                type: 'local',
+                autosave: true,
+                storeComponents: true,
+                storeStyles: true,
+                storeHtml: true,
+                storeCss: true,
             },
             deviceManager: {
-              devices:
-              [
-                {
-                  id: 'desktop',
-                  name: 'Desktop',
-                  width: '',
-                },
-                {
-                  id: 'tablet',
-                  name: 'Tablet',
-                  width: '768px',
-                  widthMedia: '992px',
-                },
-                {
-                  id: 'mobilePortrait',
-                  name: 'Mobile portrait',
-                  width: '320px',
-                  widthMedia: '575px',
-                },
-              ]
+                devices:
+                    [
+                        {
+                            id: 'desktop',
+                            name: 'Desktop',
+                            width: '',
+                        },
+                        {
+                            id: 'tablet',
+                            name: 'Tablet',
+                            width: '768px',
+                            widthMedia: '992px',
+                        },
+                        {
+                            id: 'mobilePortrait',
+                            name: 'Mobile portrait',
+                            width: '320px',
+                            widthMedia: '575px',
+                        },
+                    ]
             },
             pluginsOpts: {
-              'grapesjs-preset-webpage': {
-                blocksBasicOpts: {
-                  blocks: ['column1', 'column2', 'column3', 'column3-7', 'text',     'link', 'image', 'video'],
-                  flexGrid: 1,
+                'grapesjs-preset-webpage': {
+                    blocksBasicOpts: {
+                        blocks: ['column1', 'column2', 'column3', 'column3-7', 'text', 'link', 'image', 'video'],
+                        flexGrid: 1,
+                    },
+                    blocks: ['link-block', 'quote', 'text-basic'],
                 },
-                blocks: ['link-block', 'quote', 'text-basic'],
-              },
             }
-          })
+        })
+        if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
     }, []);
+    const dynamicErrorMsg = (fieldName, value) => {
+        !value ? setErrors(errors => ({
+            ...errors, fieldName: value
+        })) : setErrors(errors => ({
+            ...errors, fieldName: `Please insert ${fieldName}`
+        }))
+    }
     const onSubjectChange = (event) => {
         if (event.target.value) {
             setAllData(allData => ({
                 ...allData, subject: event.target.value
             }))
-            setErrors(errors => ({
-                ...errors, subject: ''
-            }))
-        } else {
-            setErrors(errors => ({
-                ...errors, subject: 'Please insert Subject'
-            }))
         }
+        dynamicErrorMsg('subject', event.target.value);
     }
     const onChangeInEditor = (input) => {
         if (input) {
             setAllData(allData => ({
                 ...allData, insertedHtml: input
             }));
-            setErrors(errors => ({
-                ...errors, insertedHtml: ''
-            }))
-        } else {
-            setErrors(errors => ({
-                ...errors, insertedHtml: 'Please insert email body'
-            }))
         }
+        dynamicErrorMsg('insertedHtml', input);
     }
     const handleChangeAction = (event) => {
         if (event.target.value) {
             setAllData(allData => ({
                 ...allData, action: event.target.value
             }))
-            setErrors(errors => ({
-                ...errors, action: ''
-            }))
-        } else {
-            setErrors(errors => ({
-                ...errors, action: 'Please insert Action'
-            }))
         }
+        dynamicErrorMsg('action', event.target.value);
+
     }
     const handleChangeVariable = (event) => {
         setAllData(allData => ({
             ...allData, variable: event.target.value
         }))
-        if(currentFocusedElement === 'template') {
-            setAllData({...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}`})
+        if (currentFocusedElement === 'template') {
+            setAllData({ ...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}` })
         } else if (currentFocusedElement === 'subject') {
-            setAllData({...allData, subject: `${allData.subject} ${event.target.value}`})
+            setAllData({ ...allData, subject: `${allData.subject} ${event.target.value}` })
         }
     }
 
@@ -153,20 +144,53 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
+    // console.log('data', allData);
     const onSubmit = () => {
-        axios.post(jwtServiceConfig.saveEmailTemplates, allData)
+        // Object.values(allData).forEach((val, key) => {
+        //     console.log(key, val)
+        //     dynamicErrorMsg(Object.keys(allData)[key], `Please insert ${val}`);
+        // })
+        // return
+        let end_point = moduleId === 'create' ? jwtServiceConfig.saveEmailTemplates : jwtServiceConfig.updateEmailTemplates + `/${moduleId}`;
+        // console.log(end_point)
+        // return
+        axios.post(end_point, {
+            subject: allData.subject,
+            // body: allData.insertedHtml,
+            body: 'Demo static body text 2',
+            email_actions: allData.action
+        })
             .then((response) => {
-                if (response.data.status) {
-                    dispatch(showMessage({ variant: 'success', message: response.data.message }))
+                if (response.data.results.status) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    moduleId === 'create' ? navigate(`/app/email-templates/${response.data.results.id}`) : getSingleEmailTemplate(moduleId);
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
             })
             .catch((error) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-
+    const getSingleEmailTemplate = (id) => {
+        axios.get(jwtServiceConfig.getSingleEmailTemplate + `/${id}`)
+            .then((response) => {
+                if (response.data.results.result) {
+                    setAllData(allData => ({
+                        ...allData,
+                        action: response.data.results.result.EmailActions[0].id,
+                        subject: response.data.results.result.subject,
+                        insertedHtml: response.data.results.result.body,
+                        variable: ''
+                    }));
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
     return (
         <>
             <CreateUpdateFormHeader moduleId={moduleId} />

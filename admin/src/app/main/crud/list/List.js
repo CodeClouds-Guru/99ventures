@@ -51,18 +51,18 @@ function List(props) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
     /* prevent to send order direction for now */
-    // direction: 'desc',
-    // id: 'id',
+    direction: '',
+    id: '',
   });
   const [moduleDeleted, setModuleDeleted] = useState(false);
 
   const resetModulesListConfig = () => {
     setSearchText('');
     /* prevent to send order direction for now */
-    // setOrder({
-    //   direction: 'desc',
-    //   id: 'id',
-    // });
+    setOrder({
+      direction: '',
+      id: '',
+    });
     setPage(0);
     setRowsPerPage(10);
   }
