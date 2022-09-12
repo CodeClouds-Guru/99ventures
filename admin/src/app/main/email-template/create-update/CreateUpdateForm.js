@@ -144,7 +144,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-    // console.log('errors', errors);
+    // console.log('data', allData);
     const onSubmit = () => {
         // Object.values(allData).forEach((val, key) => {
         //     console.log(key, val)
@@ -161,11 +161,9 @@ const CreateUpdateForm = ({ input, meta }) => {
             email_actions: allData.action
         })
             .then((response) => {
-                console.log(response)
                 if (response.data.results.status) {
-                    moduleId === 'create'
-                        ? getSingleEmailTemplate(response.data.results.id) : getSingleEmailTemplate(moduleId);
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    moduleId === 'create' ? navigate(`/app/email-templates/${response.data.results.id}`) : getSingleEmailTemplate(moduleId);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -193,7 +191,6 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-    // console.log('get', allData)
     return (
         <>
             <CreateUpdateFormHeader moduleId={moduleId} />
