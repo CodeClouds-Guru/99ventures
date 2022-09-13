@@ -44,6 +44,7 @@ class ScriptController extends Controller {
       return {
         status: true,
         message: "Record has been created successfully",
+        result: model.result,
       };
     } catch (error) {
       throw error;
