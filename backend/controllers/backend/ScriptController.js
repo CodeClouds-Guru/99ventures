@@ -53,7 +53,13 @@ class ScriptController extends Controller {
     let id = req.params.id;
     try {
       request_data.updated_by = req.user.id;
-      // let model = await this.model.create(request_data, { silent: true });
+      const script_name = req.body.name || "";
+      request_data.code =
+        script_name
+          .split(" ")
+          .reduce((response, word) => (response += word.slice(0, 1)), "") +
+        "-" +
+        new Date().getTime();
       const result = Script.update(request_data, {
         where: {
           id: id,
