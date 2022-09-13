@@ -1,25 +1,13 @@
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Tooltip from '@mui/material/Tooltip';
+import { Checkbox, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, TableCell, TableRow, TableSortLabel, Tooltip, TableHead } from '@mui/material';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box } from '@mui/system';
-import TableHead from '@mui/material/TableHead';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { darken, lighten } from '@mui/material/styles';
 import { removeModules } from '../store/modulesSlice';
 import { useParams } from 'react-router-dom';
 import AlertDialog from 'app/shared-components/AlertDialog';
-
-
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 function ListTableHead(props) {
   const { selectedOrderIds } = props;
@@ -35,7 +23,12 @@ function ListTableHead(props) {
   const { module } = props;
 
   const createSortHandler = (property) => (event) => {
-    props.onRequestSort(event, property);
+    if (!property.sort) {
+      let message = property.placeholder + ' column sort is not allowed';
+      dispatch(showMessage({ variant: 'error', message }));
+    } else {
+      props.onRequestSort(event, property.field_name);
+    }
   };
 
   function openSelectedOrdersMenu(event) {
@@ -46,11 +39,11 @@ function ListTableHead(props) {
     setSelectedOrdersMenu(null);
   }
 
-  const onCloseAlertDialogHandle = ()=>{
+  const onCloseAlertDialogHandle = () => {
     setOpenAlertDialog(false);
   }
 
-  const onConfirmAlertDialogHandle = ()=>{
+  const onConfirmAlertDialogHandle = () => {
     props.onMenuItemClick(selectedOrderIds);
     setOpenAlertDialog(false);
     setSelectedOrdersMenu(null);
@@ -138,14 +131,15 @@ function ListTableHead(props) {
             >
               {row.listing && (
                 <Tooltip
-                  title="Sort"
+                  title={row.sort ? 'Sort' : ''}
                   placement={row.align === 'right' ? 'bottom-end' : 'bottom-start'}
                   enterDelay={300}
                 >
                   <TableSortLabel
                     active={props.order.id === row.id}
                     direction={props.order.direction}
-                    onClick={createSortHandler(row.field_name)}
+                    hideSortIcon={!row.sort}
+                    onClick={createSortHandler(row)}
                     className="font-semibold"
                   >
                     {row.placeholder}

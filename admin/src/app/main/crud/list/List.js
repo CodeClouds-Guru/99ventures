@@ -1,13 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import Checkbox from '@mui/material/Checkbox';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,10 +13,7 @@ import ListTableHead from './ListTableHead';
 import moment from 'moment';
 import { resetModule } from '../store/modulesSlice';
 import axios from "axios"
-import Paper from '@mui/material/Paper';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import Input from '@mui/material/Input';
-import Button from '@mui/material/Button';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser } from 'app/store/userSlice';
@@ -50,21 +41,20 @@ function List(props) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
-    /* prevent to send order direction for now */
-    direction: '',
-    id: '',
+    direction: 'desc',
+    id: 'id',
   });
   const [moduleDeleted, setModuleDeleted] = useState(false);
-
+  const [firstCall, setFirstCall] = useState(true);
   const resetModulesListConfig = () => {
     setSearchText('');
-    /* prevent to send order direction for now */
     setOrder({
-      direction: '',
-      id: '',
+      direction: 'desc',
+      id: 'id',
     });
     setPage(0);
     setRowsPerPage(10);
+    setFirstCall(true);
   }
 
   const fetchModules = () => {
@@ -72,10 +62,13 @@ function List(props) {
       search: searchText,
       page: page + 1,
       show: rowsPerPage,
-      sort: order.id,
-      sort_order: order.direction,
       module,
       where
+    }
+    /* order is added if it's not the very first call os API listing */
+    if (!firstCall) {
+      params.sort = order.id
+      params.sort_order = order.direction
     }
 
     axios.get(`/${module}`, { params }).then(res => {
@@ -83,6 +76,7 @@ function List(props) {
       setModules(res.data.results.result.data);
       setTotalRecords(res.data.results.result.total)
       setLoading(false);
+      setFirstCall(false);
     }).catch(error => {
       let message = 'Something went wrong!'
       if (error && error.response.data && error.response.data.errors) {
@@ -99,6 +93,7 @@ function List(props) {
 
   useEffect(() => {
     resetModulesListConfig();
+    setFirstCall(true);
   }, [module]);
 
   useEffect(() => {
@@ -190,11 +185,13 @@ function List(props) {
 
   function handleChangePage(event, value) {
     setPage(value);
+    setFirstCall(true);
   }
 
   function handleChangeRowsPerPage(event) {
     setPage(0);
     setRowsPerPage(event.target.value);
+    setFirstCall(true);
   }
 
   const processFieldValue = (value, fieldConfig) => {
@@ -250,7 +247,7 @@ function List(props) {
               inputProps={{
                 'aria-label': `Search ${module}`,
               }}
-              onChange={(ev) => setSearchText(ev.target.value)}
+              onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
             />
           </Paper>}
           {addable && <motion.div
