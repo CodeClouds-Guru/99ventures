@@ -36,9 +36,7 @@ class ScriptController extends Controller {
           .reduce((response, word) => (response += word.slice(0, 1)), "") +
         "-" +
         new Date().getTime();
-      req.body.script_json = JSON.stringify(req.body.script_json) || {};
-
-      req.body.script_json = JSON.parse(req.body.script_json) || {};
+      // req.body.script_json = JSON.parse(req.body.script_json) || {};
       console.log("-----------------------", req.body);
       let model = await super.save(req);
       return {
@@ -59,6 +57,7 @@ class ScriptController extends Controller {
       let prev_data = await this.model.findOne({ where: { id: id } });
       if (prev_data) {
         const script_name = req.body.name || "";
+        // req.body.script_json = JSON.parse(req.body.script_json) || {};
         req.body.code =
           script_name
             .split(" ")
