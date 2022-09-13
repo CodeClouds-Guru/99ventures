@@ -14,6 +14,10 @@ module.exports = {
       body: {
         type: Sequelize.TEXT
       },
+      body_json: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
       company_portal_id: {
         type: Sequelize.BIGINT
       },

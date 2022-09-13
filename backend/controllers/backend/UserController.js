@@ -19,6 +19,7 @@ class UserController extends Controller {
     let permissions = await AuthController.getUserPermissions(req.user.id);
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
+    req.headers.company_portal_id = req.headers.company_id;
     let sort_field = req.query.sort || "id";
     let sort_order = req.query.sort_order || "asc";
     // return options;

@@ -36,10 +36,13 @@ class ScriptController extends Controller {
           .reduce((response, word) => (response += word.slice(0, 1)), "") +
         "-" +
         new Date().getTime();
-      req.body.status = 0;
+      req.body.script_json = JSON.stringify(req.body.script_json) || {};
+
+      req.body.script_json = JSON.parse(req.body.script_json) || {};
       console.log("-----------------------", req.body);
       let model = await super.save(req);
       return {
+        status: true,
         message: "Record has been created successfully",
         result: model,
       };
@@ -52,24 +55,35 @@ class ScriptController extends Controller {
     let request_data = req.body;
     let id = req.params.id;
     try {
-      request_data.updated_by = req.user.id;
-      const script_name = req.body.name || "";
-      request_data.code =
-        script_name
-          .split(" ")
-          .reduce((response, word) => (response += word.slice(0, 1)), "") +
-        "-" +
-        new Date().getTime();
-      const result = Script.update(request_data, {
-        where: {
-          id: id,
-        },
-      });
-      // await super.save(request_data);
-      return {
-        message: "Record has been created successfully",
-        result: result,
-      };
+      let prev_data = await this.model.findOne({ where: { id: id } });
+
+      if (prev_data.length > 0) {
+        req.body.updated_by = req.user.id;
+        const script_name = req.body.name || "";
+        req.body.code =
+          script_name
+            .split(" ")
+            .reduce((response, word) => (response += word.slice(0, 1)), "") +
+          "-" +
+          new Date().getTime();
+        const result = super.update(req, {
+          where: {
+            id: id,
+          },
+        });
+        // await super.save(request_data);
+        return {
+          status: true,
+          message: "Record has been created successfully",
+          result: result,
+        };
+      } else {
+        return {
+          status: false,
+          message: "No record found",
+          result: result,
+        };
+      }
     } catch (error) {
       throw error;
     }

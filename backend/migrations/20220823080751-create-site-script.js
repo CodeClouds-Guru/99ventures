@@ -24,6 +24,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      script_json: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
       status: {
         type: Sequelize.STRING,
         allowNull: false,
