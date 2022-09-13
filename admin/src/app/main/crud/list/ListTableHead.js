@@ -22,9 +22,7 @@ function ListTableHead(props) {
   const { module } = props;
 
   const createSortHandler = (property) => (event) => {
-    if (!property.sort) {
-      let message = property.placeholder + ' column sort is not allowed';
-    } else {
+    if (property.sort) {
       props.onRequestSort(event, property.field_name);
     }
   };
