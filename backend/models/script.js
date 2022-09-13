@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   Script.validate = function (req) {
     const schema = Joi.object({
       code: Joi.string().required().label("Code"),
-      company_portal_id: Joi.string().required().label("Company Portal Id"),
+      company_portal_id: Joi.required().label("Company portal"),
       name: Joi.string().required().label("Name"),
       script_html: Joi.string().required().label("Script HTML"),
       script_json: Joi.object().required().label("Script JSON"),

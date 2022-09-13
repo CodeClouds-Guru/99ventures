@@ -54,11 +54,10 @@ class ScriptController extends Controller {
   async update(req, res) {
     let request_data = req.body;
     let id = req.params.id;
+    req.body.company_portal_id = req.headers.site_id;
     try {
       let prev_data = await this.model.findOne({ where: { id: id } });
-
-      if (prev_data.length > 0) {
-        req.body.updated_by = req.user.id;
+      if (prev_data) {
         const script_name = req.body.name || "";
         req.body.code =
           script_name
@@ -66,12 +65,14 @@ class ScriptController extends Controller {
             .reduce((response, word) => (response += word.slice(0, 1)), "") +
           "-" +
           new Date().getTime();
-        const result = super.update(req, {
+        let result = super.update(req, {
           where: {
             id: id,
           },
         });
         // await super.save(request_data);
+        result = await this.model.findOne({ where: { id: id } });
+
         return {
           status: true,
           message: "Record has been created successfully",
@@ -81,7 +82,6 @@ class ScriptController extends Controller {
         return {
           status: false,
           message: "No record found",
-          result: result,
         };
       }
     } catch (error) {
