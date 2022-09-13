@@ -7,7 +7,6 @@ import { darken, lighten } from '@mui/material/styles';
 import { removeModules } from '../store/modulesSlice';
 import { useParams } from 'react-router-dom';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { showMessage } from 'app/store/fuse/messageSlice';
 
 function ListTableHead(props) {
   const { selectedOrderIds } = props;
@@ -25,7 +24,6 @@ function ListTableHead(props) {
   const createSortHandler = (property) => (event) => {
     if (!property.sort) {
       let message = property.placeholder + ' column sort is not allowed';
-      dispatch(showMessage({ variant: 'error', message }));
     } else {
       props.onRequestSort(event, property.field_name);
     }
