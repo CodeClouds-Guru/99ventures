@@ -165,7 +165,6 @@ const CreateUpdateForm = () => {
         }));
         dynamicErrorMsg('name', event.target.value);
     }
-
     
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
@@ -290,7 +289,7 @@ const CreateUpdateForm = () => {
                         </FormControl>
                         <FormControl className="w-1/2 mb-24">
                             <InputLabel shrink htmlFor="status-switch">
-                                Status
+                                Insets
                             </InputLabel>
                             <Switch
                                 size="large"
