@@ -30,7 +30,7 @@ class RoleController extends Controller {
       });
       //modules
       let all_modules = await Module.findAll({
-        attributes: ["id", "name", "slug"],
+        attributes: ["id", "name", "slug", "parent_module"],
       });
       all_modules = all_modules.map((all_module) => {
         return {
@@ -100,8 +100,6 @@ class RoleController extends Controller {
     }
     return true;
   }
-
-  
 }
 
 module.exports = RoleController;
