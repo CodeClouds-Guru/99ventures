@@ -32,7 +32,13 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
       script_html: DataTypes.TEXT,
-      status: DataTypes.STRING,
+      status: {
+        type: DataTypes.STRING,
+        get() {
+          
+          return parseInt(this.getDataValue("status"));
+        },
+      },
       script_json: DataTypes.JSON,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
