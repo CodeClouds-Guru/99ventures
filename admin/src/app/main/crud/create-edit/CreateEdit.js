@@ -110,7 +110,7 @@ function CreateEdit(props) {
 
   return (
     <FusePageCarded
-      header={<CreateEditHeader />}
+      header={<CreateEditHeader module={module} moduleId={moduleId}/>}
       content={
         <>
           <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
