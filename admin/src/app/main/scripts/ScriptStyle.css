@@ -1,14 +1,14 @@
-.scripts-configuration .gjs-one-bg {
+.gjs-one-bg {
     background-color: #111827;
 }
-.scripts-configuration #gjs {
+#gjs {
     border: 3px solid #111827;
 }
-.scripts-configuration .gjs-two-color {
+.gjs-two-color {
     color: rgba(255, 255, 255, 0.7);
 }
-.scripts-configuration .gjs-four-color,
-.scripts-configuration .gjs-four-color-h:hover {
+.gjs-four-color,
+.gjs-four-color-h:hover {
   color: #fff;
 }
   
