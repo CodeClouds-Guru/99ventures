@@ -26,7 +26,8 @@ const jwtServiceConfig = {
   getMetaTagsConfiguration: 'meta-tags',
   saveMetaTagsConfiguration: 'meta-tags/update',
   getPaymentMethodConfiguration: 'payment-methods',
-  savePaymentMethodConfiguration: 'payment-methods/update'
+  savePaymentMethodConfiguration: 'payment-methods/update',
+  roleEdit: 'roles/edit'
 };
 
 export default jwtServiceConfig;

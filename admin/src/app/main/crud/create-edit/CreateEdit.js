@@ -21,6 +21,7 @@ import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
+import PermissionSettings from './components/PermissionSettings';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -117,7 +118,7 @@ function CreateEdit(props) {
             {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm moduleOnSave={moduleOnSaveHandler} />
           </div>
-          {(module === 'roles' && moduleId !== 'create') ? <PermissionGrid roleId={moduleId} /> : ''}
+          {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
         </>
       }
       scroll={isMobile ? 'normal' : 'content'}
