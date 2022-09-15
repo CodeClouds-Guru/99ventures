@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   EmailTemplate.init({
     subject: DataTypes.STRING,
-    body: DataTypes.TEXT,
+    body: DataTypes.TEXT('long'),
     body_json:DataTypes.JSON,
     company_portal_id: DataTypes.BIGINT,
     created_by: DataTypes.BIGINT,

@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       body: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT('long')
       },
       body_json: {
         type: Sequelize.JSON,
