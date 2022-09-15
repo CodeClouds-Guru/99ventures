@@ -111,14 +111,14 @@ function CreateEdit(props) {
 
   return (
     <FusePageCarded
-      header={<CreateEditHeader />}
+      header={<CreateEditHeader module={module} moduleId={moduleId} />}
       content={
         <>
           <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
             {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm moduleOnSave={moduleOnSaveHandler} />
           </div>
-          {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
+          {(module === 'roles' && moduleId !== 'create') ? <PermissionGrid roleId={moduleId} /> : ''}
         </>
       }
       scroll={isMobile ? 'normal' : 'content'}

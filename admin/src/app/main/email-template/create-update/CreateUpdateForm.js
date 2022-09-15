@@ -10,6 +10,8 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateUpdateFormHeader from './CreateUpdateFormHeader';
+import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
+import AlertDialog from 'app/shared-components/AlertDialog';
 import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
@@ -17,34 +19,45 @@ import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 
 const CreateUpdateForm = ({ input, meta }) => {
+    const module = 'email-templates';
     const inputElement = useRef('subject');
-    const textAreaElement = useRef('template');
+    // const textAreaElement = useRef('template');
     const [currentFocusedElement, setCurrentFocusedElement] = useState('');
     const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [actionOptions, setActionOptions] = useState([]);
     const [variableOptions, setVariableOptions] = useState([]);
+    const [editor, setEditor] = useState({});
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [changeCount, setChangeCount] = useState(0);
+    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-email-${moduleId}` : `gjs-email-new`;
     const [allData, setAllData] = useState({
         subject: '',
         action: '',
         variable: '',
         insertedHtml: '',
     });
-    const [errors, setErrors] = useState({
+    /*const [errors, setErrors] = useState({
         subject: '',
         action: '',
-        variable: '',
         insertedHtml: '',
-    })
+        bodyJson: ''
+    })*/
+    const [errors, setErrors] = useState({})
+
+
     useEffect(() => {
         getFieldData();
-        grapesjs.init({
+        const editor = grapesjs.init({
             container: '#gjs',
             height: '700px',
             width: '100%',
             plugins: ['gjs-preset-webpage'],
             storageManager: {
+                options: {
+                    local: { key: storageKey }
+                },
                 id: 'gjs-',
                 type: 'local',
                 autosave: true,
@@ -84,41 +97,88 @@ const CreateUpdateForm = ({ input, meta }) => {
                     blocks: ['link-block', 'quote', 'text-basic'],
                 },
             }
-        })
-        if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
+        });
+        setEditor(editor);
+
+        editor.onReady(() => {
+            loadEditorData(editor);
+        });
+        editor.on('change:changesCount', (model) => {
+            const changes = model.get('changesCount');
+            if (changes) {
+                setChangeCount(changeCount => changeCount +1)
+            }
+        });
+
+        // if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
     }, []);
-    const dynamicErrorMsg = (fieldName, value) => {
-        !value ? setErrors(errors => ({
-            ...errors, fieldName: value
-        })) : setErrors(errors => ({
-            ...errors, fieldName: `Please insert ${fieldName}`
-        }))
+
+    const loadEditorData = async(editor) => {        
+        if (moduleId !== 'create' && !isNaN(moduleId)) { 
+            getSingleEmailTemplate(moduleId, editor);
+        } else {
+            const storageManager = editor.Storage;
+            const data = storageManager.load();
+            editor.loadProjectData(data);
+            setAllData({
+                ...allData, 
+                bodyJson: editor.getProjectData(),
+                insertedHtml: generatedHTMLValue(editor)
+            });
+        };
     }
-    const onSubjectChange = (event) => {
-        if (event.target.value) {
-            setAllData(allData => ({
-                ...allData, subject: event.target.value
+
+    const generatedHTMLValue = (editor) =>{
+        let generatedHTML = '';
+
+        if(editor.getHtml()) {
+            generatedHTML += 
+            `<html>`;
+                if(editor.getCss()){
+                    generatedHTML += `<head><style>${editor.getCss()}</style></head>`;
+                }
+                generatedHTML += `${editor.getHtml()}
+            </html>`;
+        }
+        return generatedHTML;
+    }
+    
+    const dynamicErrorMsg = (field, value, msg) => {
+        if(value){
+            delete errors[field];
+            setErrors(errors);
+        } else {
+            setErrors(errors => ({
+                ...errors, [field]: msg
             }))
         }
-        dynamicErrorMsg('subject', event.target.value);
     }
-    const onChangeInEditor = (input) => {
+
+    const onSubjectChange = (event) => {
+        setAllData(allData => ({
+            ...allData, 
+            subject: event.target.value
+        }))
+        dynamicErrorMsg('subject', event.target.value, 'Please insert subject');
+    }
+
+    /*const onChangeInEditor = (input) => {
         if (input) {
             setAllData(allData => ({
                 ...allData, insertedHtml: input
             }));
         }
         dynamicErrorMsg('insertedHtml', input);
-    }
+    }*/
+
     const handleChangeAction = (event) => {
-        if (event.target.value) {
-            setAllData(allData => ({
-                ...allData, action: event.target.value
-            }))
-        }
-        dynamicErrorMsg('action', event.target.value);
+        setAllData(allData => ({
+            ...allData, action: event.target.value
+        }))
+        dynamicErrorMsg('action', event.target.value, 'Please select action');
 
     }
+
     const handleChangeVariable = (event) => {
         setAllData(allData => ({
             ...allData, variable: event.target.value
@@ -144,45 +204,60 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-    // console.log('data', allData);
+    
     const onSubmit = () => {
-        // Object.values(allData).forEach((val, key) => {
-        //     console.log(key, val)
-        //     dynamicErrorMsg(Object.keys(allData)[key], `Please insert ${val}`);
-        // })
-        // return
-        let end_point = moduleId === 'create' ? jwtServiceConfig.saveEmailTemplates : jwtServiceConfig.updateEmailTemplates + `/${moduleId}`;
-        // console.log(end_point)
-        // return
-        axios.post(end_point, {
+        let end_point = moduleId === 'create' ? jwtServiceConfig.saveEmailTemplates : jwtServiceConfig.updateEmailTemplates + `/${moduleId}`;       
+        const editorJsonBody = editor.getProjectData();
+        if(editorJsonBody.styles.length < 1){
+            dispatch(showMessage({ variant: 'error', message: 'Please add the value in the email body' }));
+            return;
+        };
+        const params = {
             subject: allData.subject,
-            // body: allData.insertedHtml,
-            body: 'Demo static body text 2',
+            body: generatedHTMLValue(editor),
+            body_json: editorJsonBody,
             email_actions: allData.action
+        };
+        axios.post(end_point, params)
+        .then((response) => {
+            if (response.data.results.status) {
+                // After successfully saved the changes, need to remove the local storage value and change state to 0.
+                // New Localstorage value will be set after that.
+                setChangeCount(0);
+                localStorage.removeItem(storageKey);
+
+                setAllData({
+                    ...allData,
+                    ...params
+                });
+
+                dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                if(moduleId === 'create') navigate(`/app/${module}/${response.data.results.id}`) ;
+            } else {
+                dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+            }
         })
-            .then((response) => {
-                if (response.data.results.status) {
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    moduleId === 'create' ? navigate(`/app/email-templates/${response.data.results.id}`) : getSingleEmailTemplate(moduleId);
-                } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
-                }
-            })
-            .catch((error) => {
-                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
-            })
+        .catch((error) => {
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+        })
     }
-    const getSingleEmailTemplate = (id) => {
+
+    const getSingleEmailTemplate = (id, editor) => {
         axios.get(jwtServiceConfig.getSingleEmailTemplate + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
+                    const result = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
-                        action: response.data.results.result.EmailActions[0].id,
-                        subject: response.data.results.result.subject,
-                        insertedHtml: response.data.results.result.body,
+                        action: result.EmailActions[0].id,
+                        subject: result.subject,
+                        insertedHtml: result.body,
                         variable: ''
                     }));
+                    editor.loadProjectData(result.body_json);
+
+                    //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
+                    setChangeCount(changeCount=> changeCount-1);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -191,9 +266,48 @@ const CreateUpdateForm = ({ input, meta }) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
+
+    /**
+     * Cancel and go back to list page
+     * If editor changes have been made then show the alert dialog.
+     * Else, clear the existing local storage value and rediect to list page.
+     */
+     const handleCancel = () => {
+        if(changeCount > 0) {
+            setOpenAlertDialog(true);
+        } else {
+            navigate(`/app/${module}`);
+            localStorage.removeItem(storageKey);
+        }
+    }
+
+    const onCloseAlertDialogHandle = () => {
+        setOpenAlertDialog(false);
+    }
+    
+    /**
+     * Confirm Alert Dialog.
+     * It will redirect user to list page.
+     * At the same time need to clear the auto save value from local storage.
+     * ChangeCount value set to 0.
+     */
+    const onConfirmAlertDialogHandle = () => {
+        localStorage.removeItem(storageKey);
+        setChangeCount(0);
+        setOpenAlertDialog(true);
+        navigate(`/app/${module}`)
+    }
+
+    /**
+     * Form disabled check
+     */
+    const checkDisabled = () => {
+       return ( Object.values(errors).length || !allData.subject || !allData.action ) ? true : false
+    }
+
     return (
         <>
-            <CreateUpdateFormHeader moduleId={moduleId} />
+            <CreateEditHeader module={module} moduleId={moduleId} />
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0">
@@ -256,23 +370,37 @@ const CreateUpdateForm = ({ input, meta }) => {
                             <FormHelperText error variant="standard">{errors.insertedHtml}</FormHelperText>
                         </FormControl>
 
-                        <span className="flex items-center justify-center">
+                        <span className="flex items-center">
                             <Button
                                 variant="contained"
                                 color="secondary"
-                                className="w-1/2 mt-24"
+                                className=""
                                 aria-label="Save"
                                 type="submit"
                                 size="large"
                                 onClick={onSubmit}
+                                disabled={ checkDisabled() } 
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
+                            </Button>
+                            <Button
+                                className="whitespace-nowrap mx-4"
+                                variant="contained"
+                                color="error"
+                                onClick={ handleCancel }
+                            >
+                                Cancel
                             </Button>
                         </span>
                     </div>
                 </Paper>
             </div>
-
+            <AlertDialog
+                content="Do you want to discard the changes?"
+                open={openAlertDialog}
+                onConfirm={onConfirmAlertDialogHandle}
+                onClose={onCloseAlertDialogHandle}
+            />
         </>
     )
 }

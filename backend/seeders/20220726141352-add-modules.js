@@ -3,6 +3,7 @@ const modules = [
   {
     slug: 'users',
     name: 'Users',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -11,6 +12,7 @@ const modules = [
   {
     slug: 'roles',
     name: 'Roles',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -19,6 +21,7 @@ const modules = [
   {
     slug: 'modules',
     name: 'Modules',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -27,6 +30,7 @@ const modules = [
   {
     slug: 'actions',
     name: 'Actions',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -35,6 +39,7 @@ const modules = [
   {
     slug: 'permissions',
     name: 'Permissions',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -43,6 +48,7 @@ const modules = [
   {
     slug: 'groups',
     name: 'Groups',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -51,6 +57,7 @@ const modules = [
   {
     slug: 'companies',
     name: 'Companies',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -59,6 +66,7 @@ const modules = [
   {
     slug: 'portals',
     name: 'Portals',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -67,6 +75,7 @@ const modules = [
   {
     slug: 'emailconfigurations',
     name: 'Email Configurations',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -75,6 +84,7 @@ const modules = [
   {
     slug: 'ipconfigurations',
     name: 'Ip Configurations',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -83,6 +93,7 @@ const modules = [
   {
     slug: 'generalconfigurations',
     name: 'General Configurations',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -91,6 +102,7 @@ const modules = [
   {
     slug: 'paymentconfigurations',
     name: 'Payment Configurations',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -99,6 +111,7 @@ const modules = [
   {
     slug: 'downtime',
     name: 'Downtime',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -107,6 +120,7 @@ const modules = [
   {
     slug: 'emailtemplates',
     name: 'Email Templates',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -115,6 +129,7 @@ const modules = [
   {
     slug: 'metatagconfigurations',
     name: 'Meta Tag Configurations',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -123,6 +138,7 @@ const modules = [
   {
     slug: 'scripts',
     name: 'Scripts',
+    parent_module: 'Configurations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,

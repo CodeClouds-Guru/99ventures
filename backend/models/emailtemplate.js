@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   EmailTemplate.init({
     subject: DataTypes.STRING,
-    body: DataTypes.TEXT,
+    body: DataTypes.TEXT('long'),
+    body_json:DataTypes.JSON,
     company_portal_id: DataTypes.BIGINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
@@ -45,8 +46,9 @@ module.exports = (sequelize, DataTypes) => {
               const schema = Joi.object({
                 subject: Joi.string().required().label('Subject'),
                 body: Joi.string().required().label('Body'),
+                body_json: Joi.required().label('Body JSON'),
                 email_actions: Joi.optional().allow('').label('Email Action'),
-                company_portal_id: Joi.required().label('Company portal')
+                company_portal_id: Joi.required().label('Company portal'),
               })
               return schema.validate(req.body)
   }

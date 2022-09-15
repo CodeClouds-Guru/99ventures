@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       code: DataTypes.STRING,
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
-      script_html: DataTypes.TEXT,
+      script_html: DataTypes.TEXT('long'),
       status: {
         type: DataTypes.STRING,
         get() {
@@ -116,7 +116,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "script_html",
       type: "text",
       placeholder: "Script",
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,
@@ -140,7 +140,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: "status",
       db_name: "status",
       type: "text",
-      placeholder: "Status",
+      placeholder: "Insets",
       listing: true,
       show_in_form: true,
       sort: true,

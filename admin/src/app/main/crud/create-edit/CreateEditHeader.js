@@ -13,7 +13,9 @@ function CreateEditHeader(props) {
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigate = useNavigate();
-  const { module, moduleId } = useParams();
+  // const { module, moduleId } = useParams();
+  const module = props.module;
+  const moduleId = props.moduleId;
 
   function handleSaveProduct() {
     dispatch(saveModule(getValues()));

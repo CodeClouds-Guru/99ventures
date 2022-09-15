@@ -21,7 +21,7 @@ module.exports = {
         allowNull: false,
       },
       script_html: {
-        type: Sequelize.TEXT,
+        type: Sequelize.TEXT('long'),
         allowNull: false,
       },
       script_json: {

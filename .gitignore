@@ -8,3 +8,4 @@ frontend/node_modules
 .DS_Store
 admin/src/.DS_Store
 admin/public/.DS_Store
+*.code-workspace

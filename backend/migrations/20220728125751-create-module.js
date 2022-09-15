@@ -1,7 +1,7 @@
-'use strict'
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('modules', {
+    await queryInterface.createTable("modules", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -14,6 +14,7 @@ module.exports = {
       slug: {
         type: Sequelize.STRING,
       },
+      parent_module: { type: Sequelize.STRING },
       created_by: {
         type: Sequelize.BIGINT,
       },
@@ -24,18 +25,18 @@ module.exports = {
         type: Sequelize.BIGINT,
       },
       created_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
         allowNull: false,
       },
       updated_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
       },
       deleted_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
       },
-    })
+    });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('modules')
+    await queryInterface.dropTable("modules");
   },
-}
+};
