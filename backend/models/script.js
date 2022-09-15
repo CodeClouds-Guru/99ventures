@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       code: DataTypes.STRING,
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
-      script_html: DataTypes.TEXT,
+      script_html: DataTypes.TEXT('long'),
       status: {
         type: DataTypes.STRING,
         get() {

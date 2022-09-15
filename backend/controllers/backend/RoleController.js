@@ -31,14 +31,40 @@ class RoleController extends Controller {
       //modules
       let all_modules = await Module.findAll({
         attributes: ["id", "name", "slug", "parent_module"],
+        order: ["parent_module"],
       });
-      all_modules = all_modules.map((all_module) => {
-        return {
-          id: all_module.id,
-          slug: all_module.slug,
-          name: all_module.name,
-        };
+      let modules = {};
+      let prev_parent_module = "";
+      const all_actions_in_group = {
+        view: ["list", "view", "export"],
+        update: ["add", "save", "edit", "update", "import"],
+        delete: ["delete", "destroy"],
+      };
+      
+      const action_keys = Object.keys(all_actions_in_group);
+      console.log(all_modules);
+
+      all_modules.map((all_module) => {
+        if (all_module.parent_module == prev_parent_module) {
+          modules[prev_parent_module].push({
+            id: all_module.id,
+            slug: all_module.slug,
+            name: all_module.name,
+            action: action_keys,
+          });
+        } else {
+          prev_parent_module = all_module.parent_module;
+          modules[prev_parent_module] = [
+            {
+              id: all_module.id,
+              slug: all_module.slug,
+              name: all_module.name,
+              action: action_keys,
+            },
+          ];
+        }
       });
+
       //role permissions
       let role_permissions = await response.result.getPermissions({
         attributes: ["name", "id", "slug"],
@@ -56,6 +82,7 @@ class RoleController extends Controller {
         role_permissions: role_permissions,
         result: response.result,
         fields: response.fields,
+        new_modules: modules,
       };
     } catch (error) {
       throw error;

@@ -37,7 +37,7 @@ class ScriptController extends Controller {
         "-" +
         new Date().getTime();
       // req.body.script_json = JSON.parse(req.body.script_json) || {};
-      console.log("-----------------------", req.body);
+      // console.log("-----------------------", req.body);
       let model = await super.save(req);
       return {
         status: true,
@@ -55,6 +55,7 @@ class ScriptController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     try {
       let prev_data = await this.model.findOne({ where: { id: id } });
+      console.log(prev_data)
       if (prev_data) {
         const script_name = req.body.name || "";
         // req.body.script_json = JSON.parse(req.body.script_json) || {};
@@ -64,17 +65,17 @@ class ScriptController extends Controller {
             .reduce((response, word) => (response += word.slice(0, 1)), "") +
           "-" +
           new Date().getTime();
-        let result = super.update(req, {
+        let result = await Script.update(req.body, {
           where: {
             id: id,
           },
         });
         // await super.save(request_data);
-        result = await this.model.findOne({ where: { id: id } });
+        // result = await this.model.findOne({ where: { id: id } });
 
         return {
           status: true,
-          message: "Record has been created successfully",
+          message: "Record has been updated successfully",
           result: result,
         };
       } else {
