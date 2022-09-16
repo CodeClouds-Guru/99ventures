@@ -29,7 +29,8 @@ const jwtServiceConfig = {
   savePaymentMethodConfiguration: 'payment-methods/update',
   saveScriptsData: 'scripts/save',
   updateScriptsData: 'scripts/update',
-  getSingleScriptData: 'scripts/edit'
+  getSingleScriptData: 'scripts/edit',
+  roleEdit: 'roles/edit',
 };
 
 export default jwtServiceConfig;

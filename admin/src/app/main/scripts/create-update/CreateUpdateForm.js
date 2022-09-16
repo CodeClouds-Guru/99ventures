@@ -43,7 +43,7 @@ const CreateUpdateForm = () => {
             container: '#gjs',
             height: '700px',
             width: '100%',
-            plugins: ['gjs-preset-webpage'],
+            plugins: ["gjs-preset-webpage"],
             storageManager: {
                 id: 'gjs-',
                 type: 'local',
@@ -88,6 +88,7 @@ const CreateUpdateForm = () => {
                 },
             },
         });
+        
         setEditor(editor);       
 
         editor.onReady(() => {
@@ -197,10 +198,11 @@ const CreateUpdateForm = () => {
                         ...params
                     });
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    if(moduleId === 'create') 
+                    if(moduleId === 'create') {
                         navigate(`/app/scripts/${response.data.results.result.id}`);
-                    else
-                        getSingleRecordById(moduleId, editor);
+                    }
+                    // else
+                    //     getSingleRecordById(moduleId, editor);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }

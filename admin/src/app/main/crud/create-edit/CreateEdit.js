@@ -21,6 +21,7 @@ import CreateEditHeader from './CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
+import PermissionSettings from './components/PermissionSettings';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -110,7 +111,7 @@ function CreateEdit(props) {
 
   return (
     <FusePageCarded
-      header={<CreateEditHeader module={module} moduleId={moduleId}/>}
+      header={<CreateEditHeader module={module} moduleId={moduleId} />}
       content={
         <>
           <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
