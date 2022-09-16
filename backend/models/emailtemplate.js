@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'body',
       type: 'text',
       placeholder: 'Body',
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,

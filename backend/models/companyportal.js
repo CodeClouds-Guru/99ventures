@@ -19,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'company_portal_id',
         otherKey: 'captcha_option_id',
       })
-      
+      CompanyPortal.belongsTo(models.Company, {
+        foreignKey: 'company_id',
+      })
     }
   }
   CompanyPortal.validate = function (req) {

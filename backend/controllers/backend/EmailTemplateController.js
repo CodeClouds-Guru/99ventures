@@ -1,6 +1,7 @@
 const Controller = require('./Controller')
-const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,CompanyPortal,sequelize } = require('../../models/index')
+const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,User,CompanyPortal,sequelize } = require('../../models/index')
 const queryInterface = sequelize.getQueryInterface()
+const { Op } = require("sequelize");
 
 class EmailTemplateController extends Controller {
   constructor() {
@@ -30,6 +31,7 @@ class EmailTemplateController extends Controller {
   }
   //override add function
   async add(req,res){
+    // return this.parse(req,res)
     let response = await super.add(req)
     let fields = response.fields
     let email_actions = await EmailAction.findAll()
@@ -108,61 +110,6 @@ class EmailTemplateController extends Controller {
     } catch (error) {
       throw error;
     }
-  }
-  //email parsing
-  async parse(req,res){
-    let user = req.user;
-    let receiver_module = '';
-    let search = {'id' : '1'};
-    let email_template = await EmailTemplate.findOne({where:{'id':'1'}})
-    if(email_template){
-      //variables used for the template
-      let match_variables = email_template.body.match(/{(.*?)}/g);
-      if(match_variables){
-        //required model list
-        let models = await EmailTemplateVariable.findAll({where:{code:match_variables, module: { [Op.ne]: receiver_module }}, attributes:['module','code']})
-        let include_models = all_models = []
-        // let  = []
-        if(models){
-          include_models = models.map((model_obj)=>{
-            return {model: eval(model_obj.module)}
-          })
-          all_models = models.map((model_obj)=>{
-            return model_obj.module
-          })
-        }
-        //get company info
-        let company_details = await this.getCompanyInfo(req)
-        let replace_list = []
-        models.forEach(element => {
-          
-        });
-        //fetch all info
-        let options = {}
-        if(search)
-          options = {where:search}
-        if(include_models)
-          options['include'] = [{all:true,nested:true}]
-          
-        let email_data = await CompanyPortal.findAll(options)
-        return email_data
-      }
-      
-    }
-  }
-  //company info
-  async getCompanyInfo(req){
-    let company_id = req.headers.company_id
-    let company_portal_id = req.headers.site_id
-
-    return Company.findAll({
-      where:{'id':company_id},
-      include:{
-        model: CompanyPortal,
-        where:{id:company_portal_id},
-        include:[{all:true,nested:true}]
-      }
-    })
   }
 }
 
