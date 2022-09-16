@@ -1,6 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createReducer from './rootReducer';
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'
 
+const persistConfig = {
+  key: '99ventures',
+  storage
+};
 if (process.env.NODE_ENV === 'development' && module.hot) {
   module.hot.accept('./rootReducer', () => {
     const newRootReducer = require('./rootReducer').default;
@@ -16,9 +22,10 @@ if (process.env.NODE_ENV === 'development') {
 
   middlewares.push(logger);
 }
-
+let reducers = createReducer()
+const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({
-  reducer: createReducer(),
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       immutableCheck: false,

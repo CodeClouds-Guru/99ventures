@@ -1,22 +1,19 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useEffect } from 'react';
 import jwtService from '../../auth/services/jwtService';
-
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 /**
  * Form Validation Schema
  */
@@ -31,10 +28,11 @@ const schema = yup.object().shape({
 const defaultValues = {
   email: '',
   password: '',
-  remember: true,
+  // remember: true,
 };
 
 function SignInPage() {
+  const dispatch = useDispatch();
   const { control, formState, handleSubmit, setError, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
@@ -44,23 +42,29 @@ function SignInPage() {
   const { isValid, dirtyFields, errors } = formState;
 
   useEffect(() => {
-    setValue('email', 'admin@fusetheme.com', { shouldDirty: true, shouldValidate: true });
-    setValue('password', 'admin', { shouldDirty: true, shouldValidate: true });
+    setValue('email', '', { shouldDirty: true, shouldValidate: false });
+    setValue('password', '', { shouldDirty: true, shouldValidate: false });
   }, [setValue]);
 
-  function onSubmit({ email, password }) {
+  const onSubmit = ({ email, password }) => {
     jwtService
       .signInWithEmailAndPassword(email, password)
-      .then((user) => {
+      .then((response) => {
         // No need to do anything, user data will be set at app/auth/AuthContext
       })
       .catch((_errors) => {
-        _errors.forEach((error) => {
-          setError(error.type, {
-            type: 'manual',
-            message: error.message,
-          });
-        });
+        // _errors.forEach((error) => {
+        //   setError(error.type, {
+        //     type: 'manual',
+        //     message: error.message,
+        //   });
+        // });
+        // console.log(_errors);
+        // if (_errors.response.data) {
+        //   dispatch(showMessage({ variant: 'error', message: _errors.response.data.errors }));
+        // } else {
+        //   dispatch(showMessage({ variant: 'error', message: _errors.message }));
+        // }
       });
   }
 
@@ -73,12 +77,6 @@ function SignInPage() {
           <Typography className="mt-32 text-4xl font-extrabold tracking-tight leading-tight">
             Sign in
           </Typography>
-          <div className="flex items-baseline mt-2 font-medium">
-            <Typography>Don't have an account?</Typography>
-            <Link className="ml-4" to="/sign-up">
-              Sign up
-            </Link>
-          </div>
 
           <form
             name="loginForm"
@@ -124,20 +122,7 @@ function SignInPage() {
             />
 
             <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between">
-              <Controller
-                name="remember"
-                control={control}
-                render={({ field }) => (
-                  <FormControl>
-                    <FormControlLabel
-                      label="Remember me"
-                      control={<Checkbox size="small" {...field} />}
-                    />
-                  </FormControl>
-                )}
-              />
-
-              <Link className="text-md font-medium" to="/pages/auth/forgot-password">
+              <Link className="text-md font-medium" to="/forgot-password">
                 Forgot password?
               </Link>
             </div>
@@ -153,32 +138,6 @@ function SignInPage() {
             >
               Sign in
             </Button>
-
-            <div className="flex items-center mt-32">
-              <div className="flex-auto mt-px border-t" />
-              <Typography className="mx-8" color="text.secondary">
-                Or continue with
-              </Typography>
-              <div className="flex-auto mt-px border-t" />
-            </div>
-
-            <div className="flex items-center mt-32 space-x-16">
-              <Button variant="outlined" className="flex-auto">
-                <FuseSvgIcon size={20} color="action">
-                  feather:facebook
-                </FuseSvgIcon>
-              </Button>
-              <Button variant="outlined" className="flex-auto">
-                <FuseSvgIcon size={20} color="action">
-                  feather:twitter
-                </FuseSvgIcon>
-              </Button>
-              <Button variant="outlined" className="flex-auto">
-                <FuseSvgIcon size={20} color="action">
-                  feather:github
-                </FuseSvgIcon>
-              </Button>
-            </div>
           </form>
         </div>
       </Paper>
@@ -234,7 +193,7 @@ function SignInPage() {
         <div className="z-10 relative w-full max-w-2xl">
           <div className="text-7xl font-bold leading-none text-gray-100">
             <div>Welcome to</div>
-            <div>our community</div>
+            <div>99 Ventures</div>
           </div>
           <div className="mt-24 text-lg tracking-tight leading-6 text-gray-400">
             Fuse helps developers to build organized and well coded dashboards full of beautiful and

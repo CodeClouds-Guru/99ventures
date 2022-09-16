@@ -5,10 +5,11 @@ import { memo } from 'react';
 import { useSelector } from 'react-redux';
 import { selectFooterTheme } from 'app/store/fuse/settingsSlice';
 import clsx from 'clsx';
+import Grid from '@mui/material/Grid';
 
 function FooterLayout1(props) {
   const footerTheme = useSelector(selectFooterTheme);
-
+  const year = new Date().getFullYear()
   return (
     <ThemeProvider theme={footerTheme}>
       <AppBar
@@ -23,7 +24,14 @@ function FooterLayout1(props) {
         }}
       >
         <Toolbar className="min-h-48 md:min-h-64 px-8 sm:px-12 py-0 flex items-center overflow-x-auto">
-          Footer
+        <Grid container spacing={2}>
+          <Grid item xs={10}>
+            <p>&#xA9; {year} | 99 Ventures</p>
+          </Grid>
+          <Grid item xs={2}>
+            <p>All rights reserved.</p>
+          </Grid>
+        </Grid>
         </Toolbar>
       </AppBar>
     </ThemeProvider>

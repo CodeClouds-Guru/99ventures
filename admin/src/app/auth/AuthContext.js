@@ -5,6 +5,7 @@ import FuseSplashScreen from '@fuse/core/FuseSplashScreen';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { logoutUser, setUser } from 'app/store/userSlice';
 import jwtService from './services/jwtService';
+import {resetNavigation } from 'app/store/fuse/navigationSlice';
 
 const AuthContext = React.createContext();
 
@@ -15,7 +16,7 @@ function AuthProvider({ children }) {
 
   useEffect(() => {
     jwtService.on('onAutoLogin', () => {
-      dispatch(showMessage({ message: 'Signing in with JWT' }));
+      // dispatch(showMessage({ message: null }));
 
       /**
        * Sign in and retrieve user data with stored token
@@ -23,7 +24,7 @@ function AuthProvider({ children }) {
       jwtService
         .signInWithToken()
         .then((user) => {
-          success(user, 'Signed in with JWT');
+          success(user, null);
         })
         .catch((error) => {
           pass(error.message);
@@ -31,17 +32,16 @@ function AuthProvider({ children }) {
     });
 
     jwtService.on('onLogin', (user) => {
-      success(user, 'Signed in');
+      success(user, null);
     });
 
     jwtService.on('onLogout', () => {
-      pass('Signed out');
-
+      pass(null);
       dispatch(logoutUser());
     });
 
-    jwtService.on('onAutoLogout', (message) => {
-      pass(message);
+    jwtService.on('onAutoLogout', () => {
+      pass(null);
 
       dispatch(logoutUser());
     });
@@ -50,13 +50,17 @@ function AuthProvider({ children }) {
       pass();
     });
 
+    jwtService.on('onForbidden', (message) => {
+      dispatch(showMessage({ variant: 'error', message: message }));
+    })
+
     jwtService.init();
 
     function success(user, message) {
       if (message) {
         dispatch(showMessage({ message }));
       }
-
+      dispatch(resetNavigation());
       Promise.all([
         dispatch(setUser(user)),
         // You can receive data in here before app initialization

@@ -15,7 +15,7 @@ class FuseAuthorization extends Component {
       accessGranted: true,
       routes,
     };
-    this.defaultLoginRedirectUrl = props.loginRedirectUrl || '/';
+    this.defaultLoginRedirectUrl = props.loginRedirectUrl || '/company-site';
   }
 
   componentDidMount() {
@@ -49,7 +49,12 @@ class FuseAuthorization extends Component {
   redirectRoute() {
     const { location, userRole } = this.props;
     const { pathname } = location;
-    const redirectUrl = loginRedirectUrl || this.defaultLoginRedirectUrl;
+    // const redirectUrl = loginRedirectUrl || this.defaultLoginRedirectUrl;
+
+    /*
+    * customised redirect url
+    */
+    const redirectUrl = this.defaultLoginRedirectUrl;
 
     /*
         User is guest
