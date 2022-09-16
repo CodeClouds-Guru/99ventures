@@ -1,0 +1,14 @@
+.gjs-one-bg {
+    background-color: #111827;
+}
+#gjs {
+    border: 3px solid #111827;
+}
+.gjs-two-color {
+    color: rgba(255, 255, 255, 0.7);
+}
+.gjs-four-color,
+.gjs-four-color-h:hover {
+  color: #fff;
+}
+  

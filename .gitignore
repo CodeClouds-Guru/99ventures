@@ -1,4 +1,11 @@
 .env
+dbdiagram.txt
 backend/.env
 backend/public/uploads/*
 frontend/.env
+backend/node_modules
+frontend/node_modules
+.DS_Store
+admin/src/.DS_Store
+admin/public/.DS_Store
+*.code-workspace

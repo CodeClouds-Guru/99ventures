@@ -16,13 +16,15 @@ import settingsConfig from 'app/configs/settingsConfig';
 import withAppProviders from './withAppProviders';
 import { AuthProvider } from './auth/AuthContext';
 
-// import axios from 'axios';
+import axios from 'axios';
 /**
  * Axios HTTP Request defaults
  */
-// axios.defaults.baseURL = "";
-// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-// axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
+//  datas-loadb-16icz3rsivdw8-bdf77d8837c7d527.elb.us-east-2.amazonaws.com
+axios.defaults.baseURL = process.env.NODE_ENV === "production" ? "http://3.13.149.9/api/" : 'http://localhost:4000/api/';
+console.log('built base url', axios.defaults.baseURL);
+axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 const emotionCacheOptions = {
   rtl: {

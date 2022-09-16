@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { Link, NavLink } from 'react-router-dom';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { selectUser } from 'app/store/userSlice';
+import jwtService from 'src/app/auth/services/jwtService';
 
 function UserMenu(props) {
   const user = useSelector(selectUser);
@@ -23,7 +24,8 @@ function UserMenu(props) {
   const userMenuClose = () => {
     setUserMenu(null);
   };
-
+  const companySiteId = jwtService.getCompanySiteId();
+  const userRole = user.role.toString();
   return (
     <>
       <Button
@@ -31,20 +33,20 @@ function UserMenu(props) {
         onClick={userMenuClick}
         color="inherit"
       >
-        <div className="hidden md:flex flex-col mx-4 items-end">
+        <div className="md:flex flex-col mx-4 items-end">
           <Typography component="span" className="font-semibold flex">
-            {user.data.displayName}
+            {user.first_name + ' ' + user.last_name}
           </Typography>
           <Typography className="text-11 font-medium capitalize" color="text.secondary">
-            {user.role.toString()}
+            {jwtService.checkCompanySiteId() ? user.role.toString().split('-').join(' ') : ''}
             {(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
           </Typography>
         </div>
 
-        {user.data.photoURL ? (
-          <Avatar className="md:mx-4" alt="user photo" src={user.data.photoURL} />
+        {user.avatar ? (
+          <Avatar className="md:mx-4" alt="user photo" src={user.avatar} />
         ) : (
-          <Avatar className="md:mx-4">{user.data.displayName[0]}</Avatar>
+          <Avatar className="md:mx-4">{user.first_name + ' ' + user.last_name}</Avatar>
         )}
       </Button>
 
@@ -81,18 +83,18 @@ function UserMenu(props) {
           </>
         ) : (
           <>
-            <MenuItem component={Link} to="/apps/profile" onClick={userMenuClose} role="button">
+            <MenuItem component={Link} to="profile" onClick={userMenuClose} role="button">
               <ListItemIcon className="min-w-40">
                 <FuseSvgIcon>heroicons-outline:user-circle</FuseSvgIcon>
               </ListItemIcon>
               <ListItemText primary="My Profile" />
             </MenuItem>
-            <MenuItem component={Link} to="/apps/mailbox" onClick={userMenuClose} role="button">
+            {/* <MenuItem component={Link} to="/apps/mailbox" onClick={userMenuClose} role="button">
               <ListItemIcon className="min-w-40">
                 <FuseSvgIcon>heroicons-outline:mail-open</FuseSvgIcon>
               </ListItemIcon>
               <ListItemText primary="Inbox" />
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem
               component={NavLink}
               to="/sign-out"

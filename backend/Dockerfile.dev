@@ -1,7 +1,7 @@
 FROM node:17
 WORKDIR /usr/src/backend
 COPY package*.json ./
-RUN npm install
+RUN npm install --global nodemon
 RUN npm install sequelize-cli --save-dev
 COPY . .
 EXPOSE 4000

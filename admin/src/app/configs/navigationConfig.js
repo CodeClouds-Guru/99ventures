@@ -1,21 +1,81 @@
-import i18next from 'i18next';
-import ar from './navigation-i18n/ar';
-import en from './navigation-i18n/en';
-import tr from './navigation-i18n/tr';
-
-i18next.addResourceBundle('en', 'navigation', en);
-i18next.addResourceBundle('tr', 'navigation', tr);
-i18next.addResourceBundle('ar', 'navigation', ar);
-
 const navigationConfig = [
   {
-    id: 'example-component',
-    title: 'Example',
-    translate: 'EXAMPLE',
+    id: 'dashboard',
+    title: 'Dashboard',
+    translate: 'Dashboard',
     type: 'item',
-    icon: 'heroicons-outline:star',
-    url: 'example',
+    icon: 'heroicons-outline:home',
+    url: 'dashboard',
   },
+  {
+    id: 'configuration',
+    title: 'Configuration',
+    translate: 'Configuration',
+    type: 'item',
+    icon: 'heroicons-outline:cog',
+    url: 'configuration',
+  },
+  {
+    id: 'scripts',
+    title: 'Scripts',
+    translate: 'Scripts',
+    type: 'item',
+    icon: 'heroicons-outline:code',
+    url: 'app/scripts',
+  },
+  {
+    id: 'administration',
+    title: 'Administration',
+    translate: 'Administration',
+    type: 'collapse',
+    icon: 'heroicons-outline:user-circle',
+    children: [
+      {
+        id: 'users',
+        title: 'Users',
+        translate: 'Users',
+        type: 'item',
+        icon: 'heroicons-outline:user-circle',
+        url: 'app/users',
+        end: true,
+      },
+      {
+        id: 'roles',
+        title: 'Roles',
+        translate: 'Roles',
+        type: 'item',
+        icon: 'heroicons-outline:users',
+        url: 'app/roles',
+        end: true,
+      },
+      {
+        id: 'groups',
+        title: 'Groups',
+        translate: 'Groups',
+        type: 'item',
+        icon: 'heroicons-outline:user-group',
+        url: 'app/groups',
+        end: true,
+      },
+      {
+        id: 'email-templates',
+        title: 'Email Templates',
+        type: 'item',
+        icon: 'heroicons-outline:mail',
+        url: 'app/email-templates',
+        end: true,
+      },
+      // {
+      //   id: 'permissions',
+      //   title: 'Permissions',
+      //   translate: 'Permissions',
+      //   type: 'item',
+      //   icon: 'heroicons-outline:shield-check',
+      //   url: 'app/permissions',
+      // },
+    ]
+  },
+
 ];
 
 export default navigationConfig;

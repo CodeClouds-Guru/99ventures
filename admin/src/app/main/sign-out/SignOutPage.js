@@ -5,9 +5,11 @@ import JwtService from '../../auth/services/jwtService';
 
 function SignOutPage() {
   useEffect(() => {
-    setTimeout(() => {
-      JwtService.logout();
-    }, 1000);
+    if (localStorage.getItem('jwt_access_token')) {
+      setTimeout(() => {
+        JwtService.logout();
+      }, 1000);
+    }
   }, []);
 
   return (

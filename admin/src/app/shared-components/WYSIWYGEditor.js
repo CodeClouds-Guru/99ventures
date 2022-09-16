@@ -31,7 +31,7 @@ const WYSIWYGEditor = forwardRef((props, ref) => {
 
   return (
     <Root className={clsx('rounded-4 border-1 overflow-hidden w-full', props.className)} ref={ref}>
-      <Editor editorState={editorState} onEditorStateChange={onEditorStateChange} />
+      <Editor ref={ref} {...props} editorState={editorState} onEditorStateChange={onEditorStateChange} />
     </Root>
   );
 });

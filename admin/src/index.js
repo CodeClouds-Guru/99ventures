@@ -9,10 +9,18 @@ import { createRoot } from 'react-dom/client';
 import App from './app/App';
 import * as serviceWorker from './serviceWorker';
 import reportWebVitals from './reportWebVitals';
+import { PersistGate } from 'redux-persist/integration/react'
+import { persistStore } from 'redux-persist'
+import store from './app/store';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<App />);
+let persistor = persistStore(store);
+root.render(
+    // <PersistGate loading={null} persistor={persistor}>
+        <App/>
+    // </PersistGate>
+);
 
 reportWebVitals();
 
