@@ -11,4 +11,10 @@
 .gjs-four-color-h:hover {
   color: #fff;
 }
-  
+
+.custom-code-editor .gjs-cm-editor-c:first-of-type{width: 53%;} 
+.custom-code-editor .gjs-cm-editor-c:nth-child(2){width: 45%; margin-left: 10px;} 
+.custom-code-editor .gjs-btn-prim{margin-top: 10px}
+.custom-code-editor .gjs-cm-editor#gjs-cm-css {
+    padding-left: 0;
+}
