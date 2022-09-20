@@ -5,7 +5,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - $(aws ecr get-login-password --region us-east-2)
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - BACKEND_REPOSITORY_URI=473524174152.dkr.ecr.us-east-2.amazonaws.com/99ventures-backend-stg
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - BACKEND_IMAGE_TAG=${COMMIT_HASH:=latest}
