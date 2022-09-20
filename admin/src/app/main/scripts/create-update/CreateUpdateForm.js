@@ -60,25 +60,25 @@ const CreateUpdateForm = () => {
             },
             deviceManager: {
                 devices:
-                    [
-                        {
-                            id: 'desktop',
-                            name: 'Desktop',
-                            width: '',
-                        },
-                        {
-                            id: 'tablet',
-                            name: 'Tablet',
-                            width: '768px',
-                            widthMedia: '992px',
-                        },
-                        {
-                            id: 'mobilePortrait',
-                            name: 'Mobile portrait',
-                            width: '320px',
-                            widthMedia: '575px',
-                        },
-                    ]
+                [
+                    {
+                        id: 'desktop',
+                        name: 'Desktop',
+                        width: '',
+                    },
+                    {
+                        id: 'tablet',
+                        name: 'Tablet',
+                        width: '768px',
+                        widthMedia: '992px',
+                    },
+                    {
+                        id: 'mobilePortrait',
+                        name: 'Mobile portrait',
+                        width: '320px',
+                        widthMedia: '575px',
+                    },
+                ]
             },
             pluginsOpts: {
                 'grapesjs-preset-webpage': {
@@ -91,6 +91,21 @@ const CreateUpdateForm = () => {
             },
         });        
         setEditor(editor);
+
+        // Rich text Editor 
+        editor.RichTextEditor.add('custom-vars', {
+            icon: `<select class="gjs-field">
+                  <option value="">- Select -</option>
+                  <option value="[[firstname]]">FirstName</option>
+                  <option value="[[lastname]]">LastName</option>
+                  <option value="[[age]]">Age</option>
+                </select>`,
+              // Bind the 'result' on 'change' listener
+            event: 'change',
+            result: (rte, action) => rte.insertHTML(action.btn.firstChild.value),
+            // Reset the select on change
+            update: (rte, action) => { action.btn.firstChild.value = "";}
+        })
 
         const pfx = editor.getConfig().stylePrefix
         const modal = editor.Modal
@@ -125,8 +140,8 @@ const CreateUpdateForm = () => {
         btnEdit.innerHTML = 'Save'
         btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
         btnEdit.onclick = function () {
-            var html = htmlCodeViewer.editor.getValue()
-            var css = cssCodeViewer.editor.getValue()
+            const html = htmlCodeViewer.editor.getValue()
+            const css = cssCodeViewer.editor.getValue()
             editor.DomComponents.getWrapper().set('content', '')
             // editor.CssComposer.clear();            
             // const HTML_CSS = html.trim() + `<style>${css}</style>`
@@ -141,17 +156,18 @@ const CreateUpdateForm = () => {
                 var htmlViewer = htmlCodeViewer.editor
                 var cssViewer = cssCodeViewer.editor
                 modal.setTitle('Edit code')
+                var InnerHtml = editor.getHtml()                
+                var Css = editor.getCss();
                 if (!htmlViewer && !cssViewer) {
                     const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
                     const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+
                     rootContainer.append(btnEdit)
                     htmlCodeViewer.init(txtarea)
                     cssCodeViewer.init(cssarea)
                     htmlViewer = htmlCodeViewer.editor
-                    cssViewer = cssCodeViewer.editor
+                    cssViewer = cssCodeViewer.editor              
                 }
-                var InnerHtml = editor.getHtml()                
-                var Css = editor.getCss();
                 modal.setContent('')
                 modal.setContent(rootContainer)                
                 htmlCodeViewer.setContent(InnerHtml)                
