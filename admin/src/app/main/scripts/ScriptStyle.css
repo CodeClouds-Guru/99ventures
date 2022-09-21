@@ -18,5 +18,5 @@
 .custom-code-editor .gjs-cm-editor#gjs-cm-css {
     padding-left: 0;
 }
-.gjs-rte-action:last-child{width: 60px;}
+.gjs-rte-action:last-child{width: auto;}
 select.gjs-field option{background-color: #111827;}

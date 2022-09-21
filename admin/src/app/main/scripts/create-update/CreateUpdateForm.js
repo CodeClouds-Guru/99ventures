@@ -92,21 +92,6 @@ const CreateUpdateForm = () => {
         });        
         setEditor(editor);
 
-        // Rich text Editor 
-        editor.RichTextEditor.add('custom-vars', {
-            icon: `<select class="gjs-field">
-                  <option value="">- Select -</option>
-                  <option value="[[firstname]]">FirstName</option>
-                  <option value="[[lastname]]">LastName</option>
-                  <option value="[[age]]">Age</option>
-                </select>`,
-              // Bind the 'result' on 'change' listener
-            event: 'change',
-            result: (rte, action) => rte.insertHTML(action.btn.firstChild.value),
-            // Reset the select on change
-            update: (rte, action) => { action.btn.firstChild.value = "";}
-        })
-
         const pfx = editor.getConfig().stylePrefix
         const modal = editor.Modal
         const cmdm = editor.Commands

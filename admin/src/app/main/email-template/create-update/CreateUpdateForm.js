@@ -17,6 +17,8 @@ import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
+import '../EmailTemplate.css'
+
 
 const CreateUpdateForm = ({ input, meta }) => {
     const module = 'email-templates';
@@ -31,6 +33,7 @@ const CreateUpdateForm = ({ input, meta }) => {
     const [editor, setEditor] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [changeCount, setChangeCount] = useState(0);
+    const [showDropdown, setShowDropdown] = useState(false)
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-email-${moduleId}` : `gjs-email-new`;
     const [allData, setAllData] = useState({
         subject: '',
@@ -100,6 +103,89 @@ const CreateUpdateForm = ({ input, meta }) => {
         });
         setEditor(editor);
 
+        const pfx = editor.getConfig().stylePrefix
+        const modal = editor.Modal
+        const cmdm = editor.Commands
+        const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const pnm = editor.Panels
+        const rootContainer = document.createElement('div')
+        const btnEdit = document.createElement('button')
+        const codeViewerOpt = {
+            readOnly: 0,
+            theme: 'hopscotch',
+            autoBeautify: true,
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            lineWrapping: true,
+            styleActiveLine: true,
+            smartIndent: true,
+            indentWithTabs: true
+        }       
+
+        htmlCodeViewer.set({
+            codeName: 'htmlmixed',
+            ...codeViewerOpt
+        })
+
+        cssCodeViewer.set({
+            codeName: 'css',
+            ...codeViewerOpt
+        })
+
+        btnEdit.innerHTML = 'Save'
+        btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
+        btnEdit.onclick = function () {
+            const html = htmlCodeViewer.editor.getValue()
+            const css = cssCodeViewer.editor.getValue()
+            editor.DomComponents.getWrapper().set('content', '')
+            // editor.CssComposer.clear();            
+            // const HTML_CSS = html.trim() + `<style>${css}</style>`
+            editor.setComponents(html.trim());
+            editor.setStyle(css)
+            modal.close()
+        }
+        
+        cmdm.add('edit-code', {
+            run: function (editor, sender) {
+                sender && sender.set('active', 0)
+                var htmlViewer = htmlCodeViewer.editor
+                var cssViewer = cssCodeViewer.editor
+                modal.setTitle('Edit code')
+                var InnerHtml = editor.getHtml()                
+                var Css = editor.getCss();
+                if (!htmlViewer && !cssViewer) {
+                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
+                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+                    rootContainer.append(btnEdit)
+                    htmlCodeViewer.init(txtarea)
+                    cssCodeViewer.init(cssarea)
+                    htmlViewer = htmlCodeViewer.editor
+                    cssViewer = cssCodeViewer.editor              
+                }
+                modal.setContent('')
+                modal.setContent(rootContainer)                
+                htmlCodeViewer.setContent(InnerHtml)                
+                cssCodeViewer.setContent(Css)
+                modal.open({attributes: { class: 'custom-code-editor' }})
+                htmlViewer.refresh()
+                cssViewer.refresh()
+            }
+        })
+
+        pnm.addButton('options',
+            [
+                {
+                    id: 'edit',
+                    className: 'fa fa-code',
+                    command: 'edit-code',
+                    attributes: {
+                        title: 'Edit Code'
+                    }
+                }
+            ]
+        );
+
         editor.onReady(() => {
             loadEditorData(editor);
         });
@@ -112,6 +198,44 @@ const CreateUpdateForm = ({ input, meta }) => {
 
         // if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
     }, []);
+
+    /**
+     * Set select option in Rich Text Editor
+     */
+    useEffect(()=>{
+        if(variableOptions.length) {           
+            let selectHTML = `<select class="gjs-field"><option value="">- Select -</option>`
+            variableOptions.map(op => {
+                selectHTML += `<option value="${op.code}">${op.name}</option>`
+            })
+            selectHTML += `</select>`;
+            editor.RichTextEditor.add('custom-vars', {
+                icon: selectHTML,                    
+                event: 'change',    // Bind the 'result' on 'change' listener
+                result: (rte, action) => rte.insertHTML(action.btn.firstChild.value),
+                // Reset the select on change
+                update: (rte, action) => { action.btn.firstChild.value = "";}
+            })
+        }
+    }, [variableOptions])
+
+    const editorTextAreaCreate = (rootContainer, title) => {
+        const container = document.createElement('div')
+        const childContainer = document.createElement('div')
+        const titleContainer = document.createElement('div')
+        const txtarea = document.createElement('textarea')
+        
+        container.setAttribute('class', 'gjs-cm-editor-c')
+        childContainer.setAttribute('id', 'gjs-cm-css')
+        childContainer.setAttribute('class', 'gjs-cm-editor')
+        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.textContent = title
+        childContainer.appendChild(titleContainer)
+        childContainer.appendChild(txtarea)
+        container.appendChild(childContainer)
+        rootContainer.appendChild(container)
+        return txtarea
+    }
 
     const loadEditorData = async(editor) => {        
         if (moduleId !== 'create' && !isNaN(moduleId)) { 
@@ -132,12 +256,15 @@ const CreateUpdateForm = ({ input, meta }) => {
         let generatedHTML = '';
 
         if(editor.getHtml()) {
+            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
             generatedHTML += 
-            `<html>`;
-                if(editor.getCss()){
-                    generatedHTML += `<head><style>${editor.getCss()}</style></head>`;
-                }
-                generatedHTML += `${editor.getHtml()}
+            `<html>
+                <head>
+                    <title>${allData.name}</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    ${css}
+                </head>
+                ${editor.getHtml()}            
             </html>`;
         }
         return generatedHTML;
@@ -179,15 +306,16 @@ const CreateUpdateForm = ({ input, meta }) => {
 
     }
 
-    const handleChangeVariable = (event) => {
+    const handleChangeVariable = (value) => {
         setAllData(allData => ({
-            ...allData, variable: event.target.value
+            ...allData, variable: value
         }))
-        if (currentFocusedElement === 'template') {
-            setAllData({ ...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}` })
-        } else if (currentFocusedElement === 'subject') {
-            setAllData({ ...allData, subject: `${allData.subject} ${event.target.value}` })
-        }
+        // if (currentFocusedElement === 'template') {
+        //   }  setAllData({ ...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}` })
+        //if (currentFocusedElement === 'subject') {
+            setAllData({ ...allData, subject: `${allData.subject} ${value}` })
+        //}
+        setShowDropdown(!showDropdown)
     }
 
     const getFieldData = () => {
@@ -328,7 +456,44 @@ const CreateUpdateForm = ({ input, meta }) => {
                             <FormHelperText error variant="standard">{errors.action}</FormHelperText>
                         </FormControl>
 
-                        <FormControl className="w-1/2 mb-24">
+                        <FormControl className="w-full mb-24 input--group">
+                            <TextField
+                                label="Subject"
+                                type="text"
+                                error={!!errors.subject}
+                                helperText={errors?.subject?.message}  
+                                variant="outlined"
+                                required
+                                fullWidth
+                                value={allData.subject}
+                                onChange={onSubjectChange}
+                                ref={inputElement}
+                                onFocus={() => setShowDropdown(false)}
+                            />
+                            <div className="input-group-append">
+                                <button className="btn btn-outline-primary dropdown-toggle MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root whitespace-nowrap muiltr-13n15ve-MuiButtonBase-root-MuiButton-root" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={()=> setShowDropdown(!showDropdown)}>Variable</button>
+                                <div className="dropdown-menu" style={{ display: showDropdown ? 'block' : 'none' }}>
+                                    {
+                                        variableOptions.map(value => {
+                                            return <a 
+                                                key={value.id} 
+                                                className="dropdown-item" 
+                                                href="#"
+                                                onClick={ 
+                                                    (e)=> {
+                                                        e.preventDefault();
+                                                        handleChangeVariable(value.code)
+                                                    }
+                                                }
+                                            >{value.name}</a>
+                                        })
+                                    }
+                                </div>
+                            </div>
+                            <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
+                        </FormControl>
+
+                        {/* <FormControl className="w-1/2 mb-24">
                             <InputLabel id="demo-simple-select-label">Variable</InputLabel>
                             <Select
                                 labelId="demo-simple-select-label"
@@ -358,7 +523,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                                 onFocus={() => setCurrentFocusedElement('subject')}
                             />
                             <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
-                        </FormControl>
+                        </FormControl> */}
 
                         <FormControl className="w-full mb-24">
                             {/* <WYSIWYGEditor
