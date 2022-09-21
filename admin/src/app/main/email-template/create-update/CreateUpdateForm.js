@@ -11,6 +11,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateUpdateFormHeader from './CreateUpdateFormHeader';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
@@ -23,6 +24,8 @@ import '../EmailTemplate.css'
 const CreateUpdateForm = ({ input, meta }) => {
     const module = 'email-templates';
     const inputElement = useRef('subject');
+    const dropDownBtnRef = useRef();
+    const dropDownListRef = useRef();
     // const textAreaElement = useRef('template');
     const [currentFocusedElement, setCurrentFocusedElement] = useState('');
     const moduleId = useParams().id;
@@ -197,7 +200,28 @@ const CreateUpdateForm = ({ input, meta }) => {
         });
 
         // if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
+        // Bind the event listener
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            // Unbind the event listener on clean up
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
+
+
+    /**
+     * Disabled variable dropdown by clicking outside
+     */
+    const handleClickOutside = (e) => {
+        if(
+            inputElement.current.contains(e.target) || 
+            dropDownBtnRef.current.contains(e.target) || 
+            dropDownListRef.current.contains(e.target)
+        ) {
+            return;
+        }
+        setShowDropdown(false);
+    }
 
     /**
      * Set select option in Rich Text Editor
@@ -305,7 +329,7 @@ const CreateUpdateForm = ({ input, meta }) => {
         dynamicErrorMsg('action', event.target.value, 'Please select action');
 
     }
-
+    
     const handleChangeVariable = (value) => {
         setAllData(allData => ({
             ...allData, variable: value
@@ -471,8 +495,8 @@ const CreateUpdateForm = ({ input, meta }) => {
                                 onFocus={() => setShowDropdown(false)}
                             />
                             <div className="input-group-append">
-                                <button className="btn btn-outline-primary dropdown-toggle MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root whitespace-nowrap muiltr-13n15ve-MuiButtonBase-root-MuiButton-root" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={()=> setShowDropdown(!showDropdown)}>Variable</button>
-                                <div className="dropdown-menu" style={{ display: showDropdown ? 'block' : 'none' }}>
+                                <button ref={ dropDownBtnRef } className="btn btn-outline-primary dropdown-toggle MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root whitespace-nowrap muiltr-13n15ve-MuiButtonBase-root-MuiButton-root" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={()=> setShowDropdown(!showDropdown)}>Select Variable <KeyboardArrowDownIcon className="ml-5" /></button>
+                                <div ref={ dropDownListRef } className="dropdown-menu" style={{ display: showDropdown ? 'block' : 'none' }}>
                                     {
                                         variableOptions.map(value => {
                                             return <a 
