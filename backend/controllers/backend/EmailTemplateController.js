@@ -2,6 +2,7 @@ const Controller = require('./Controller')
 const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,User,CompanyPortal,sequelize } = require('../../models/index')
 const queryInterface = sequelize.getQueryInterface()
 const { Op } = require("sequelize");
+const EmailHelper = require("../../helpers/EmailHelper");
 
 class EmailTemplateController extends Controller {
   constructor() {
@@ -31,7 +32,6 @@ class EmailTemplateController extends Controller {
   }
   //override add function
   async add(req,res){
-    // return this.parse(req,res)
     let response = await super.add(req)
     let fields = response.fields
     let email_actions = await EmailAction.findAll()
@@ -109,6 +109,14 @@ class EmailTemplateController extends Controller {
       }
     } catch (error) {
       throw error;
+    }
+  }
+  //email parsing
+  async parse(req,res){
+    const emailHelper = new EmailHelper(req);
+    let email_body = await emailHelper.parse();
+    return {
+      body:email_body
     }
   }
 }
