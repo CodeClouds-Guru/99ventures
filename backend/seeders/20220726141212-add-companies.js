@@ -11,6 +11,17 @@ const companies = [
     deleted_by: null,
     created_at: new Date(),
   },
+  {
+    id: 2,
+    name: '99 Ventures',
+    company_type_id: 1,
+    slug: '99_ventures',
+    status: 1,
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
 ]
 module.exports = {
   async up(queryInterface, Sequelize) {
