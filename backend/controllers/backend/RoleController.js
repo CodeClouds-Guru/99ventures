@@ -82,34 +82,28 @@ class RoleController extends Controller {
   //override role update function
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
-    let module_data = [
-      {
-        id: 1,
-        slug: "users",
-        name: "Users",
-        action: [
-          {
-            delete: false,
-          },
-          {
-            update: true,
-          },
-          {
-            view: true,
-          },
-        ],
-      },
-    ];
+    let module_data = req.body.role_permissions || []
+    
+    // [
+    //   {
+    //     id: 1,
+    //     slug: "users",
+    //     name: "Users",
+    //     action: [
+    //       {
+    //         delete: false,
+    //       },
+    //       {
+    //         update: true,
+    //       },
+    //       {
+    //         view: true,
+    //       },
+    //     ],
+    //   },
+    // ];
 
     const types = ["all", "group", "owner"];
-
-    //parent modules
-    // let parent_modules = await Module.findAll({
-    //   attributes: ["parent_module"],
-    //   group: ["parent_module"],
-    // });
-
-    //search for update value
 
     let all_actions = await Action.findAll({
       attributes: ["id", "name", "slug", "parent_action"],
@@ -123,11 +117,6 @@ class RoleController extends Controller {
       "parent_action"
     );
 
-    // //modules
-    // let all_modules = await Module.findAll({
-    //   attributes: ["id", "name", "slug", "parent_module"],
-    //   order: ["parent_module"],
-    // });
     let selected_permissions = [];
     for (let i = 0; i < module_data.length; i++) {
       for (let j = 0; j < module_data[i].action.length; j++) {
@@ -149,7 +138,6 @@ class RoleController extends Controller {
         });
       }
     }
-    console.log("=============selected_permissions", selected_permissions);
     req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
