@@ -31,6 +31,7 @@ const jwtServiceConfig = {
   updateScriptsData: 'scripts/update',
   getSingleScriptData: 'scripts/edit',
   roleEdit: 'roles/edit',
+  roleUpdate: 'roles/update',
 };
 
 export default jwtServiceConfig;
