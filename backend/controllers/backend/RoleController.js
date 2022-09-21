@@ -86,8 +86,109 @@ class RoleController extends Controller {
   //override role update function
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
-    let module_data = req.body.role_permissions || [];
-
+    // let module_data = req.body.role_permissions || [];
+    let module_data = {
+      Administrations: [
+        {
+          id: 1,
+          slug: "users",
+          name: "Users",
+          action: ["update", "view"],
+        },
+        {
+          id: 2,
+          slug: "roles",
+          name: "Roles",
+          action: ["update"],
+        },
+        {
+          id: 3,
+          slug: "modules",
+          name: "Modules",
+          action: [],
+        },
+        {
+          id: 4,
+          slug: "actions",
+          name: "Actions",
+          action: [],
+        },
+        {
+          id: 5,
+          slug: "permissions",
+          name: "Permissions",
+          action: [],
+        },
+        {
+          id: 6,
+          slug: "groups",
+          name: "Groups",
+          action: [],
+        },
+        {
+          id: 7,
+          slug: "companies",
+          name: "Companies",
+          action: [],
+        },
+        {
+          id: 8,
+          slug: "portals",
+          name: "Portals",
+          action: [],
+        },
+        {
+          id: 14,
+          slug: "emailtemplates",
+          name: "Email Templates",
+          action: [],
+        },
+      ],
+      Configurations: [
+        {
+          id: 9,
+          slug: "emailconfigurations",
+          name: "Email Configurations",
+          action: [],
+        },
+        {
+          id: 10,
+          slug: "ipconfigurations",
+          name: "Ip Configurations",
+          action: [],
+        },
+        {
+          id: 11,
+          slug: "generalconfigurations",
+          name: "General Configurations",
+          action: [],
+        },
+        {
+          id: 12,
+          slug: "paymentconfigurations",
+          name: "Payment Configurations",
+          action: [],
+        },
+        {
+          id: 13,
+          slug: "downtime",
+          name: "Downtime",
+          action: [],
+        },
+        {
+          id: 15,
+          slug: "metatagconfigurations",
+          name: "Meta Tag Configurations",
+          action: [],
+        },
+        {
+          id: 16,
+          slug: "scripts",
+          name: "Scripts",
+          action: [],
+        },
+      ],
+    };
     const types = ["all", "group", "owner"];
 
     let all_actions = await Action.findAll({
@@ -102,27 +203,33 @@ class RoleController extends Controller {
       "parent_action",
       []
     );
-
+    // console.log("================module_data[i]", module_data);
+    let keys = Object.keys(module_data);
     let selected_permissions = [];
-    for (let i = 0; i < module_data.length; i++) {
-      for (let j = 0; j < module_data[i].action.length; j++) {
-        Object.entries(module_data[i].action[j]).find(([key, value]) => {
-          if (value === true) {
-            for (let k = 0; k < actions_in_group[key].length; k++) {
+    keys.map((key) => {
+    for (let i = 0; i < module_data[key].length; i++) {
+     
+      for (let j = 0; j < module_data[key][i].action.length; j++) {
+        // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
+          if (module_data[key][i].action.length > 0) {
+            let action_key = module_data[key][i].action[j]
+            for (let k = 0; k < actions_in_group[action_key].length; k++) {
               for (let l = 0; l < types.length; l++) {
                 selected_permissions.push(
                   types[l] +
                     "-" +
-                    module_data[i].slug +
+                    module_data[key][i].slug +
                     "-" +
-                    actions_in_group[key][k].slug
+                    actions_in_group[action_key][k].slug
                 );
               }
             }
           }
-        });
+        // });
       }
     }
+  });
+  // console.log("================selected_permissions", selected_permissions);
     req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
@@ -192,7 +299,7 @@ class RoleController extends Controller {
           });
         }
 
-        console.log("==============actions", actions);
+        // console.log("==============actions====", actions);
         if (curr_parent_data == prev_parent_data) {
           result[prev_parent_data].push({
             id: all_action.id,
