@@ -17,6 +17,19 @@ class RoleController extends Controller {
   async edit(req, res) {
     try {
       let response = await super.edit(req);
+
+      //role permissions
+      let role_permissions = await response.result.getPermissions({
+        attributes: ["name", "id", "slug"],
+      });
+      role_permissions = role_permissions.map((role_permission) => {
+        return {
+          id: role_permission.id,
+          slug: role_permission.slug,
+          name: role_permission.name,
+        };
+      });
+
       //actions
       let all_actions = await Action.findAll({
         attributes: ["id", "name", "slug", "parent_action"],
@@ -27,7 +40,8 @@ class RoleController extends Controller {
       let actions_in_group = await this.getFormattedChildParentData(
         all_actions,
         [],
-        "parent_action"
+        "parent_action",
+        []
       );
 
       let actions = all_actions.map((all_action) => {
@@ -52,21 +66,11 @@ class RoleController extends Controller {
       let modules = await this.getFormattedChildParentData(
         all_modules,
         action_keys,
-        "parent_module"
+        "parent_module",
+        role_permissions
       );
       // console.log("======================modules", modules);
 
-      //role permissions
-      let role_permissions = await response.result.getPermissions({
-        attributes: ["name", "id", "slug"],
-      });
-      role_permissions = role_permissions.map((role_permission) => {
-        return {
-          id: role_permission.id,
-          slug: role_permission.slug,
-          name: role_permission.name,
-        };
-      });
       return {
         actions: actions,
         modules: all_modules,
@@ -82,26 +86,7 @@ class RoleController extends Controller {
   //override role update function
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
-    let module_data = req.body.role_permissions || []
-    
-    // [
-    //   {
-    //     id: 1,
-    //     slug: "users",
-    //     name: "Users",
-    //     action: [
-    //       {
-    //         delete: false,
-    //       },
-    //       {
-    //         update: true,
-    //       },
-    //       {
-    //         view: true,
-    //       },
-    //     ],
-    //   },
-    // ];
+    let module_data = req.body.role_permissions || [];
 
     const types = ["all", "group", "owner"];
 
@@ -114,7 +99,8 @@ class RoleController extends Controller {
     let actions_in_group = await this.getFormattedChildParentData(
       all_actions,
       [],
-      "parent_action"
+      "parent_action",
+      []
     );
 
     let selected_permissions = [];
@@ -123,10 +109,9 @@ class RoleController extends Controller {
         Object.entries(module_data[i].action[j]).find(([key, value]) => {
           if (value === true) {
             for (let k = 0; k < actions_in_group[key].length; k++) {
-              for (let l = 0; l<types.length; l++) {
+              for (let l = 0; l < types.length; l++) {
                 selected_permissions.push(
-                  types[l] 
-                  +
+                  types[l] +
                     "-" +
                     module_data[i].slug +
                     "-" +
@@ -179,7 +164,8 @@ class RoleController extends Controller {
   async getFormattedChildParentData(
     all_data,
     data_in_group = [],
-    field_name = "parent_action"
+    field_name = "parent_action",
+    role_permissions
   ) {
     let result = {};
     let prev_parent_data = "";
@@ -191,12 +177,28 @@ class RoleController extends Controller {
         } else {
           curr_parent_data = all_action.parent_module;
         }
+        let actions = [];
+        if (role_permissions.length > 0) {
+          role_permissions.find((val, index) => {
+            if (val.slug.includes("-" + all_action.slug + "-list")) {
+              if (!actions.includes("view")) actions.push("view");
+            }
+            if (val.slug.includes("-" + all_action.slug + "-save")) {
+              if (!actions.includes("update")) actions.push("update");
+            }
+            if (val.slug.includes("-" + all_action.slug + "-delete")) {
+              if (!actions.includes("delete")) actions.push("delete");
+            }
+          });
+        }
+
+        console.log("==============actions", actions);
         if (curr_parent_data == prev_parent_data) {
           result[prev_parent_data].push({
             id: all_action.id,
             slug: all_action.slug,
             name: all_action.name,
-            ...(data_in_group.length > 0 && { action: data_in_group }),
+            ...(field_name === "parent_module" && { action: actions }),
           });
         } else {
           prev_parent_data = curr_parent_data;
@@ -205,7 +207,9 @@ class RoleController extends Controller {
               id: all_action.id,
               slug: all_action.slug,
               name: all_action.name,
-              ...(data_in_group.length > 0 && { action: data_in_group }),
+              ...(field_name === "parent_module" && {
+                action: actions,
+              }),
             },
           ];
         }
