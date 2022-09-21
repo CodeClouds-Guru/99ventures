@@ -86,109 +86,109 @@ class RoleController extends Controller {
   //override role update function
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
-    // let module_data = req.body.role_permissions || [];
-    let module_data = {
-      Administrations: [
-        {
-          id: 1,
-          slug: "users",
-          name: "Users",
-          action: ["update", "view"],
-        },
-        {
-          id: 2,
-          slug: "roles",
-          name: "Roles",
-          action: ["update"],
-        },
-        {
-          id: 3,
-          slug: "modules",
-          name: "Modules",
-          action: [],
-        },
-        {
-          id: 4,
-          slug: "actions",
-          name: "Actions",
-          action: [],
-        },
-        {
-          id: 5,
-          slug: "permissions",
-          name: "Permissions",
-          action: [],
-        },
-        {
-          id: 6,
-          slug: "groups",
-          name: "Groups",
-          action: [],
-        },
-        {
-          id: 7,
-          slug: "companies",
-          name: "Companies",
-          action: [],
-        },
-        {
-          id: 8,
-          slug: "portals",
-          name: "Portals",
-          action: [],
-        },
-        {
-          id: 14,
-          slug: "emailtemplates",
-          name: "Email Templates",
-          action: [],
-        },
-      ],
-      Configurations: [
-        {
-          id: 9,
-          slug: "emailconfigurations",
-          name: "Email Configurations",
-          action: [],
-        },
-        {
-          id: 10,
-          slug: "ipconfigurations",
-          name: "Ip Configurations",
-          action: [],
-        },
-        {
-          id: 11,
-          slug: "generalconfigurations",
-          name: "General Configurations",
-          action: [],
-        },
-        {
-          id: 12,
-          slug: "paymentconfigurations",
-          name: "Payment Configurations",
-          action: [],
-        },
-        {
-          id: 13,
-          slug: "downtime",
-          name: "Downtime",
-          action: [],
-        },
-        {
-          id: 15,
-          slug: "metatagconfigurations",
-          name: "Meta Tag Configurations",
-          action: [],
-        },
-        {
-          id: 16,
-          slug: "scripts",
-          name: "Scripts",
-          action: [],
-        },
-      ],
-    };
+    let module_data = req.body.role_permissions || [];
+    // let module_data = {
+    //   Administrations: [
+    //     {
+    //       id: 1,
+    //       slug: "users",
+    //       name: "Users",
+    //       action: ["update", "view"],
+    //     },
+    //     {
+    //       id: 2,
+    //       slug: "roles",
+    //       name: "Roles",
+    //       action: ["update"],
+    //     },
+    //     {
+    //       id: 3,
+    //       slug: "modules",
+    //       name: "Modules",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 4,
+    //       slug: "actions",
+    //       name: "Actions",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 5,
+    //       slug: "permissions",
+    //       name: "Permissions",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 6,
+    //       slug: "groups",
+    //       name: "Groups",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 7,
+    //       slug: "companies",
+    //       name: "Companies",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 8,
+    //       slug: "portals",
+    //       name: "Portals",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 14,
+    //       slug: "emailtemplates",
+    //       name: "Email Templates",
+    //       action: [],
+    //     },
+    //   ],
+    //   Configurations: [
+    //     {
+    //       id: 9,
+    //       slug: "emailconfigurations",
+    //       name: "Email Configurations",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 10,
+    //       slug: "ipconfigurations",
+    //       name: "Ip Configurations",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 11,
+    //       slug: "generalconfigurations",
+    //       name: "General Configurations",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 12,
+    //       slug: "paymentconfigurations",
+    //       name: "Payment Configurations",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 13,
+    //       slug: "downtime",
+    //       name: "Downtime",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 15,
+    //       slug: "metatagconfigurations",
+    //       name: "Meta Tag Configurations",
+    //       action: [],
+    //     },
+    //     {
+    //       id: 16,
+    //       slug: "scripts",
+    //       name: "Scripts",
+    //       action: [],
+    //     },
+    //   ],
+    // };
     const types = ["all", "group", "owner"];
 
     let all_actions = await Action.findAll({
