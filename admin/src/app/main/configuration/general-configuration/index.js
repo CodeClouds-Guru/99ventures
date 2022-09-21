@@ -214,6 +214,7 @@ function GeneralConfiguration(props) {
             }
         ]);        
         autoResponderFormReset({replyFormDefaultValues});
+        handleClose();
     }
 
     const handleClose = () => {
