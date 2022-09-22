@@ -119,7 +119,8 @@ class IpConfigurationController extends Controller {
       // console.log(req.body)
       const site_id = req.header('site_id') || 1
       const company_id = req.header('company_id') || 1
-      const shutdown_checked = req.body.shutdown_checked || ''
+      const shutdown_checked =
+        'shutdown_checked' in req.body ? req.body.shutdown_checked : ''
       const updated_downtime_text = req.body.updated_downtime_text || ''
       const new_ip_list = req.body.new_ip_list || null
       let flag = false
