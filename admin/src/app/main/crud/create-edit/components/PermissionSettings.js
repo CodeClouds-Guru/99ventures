@@ -19,46 +19,43 @@ function PermissionSettings(props) {
         // console.log(panel, isExpanded, event)
         setExpanded(isExpanded ? panel : false);
     };
-    // const [actions, setActions] = useState([{
-    //     slug: 'module',
-    //     name: 'Module',
-    //     minWidth: 170,
-    //     align: 'left'
-    // },]);
     const [modules, setModules] = useState({});
-    // const [rolePermissions, setRolePermissions] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    // const [selectedPermissions, setSelectedPermissions] = useState({});
+    const [checkCount, setCheckCount] = useState({});
     useEffect(() => {
         getRolePermissions();
     }, [])
+    console.log('checkCount', checkCount)
     const getRolePermissions = () => {
         axios.get(jwtServiceConfig.roleEdit + `/${props.roleId}`)
             .then(res => {
-                // setActions((prevState) => [...prevState, ...res.data.results.actions]);
                 setModules(res.data.results.new_modules);
-                // let rolPermissionsResp = res.data.results.role_permissions.map(rolePermission => rolePermission.slug);
-                // setRolePermissions(rolPermissionsResp);
-
-                /* set parent module in structure */
-                // Object.keys(res.data.results.new_modules).map((module, key) => {
-                // res.data.results.new_modules[module].map((childModule, childKey) => {
-                //     childModule.insertedAction = [];
-                // })
-                //     setSelectedPermissions(
-                //         selectedPermissions => ({
-                //             ...selectedPermissions, ...{ [module]: [] }
-                //         })
-                //     )
-                // })
+                syncParentChildCheckbox();
+                Object.keys(res.data.results.new_modules).map((module, key) => {
+                    setCheckCount(checkCount => ({ ...checkCount, ...{ [module]: { view: 0, update: 0, delete: 0 } } }))
+                })
             })
     }
-    const handleParentChecbox = (type) => (event) => {
-        // event.preventDefault();
-        console.log(event, type);
+    const handleParentChecbox = (type, parent_module) => (event) => {
+        event.stopPropagation();
+        // Object.keys(modules).map((module, key) => {
+        modules[parent_module].map((child_module, child_key) => {
+            if (event.target.checked) {
+                child_module.action.push(type);
+            } else {
+                if (child_module.action.includes(type)) {
+                    child_module.action.splice(child_module.action.indexOf(type), 1)
+                }
+            }
+        })
+        // })
+        setModules(modules => ({
+            ...modules, ...modules
+        }));
+        syncParentChildCheckbox();
     }
     const handleChildCheckbox = (type, childModule) => (event) => {
-        // event.preventDefault();
+        event.stopPropagation();
         Object.keys(modules).map((module, key) => {
             modules[module].map((child_module, child_key) => {
                 if (child_module.slug === childModule.slug) {
@@ -72,11 +69,30 @@ function PermissionSettings(props) {
         })
         setModules(modules => ({
             ...modules, ...modules
-        }))
+        }));
+        syncParentChildCheckbox();
+    }
+    const syncParentChildCheckbox = () => {
+        Object.keys(modules).map((module, key) => {
+            setCheckCount(checkCount => ({ ...checkCount, ...{ [module]: { view: 0, update: 0, delete: 0 } } }));
+            let [view_count, update_count, delete_count] = [0, 0, 0];
+            modules[module].map((childModule, childKey) => {
+                if (childModule.action.includes('view')) {
+                    view_count++;
+                }
+                if (childModule.action.includes('update')) {
+                    update_count++;
+                }
+                if (childModule.action.includes('delete')) {
+                    delete_count++;
+                }
+            })
+            setCheckCount(checkCount => ({ ...checkCount, ...{ [module]: { view: view_count, update: update_count, delete: delete_count } } }));
+        })
     }
     const onConfirmAlertDialogHandle = () => {
-        console.log({ requestType: 'apply-permission', role_permissions: modules });
-        return
+        // console.log({ requestType: 'apply-permission', role_permissions: modules });
+        // return
         axios.post(`${jwtServiceConfig.roleUpdate}/${props.roleId}`, { requestType: 'apply-permission', role_permissions: modules })
             .then(res => {
                 dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
@@ -92,6 +108,7 @@ function PermissionSettings(props) {
                 setOpenAlertDialog(false);
             })
     }
+
     return (
         <div className="p-16">
             <AlertDialog
@@ -116,13 +133,20 @@ function PermissionSettings(props) {
                                     <Typography component={'div'} sx={{ color: 'text.secondary' }} className="flex justify-end px-10">
                                         <FormGroup row={true}>
                                             <FormControlLabel control={
-                                                <Checkbox onClick={handleParentChecbox('view')} id={`view-${module}-${key}`} />
-                                            } label="View" />
+                                                <Checkbox onClick={handleParentChecbox('view', module)} id={`view-${module}-${key}`}
+                                                    checked={Object.keys(modules[module]).length === checkCount[module].view}
+                                                />
+                                            } label="View"
+                                            />
                                             <FormControlLabel control={
-                                                <Checkbox onClick={handleParentChecbox('update')} id={`update-${module}-${key}`} />
+                                                <Checkbox onClick={handleParentChecbox('update', module)} id={`update-${module}-${key}`}
+                                                    checked={Object.keys(modules[module]).length === checkCount[module].update}
+                                                />
                                             } label="Update" />
                                             <FormControlLabel control={
-                                                <Checkbox onClick={handleParentChecbox('delete')} id={`delete-${module}-${key}`} />
+                                                <Checkbox onClick={handleParentChecbox('delete', module)} id={`delete-${module}-${key}`}
+                                                    checked={Object.keys(modules[module]).length === checkCount[module].delete}
+                                                />
                                             } label="Delete" />
                                         </FormGroup>
                                     </Typography>
@@ -130,8 +154,6 @@ function PermissionSettings(props) {
                                 <AccordionDetails>
                                     {
                                         modules[module].map((childModule, childKey) => {
-                                            // console.log(childModule.name);
-                                            // return;
                                             return (
                                                 <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-20 py-5">
                                                     <span className="pt-10">
