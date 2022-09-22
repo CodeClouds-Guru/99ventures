@@ -11,6 +11,7 @@ import axios from 'axios';
 import { confirmAccountPassword } from 'app/store/accountSlice';
 import { selectUser } from 'app/store/userSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import { rest } from 'lodash';
 
 const modalStyle = {
     position: 'absolute',
@@ -50,7 +51,7 @@ const PaymentCredentials = (props) => {
         })
     });
     const validationSchema = yup.object().shape({ ...validationFields});
-
+    
     /**
      * Props changed event listener
      */
@@ -69,11 +70,13 @@ const PaymentCredentials = (props) => {
     }, [props]);
 
 
+
     const { 
         control,
         formState: { isValid, dirtyFields, errors }, 
         handleSubmit,
-        setValue
+        setValue,
+        reset
     } = useForm({
         mode: 'onChange',
         defaultValues: defaultValues,
@@ -131,7 +134,7 @@ const PaymentCredentials = (props) => {
      * @param confirmAccountStatus [true|false]
      */
     const [showPassword, setShowPassword] = React.useState(confirmAccountStatus);   
-
+    
     const handleClickShowPassword = () => {
         setShowPassword(true);
         // If not confirmed account password, show Modal.
@@ -228,7 +231,7 @@ const PaymentCredentials = (props) => {
                     <Typography variant="body2">Please add below details</Typography>
                 </div>
                 <Divider style={{ marginBottom: '4rem', marginTop: '1.5rem'}}/>
-                
+               
                 <form
                     name="PaypalForm"
                     noValidate  
@@ -251,11 +254,11 @@ const PaymentCredentials = (props) => {
                                                 id={ el.slug }
                                                 type="text"
                                                 endAdornment={
-                                                    el.value ? 
+                                                    (el.value && el.auth) ? 
                                                         <InputAdornment position="end">
                                                             <IconButton
                                                                 aria-label="toggle password visibility"
-                                                                onClick={() => handleClickShowPassword()}                                                        
+                                                                onClick={handleClickShowPassword}                                                        
                                                                 edge="end"
                                                             >
                                                             { !showPassword ? <VisibilityOff /> : ''}
@@ -264,15 +267,18 @@ const PaymentCredentials = (props) => {
                                                     : ''
                                                 }
                                                 label={ el.name }
-                                                disabled={ !confirmAccountStatus || !permission}
+                                                disabled={
+                                                    (!permission) ? true : ((el.value && el.auth && !confirmAccountStatus) ? true : false)
+                                                }
+
                                             />
                                         </FormControl>
                                     )}
                                 />
-                            )                        
+                            )
                         })
                     }
-                    
+
                     {
                         permission ? 
                             <div className='flex justify-end'>
@@ -283,7 +289,10 @@ const PaymentCredentials = (props) => {
                                     loading={loading}
                                     type="submit"
                                     size="large"
-                                    disabled={ !confirmAccountStatus || !Object.keys(dirtyFields).length || !isValid }
+                                    disabled={ 
+                                        (!confirmAccountStatus || !isValid) && 
+                                        (Object.keys(dirtyFields).length !=  credentials.length) // If no. of dirtyfields & total no. of fields count check
+                                    }
                                 >
                                 Save
                                 </LoadingButton>
