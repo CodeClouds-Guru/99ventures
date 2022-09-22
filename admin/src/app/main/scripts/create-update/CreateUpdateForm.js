@@ -41,8 +41,10 @@ const CreateUpdateForm = () => {
     useEffect(() => {
         const editor = grapesjs.init({
             container: '#gjs',
+            protectedCss: '',   // disabled default CSS
             height: '700px',
             width: '100%',
+            style: '.txt-red{color: red}',
             plugins: ["gjs-preset-webpage"],
             storageManager: {
                 id: 'gjs-',
@@ -58,25 +60,25 @@ const CreateUpdateForm = () => {
             },
             deviceManager: {
                 devices:
-                    [
-                        {
-                            id: 'desktop',
-                            name: 'Desktop',
-                            width: '',
-                        },
-                        {
-                            id: 'tablet',
-                            name: 'Tablet',
-                            width: '768px',
-                            widthMedia: '992px',
-                        },
-                        {
-                            id: 'mobilePortrait',
-                            name: 'Mobile portrait',
-                            width: '320px',
-                            widthMedia: '575px',
-                        },
-                    ]
+                [
+                    {
+                        id: 'desktop',
+                        name: 'Desktop',
+                        width: '',
+                    },
+                    {
+                        id: 'tablet',
+                        name: 'Tablet',
+                        width: '768px',
+                        widthMedia: '992px',
+                    },
+                    {
+                        id: 'mobilePortrait',
+                        name: 'Mobile portrait',
+                        width: '320px',
+                        widthMedia: '575px',
+                    },
+                ]
             },
             pluginsOpts: {
                 'grapesjs-preset-webpage': {
@@ -87,22 +89,127 @@ const CreateUpdateForm = () => {
                     blocks: ['link-block', 'quote', 'text-basic'],
                 },
             },
-        });
+        });        
+        setEditor(editor);
+
+        const pfx = editor.getConfig().stylePrefix
+        const modal = editor.Modal
+        const cmdm = editor.Commands
+        const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const pnm = editor.Panels
+        const rootContainer = document.createElement('div')
+        const btnEdit = document.createElement('button')
+        const codeViewerOpt = {
+            readOnly: 0,
+            theme: 'hopscotch',
+            autoBeautify: true,
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            lineWrapping: true,
+            styleActiveLine: true,
+            smartIndent: true,
+            indentWithTabs: true
+        }       
+
+        htmlCodeViewer.set({
+            codeName: 'htmlmixed',
+            ...codeViewerOpt
+        })
+
+        cssCodeViewer.set({
+            codeName: 'css',
+            ...codeViewerOpt
+        })
+
+        btnEdit.innerHTML = 'Save'
+        btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
+        btnEdit.onclick = function () {
+            const html = htmlCodeViewer.editor.getValue()
+            const css = cssCodeViewer.editor.getValue()
+            editor.DomComponents.getWrapper().set('content', '')
+            // editor.CssComposer.clear();            
+            // const HTML_CSS = html.trim() + `<style>${css}</style>`
+            editor.setComponents(html.trim());
+            editor.setStyle(css)
+            modal.close()
+        }
         
-        setEditor(editor);       
+        cmdm.add('edit-code', {
+            run: function (editor, sender) {
+                sender && sender.set('active', 0)
+                var htmlViewer = htmlCodeViewer.editor
+                var cssViewer = cssCodeViewer.editor
+                modal.setTitle('Edit code')
+                var InnerHtml = editor.getHtml()                
+                var Css = editor.getCss();
+                if (!htmlViewer && !cssViewer) {
+                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
+                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+
+                    rootContainer.append(btnEdit)
+                    htmlCodeViewer.init(txtarea)
+                    cssCodeViewer.init(cssarea)
+                    htmlViewer = htmlCodeViewer.editor
+                    cssViewer = cssCodeViewer.editor              
+                }
+                modal.setContent('')
+                modal.setContent(rootContainer)                
+                htmlCodeViewer.setContent(InnerHtml)                
+                cssCodeViewer.setContent(Css)
+                modal.open({attributes: { class: 'custom-code-editor' }})
+                htmlViewer.refresh()
+                cssViewer.refresh()
+            }
+        })
+
+        // Removed default read-only code editor btn from toolbar
+        pnm.removeButton("options", 'export-template');
+
+        pnm.addButton('options',
+            [
+                {
+                    id: 'edit',
+                    className: 'fa fa-code',
+                    command: 'edit-code',
+                    attributes: {
+                        title: 'Edit Code'
+                    }
+                }
+            ]
+        );
 
         editor.onReady(() => {
             loadEditorData(editor);
         });
+
         editor.on('change:changesCount', (model) => {
             const changes = model.get('changesCount');
             if (changes) {
                 setChangeCount(changeCount => changeCount +1)
             }
         });
-        
     }, []);
 
+    const editorTextAreaCreate = (rootContainer, title) => {
+        const container = document.createElement('div')
+        const childContainer = document.createElement('div')
+        const titleContainer = document.createElement('div')
+        const txtarea = document.createElement('textarea')
+        
+        container.setAttribute('class', 'gjs-cm-editor-c')
+        childContainer.setAttribute('id', 'gjs-cm-css')
+        childContainer.setAttribute('class', 'gjs-cm-editor')
+        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.textContent = title
+        childContainer.appendChild(titleContainer)
+        childContainer.appendChild(txtarea)
+        container.appendChild(childContainer)
+        rootContainer.appendChild(container)
+        return txtarea
+    }
+
+    
     // useEffect(() => {
     //     console.log(changeCount)
     //     if(changeCount > 0)
@@ -138,12 +245,15 @@ const CreateUpdateForm = () => {
         let generatedHTML = '';
 
         if(editor.getHtml()) {
+            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
             generatedHTML += 
-            `<html>`;
-                if(editor.getCss()){
-                    generatedHTML += `<head><style>${editor.getCss()}</style></head>`;
-                }
-                generatedHTML += `${editor.getHtml()}
+            `<html>
+                <head>
+                    <title>${allData.name}</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    ${css}
+                </head>
+                ${editor.getHtml()}            
             </html>`;
         }
         return generatedHTML;

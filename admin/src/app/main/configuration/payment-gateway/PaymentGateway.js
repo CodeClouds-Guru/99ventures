@@ -65,14 +65,30 @@ const PaymentGateway = (props) => {
 		}
 		axios.get(jwtServiceConfig.getPaymentMethodConfiguration, {params})
 		.then(response => {
-			if (response.data.status && response.data.payment_method_list.length > 0) {
-				setGateways(response.data.payment_method_list);
+			if (response.data.status && response.data.payment_method_list.length > 0) {				
+				const results = response.data.payment_method_list;
+				if(results.length) {
+					results.map((pm, ind) => {						
+						const credentials = [];
+						pm.credentials.map((cr) => {
+							credentials.push({
+								...cr,
+								auth: cr.value ? true : false
+							});							
+						})
+						results[ind]['credentials'] = credentials
+					})
+				}
+				setGateways(results);
+				// setGateways(response.data.payment_method_list);
+
 			} else {
                 console.log('Unable to get payment gateways');
             }
 		})
 		.catch(error => console.log(error))
 	}
+
 	
 	return (
 		<Box
@@ -88,7 +104,7 @@ const PaymentGateway = (props) => {
 				sx={{ borderRight: 1, borderColor: 'divider' }}
 			>
 				{
-					gateways.map((gateway, indx) => {
+					gateways.map((gateway, indx) => {						
 						return <Tab key={ indx } label={ gateway.name } {...a11yProps(indx)} icon={<PlayArrowIcon />} iconPosition="start" />
 					})
 				}
@@ -96,7 +112,12 @@ const PaymentGateway = (props) => {
 			{
 				gateways.map((gateway, indx) => {
 					return (
-						<TabPanel key={ indx } value={value} index={ indx } className="w-full">
+						<TabPanel 
+							key={ indx } 
+							value={value} 
+							index={ indx } 
+							className="w-full"
+							>
 							<PaymentCredentials gateway={gateway.name} credentials={ gateway.credentials } permission={hasPermission} />
 						</TabPanel>
 					)
@@ -105,5 +126,6 @@ const PaymentGateway = (props) => {
 		</Box>
 	);
 }
+
 
 export default PaymentGateway;

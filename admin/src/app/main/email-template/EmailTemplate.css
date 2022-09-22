@@ -1,0 +1,53 @@
+.input--group{ display: flex; flex-direction: row;}
+.input-group-append{position: relative;}
+.input--group .muiltr-13n15ve-MuiButtonBase-root-MuiButton-root{
+    background-color: rgb(224, 224, 224);
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    color: #212529;
+    border-radius:0;
+    max-height: 53.125px;
+    height: 53.125px;
+    border-radius: 0 4px 4px 0;
+    width: 187px;
+}
+.input--group .muiltr-zsctt5-MuiInputBase-root-MuiOutlinedInput-root{border-radius: 4px 0 0 4px;}
+.input--group .muiltr-13n15ve-MuiButtonBase-root-MuiButton-root:hover {
+    text-decoration: none;
+    background-color: rgb(245, 245, 245);
+}
+.dropdown-menu {
+    z-index: 1000;
+    display: none;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+    position: absolute;    
+    top: 100%;
+    right: 0;
+    max-height: 250px;
+    overflow-y:scroll ;
+}
+a.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    clear: both;
+    font-size: 15px;
+    font-weight: 400;
+    color: #212529 !important;
+    text-decoration: none !important;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
