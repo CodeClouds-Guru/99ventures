@@ -163,6 +163,9 @@ const CreateUpdateForm = () => {
             }
         })
 
+        // Removed default read-only code editor btn from toolbar
+        pnm.removeButton("options", 'export-template');
+
         pnm.addButton('options',
             [
                 {

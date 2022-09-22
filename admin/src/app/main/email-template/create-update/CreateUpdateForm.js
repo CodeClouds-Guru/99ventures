@@ -1,15 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button, FormControl, TextField, Paper, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
 import _ from '@lodash';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import CreateUpdateFormHeader from './CreateUpdateFormHeader';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AlertDialog from 'app/shared-components/AlertDialog';
@@ -27,7 +24,7 @@ const CreateUpdateForm = ({ input, meta }) => {
     const dropDownBtnRef = useRef();
     const dropDownListRef = useRef();
     // const textAreaElement = useRef('template');
-    const [currentFocusedElement, setCurrentFocusedElement] = useState('');
+    // const [currentFocusedElement, setCurrentFocusedElement] = useState('');
     const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -176,18 +173,19 @@ const CreateUpdateForm = ({ input, meta }) => {
             }
         })
 
-        pnm.addButton('options',
-            [
-                {
-                    id: 'edit',
-                    className: 'fa fa-code',
-                    command: 'edit-code',
-                    attributes: {
-                        title: 'Edit Code'
-                    }
+        // Removed default read-only code editor btn from toolbar
+        pnm.removeButton("options", 'export-template');
+        
+        pnm.addButton('options',[
+            {
+                id: 'edit',
+                className: 'fa fa-code',
+                command: 'edit-code',
+                attributes: {
+                    title: 'Edit Code'
                 }
-            ]
-        );
+            }
+        ]);
 
         editor.onReady(() => {
             loadEditorData(editor);
@@ -199,14 +197,13 @@ const CreateUpdateForm = ({ input, meta }) => {
             }
         });
 
-        // if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
         // Bind the event listener
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             // Unbind the event listener on clean up
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, []); 
 
 
     /**
@@ -312,15 +309,6 @@ const CreateUpdateForm = ({ input, meta }) => {
         }))
         dynamicErrorMsg('subject', event.target.value, 'Please insert subject');
     }
-
-    /*const onChangeInEditor = (input) => {
-        if (input) {
-            setAllData(allData => ({
-                ...allData, insertedHtml: input
-            }));
-        }
-        dynamicErrorMsg('insertedHtml', input);
-    }*/
 
     const handleChangeAction = (event) => {
         setAllData(allData => ({
@@ -517,44 +505,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                             <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
                         </FormControl>
 
-                        {/* <FormControl className="w-1/2 mb-24">
-                            <InputLabel id="demo-simple-select-label">Variable</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={allData.variable}
-                                label="Variable"
-                                onChange={handleChangeVariable}
-                            >
-                                <MenuItem value="">Select a variable</MenuItem>
-                                {variableOptions.map((value) => {
-                                    return <MenuItem key={value.id} value={value.code}>{value.name}</MenuItem>
-                                })}
-                            </Select>
-                        </FormControl>
-                        <FormControl className="w-full mb-24">
-                            <TextField
-                                label="Subject"
-                                type="text"
-                                error={!!errors.subject}
-                                helperText={errors?.subject?.message}
-                                variant="outlined"
-                                required
-                                fullWidth
-                                value={allData.subject}
-                                onChange={onSubjectChange}
-                                ref={inputElement}
-                                onFocus={() => setCurrentFocusedElement('subject')}
-                            />
-                            <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
-                        </FormControl> */}
-
-                        <FormControl className="w-full mb-24">
-                            {/* <WYSIWYGEditor
-                                ref={textAreaElement}
-                                onChange={onChangeInEditor}
-                                onFocus={() => setCurrentFocusedElement('template')}
-                            /> */}
+                        <FormControl className="w-full mb-24">                           
                             <div id="gjs" />
                             <FormHelperText error variant="standard">{errors.insertedHtml}</FormHelperText>
                         </FormControl>
