@@ -57,7 +57,7 @@ class RoleController extends Controller {
       //modules
       let all_modules = await Module.findAll({
         attributes: ["id", "name", "slug", "parent_module"],
-        order: ["parent_module"],
+        order: ["name"],
       });
 
       const action_keys = Object.keys(actions_in_group);
@@ -106,11 +106,12 @@ class RoleController extends Controller {
     let keys = Object.keys(module_data);
     let selected_permissions = [];
     keys.map((key) => {
-      for (let i = 0; i < module_data[key].length; i++) {
-        for (let j = 0; j < module_data[key][i].action.length; j++) {
-          // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
+    for (let i = 0; i < module_data[key].length; i++) {
+     
+      for (let j = 0; j < module_data[key][i].action.length; j++) {
+        // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
           if (module_data[key][i].action.length > 0) {
-            let action_key = module_data[key][i].action[j];
+            let action_key = module_data[key][i].action[j]
             for (let k = 0; k < actions_in_group[action_key].length; k++) {
               for (let l = 0; l < types.length; l++) {
                 selected_permissions.push(
@@ -123,11 +124,11 @@ class RoleController extends Controller {
               }
             }
           }
-          // });
-        }
+        // });
       }
-    });
-    // console.log("================selected_permissions", selected_permissions);
+    }
+  });
+  // console.log("================selected_permissions", selected_permissions);
     req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
@@ -174,6 +175,7 @@ class RoleController extends Controller {
   ) {
     let result = {};
     let prev_parent_data = "";
+    // console.log("==============all_data====", all_data);
     if (all_data.length > 0) {
       all_data.map((all_action) => {
         let curr_parent_data = "";
@@ -183,30 +185,24 @@ class RoleController extends Controller {
           curr_parent_data = all_action.parent_module;
         }
         let actions = [];
-
-        // console.log("--------------role_permissions", role_permissions);
         if (role_permissions.length > 0) {
           role_permissions.find((val, index) => {
             if (val.slug.includes("-" + all_action.slug + "-list")) {
-              if (!actions.includes("view")) {
-                actions.push("view");
-              }
+              if (!actions.includes("view")) actions.push("view");
             }
             if (val.slug.includes("-" + all_action.slug + "-save")) {
-              if (!actions.includes("update")) {
-                actions.push("update");
-              }
+              if (!actions.includes("update")) actions.push("update");
             }
             if (val.slug.includes("-" + all_action.slug + "-delete")) {
-              if (!actions.includes("delete")) {
-                actions.push("delete");
-              }
+              if (!actions.includes("delete")) actions.push("delete");
             }
           });
         }
 
-        if (curr_parent_data == prev_parent_data) {
-          result[prev_parent_data].push({
+        let keys = Object.keys(result);
+        
+        if (keys.length > 0 && keys.includes(curr_parent_data)) {
+          result[curr_parent_data].push({
             id: all_action.id,
             slug: all_action.slug,
             name: all_action.name,
@@ -214,7 +210,7 @@ class RoleController extends Controller {
           });
         } else {
           prev_parent_data = curr_parent_data;
-          result[prev_parent_data] = [
+          result[curr_parent_data] = [
             {
               id: all_action.id,
               slug: all_action.slug,
@@ -225,6 +221,7 @@ class RoleController extends Controller {
             },
           ];
         }
+        
       });
     }
     return result;
