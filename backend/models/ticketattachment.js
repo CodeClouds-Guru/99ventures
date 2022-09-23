@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class MetaTag extends Model {
+  class TicketAttachment extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,26 +13,22 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  MetaTag.init({
-    company_portal_id: DataTypes.BIGINT,
-    tag_name: DataTypes.STRING,
-    tag_html: DataTypes.TEXT,
-    status: DataTypes.STRING,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
+  TicketAttachment.init({
+    ticket_conversation_id: DataTypes.BIGINT,
+    attachment: DataTypes.TEXT,
+    mime_type: DataTypes.STRING,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'MetaTag',
+    modelName: 'TicketAttachment',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'meta_tags',
+    tableName: 'ticket_attachments',
   });
-  return MetaTag;
+  return TicketAttachment;
 };

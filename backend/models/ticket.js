@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     company_portal_id_id: DataTypes.BIGINT,
     member_id: DataTypes.BIGINT,
     subject: DataTypes.STRING,
-    status: DataTypes.STRING,
+    status: DataTypes.TINYINT,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',
     deleted_at: 'TIMESTAMP'

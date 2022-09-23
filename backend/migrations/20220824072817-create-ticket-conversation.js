@@ -14,7 +14,6 @@ module.exports = {
       },
       member_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
       },
       message: {
         type: Sequelize.TEXT,
@@ -22,7 +21,6 @@ module.exports = {
       },
       user_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
       },
       created_at: {
         type: 'TIMESTAMP',

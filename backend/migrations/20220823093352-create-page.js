@@ -19,6 +19,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         default: "draft",
+        comment: "pending, draft, published, archived"
       },
       parmalink: {
         type: Sequelize.STRING,
