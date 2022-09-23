@@ -11,7 +11,6 @@ import axios from 'axios';
 import { confirmAccountPassword } from 'app/store/accountSlice';
 import { selectUser } from 'app/store/userSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import { rest } from 'lodash';
 
 const modalStyle = {
     position: 'absolute',
@@ -61,22 +60,19 @@ const PaymentCredentials = (props) => {
                 (props.permission('save') || props.permission('update'))
             )
         }
+        
         if(props.credentials) {
-            setCredentials(props.credentials);
             props.credentials.map(val => {
-                setValue(val.slug, val.value, {shouldDirty: false, shouldValidate: true })
+                setValue(val.slug, val.value, {shouldDirty: false, shouldValidate: true });                
             });
         }
     }, [props]);
-
-
 
     const { 
         control,
         formState: { isValid, dirtyFields, errors }, 
         handleSubmit,
-        setValue,
-        reset
+        setValue
     } = useForm({
         mode: 'onChange',
         defaultValues: defaultValues,
@@ -300,7 +296,7 @@ const PaymentCredentials = (props) => {
                             </div>
                         : ''
                     }
-                </form>
+                </form> 
             </Box>
         </>
     );
