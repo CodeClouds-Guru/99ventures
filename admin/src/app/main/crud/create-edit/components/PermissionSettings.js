@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Typography, Paper, Button, Accordion, AccordionDetails, AccordionSummary, FormGroup, FormControlLabel, Checkbox } from '@mui/material';
 import axios from "axios";
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ import { resetNavigation } from 'app/store/fuse/navigationSlice';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { indexOf } from 'lodash';
+import { callbackify } from 'util';
 
 function PermissionSettings(props) {
     const dispatch = useDispatch();
@@ -22,15 +23,19 @@ function PermissionSettings(props) {
     const [modules, setModules] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [checkCount, setCheckCount] = useState({});
+    const isFirstRender = useRef(true)
     useEffect(() => {
-        getRolePermissions();
-    }, [])
-    console.log('checkCount', checkCount)
+        if (isFirstRender.current) {
+            isFirstRender.current = false
+            getRolePermissions();
+        } else {
+            syncParentChildCheckbox();
+        }
+    }, [modules])
     const getRolePermissions = () => {
         axios.get(jwtServiceConfig.roleEdit + `/${props.roleId}`)
             .then(res => {
                 setModules(res.data.results.new_modules);
-                syncParentChildCheckbox();
                 Object.keys(res.data.results.new_modules).map((module, key) => {
                     setCheckCount(checkCount => ({ ...checkCount, ...{ [module]: { view: 0, update: 0, delete: 0 } } }))
                 })
@@ -91,15 +96,13 @@ function PermissionSettings(props) {
         })
     }
     const onConfirmAlertDialogHandle = () => {
-        // console.log({ requestType: 'apply-permission', role_permissions: modules });
-        // return
         axios.post(`${jwtServiceConfig.roleUpdate}/${props.roleId}`, { requestType: 'apply-permission', role_permissions: modules })
             .then(res => {
                 dispatch(showMessage({ variant: 'success', message: 'Permissions applied successfully.' }));
                 jwtService.getProfile()
                     .then(user => {
-                        dispatch(resetNavigation());
                         dispatch(setUser(user));
+                        dispatch(resetNavigation());
                     })
                 setOpenAlertDialog(false);
                 getRolePermissions();
@@ -121,7 +124,7 @@ function PermissionSettings(props) {
                 {
                     Object.keys(modules).map((module, key) => {
                         return (
-                            <Accordion key={`accordion-${module}-${key}`} expanded={expanded === module} onChange={handleAccordionClick(module)}>
+                            <Accordion key={`accordion-${module}-${key}`} expanded={expanded === module} onClick={(e) => { e.stopPropagation(); }} onChange={handleAccordionClick(module)}>
                                 <AccordionSummary
                                     expandIcon={<ExpandMoreIcon />}
                                     aria-controls={module + '-' + key}
@@ -130,7 +133,8 @@ function PermissionSettings(props) {
                                     <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pt-10 pl-5">
                                         {module}
                                     </Typography>
-                                    <Typography component={'div'} sx={{ color: 'text.secondary' }} className="flex justify-end px-10">
+                                    <Typography component={'div'}
+                                        sx={{ color: 'text.secondary', position: 'absolute', right: '80px', zIndex: 999 }} className="flex justify-end px-10">
                                         <FormGroup row={true}>
                                             <FormControlLabel control={
                                                 <Checkbox onClick={handleParentChecbox('view', module)} id={`view-${module}-${key}`}
@@ -155,7 +159,7 @@ function PermissionSettings(props) {
                                     {
                                         modules[module].map((childModule, childKey) => {
                                             return (
-                                                <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-20 py-5">
+                                                <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-60 py-5">
                                                     <span className="pt-10">
                                                         {childModule.name}
                                                     </span>
