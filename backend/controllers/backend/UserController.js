@@ -82,7 +82,7 @@ class UserController extends Controller {
         data: result.rows,
         pages,
         total: result.count,
-        test: result.rows[0].first_name,
+        // test: result.rows[0].first_name,
       },
       fields: this.model.fields,
     };

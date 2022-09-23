@@ -99,6 +99,21 @@ let users = [
     deleted_by: null,
     created_at: new Date(),
   },
+  {
+    id: 8,
+    first_name: 'Debosmita',
+    last_name: 'Dey',
+    username: 'Debosmita_CC',
+    email: 'debosmita.dey@codeclouds.co.in',
+    avatar: '',
+    password: '123456',
+    phone_no: '',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  
 ]
 module.exports = {
   async up(queryInterface, Sequelize) {

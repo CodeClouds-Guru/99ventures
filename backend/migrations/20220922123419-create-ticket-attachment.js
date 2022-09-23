@@ -1,34 +1,24 @@
 "use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("ip_configurations", {
+    await queryInterface.createTable("ticket_attachments", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      company_portal_id: {
+      ticket_conversation_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
-      ip: {
+      attachment: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      mime_type: {
         type: Sequelize.STRING,
         allowNull: false,
-      },
-      status: {
-        type: Sequelize.TINYINT,
-        defaultValue: 1,
-        comment: "0=Blacklisted, 1=Whitelisted"
-      },
-      created_by: {
-        type: Sequelize.BIGINT,
-      },
-      updated_by: {
-        type: Sequelize.BIGINT,
-      },
-      deleted_by: {
-        type: Sequelize.BIGINT,
       },
       created_at: {
         type: "TIMESTAMP",
@@ -43,6 +33,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("ip_configurations");
+    await queryInterface.dropTable("ticket_attachments");
   },
 };

@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
           return this.getDataValue('downtime_message') || ''
         },
       },
-      status: DataTypes.INTEGER,
+      status: DataTypes.TINYINT,
       site_layout_id: DataTypes.INTEGER,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,

@@ -1,6 +1,8 @@
 const Controller = require("./Controller");
 const { stringToSlug } = require("../../helpers/global");
-const { Script } = require("../../models/index");
+const { Script, sequelize } = require("../../models/index");
+
+const { Op } = require("sequelize");
 
 class ScriptController extends Controller {
   constructor() {
@@ -9,13 +11,16 @@ class ScriptController extends Controller {
 
   async list(req, res) {
     const options = this.getQueryOptions(req);
-    options.where = { company_portal_id: req.headers.site_id };
-
+    const company_portal_id = req.headers.site_id;
+    var search = req.query.search || "";
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
+    
+    options.where= {...options.where, ...{[Op.and]: { company_portal_id: company_portal_id }}};
+    
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -55,7 +60,7 @@ class ScriptController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     try {
       let prev_data = await this.model.findOne({ where: { id: id } });
-      console.log(prev_data)
+     
       if (prev_data) {
         const script_name = req.body.name || "";
         // req.body.script_json = JSON.parse(req.body.script_json) || {};

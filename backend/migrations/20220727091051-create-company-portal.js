@@ -12,6 +12,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.BIGINT
       },
+      site_layout_id : {
+        type: Sequelize.TINYINT
+      },
       domain: {
         type: Sequelize.STRING
       },
@@ -23,7 +26,9 @@ module.exports = {
         type: Sequelize.TEXT
       },
       status: {
-        type: Sequelize.INTEGER
+        type: Sequelize.TINYINT,
+        defaultValue:1,
+        comment: "0=Inactive, 1=Active, 2=Shutdown"
       },
       created_by: {
         type: Sequelize.BIGINT

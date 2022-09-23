@@ -14,7 +14,9 @@ module.exports = {
       slug: {
         type: Sequelize.STRING,
       },
-      parent_module: { type: Sequelize.STRING },
+      parent_module: {
+        type: Sequelize.STRING,
+      },
       created_by: {
         type: Sequelize.BIGINT,
       },

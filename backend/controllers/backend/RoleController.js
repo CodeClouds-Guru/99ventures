@@ -87,108 +87,7 @@ class RoleController extends Controller {
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
     let module_data = req.body.role_permissions || [];
-    // let module_data = {
-    //   Administrations: [
-    //     {
-    //       id: 1,
-    //       slug: "users",
-    //       name: "Users",
-    //       action: ["update", "view"],
-    //     },
-    //     {
-    //       id: 2,
-    //       slug: "roles",
-    //       name: "Roles",
-    //       action: ["update"],
-    //     },
-    //     {
-    //       id: 3,
-    //       slug: "modules",
-    //       name: "Modules",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 4,
-    //       slug: "actions",
-    //       name: "Actions",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 5,
-    //       slug: "permissions",
-    //       name: "Permissions",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 6,
-    //       slug: "groups",
-    //       name: "Groups",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 7,
-    //       slug: "companies",
-    //       name: "Companies",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 8,
-    //       slug: "portals",
-    //       name: "Portals",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 14,
-    //       slug: "emailtemplates",
-    //       name: "Email Templates",
-    //       action: [],
-    //     },
-    //   ],
-    //   Configurations: [
-    //     {
-    //       id: 9,
-    //       slug: "emailconfigurations",
-    //       name: "Email Configurations",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 10,
-    //       slug: "ipconfigurations",
-    //       name: "Ip Configurations",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 11,
-    //       slug: "generalconfigurations",
-    //       name: "General Configurations",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 12,
-    //       slug: "paymentconfigurations",
-    //       name: "Payment Configurations",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 13,
-    //       slug: "downtime",
-    //       name: "Downtime",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 15,
-    //       slug: "metatagconfigurations",
-    //       name: "Meta Tag Configurations",
-    //       action: [],
-    //     },
-    //     {
-    //       id: 16,
-    //       slug: "scripts",
-    //       name: "Scripts",
-    //       action: [],
-    //     },
-    //   ],
-    // };
+    
     const types = ["all", "group", "owner"];
 
     let all_actions = await Action.findAll({
@@ -207,12 +106,11 @@ class RoleController extends Controller {
     let keys = Object.keys(module_data);
     let selected_permissions = [];
     keys.map((key) => {
-    for (let i = 0; i < module_data[key].length; i++) {
-     
-      for (let j = 0; j < module_data[key][i].action.length; j++) {
-        // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
+      for (let i = 0; i < module_data[key].length; i++) {
+        for (let j = 0; j < module_data[key][i].action.length; j++) {
+          // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
           if (module_data[key][i].action.length > 0) {
-            let action_key = module_data[key][i].action[j]
+            let action_key = module_data[key][i].action[j];
             for (let k = 0; k < actions_in_group[action_key].length; k++) {
               for (let l = 0; l < types.length; l++) {
                 selected_permissions.push(
@@ -225,11 +123,11 @@ class RoleController extends Controller {
               }
             }
           }
-        // });
+          // });
+        }
       }
-    }
-  });
-  // console.log("================selected_permissions", selected_permissions);
+    });
+    // console.log("================selected_permissions", selected_permissions);
     req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
@@ -285,21 +183,28 @@ class RoleController extends Controller {
           curr_parent_data = all_action.parent_module;
         }
         let actions = [];
+
+        // console.log("--------------role_permissions", role_permissions);
         if (role_permissions.length > 0) {
           role_permissions.find((val, index) => {
             if (val.slug.includes("-" + all_action.slug + "-list")) {
-              if (!actions.includes("view")) actions.push("view");
+              if (!actions.includes("view")) {
+                actions.push("view");
+              }
             }
             if (val.slug.includes("-" + all_action.slug + "-save")) {
-              if (!actions.includes("update")) actions.push("update");
+              if (!actions.includes("update")) {
+                actions.push("update");
+              }
             }
             if (val.slug.includes("-" + all_action.slug + "-delete")) {
-              if (!actions.includes("delete")) actions.push("delete");
+              if (!actions.includes("delete")) {
+                actions.push("delete");
+              }
             }
           });
         }
 
-        // console.log("==============actions====", actions);
         if (curr_parent_data == prev_parent_data) {
           result[prev_parent_data].push({
             id: all_action.id,
