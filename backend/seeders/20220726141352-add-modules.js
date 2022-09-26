@@ -147,7 +147,16 @@ const modules = [
   {
     slug: 'filemanager',
     name: 'File Manager',
-    parent_module: '',
+    parent_module: 'Administrations',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'supportticket',
+    name: 'Support Ticket',
+    parent_module: 'Administrations',
     created_by: 1,
     updated_by: null,
     deleted_by: null,

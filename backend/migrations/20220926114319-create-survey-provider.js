@@ -1,46 +1,28 @@
 "use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("pages", {
+    await queryInterface.createTable("survey_providers", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      company_portal_id: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-      },
-      html: {
-        type: Sequelize.TEXT,
-      },
-      status: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: "draft",
-        comment: "pending, draft, published, archived"
-      },
-      parmalink: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      is_homepage: {
-        type: Sequelize.TINYINT,
-        allowNull: false,
-        defaultValue: 0,
-      },
-      slug: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-
+      logo: {
+        type: Sequelize.STRING,
+      },
+      status: {
+        type: Sequelize.TINYINT,
+        allowNull: false,
+        defaultValue: 0,
+      },
       created_by: {
         type: Sequelize.BIGINT,
+        allowNull: false,
       },
       updated_by: {
         type: Sequelize.BIGINT,
@@ -61,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("pages");
+    await queryInterface.dropTable("survey_providers");
   },
 };

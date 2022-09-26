@@ -10,12 +10,15 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       slug: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       parent_module: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       created_by: {
         type: Sequelize.BIGINT,

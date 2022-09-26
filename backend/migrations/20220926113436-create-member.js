@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("pages", {
+    await queryInterface.createTable("members", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,33 +12,50 @@ module.exports = {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
-      html: {
-        type: Sequelize.TEXT,
+      company_id: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+      },
+      membership_tier_id: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+      },
+      first_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      last_name: {
+        type: Sequelize.STRING,
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       status: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: "draft",
-        comment: "pending, draft, published, archived"
+        defaultValue: "not_verified",
+        comment: "member, suspended, validating, deleted, not_verified",
       },
-      parmalink: {
+      phone_no: {
+        type: Sequelize.STRING,
+      },
+      country_code: {
+        type: Sequelize.STRING,
+      },
+      dob: {
+        type: Sequelize.DATE,
+      },
+      referer: {
+        type: Sequelize.STRING,
+      },
+      password: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      is_homepage: {
-        type: Sequelize.TINYINT,
-        allowNull: false,
-        defaultValue: 0,
+      last_active_on: {
+        type: Sequelize.DATE,
       },
-      slug: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-
       created_by: {
         type: Sequelize.BIGINT,
       },
@@ -61,6 +78,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("pages");
+    await queryInterface.dropTable("members");
   },
 };

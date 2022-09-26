@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class TicketConversation extends Model {
+  class SurveyProvider extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,28 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      TicketConversation.hasMany(models.TicketAttachment, {
-        foreignKey: 'ticket_conversation_id',
-      })
     }
   }
-  TicketConversation.init({
-    ticket_id: DataTypes.BIGINT,
-    member_id: DataTypes.BIGINT,
-    message: DataTypes.TEXT,
-    user_id: DataTypes.BIGINT,
+  SurveyProvider.init({
+    name: DataTypes.STRING,
+    logo: DataTypes.STRING,
+    status: DataTypes.STRING,
+    created_by: DataTypes.BIGINT,
+    updated_by: DataTypes.BIGINT,
+    deleted_by: DataTypes.BIGINT,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'TicketConversation',
+    modelName: 'SurveyProvider',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'ticket_conversations',
+    tableName: 'survey_providers',
   });
-  return TicketConversation;
+  return SurveyProvider;
 };

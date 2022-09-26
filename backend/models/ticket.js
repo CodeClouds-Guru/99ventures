@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Ticket extends Model {
     /**
@@ -11,25 +9,112 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Ticket.hasMany(models.TicketConversation, {
+        foreignKey: "ticket_id",
+      });
     }
   }
-  Ticket.init({
-    company_portal_id_id: DataTypes.BIGINT,
-    member_id: DataTypes.BIGINT,
-    subject: DataTypes.STRING,
-    status: DataTypes.TINYINT,
-    created_at: 'TIMESTAMP',
-    updated_at: 'TIMESTAMP',
-    deleted_at: 'TIMESTAMP'
-  }, {
-    sequelize,
-    modelName: 'Ticket',
-    timestamps: true,
-    paranoid: true,
-    createdAt: 'created_at', // alias createdAt as created_date
-    updatedAt: 'updated_at',
-    deletedAt: 'deleted_at',
-    tableName: 'tickets',
-  });
+  Ticket.init(
+    {
+      company_portal_id: DataTypes.BIGINT,
+      member_id: DataTypes.BIGINT,
+      subject: DataTypes.STRING,
+      status: DataTypes.TINYINT,
+      created_at: "TIMESTAMP",
+      updated_at: "TIMESTAMP",
+      deleted_at: "TIMESTAMP",
+    },
+    {
+      sequelize,
+      modelName: "Ticket",
+      timestamps: true,
+      paranoid: true,
+      createdAt: "created_at", // alias createdAt as created_date
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
+      tableName: "tickets",
+    }
+  );
+  Ticket.fields = {
+    id: {
+      field_name: "id",
+      db_name: "id",
+      type: "text",
+      placeholder: "Id",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    company_portal_id: {
+      field_name: "company_portal_id",
+      db_name: "company_portal_id",
+      type: "text",
+      placeholder: "company_portal_id",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    member_id: {
+      field_name: "member_id",
+      db_name: "member_id",
+      type: "text",
+      placeholder: "Member ID",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    subject: {
+      field_name: "subject",
+      db_name: "subject",
+      type: "text",
+      placeholder: "Subject",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    status: {
+      field_name: "status",
+      db_name: "status",
+      type: "text",
+      placeholder: "Status",
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    created_at: {
+      field_name: "created_at",
+      db_name: "created_at",
+      type: "text",
+      placeholder: "Created at",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+  };
+  sequelizePaginate.paginate(Ticket);
   return Ticket;
 };

@@ -28,14 +28,14 @@ module.exports = {
         type: Sequelize.STRING,
       },
       created_at: {
-        type: Sequelize.DATE,
+        type: 'TIMESTAMP',
         allowNull: false,
       },
       updated_at: {
-        type: Sequelize.DATE,
+        type: 'TIMESTAMP'
       },
       deleted_at: {
-        type: Sequelize.DATE,
+        type: 'TIMESTAMP'
       },
       created_by: {
         type: Sequelize.BIGINT,

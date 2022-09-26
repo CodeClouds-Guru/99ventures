@@ -27,7 +27,7 @@ npx sequelize-cli model:generate --name ModelName --attributes col1:datatype,col
 ```
 ## Run migrations and rollbacks
 ```bash
-npx sequelize db:migrate
+npx sequelize db:migrate 
 npx sequelize db:migrate:all
 npx sequelize db:migrate:undo
 npx sequelize db:migrate:undo:all

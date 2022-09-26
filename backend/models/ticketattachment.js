@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   TicketAttachment.init({
     ticket_conversation_id: DataTypes.BIGINT,
-    attachment: DataTypes.TEXT,
+    file_name: DataTypes.STRING,
     mime_type: DataTypes.STRING,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',

@@ -1,23 +1,33 @@
 "use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("ticket_attachments", {
+    await queryInterface.createTable("member_notes", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      ticket_conversation_id: {
+      user_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
-      file_name: {
-        type: Sequelize.STRING,
+      member_id: {
+        type: Sequelize.BIGINT,
         allowNull: false,
       },
-      mime_type: {
-        type: Sequelize.STRING,
+      previous_status: {
+        type: Sequelize.TINYINT,
+        comment: "1=open,2=pending,0=closed"
+      },
+      current_status: {
+        type: Sequelize.TINYINT,
+        allowNull: false,
+        defaultValue: 1,
+        comment: "1=open,2=pending,0=closed"
+      },
+      note: {
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       created_at: {
@@ -33,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("ticket_attachments");
+    await queryInterface.dropTable("member_notes");
   },
 };
