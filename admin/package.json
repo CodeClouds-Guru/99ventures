@@ -45,6 +45,7 @@
     "react-autosuggest": "10.1.0",
     "react-dom": "18.1.0",
     "react-draft-wysiwyg": "^1.14.7",
+    "react-dropzone": "^14.2.2",
     "react-hook-form": "7.31.1",
     "react-i18next": "11.16.9",
     "react-input-mask": "^2.0.4",
