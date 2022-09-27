@@ -66,7 +66,6 @@ class FileHelper {
   //get file path
   async getPath(model) {
     const { Company } = require('../models/index')
-    console.log('cccc',Company)
     this.company = await Company.findOne({
       attributes: ['name'],
       where: { id: this.company_id },
@@ -96,6 +95,35 @@ class FileHelper {
       Bucket: process.env.S3_BUCKET_NAME
     });
     return true
+  }
+  //get folder list
+  async getList(){
+    this.company = await getCompanyDetails(this.company_id)
+    let s3 = this.s3Connect()
+    var params = { 
+      Bucket: process.env.S3_BUCKET_NAME,
+      // MaxKeys: 2,
+      // Delimiter: '/',
+      Prefix: this.company.name
+     }
+     
+     s3.listObjects(params, function(err, data) {
+      console.log('filename',data)
+      if (err) 
+        return {status:0,data:{}}
+      else
+        return {status:0,data:data}
+     })
+  }
+  //get company details
+  async getCompanyDetails(company_id){
+    //company details
+    const { Company } = require('../models/index')
+    let company = await Company.findOne({
+      attributes: ['name'],
+      where: { id: company_id },
+    })
+    return company
   }
 }
 
