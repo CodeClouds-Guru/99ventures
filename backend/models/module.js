@@ -17,7 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       slug: DataTypes.STRING,
-      parent_module: DataTypes.STRING,
+      parent_module: {
+        type: DataTypes.STRING,
+        get() {
+          return this.getDataValue("parent_module") || 'uncategorized';
+        }
+      },
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
