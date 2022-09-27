@@ -136,12 +136,12 @@ function GeneralConfiguration(props) {
                                     <IconButton key={ Math.random() } edge="end" aria-label="delete" onClick={()=> removeListItem(indx)}>
                                         <DeleteIcon />
                                     </IconButton>
-                                    <ListItemIcon className="drag-handle">
-                                        <DragHandleIcon />
-                                    </ListItemIcon>
                                 </>
                             }
                         >
+                            <ListItemIcon className="drag-handle mt-4">
+                                        <DragHandleIcon />
+                                    </ListItemIcon>
                             <ListItemText key={ Math.random() } 
                                 primary={reply.name}
                                 secondary={ 

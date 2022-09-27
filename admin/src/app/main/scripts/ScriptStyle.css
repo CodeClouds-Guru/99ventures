@@ -28,3 +28,7 @@ select.gjs-field option{background-color: #111827;}
     .gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 0.8rem !important;}
     
 }
+
+.gjs-rte-action:last-child{width: auto;}
+select.gjs-field option{background-color: #111827;}
+.gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 1rem !important;}
