@@ -18,7 +18,6 @@ module.exports = {
       },
       parent_module: {
         type: Sequelize.STRING,
-        allowNull: false,
       },
       created_by: {
         type: Sequelize.BIGINT,

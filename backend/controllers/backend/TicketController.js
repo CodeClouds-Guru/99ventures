@@ -3,7 +3,7 @@ const { Ticket, sequelize } = require("../../models/index");
 
 const { Op } = require("sequelize");
 
-class SupportTicketController extends Controller {
+class TicketController extends Controller {
   constructor() {
     super("Ticket");
   }
@@ -33,4 +33,4 @@ class SupportTicketController extends Controller {
   async view(req, res) {}
 }
 
-module.exports = SupportTicketController;
+module.exports = TicketController;
