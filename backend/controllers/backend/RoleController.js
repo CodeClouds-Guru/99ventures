@@ -10,60 +10,13 @@ const queryInterface = sequelize.getQueryInterface();
 class RoleController extends Controller {
   constructor() {
     super("Role");
+    this.edit = this.edit.bind(this);
+    this.update = this.update.bind(this);
   }
   //override the edit function
   async edit(req, res) {
     try {
       let response = await super.edit(req);
-      //actions
-      let all_actions = await Action.findAll({
-        attributes: ["id", "name", "slug"],
-      });
-      all_actions = all_actions.map((all_action) => {
-        return {
-          id: all_action.id,
-          slug: all_action.slug,
-          name: all_action.name,
-          minWidth: 170,
-          align: "left",
-        };
-      });
-      //modules
-      let all_modules = await Module.findAll({
-        attributes: ["id", "name", "slug", "parent_module"],
-        order: ["parent_module"],
-      });
-      let modules = {};
-      let prev_parent_module = "";
-      const all_actions_in_group = {
-        view: ["list", "view", "export"],
-        update: ["add", "save", "edit", "update", "import"],
-        delete: ["delete", "destroy"],
-      };
-      
-      const action_keys = Object.keys(all_actions_in_group);
-      console.log(all_modules);
-
-      all_modules.map((all_module) => {
-        if (all_module.parent_module == prev_parent_module) {
-          modules[prev_parent_module].push({
-            id: all_module.id,
-            slug: all_module.slug,
-            name: all_module.name,
-            action: action_keys,
-          });
-        } else {
-          prev_parent_module = all_module.parent_module;
-          modules[prev_parent_module] = [
-            {
-              id: all_module.id,
-              slug: all_module.slug,
-              name: all_module.name,
-              action: action_keys,
-            },
-          ];
-        }
-      });
 
       //role permissions
       let role_permissions = await response.result.getPermissions({
@@ -76,8 +29,50 @@ class RoleController extends Controller {
           name: role_permission.name,
         };
       });
+
+      //actions
+      let all_actions = await Action.findAll({
+        attributes: ["id", "name", "slug", "parent_action"],
+        order: ["parent_action"],
+      });
+
+      //get formatted action data
+      let actions_in_group = await this.getFormattedChildParentData(
+        all_actions,
+        [],
+        "parent_action",
+        []
+      );
+
+      let actions = all_actions.map((all_action) => {
+        return {
+          id: all_action.id,
+          slug: all_action.slug,
+          name: all_action.name,
+          minWidth: 170,
+          align: "left",
+        };
+      });
+
+      //modules
+      let all_modules = await Module.findAll({
+        attributes: ["id", "name", "slug", "parent_module"],
+        order: ["name"],
+      });
+
+      const action_keys = Object.keys(actions_in_group);
+
+      //get formatted module data
+      let modules = await this.getFormattedChildParentData(
+        all_modules,
+        action_keys,
+        "parent_module",
+        role_permissions
+      );
+      // console.log("======================modules", modules);
+
       return {
-        actions: all_actions,
+        actions: actions,
         modules: all_modules,
         role_permissions: role_permissions,
         result: response.result,
@@ -91,6 +86,50 @@ class RoleController extends Controller {
   //override role update function
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
+    let module_data = req.body.role_permissions || [];
+    
+    const types = ["all", "group", "owner"];
+
+    let all_actions = await Action.findAll({
+      attributes: ["id", "name", "slug", "parent_action"],
+      order: ["parent_action"],
+    });
+
+    //get formatted action data
+    let actions_in_group = await this.getFormattedChildParentData(
+      all_actions,
+      [],
+      "parent_action",
+      []
+    );
+    // console.log("================module_data[i]", module_data);
+    let keys = Object.keys(module_data);
+    let selected_permissions = [];
+    keys.map((key) => {
+    for (let i = 0; i < module_data[key].length; i++) {
+     
+      for (let j = 0; j < module_data[key][i].action.length; j++) {
+        // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
+          if (module_data[key][i].action.length > 0) {
+            let action_key = module_data[key][i].action[j]
+            for (let k = 0; k < actions_in_group[action_key].length; k++) {
+              for (let l = 0; l < types.length; l++) {
+                selected_permissions.push(
+                  types[l] +
+                    "-" +
+                    module_data[key][i].slug +
+                    "-" +
+                    actions_in_group[action_key][k].slug
+                );
+              }
+            }
+          }
+        // });
+      }
+    }
+  });
+  // console.log("================selected_permissions", selected_permissions);
+    req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
         let update_role_permission = await this.updateRolePermission(req);
@@ -126,6 +165,66 @@ class RoleController extends Controller {
       await queryInterface.bulkInsert("permission_role", permissions);
     }
     return true;
+  }
+
+  async getFormattedChildParentData(
+    all_data,
+    data_in_group = [],
+    field_name = "parent_action",
+    role_permissions
+  ) {
+    let result = {};
+    let prev_parent_data = "";
+    // console.log("==============all_data====", all_data);
+    if (all_data.length > 0) {
+      all_data.map((all_action) => {
+        let curr_parent_data = "";
+        if (field_name === "parent_action") {
+          curr_parent_data = all_action.parent_action;
+        } else {
+          curr_parent_data = all_action.parent_module;
+        }
+        let actions = [];
+        if (role_permissions.length > 0) {
+          role_permissions.find((val, index) => {
+            if (val.slug.includes("-" + all_action.slug + "-list")) {
+              if (!actions.includes("view")) actions.push("view");
+            }
+            if (val.slug.includes("-" + all_action.slug + "-save")) {
+              if (!actions.includes("update")) actions.push("update");
+            }
+            if (val.slug.includes("-" + all_action.slug + "-delete")) {
+              if (!actions.includes("delete")) actions.push("delete");
+            }
+          });
+        }
+
+        let keys = Object.keys(result);
+        
+        if (keys.length > 0 && keys.includes(curr_parent_data)) {
+          result[curr_parent_data].push({
+            id: all_action.id,
+            slug: all_action.slug,
+            name: all_action.name,
+            ...(field_name === "parent_module" && { action: actions }),
+          });
+        } else {
+          prev_parent_data = curr_parent_data;
+          result[curr_parent_data] = [
+            {
+              id: all_action.id,
+              slug: all_action.slug,
+              name: all_action.name,
+              ...(field_name === "parent_module" && {
+                action: actions,
+              }),
+            },
+          ];
+        }
+        
+      });
+    }
+    return result;
   }
 }
 

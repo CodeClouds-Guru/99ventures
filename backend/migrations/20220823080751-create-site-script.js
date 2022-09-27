@@ -29,7 +29,7 @@ module.exports = {
         allowNull: false,
       },
       status: {
-        type: Sequelize.STRING,
+        type: Sequelize.TINYINT,
         allowNull: false,
       },
       created_by: {

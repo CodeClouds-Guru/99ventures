@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   IspConfiguration.init({
     company_portal_id: DataTypes.BIGINT,
     isp: DataTypes.STRING,
-    status: DataTypes.STRING,
+    status: DataTypes.TINYINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

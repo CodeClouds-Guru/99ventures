@@ -119,9 +119,10 @@ class IpConfigurationController extends Controller {
       // console.log(req.body)
       const site_id = req.header('site_id') || 1
       const company_id = req.header('company_id') || 1
-      const shutdown_checked = req.body.shutdown_checked || false
+      const shutdown_checked =
+        'shutdown_checked' in req.body ? req.body.shutdown_checked : ''
       const updated_downtime_text = req.body.updated_downtime_text || ''
-      const new_ip_list = req.body.new_ip_list || []
+      const new_ip_list = req.body.new_ip_list || null
       let flag = false
 
       let comPorData = []
@@ -129,7 +130,7 @@ class IpConfigurationController extends Controller {
         comPorData.downtime_message = updated_downtime_text
       }
       if (shutdown_checked !== '') {
-        comPorData.status = shutdown_checked == true ? 2 : 1;
+        comPorData.status = shutdown_checked ? 2 : 1
       }
       if (comPorData) {
         const company_portal_update = await CompanyPortal.update(comPorData, {
@@ -140,10 +141,10 @@ class IpConfigurationController extends Controller {
         }
       }
 
-      if (new_ip_list.length > 0) {
+      if (new_ip_list) {
         //remove previous ip records
         await IpConfiguration.destroy({
-          where: { company_portal_id: site_id, status: '0' },
+          where: { company_portal_id: site_id, status: 1 },
         })
 
         // console.log(req.body.new_ip_list)

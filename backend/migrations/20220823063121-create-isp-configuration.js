@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('isp_configurations', {
+    await queryInterface.createTable("isp_configurations", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       company_portal_id: {
         type: Sequelize.BIGINT,
@@ -17,31 +17,32 @@ module.exports = {
         allowNull: false,
       },
       status: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        type: Sequelize.TINYINT,
+        defaultValue: 1,
+        comment: "0=Blacklisted, 1=Whitelisted"
       },
       created_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       updated_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       created_at: {
-        type: 'TIMESTAMP',
+        type: "TIMESTAMP",
         allowNull: false,
       },
       updated_at: {
-        type: 'TIMESTAMP'
+        type: "TIMESTAMP",
       },
       deleted_at: {
-        type: 'TIMESTAMP'
-      }
+        type: "TIMESTAMP",
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('isp_configurations');
-  }
+    await queryInterface.dropTable("isp_configurations");
+  },
 };

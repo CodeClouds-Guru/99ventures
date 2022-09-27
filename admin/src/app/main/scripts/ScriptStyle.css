@@ -11,4 +11,24 @@
 .gjs-four-color-h:hover {
   color: #fff;
 }
-  
+
+.custom-code-editor .gjs-cm-editor-c:first-of-type{width: 53%;} 
+.custom-code-editor .gjs-cm-editor-c:nth-child(2){width: 45%; margin-left: 10px;} 
+.custom-code-editor .gjs-btn-prim{margin-top: 10px}
+.custom-code-editor .gjs-cm-editor#gjs-cm-css {
+    padding-left: 0;
+}
+.gjs-rte-action:last-child{width: auto;}
+select.gjs-field option{background-color: #111827;}
+.gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 0.9rem !important;}
+@media only screen and (max-width: 760px) {
+    .gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 0.7rem !important;}
+}
+@media only screen and (max-width: 1024px) {
+    .gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 0.8rem !important;}
+    
+}
+
+.gjs-rte-action:last-child{width: auto;}
+select.gjs-field option{background-color: #111827;}
+.gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 1rem !important;}

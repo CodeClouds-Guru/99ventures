@@ -118,7 +118,7 @@ function CreateEdit(props) {
             {errors && <Alert severity="error">{errors}</Alert>}
             <CreateEditForm moduleOnSave={moduleOnSaveHandler} />
           </div>
-          {(module === 'roles' && moduleId !== 'create') ? <PermissionGrid roleId={moduleId} /> : ''}
+          {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
         </>
       }
       scroll={isMobile ? 'normal' : 'content'}

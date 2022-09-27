@@ -33,11 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       script_html: DataTypes.TEXT('long'),
       status: {
-        type: DataTypes.STRING,
-        get() {
-          
-          return parseInt(this.getDataValue("status"));
-        },
+        type: DataTypes.TINYINT,
+        // get() {
+        //   return parseInt(this.getDataValue("status"));
+        // },
       },
       script_json: DataTypes.JSON,
       created_by: DataTypes.BIGINT,
@@ -96,7 +95,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     name: {
       field_name: "name",
@@ -122,7 +121,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     script_json: {
       field_name: "script_json",
@@ -134,7 +133,7 @@ module.exports = (sequelize, DataTypes) => {
       sort: true,
       required: true,
       value: "",
-      searchable: true,
+      searchable: false,
     },
     status: {
       field_name: "status",

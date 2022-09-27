@@ -1,28 +1,30 @@
 import { useRef, useState, useEffect } from 'react';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, Checkbox, FormControl, FormControlLabel, TextField, Paper, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button, FormControl, TextField, Paper, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
 import _ from '@lodash';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import CreateUpdateFormHeader from './CreateUpdateFormHeader';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
+import '../EmailTemplate.css'
+
 
 const CreateUpdateForm = ({ input, meta }) => {
     const module = 'email-templates';
     const inputElement = useRef('subject');
+    const dropDownBtnRef = useRef();
+    const dropDownListRef = useRef();
     // const textAreaElement = useRef('template');
-    const [currentFocusedElement, setCurrentFocusedElement] = useState('');
+    // const [currentFocusedElement, setCurrentFocusedElement] = useState('');
     const moduleId = useParams().id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -31,6 +33,7 @@ const CreateUpdateForm = ({ input, meta }) => {
     const [editor, setEditor] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [changeCount, setChangeCount] = useState(0);
+    const [showDropdown, setShowDropdown] = useState(false)
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-email-${moduleId}` : `gjs-email-new`;
     const [allData, setAllData] = useState({
         subject: '',
@@ -100,6 +103,90 @@ const CreateUpdateForm = ({ input, meta }) => {
         });
         setEditor(editor);
 
+        const pfx = editor.getConfig().stylePrefix
+        const modal = editor.Modal
+        const cmdm = editor.Commands
+        const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
+        const pnm = editor.Panels
+        const rootContainer = document.createElement('div')
+        const btnEdit = document.createElement('button')
+        const codeViewerOpt = {
+            readOnly: 0,
+            theme: 'hopscotch',
+            autoBeautify: true,
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            lineWrapping: true,
+            styleActiveLine: true,
+            smartIndent: true,
+            indentWithTabs: true
+        }       
+
+        htmlCodeViewer.set({
+            codeName: 'htmlmixed',
+            ...codeViewerOpt
+        })
+
+        cssCodeViewer.set({
+            codeName: 'css',
+            ...codeViewerOpt
+        })
+
+        btnEdit.innerHTML = 'Save'
+        btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
+        btnEdit.onclick = function () {
+            const html = htmlCodeViewer.editor.getValue()
+            const css = cssCodeViewer.editor.getValue()
+            editor.DomComponents.getWrapper().set('content', '')
+            // editor.CssComposer.clear();            
+            // const HTML_CSS = html.trim() + `<style>${css}</style>`
+            editor.setComponents(html.trim());
+            editor.setStyle(css)
+            modal.close()
+        }
+        
+        cmdm.add('edit-code', {
+            run: function (editor, sender) {
+                sender && sender.set('active', 0)
+                var htmlViewer = htmlCodeViewer.editor
+                var cssViewer = cssCodeViewer.editor
+                modal.setTitle('Edit code')
+                var InnerHtml = editor.getHtml()                
+                var Css = editor.getCss();
+                if (!htmlViewer && !cssViewer) {
+                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
+                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+                    rootContainer.append(btnEdit)
+                    htmlCodeViewer.init(txtarea)
+                    cssCodeViewer.init(cssarea)
+                    htmlViewer = htmlCodeViewer.editor
+                    cssViewer = cssCodeViewer.editor              
+                }
+                modal.setContent('')
+                modal.setContent(rootContainer)                
+                htmlCodeViewer.setContent(InnerHtml)                
+                cssCodeViewer.setContent(Css)
+                modal.open({attributes: { class: 'custom-code-editor' }})
+                htmlViewer.refresh()
+                cssViewer.refresh()
+            }
+        })
+
+        // Removed default read-only code editor btn from toolbar
+        pnm.removeButton("options", 'export-template');
+        
+        pnm.addButton('options',[
+            {
+                id: 'edit',
+                className: 'fa fa-code',
+                command: 'edit-code',
+                attributes: {
+                    title: 'Edit Code'
+                }
+            }
+        ]);
+
         editor.onReady(() => {
             loadEditorData(editor);
         });
@@ -110,8 +197,66 @@ const CreateUpdateForm = ({ input, meta }) => {
             }
         });
 
-        // if (moduleId !== 'create') { getSingleEmailTemplate(moduleId) }
-    }, []);
+        // Bind the event listener
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            // Unbind the event listener on clean up
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []); 
+
+
+    /**
+     * Disabled variable dropdown by clicking outside
+     */
+    const handleClickOutside = (e) => {
+        if(
+            inputElement.current.contains(e.target) || 
+            dropDownBtnRef.current.contains(e.target) || 
+            dropDownListRef.current.contains(e.target)
+        ) {
+            return;
+        }
+        setShowDropdown(false);
+    }
+
+    /**
+     * Set select option in Rich Text Editor
+     */
+    useEffect(()=>{
+        if(variableOptions.length) {           
+            let selectHTML = `<select class="gjs-field"><option value="">- Select -</option>`
+            variableOptions.map(op => {
+                selectHTML += `<option value="${op.code}">${op.name}</option>`
+            })
+            selectHTML += `</select>`;
+            editor.RichTextEditor.add('custom-vars', {
+                icon: selectHTML,                    
+                event: 'change',    // Bind the 'result' on 'change' listener
+                result: (rte, action) => rte.insertHTML(action.btn.firstChild.value),
+                // Reset the select on change
+                update: (rte, action) => { action.btn.firstChild.value = "";}
+            })
+        }
+    }, [variableOptions])
+
+    const editorTextAreaCreate = (rootContainer, title) => {
+        const container = document.createElement('div')
+        const childContainer = document.createElement('div')
+        const titleContainer = document.createElement('div')
+        const txtarea = document.createElement('textarea')
+        
+        container.setAttribute('class', 'gjs-cm-editor-c')
+        childContainer.setAttribute('id', 'gjs-cm-css')
+        childContainer.setAttribute('class', 'gjs-cm-editor')
+        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.textContent = title
+        childContainer.appendChild(titleContainer)
+        childContainer.appendChild(txtarea)
+        container.appendChild(childContainer)
+        rootContainer.appendChild(container)
+        return txtarea
+    }
 
     const loadEditorData = async(editor) => {        
         if (moduleId !== 'create' && !isNaN(moduleId)) { 
@@ -132,12 +277,15 @@ const CreateUpdateForm = ({ input, meta }) => {
         let generatedHTML = '';
 
         if(editor.getHtml()) {
+            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
             generatedHTML += 
-            `<html>`;
-                if(editor.getCss()){
-                    generatedHTML += `<head><style>${editor.getCss()}</style></head>`;
-                }
-                generatedHTML += `${editor.getHtml()}
+            `<html>
+                <head>
+                    <title>${allData.name}</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    ${css}
+                </head>
+                ${editor.getHtml()}            
             </html>`;
         }
         return generatedHTML;
@@ -162,15 +310,6 @@ const CreateUpdateForm = ({ input, meta }) => {
         dynamicErrorMsg('subject', event.target.value, 'Please insert subject');
     }
 
-    /*const onChangeInEditor = (input) => {
-        if (input) {
-            setAllData(allData => ({
-                ...allData, insertedHtml: input
-            }));
-        }
-        dynamicErrorMsg('insertedHtml', input);
-    }*/
-
     const handleChangeAction = (event) => {
         setAllData(allData => ({
             ...allData, action: event.target.value
@@ -178,16 +317,17 @@ const CreateUpdateForm = ({ input, meta }) => {
         dynamicErrorMsg('action', event.target.value, 'Please select action');
 
     }
-
-    const handleChangeVariable = (event) => {
+    
+    const handleChangeVariable = (value) => {
         setAllData(allData => ({
-            ...allData, variable: event.target.value
+            ...allData, variable: value
         }))
-        if (currentFocusedElement === 'template') {
-            setAllData({ ...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}` })
-        } else if (currentFocusedElement === 'subject') {
-            setAllData({ ...allData, subject: `${allData.subject} ${event.target.value}` })
-        }
+        // if (currentFocusedElement === 'template') {
+        //   }  setAllData({ ...allData, insertedHtml: `${allData.insertedHtml} ${event.target.value}` })
+        //if (currentFocusedElement === 'subject') {
+            setAllData({ ...allData, subject: `${allData.subject} ${value}` })
+        //}
+        setShowDropdown(!showDropdown)
     }
 
     const getFieldData = () => {
@@ -309,7 +449,7 @@ const CreateUpdateForm = ({ input, meta }) => {
         <>
             <CreateEditHeader module={module} moduleId={moduleId} />
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-40 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0">
                         <FormControl className="w-1/2 mb-24 pr-10">
                             <InputLabel id="demo-simple-select-label">Action*</InputLabel>
@@ -328,44 +468,44 @@ const CreateUpdateForm = ({ input, meta }) => {
                             <FormHelperText error variant="standard">{errors.action}</FormHelperText>
                         </FormControl>
 
-                        <FormControl className="w-1/2 mb-24">
-                            <InputLabel id="demo-simple-select-label">Variable</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={allData.variable}
-                                label="Variable"
-                                onChange={handleChangeVariable}
-                            >
-                                <MenuItem value="">Select a variable</MenuItem>
-                                {variableOptions.map((value) => {
-                                    return <MenuItem key={value.id} value={value.code}>{value.name}</MenuItem>
-                                })}
-                            </Select>
-                        </FormControl>
-                        <FormControl className="w-full mb-24">
+                        <FormControl className="w-full mb-24 input--group">
                             <TextField
                                 label="Subject"
                                 type="text"
                                 error={!!errors.subject}
-                                helperText={errors?.subject?.message}
+                                helperText={errors?.subject?.message}  
                                 variant="outlined"
                                 required
                                 fullWidth
                                 value={allData.subject}
                                 onChange={onSubjectChange}
                                 ref={inputElement}
-                                onFocus={() => setCurrentFocusedElement('subject')}
+                                onFocus={() => setShowDropdown(false)}
                             />
+                            <div className="input-group-append">
+                                <button ref={ dropDownBtnRef } className="btn btn-outline-primary dropdown-toggle MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root whitespace-nowrap muiltr-13n15ve-MuiButtonBase-root-MuiButton-root" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={()=> setShowDropdown(!showDropdown)}>Select Variable <KeyboardArrowDownIcon className="ml-5" /></button>
+                                <div ref={ dropDownListRef } className="dropdown-menu" style={{ display: showDropdown ? 'block' : 'none' }}>
+                                    {
+                                        variableOptions.map(value => {
+                                            return <a 
+                                                key={value.id} 
+                                                className="dropdown-item" 
+                                                href="#"
+                                                onClick={ 
+                                                    (e)=> {
+                                                        e.preventDefault();
+                                                        handleChangeVariable(value.code)
+                                                    }
+                                                }
+                                            >{value.name}</a>
+                                        })
+                                    }
+                                </div>
+                            </div>
                             <FormHelperText error variant="standard">{errors.subject}</FormHelperText>
                         </FormControl>
 
-                        <FormControl className="w-full mb-24">
-                            {/* <WYSIWYGEditor
-                                ref={textAreaElement}
-                                onChange={onChangeInEditor}
-                                onFocus={() => setCurrentFocusedElement('template')}
-                            /> */}
+                        <FormControl className="w-full mb-24">                           
                             <div id="gjs" />
                             <FormHelperText error variant="standard">{errors.insertedHtml}</FormHelperText>
                         </FormControl>

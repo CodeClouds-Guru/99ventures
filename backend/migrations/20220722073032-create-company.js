@@ -18,11 +18,9 @@ module.exports = {
       },
       slug: {
         type: Sequelize.STRING,
-        allowNull:true,
       },
       logo: {
         type: Sequelize.STRING,
-        allowNull:true,
       },
       status: {
         type: Sequelize.TINYINT,

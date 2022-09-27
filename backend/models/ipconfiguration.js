@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   IpConfiguration.init({
     company_portal_id: DataTypes.BIGINT,
     ip: DataTypes.STRING,
-    status: DataTypes.STRING,
+    status: DataTypes.TINYINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

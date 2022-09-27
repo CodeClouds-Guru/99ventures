@@ -144,6 +144,15 @@ const modules = [
     deleted_by: null,
     created_at: new Date(),
   },
+  {
+    slug: 'filemanager',
+    name: 'File Manager',
+    parent_module: '',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  }
 ]
 module.exports = {
   async up(queryInterface, Sequelize) {
