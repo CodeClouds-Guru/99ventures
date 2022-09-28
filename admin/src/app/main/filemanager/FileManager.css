@@ -1,0 +1,4 @@
+.listBox{border: 1px solid #eee; position: absolute; right: 0; top: 94%; z-index: 999;}
+.item-list-icon{position: absolute; right: 0; top: 73%;}
+.filter-list-box{z-index: 999; position: absolute; top: 100%; right: 120px;}
+.view--type .active{background-color: rgba(30, 41, 59, 0.08);}
