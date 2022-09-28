@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Ticket.belongsTo(models.Member, {
         foreignKey: "member_id",
-        as: 'username'
+        as: "username",
       });
       Ticket.hasMany(models.TicketConversation, {
         foreignKey: "ticket_id",
@@ -138,7 +138,13 @@ module.exports = (sequelize, DataTypes) => {
   };
   sequelizePaginate.paginate(Ticket);
 
-  function testFunction() {}
+  Ticket.getTicketCount = async (read, company_portal_id) => {
+    let result = await Ticket.findAndCountAll({
+      where: { is_read: read, company_portal_id: company_portal_id },
+    });
+    console.log("result.count", result.count);
+    return result.count;
+  };
 
   return Ticket;
 };

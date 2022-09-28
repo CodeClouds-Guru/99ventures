@@ -77,11 +77,17 @@ class TicketController {
           result.rows[i].username.first_name
       );
     }
-
-    return res.status(200).json({
-      result: { data: result.rows, pages, total: result.count },
+    var unread_ticket_count = await Ticket.getTicketCount(0, company_portal_id);
+    // console.log("unread_ticket_count", unread_ticket_count);
+    return {
+      result: {
+        data: result.rows,
+        pages,
+        total: result.count,
+        unread: unread_ticket_count,
+      },
       fields: Ticket.fields,
-    });
+    };
   }
 
   async view(req, res) {}
