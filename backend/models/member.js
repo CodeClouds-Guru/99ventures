@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     membership_tier_id: DataTypes.BIGINT,
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
+    username: DataTypes.STRING,
     email: DataTypes.STRING,
     status: DataTypes.STRING,
     phone_no: DataTypes.STRING,

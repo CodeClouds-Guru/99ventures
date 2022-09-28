@@ -29,7 +29,7 @@ class PaymentConfigurationController extends Controller {
           },
         },
       });
-      console.log('==================',typeof mask_auth, mask_auth)
+      // console.log('==================',typeof mask_auth, mask_auth)
       if (mask_auth === true || mask_auth === "true") {
         return res.status(200).json({
           status: true,
