@@ -145,14 +145,16 @@ module.exports = (sequelize, DataTypes) => {
     return result.count;
   };
 
-  Ticket.changeIsReadStatus = async (status, ticket_id) => {
-    let result = await Ticket.update(
-      { is_read: status },
-      {
-        where: { id: ticket_id },
-      }
-    );
-    return result.count;
+  Ticket.changeIsReadStatus = async (field_name, val, ticket_id) => {
+    let update_data = {
+      [field_name]: val,
+    };
+    console.log(update_data);
+    let result = await Ticket.update(update_data, {
+      where: { id: ticket_id },
+      return:true
+    });
+    return result[0];
   };
 
   return Ticket;

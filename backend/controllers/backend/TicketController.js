@@ -12,8 +12,7 @@ const moment = require("moment");
 
 class TicketController {
   constructor() {
-    this.isRead = this.isRead.bind(this);
-
+    this.changeStatus = this.changeStatus.bind(this);
   }
 
   async list(req, res) {
@@ -93,22 +92,23 @@ class TicketController {
 
   async view(req, res) {}
 
-  async isRead(req, res) {
-    let status = req.query.status || null;
+  async changeStatus(req, res) {
+    let value = req.query.value || null;
+    let field_name = req.query.field_name || null;
     let ticket_id = req.query.id || null;
-    console.log(status,ticket_id,'--------------')
+    console.log(value, field_name, ticket_id, "--------------");
     try {
-      if (status !== null && ticket_id !== null) {
-        var is_read = await Ticket.changeIsReadStatus(status, ticket_id);
-        res
-          .status(200)
-          .json(
-            { 
-            status: false, message: "Data updated successfully" 
-          });
-      } else {
-        res.status(401).json({ status: false, errors: "Data not updated" });
-      }
+      let update = await Ticket.changeIsReadStatus(
+        field_name,
+        value,
+        ticket_id
+      );
+      console.log(update);
+      if (update > 0)
+        res.status(200).json({
+          status: true,
+          message: "Data updated successfully",
+        });
     } catch (error) {
       throw error;
     }
