@@ -4,6 +4,10 @@ const AuthMiddleware = require("../middlewares/authMiddleware");
 const checkPermissionMiddleware = require("../middlewares/CheckPermissionMiddleware");
 const AuthControllerClass = require("../controllers/backend/AuthController");
 const AuthController = new AuthControllerClass();
+
+const TicketControllerClass = require("../controllers/backend/TicketController");
+const TicketController = new TicketControllerClass();
+
 const InvitationControllerClass = require("../controllers/backend/InvitationController");
 const InvitationController = new InvitationControllerClass();
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
@@ -30,6 +34,9 @@ router.post("/invitation-details", InvitationController.invitationDetails);
 
 //check password
 router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
+
+//change ticket read status
+router.get("/tickets/is-read", [AuthMiddleware], TicketController.isRead);
 
 router.all(
   "/:module/:action?/:id?",
