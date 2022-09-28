@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Ticket.belongsTo(models.Member, {
+        foreignKey: "member_id",
+      });
       Ticket.hasMany(models.TicketConversation, {
         foreignKey: "ticket_id",
       });
@@ -22,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       subject: DataTypes.STRING,
       status: DataTypes.TINYINT,
+      is_read: DataTypes.TINYINT,
       created_at: "TIMESTAMP",
       updated_at: "TIMESTAMP",
       deleted_at: "TIMESTAMP",
