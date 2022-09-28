@@ -5,7 +5,7 @@ const {
   PaymentMethod,
 } = require("../../models/index");
 const bcrypt = require("bcryptjs");
-class PaymentMethodController extends Controller {
+class PaymentConfigurationController extends Controller {
   constructor() {
     super("PaymentMethod");
     this.list = this.list.bind(this);
@@ -101,6 +101,6 @@ class PaymentMethodController extends Controller {
   }
 }
 
-module.exports = PaymentMethodController;
+module.exports = PaymentConfigurationController;
 
 // update payment_method_credentials set deleted_at = NULL where id > 0

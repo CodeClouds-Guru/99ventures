@@ -15,13 +15,13 @@ const {
 const db = require('../../models/index')
 const { QueryTypes, Op } = require('sequelize')
 
-class GeneralController {
+class GeneralConfigurationController {
   constructor() {
-    this.getGeneralTabData = this.getGeneralTabData.bind(this)
-    this.saveGeneralTabData = this.saveGeneralTabData.bind(this)
+    this.list = this.list.bind(this)
+    this.save = this.save.bind(this)
   }
 
-  async getGeneralTabData(req, res) {
+  async list(req, res) {
     const site_id = req.header('site_id') || 1
 
     let home_page_id = 0
@@ -87,7 +87,7 @@ class GeneralController {
     }
   }
 
-  async saveGeneralTabData(req, res) {
+  async save(req, res) {
     const site_id = req.header('site_id') || 1
     const company_id = req.header('company_id') || 1
 
@@ -208,4 +208,4 @@ class GeneralController {
   }
 }
 
-module.exports = GeneralController
+module.exports = GeneralConfigurationController

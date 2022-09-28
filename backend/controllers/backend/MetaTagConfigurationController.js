@@ -1,7 +1,7 @@
 const Controller = require("./Controller");
 const { CompanyPortalMetaTag } = require("../../models/index");
 
-class MetaTagController extends Controller {
+class MetaTagConfigurationController extends Controller {
   constructor() {
     super("CompanyPortalMetaTag");
     this.list = this.list.bind(this);
@@ -77,4 +77,4 @@ class MetaTagController extends Controller {
   }
 }
 
-module.exports = MetaTagController;
+module.exports = MetaTagConfigurationController;
