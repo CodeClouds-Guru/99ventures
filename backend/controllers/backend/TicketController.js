@@ -50,16 +50,17 @@ class TicketController {
     };
 
     options.include = [
-      {
-        model: TicketConversation,
-        attributes: ["message"],
-        include: {
-          model: TicketAttachment,
-          attributes: ["file_name", "mime_type"],
-        },
-      },
+      // {
+      //   model: TicketConversation,
+      //   attributes: ["message"],
+      //   include: {
+      //     model: TicketAttachment,
+      //     attributes: ["file_name", "mime_type"],
+      //   },
+      // },
       {
         model: Member,
+        as: "username",
         attributes: ["first_name", "last_name", "email", "status"],
       },
     ];
@@ -70,17 +71,17 @@ class TicketController {
 
     for (let i = 0; i < result.rows.length; i++) {
       result.rows[i].setDataValue(
-        "Member",
-        result.rows[i].Member.first_name +
+        "username",
+        result.rows[i].username.first_name +
           " " +
-          result.rows[i].Member.first_name
+          result.rows[i].username.first_name
       );
     }
 
-    return {
+    return res.status(200).json({
       result: { data: result.rows, pages, total: result.count },
       fields: Ticket.fields,
-    };
+    });
   }
 
   async view(req, res) {}
