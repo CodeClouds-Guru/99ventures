@@ -1,0 +1,7 @@
+
+.permission--section .MuiAccordionSummary-content {
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 0;
+}
+.permission--section .uncategorized--accordian{cursor: auto !important;}

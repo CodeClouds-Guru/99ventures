@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Typography, Paper, Button, Accordion, AccordionDetails, AccordionSummary, FormGroup, FormControlLabel, Checkbox } from '@mui/material';
+import { Typography, Paper, Button, Accordion, AccordionDetails, AccordionSummary, FormGroup, FormControlLabel, Checkbox, List, ListItem, Divider} from '@mui/material';
 import axios from "axios";
 import { motion } from 'framer-motion';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -111,58 +111,53 @@ function PermissionSettings(props) {
                 setOpenAlertDialog(false);
             })
     }
-
+    
     return (
-        <div className="p-16">
+        <div className="p-16 permission--section">
             <AlertDialog
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={() => { setOpenAlertDialog(false); }}
             />
-            <Typography variant="subtitle1" className="mb-5 pl-8">Permissions</Typography>
+            <Typography variant="h6"> Permissions</Typography>
+            <Divider className="my-10" />
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
                 {
                     Object.keys(modules).map((module, key) => {
                         if (module === 'uncategorized') {
-                            return (
-                                <div key={`accordion-${module}-${key}`}>
-                                    <div className="MuiButtonBase-root MuiAccordionSummary-root MuiAccordionSummary-gutters muiltr-sh22l5-MuiButtonBase-root-MuiAccordionSummary-root" tabIndex="0" role="button" aria-expanded="false" aria-controls={`${module}-${key}`} id={`${module}-${key}`} style={{ cursor: 'default' }} >
-                                        <div className="MuiAccordionSummary-content MuiAccordionSummary-contentGutters muiltr-o4b71y-MuiAccordionSummary-content">
-                                            {
-                                                modules[module].map((childModule, childKey) => {
-                                                    return (
-                                                        <div className="flex justify-center" key={`accordion-${childModule}-${childKey}`} >
-                                                            <Typography component={'div'} sx={{ width: '33%', flexShrink: 0, marginLeft: '-12px' }} className="pt-10 justify-start">
-                                                                {childModule.name}
-                                                            </Typography>
-                                                            <Typography component={'div'} row={true} sx={{ color: 'text.secondary', position: 'absolute', right: '80px', zIndex: 999 }} className="flex justify-end px-10">
-                                                                <FormGroup row={true} className="">
-                                                                    <FormControlLabel control={
-                                                                        <Checkbox onClick={handleChildCheckbox('view', childModule)} id={`view-${childModule.slug}-${childKey}`}
-                                                                            checked={childModule.action.includes('view')}
-                                                                        />
-                                                                    } label="View" />
-                                                                    <FormControlLabel control={
-                                                                        <Checkbox onClick={handleChildCheckbox('update', childModule)} id={`update-${childModule.slug}-${childKey}`}
-                                                                            checked={childModule.action.includes('update')}
-                                                                        />
-                                                                    } label="Update" />
-                                                                    <FormControlLabel control={
-                                                                        <Checkbox onClick={handleChildCheckbox('delete', childModule)} id={`delete-${childModule.slug}-${childKey}`}
-                                                                            checked={childModule.action.includes('delete')}
-                                                                        />
-                                                                    } label="Delete" />
-                                                                </FormGroup>
-                                                            </Typography>
-                                                        </div>
-                                                    )
-                                                })
-                                            }
-                                        </div>
-                                    </div>
-                                    {/* </Typography> */}
-                                </div>
-                            )
+                            return modules[module].map((childModule, childKey) => {
+                                return (
+                                    <Accordion expanded={expanded === 'panel1'} key={`accordion-${childModule}-${childKey}`}>
+                                        <AccordionSummary
+                                            aria-controls="panel1bh-content"
+                                            className="uncategorized--accordian"                                       
+                                        >
+                                            <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pl-5 font-semibold" variant="body1">
+                                                {childModule.name}
+                                            </Typography>
+                                            <Typography component={'div'} row={true} className="mr-24">
+                                                <FormGroup row={true} className="">
+                                                    <FormControlLabel control={
+                                                        <Checkbox onClick={handleChildCheckbox('view', childModule)} id={`view-${childModule.slug}-${childKey}`}
+                                                            checked={childModule.action.includes('view')}
+                                                        />
+                                                    } label="View" />
+                                                    <FormControlLabel control={
+                                                        <Checkbox onClick={handleChildCheckbox('update', childModule)} id={`update-${childModule.slug}-${childKey}`}
+                                                            checked={childModule.action.includes('update')}
+                                                        />
+                                                    } label="Update" />
+                                                    <FormControlLabel control={
+                                                        <Checkbox onClick={handleChildCheckbox('delete', childModule)} id={`delete-${childModule.slug}-${childKey}`}
+                                                            checked={childModule.action.includes('delete')}
+                                                        />
+                                                    } label="Delete" />
+                                                </FormGroup>
+                                            </Typography>
+                                        </AccordionSummary>
+                                    </Accordion>
+                                )
+                            })
                         } else {
                             return (
                                 <Accordion key={`accordion-${module}-${key}`} expanded={expanded === module} onClick={(e) => { e.stopPropagation(); }} onChange={handleAccordionClick(module)}>
@@ -171,12 +166,11 @@ function PermissionSettings(props) {
                                         aria-controls={module + '-' + key}
                                         id={module + '-' + key}
                                     >
-                                        <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pt-10 pl-5">
+                                        <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pl-5 font-semibold" variant="body1">
                                             {module}
                                         </Typography>
-                                        <Typography component={'div'}
-                                            sx={{ color: 'text.secondary', position: 'absolute', right: '80px', zIndex: 999 }}
-                                            className="flex justify-end px-10">
+                                        <Typography component={'div'}                                            
+                                            className="">
                                             <FormGroup row={true}>
                                                 <FormControlLabel onClick={(e) => e.stopPropagation()} control={
                                                     <Checkbox onClick={handleParentChecbox('view', module)} id={`view-${module}-${key}`}
@@ -201,10 +195,9 @@ function PermissionSettings(props) {
                                         {
                                             modules[module].map((childModule, childKey) => {
                                                 return (
-                                                    <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-60 py-5">
-                                                        <span className="pt-10">
-                                                            {childModule.name}
-                                                        </span>
+                                                    <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-24 py-5">
+                                                        <Typography variant="body1">{childModule.name}</Typography>
+                                                        
                                                         <FormGroup row={true} className="">
                                                             <FormControlLabel control={
                                                                 <Checkbox onClick={handleChildCheckbox('view', childModule)} id={`view-${childModule.slug}-${childKey}`}
