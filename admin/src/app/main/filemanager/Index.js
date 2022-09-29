@@ -13,7 +13,7 @@ import FileManagerList from './FilemanagerList';
 import { useSelector } from 'react-redux';
 
 const Index = () => {
-    const showSidebar = useSelector(state => state.filemanager.show_sidebar);
+    const selectedItem = useSelector(state=>state.filemanager.selectedItem)
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     return (
         <>
@@ -42,11 +42,12 @@ const Index = () => {
             <FusePageCarded
                 header={<FileManagerHeader />}
                 content={<FileManagerList />}
-                rightSidebarOpen={showSidebar}
+                rightSidebarOpen={ selectedItem !== null }
                 rightSidebarContent={<SidebarContent />}
                 rightSidebarWidth={400}
                 scroll={isMobile ? 'normal' : 'content'}
             />
+            
         </>
     )
 }
