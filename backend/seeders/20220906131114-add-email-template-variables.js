@@ -93,25 +93,25 @@ module.exports = {
           module: "WithdrawRequest"
         },
         {
-          id:"15",
-          name: "Contest Start and End Date",
-          code: "{offers.start_date} to {offers.end_date}",
-          module: "Offer"
-        },
-        {
-          id:"15",
-          name: "Contest Start and End Date",
-          code: "{offers.start_date} to {offers.end_date}",
-          module: "Offer"
-        },
-        {
           id:"16",
+          name: "Contest Start and End Date",
+          code: "{offers.start_date} to {offers.end_date}",
+          module: "Offer"
+        },
+        {
+          id:"17",
+          name: "Contest Start and End Date",
+          code: "{offers.start_date} to {offers.end_date}",
+          module: "Offer"
+        },
+        {
+          id:"18",
           name: "Support Ticket ID ",
           code: "{tickets.id}",
           module: "Ticket"
         },
         {
-          id:"17",
+          id:"19",
           name: "Email confirmation link",
           code: "{email_confirmation_link}",
           module: ""
