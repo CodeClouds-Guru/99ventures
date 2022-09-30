@@ -40,7 +40,7 @@ class EmailConfigurationController extends Controller {
     }
     return {
       status: true,
-      data: 'Record Updated',
+      message: 'Record Updated',
     }
   }
 }
