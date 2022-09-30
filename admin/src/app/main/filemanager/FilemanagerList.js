@@ -66,7 +66,7 @@ const FileManagerList = () => {
     ]
 
     return (
-        <div className="p-32">
+        <div className="p-32 list--view">
             <Box
                 className="p-16 w-full rounded-16 mb-24 border filemanager-file-box"
                 sx={{

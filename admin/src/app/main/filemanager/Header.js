@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { lighten } from '@mui/material/styles';
-import { Checkbox, Box, FormGroup, Tooltip, FormControlLabel, ListItemIcon, IconButton, Paper, Input, List, ListItem, ListItemText, ListItemButton, Menu, MenuItem} from '@mui/material';
+// import { lighten } from '@mui/material/styles';
+import { Tooltip, IconButton, Paper, Input, ListItemText, Menu, MenuItem} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import SelectAll from './SelectAll';
 
 const baseStyle = {
     marginBottom: '1rem',
@@ -14,34 +15,10 @@ const baseStyle = {
 }
 
 const Header = () => {
-    const [ filter, toggleFilter ] = useState(false);
     const [ viewType, setViewType ] = useState('grid');
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    // const listRef = useRef();
-    // const listBtnRef = useRef();
-
-    // useEffect(()=>{
-        // Bind the event listener
-        // document.addEventListener("mousedown", handleClickOutside);
-        // return () => {
-        //     // Unbind the event listener on clean up
-        //     document.removeEventListener("mousedown", handleClickOutside);
-        // };
-    // }, []);
-
-    /**
-     * Disabled dropdown by clicking outside
-     */
-    //  const handleClickOutside = (e) => {
-    //     if(
-    //         listRef.current.contains(e.target) ||
-    //         listBtnRef.current.contains(e.target)
-    //     ) {
-    //         return;
-    //     }
-    //     toggleFilter(false);
-    // }
-
+    const [anchorEl, setAnchorEl] = useState(null);
+        
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
     }
@@ -49,27 +26,25 @@ const Header = () => {
     const onConfirmAlertDialogHandle = () => {
         console.log('sss')
     }
-    const [anchorEl, setAnchorEl] = useState(null);
+
     // useEffect(() => {
     //     if ( anchorEl) {
     //       setAnchorEl(null);
     //     }
     // }, [anchorEl]);
 
-      function handleMenuClick(event) {
+    function handleMenuClick(event) {
         setAnchorEl(event.currentTarget);
-      }
+    }
 
-      function handleMenuClose() {
+    function handleMenuClose() {
         setAnchorEl(null);
-      }
+    }
 
     return (
         <>
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
-                <FormGroup className="flex" variant="outlined">
-                    <FormControlLabel control={<Checkbox defaultChecked />} label="Select All" />
-                </FormGroup>
+                <SelectAll />
                 <div className='flex justify-between'>
                     <Tooltip title="Delete">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
@@ -104,7 +79,7 @@ const Header = () => {
                         />
                     </Paper>
                 </div>
-                <div className='flex max-w-200 w-200 relative'>                
+                <div className='flex'>                
                     <Tooltip title="Filter">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleMenuClick } >
                             <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:filter</FuseSvgIcon>

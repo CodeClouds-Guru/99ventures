@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     show_sidebar: false,
-    selectedItem: null
+    selectedItem: null,
+    selectAll: false
 }
 
 const fileManagerSlice = createSlice({
@@ -14,10 +15,13 @@ const fileManagerSlice = createSlice({
         },
         setSelectedItem: (state, action) => {
             state.selectedItem = action.payload;
+        },
+        setSelectAll: (state, action) => {
+            state.selectAll = action.payload
         }
     }
 });
 
-export const { toggleSidebar, setSelectedItem } = fileManagerSlice.actions
+export const { toggleSidebar, setSelectedItem, setSelectAll } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer
