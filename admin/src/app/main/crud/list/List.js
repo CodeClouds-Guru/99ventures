@@ -28,6 +28,7 @@ function List(props) {
   const addable = props.addable ?? true;
   const deletable = props.deletable ?? true;
   const where = props.where ?? {};
+  const showModuleHeading = props.moduleHeading ?? '';
   const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
   const [modules, setModules] = useState([]);
@@ -219,7 +220,7 @@ function List(props) {
     <div>
       {/* // header */}
       <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
-        <Typography
+        {showModuleHeading === '' ? <Typography
           component={motion.span}
           initial={{ x: -20 }}
           animate={{ x: 0, transition: { delay: 0.2 } }}
@@ -227,7 +228,7 @@ function List(props) {
           className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
         >
           {module.split('-').join(' ')}
-        </Typography>
+        </Typography> : <></>}
 
         <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
           {searchable && <Paper
