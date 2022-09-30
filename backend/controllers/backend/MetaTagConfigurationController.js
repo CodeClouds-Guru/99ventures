@@ -26,16 +26,12 @@ class MetaTagConfigurationController extends Controller {
       data = Object.assign({}, ...data)
 
       // console.log(data);
-      return res.status(200).json({
+      return {
         status: true,
-        data,
-      });
+        data:data,
+      };
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 
@@ -62,17 +58,13 @@ class MetaTagConfigurationController extends Controller {
       const company_portal_meta = CompanyPortalMetaTag.bulkCreate(data);
 
       if (company_portal_meta) {
-        return res.status(200).json({
+        return {
           status: true,
           message: "Data saved",
-        });
+        };
       }
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }

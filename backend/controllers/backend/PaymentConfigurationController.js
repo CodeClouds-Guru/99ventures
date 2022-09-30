@@ -31,10 +31,10 @@ class PaymentConfigurationController extends Controller {
       });
       // console.log('==================',typeof mask_auth, mask_auth)
       if (mask_auth === true || mask_auth === "true") {
-        return res.status(200).json({
+        return {
           status: true,
           payment_method_list,
-        });
+        };
       } else {
         // if (mask_auth === "false" || mask_auth === false) {
         for (let i = 0; i < payment_method_list.length; i++) {
@@ -52,17 +52,13 @@ class PaymentConfigurationController extends Controller {
               cred.substring(0, count) + str;
           }
         }
-        return res.status(200).json({
+        return {
           status: true,
-          payment_method_list,
-        });
+          data: {payment_method_list:payment_method_list},
+        };
       }
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to get data', 500);
     }
   }
   async update(req, res) {
@@ -81,22 +77,15 @@ class PaymentConfigurationController extends Controller {
         ignoreDuplicates: true,
       });
       if (insertNewData) {
-        return res.status(200).json({
+        return{
           status: true,
           message: "Data Saved",
-        });
+        }
       } else {
-        return res.status(500).json({
-          status: false,
-          errors: "Unable to save data",
-        });
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }

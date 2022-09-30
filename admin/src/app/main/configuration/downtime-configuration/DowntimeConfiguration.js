@@ -33,12 +33,12 @@ function DowntimeConfiguration(props) {
 
     const getDowntime = () => {
         axios.get(jwtServiceConfig.getDowntimeConfiguration).then(res => {
-            if (res.data.status) {
-                setAllowedIPs(res.data.data.ip_list)
-                setMessage(res.data.data.downtime_text.downtime_message)
-                setShutdown(res.data.data.downtime_text.status === 2)    // status 2 is checked
+            if (res.data.results.status) {
+                setAllowedIPs(res.data.results.data.ip_list)
+                setMessage(res.data.results.data.downtime_text.downtime_message)
+                setShutdown(res.data.results.data.downtime_text.status === 2)    // status 2 is checked
             } else {
-                dispatch(showMessage({ variant: 'error', message: res.data.message }))
+                dispatch(showMessage({ variant: 'error', message: res.data.errors }))
             }
         }).catch(e => {
             console.error(e)
@@ -53,9 +53,9 @@ function DowntimeConfiguration(props) {
             updated_downtime_text: message,
             shutdown_checked: shutdown,
         }).then(res => {
-            const variant = res.data.status ? 'success' : 'error';
-            dispatch(showMessage({ variant, message: res.data.message }))
-            getDowntime() ? res.data.status : null
+            const variant = res.data.results.status ? 'success' : 'error';
+            dispatch(showMessage({ variant, message: res.data.results.message }))
+            getDowntime() ? res.data.results.status : null
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong' }))
@@ -63,10 +63,10 @@ function DowntimeConfiguration(props) {
     }
 
     const addMyIP = () => {
-            fetch('https://geolocation-db.com/json/')
+        fetch('https://geolocation-db.com/json/')
             .then(resp => {
                 resp.json().then((data) => {
-                    if(data.IPv4.trim().length > 0 && !allowedIPs.includes(data.IPv4)) {
+                    if (data.IPv4.trim().length > 0 && !allowedIPs.includes(data.IPv4)) {
                         setAllowedIPs([...allowedIPs, data.IPv4])
                     }
                 })
@@ -74,7 +74,7 @@ function DowntimeConfiguration(props) {
                 console.error(e)
                 dispatch(showMessage({ variant: 'error', message: 'Unable to get your IP, Please check if you are behind any firewall' }))
             });
-            
+
     }
 
     return (
@@ -84,19 +84,19 @@ function DowntimeConfiguration(props) {
                     <div className="flex flex-col justify-center w-full">
                         <Card variant="outlined" className="mb-20">
                             {
-                                permission ? 
+                                permission ?
                                     <CardHeader
                                         title="Allowed IP List"
                                         action={
                                             <Button size="small" variant="outlined" onClick={addMyIP}>Add Mine</Button>
                                         }
                                     />
-                                : ''
+                                    : ''
                             }
-                            
+
                             <CardContent>
                                 <AddMore
-                                    permission={ permission }
+                                    permission={permission}
                                     data={allowedIPs}
                                     placeholder="Enter allowed IP(s)"
                                     onChange={onIpChangeFromChild}
@@ -116,7 +116,7 @@ function DowntimeConfiguration(props) {
                             minRows={3}
                             value={message}
                             onChange={onMessageChange}
-                            disabled={ !permission }
+                            disabled={!permission}
                         />
 
                         <FormControl className="items-center">
@@ -130,8 +130,8 @@ function DowntimeConfiguration(props) {
                             />
                         </FormControl>
 
-                        { 
-                            permission ? 
+                        {
+                            permission ?
                                 <span className="flex items-center justify-center">
                                     <Button
                                         variant="contained"
@@ -144,7 +144,7 @@ function DowntimeConfiguration(props) {
                                         Save
                                     </Button>
                                 </span>
-                            : ''
+                                : ''
                         }
                     </div>
                 </div>

@@ -65,20 +65,18 @@ class GeneralConfigurationController {
         selected_captcha && selected_captcha.length > 0
           ? selected_captcha[0].captcha_option_id
           : 0
-
-      const response = {
+      // return res.status(200).json(response)
+      return {
         status: true,
-        page_options,
-        layout_options,
-        captcha_options,
-        general_replies,
-        home_page_id,
-        default_template_id,
-        default_captcha_option_id,
+        data:{page_options,
+          layout_options,
+          captcha_options,
+          general_replies,
+          home_page_id,
+          default_template_id,
+          default_captcha_option_id}
       }
-      return res.status(200).json(response)
     } catch (err) {
-      console.error(err)
       res.status(500).json({
         status: false,
         errors: 'Unable to get data',
@@ -188,22 +186,15 @@ class GeneralConfigurationController {
       }
 
       if (flag) {
-        return res.status(200).json({
+        return {
           status: true,
           message: 'Data saved',
-        })
+        }
       } else {
-        res.status(500).json({
-          status: false,
-          errors: 'Unable to save data',
-        })
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      console.log(err.message)
-      res.status(500).json({
-        status: false,
-        errors: 'Unable to save data',
-      })
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }
