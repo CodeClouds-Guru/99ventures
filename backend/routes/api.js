@@ -4,19 +4,14 @@ const AuthMiddleware = require("../middlewares/authMiddleware");
 const checkPermissionMiddleware = require("../middlewares/CheckPermissionMiddleware");
 const AuthControllerClass = require("../controllers/backend/AuthController");
 const AuthController = new AuthControllerClass();
-const GeneralControllerClass = require("../controllers/backend/GeneralController");
-const GeneralController = new GeneralControllerClass();
+
+const TicketControllerClass = require("../controllers/backend/TicketController");
+const TicketController = new TicketControllerClass();
+
 const InvitationControllerClass = require("../controllers/backend/InvitationController");
 const InvitationController = new InvitationControllerClass();
-const EmailConfigurationControllerClass = require("../controllers/backend/EmailConfigurationController");
-const EmailConfigurationController = new EmailConfigurationControllerClass();
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
-const IpConfigurationControllerClass = require("../controllers/backend/IpConfigurationController");
-const IpConfigurationController = new IpConfigurationControllerClass();
-const PaymentMethodControllerClass = require("../controllers/backend/PaymentMethodController");
-const PaymentMethodController = new PaymentMethodControllerClass();
-const MetaTagControllerClass = require("../controllers/backend/MetaTagController");
-const MetaTagController = new MetaTagControllerClass();
+
 router.get("/", (req, res) => {
   res.json({ message: "API working" });
 });
@@ -36,59 +31,12 @@ router.get(
   InvitationController.resendInvitation
 );
 router.post("/invitation-details", InvitationController.invitationDetails);
-router.get(
-  "/emailconfigurations/view",
-  [AuthMiddleware],
-  EmailConfigurationController.view
-);
-router.post(
-  "/emailconfigurations/save",
-  [AuthMiddleware],
-  EmailConfigurationController.save
-);
-router.get(
-  "/get-general-tab-data/",
-  [AuthMiddleware],
-  GeneralController.getGeneralTabData
-);
-router.post(
-  "/save-general-tab-data",
-  [AuthMiddleware],
-  GeneralController.saveGeneralTabData
-);
-router.get(
-  "/ip-downtime-settings",
-  [AuthMiddleware],
-  IpConfigurationController.getIpDowntimeSettings
-);
-router.post(
-  "/ip-downtime-update",
-  [AuthMiddleware],
-  IpConfigurationController.updateIpDowntimeData
-);
-router.get(
-  "/ip-configurations",
-  [AuthMiddleware],
-  IpConfigurationController.list
-);
-router.post(
-  "/ip-configurations/save",
-  [AuthMiddleware],
-  IpConfigurationController.save
-);
-
-router.get("/payment-methods", [AuthMiddleware], PaymentMethodController.list);
-router.post(
-  "/payment-methods/update",
-  [AuthMiddleware],
-  PaymentMethodController.update
-);
-
-router.get("/meta-tags", [AuthMiddleware], MetaTagController.list);
-router.post("/meta-tags/update", [AuthMiddleware], MetaTagController.update);
 
 //check password
 router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
+
+//change ticket read status
+router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
 
 router.all(
   "/:module/:action?/:id?",

@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Ticket.belongsTo(models.Member, {
         foreignKey: "member_id",
+        as: "username",
       });
       Ticket.hasMany(models.TicketConversation, {
         foreignKey: "ticket_id",
@@ -41,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "tickets",
     }
   );
+  Ticket.extra_fields = ["username"];
   Ticket.fields = {
     id: {
       field_name: "id",
@@ -73,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "member_id",
       type: "text",
       placeholder: "Member ID",
-      listing: true,
+      listing: false,
       show_in_form: false,
       sort: true,
       required: false,
@@ -99,7 +101,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "status",
       type: "text",
       placeholder: "Status",
-      listing: false,
+      listing: true,
       show_in_form: true,
       sort: true,
       required: true,
@@ -112,8 +114,21 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "created_at",
       type: "text",
       placeholder: "Created at",
-      listing: false,
+      listing: true,
       show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    username: {
+      field_name: "username",
+      db_name: "username",
+      type: "text",
+      placeholder: "Username",
+      listing: true,
+      show_in_form: true,
       sort: true,
       required: true,
       value: "",
@@ -122,5 +137,25 @@ module.exports = (sequelize, DataTypes) => {
     },
   };
   sequelizePaginate.paginate(Ticket);
+
+  Ticket.getTicketCount = async (read, company_portal_id) => {
+    let result = await Ticket.findAndCountAll({
+      where: { is_read: read, company_portal_id: company_portal_id },
+    });
+    return result.count;
+  };
+
+  Ticket.changeIsReadStatus = async (field_name, val, ticket_id) => {
+    let update_data = {
+      [field_name]: val,
+    };
+    console.log(update_data);
+    let result = await Ticket.update(update_data, {
+      where: { id: ticket_id },
+      return:true
+    });
+    return result[0];
+  };
+
   return Ticket;
 };

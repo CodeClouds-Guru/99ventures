@@ -5,7 +5,7 @@ const {
   PaymentMethod,
 } = require("../../models/index");
 const bcrypt = require("bcryptjs");
-class PaymentMethodController extends Controller {
+class PaymentConfigurationController extends Controller {
   constructor() {
     super("PaymentMethod");
     this.list = this.list.bind(this);
@@ -31,10 +31,10 @@ class PaymentMethodController extends Controller {
       });
       // console.log('==================',typeof mask_auth, mask_auth)
       if (mask_auth === true || mask_auth === "true") {
-        return res.status(200).json({
+        return {
           status: true,
           payment_method_list,
-        });
+        };
       } else {
         // if (mask_auth === "false" || mask_auth === false) {
         for (let i = 0; i < payment_method_list.length; i++) {
@@ -52,17 +52,13 @@ class PaymentMethodController extends Controller {
               cred.substring(0, count) + str;
           }
         }
-        return res.status(200).json({
+        return {
           status: true,
-          payment_method_list,
-        });
+          data: payment_method_list,
+        };
       }
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to get data', 500);
     }
   }
   async update(req, res) {
@@ -81,26 +77,19 @@ class PaymentMethodController extends Controller {
         ignoreDuplicates: true,
       });
       if (insertNewData) {
-        return res.status(200).json({
+        return{
           status: true,
           message: "Data Saved",
-        });
+        }
       } else {
-        return res.status(500).json({
-          status: false,
-          errors: "Unable to save data",
-        });
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      console.log(err.message);
-      return res.status(500).json({
-        status: false,
-        errors: "Unable to get data",
-      });
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }
 
-module.exports = PaymentMethodController;
+module.exports = PaymentConfigurationController;
 
 // update payment_method_credentials set deleted_at = NULL where id > 0
