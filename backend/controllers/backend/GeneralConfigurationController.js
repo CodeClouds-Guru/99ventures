@@ -76,7 +76,11 @@ class GeneralConfigurationController {
         default_template_id,
         default_captcha_option_id,
       }
-      return res.status(200).json(response)
+      // return res.status(200).json(response)
+      return {
+        status:true,
+        data: response
+      }
     } catch (err) {
       console.error(err)
       res.status(500).json({
@@ -188,22 +192,28 @@ class GeneralConfigurationController {
       }
 
       if (flag) {
-        return res.status(200).json({
+        // return res.status(200).json({
+        //   status: true,
+        //   message: 'Data saved',
+        // })
+        return {
           status: true,
           message: 'Data saved',
-        })
+        }
       } else {
-        res.status(500).json({
-          status: false,
-          errors: 'Unable to save data',
-        })
+        // res.status(500).json({
+        //   status: false,
+        //   errors: 'Unable to save data',
+        // })
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      console.log(err.message)
-      res.status(500).json({
-        status: false,
-        errors: 'Unable to save data',
-      })
+      // console.log(err.message)
+      // res.status(500).json({
+      //   status: false,
+      //   errors: 'Unable to save data',
+      // })
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }
