@@ -97,7 +97,7 @@ const PaymentCredentials = (props) => {
                 setLoading(false)
                 if (response.data.results.status) {
                     setCredentials(credentials);
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.data.message }))
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
