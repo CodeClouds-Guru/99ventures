@@ -54,7 +54,7 @@ class PaymentConfigurationController extends Controller {
         }
         return {
           status: true,
-          data: payment_method_list,
+          data: {payment_method_list:payment_method_list},
         };
       }
     } catch (err) {
