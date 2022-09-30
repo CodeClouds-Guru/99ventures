@@ -28,16 +28,12 @@ class DowntimeController extends Controller {
         where: { id: site_id },
         attributes: ['downtime_message', 'status'],
       })
-      return res.status(200).json({
+      return {
         status: true,
         data: { ip_list, downtime_text },
-      })
+      }
     } catch (err) {
-      console.log(err.message)
-      return res.status(500).json({
-        status: false,
-        errors: 'Unable to get data',
-      })
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 
@@ -95,22 +91,15 @@ class DowntimeController extends Controller {
       }
 
       if (flag) {
-        return res.status(200).json({
+        return {
           status: true,
           message: 'Data saved',
-        })
+        }
       } else {
-        return res.status(500).json({
-          status: false,
-          errors: 'Unable to save data',
-        })
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      console.log(err.message)
-      return res.status(500).json({
-        status: false,
-        errors: 'Unable to get data',
-      })
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 }

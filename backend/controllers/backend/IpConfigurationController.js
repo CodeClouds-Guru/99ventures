@@ -25,12 +25,10 @@ class IpConfigurationController extends Controller {
     isp_list = isp_list.map((isp_result) => {
       return isp_result.isp
     })
-
-    res.status(200).json({
+    return {
       status: true,
-      ip_list,
-      isp_list,
-    })
+      data:{ip_list,isp_list}
+    }
   }
   //override save function
   async save(req, res) {
@@ -76,10 +74,10 @@ class IpConfigurationController extends Controller {
       //bulck create isp list
       await IspConfiguration.bulkCreate(isps)
     }
-    res.status(200).json({
+    return {
       status: true,
       message: 'Record Updated',
-    })
+    }
   }
 }
 

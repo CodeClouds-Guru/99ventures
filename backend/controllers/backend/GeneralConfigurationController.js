@@ -192,27 +192,14 @@ class GeneralConfigurationController {
       }
 
       if (flag) {
-        // return res.status(200).json({
-        //   status: true,
-        //   message: 'Data saved',
-        // })
         return {
           status: true,
           message: 'Data saved',
         }
       } else {
-        // res.status(500).json({
-        //   status: false,
-        //   errors: 'Unable to save data',
-        // })
         this.throwCustomError('Unable to save data', 500);
       }
     } catch (err) {
-      // console.log(err.message)
-      // res.status(500).json({
-      //   status: false,
-      //   errors: 'Unable to save data',
-      // })
       this.throwCustomError('Unable to save data', 500);
     }
   }
