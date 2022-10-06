@@ -16,12 +16,20 @@ const navigationConfig = [
     url: 'configuration',
   },
   {
-    id: 'scripts',
+    id: 'scripts', 
     title: 'Scripts',
     translate: 'Scripts',
     type: 'item',
     icon: 'heroicons-outline:code',
     url: 'app/scripts',
+  },
+  {
+    id: 'filemanager',
+    title: 'File Manager',
+    // translate: 'File Manager',
+    type: 'item',
+    icon: 'heroicons-outline:folder',
+    url: 'app/filemanager',
   },
   {
     id: 'tickets',

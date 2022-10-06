@@ -4,17 +4,22 @@ const {
   TicketAttachment,
   TicketConversation,
   Member,
+  MemberNote,
+  MembershipTier,
+  AutoResponder,
   sequelize,
 } = require("../../models/index");
 
 const { Op } = require("sequelize");
 const moment = require("moment");
 
-class TicketController {
+class TicketController extends Controller {
   constructor() {
-    this.changeStatus = this.changeStatus.bind(this);
+    super('Ticket');
+    // this.changeStatus = this.changeStatus.bind(this);
   }
 
+  //ticket listing
   async list(req, res) {
     //header data
     let company_id = req.headers.company_id;
@@ -34,7 +39,7 @@ class TicketController {
       let options = {};
 
       let offset = (page - 1) * limit;
-      options.attributes = ["subject", "created_at", "status"];
+      options.attributes = ["id", "subject", "created_at", "status"];
       options.limit = limit;
       options.offset = offset;
       options.where = { [Op.and]: { company_portal_id: company_portal_id } };
@@ -54,7 +59,7 @@ class TicketController {
       options.include = [
         {
           model: Member,
-          as: "username",
+          // as: "username",
           attributes: ["first_name", "last_name", "email", "status"],
         },
       ];
@@ -66,9 +71,9 @@ class TicketController {
       for (let i = 0; i < result.rows.length; i++) {
         result.rows[i].setDataValue(
           "username",
-          result.rows[i].username.first_name +
+          result.rows[i].Member.first_name +
             " " +
-            result.rows[i].username.first_name
+            result.rows[i].Member.first_name
         );
       }
       var unread_ticket_count = await Ticket.getTicketCount(
@@ -86,33 +91,140 @@ class TicketController {
         fields: Ticket.fields,
       };
     } catch (error) {
-      throw error;
+      this.throwCustomError("Unable to get data", 500);
     }
   }
 
-  async view(req, res) {}
-
-  async changeStatus(req, res) {
-    let value = req.query.value || null;
-    let field_name = req.query.field_name || null;
+  //ticket view
+  async view(req, res) {
+    //header data
+    let company_id = req.headers.company_id;
+    let company_portal_id = req.headers.site_id;
     let ticket_id = req.query.id || null;
-    console.log(value, field_name, ticket_id, "--------------");
-    try {
-      let update = await Ticket.changeIsReadStatus(
-        field_name,
-        value,
-        ticket_id
-      );
-      console.log(update);
-      if (update > 0)
-        res.status(200).json({
-          status: true,
-          message: "Data updated successfully",
+
+    if (ticket_id !== null) {
+      try {
+        let options = {};
+        options.attributes = [
+          "id",
+          "subject",
+          "created_at",
+          "status",
+          "member_id",
+        ];
+        options.where = { [Op.and]: { id: ticket_id } };
+        options.include = [
+          {
+            model: TicketConversation,
+            attributes: ["message", "member_id", "user_id"],
+            include: {
+              model: TicketAttachment,
+              attributes: ["file_name", "mime_type"],
+            },
+          },
+          {
+            model: Member,
+            // as: "username",
+            attributes: ["first_name", "last_name", "email", "status"],
+            include: [
+              {
+                model: MemberNote,
+                attributes: [
+                  "user_id",
+                  "member_id",
+                  "previous_status",
+                  "current_status",
+                  "note",
+                ],
+              },
+              {
+                model: MembershipTier,
+                attributes: ["name"],
+              },
+            ],
+          },
+        ];
+        //final query to get ticket details
+        let result = await Ticket.findOne(options);
+        // console.log(result);
+
+        //previous tickets
+        let prev_tickets = await Ticket.findAll({
+          attributes: ["subject", "status", "is_read"],
+          where: {
+            [Op.and]: { member_id: result.member_id },
+            id: { [Op.ne]: ticket_id },
+          },
+          include: {
+            model: TicketConversation,
+            attributes: ["message", "member_id", "user_id"],
+          },
         });
-    } catch (error) {
-      throw error;
+
+        //all auto responders
+        let auto_responders = await AutoResponder.findAll({
+          attributes: ["name", "body"],
+        });
+        console.log(auto_responders);
+        result.setDataValue("previous_tickets", prev_tickets);
+        result.setDataValue("auto_responders", auto_responders);
+
+        return {
+          status: true,
+          data: result,
+        };
+      } catch (error) {
+        this.throwCustomError("Unable to get data", 500);
+      }
+    } else {
+      this.throwCustomError("Unable to get data", 500);
     }
   }
+
+  //update for all type of updation
+  // async update(req, res) {
+  //   let value = req.body.value || null;
+  //   let field_name = req.body.field_name || null;
+  //   let ticket_id = req.body.id || null;
+
+  //   const type = req.body.type || "";
+  //   let change = false;
+  //   switch (type) {
+  //     case "is_read":
+  //       change = await this.changeStatus(value, field_name, ticket_id);
+  //       break;
+  //     case "ticket_status":
+  //     case "member_status":
+  //       console.log("Mangoes and papayas are $2.79 a pound.");
+  //       // expected output: "Mangoes and papayas are $2.79 a pound."
+  //       break;
+  //     default:
+  //       this.throwCustomError("Unable to get data", 500);
+  //   }
+  //   if (change)
+  //     return {
+  //       status: true,
+  //       message: "Email template updated.",
+  //     };
+  // }
+
+  // //update for all type of updation
+  // async save(req, res) {}
+
+  // async changeStatus(value, field_name, ticket_id) {
+  //   console.log(value, field_name, ticket_id, "--------------");
+  //   try {
+  //     let update = await Ticket.changeIsReadStatus(
+  //       field_name,
+  //       value,
+  //       ticket_id
+  //     );
+  //     console.log(update);
+  //     if (update > 0) return true;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }
 
 module.exports = TicketController;
