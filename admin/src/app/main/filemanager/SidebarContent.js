@@ -41,7 +41,8 @@ const SidebarContent = (props) => {
 			animate={{ y: 0, opacity: 1, transition: { delay: 0.3 } }}
 			className="file-details p-24 sm:p-32"
 		>
-			<div className="flex items-center justify-end w-full">
+			<div className="flex items-center justify-between w-full">
+				<Typography variant="h5">Details</Typography>
 				<IconButton className="" size="large" onClick={() => dispatch(setSelectedItem(null))}>
 					<FuseSvgIcon>heroicons-outline:x</FuseSvgIcon>
 				</IconButton>

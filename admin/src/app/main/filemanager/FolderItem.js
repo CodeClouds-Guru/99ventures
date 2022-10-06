@@ -5,14 +5,28 @@ import { Box } from '@mui/system';
 // import { useDispatch } from 'react-redux';
 // import { setSelectedItem } from './store/itemsSlice';
 import ItemIcon from './ItemIcon';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSelectedItemsId } from 'app/store/filemanager'
 
 function FolderItem(props) {
+	const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
+	const dispatch = useDispatch();
 	// const { item } = props;
-	// const dispatch = useDispatch();
 
 	// if (!item) {
 	// 	return null;
 	// }
+
+	const handleChange = (event) => {
+        if(!event.target.checked && selectedItemsId.includes(props.file.id)){
+            const ids = selectedItemsId.filter(el=> el !== props.file.id);
+            dispatch(setSelectedItemsId(ids))
+        } else {
+            dispatch(
+                setSelectedItemsId([...selectedItemsId, props.file.id])
+            )            
+        }
+    }
 
 	return (
 		<Box
@@ -22,7 +36,11 @@ function FolderItem(props) {
 			<IconButton
                 className="absolute z-20 top-0 right-0 m-6 w-32 h-32 min-h-32"
             >
-                <Checkbox { ...{ inputProps: { 'aria-label': 'Checkbox demo' } } } />
+                <Checkbox 
+                    checked={ selectedItemsId.includes(props.file.id) }
+                    inputProps={{ 'aria-label': 'controlled' }}
+                    onChange={handleChange} 
+                />
             </IconButton>
 			<NavLinkAdapter
 				className="flex flex-col h-full w-full"

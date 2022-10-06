@@ -1,19 +1,28 @@
-import { setSelectAll } from 'app/store/filemanager'
+import { setSelectedItemsId } from 'app/store/filemanager'
 import { useSelector, useDispatch } from 'react-redux';
 import { Checkbox, FormGroup, FormControlLabel} from '@mui/material';
 
 const selectAll = () => {
-    const selectAll = useSelector(state=> state.filemanager.selectAll);
+    const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
+    const jsonData = useSelector(state=> state.filemanager.jsonData)
     const dispatch = useDispatch();
 
     const handleChange = (event) => {
-        dispatch(setSelectAll(event.target.checked))
+        if(event.target.checked){
+            const ids = jsonData.map(el=> el.id);
+            dispatch(setSelectedItemsId(ids))
+        } else {
+            dispatch(setSelectedItemsId([]));
+        }        
     };
+
     return (
         <FormGroup className="flex" variant="outlined">
             <FormControlLabel control={
                 <Checkbox 
-                    checked={ selectAll }
+                    checked={ Boolean(
+                        selectedItemsId.length && selectedItemsId.length === jsonData.length
+                    ) }
                     onChange={handleChange} 
                     inputProps={{ 'aria-label': 'controlled' }}
                 />

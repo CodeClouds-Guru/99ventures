@@ -9,61 +9,11 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 
-
 const FileManagerList = () => {
+    const jsonData = useSelector(state=> state.filemanager.jsonData)
     // const sideBar = useSelector(state=>state.filemanager.show_sidebar)
     // const dispatch = useDispatch();
-    
-    const jsonData = [
-        {
-            id: 1,
-            type: 'file',
-            mime_type: 'application/pdf',
-            size: 18879,
-            path: "/",
-            name: "document.pdf"
-        },
-        {
-            id: 2,
-            type: 'file',
-            mime_type: 'image/jpg',
-            size: 18879,
-            path: "/",
-            name: "main_logo.png"
-        },
-        {
-            id: 3,
-            type: 'file',
-            mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            size: 18879,
-            path: "/",
-            name: "sheet.xlsx"
-        },
-        {
-            id: 4,
-            type: 'folder',
-            mime_type: '',
-            size: 18879,
-            path: "/",
-            name: "Photos"
-        },
-        {
-            id: 5,
-            type: 'file',
-            mime_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            size: 18879,
-            path: "/",
-            name: "word.docx"
-        },
-        {
-            id: 6,
-            type: 'folder',
-            mime_type: '',
-            size: 18879,
-            path: "/",
-            name: "Demo"
-        }
-    ]
+        
 
     return (
         <div className="p-32 list--view">
@@ -77,7 +27,7 @@ const FileManagerList = () => {
                     {
                         jsonData.map((el, i) => {
                             if(el.type === 'folder') {
-                                return <FolderItem key={i} />
+                                return <FolderItem key={i} file={ el }/>
                             }
                         })
                     }

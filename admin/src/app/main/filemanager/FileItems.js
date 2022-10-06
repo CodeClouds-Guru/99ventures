@@ -3,13 +3,16 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Checkbox, Box, Typography, IconButton, List, ListItem, ListItemText, ListItemIcon, ListItemButton, Menu, MenuItem } from '@mui/material';
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
+import { setSelectedItemsId } from 'app/store/filemanager'
 import { setSelectedItem } from 'app/store/filemanager'
 import AlertDialog from 'app/shared-components/AlertDialog';
 import './FileManager.css'
 
+
 const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
+    const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
     const selectAll = useSelector(state=> state.filemanager.selectAll);
     const [anchorEl, setAnchorEl] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
@@ -30,6 +33,17 @@ const FileItems = (props) => {
         console.log('sss')
     }
 
+    const handleChange = (event) => {
+        if(!event.target.checked && selectedItemsId.includes(props.file.id)){
+            const ids = selectedItemsId.filter(el=> el !== props.file.id);
+            dispatch(setSelectedItemsId(ids))
+        } else {
+            dispatch(
+                setSelectedItemsId([...selectedItemsId, props.file.id])
+            )            
+        }
+    }
+
     return (
         <Box
             sx={{ backgroundColor: 'rgb(255, 255, 255)' }}
@@ -38,7 +52,11 @@ const FileItems = (props) => {
             <IconButton
                 className="absolute z-20 top-0 right-0 m-6 w-32 h-32 min-h-32"
             >
-                <Checkbox checked={ selectAll } { ...{ inputProps: { 'aria-label': 'Checkbox demo' } } } />
+                <Checkbox 
+                    checked={ selectedItemsId.includes(props.file.id) }
+                    inputProps={{ 'aria-label': 'controlled' }}
+                    onChange={handleChange} 
+                />
             </IconButton>                
             
             <div className="flex flex-auto w-full items-center justify-center" onClick={()=> dispatch(setSelectedItem(props.file)) }>
