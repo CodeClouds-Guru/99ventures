@@ -6,9 +6,10 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import moment from 'moment';
 function ConfigurationContent() {
     const [selectedStatus, setSelectedStatus] = useState('');
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState(null);
-    const [whereClause, setWhereClause] = useState({})
+    const [whereClause, setWhereClause] = useState({});
+    const [listKey, setListKey] = useState(0);
 
     const toggle = () => setOpen(!open);
 
@@ -19,7 +20,6 @@ function ConfigurationContent() {
 
     const handleChange = (e) => {
         setSelectedStatus(e.target.value);
-        setWhereClause({...whereClause, status: e.target.value});
     }
 
     const dateRangeSelected = (val) => {
@@ -28,16 +28,18 @@ function ConfigurationContent() {
     }
 
     const constructWhereclause = () => {
-        if(selectedStatus !== '') {
-
-        }
+        setWhereClause({...whereClause, status: selectedStatus});
     }
+
+    useEffect(() => {
+        constructWhereclause();
+    }, [selectedStatus, dateRange])
     
     return (
         <div>
             <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={4}>
+                    <Grid item xs={2}>
                         <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Ticket Status</InputLabel>
                             <Select
@@ -54,7 +56,7 @@ function ConfigurationContent() {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={8}>
                         {
                             open 
                             ? 
@@ -86,10 +88,12 @@ function ConfigurationContent() {
                     </Grid>
                 </Grid>
             </Box>
+            {JSON.stringify(whereClause)}
             <List
                 module="tickets"
-                where={whereClause}
                 moduleHeading='N/A'
+                where={whereClause}
+                key={listKey}
             />
         </div>
     );
