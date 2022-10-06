@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberNote, {
         foreignKey: 'member_id',
       })
+      Member.belongsTo(models.MembershipTier, {
+        foreignKey: 'membership_tier_id',
+      })
     }
   }
   Member.init({
