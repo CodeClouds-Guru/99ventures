@@ -78,17 +78,17 @@ function EmailConfiguration(props) {
     const getEmailConfiguration = () => {
         axios.get(jwtServiceConfig.getEmailConguration)
             .then((response) => {
-                if (response.data.status) {
-                    setValue('fromName', response.data.data.from_name, { shouldDirty: false, shouldValidate: true });
-                    setValue('fromEmail', response.data.data.from_email, { shouldDirty: false, shouldValidate: true });
-                    setValue('emailUsername', response.data.data.email_username, { shouldDirty: false, shouldValidate: true });
-                    setValue('emailServerHost', response.data.data.email_server_host, { shouldDirty: false, shouldValidate: true });
-                    setValue('port', response.data.data.email_server_port, { shouldDirty: false, shouldValidate: true });
-                    setValue('password', response.data.data.password, { shouldDirty: false, shouldValidate: true });
-                    setSslRequired(response.data.data.ssl_required === 1);
-                    setSiteNameVisible(response.data.data.site_name_visible === 1);
+                if (response.data.results.status) {
+                    setValue('fromName', response.data.results.data.from_name, { shouldDirty: false, shouldValidate: true });
+                    setValue('fromEmail', response.data.results.data.from_email, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailUsername', response.data.results.data.email_username, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailServerHost', response.data.results.data.email_server_host, { shouldDirty: false, shouldValidate: true });
+                    setValue('port', response.data.results.data.email_server_port, { shouldDirty: false, shouldValidate: true });
+                    setValue('password', response.data.results.data.password, { shouldDirty: false, shouldValidate: true });
+                    setSslRequired(response.data.results.data.ssl_required === 1);
+                    setSiteNameVisible(response.data.results.data.site_name_visible === 1);
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
             })
             .catch((error) => {
@@ -110,11 +110,11 @@ function EmailConfiguration(props) {
 
         axios.post(jwtServiceConfig.saveEmailConguration, data)
             .then((response) => {
-                if (response.data.status) {
-                    dispatch(showMessage({ variant: 'success', message: response.data.message }))
+                if (response.data.results.status) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
                     getEmailConfiguration();
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
             })
             .catch((error) => {
@@ -155,7 +155,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -174,7 +174,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -193,7 +193,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -212,7 +212,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -231,7 +231,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -249,7 +249,7 @@ function EmailConfiguration(props) {
                                     helperText={errors?.password?.message}
                                     variant="outlined"
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -284,9 +284,9 @@ function EmailConfiguration(props) {
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
-                        />  
+                        />
                         {
-                            permission ? 
+                            permission ?
                                 <span className="flex items-center justify-center">
                                     <Button
                                         variant="contained"
@@ -300,9 +300,9 @@ function EmailConfiguration(props) {
                                         Save
                                     </Button>
                                 </span>
-                            : ''
+                                : ''
                         }
-                        
+
                     </form>
                 </div>
             </Paper>

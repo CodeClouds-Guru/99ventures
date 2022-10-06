@@ -24,7 +24,7 @@ const modalStyle = {
     p: 4,
 };
 
-const modalValidationSchema = yup.object().shape({ 
+const modalValidationSchema = yup.object().shape({
     password: yup.string().required(`Please enter password`)
 });
 
@@ -33,11 +33,11 @@ const PaymentCredentials = (props) => {
     const dispatch = useDispatch();
     const confirmAccountStatus = useSelector(state => state.account.confirm_account);
     const user = useSelector(selectUser);
-    const [ loading, setLoading ] = React.useState(false);
-    const [ credentials, setCredentials ] = React.useState(props.credentials);
-    const [ permission, setPermission ] = React.useState(false);
-    const [ toggleModal, setToggleModal ] = React.useState(false);
-    
+    const [loading, setLoading] = React.useState(false);
+    const [credentials, setCredentials] = React.useState(props.credentials);
+    const [permission, setPermission] = React.useState(false);
+    const [toggleModal, setToggleModal] = React.useState(false);
+
     /**
      * Default Value object creation and validation object creation
      */
@@ -49,28 +49,28 @@ const PaymentCredentials = (props) => {
             [val.slug]: yup.string().required(`Please enter ${val.name}`)
         })
     });
-    const validationSchema = yup.object().shape({ ...validationFields});
-    
+    const validationSchema = yup.object().shape({ ...validationFields });
+
     /**
      * Props changed event listener
      */
-    React.useEffect(() => { 
-        if(props.permission){
+    React.useEffect(() => {
+        if (props.permission) {
             setPermission(
                 (props.permission('save') || props.permission('update'))
             )
         }
-        
-        if(props.credentials) {
+
+        if (props.credentials) {
             props.credentials.map(val => {
-                setValue(val.slug, val.value, {shouldDirty: false, shouldValidate: true });                
+                setValue(val.slug, val.value, { shouldDirty: false, shouldValidate: true });
             });
         }
     }, [props]);
 
-    const { 
+    const {
         control,
-        formState: { isValid, dirtyFields, errors }, 
+        formState: { isValid, dirtyFields, errors },
         handleSubmit,
         setValue
     } = useForm({
@@ -86,28 +86,28 @@ const PaymentCredentials = (props) => {
                 value: data[cr.slug]
             }
         });
-        
+
         credentials.map((cr, indx) => {
             credentials[indx].value = data[cr.slug]
         });
-        
+
         setLoading(true)
-        axios.post(jwtServiceConfig.savePaymentMethodConfiguration, {credentials: params})
-        .then((response) => {
-            setLoading(false)
-            if (response.data.status) {
-                setCredentials(credentials);
-                dispatch(showMessage({ variant: 'success', message: response.data.message }))
-            } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.message }))
-            }
-        })
-        .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+        axios.post(jwtServiceConfig.savePaymentMethodConfiguration, { credentials: params })
+            .then((response) => {
+                setLoading(false)
+                if (response.data.results.status) {
+                    setCredentials(credentials);
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            })
+            .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
     }
 
-    const { 
+    const {
         control: modalControl,
-        formState: { isValid: isModalValid, dirtyFields: modalDirtyField }, 
+        formState: { isValid: isModalValid, dirtyFields: modalDirtyField },
         handleSubmit: handleModalSubmit,
         reset: modalFormReset
     } = useForm({
@@ -129,21 +129,21 @@ const PaymentCredentials = (props) => {
      * Show / Hide Password Icon Variable Set
      * @param confirmAccountStatus [true|false]
      */
-    const [showPassword, setShowPassword] = React.useState(confirmAccountStatus);   
-    
+    const [showPassword, setShowPassword] = React.useState(confirmAccountStatus);
+
     const handleClickShowPassword = () => {
         setShowPassword(true);
         // If not confirmed account password, show Modal.
-        if(!confirmAccountStatus){
+        if (!confirmAccountStatus) {
             setToggleModal(true);
         }
     };
-    
+
     /**
      * Account status changed listener
      */
-    React.useEffect(()=>{
-        if(confirmAccountStatus === true){
+    React.useEffect(() => {
+        if (confirmAccountStatus === true) {
             setToggleModal(false);
         }
     }, [confirmAccountStatus]);
@@ -151,9 +151,9 @@ const PaymentCredentials = (props) => {
     const handleModalClose = () => {
         setToggleModal(false);
         setShowPassword(false);
-        modalFormReset({password: ''})
+        modalFormReset({ password: '' })
     }
-    
+
     return (
         <>
             <Modal
@@ -161,7 +161,7 @@ const PaymentCredentials = (props) => {
                 open={toggleModal}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
-                style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
             >
                 <Box sx={modalStyle}>
                     <h2 id="child-modal-title">Hey, {user.first_name}!</h2>
@@ -170,7 +170,7 @@ const PaymentCredentials = (props) => {
                     </p>
                     <form
                         name="AutoresponderForm"
-                        noValidate  
+                        noValidate
                         className="flex flex-col justify-center w-full mt-32"
                         onSubmit={handleModalSubmit(onModalSubmit)}
                     >
@@ -182,36 +182,36 @@ const PaymentCredentials = (props) => {
                                     {...field}
                                     type="password"
                                     className="mb-24"
-                                    label="Password"                            
+                                    label="Password"
                                     variant="outlined"
                                     required
                                     fullWidth
                                 />
                             )}
                         />
-                        
-                        
+
+
                         <div className='flex justify-between'>
-                            <Button 
+                            <Button
                                 variant="contained"
                                 component="label"
                                 className=""
-                                color="primary" 
-                                onClick={ handleModalClose }
+                                color="primary"
+                                onClick={handleModalClose}
                             >Close</Button>
 
                             <LoadingButton
                                 variant="contained"
                                 color="secondary"
-                                aria-label="Confirm"                        
+                                aria-label="Confirm"
                                 loading={loading}
                                 type="submit"
                                 size="large"
-                                disabled={ !Object.keys(modalDirtyField).length || !isModalValid}
-                                >
+                                disabled={!Object.keys(modalDirtyField).length || !isModalValid}
+                            >
                                 Confirm
                             </LoadingButton>
-                            
+
                         </div>
                     </form>
                 </Box>
@@ -223,14 +223,14 @@ const PaymentCredentials = (props) => {
                 }}
             >
                 <div>
-                    <Typography variant="h6">{ props.gateway }</Typography>            
+                    <Typography variant="h6">{props.gateway}</Typography>
                     <Typography variant="body2">Please add below details</Typography>
                 </div>
-                <Divider style={{ marginBottom: '4rem', marginTop: '1.5rem'}}/>
-               
+                <Divider style={{ marginBottom: '4rem', marginTop: '1.5rem' }} />
+
                 <form
                     name="PaypalForm"
-                    noValidate  
+                    noValidate
                     className="flex flex-col justify-center w-full mt-24"
                     onSubmit={handleSubmit(formSubmit)}
                 >
@@ -238,31 +238,31 @@ const PaymentCredentials = (props) => {
                         credentials.map((el, indx) => {
                             return (
                                 <Controller
-                                    key={ indx }
-                                    name={ el.slug }
+                                    key={indx}
+                                    name={el.slug}
                                     control={control}
                                     render={({ field }) => (
 
                                         <FormControl sx={{ m: 1, width: 'full' }} variant="outlined">
-                                            <InputLabel htmlFor={ el.slug }>{ el.name }</InputLabel>
+                                            <InputLabel htmlFor={el.slug}>{el.name}</InputLabel>
                                             <OutlinedInput
                                                 {...field}
-                                                id={ el.slug }
+                                                id={el.slug}
                                                 type="text"
                                                 endAdornment={
-                                                    (el.value && el.auth) ? 
+                                                    (el.value && el.auth) ?
                                                         <InputAdornment position="end">
                                                             <IconButton
                                                                 aria-label="toggle password visibility"
-                                                                onClick={handleClickShowPassword}                                                        
+                                                                onClick={handleClickShowPassword}
                                                                 edge="end"
                                                             >
-                                                            { !showPassword ? <VisibilityOff /> : ''}
+                                                                {!showPassword ? <VisibilityOff /> : ''}
                                                             </IconButton>
                                                         </InputAdornment>
-                                                    : ''
+                                                        : ''
                                                 }
-                                                label={ el.name }
+                                                label={el.name}
                                                 disabled={
                                                     (!permission) ? true : ((el.value && el.auth && !confirmAccountStatus) ? true : false)
                                                 }
@@ -276,27 +276,27 @@ const PaymentCredentials = (props) => {
                     }
 
                     {
-                        permission ? 
+                        permission ?
                             <div className='flex justify-end'>
                                 <LoadingButton
                                     variant="contained"
                                     color="secondary"
-                                    aria-label="Save"                        
+                                    aria-label="Save"
                                     loading={loading}
                                     type="submit"
                                     size="large"
-                                    disabled={ 
-                                        (!confirmAccountStatus || !isValid) && 
-                                        (Object.keys(dirtyFields).length !=  credentials.length) // If no. of dirtyfields & total no. of fields count check
+                                    disabled={
+                                        (!confirmAccountStatus || !isValid) &&
+                                        (Object.keys(dirtyFields).length != credentials.length) // If no. of dirtyfields & total no. of fields count check
                                     }
                                 >
-                                Save
+                                    Save
                                 </LoadingButton>
-                        
+
                             </div>
-                        : ''
+                            : ''
                     }
-                </form> 
+                </form>
             </Box>
         </>
     );

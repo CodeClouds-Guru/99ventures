@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Ticket.belongsTo(models.Member, {
         foreignKey: "member_id",
-        as: "username",
+        // as: "username",
       });
       Ticket.hasMany(models.TicketConversation, {
         foreignKey: "ticket_id",

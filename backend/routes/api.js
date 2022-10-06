@@ -36,7 +36,7 @@ router.post("/invitation-details", InvitationController.invitationDetails);
 router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
 
 //change ticket read status
-router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
+// router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
 
 router.all(
   "/:module/:action?/:id?",

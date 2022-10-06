@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl } from '@mui/material';
+import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
@@ -31,13 +31,13 @@ const schema = yup.object().shape({
         .string()
         .required('Please select a default layout'),
 });
-  
+
 const replyFormDefaultValues = {
     heading: '',
     messageBody: ''
 }
 
-const replyFormSchema =  yup.object().shape({
+const replyFormSchema = yup.object().shape({
     heading: yup.string().required('Please enter the heading'),
     messageBody: yup.string().required('Please enter Message'),
 });
@@ -50,25 +50,25 @@ function GeneralConfiguration(props) {
     const [pageOptions, setPageOptions] = useState([])
     const [toggleModal, setToggleModal] = useState(false)
     const [permission, setPermission] = useState(false)
-    
+
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
         default_template_id: 0,
         default_captcha_option_id: 0
     });
 
-    const { 
-        control: generalFormControl, 
-        formState: {isValid, dirtyFields, errors}, 
-        handleSubmit, 
-        setError, 
-        setValue 
+    const {
+        control: generalFormControl,
+        formState: { isValid, dirtyFields, errors },
+        handleSubmit,
+        setError,
+        setValue
     } = useForm({
         mode: 'onChange',
         defaultValues,
         resolver: yupResolver(schema),
     });
-    
+
     const selectHomePage = (event) => {
         setDefaultValues({
             ...defaultValues,
@@ -76,19 +76,19 @@ function GeneralConfiguration(props) {
         });
     }
     const selectLayoutOption = (event) => {
-            setDefaultValues({
-                ...defaultValues,
-                default_template_id: event.target.value,
-            })
+        setDefaultValues({
+            ...defaultValues,
+            default_template_id: event.target.value,
+        })
     }
     const selectCaptchaOption = (event) => {
-            setDefaultValues({
-                ...defaultValues,
-                default_captcha_option_id: event.target.value
-            })
+        setDefaultValues({
+            ...defaultValues,
+            default_captcha_option_id: event.target.value
+        })
     }
 
-    useEffect(() => { 
+    useEffect(() => {
         setPermission(
             (props.permission('save') || props.permission('update'))
         );
@@ -97,16 +97,16 @@ function GeneralConfiguration(props) {
 
     const fetchData = () => {
         axios.get(jwtServiceConfig.getGeneralConfiguration).then((response) => {
-            if (response.data.status) {
-                setCaptchaOptions([...response.data.captcha_options, {id: 0, name: 'Select Captcha Option'}])
-                setPageOptions([...response.data.page_options, {id: 0, name: 'Select Home Page'}])
-                setLayoutOptions([...response.data.layout_options, {id: 0, name: 'Select default layout'}])
-                setGeneralReplies([...response.data.general_replies])
+            if (response.data.results.status) {
+                setCaptchaOptions([...response.data.results.data.captcha_options, { id: 0, name: 'Select Captcha Option' }])
+                setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Home Page' }])
+                setLayoutOptions([...response.data.results.data.layout_options, { id: 0, name: 'Select default layout' }])
+                setGeneralReplies([...response.data.results.data.general_replies])
                 setDefaultValues({
                     ...defaultValues,
-                    home_page_id: response.data.home_page_id,
-                    default_template_id: response.data.default_template_id,
-                    default_captcha_option_id: response.data.default_captcha_option_id
+                    home_page_id: response.data.results.data.home_page_id,
+                    default_template_id: response.data.results.data.default_template_id,
+                    default_captcha_option_id: response.data.results.data.default_captcha_option_id
                 })
             } else {
                 console.log('Error');
@@ -117,23 +117,23 @@ function GeneralConfiguration(props) {
     const getFormattedOptions = (options) => {
         return options.map(option => <MenuItem key={Math.random()} value={option.id}>{option.name ?? ''}</MenuItem>)
     }
-    
+
     const getReplies = (replies) => {
         return replies.map((reply, indx) => {
             return (
-                <React.Fragment key={ Math.random() }>
-                    <ListItem key={ Math.random() }  
-                        secondaryAction= {
-                            <IconButton key={ Math.random() } edge="end" aria-label="delete" onClick={()=> removeListItem(indx)}>
+                <React.Fragment key={Math.random()}>
+                    <ListItem key={Math.random()}
+                        secondaryAction={
+                            <IconButton key={Math.random()} edge="end" aria-label="delete" onClick={() => removeListItem(indx)}>
                                 <DeleteIcon />
                             </IconButton>
                         }
                     >
-                        <ListItemText key={ Math.random() } 
+                        <ListItemText key={Math.random()}
                             primary={reply.name}
-                            secondary={ 
+                            secondary={
                                 <Typography
-                                    key={ Math.random() }
+                                    key={Math.random()}
                                     variant="body2"
                                     color="text.secondary"
                                     noWrap
@@ -143,7 +143,7 @@ function GeneralConfiguration(props) {
                             }
                         />
                     </ListItem>
-                    <Divider variant="inset" component="li" className="ml-12" key={ Math.random() }/>
+                    <Divider variant="inset" component="li" className="ml-12" key={Math.random()} />
                 </React.Fragment>
             )
         })
@@ -160,7 +160,7 @@ function GeneralConfiguration(props) {
         generalReplies.splice(itemKey, 1);
         setGeneralReplies([...generalReplies]);
     }
-    
+
     /**
      * General Config data post
      */
@@ -178,48 +178,48 @@ function GeneralConfiguration(props) {
             selected_captcha_id: defaultValues.default_captcha_option_id,
             auto_response_new_data: responses
         }
-        
+
         axios.post(jwtServiceConfig.saveGeneralConfiguration, params)
-        .then((response) => {
-            if (response.data.status) {
-                dispatch(showMessage({ variant: 'success', message: response.data.message }))
-            } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.message }))
-            }
-        })
-        .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+            .then((response) => {
+                if (response.data.results.status) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            })
+            .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
     }
 
-    
+
     /**
      * Modal Form validation 
-     */  
-    const { 
-        control: replyControl, 
-        formState: { isValid: isRPFValid, dirtyFields: dirtyRPFFields }, 
+     */
+    const {
+        control: replyControl,
+        formState: { isValid: isRPFValid, dirtyFields: dirtyRPFFields },
         handleSubmit: handleReplySubmit,
         reset: autoResponderFormReset
     } = useForm({
         mode: 'onChange',
         defaultValues: replyFormDefaultValues,
         resolver: yupResolver(replyFormSchema),
-    });  
-    
-    const onReplySubmit = ({heading, messageBody}) => {
+    });
+
+    const onReplySubmit = ({ heading, messageBody }) => {
         setGeneralReplies([
             ...generalReplies,
             {
                 name: heading,
                 body: messageBody
             }
-        ]);        
-        autoResponderFormReset({replyFormDefaultValues});
+        ]);
+        autoResponderFormReset({ replyFormDefaultValues });
         handleClose();
     }
 
     const handleClose = () => {
         setToggleModal(false);
-        autoResponderFormReset({replyFormDefaultValues});
+        autoResponderFormReset({ replyFormDefaultValues });
     }
 
     return (
@@ -229,7 +229,7 @@ function GeneralConfiguration(props) {
                 open={toggleModal}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
-                style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
             >
                 <Box sx={modalStyle}>
                     <h2 id="child-modal-title mb-24">Auto Responder</h2>
@@ -238,7 +238,7 @@ function GeneralConfiguration(props) {
                     </p> */}
                     <form
                         name="AutoresponderForm"
-                        noValidate  
+                        noValidate
                         className="flex flex-col justify-center w-full mt-32"
                         onSubmit={handleReplySubmit(onReplySubmit)}
                     >
@@ -249,14 +249,14 @@ function GeneralConfiguration(props) {
                                 <TextField
                                     {...field}
                                     className="mb-24"
-                                    label="Heading"                            
+                                    label="Heading"
                                     variant="outlined"
                                     required
                                     fullWidth
                                 />
                             )}
                         />
-                        
+
                         <Controller
                             name="messageBody"
                             control={replyControl}
@@ -274,11 +274,11 @@ function GeneralConfiguration(props) {
                             )}
                         />
                         <div className='flex justify-between'>
-                            <Button 
+                            <Button
                                 variant="contained"
                                 component="label"
                                 className=""
-                                color="primary" 
+                                color="primary"
                                 onClick={handleClose}
                             >Close</Button>
                             <Button
@@ -289,7 +289,7 @@ function GeneralConfiguration(props) {
                                 disabled={_.isEmpty(dirtyRPFFields) || !isRPFValid}
                                 type="submit"
                                 size="large"
-                                >
+                            >
                                 Add
                             </Button>
                         </div>
@@ -305,7 +305,7 @@ function GeneralConfiguration(props) {
 
                         <form
                             name="GeneralConfigurationForm"
-                            noValidate  
+                            noValidate
                             className="flex flex-col justify-center w-full mt-32"
                             onSubmit={handleSubmit(onSubmit)}
                         >
@@ -324,7 +324,7 @@ function GeneralConfiguration(props) {
                                             label="Homepage"
                                             onChange={selectHomePage}
                                             required
-                                            disabled={ !permission }
+                                            disabled={!permission}
                                         >
                                             {getFormattedOptions(pageOptions)}
                                         </Select>
@@ -345,8 +345,8 @@ function GeneralConfiguration(props) {
                                             id="demo-simple-select"
                                             value={defaultValues.default_template_id}
                                             label="Default Template"
-                                            onChange={selectLayoutOption}                                            
-                                            disabled={ !permission }
+                                            onChange={selectLayoutOption}
+                                            disabled={!permission}
                                         >
                                             {getFormattedOptions(layoutOptions)}
                                         </Select>
@@ -368,14 +368,14 @@ function GeneralConfiguration(props) {
                                             value={defaultValues.default_captcha_option_id}
                                             label="Captcha"
                                             onChange={selectCaptchaOption}
-                                            disabled={ !permission }
-                                            >
+                                            disabled={!permission}
+                                        >
                                             {getFormattedOptions(captchaOptions)}
                                         </Select>
                                     </FormControl>
                                 )}
                             />
-                            <Divider className="mb-24"/>
+                            <Divider className="mb-24" />
                             <h3>
                                 Replies
                                 <Button
@@ -396,8 +396,8 @@ function GeneralConfiguration(props) {
                             </CardContent>
 
                             {
-                                (permission) ? 
-                                    <div className='flex items-center justify-center'> 
+                                (permission) ?
+                                    <div className='flex items-center justify-center'>
                                         <Button
                                             variant="contained"
                                             color="secondary"
@@ -408,9 +408,9 @@ function GeneralConfiguration(props) {
                                         >
                                             Save
                                         </Button>
-                                    </div> 
-                                : ''
-                            }                            
+                                    </div>
+                                    : ''
+                            }
                         </form>
                     </div>
                 </Paper>

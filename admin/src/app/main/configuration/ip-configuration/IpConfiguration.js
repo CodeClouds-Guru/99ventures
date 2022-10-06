@@ -26,8 +26,8 @@ function IpConfiguration(props) {
             ips,
             isps,
         }).then(res => {
-            const variant = res.data.status ? 'success' : 'error';
-            dispatch(showMessage({ variant, message: res.data.message }))
+            const variant = res.data.results.status ? 'success' : 'error';
+            dispatch(showMessage({ variant, message: res.data.results.message }))
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong' }))
@@ -44,11 +44,11 @@ function IpConfiguration(props) {
 
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
-            if (res.data.status) {
-                setIps(res.data.ip_list)
-                setIsps(res.data.isp_list)
+            if (res.data.results.status) {
+                setIps(res.data.results.data.ip_list)
+                setIsps(res.data.results.data.isp_list)
             } else {
-                dispatch(showMessage({ variant: 'error', message: res.data.message }))
+                dispatch(showMessage({ variant: 'error', message: res.data.errors }))
             }
         }).catch(e => {
             console.error(e)
@@ -65,7 +65,7 @@ function IpConfiguration(props) {
                             <CardHeader title="Denied IP List" />
                             <CardContent>
                                 <AddMore
-                                    permission={ permission }
+                                    permission={permission}
                                     data={ips}
                                     placeholder="Enter IP"
                                     onChange={onIpChangeFromChild}
@@ -78,7 +78,7 @@ function IpConfiguration(props) {
                             <CardHeader title="Denied ISP List" />
                             <CardContent>
                                 <AddMore
-                                    permission={ permission }
+                                    permission={permission}
                                     data={isps}
                                     placeholder="Enter ISP"
                                     onChange={onIspChangeFromChild}
@@ -88,7 +88,7 @@ function IpConfiguration(props) {
                         </Card>
 
                         {
-                            permission ? 
+                            permission ?
                                 <span className="flex items-center justify-center">
                                     <Button
                                         variant="contained"
@@ -101,7 +101,7 @@ function IpConfiguration(props) {
                                         Save
                                     </Button>
                                 </span>
-                            : ''
+                                : ''
                         }
                     </div>
                 </div>
