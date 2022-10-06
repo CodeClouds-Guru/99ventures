@@ -14,9 +14,12 @@ const FileManagerList = () => {
     // const sideBar = useSelector(state=>state.filemanager.show_sidebar)
     // const dispatch = useDispatch();
         
+    const handleDragOver = () => {
+        console.log('ss')
+    }
 
     return (
-        <div className="p-32 list--view">
+        <div className="p-32 list--view" onDragOver={handleDragOver}>
             <Box
                 className="p-16 w-full rounded-16 mb-24 border filemanager-file-box"
                 sx={{

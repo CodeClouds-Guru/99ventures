@@ -11,6 +11,8 @@ import Divider from '@mui/material/Divider';
 import SidebarContent from './SidebarContent';
 import FileManagerList from './FilemanagerList';
 import { useSelector } from 'react-redux';
+import ImagePreview from './ImagePreview';
+import DragDropzone from './DragDropZone';
 
 const Index = () => {
     const selectedItem = useSelector(state=>state.filemanager.selectedItem)
@@ -41,13 +43,13 @@ const Index = () => {
             </Box> */}
             <FusePageCarded
                 header={<FileManagerHeader />}
-                content={<FileManagerList />}
+                content={<DragDropzone />}
                 rightSidebarOpen={ selectedItem !== null }
                 rightSidebarContent={<SidebarContent />}
                 rightSidebarWidth={400}
                 scroll={isMobile ? 'normal' : 'content'}
-            />
-            
+            />            
+            <ImagePreview />
         </>
     )
 }

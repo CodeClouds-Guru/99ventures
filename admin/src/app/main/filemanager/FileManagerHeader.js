@@ -40,6 +40,9 @@ function FileManagerHeader(props) {
 		</div>
 
 		<Header/>
+		<div className='breadcrumb py-24 flex items-center'>
+			<FuseSvgIcon className="text-48" size={30} color="action">material-outline:home</FuseSvgIcon> <span>/</span>
+		</div>
 	</div>
   );
 }

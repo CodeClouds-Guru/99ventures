@@ -8,6 +8,7 @@ import { lighten } from '@mui/material/styles';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { useState } from 'react';
 import AltTag from './AltTag';
+import { setlightBoxStatus } from 'app/store/filemanager';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
@@ -100,7 +101,7 @@ const SidebarContent = (props) => {
 			
 			<div className=" gap-16 w-full mt-32 flex justify-between">
 				<Button className="" color="secondary" variant="contained">Download</Button>
-				<Button className="" color="primary" variant="contained">Preview</Button>
+				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: '//placekitten.com/1500/500'})) }>Preview</Button>
 				<Button className="" color="error" variant="outlined" onClick={ ()=>setOpenAlertDialog(true) }>Delete</Button>
 			</div>
 			<AlertDialog

@@ -16,15 +16,10 @@ import ConfigurationConfig from '../main/configuration/ConfigurationConfig';
 import ProfileConfig from '../main/profile/ProfileConfig';
 import EmailTemplateConfig from '../main/email-template/EmailTemplateConfig';
 import ScriptConfig from '../main/scripts/ScriptConfig';
-<<<<<<< HEAD
 import FilemanagerConfig from '../main/filemanager/FilemanagerConfig';
- 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, FilemanagerConfig];
-=======
 import TicketConfig from '../main/ticket/ConfigurationConfig';
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig];
->>>>>>> 924c93820fb904ba449e8599b59f66a20e94abfe
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set

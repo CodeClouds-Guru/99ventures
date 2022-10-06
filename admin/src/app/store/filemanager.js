@@ -48,7 +48,23 @@ const jsonData = [
         size: 18879,
         path: "/",
         name: "Demo"
-    }
+    },
+    {
+        id: 2,
+        type: 'file',
+        mime_type: 'image/jpg',
+        size: 18879,
+        path: "/",
+        name: "main_logo.png"
+    },
+    {
+        id: 3,
+        type: 'file',
+        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        size: 18879,
+        path: "/",
+        name: "sheet.xlsx"
+    },
 ]
 
 const initialState = {
@@ -56,6 +72,7 @@ const initialState = {
     selectedItem: null,
     selectAll: false,
     selectedItemsId: [],
+    lightBox: {isOpen: false, src: null},
     jsonData
 }
 
@@ -74,10 +91,19 @@ const fileManagerSlice = createSlice({
         },
         setSelectedItemsId: (state, action) => {
             state.selectedItemsId = action.payload
+        },
+        setlightBoxStatus: (state, action) => {
+            state.lightBox = action.payload
         }
     }
 });
 
-export const { toggleSidebar, setSelectedItem, setSelectAll, setSelectedItemsId } = fileManagerSlice.actions
+export const { 
+    toggleSidebar, 
+    setSelectedItem, 
+    setSelectAll, 
+    setSelectedItemsId,
+    setlightBoxStatus
+} = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

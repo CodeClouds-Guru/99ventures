@@ -24,21 +24,20 @@ const navigationConfig = [
     url: 'app/scripts',
   },
   {
-<<<<<<< HEAD
     id: 'filemanager',
     title: 'File Manager',
     // translate: 'File Manager',
     type: 'item',
     icon: 'heroicons-outline:folder',
     url: 'app/filemanager',
-=======
+  },
+  {
     id: 'tickets',
     title: 'Tickets',
     translate: 'Tickets',
     type: 'item',
     icon: 'heroicons-outline:ticket',
     url: 'app/tickets',
->>>>>>> 924c93820fb904ba449e8599b59f66a20e94abfe
   },
   {
     id: 'administration',
