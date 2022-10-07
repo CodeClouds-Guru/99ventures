@@ -16,7 +16,7 @@ const navigationConfig = [
     url: 'configuration',
   },
   {
-    id: 'scripts', 
+    id: 'scripts',
     title: 'Scripts',
     translate: 'Scripts',
     type: 'item',
@@ -24,6 +24,12 @@ const navigationConfig = [
     url: 'app/scripts',
   },
   {
+    id: 'ticketingsystem',
+    title: 'Ticketing System',
+    // translate: 'Ticketing System',
+    type: 'item',
+    icon: 'heroicons-outline:ticket',
+    url: 'ticketing-system',
     id: 'filemanager',
     title: 'File Manager',
     // translate: 'File Manager',
