@@ -40,7 +40,7 @@ const SidebarContent = (props) => {
 		<motion.div
 			initial={{ y: 50, opacity: 0.8 }}
 			animate={{ y: 0, opacity: 1, transition: { delay: 0.3 } }}
-			className="file-details p-24 sm:p-32"
+			className="file-details lg:p-24 md:24 sm:p-24"
 		>
 			<div className="flex items-center justify-between w-full">
 				<Typography variant="h5">Details</Typography>
@@ -50,7 +50,7 @@ const SidebarContent = (props) => {
 			</div>
 
 			<Box
-				className="overflow-hidden w-full rounded-8 border preview h-128 sm:h-256 file-icon flex items-center justify-center my-32"
+				className="overflow-hidden w-full rounded-8 border preview h-128 sm:h-256 file-icon flex items-center justify-center my-24"
 				sx={{
 				backgroundColor: (theme) =>
 					theme.palette.mode === 'light'
@@ -92,24 +92,21 @@ const SidebarContent = (props) => {
 				</div>
 			</div>
 
-			{/* {item.description && (
-				<>
-					<div className="text-16 font-medium mt-32 pb-16 border-b">Description</div>
-					<Typography className="py-12">{item.description}</Typography>
-				</>
-			)} */}
-			
 			<div className=" gap-16 w-full mt-32 flex justify-between">
 				<Button className="" color="secondary" variant="contained">Download</Button>
 				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: '//placekitten.com/1500/500'})) }>Preview</Button>
 				<Button className="" color="error" variant="outlined" onClick={ ()=>setOpenAlertDialog(true) }>Delete</Button>
 			</div>
-			<AlertDialog
-				content="Do you delete this item?"
-				open={openAlertDialog}
-				onConfirm={onConfirmAlertDialogHandle}
-				onClose={onCloseAlertDialogHandle}
-			/>
+			{
+				openAlertDialog && (
+					<AlertDialog
+						content="Do you delete this item?"
+						open={openAlertDialog}
+						onConfirm={onConfirmAlertDialogHandle}
+						onClose={onCloseAlertDialogHandle}
+					/>
+				)
+			}			
 		</motion.div>
 	);
 }

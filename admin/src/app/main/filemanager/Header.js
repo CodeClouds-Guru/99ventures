@@ -119,13 +119,16 @@ const Header = () => {
                     </Tooltip>
                 </div>            
             </div>
-            
-        <AlertDialog
-            content="Do you delete the item(s)?"
-            open={openAlertDialog}
-            onConfirm={onConfirmAlertDialogHandle}
-            onClose={onCloseAlertDialogHandle}
-        />
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content="Do you delete the item(s)?"
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }            
         </>
     )
 }
