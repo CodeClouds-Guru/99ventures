@@ -33,6 +33,7 @@ function ConfigurationContent() {
 
     useEffect(() => {
         constructWhereclause();
+        setListKey((c) => c + 1);
     }, [selectedStatus, dateRange])
     
     return (
