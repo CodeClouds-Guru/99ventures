@@ -19,6 +19,8 @@ const baseStyle = {
 const Header = () => {
     const dispatch = useDispatch();
     const viewType = useSelector(state=> state.filemanager.viewType);
+    const selectedItem = useSelector(state=>state.filemanager.selectedItem);
+    const selectedItemIdArry = useSelector(state=> state.filemanager.selectedItemsId);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     
@@ -49,11 +51,16 @@ const Header = () => {
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
                 <SelectAll />
                 <div className='flex justify-between'>
-                    <Tooltip title="Delete">
-                        <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
-                            <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:trash</FuseSvgIcon>
-                        </IconButton>
-                    </Tooltip>
+                    {
+                        (selectedItemIdArry.length || selectedItem) ? (
+                            <Tooltip title="Delete">
+                                <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
+                                    <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                </IconButton>
+                            </Tooltip>
+                        ) : ''
+                    }
+                    
                     <CreateFolder />
                     <Tooltip title="Download">
                         <IconButton color="primary" aria-label="Filter" component="label" >
