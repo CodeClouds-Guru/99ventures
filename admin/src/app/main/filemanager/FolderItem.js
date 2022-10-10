@@ -56,20 +56,20 @@ function FolderItem(props) {
 			sx={{ backgroundColor: 'background.paper' }}
 			className={`relative w-full m-8 shadow rounded-16 folder--box ${style[viewType].box} ${viewType}--view--section`}
 		> 
-			<IconButton
-                className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
-            >
-                <Checkbox 
-                    checked={ selectedItemsId.includes(props.file.id) }
-                    inputProps={{ 'aria-label': 'controlled' }}
-                    onChange={handleChange} 
-                />
-            </IconButton>
-			<NavLinkAdapter
+			{/* <NavLinkAdapter
 				className={`flex h-full w-full ${style[viewType].nav_icon_adapter}`}
 				to={`/app/filemanager/ss`}
 				role="button"
-			>
+			> */}
+				<IconButton
+                	className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
+				>
+					<Checkbox 
+						checked={ selectedItemsId.includes(props.file.id) }
+						inputProps={{ 'aria-label': 'controlled' }}
+						onChange={handleChange} 
+					/>
+				</IconButton>
 				<div className={`flex  items-center ${style[viewType].icon}`}>
 					<ItemIcon className="" type="folder" />
 				</div>
@@ -88,7 +88,7 @@ function FolderItem(props) {
 						</>
 					)
 				}				
-			</NavLinkAdapter>
+			{/* </NavLinkAdapter> */}
 		</Box>
 	);
 }
