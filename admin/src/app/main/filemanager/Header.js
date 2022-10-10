@@ -6,6 +6,8 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
+import { useSelector, useDispatch } from 'react-redux';
+import { setViewType } from '../../store/filemanager'
 
 const baseStyle = {
     marginBottom: '1rem',
@@ -15,10 +17,11 @@ const baseStyle = {
 }
 
 const Header = () => {
-    const [ viewType, setViewType ] = useState('grid');
+    const dispatch = useDispatch();
+    const viewType = useSelector(state=> state.filemanager.viewType);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-        
+    
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
     }
@@ -108,12 +111,12 @@ const Header = () => {
                 </div>
                 <div className='flex view--type'>
                     <Tooltip title="Grid">
-                        <IconButton color="primary" aria-label="Filter" component="label" className={ viewType === 'grid' ? 'active' : '' }>
+                        <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('grid'))} className={ viewType === 'grid' ? 'active' : '' }>
                             <FuseSvgIcon className="text-48" size={30} color="action">material-outline:grid_view</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="List">
-                        <IconButton color="primary" aria-label="Filter" component="label" className={ viewType === 'list' ? 'active' : ''}>
+                        <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('list'))} className={ viewType === 'list' ? 'active' : ''}>
                             <FuseSvgIcon className="text-48" size={30} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>

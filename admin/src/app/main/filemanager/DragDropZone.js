@@ -91,8 +91,8 @@ const centerStyle = {
 }
 
 function DragDropzone(props) {
-    // const jsonData = useSelector(state=> state.filemanager.jsonData)
-    const jsonData = []
+    const jsonData = useSelector(state=> state.filemanager.jsonData)
+    // const jsonData = []
 	const [files, setFiles] = useState([]);
 	const {
 		getRootProps,
