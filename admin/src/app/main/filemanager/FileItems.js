@@ -99,13 +99,17 @@ const FileItems = (props) => {
                         </MenuItem>                        
                     </Menu>                     
                 </div>
-            </div>        
-            <AlertDialog
-                content="Do you delete the item(s)?"
-                open={openAlertDialog}
-                onConfirm={onConfirmAlertDialogHandle}
-                onClose={onCloseAlertDialogHandle}
-            />
+            </div>
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content="Do you delete the item(s)?"
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
         </Box>
     )
 }
