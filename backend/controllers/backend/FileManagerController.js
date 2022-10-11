@@ -7,56 +7,14 @@ class FileManagerController {
     const fileHelper = new FileHelper('','file-manager',req);
     let file_list = await fileHelper.getList();
     let file_objects = []
-    return {
-      status:true,
-      data:[
-        {
-          type:'folder',
-          name: 'abc',
-          details:[
-            {
-              type:'folder',
-              name:'new folder',
-              details:[
-                {
-                  type:'file',
-                  name:'1665138206251sample.pdf',
-                  details:[],
-                  file_path:"https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/abc/1665138206251sample.pdf"
-                }
-              ],
-              file_path:''
-            }
-          ],
-          file_path:''
-        },
-        {
-          type:'file',
-          name:'1665138206251sample.pdf',
-          details:[],
-          file_path:"https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/abc/1665138206251sample.pdf"
-        }
-      ]
-    }
     if(file_list)
     {
       for(let i = 0; i < file_list.length; i++){
         let folder_structure = []
         folder_structure = file_list[i].Key.split('/')
         if(folder_structure.length > 3){//company name/site id/file-manager/folder-name/file
-          file_objects = this.folderStructure(file_objects,folder_structure) 
+          file_objects = this.folderStructure(file_objects,folder_structure,file_list[i]) 
         }
-        // file_objects.push(folder_structure)
-        // if(folder_structure.length == 4){
-        //   if(folder_structure[folder_structure.length - 1] == ''){
-        //     file_objects.push({type:'folder',name:folder_structure[2],delails:[],file_path:''})
-        //   }else{
-        //     file_objects.push({type:'file',name:folder_structure[3],delails:[],file_path:file_list[i].Key})
-        //   }
-        // }else{
-        //   file_structure = this.folderStructure(file_objects,folder_structure)
-          
-        // }
       }
       
     }
@@ -65,45 +23,72 @@ class FileManagerController {
     }
   }
   //folder structure
-  folderStructure(file_objects,folder_structure){
+  folderStructure(file_objects,folder_structure,object_key){
     let matched_object = file_objects
     let index_string = ''
     let indexes = []
+    let start_index = 3;
     for(let i = 3; i < folder_structure.length - 1; i++){
         let get_index = this.getIndex(index_string,matched_object,folder_structure[i])
+        if(get_index.folder_index != -1)
+          matched_object = matched_object[get_index.folder_index].details
         // index_string = get_index.index_string
         indexes.push(get_index.folder_index)
     }
-
+    let details_arr = []
+    if(folder_structure[folder_structure.length - 1] !=''){
+      details_arr = [{type:'file',name:folder_structure[folder_structure.length - 1],details:[],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg'}]
+    }
     switch(indexes.length) {
       case 1:
         // single folder - company name/site id/file-manager/folder-name/file
-        file_objects.push({type:'folder',name:folder_structure[0],delails:[],file_path:''})
+        if(indexes[0] == -1)
+          file_objects.push({type:'folder',name:folder_structure[start_index],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        else
+          file_objects[indexes[0]].details.push(details_arr[0])
         break;
       case 2:
         // 2 layar
-        file_objects.push({type:'folder',name:folder_structure[0],delails:[],file_path:''})
+        if(indexes[0] == -1 && indexes[1] == -1){
+          file_objects.push({type:'folder',name:folder_structure[start_index],details:[{type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        }
+        else if(indexes[0] != -1 && indexes[1] == -1){
+          file_objects[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        }
+        else{
+          file_objects[indexes[0]].details[indexes[1]].details.push(details_arr[0])
+        }
         break;
       case 3:
         // 3 layar
+        if(indexes[0] == -1 && indexes[1] == -1 && indexes[2] == -1){
+          file_objects.push({type:'folder',name:folder_structure[start_index],details:[{type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        }
+        else if(indexes[0] != -1 && indexes[1] == -1 && indexes[2] == -1){
+          file_objects[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:[{type:'folder',name:folder_structure[start_index+2],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        }
+        else if(indexes[0] != -1 && indexes[1] != -1 && indexes[2] == -1){
+          file_objects[indexes[0]].details[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+        }
+        else
+          file_objects[indexes[0]].details[indexes[1]].details[indexes[1]].details.push(details_arr[0])
         break;
       default:
         // code block
     }
+    return file_objects
   }
   //find the index
   getIndex(index_string,matched_object,folder_name){
     let matched = false
-    let folder_index = ''
-    for(let i = 0; i < matched_object.length; i++){
-      if(matched_object[i].name == folder_name){
-        folder_index = i
-        matched = true
-        // if(index_string == '')
-        //   index_string = index_string+"["+i+"]"
-        // else
-        //   index_string = index_string+".details["+i+"]"
-        break;
+    let folder_index = -1
+    if(matched_object.length){
+      for(let i = 0; i < matched_object.length; i++){
+        if(matched_object[i].name == folder_name){
+          folder_index = i
+          matched = true
+          break;
+        }
       }
     }
     return {
