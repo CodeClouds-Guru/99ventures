@@ -19,6 +19,8 @@ class TicketController extends Controller {
     // this.changeStatus = this.changeStatus.bind(this);
   }
 
+
+  /**
   //ticket listing
   async list(req, res) {
     //header data
@@ -94,6 +96,40 @@ class TicketController extends Controller {
       this.throwCustomError("Unable to get data", 500);
     }
   }
+  */
+
+  async list(req, res) {
+    var options = super.getQueryOptions(req);
+    var option_where = options.where || {};
+    var query_where = req.query.where || "{}";
+    let company_portal_id = req.headers.site_id
+    query_where = JSON.parse(query_where);
+    var new_option = {}
+    var and_query = {
+      company_portal_id: company_portal_id,
+      created_at: {
+        [Op.between] : query_where.created_at
+      }
+    }
+    if('status' in query_where) {
+      and_query.status = query_where.status
+    }
+    if(Object.keys(query_where).length > 0) {
+      new_option[Op.and] = {
+        ...option_where,
+        ...and_query
+      }
+    }
+    options.where = new_option;
+    console.log('options', options);
+
+    const { docs, pages, total } = await this.model.paginate(options);
+    return {
+      result: { data: docs, pages, total },
+      fields: this.model.fields,
+    };
+  }
+
 
   //ticket view
   async view(req, res) {
