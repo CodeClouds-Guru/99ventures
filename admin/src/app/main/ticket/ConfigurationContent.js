@@ -7,7 +7,10 @@ import moment from 'moment';
 function ConfigurationContent() {
     const [selectedStatus, setSelectedStatus] = useState('');
     const [open, setOpen] = useState(false);
-    const [dateRange, setDateRange] = useState(null);
+    const [dateRange, setDateRange] = useState({
+        startDate: moment().subtract(7, 'd').startOf('day'),
+        endDate: moment(),  
+    });
     const [whereClause, setWhereClause] = useState({});
     const [listKey, setListKey] = useState(0);
 
@@ -15,7 +18,10 @@ function ConfigurationContent() {
 
     const clearFilter = () => {
         setSelectedStatus('')
-        setDateRange(null);
+        setDateRange({
+            startDate: moment().subtract(7, 'd').startOf('day'),
+            endDate: moment(),  
+        });
     }
 
     const handleChange = (e) => {
@@ -24,11 +30,21 @@ function ConfigurationContent() {
 
     const dateRangeSelected = (val) => {
         toggle();
-        setDateRange(val);
+        setDateRange({
+            startDate: moment(val.startDate),
+            endDate: moment(val.endDate)
+        });
+        console.log(val);
     }
 
     const constructWhereclause = () => {
-        setWhereClause({...whereClause, status: selectedStatus});
+        const param = {
+            created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
+        }
+        if(selectedStatus !== '') {
+            param['status'] = selectedStatus
+        }
+        setWhereClause(param);
     }
 
     useEffect(() => {
@@ -51,9 +67,9 @@ function ConfigurationContent() {
                                 onChange={handleChange}
                             >
                             <MenuItem value={''}>All</MenuItem>
-                            <MenuItem value={'closed'}>Closed</MenuItem>
-                            <MenuItem value={'open'}>Open</MenuItem>
-                            <MenuItem value={'pending'}>Pending</MenuItem>
+                            <MenuItem value={1}>Open</MenuItem>
+                            <MenuItem value={2}>Pending</MenuItem>
+                            <MenuItem value={0}>Closed</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -82,14 +98,14 @@ function ConfigurationContent() {
                         color="primary"
                         aria-label="Clear Filter"
                         component="label"
-                        click={clearFilter}
+                        onClick={clearFilter}
                     >
                         <ClearAllIcon />
                     </IconButton>
                     </Grid>
                 </Grid>
             </Box>
-            {JSON.stringify(whereClause)}
+            {/* {JSON.stringify(whereClause)} */}
             <List
                 module="tickets"
                 moduleHeading='N/A'
