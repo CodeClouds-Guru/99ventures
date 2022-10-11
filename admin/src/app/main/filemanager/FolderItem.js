@@ -32,7 +32,7 @@ function FolderItem(props) {
 	 */
 	const style = {
 		grid: {
-			box: 'sm:w-160 h-160 p-16',
+			box: 'sm:w-160 h-160 p-16 flex-col',
 			icon_btn: 'absolute',
 			nav_icon_adapter: 'flex-col',
 			icon: 'flex-auto w-full justify-center',
@@ -41,7 +41,7 @@ function FolderItem(props) {
 			size: 'text-center'
 		},
 		list: {
-			box: 'sm:w-full flex items-center row-style p-10',
+			box: 'sm:w-full items-center row-style p-10',
 			icon_btn: '',
 			nav_icon_adapter: 'flex-row items-center justify-between',
 			icon: '',
@@ -54,22 +54,23 @@ function FolderItem(props) {
 	return (
 		<Box
 			sx={{ backgroundColor: 'background.paper' }}
-			className={`relative w-full m-8 shadow rounded-16 folder--box ${style[viewType].box} ${viewType}--view--section`}
+			className={`relative flex w-full m-8 shadow rounded-16 folder--box ${style[viewType].box} ${viewType}--view--section`}
 		> 
-			{/* <NavLinkAdapter
+			<IconButton
+                	className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
+			>
+				<Checkbox 
+					checked={ selectedItemsId.includes(props.file.id) }
+					inputProps={{ 'aria-label': 'controlled' }}
+					onChange={handleChange} 
+				/>
+			</IconButton>
+			<NavLinkAdapter
 				className={`flex h-full w-full ${style[viewType].nav_icon_adapter}`}
 				to={`/app/filemanager/ss`}
 				role="button"
-			> */}
-				<IconButton
-                	className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
-				>
-					<Checkbox 
-						checked={ selectedItemsId.includes(props.file.id) }
-						inputProps={{ 'aria-label': 'controlled' }}
-						onChange={handleChange} 
-					/>
-				</IconButton>
+			>
+				
 				<div className={`flex  items-center ${style[viewType].icon}`}>
 					<ItemIcon className="" type="folder" />
 				</div>
@@ -88,7 +89,7 @@ function FolderItem(props) {
 						</>
 					)
 				}				
-			{/* </NavLinkAdapter> */}
+			</NavLinkAdapter>
 		</Box>
 	);
 }

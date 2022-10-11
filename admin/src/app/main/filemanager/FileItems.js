@@ -4,6 +4,7 @@ import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedItemsId, setSelectedItem, setlightBoxStatus } from 'app/store/filemanager'
+import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 // import { setSelectedItem } from 'app/store/filemanager'
 import AlertDialog from 'app/shared-components/AlertDialog';
 import './FileManager.css';
@@ -74,18 +75,7 @@ const FileItems = (props) => {
     return (
         <Box
             sx={{ backgroundColor: 'rgb(255, 255, 255)' }}
-            className={`
-                ${style[viewType].box}
-                flex 
-                relative 
-                w-full
-                m-8                 
-                shadow r
-                rounded-16 
-                cursor-pointer 
-                file--box ${selectedItem && selectedItem.id === props.file.id ? 'border-2 border-gray-800' : ''}
-                ${viewType}--view--section
-            `}
+            className={`${style[viewType].box} flex relative w-full m-8 shadow rounded-16 cursor-pointer ${selectedItem && selectedItem.id === props.file.id ? 'border-2 border-gray-800' : ''} ${viewType}--view--section`}
             >
             <IconButton
                 className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
@@ -95,64 +85,70 @@ const FileItems = (props) => {
                     inputProps={{ 'aria-label': 'controlled' }}
                     onChange={handleChange} 
                 />
-            </IconButton>                
-            
-            <div className={`flex items-center ${style[viewType].icon}`} onClick={()=> dispatch(setSelectedItem(props.file)) }>
-                <ItemIcon className="" type={props.file.mime_type} />
-            </div>
-            
-            <div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
-                <Typography className="truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file)) }>{ props.file.name }</Typography>
-                <div className="item-list-icon">
-                    <IconButton color="primary" aria-label="Filter" component="label"  onClick={ handleMenuClick }>
-                        <FuseSvgIcon className="text-32" size={24} color="action">heroicons-outline:dots-vertical</FuseSvgIcon>  
-                    </IconButton>
+            </IconButton>
 
-                    <Menu
-                        id="actions-menu"
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleMenuClose}
-                        >
-                        <MenuItem onClick={()=> dispatch(setSelectedItem(props.file))}>
-                            <ListItemIcon className="min-w-40">
-                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:info</FuseSvgIcon>
-                            </ListItemIcon>
-                            <ListItemText primary="Details" />
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItemIcon className="min-w-40">
-                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:content_copy</FuseSvgIcon>
-                            </ListItemIcon>
-                            <ListItemText primary="Copy" />
-                        </MenuItem>
-                        <MenuItem onClick={ openPreview }>
-                            <ListItemIcon className="min-w-40">
-                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:remove_red_eye</FuseSvgIcon>
-                            </ListItemIcon>
-                            <ListItemText primary="Preview" />
-                        </MenuItem>
-                        <MenuItem onClick={ ()=> setOpenAlertDialog(true) }>
-                            <ListItemIcon className="min-w-40">
-                                <FuseSvgIcon>heroicons-outline:trash</FuseSvgIcon>
-                            </ListItemIcon>
-                            <ListItemText primary="Delete" />
-                        </MenuItem>                        
-                    </Menu>                     
+            <NavLinkAdapter
+				className={`flex h-full w-full ${style[viewType].nav_icon_adapter}`}
+                to="#"
+				role="button"
+			>
+                <div className={`flex items-center ${style[viewType].icon}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
+                    <ItemIcon className="" type={props.file.mime_type} />
                 </div>
-            </div>
-            {
-                viewType === 'list' && (
-                    <>
-                        <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].modify}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                            <Typography className="truncate text-12 font-medium">Modified At</Typography>
-                        </div>
-                        <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].size}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                            <Typography className="truncate text-12 font-medium">100KB</Typography>
-                        </div>
-                    </>
-                )
-            }	
+                
+                <div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
+                    <Typography className="truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file))}>{ props.file.name }</Typography>
+                    <div className="item-list-icon">
+                        <IconButton color="primary" aria-label="Filter" component="label"  onClick={ handleMenuClick }>
+                            <FuseSvgIcon className="text-32" size={20} color="action">heroicons-outline:dots-vertical</FuseSvgIcon>  
+                        </IconButton>
+
+                        <Menu
+                            id="actions-menu"
+                            anchorEl={anchorEl}
+                            open={Boolean(anchorEl)}
+                            onClose={handleMenuClose}
+                            >
+                            <MenuItem onClick={()=> dispatch(setSelectedItem(props.file))}>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:info</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Details" />
+                            </MenuItem>
+                            <MenuItem>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Copy" />
+                            </MenuItem>
+                            <MenuItem onClick={ openPreview }>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Preview" />
+                            </MenuItem>
+                            <MenuItem onClick={ ()=> setOpenAlertDialog(true) }>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon size={20}>heroicons-outline:trash</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Delete" />
+                            </MenuItem>                        
+                        </Menu>                     
+                    </div>
+                </div>
+                {
+                    viewType === 'list' && (
+                        <>
+                            <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].modify}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
+                                <Typography className="truncate text-12 font-medium">Modified At</Typography>
+                            </div>
+                            <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].size}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
+                                <Typography className="truncate text-12 font-medium">100KB</Typography>
+                            </div>
+                        </>
+                    )
+                }	
+            </NavLinkAdapter>
             {
                 openAlertDialog && (
                     <AlertDialog
