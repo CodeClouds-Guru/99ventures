@@ -30,6 +30,8 @@ const navigationConfig = [
     type: 'item',
     icon: 'heroicons-outline:ticket',
     url: 'ticketing-system',
+  },
+  {
     id: 'filemanager',
     title: 'File Manager',
     // translate: 'File Manager',

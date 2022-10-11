@@ -7,7 +7,7 @@ import FolderItem from "./FolderItem";
 import { useSelector } from 'react-redux';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
-const baseStyle = {
+const baseStyle1 = {
 	flex: 1,
 	display: 'flex',
 	flexDirection: 'column',
@@ -22,6 +22,13 @@ const baseStyle = {
 	outline: 'none',
 	transition: 'border .24s ease-in-out'
 };
+
+const baseStyle = {
+	justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+};
+
 
 const focusedStyle = {
 	borderColor: '#2196f3'
@@ -69,21 +76,23 @@ const img = {
 };
 
 const centerStyle = {
-    backgroundColor: 'rgba(0,0,0,.04)',
-    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    inset: '0px',
     height: '220px',
-    left: 0,
-    margin: 'auto',
-    position: 'absolute',
-    right: 0,
-    top: 0,
     width: '220px',
     borderRadius: '50%',
-    textAlign: 'center'
+    textAlign: 'center',
+    marginBottom: 'auto',
+    display: 'flex',
+    zIndex: '-9',
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center'
 }
 
 function DragDropzone(props) {
     const jsonData = useSelector(state=> state.filemanager.jsonData)
+    // const jsonData = []
 	const [files, setFiles] = useState([]);
 	const {
 		getRootProps,
@@ -117,7 +126,7 @@ function DragDropzone(props) {
 	});
 
 	const style = useMemo(() => ({
-		//...baseStyle,
+		...(!jsonData.length ? baseStyle: {}),
 		...(isFocused ? focusedStyle : {}),
 		...(isDragAccept ? acceptStyle : {}),
 		...(isDragReject ? rejectStyle : {})
@@ -152,37 +161,41 @@ function DragDropzone(props) {
 
 
 	return (
-        <section className="container flex flex-col h-full p-24 w-full border filemanager-file-box ">
+        <section className="container flex flex-col h-full  md:p-24 sm:p-24 lg:p-24 w-full border filemanager-file-box ">
             <Box 
                 className="dropzone h-full"
                 {...getRootProps({ style })}
             >
                 <div className='flex flex-wrap items-center' >
-                    {/* {
-                        jsonData.map((el, i) => {
+                    {
+                        jsonData.length ? jsonData.map((el, i) => {
                             if(el.type === 'folder') {
                                 return <FolderItem key={i} file={ el }/>
                             }
-                        })
+                        }) : ''
                     }
                     {
-                        jsonData.map((el, i) => {
+                        jsonData.length ? jsonData.map((el, i) => {
                             if(el.type === 'file') {
                                 return <FileItems key={i} file={ el } />
                             }
-                        })
-                    }  */}
+                        }) : ''
+                    } 
                     <input {...getInputProps({
                         onChange: handleFile,
                     })} />
                 </div>
-                <div style={centerStyle}>
-                    <div style={{ marginTop: '35%'}}>
-                        <FuseSvgIcon className="text-48 drop-area-photo-icon text-gray-100" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
-                        <FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
-                        <Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
-                    </div>
-                </div>
+                {
+					!jsonData.length && (
+						<div style={centerStyle}>
+							<div className='relative flex items-center relative flex-col justify-between'>
+								<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
+								<FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
+								<Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
+							</div>
+						</div> 
+					)
+				}
             </Box>
             
         </section>
