@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider } from '@mui/material';
+import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack } from '@mui/material';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import SendIcon from '@mui/icons-material/Send';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -96,6 +98,21 @@ function TicketingSystemPage() {
                                     minRows={6}
                                     sx={{ background: '#dcdcdc' }}
                                 />
+                                <div className="flex flex-row justify-between h-auto w-full px-10">
+                                    <div className="flex flex-col justify-start">
+                                        attached file
+                                    </div>
+                                    <div className="flex flex-col justify-end">
+                                        <Stack direction="row" spacing={1}>
+                                            <IconButton aria-label="fingerprint" color="secondary">
+                                                <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
+                                            </IconButton>
+                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />}>
+                                                Send
+                                            </Button>
+                                        </Stack>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="h-full w-1/2 border-2">
