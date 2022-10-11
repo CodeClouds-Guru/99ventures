@@ -41,6 +41,7 @@ class FileHelper {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: path.concat(new_filename),
             Body: blob,
+            ACL: "public-read"
         }).promise()
 
         this.response.status = true
@@ -53,12 +54,31 @@ class FileHelper {
     }
     return this.response
   }
+  //create folder on bucket
+  async createFolder(){
+    var path = await this.getPath(this.model)
+    try {
+      let s3 = await this.s3Connect()
+      await s3.putObject({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: path,
+          Body: path,
+          // ACL: "public-read"
+      }).promise()
+
+      this.response.status = true
+    } catch (e) {
+      this.response.trace = e
+    }
+    return this.response
+  }
+  
   //s3 bucket connection
   s3Connect(){
     let s3 =new AWS.S3({
                 accessKeyId: process.env.S3_ACCESS_KEY_ID,
                 secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-                region:process.env.DEFAULT_REGION,
+                region:process.env.AWS_DEFAULT_REGION,
                 signatureVersion: "v4"
             })
     return s3
@@ -99,22 +119,18 @@ class FileHelper {
   }
   //get folder list
   async getList(){
-    this.company = await getCompanyDetails(this.company_id)
+    this.company = await this.getCompanyDetails(this.company_id)
     let s3 = this.s3Connect()
     var params = { 
       Bucket: process.env.S3_BUCKET_NAME,
       // MaxKeys: 2,
       // Delimiter: '/',
-      Prefix: this.company.name
+      Prefix: this.company.name+'/'+this.site_id+'/'+this.model
      }
+     let object_list =[]
+     let get_objects = await s3.listObjects(params).promise()
+     return get_objects.Contents
      
-     s3.listObjects(params, function(err, data) {
-      console.log('filename',data)
-      if (err) 
-        return {status:0,data:{}}
-      else
-        return {status:0,data:data}
-     })
   }
   //get company details
   async getCompanyDetails(company_id){
