@@ -1,6 +1,6 @@
 import List from "../crud/list/List";
 import { useState, useEffect } from 'react';
-import {Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton } from '@mui/material';
+import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton } from '@mui/material';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import moment from 'moment';
@@ -9,7 +9,7 @@ function ConfigurationContent() {
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
-        endDate: moment(),  
+        endDate: moment(),
     });
     const [whereClause, setWhereClause] = useState({});
     const [listKey, setListKey] = useState(0);
@@ -20,7 +20,7 @@ function ConfigurationContent() {
         setSelectedStatus('')
         setDateRange({
             startDate: moment().subtract(7, 'd').startOf('day'),
-            endDate: moment(),  
+            endDate: moment(),
         });
     }
 
@@ -41,7 +41,7 @@ function ConfigurationContent() {
         const param = {
             created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
         }
-        if(selectedStatus !== '') {
+        if (selectedStatus !== '') {
             param['status'] = selectedStatus
         }
         setWhereClause(param);
@@ -51,7 +51,7 @@ function ConfigurationContent() {
         constructWhereclause();
         setListKey((c) => c + 1);
     }, [selectedStatus, dateRange])
-    
+
     return (
         <div>
             <Box sx={{ flexGrow: 1 }}>
@@ -62,46 +62,46 @@ function ConfigurationContent() {
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                label="Age"
+                                label="Ticket Status"
                                 value={selectedStatus}
                                 onChange={handleChange}
                             >
-                            <MenuItem value={''}>All</MenuItem>
-                            <MenuItem value={1}>Open</MenuItem>
-                            <MenuItem value={2}>Pending</MenuItem>
-                            <MenuItem value={0}>Closed</MenuItem>
+                                <MenuItem value={''}>All</MenuItem>
+                                <MenuItem value={1}>Open</MenuItem>
+                                <MenuItem value={2}>Pending</MenuItem>
+                                <MenuItem value={0}>Closed</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
                     <Grid item xs={8}>
                         {
-                            open 
-                            ? 
-                            <DateRangePicker
-                                open={open}
-                                toggle={toggle}
-                                onChange={dateRangeSelected}
-                            /> 
-                            : 
-                            <div onClick={toggle}>
-                                <TextField 
-                                    label="Select a date range" 
-                                    variant="outlined"
-                                    disabled
-                                    defaultValue={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : '' }
+                            open
+                                ?
+                                <DateRangePicker
+                                    open={open}
+                                    toggle={toggle}
+                                    onChange={dateRangeSelected}
                                 />
-                            </div>
+                                :
+                                <div onClick={toggle}>
+                                    <TextField
+                                        label="Select a date range"
+                                        variant="outlined"
+                                        disabled
+                                        defaultValue={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
+                                    />
+                                </div>
                         }
                     </Grid>
                     <Grid item xs={2}>
-                    <IconButton
-                        color="primary"
-                        aria-label="Clear Filter"
-                        component="label"
-                        onClick={clearFilter}
-                    >
-                        <ClearAllIcon />
-                    </IconButton>
+                        <IconButton
+                            color="primary"
+                            aria-label="Clear Filter"
+                            component="label"
+                            onClick={clearFilter}
+                        >
+                            <ClearAllIcon />
+                        </IconButton>
                     </Grid>
                 </Grid>
             </Box>
