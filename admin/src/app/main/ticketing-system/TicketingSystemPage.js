@@ -51,30 +51,55 @@ function TicketingSystemPage() {
                                     </Select>
                                 </FormControl>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ background: '#efeded', minHeight: '22rem' }}>
-                                <div className="w-auto flex flex-col justify-items-start p-5" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>Milly Hopkins</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
+                            <div className="flex-row w-full px-10" style={{ background: '#efeded', minHeight: '18rem' }}>
+                                <div className="pt-10" style={{ overflow: 'scroll', height: '18rem' }}>
+                                    <div className="w-auto flex flex-col justify-items-start p-5" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>Milly Hopkins</b>
+                                            <div className="flex justify-end">25th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, I faced issued regarding this.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p>
-                                            Hi, I faced issued regarding this.
-                                        </p>
+                                    <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">25th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, Milly we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>John Doe</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
+                                    <div className="w-auto flex flex-col justify-items-start p-5" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>Milly Hopkins</b>
+                                            <div className="flex justify-end">25th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, I faced issued regarding this.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p>
-                                            Hi, Milly we looking on this and keep you posted.
-                                        </p>
+                                    <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">25th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, Milly we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <Divider />
                             <div className="flex-row h-auto w-full px-10">
                                 <FormControl variant="standard" className="w-full mt-0 mb-5" >
                                     <InputLabel id="demo-simple-select-standard-label">Select quick response</InputLabel>
@@ -181,55 +206,97 @@ function TicketingSystemPage() {
                             </div>
                             <Divider />
                             <div className="flex flex-col justify-start p-0 m-0">
-                                <div className="flex flex-row justify-start p-0 m-0 pl-5 mt-5">
+                                <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
                                     <Typography component={'h2'}>
                                         <b>Notes</b>
                                     </Typography>
                                 </div>
-                                <div className="w-auto flex flex-col justify-items-center p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>John Doe</b>
-                                        <div className="flex justify-end">11th Sep 2022</div>
+                                <div style={{ overflow: 'scroll', height: '14.5rem' }}>
+                                    <div className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">11th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p>
-                                            Hi, we looking on this and keep you posted.
-                                        </p>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">11th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>John Doe</b>
-                                        <div className="flex justify-end">11th Sep 2022</div>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">11th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p>
-                                            Hi, we looking on this and keep you posted.
-                                        </p>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-between">
+                                            <b>John Doe</b>
+                                            <div className="flex justify-end">11th Sep 2022</div>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <Divider />
-                            <div className="flex flex-col justify-start p-0 m-0">
-                                <div className="flex flex-row justify-start p-0 m-0 pl-5 mt-5">
+                            <div className="flex flex-col justify-start p-0 m-0 mt-5" >
+                                <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
                                         <b>Previous Tickets</b>
                                     </Typography>
                                 </div>
-                                <div className="w-auto flex flex-col justify-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-end">11th Sep 2022</div>
-                                    <div>
-                                        <p>
-                                            Hi, we looking on this and keep you posted.
-                                        </p>
+                                <div style={{ overflow: 'scroll', height: '14rem' }}>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-end">12th Sep 2022</div>
-                                    <div>
-                                        <p>
-                                            Hi, we looking on this and keep you posted.
-                                        </p>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                        <div className="flex flex-row justify-end">12th Sep 2022</div>
+                                        <div>
+                                            <p>
+                                                Hi, we looking on this and keep you posted.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
