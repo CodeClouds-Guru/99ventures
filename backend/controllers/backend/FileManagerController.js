@@ -6,6 +6,7 @@ class FileManagerController {
   async list(req,res){
     const fileHelper = new FileHelper('','file-manager',req);
     let file_list = await fileHelper.getList();
+    // return file_list
     let file_objects = []
     if(file_list)
     {
