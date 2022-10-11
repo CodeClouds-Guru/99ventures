@@ -21,17 +21,17 @@ const TypeBadge = styled(Box)(
 
 const badgeComponent = (type) => {
 	return (
-		<>
-			<FuseSvgIcon className="" size={56} color="disabled">
+		<div className="relative">
+			<FuseSvgIcon className="fuse--icon" size={56} color="disabled">
 				heroicons-outline:document
 			</FuseSvgIcon>
 			<TypeBadge
 				color={type}
-				className="absolute left-0 bottom-0 px-6 rounded text-12 font-semibold leading-20 text-white"
+				className="type-badge absolute left-0 bottom-0 px-6 rounded text-12 font-semibold leading-20 text-white"
 			>
 				{type}
 			</TypeBadge>
-		</>
+		</div>
 	)
 }
 
@@ -44,19 +44,21 @@ const renderItem = (type)=> {
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
 			return badgeComponent('DOC');;
 		case 'image/jpg':
-			return (				
-				<img
-					src="https://picsum.photos/200"
-					alt="lorem ipsum"
-					loading="lazy"
-					className='rounded-md'
-					style={{
-						borderBottomLeftRadius: 4,
-						borderBottomRightRadius: 4,
-						display: 'block',
-						width: '80px',
-					}}
-				/>				
+			return (	
+				<div className='img-div'>		
+					<img
+						src="https://picsum.photos/200"
+						alt="lorem ipsum"
+						loading="lazy"
+						className='rounded-md'
+						style={{
+							borderBottomLeftRadius: 4,
+							borderBottomRightRadius: 4,
+							display: 'block',
+							width: '100%',
+						}}
+					/>		
+				</div>			
 			);
 		default:
 			return '';
@@ -69,28 +71,13 @@ function ItemIcon(props) {
 
 	if (type === 'folder') {
 		return (
-			<FuseSvgIcon className="" size={56} color="disabled">
+			<FuseSvgIcon className="fuse--icon" size={56} color="disabled">
 				material-outline:folder_open
 			</FuseSvgIcon>
 		);
 	}
 
-	return (
-		<div className="relative">
-			{ renderItem(type) }
-			
-			{/* <FuseSvgIcon className="" size={56} color="disabled">
-				heroicons-outline:document
-			</FuseSvgIcon> */}
-			
-			{/* <TypeBadge
-				color={type}
-				className="absolute left-0 bottom-0 px-6 rounded text-12 font-semibold leading-20 text-white"
-			>
-				{type}
-			</TypeBadge> */}
-		</div>
-	);
+	return renderItem(type);
 }
 
 export default ItemIcon;

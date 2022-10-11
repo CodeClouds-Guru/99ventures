@@ -48,23 +48,7 @@ const jsonData = [
         size: 18879,
         path: "/",
         name: "Demo"
-    },
-    {
-        id: 2,
-        type: 'file',
-        mime_type: 'image/jpg',
-        size: 18879,
-        path: "/",
-        name: "main_logo.png"
-    },
-    {
-        id: 3,
-        type: 'file',
-        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        size: 18879,
-        path: "/",
-        name: "sheet.xlsx"
-    },
+    }
 ]
 
 const initialState = {
@@ -73,6 +57,7 @@ const initialState = {
     selectAll: false,
     selectedItemsId: [],
     lightBox: {isOpen: false, src: null},
+    viewType: 'grid',
     jsonData
 }
 
@@ -94,6 +79,9 @@ const fileManagerSlice = createSlice({
         },
         setlightBoxStatus: (state, action) => {
             state.lightBox = action.payload
+        },
+        setViewType: (state, action) => {
+            state.viewType = action.payload
         }
     }
 });
@@ -103,7 +91,8 @@ export const {
     setSelectedItem, 
     setSelectAll, 
     setSelectedItemsId,
-    setlightBoxStatus
+    setlightBoxStatus,
+    setViewType
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

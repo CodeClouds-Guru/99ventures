@@ -12,13 +12,8 @@ function FileManagerHeader(props) {
 
   return (
 	<div className='w-full'>
-		<div className="lg:py-20 md:20 sm:py-20 w-full flex flex-col sm:flex-row space-y-8 sm:space-y-0 items-center justify-between">
+		<div className="lg:py-32 md:20 sm:py-20 w-full flex flex-col sm:flex-row space-y-8 sm:space-y-0 items-center justify-between">
 			<div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0">
-				<FuseSvgIcon size={20}>
-					{theme.direction === 'ltr'
-					? 'heroicons-outline:arrow-sm-left'
-					: 'heroicons-outline:arrow-sm-right'}
-				</FuseSvgIcon>
 				<motion.span
 					className="flex items-end"
 					initial={{ x: -20 }}
