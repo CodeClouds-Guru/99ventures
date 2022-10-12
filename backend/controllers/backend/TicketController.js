@@ -136,9 +136,9 @@ class TicketController extends Controller {
     //header data
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
-    let ticket_id = req.query.id || null;
+    let ticket_id = req.params.id || null;
 
-    if (ticket_id !== null) {
+    if (ticket_id) {
       try {
         let options = {};
         options.attributes = [

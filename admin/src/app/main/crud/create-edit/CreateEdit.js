@@ -22,6 +22,7 @@ import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
 import PermissionSettings from './components/PermissionSettings';
+import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -111,15 +112,23 @@ function CreateEdit(props) {
 
   return (
     <FusePageCarded
-      header={<CreateEditHeader module={module} moduleId={moduleId} />}
+      header={
+        // (module !== 'tickets') ? <CreateEditHeader module={module} moduleId={moduleId} /> : ''
+        <CreateEditHeader module={module} moduleId={moduleId} />
+      }
       content={
         <>
-          <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
-            {errors && <Alert severity="error">{errors}</Alert>}
-            <CreateEditForm moduleOnSave={moduleOnSaveHandler} />
+          <div>
+            <div className={`${module !== 'tickets' ? 'p-16 sm:p-24' : ''} ${module === 'email-templates' || module === 'tickets' ? 'w-full' : 'max-w-3xl'}`} >
+              {errors && <Alert severity="error">{errors}</Alert>}
+              {/* <CreateEditForm moduleOnSave={moduleOnSaveHandler} /> */}
+              {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> : <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
+            </div>
+            {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
           </div>
-          {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
+
         </>
+
       }
       scroll={isMobile ? 'normal' : 'content'}
     />

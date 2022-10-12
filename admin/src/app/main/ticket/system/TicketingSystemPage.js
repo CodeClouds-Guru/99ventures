@@ -11,7 +11,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import AlertDialog from 'app/shared-components/AlertDialog';
 
-function TicketingSystemPage() {
+function TicketingSystemPage(props) {
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponse, setQuickResponses] = useState('');
     const [memberStatus, setMemberStatus] = useState('');
@@ -30,7 +30,7 @@ function TicketingSystemPage() {
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-10">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
                 <Paper className="flex h-full md:items-center md:justify-center w-full  p-10 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
-                    <div className="flex w-full h-full mx-auto sm:mx-0 ticketing-system">
+                    <div className="flex w-full h-full mx-auto sm:mx-0">
                         <div className="h-full w-1/2 border-2">
                             <div className="flex flex-row justify-end p-0 m-0">
                                 <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
@@ -51,51 +51,49 @@ function TicketingSystemPage() {
                                     </Select>
                                 </FormControl>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ background: '#efeded', minHeight: '18rem' }}>
-                                <div className="pt-10" style={{ overflow: 'scroll', height: '18rem' }}>
-                                    <div className="w-auto flex flex-col justify-items-start p-5" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>Milly Hopkins</b>
-                                            <div className="flex justify-end">25th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, I faced issued regarding this.
-                                            </p>
-                                        </div>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '13rem', }}>
+                                <div className="w-auto flex flex-col justify-items-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                    <div className="flex flex-row justify-between">
+                                        <b>Milly Hopkins</b>
+                                        <div className="flex justify-end">25th Sep 2022</div>
                                     </div>
-                                    <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">25th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, Milly we looking on this and keep you posted.
-                                            </p>
-                                        </div>
+                                    <div>
+                                        <p>
+                                            Hi, I faced issued regarding this.
+                                        </p>
                                     </div>
-                                    <div className="w-auto flex flex-col justify-items-start p-5" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>Milly Hopkins</b>
-                                            <div className="flex justify-end">25th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, I faced issued regarding this.
-                                            </p>
-                                        </div>
+                                </div>
+                                <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                    <div className="flex flex-row justify-between">
+                                        <b>John Doe</b>
+                                        <div className="flex justify-end">25th Sep 2022</div>
                                     </div>
-                                    <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">25th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, Milly we looking on this and keep you posted.
-                                            </p>
-                                        </div>
+                                    <div>
+                                        <p>
+                                            Hi, Milly we looking on this and keep you posted.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="w-auto flex flex-col justify-items-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                    <div className="flex flex-row justify-between">
+                                        <b>Milly Hopkins</b>
+                                        <div className="flex justify-end">25th Sep 2022</div>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            Hi, I faced issued regarding this.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
+                                    <div className="flex flex-row justify-between">
+                                        <b>John Doe</b>
+                                        <div className="flex justify-end">25th Sep 2022</div>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            Hi, Milly we looking on this and keep you posted.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -187,10 +185,10 @@ function TicketingSystemPage() {
                                                 <MenuItem value="">
                                                     <em>None</em>
                                                 </MenuItem>
-                                                <MenuItem value="pending">Pending</MenuItem>
-                                                <MenuItem value="not verified">Not Verified</MenuItem>
                                                 <MenuItem value="verified">Verified</MenuItem>
-                                                <MenuItem value="blacklisted">Blacklisted</MenuItem>
+                                                <MenuItem value="validating">Validating</MenuItem>
+                                                <MenuItem value="suspended">Suspended</MenuItem>
+                                                <MenuItem value="deleted">Deleted</MenuItem>
                                             </Select>
                                         </FormControl>
                                     </div>
@@ -208,10 +206,10 @@ function TicketingSystemPage() {
                             <div className="flex flex-col justify-start p-0 m-0">
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
                                     <Typography component={'h2'}>
-                                        <b>Notes</b>
+                                        <b>Notes (4)</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflow: 'scroll', height: '14.5rem' }}>
+                                <div style={{ overflow: 'scroll', height: '12.25rem' }}>
                                     <div className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
                                         <div className="flex flex-row justify-between">
                                             <b>John Doe</b>
@@ -262,10 +260,10 @@ function TicketingSystemPage() {
                             <div className="flex flex-col justify-start p-0 m-0 mt-5" >
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
-                                        <b>Previous Tickets</b>
+                                        <b>Previous Tickets (4)</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflow: 'scroll', height: '14rem' }}>
+                                <div style={{ overflow: 'scroll', height: '12.25rem' }}>
                                     <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
                                         <div className="flex flex-row justify-end">11th Sep 2022</div>
                                         <div>
