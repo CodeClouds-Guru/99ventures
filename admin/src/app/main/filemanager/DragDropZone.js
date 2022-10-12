@@ -4,8 +4,11 @@ import { Box, Typography } from '@mui/material';
 import axios from 'axios'
 import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
-import { useSelector } from 'react-redux';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import { useDispatch, useSelector } from 'react-redux';
+import { getList } from '../../store/filemanager'
+import { useParams, useLocation } from 'react-router-dom';
+import { setBreadCrumb } from 'app/store/filemanager';
 
 const baseStyle1 = {
 	flex: 1,
@@ -90,9 +93,15 @@ const centerStyle = {
     justifyContent: 'center'
 }
 
-function DragDropzone(props) {
+function DragDropzone() {
+	const location = useLocation();
+	const dispatch = useDispatch();
     const jsonData = useSelector(state=> state.filemanager.jsonData)
-    // const jsonData = []
+    // const jsonData = useSelector(state=> state.filemanager.listData)
+    const [ listing, setListing ] = useState([]);
+
+	// console.log(jsonData)
+
 	const [files, setFiles] = useState([]);
 	const {
 		getRootProps,
@@ -125,6 +134,7 @@ function DragDropzone(props) {
 		}
 	});
 
+
 	const style = useMemo(() => ({
 		...(!jsonData.length ? baseStyle: {}),
 		...(isFocused ? focusedStyle : {}),
@@ -133,7 +143,8 @@ function DragDropzone(props) {
 	}), [
 		isFocused,
 		isDragAccept,
-		isDragReject
+		isDragReject,
+		jsonData
 	]);
 
 	const thumbs = files.map(file => (
@@ -150,15 +161,52 @@ function DragDropzone(props) {
 	));
 
 	useEffect(() => {
+		dispatch(getList());
 		// Make sure to revoke the data uris to avoid memory leaks, will run on unmount
 		return () => files.forEach(file => URL.revokeObjectURL(file.preview));
 	}, []);
 
+
+	/**
+	 * Used to navigate inside folder
+	 * And return files | folder data
+	 */
+	useEffect(()=>{
+		setListing(jsonData);
+		// console.log(jsonData)
+
+		const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
+		const pathArry = pathname.split('/');
+		const breadCrumbArray = [];
+
+		if(pathArry.length > 3 && jsonData.length) {
+			const staticPath = pathArry.splice(0, 3);	// truncate frist three static path, like /app/filemanager
+			
+			var finalResult = [];
+			for(let i=0; i<pathArry.length; i++) {
+				if(i < 1) {
+					finalResult = jsonData.filter(file => file.id === pathArry[i]);					
+				} else if(finalResult[0].details.length){
+					finalResult = finalResult[0].details.filter(file => file.id === pathArry[i]);					
+				}		
+				staticPath.push(finalResult[0].id);
+				breadCrumbArray.push({
+					name: finalResult[0].name, 
+					path: staticPath.join('/')
+				})	
+			}
+			if(finalResult.length && finalResult[0].details.length){				
+				setListing(finalResult[0].details);
+			}
+		}
+		dispatch(setBreadCrumb(breadCrumbArray))
+	}, [jsonData, location.pathname]);
+
+	
 	const handleFile = (e) => {
 		console.log(e.target.files)
 		// setImageSent(e.target.files[0]);
-	};
-
+	}; 
 
 	return (
         <section className="container flex flex-col h-full  md:p-24 sm:p-24 lg:p-24 w-full border filemanager-file-box ">
@@ -168,14 +216,14 @@ function DragDropzone(props) {
             >
                 <div className='flex flex-wrap items-center' >
                     {
-                        jsonData.length ? jsonData.map((el, i) => {
+                        listing.length ? listing.map((el, i) => {
                             if(el.type === 'folder') {
                                 return <FolderItem key={i} file={ el }/>
                             }
                         }) : ''
                     }
                     {
-                        jsonData.length ? jsonData.map((el, i) => {
+                        listing.length ? listing.map((el, i) => {
                             if(el.type === 'file') {
                                 return <FileItems key={i} file={ el } />
                             }

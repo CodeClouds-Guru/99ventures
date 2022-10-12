@@ -35,8 +35,8 @@ const badgeComponent = (type) => {
 	)
 }
 
-const renderItem = (type)=> {
-	switch(type) {
+const renderItem = (file)=> {
+	switch(file.mime_type) {
 		case 'application/pdf':
 			return badgeComponent('PDF');
 		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -44,10 +44,14 @@ const renderItem = (type)=> {
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
 			return badgeComponent('DOC');;
 		case 'image/jpg':
+		case 'image/jpeg':
+		case 'image/png':
+		case 'image/gif':
+		case 'image/svg':
 			return (	
 				<div className='img-div'>		
 					<img
-						src="https://picsum.photos/200"
+						src={file.file_path}
 						alt="lorem ipsum"
 						loading="lazy"
 						className='rounded-md'
@@ -67,9 +71,8 @@ const renderItem = (type)=> {
 
 
 function ItemIcon(props) {
-	const { type } = props;
-
-	if (type === 'folder') {
+	const { file } = props;
+	if (file.type === 'folder') {
 		return (
 			<div className="relative">
 			<FuseSvgIcon className="fuse--icon" size={56} color="disabled">
@@ -77,8 +80,7 @@ function ItemIcon(props) {
 			</FuseSvgIcon></div>
 		);
 	}
-
-	return renderItem(type);
+	return renderItem(file);
 }
 
 export default ItemIcon;

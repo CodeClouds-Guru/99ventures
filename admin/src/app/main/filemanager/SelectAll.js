@@ -7,6 +7,8 @@ const selectAll = () => {
     const jsonData = useSelector(state=> state.filemanager.jsonData)
     const dispatch = useDispatch();
 
+    // console.log(selectedItemsId)
+
     const handleChange = (event) => {
         if(event.target.checked){
             const ids = jsonData.map(el=> el.id);

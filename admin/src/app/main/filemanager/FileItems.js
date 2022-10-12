@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import ItemIcon from "./ItemIcon";
@@ -7,6 +7,8 @@ import { setSelectedItemsId, setSelectedItem, setlightBoxStatus } from 'app/stor
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 // import { setSelectedItem } from 'app/store/filemanager'
 import AlertDialog from 'app/shared-components/AlertDialog';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { copyUrl, convertFileSizeToKB } from './helper'
 import './FileManager.css';
 
 const FileItems = (props) => {
@@ -46,8 +48,8 @@ const FileItems = (props) => {
         }
     }
 
-    const openPreview = () => {
-        dispatch(setlightBoxStatus({isOpen: true, src: '//placekitten.com/1500/500'}));
+    const openPreview = (filePath) => {
+        dispatch(setlightBoxStatus({isOpen: true, src: filePath}));
         handleMenuClose();
     }
     
@@ -72,6 +74,12 @@ const FileItems = (props) => {
 		}
 	}
 
+    const copyFilePath = () => {
+        handleMenuClose()
+		copyUrl(props.file.file_path);
+        dispatch(showMessage({ variant: 'success', message: 'URL Copied' }));
+  	}
+
     return (
         <Box
             sx={{ backgroundColor: 'rgb(255, 255, 255)' }}
@@ -93,11 +101,11 @@ const FileItems = (props) => {
 				role="button"
 			>
                 <div className={`flex items-center ${style[viewType].icon}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                    <ItemIcon className="" type={props.file.mime_type} />
+                    <ItemIcon file={ props.file } />
                 </div>
                 
                 <div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
-                    <Typography className="truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file))}>{ props.file.name }</Typography>
+                    <Typography className="pr-5 truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file))}>{ props.file.name }</Typography>
                     <div className="item-list-icon">
                         <IconButton color="primary" aria-label="Filter" component="label"  onClick={ handleMenuClick }>
                             <FuseSvgIcon className="text-32" size={20} color="action">heroicons-outline:dots-vertical</FuseSvgIcon>  
@@ -115,13 +123,13 @@ const FileItems = (props) => {
                                 </ListItemIcon>
                                 <ListItemText primary="Details" />
                             </MenuItem>
-                            <MenuItem>
+                            <MenuItem onClick={ copyFilePath }>
                                 <ListItemIcon className="min-w-40">
                                     <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
                                 </ListItemIcon>
                                 <ListItemText primary="Copy" />
                             </MenuItem>
-                            <MenuItem onClick={ openPreview }>
+                            <MenuItem onClick={ ()=>openPreview(props.file.file_path) }>
                                 <ListItemIcon className="min-w-40">
                                     <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
                                 </ListItemIcon>
@@ -140,10 +148,10 @@ const FileItems = (props) => {
                     viewType === 'list' && (
                         <>
                             <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].modify}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                                <Typography className="truncate text-12 font-medium">Modified At</Typography>
+                                <Typography className="truncate text-12 font-medium">{ props.file.last_modified }</Typography>
                             </div>
                             <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].size}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                                <Typography className="truncate text-12 font-medium">100KB</Typography>
+                                <Typography className="truncate text-12 font-medium">{ convertFileSizeToKB(props.file.size) } KB</Typography>
                             </div>
                         </>
                     )

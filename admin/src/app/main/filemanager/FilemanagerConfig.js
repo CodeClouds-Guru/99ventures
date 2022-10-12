@@ -28,6 +28,11 @@ const FilemanagerConfig = {
     },
     routes: [
         {
+            path: 'app/filemanager/*',
+            element: <Index />,
+            auth: settingsConfig.defaultAuth
+        },
+        {
             path: 'app/filemanager',
             element: <Index />,
             auth: settingsConfig.defaultAuth

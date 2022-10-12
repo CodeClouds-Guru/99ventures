@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useTheme } from '@mui/material/styles';
 import Header from './Header';
+import BreadCrumb from './BreadCrumb';
 
 function FileManagerHeader(props) {
   const theme = useTheme();
@@ -34,9 +35,7 @@ function FileManagerHeader(props) {
 		</div>
 		
 		<Header/>
-		<div className='w-full breadcrumb py-24 flex items-center'>
-			<FuseSvgIcon className="text-48" size={30} color="action">material-outline:home</FuseSvgIcon> <span>/</span>
-		</div>
+		<BreadCrumb/>
 	</div>
   );
 }

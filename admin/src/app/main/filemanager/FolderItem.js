@@ -4,18 +4,28 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Box } from '@mui/system';
 import ItemIcon from './ItemIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId } from 'app/store/filemanager'
+import { setSelectedItemsId, setBreadCrumb } from 'app/store/filemanager';
+import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 function FolderItem(props) {
+	const location = useLocation();
+	const dispatch = useDispatch();
 	const viewType = useSelector(state=> state.filemanager.viewType);
 	const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-	const dispatch = useDispatch();
-	// const { item } = props;
+	const [ path, setPath ] = useState(location.pathname);
+	const navigate = useNavigate();
 
-	// if (!item) {
-	// 	return null;
-	// }
+	useEffect(()=> {
+		const currentPath = location.pathname.replace(/\/$/, "");
+		const pathArry = currentPath.split('/');
+		setPath(
+			[...new Set([...pathArry, props.file.id])].join('/')
+		)
+	}, [location.pathname])
 
+		
 	const handleChange = (event) => {
         if(!event.target.checked && selectedItemsId.includes(props.file.id)){
             const ids = selectedItemsId.filter(el=> el !== props.file.id);
@@ -51,6 +61,11 @@ function FolderItem(props) {
 		}
 	}
 
+	const navigateTochild = ()=>{
+		// console.log(path)		
+		return navigate(path);
+	}
+
 	return (
 		<Box
 			sx={{ backgroundColor: 'background.paper' }}
@@ -65,31 +80,32 @@ function FolderItem(props) {
 					onChange={handleChange} 
 				/>
 			</IconButton>
-			<NavLinkAdapter
+			<a
 				className={`flex h-full w-full ${style[viewType].nav_icon_adapter}`}
-				to={`/app/filemanager/ss`}
+				to="#"
 				role="button"
+				onClick= { navigateTochild }
 			>
 				
 				<div className={`flex  items-center ${style[viewType].icon}`}>
-					<ItemIcon className="" type="folder" />
+					<ItemIcon file={ props.file } />
 				</div>
 				<div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
-					<Typography className="truncate text-12 font-medium">Folder</Typography>					
+					<Typography className="truncate text-12 font-medium">{ props.file.name }</Typography>					
 				</div>
 				{
 					viewType === 'list' && (
 						<>
 							<div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].modify}`}>
-								<Typography className="truncate text-12 font-medium">Modified At</Typography>
+								<Typography className="truncate text-12 font-medium">{ props.file.last_modified }</Typography>
 							</div>
 							<div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].size}`}>
-								<Typography className="truncate text-12 font-medium">100KB</Typography>
+								<Typography className="truncate text-12 font-medium">---</Typography>
 							</div>
 						</>
 					)
 				}				
-			</NavLinkAdapter>
+			</a>
 		</Box>
 	);
 }

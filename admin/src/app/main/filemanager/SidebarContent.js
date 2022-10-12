@@ -6,26 +6,32 @@ import ItemIcon from './ItemIcon';
 import { setSelectedItem } from 'app/store/filemanager';
 import { lighten } from '@mui/material/styles';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AltTag from './AltTag';
 import { setlightBoxStatus } from 'app/store/filemanager';
+import { copyUrl } from './helper'
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
+	const [ tooltipTitle, setToolTipTitle ] = useState('Copy URL');
 	
 	if (!selectedItem) {
 		return null;
 	}
 
-  	const copyUrl = () => {
-		const el = document.createElement('input');
-		el.value = window.location.href;
-		document.body.appendChild(el);
-		el.select();
-		document.execCommand('copy');
-		document.body.removeChild(el);
+	/**
+	 * It has used to change the tooltip title when 
+	 * user click any items by opening the sidebar.
+	 */
+	// useEffect(()=>{
+	// 	setToolTipTitle('Copy URL');
+	// }, [selectedItem])
+
+  	const copyFilePath = () => {
+		copyUrl(selectedItem.file_path);
+		setToolTipTitle('Copied')
   	}
 
 	const onConfirmAlertDialogHandle = () => {
@@ -36,6 +42,12 @@ const SidebarContent = (props) => {
         setOpenAlertDialog(false);
     }
 
+	const disabledSideBar = () => {
+		dispatch(setSelectedItem(null));
+		setToolTipTitle('Copy URL');
+	}
+
+
 	return (
 		<motion.div
 			initial={{ y: 50, opacity: 0.8 }}
@@ -44,7 +56,7 @@ const SidebarContent = (props) => {
 		>
 			<div className="flex items-center justify-between w-full">
 				<Typography variant="h5">Details</Typography>
-				<IconButton className="" size="large" onClick={() => dispatch(setSelectedItem(null))}>
+				<IconButton className="" size="large" onClick={ disabledSideBar }>
 					<FuseSvgIcon>heroicons-outline:x</FuseSvgIcon>
 				</IconButton>
 			</div>
@@ -59,7 +71,7 @@ const SidebarContent = (props) => {
 				}}
 			>
 				<motion.div initial={{ scale: 0 }} animate={{ scale: 1, transition: { delay: 0.3 } }}>
-					<ItemIcon className="" type={selectedItem.mime_type} />
+					<ItemIcon file={selectedItem} />
 				</motion.div>
 			</Box> 
 
@@ -73,16 +85,16 @@ const SidebarContent = (props) => {
 				</div> */}
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
-					<Typography></Typography>
+					<Typography>{selectedItem.last_modified}</Typography>
 				</div>
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Size</Typography>
-					<Typography>{selectedItem.size}</Typography>
+					<Typography>{ (selectedItem.size/1024).toFixed(2) } KB</Typography>
 				</div>	
 				<div className="flex items-center justify-between py-8">
 					<Typography color="text.secondary">Copy URL</Typography>
-					<Tooltip title="Copy URL">
-						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyUrl }>
+					<Tooltip title={tooltipTitle}>
+						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
 							<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
 						</IconButton>
 					</Tooltip>
@@ -94,7 +106,7 @@ const SidebarContent = (props) => {
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">
 				<Button className="" color="secondary" variant="contained">Download</Button>
-				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: '//placekitten.com/1500/500'})) }>Preview</Button>
+				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path})) }>Preview</Button>
 				<Button className="" color="error" variant="outlined" onClick={ ()=>setOpenAlertDialog(true) }>Delete</Button>
 			</div>
 			{
