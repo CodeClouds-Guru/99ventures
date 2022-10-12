@@ -135,6 +135,22 @@ class FileManagerController {
       data:file_name
     }
   }
+  //delete file
+  async delete(req,res){
+    let model_ids = req.body.modelIds ?? [];
+    if (model_ids.length) {
+      model_ids.forEach(async (model_id) => {
+        let object_key = Buffer.from(model_id, "base64");
+        object_key = object_key.toString("utf8"); 
+        const fileHelper = new FileHelper([], "file-manager", req);
+        let file_delete = await fileHelper.deleteFile(object_key);
+      });
+    }
+    return{
+      status: true,
+      message: "File Deleted."
+    };
+  }
 }
 
 module.exports = FileManagerController
