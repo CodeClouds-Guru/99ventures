@@ -86,12 +86,10 @@ class FileHelper {
   //get file path
   async getPath(model) {
     const { Company } = require('../models/index')
-    console.log('cccc',Company)
     this.company = await Company.findOne({
       attributes: ['name'],
       where: { id: this.company_id },
     })
-    console.log('company',this.company);
     var base_path = ''
     if (model.trim().length > 0) {
       base_path += this.company.name+'/'+this.site_id+'/'+model + '/'
