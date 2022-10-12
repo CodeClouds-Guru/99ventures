@@ -206,7 +206,7 @@ function TicketingSystemPage(props) {
                             <div className="flex flex-col justify-start p-0 m-0">
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
                                     <Typography component={'h2'}>
-                                        <b>Notes</b>
+                                        <b>Notes (4)</b>
                                     </Typography>
                                 </div>
                                 <div style={{ overflow: 'scroll', height: '12.25rem' }}>
@@ -260,7 +260,7 @@ function TicketingSystemPage(props) {
                             <div className="flex flex-col justify-start p-0 m-0 mt-5" >
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
-                                        <b>Previous Tickets</b>
+                                        <b>Previous Tickets (4)</b>
                                     </Typography>
                                 </div>
                                 <div style={{ overflow: 'scroll', height: '12.25rem' }}>
