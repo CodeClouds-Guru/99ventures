@@ -6,6 +6,7 @@ class FileManagerController {
   async list(req,res){
     const fileHelper = new FileHelper('','file-manager',req);
     let file_list = await fileHelper.getList();
+    // return file_list
     let file_objects = []
     if(file_list)
     {
@@ -36,24 +37,26 @@ class FileManagerController {
         indexes.push(get_index.folder_index)
     }
     let details_arr = []
+    let object_id = ''
     if(folder_structure[folder_structure.length - 1] !=''){
-      details_arr = [{type:'file',name:folder_structure[folder_structure.length - 1],details:[],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg'}]
+      object_id = this.generateId(object_key.Key,[],'')
+      details_arr = [{id:object_id,type:'file',name:folder_structure[folder_structure.length - 1],details:[],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg'}]
     }
     switch(indexes.length) {
       case 1:
         // single folder - company name/site id/file-manager/folder-name/file
         if(indexes[0] == -1)
-          file_objects.push({type:'folder',name:folder_structure[start_index],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+          file_objects.push({id:this.generateId('',folder_structure,start_index),type:'folder',name:folder_structure[start_index],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         else
           file_objects[indexes[0]].details.push(details_arr[0])
         break;
       case 2:
         // 2 layar
         if(indexes[0] == -1 && indexes[1] == -1){
-          file_objects.push({type:'folder',name:folder_structure[start_index],details:[{type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+          file_objects.push({id:this.generateId('',folder_structure,start_index),type:'folder',name:folder_structure[start_index],details:[{id:this.generateId('',folder_structure,start_index+1),type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         }
         else if(indexes[0] != -1 && indexes[1] == -1){
-          file_objects[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+          file_objects[indexes[0]].details.push({id:this.generateId('',folder_structure,start_index+1),type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         }
         else{
           file_objects[indexes[0]].details[indexes[1]].details.push(details_arr[0])
@@ -62,13 +65,14 @@ class FileManagerController {
       case 3:
         // 3 layar
         if(indexes[0] == -1 && indexes[1] == -1 && indexes[2] == -1){
-          file_objects.push({type:'folder',name:folder_structure[start_index],details:[{type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+
+          file_objects.push({id:this.generateId('',folder_structure,start_index),type:'folder',name:folder_structure[start_index],details:[{id:this.generateId('',folder_structure,start_index+1),type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         }
         else if(indexes[0] != -1 && indexes[1] == -1 && indexes[2] == -1){
-          file_objects[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:[{type:'folder',name:folder_structure[start_index+2],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+          file_objects[indexes[0]].details.push({id:this.generateId('',folder_structure,start_index+1),type:'folder',name:folder_structure[start_index+1],details:[{id:this.generateId('',folder_structure,start_index+2),type:'folder',name:folder_structure[start_index+2],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''}],file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         }
         else if(indexes[0] != -1 && indexes[1] != -1 && indexes[2] == -1){
-          file_objects[indexes[0]].details[indexes[0]].details.push({type:'folder',name:folder_structure[start_index+1],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
+          file_objects[indexes[0]].details[indexes[0]].details.push({id:this.generateId('',folder_structure,start_index+2),type:'folder',name:folder_structure[start_index+2],details:details_arr,file_path:'',size:'',last_modified:object_key.LastModified,mime_type:''})
         }
         else
           file_objects[indexes[0]].details[indexes[1]].details[indexes[1]].details.push(details_arr[0])
@@ -77,6 +81,16 @@ class FileManagerController {
         // code block
     }
     return file_objects
+  }
+  //generate id
+  generateId(object_key,folder_names,folder_index){
+    if(object_key == ''){
+      folder_names = folder_names.slice(0,folder_index+1)
+      object_key = folder_names.join('/')
+    }
+    let base64data = Buffer.from(object_key, 'utf8')
+    object_key = base64data.toString('base64')
+    return object_key
   }
   //find the index
   getIndex(index_string,matched_object,folder_name){
