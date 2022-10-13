@@ -109,12 +109,26 @@ class FileHelper {
   //delete file
   async deleteFile(key){
     let s3 = this.s3Connect()
-    s3.deleteObject({
-      Key: key,
-      Bucket: process.env.S3_BUCKET_NAME
+    const listParams = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Prefix: key
+    };
+    const listedObjects = await s3.listObjectsV2(listParams).promise();
+    if (listedObjects.Contents.length === 0) return;
+
+    const deleteParams = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Delete: { Objects: [] }
+    };
+
+    listedObjects.Contents.forEach(({ Key }) => {
+      deleteParams.Delete.Objects.push({ Key:Key });
     });
+    await s3.deleteObjects(deleteParams).promise();
+    // if (listedObjects.IsTruncated) await deleteFile(key);
     return true
   }
+  
   //get folder list
   async getList(){
     this.company = await this.getCompanyDetails(this.company_id)
