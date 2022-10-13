@@ -121,9 +121,17 @@ class TicketController extends Controller {
       }
     }
     options.where = new_option;
-    console.log('options', options);
+    options.include = [
+      {
+        model: Member,
+        attributes: ["username"],
+      },
+    ];
 
     const { docs, pages, total } = await this.model.paginate(options);
+    docs.forEach((element, index) => {
+      docs[index].setDataValue('username',element.Member.username);
+    });
     return {
       result: { data: docs, pages, total },
       fields: this.model.fields,
@@ -137,7 +145,7 @@ class TicketController extends Controller {
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
     let ticket_id = req.params.id || null;
-
+    console.log(ticket_id);
     if (ticket_id) {
       try {
         let options = {};
@@ -180,9 +188,10 @@ class TicketController extends Controller {
             ],
           },
         ];
+        console.log(options);
         //final query to get ticket details
         let result = await Ticket.findOne(options);
-        // console.log(result);
+        
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({

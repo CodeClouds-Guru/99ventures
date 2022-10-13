@@ -2,12 +2,14 @@ const AWS = require('aws-sdk')
 const assert = require('assert')
 var fs = require('fs')
 class FileHelper {
-  constructor(files, model, req) {
+  constructor(files, model, req,new_filename) {
     this.company_id = ''
     this.site_id = ''
+    this.new_filename = ''
     if(req){
       this.company_id = req.headers.company_id
       this.site_id = req.headers.site_id
+      this.new_filename = new_filename
     }
     this.files = files
     this.model = model
@@ -24,6 +26,7 @@ class FileHelper {
     this.s3Connect = this.s3Connect.bind(this)
     this.generateSignedUrl = this.generateSignedUrl.bind(this)
     this.deleteFile = this.deleteFile.bind(this)
+    this.copyObjects = this.copyObjects.bind(this)
   }
   //upload file to s3 bucket  
   async upload() {
@@ -132,16 +135,15 @@ class FileHelper {
   //get folder list
   async getList(){
     this.company = await this.getCompanyDetails(this.company_id)
+    
     let s3 = this.s3Connect()
-    var params = { 
+    let get_objects = await s3.listObjectsV2({ 
       Bucket: process.env.S3_BUCKET_NAME,
-      // MaxKeys: 2,
-      // Delimiter: '/',
-      Prefix: this.company.name+'/'+this.site_id+'/'+this.model
-     }
-     let object_list =[]
-     let get_objects = await s3.listObjects(params).promise()
-     return get_objects.Contents
+      Delimiter: '/',
+      Prefix: this.company.name+'/'+this.site_id+'/'+this.model+'/'
+    }).promise()
+    
+    return get_objects
      
   }
   //get company details
@@ -153,6 +155,10 @@ class FileHelper {
       where: { id: company_id },
     })
     return company
+  }
+  //copy bucket objects
+  async copyObjects(){
+
   }
 }
 
