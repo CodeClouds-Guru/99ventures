@@ -35,7 +35,7 @@ function TicketingSystemPage(props) {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
             .then(response => {
                 if (response.data.results.status) {
-                    console.log(response.data.results.data);
+                    // console.log(response.data.results.data);
                     setTicketStatus(response.data.results.data.status);
                     setTicketConversations(response.data.results.data.TicketConversations);
                     setMemberDetails(response.data.results.data.Member);
@@ -73,7 +73,6 @@ function TicketingSystemPage(props) {
                             </div>
                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '13rem', }}>
                                 {ticketConversations.map((val, key) => {
-                                    // console.log(val, key);
                                     return (
                                         <>
                                             <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
