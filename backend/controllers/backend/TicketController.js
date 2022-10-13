@@ -144,8 +144,8 @@ class TicketController extends Controller {
     //header data
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
-    let ticket_id = req.params.id || null;
-
+    let ticket_id = req.headers.id || null;
+    console.log(ticket_id);
     if (ticket_id) {
       try {
         let options = {};
@@ -188,9 +188,10 @@ class TicketController extends Controller {
             ],
           },
         ];
+        console.log(options);
         //final query to get ticket details
         let result = await Ticket.findOne(options);
-        // console.log(result);
+        
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({
