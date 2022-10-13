@@ -121,9 +121,17 @@ class TicketController extends Controller {
       }
     }
     options.where = new_option;
-    console.log('options', options);
+    options.include = [
+      {
+        model: Member,
+        attributes: ["username"],
+      },
+    ];
 
     const { docs, pages, total } = await this.model.paginate(options);
+    docs.forEach((element, index) => {
+      docs[index].setDataValue('username',element.Member.username);
+    });
     return {
       result: { data: docs, pages, total },
       fields: this.model.fields,
