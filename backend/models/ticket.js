@@ -25,7 +25,26 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: DataTypes.BIGINT,
       member_id: DataTypes.BIGINT,
       subject: DataTypes.STRING,
-      status: DataTypes.TINYINT,
+      status: {
+        type: DataTypes.TINYINT,
+        get() {
+          let status_str = "";
+          switch (this.getDataValue("status")) {
+            case 1:
+              status_str = "open";
+              break;
+            case 2:
+              status_str = "pending";
+              break;
+            case 0:
+              status_str = "closed";
+              break;
+            default:
+              status_str = "";
+          }
+          return status_str;
+        },
+      },
       is_read: DataTypes.TINYINT,
       created_at: "TIMESTAMP",
       updated_at: "TIMESTAMP",
@@ -152,7 +171,7 @@ module.exports = (sequelize, DataTypes) => {
     console.log(update_data);
     let result = await Ticket.update(update_data, {
       where: { id: ticket_id },
-      return:true
+      return: true,
     });
     return result[0];
   };
