@@ -32,6 +32,7 @@ const jwtServiceConfig = {
   getSingleScriptData: 'scripts/edit',
   roleEdit: 'roles/edit',
   roleUpdate: 'roles/update',
+  getSingleTickketDetails: 'tickets/view',
 };
 
 export default jwtServiceConfig;
