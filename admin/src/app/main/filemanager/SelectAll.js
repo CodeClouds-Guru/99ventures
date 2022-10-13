@@ -4,14 +4,12 @@ import { Checkbox, FormGroup, FormControlLabel} from '@mui/material';
 
 const selectAll = () => {
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-    const jsonData = useSelector(state=> state.filemanager.jsonData)
+    const listData = useSelector(state=> state.filemanager.listData)
     const dispatch = useDispatch();
-
-    // console.log(selectedItemsId)
 
     const handleChange = (event) => {
         if(event.target.checked){
-            const ids = jsonData.map(el=> el.id);
+            const ids = listData.map(el=> el.id);
             dispatch(setSelectedItemsId(ids))
         } else {
             dispatch(setSelectedItemsId([]));
@@ -22,8 +20,9 @@ const selectAll = () => {
         <FormGroup className="flex" variant="outlined">
             <FormControlLabel control={
                 <Checkbox 
+                    sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                     checked={ Boolean(
-                        selectedItemsId.length && selectedItemsId.length === jsonData.length
+                        selectedItemsId.length && selectedItemsId.length === listData.length
                     ) }
                     onChange={handleChange} 
                     inputProps={{ 'aria-label': 'controlled' }}

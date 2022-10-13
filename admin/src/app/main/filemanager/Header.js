@@ -10,7 +10,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setViewType } from '../../store/filemanager'
 
 const baseStyle = {
-    marginBottom: '1rem',
     borderTop: '3px solid #77777763',
     borderBottom: '3px solid #ddd',
     padding: '5px 0',
@@ -55,7 +54,7 @@ const Header = () => {
                         (selectedItemIdArry.length || selectedItem) ? (
                             <Tooltip title="Delete">
                                 <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
-                                    <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                    <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:trash</FuseSvgIcon>
                                 </IconButton>
                             </Tooltip>
                         ) : ''
@@ -64,7 +63,7 @@ const Header = () => {
                     <CreateFolder />
                     <Tooltip title="Download">
                         <IconButton color="primary" aria-label="Filter" component="label" >
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:file_download</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:file_download</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                 </div>
@@ -92,7 +91,7 @@ const Header = () => {
                 <div className='flex'>                
                     <Tooltip title="Filter">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleMenuClick } >
-                            <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:filter</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:filter</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>                    
 
@@ -119,12 +118,12 @@ const Header = () => {
                 <div className='flex view--type'>
                     <Tooltip title="Grid">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('grid'))} className={ viewType === 'grid' ? 'active' : '' }>
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:grid_view</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:grid_view</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="List">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('list'))} className={ viewType === 'list' ? 'active' : ''}>
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                 </div>            

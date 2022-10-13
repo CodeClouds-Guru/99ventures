@@ -6,22 +6,65 @@ import axios from 'axios';
 export const getList = createAsyncThunk(
     'filemanager/getList',
     async(params, {dispatch, getState}) => {   
+        const { filemanager } = getState();
+        if(filemanager.listData.length && params) {
+            const result = navigateToNested(filemanager.jsonData, dispatch);
+            return {
+                'list_data': result,
+            };
+        }
+        
         const result = await axios.post('file-manager/list', params)
         .then(res => {
             if(res.status === 200 && res.data.results.data) {
                 const result = res.data.results.data;
-                return result;
+                return {
+                    'list_data': navigateToNested(result, dispatch),
+                    'json_data': result
+                }
             }
-            return [];
+            return {};
         })
         .catch(error => {
             dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
-            return [];
+            return {};
         })
 
         return result;
     }
 );
+
+function navigateToNested(jsonData, dispatch){    
+    const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
+    const pathArry = pathname.split('/');
+    const breadCrumbArray = [];
+
+    //Cleared selected items while navigate
+    dispatch(setSelectedItemsId([]));
+
+    if(pathArry.length > 3 && jsonData.length) {
+        const staticPath = pathArry.splice(0, 3);	// truncate frist three static path, like ['/', 'app', 'filemanager']
+        
+        var finalResult = [];
+        for(let i=0; i<pathArry.length; i++) {
+            if(i < 1) {
+                finalResult = jsonData.filter(file => file.id === pathArry[i]);					
+            } else if(finalResult[0].details.length){
+                finalResult = finalResult[0].details.filter(file => file.id === pathArry[i]);					
+            }
+
+            staticPath.push(finalResult[0].id);
+            breadCrumbArray.push({
+                name: finalResult[0].name, 
+                path: staticPath.join('/')
+            });            	
+        }
+        dispatch(setBreadCrumb(breadCrumbArray));
+        return (finalResult.length && finalResult[0].details.length) ? finalResult[0].details : [];
+    }
+    
+    return jsonData;
+}
 
 const jsonData1 = [
     // {
@@ -74,7 +117,7 @@ const jsonData1 = [
     }
 ]
 
-const jsonData = [
+const jsonData2 = [
     {
         "id": "Q29kZUNsb3Vkcy8xL2ZpbGUtbWFuYWdlci9hYmM=",
         "type": "folder",
@@ -218,7 +261,7 @@ const initialState = {
     selectedItemsId: [],
     lightBox: {isOpen: false, src: null},
     viewType: 'grid',
-    jsonData,
+    jsonData: [],
     listData: [],
     breadCrumb: []
 }
@@ -251,7 +294,10 @@ const fileManagerSlice = createSlice({
     },
     extraReducers: {
         [getList.fulfilled]: (state, {payload}) => {
-            state.listData = payload
+            state.listData = payload.list_data;
+            if(payload.json_data){
+                state.jsonData = payload.json_data;
+            }
         }
     }
 });

@@ -8,7 +8,6 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import { getList } from '../../store/filemanager'
 import { useParams, useLocation } from 'react-router-dom';
-import { setBreadCrumb } from 'app/store/filemanager';
 
 const baseStyle1 = {
 	flex: 1,
@@ -96,11 +95,11 @@ const centerStyle = {
 function DragDropzone() {
 	const location = useLocation();
 	const dispatch = useDispatch();
-    const jsonData = useSelector(state=> state.filemanager.jsonData)
-    // const jsonData = useSelector(state=> state.filemanager.listData)
-    const [ listing, setListing ] = useState([]);
+    // const jsonData = useSelector(state=> state.filemanager.jsonData)
+    const listing = useSelector(state=> state.filemanager.listData)
+    // const [ listing, setListing ] = useState([]);
 
-	// console.log(jsonData)
+	// console.log(listing)
 
 	const [files, setFiles] = useState([]);
 	const {
@@ -136,7 +135,7 @@ function DragDropzone() {
 
 
 	const style = useMemo(() => ({
-		...(!jsonData.length ? baseStyle: {}),
+		...(!listing.length ? baseStyle: {}),
 		...(isFocused ? focusedStyle : {}),
 		...(isDragAccept ? acceptStyle : {}),
 		...(isDragReject ? rejectStyle : {})
@@ -144,7 +143,7 @@ function DragDropzone() {
 		isFocused,
 		isDragAccept,
 		isDragReject,
-		jsonData
+		listing
 	]);
 
 	const thumbs = files.map(file => (
@@ -161,17 +160,18 @@ function DragDropzone() {
 	));
 
 	useEffect(() => {
-		dispatch(getList());
+		dispatch(getList(location.pathname));
+
 		// Make sure to revoke the data uris to avoid memory leaks, will run on unmount
 		return () => files.forEach(file => URL.revokeObjectURL(file.preview));
-	}, []);
+	}, [location.pathname]);
 
 
 	/**
 	 * Used to navigate inside folder
 	 * And return files | folder data
 	 */
-	useEffect(()=>{
+	/*useEffect(()=>{
 		setListing(jsonData);
 		// console.log(jsonData)
 
@@ -200,7 +200,7 @@ function DragDropzone() {
 			}
 		}
 		dispatch(setBreadCrumb(breadCrumbArray))
-	}, [jsonData, location.pathname]);
+	}, [jsonData, location.pathname]);*/
 
 	
 	const handleFile = (e) => {
@@ -234,7 +234,7 @@ function DragDropzone() {
                     })} />
                 </div>
                 {
-					!jsonData.length && (
+					!listing.length && (
 						<div style={centerStyle}>
 							<div className='relative flex items-center relative flex-col justify-between'>
 								<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>

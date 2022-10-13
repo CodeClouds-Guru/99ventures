@@ -13,6 +13,7 @@ const TypeBadge = styled(Box)(
 			PPT: orange[500],
 			TXT: grey[600],
 			JPG: amber[600],
+			JPEG: amber[600],
 			PNG: purple[700],
 			GIF: grey[900]
 		}[props.color],
@@ -42,28 +43,30 @@ const renderItem = (file)=> {
 		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 			return badgeComponent('XLS');
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-			return badgeComponent('DOC');;
+			return badgeComponent('DOC');
 		case 'image/jpg':
 		case 'image/jpeg':
 		case 'image/png':
 		case 'image/gif':
 		case 'image/svg':
-			return (	
-				<div className='img-div'>		
-					<img
-						src={file.file_path}
-						alt="lorem ipsum"
-						loading="lazy"
-						className='rounded-md'
-						style={{
-							borderBottomLeftRadius: 4,
-							borderBottomRightRadius: 4,
-							display: 'block',
-							width: '100%',
-						}}
-					/>		
-				</div>			
-			);
+			const type = file.mime_type.split('/')[1];
+			return badgeComponent(type.toUpperCase());
+			// return (	
+			// 	<div className='img-div'>		
+			// 		<img
+			// 			src={file.file_path}
+			// 			alt="lorem ipsum"
+			// 			loading="lazy"
+			// 			className='rounded-md'
+			// 			style={{
+			// 				borderBottomLeftRadius: 4,
+			// 				borderBottomRightRadius: 4,
+			// 				display: 'block',
+			// 				width: '100%',
+			// 			}}
+			// 		/>		
+			// 	</div>			
+			// );
 		default:
 			return '';
 	}

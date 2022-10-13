@@ -64,10 +64,10 @@ const FileItems = (props) => {
 			size: 'text-center'
 		},
 		list: {
-			box: 'sm:w-full flex items-center flex-row row-style p-10',
+			box: 'sm:w-full flex items-center flex-row row-style p-6',
 			icon_btn: '',
 			nav_icon_adapter: 'flex-row items-center justify-between',
-			icon: '',
+			icon: 'mr-3',
 			title: 'text-left grow w-20',
 			modify: 'text-left basis-1/5',
 			size: 'text-left basis-1/5'
@@ -89,6 +89,7 @@ const FileItems = (props) => {
                 className={`z-20 top-0 right-0 m-6 w-32 h-32 min-h-32 ${style[viewType].icon_btn}`}
             >
                 <Checkbox 
+                    size="small"
                     checked={ selectedItemsId.includes(props.file.id) }
                     inputProps={{ 'aria-label': 'controlled' }}
                     onChange={handleChange} 
