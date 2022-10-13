@@ -8,7 +8,7 @@ import { lighten } from '@mui/material/styles';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { useEffect, useState } from 'react';
 import AltTag from './AltTag';
-import { setlightBoxStatus } from 'app/store/filemanager';
+import { setlightBoxStatus, deleteData } from 'app/store/filemanager';
 import { copyUrl } from './helper'
 
 const SidebarContent = (props) => {
@@ -16,10 +16,13 @@ const SidebarContent = (props) => {
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
 	const [ tooltipTitle, setToolTipTitle ] = useState('Copy URL');
-	
+	const [ msg, setMsg ] = useState('');
+
 	if (!selectedItem) {
 		return null;
 	}
+
+	console.log(selectedItem)
 
 	/**
 	 * It has used to change the tooltip title when 
@@ -34,12 +37,24 @@ const SidebarContent = (props) => {
 		setToolTipTitle('Copied')
   	}
 
-	const onConfirmAlertDialogHandle = () => {
-        console.log('sss')
+	/**
+     * Alert box open, close & confirm delete
+	*/
+	const onOpenAlertDialogHandle = () => {
+        setMsg(`Do you want to delete ${selectedItem.name}?`);
+        setOpenAlertDialog(true);
     }
 
-	const onCloseAlertDialogHandle = () => {
+    const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+    }
+  
+    const onConfirmAlertDialogHandle = async () => {        
+        dispatch(deleteData([selectedItem.id]))
+        .then(result => {
+            setOpenAlertDialog(false);
+			disabledSideBar()
+        })        
     }
 
 	const disabledSideBar = () => {
@@ -56,7 +71,7 @@ const SidebarContent = (props) => {
 		>
 			<div className="flex items-center justify-between w-full">
 				<Typography variant="h5">Details</Typography>
-				<IconButton className="" size="large" onClick={ disabledSideBar }>
+				<IconButton size="small" onClick={ disabledSideBar }>
 					<FuseSvgIcon>heroicons-outline:x</FuseSvgIcon>
 				</IconButton>
 			</div>
@@ -91,6 +106,10 @@ const SidebarContent = (props) => {
 					<Typography color="text.secondary">Size</Typography>
 					<Typography>{ (selectedItem.size/1024).toFixed(2) } KB</Typography>
 				</div>	
+				<div className="flex items-center justify-between py-14">
+					<Typography color="text.secondary">Access</Typography>
+					<Typography>{ selectedItem.access }</Typography>
+				</div>	
 				<div className="flex items-center justify-between py-8">
 					<Typography color="text.secondary">Copy URL</Typography>
 					<Tooltip title={tooltipTitle}>
@@ -106,13 +125,17 @@ const SidebarContent = (props) => {
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">
 				<Button className="" color="secondary" variant="contained">Download</Button>
-				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path})) }>Preview</Button>
-				<Button className="" color="error" variant="outlined" onClick={ ()=>setOpenAlertDialog(true) }>Delete</Button>
+				{
+					selectedItem.access === 'public' && (
+						<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path})) }>Preview</Button>
+					)
+				}
+				<Button className="" color="error" variant="outlined" onClick={ onOpenAlertDialogHandle }>Delete</Button>
 			</div>
 			{
 				openAlertDialog && (
 					<AlertDialog
-						content="Do you delete this item?"
+						content={ msg }
 						open={openAlertDialog}
 						onConfirm={onConfirmAlertDialogHandle}
 						onClose={onCloseAlertDialogHandle}

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-// import { lighten } from '@mui/material/styles';
 import { Tooltip, IconButton, Paper, Input, ListItemText, Menu, MenuItem} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
-import { setViewType } from '../../store/filemanager'
+import { setViewType, deleteData } from '../../store/filemanager'
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -22,13 +21,39 @@ const Header = () => {
     const selectedItemIdArry = useSelector(state=> state.filemanager.selectedItemsId);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [ msg, setMsg ] = useState('');
     
+    /**
+     * Alert box open, close & confirm delete
+	*/
+	const onOpenAlertDialogHandle = () => {
+        var message = '';
+        if(selectedItemIdArry.length > 1)
+            message = `Do you want to delete ${selectedItemIdArry.length} item(s)?`;
+        else if(selectedItemIdArry.length == 1)
+            message = `Do you want to delete this item?`;
+        else if(selectedItem)
+            message = `Do you want to delete ${selectedItem.name}?`;
+
+        setMsg(message);
+        setOpenAlertDialog(true);
+    }
+
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
     }
   
-    const onConfirmAlertDialogHandle = () => {
-        console.log('sss')
+    const onConfirmAlertDialogHandle = async () => {
+        var params = [];
+        if(selectedItemIdArry.length)
+            params = selectedItemIdArry;
+        else if(selectedItem)
+            params = [selectedItem.id]
+
+        dispatch(deleteData(params))
+        .then(result => {
+            setOpenAlertDialog(false);
+        })        
     }
 
     // useEffect(() => {
@@ -53,7 +78,7 @@ const Header = () => {
                     {
                         (selectedItemIdArry.length || selectedItem) ? (
                             <Tooltip title="Delete">
-                                <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
+                                <IconButton color="primary" aria-label="Filter" component="label" onClick={ onOpenAlertDialogHandle }>
                                     <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:trash</FuseSvgIcon>
                                 </IconButton>
                             </Tooltip>
@@ -131,7 +156,7 @@ const Header = () => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content="Do you delete the item(s)?"
+                        content={msg}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
