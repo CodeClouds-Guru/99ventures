@@ -160,11 +160,21 @@ class TicketController extends Controller {
         options.include = [
           {
             model: TicketConversation,
-            attributes: ["message", "member_id", "user_id"],
-            include: {
-              model: TicketAttachment,
-              attributes: ["file_name", "mime_type"],
-            },
+            attributes: ["message", "member_id", "user_id",'created_at'],
+            include: [
+              {
+                model: TicketAttachment,
+                attributes: ["file_name", "mime_type"],
+              },
+              {
+                model: Member,
+                attributes: ["first_name", "last_name", "username"],
+              },
+              {
+                model: User,
+                attributes: ["first_name", "last_name", "username"],
+              },
+            ],
           },
           {
             model: Member,
@@ -213,7 +223,7 @@ class TicketController extends Controller {
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({
-          attributes: ["subject", "status", "is_read"],
+          attributes: ["subject", "status", "is_read", "created_at"],
           where: {
             [Op.and]: { member_id: result.member_id },
             id: { [Op.ne]: ticket_id },
@@ -316,7 +326,7 @@ class TicketController extends Controller {
       };
       if (member_id !== null) data.member_id = member_id;
       if (user_id !== null) data.user_id = user_id;
-      
+
       let saved = await TicketConversation.create(data);
       console.log(attachments.length);
       if (saved.id > 0 && attachments) {
