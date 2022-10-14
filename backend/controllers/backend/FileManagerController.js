@@ -29,8 +29,13 @@ class FileManagerController {
           file_objects.push({id:this.generateId(object_key.Key,'',''),type:'file',name:file_structure[file_structure.length - 1],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg',access:'public'})
       }
     }
-    return {
-      data:file_objects
+    if(file_objects.length){
+      return {
+        status:true,
+        data:file_objects
+      }
+    }else{
+      this.throwCustomError("No data found.", 409);
     }
   }
   //generate id
@@ -82,22 +87,23 @@ class FileManagerController {
     return{
       status: true,
       message: "File Deleted."
-    };
+    }
   }
   //rename folder name
   async update(req,res){
     let id = req.body.id
-    let file_path = req.body.file_path
     let folder_name = req.body.folder_name
 
     let object_key = Buffer.from(id, "base64");
     object_key = object_key.toString("utf8"); 
 
-    file_path = file_path+'/'+folder_name
-
-    const fileHelper = new FileHelper('', object_key, req,file_path);
-    file_name = await fileHelper.copyObjects();
-
+    const fileHelper = new FileHelper('', object_key, req,folder_name);
+    let file_copy = await fileHelper.copyObjects(req.body.type)
+    
+    return{
+      status: true,
+      message: "Folder Updated."
+    };
   }
 }
 

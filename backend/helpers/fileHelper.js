@@ -128,7 +128,6 @@ class FileHelper {
       deleteParams.Delete.Objects.push({ Key:Key });
     });
     await s3.deleteObjects(deleteParams).promise();
-    // if (listedObjects.IsTruncated) await deleteFile(key);
     return true
   }
   
@@ -157,8 +156,33 @@ class FileHelper {
     return company
   }
   //copy bucket objects
-  async copyObjects(){
-
+  async copyObjects(req_type){
+    let s3 = this.s3Connect()
+    let model_structure = this.model.split('/')
+    model_structure[model_structure.length-2] = this.new_filename
+    model_structure = model_structure.join('/')
+    let pre_model = this.model
+    await s3.listObjects({Bucket: process.env.S3_BUCKET_NAME,Prefix: this.model}, function(err, data) {
+      
+      if (data.Contents.length) {
+        data.Contents.forEach(({ Key }) => {
+          var params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
+            Key: Key.replace(pre_model,model_structure)
+          };
+          s3.copyObject(params, function(copyErr, copyData){
+            if (copyErr) {
+              console.log(copyErr);
+            }
+          });
+        });
+      }
+    });
+    if(req_type == 'rename'){
+      this.deleteFile(this.model)
+    }
+    return true
   }
 }
 
