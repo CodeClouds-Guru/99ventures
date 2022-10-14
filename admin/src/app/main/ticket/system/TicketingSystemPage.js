@@ -12,10 +12,16 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 import AlertDialog from 'app/shared-components/AlertDialog';
 
 function TicketingSystemPage(props) {
+    const dispatch = useDispatch();
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponse, setQuickResponses] = useState('');
     const [memberStatus, setMemberStatus] = useState('');
-
+    const [ticketConversations, setTicketConversations] = useState([]);
+    const [memberDetails, setMemberDetails] = useState({});
+    const [previousTickets, setPreviousTIckets] = useState([]);
+    useEffect(() => {
+        getTicketDetails();
+    }, [])
     const handleChangeTicketStatus = (event) => {
         setTicketStatus(event.target.value);
     };
@@ -25,7 +31,21 @@ function TicketingSystemPage(props) {
     const handleMemberStatus = (event) => {
         setMemberStatus(event.target.value);
     };
-
+    const getTicketDetails = () => {
+        axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
+            .then(response => {
+                if (response.data.results.status) {
+                    // console.log(response.data.results.data);
+                    setTicketStatus(response.data.results.data.status);
+                    setTicketConversations(response.data.results.data.TicketConversations);
+                    setMemberDetails(response.data.results.data.Member);
+                    setMemberStatus(response.data.results.data.Member.status);
+                    setPreviousTIckets(response.data.results.data.previous_tickets);
+                }
+            }).catch(err => {
+                dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+            })
+    }
     return (
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-10">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
@@ -45,57 +65,31 @@ function TicketingSystemPage(props) {
                                         <MenuItem value="">
                                             <em>None</em>
                                         </MenuItem>
-                                        <MenuItem value="pending">Pending</MenuItem>
-                                        <MenuItem value="opened">Opened</MenuItem>
-                                        <MenuItem value="closed">Closed</MenuItem>
+                                        <MenuItem value="1">Opened</MenuItem>
+                                        <MenuItem value="2">Pending</MenuItem>
+                                        <MenuItem value="0">Closed</MenuItem>
                                     </Select>
                                 </FormControl>
                             </div>
                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '13rem', }}>
-                                <div className="w-auto flex flex-col justify-items-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>Milly Hopkins</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
-                                    </div>
-                                    <div>
-                                        <p>
-                                            Hi, I faced issued regarding this.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>John Doe</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
-                                    </div>
-                                    <div>
-                                        <p>
-                                            Hi, Milly we looking on this and keep you posted.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-items-start p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>Milly Hopkins</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
-                                    </div>
-                                    <div>
-                                        <p>
-                                            Hi, I faced issued regarding this.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="w-auto flex flex-col justify-items-end p-5 mt-10" style={{ background: '#dcdcdc' }}>
-                                    <div className="flex flex-row justify-between">
-                                        <b>John Doe</b>
-                                        <div className="flex justify-end">25th Sep 2022</div>
-                                    </div>
-                                    <div>
-                                        <p>
-                                            Hi, Milly we looking on this and keep you posted.
-                                        </p>
-                                    </div>
-                                </div>
+                                {ticketConversations.map((val, key) => {
+                                    return (
+                                        <>
+                                            <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                                <div className="flex flex-row justify-between">
+                                                    <b>Milly Hopkins</b>
+                                                    <div className="flex justify-end">25th Sep 2022</div>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        {val.message}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )
+                                })
+                                }
                             </div>
                             <Divider />
                             <div className="flex-row h-auto w-full px-10">
@@ -159,7 +153,7 @@ function TicketingSystemPage(props) {
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Full name:</b>
                                             </Typography>
-                                            Milly Hopkins
+                                            {memberDetails.first_name + ' ' + memberDetails.last_name}
                                         </div>
                                     </div>
                                     <div className="flex justify-start">
@@ -167,7 +161,7 @@ function TicketingSystemPage(props) {
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Email:</b>
                                             </Typography>
-                                            millyhopkins@gmail.com
+                                            {memberDetails.email}
                                         </div>
                                     </div>
                                 </div>

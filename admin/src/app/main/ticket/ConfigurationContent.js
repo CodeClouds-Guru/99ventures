@@ -1,9 +1,10 @@
 import List from "../crud/list/List";
 import { useState, useEffect } from 'react';
-import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton } from '@mui/material';
+import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Tooltip } from '@mui/material';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import moment from 'moment';
+import { position } from "stylis";
 function ConfigurationContent() {
     const [selectedStatus, setSelectedStatus] = useState('');
     const [open, setOpen] = useState(false);
@@ -81,6 +82,7 @@ function ConfigurationContent() {
                                     open={open}
                                     toggle={toggle}
                                     onChange={dateRangeSelected}
+                                    className="daterangepicker-filter"
                                 />
                                 :
                                 <div onClick={toggle}>
@@ -94,14 +96,16 @@ function ConfigurationContent() {
                         }
                     </Grid>
                     <Grid item xs={2}>
-                        <IconButton
-                            color="primary"
-                            aria-label="Clear Filter"
-                            component="label"
-                            onClick={clearFilter}
-                        >
-                            <ClearAllIcon />
-                        </IconButton>
+                        <Tooltip title="Clear Filter(s)" placement="left">
+                            <IconButton
+                                color="primary"
+                                aria-label="Clear Filter"
+                                component="label"
+                                onClick={clearFilter}
+                            >
+                                <ClearAllIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Grid>
                 </Grid>
             </Box>
