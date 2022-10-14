@@ -1,7 +1,6 @@
-const Controller = require('./Controller')
 const FileHelper = require("../../helpers/fileHelper");
 
-class FileManagerController extends Controller{
+class FileManagerController {
   constructor() {
   }
   async list(req,res){
@@ -32,11 +31,13 @@ class FileManagerController extends Controller{
     }
     if(file_objects.length){
       return {
-        status:true,
         data:file_objects
       }
     }else{
-      this.throwCustomError("No data found.", 409);
+      const errorObj = new Error("Request failed.");
+      errorObj.statusCode = 409;
+      errorObj.data = "No data found.";
+      throw errorObj;
     }
   }
   //generate id
