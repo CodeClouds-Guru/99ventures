@@ -14,7 +14,8 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const [ticketStatus, setTicketStatus] = useState('');
-    const [quickResponse, setQuickResponses] = useState('');
+    const [quickResponseOptions, setQuickResponseOptions] = useState([]);
+    const [quickResponse, setQuickResponse] = useState('');
     const [memberStatus, setMemberStatus] = useState('');
     const [ticketConversations, setTicketConversations] = useState([]);
     const [memberDetails, setMemberDetails] = useState({});
@@ -26,7 +27,7 @@ function TicketingSystemPage(props) {
         setTicketStatus(event.target.value);
     };
     const handleChangeQuickResponse = (event) => {
-        setQuickResponses(event.target.value);
+        setQuickResponse(event.target.value);
     };
     const handleMemberStatus = (event) => {
         setMemberStatus(event.target.value);
@@ -41,6 +42,7 @@ function TicketingSystemPage(props) {
                     setMemberDetails(response.data.results.data.Member);
                     setMemberStatus(response.data.results.data.Member.status);
                     setPreviousTIckets(response.data.results.data.previous_tickets);
+                    setQuickResponseOptions(response.data.results.data.auto_responders)
                 }
             }).catch(err => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
@@ -65,28 +67,26 @@ function TicketingSystemPage(props) {
                                         <MenuItem value="">
                                             <em>None</em>
                                         </MenuItem>
-                                        <MenuItem value="1">Opened</MenuItem>
-                                        <MenuItem value="2">Pending</MenuItem>
-                                        <MenuItem value="0">Closed</MenuItem>
+                                        <MenuItem value="open">Open</MenuItem>
+                                        <MenuItem value="pending">Pending</MenuItem>
+                                        <MenuItem value="closed">Closed</MenuItem>
                                     </Select>
                                 </FormControl>
                             </div>
                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '13rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <>
-                                            <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
-                                                <div className="flex flex-row justify-between">
-                                                    <b>Milly Hopkins</b>
-                                                    <div className="flex justify-end">25th Sep 2022</div>
-                                                </div>
-                                                <div>
-                                                    <p>
-                                                        {val.message}
-                                                    </p>
-                                                </div>
+                                        <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                            <div className="flex flex-row justify-between">
+                                                <b>Milly Hopkins</b>
+                                                <div className="flex justify-end">25th Sep 2022</div>
                                             </div>
-                                        </>
+                                            <div>
+                                                <p>
+                                                    {val.message}
+                                                </p>
+                                            </div>
+                                        </div>
                                     )
                                 })
                                 }
@@ -105,8 +105,12 @@ function TicketingSystemPage(props) {
                                         <MenuItem value="">
                                             <em>None</em>
                                         </MenuItem>
-                                        <MenuItem value="will check">Will check</MenuItem>
-                                        <MenuItem value="got it">Got it</MenuItem>
+                                        {quickResponseOptions.map((val, key) => {
+                                            return (
+                                                <MenuItem key={key} value={val.name}>{val.name}</MenuItem>
+                                            )
+                                        })
+                                        }
                                     </Select>
                                 </FormControl>
                                 <TextareaAutosize className="w-full border-1"
