@@ -1,6 +1,7 @@
+const Controller = require('./Controller')
 const FileHelper = require("../../helpers/fileHelper");
 
-class FileManagerController {
+class FileManagerController extends Controller{
   constructor() {
   }
   async list(req,res){
