@@ -27,23 +27,23 @@ module.exports = (sequelize, DataTypes) => {
       subject: DataTypes.STRING,
       status: {
         type: DataTypes.TINYINT,
-        get() {
-          let status_str = "";
-          switch (this.getDataValue("status")) {
-            case 1:
-              status_str = "open";
-              break;
-            case 2:
-              status_str = "pending";
-              break;
-            case 0:
-              status_str = "closed";
-              break;
-            default:
-              status_str = "";
-          }
-          return status_str;
-        },
+        // get() {
+        //   let status_str = "";
+        //   switch (this.getDataValue("status")) {
+        //     case 1:
+        //       status_str = "open";
+        //       break;
+        //     case 2:
+        //       status_str = "pending";
+        //       break;
+        //     case 0:
+        //       status_str = "closed";
+        //       break;
+        //     default:
+        //       status_str = "";
+        //   }
+        //   return status_str;
+        // },
       },
       is_read: DataTypes.TINYINT,
       created_at: "TIMESTAMP",
@@ -164,7 +164,7 @@ module.exports = (sequelize, DataTypes) => {
     return result.count;
   };
 
-  Ticket.changeIsReadStatus = async (field_name, val, ticket_id) => {
+  Ticket.changeStatus = async (field_name, val, ticket_id) => {
     let update_data = {
       [field_name]: val,
     };
