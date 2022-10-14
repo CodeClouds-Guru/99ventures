@@ -81,9 +81,7 @@ const centerStyle = {
 function DragDropzone() {
 	const location = useLocation();
 	const dispatch = useDispatch();
-    // const jsonData = useSelector(state=> state.filemanager.jsonData)
-    const listing = useSelector(state=> state.filemanager.listData)
-    // const [ listing, setListing ] = useState([]);
+    const listing = useSelector(state=> state.filemanager.listData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const navigate = useNavigate();
@@ -149,8 +147,12 @@ function DragDropzone() {
 	useEffect(() => {
 		var path = pathObject;		
 		
+		/**
+		 * This block will execute while reloading the page
+		 */
 		if(!pathObject.length){
-			const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
+			// Remove trailing slash
+			const pathname = location.pathname.replace(/\/$/, "");
 			const pathArry = decodeURI(pathname).split('/');
 			pathArry.splice(0, 3);
 			path = pathArry

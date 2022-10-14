@@ -28,22 +28,15 @@ export const deleteData = createAsyncThunk(
             dispatch(showMessage({ variant: 'error', message: 'Unable to process your request!' }));
             return {'status': false};
         }
-        
+                
         const result = await axios.post('file-manager/delete', {modelIds: params})
         .then(result => {
             if(result.status === 200 && result.data.results.status) {
                 dispatch(showMessage({ variant: 'success', message: result.data.results.message }));
                 const { filemanager } = getState();
-                /**
-                 * setTimeout has used to delay the api call
-                 * It's taking time to delete file from S3
-                 */                
-                setTimeout(()=>{
-                    dispatch(
-                        getList(filemanager.pathObject.join('/'))
-                    );
-                }, 5000)
-                return {'status': true};
+                const listData = filemanager.listData;
+                const newlistData = listData.filter(file => !params.includes(file.id));
+                return {'status': true, 'list_data': newlistData};
             } else {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
                 return {'status': false};
@@ -56,38 +49,6 @@ export const deleteData = createAsyncThunk(
         return result;
     }
 )
-
-/*function navigateToNested(jsonData, dispatch){    
-    const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
-    const pathArry = pathname.split('/');
-    const breadCrumbArray = [];
-
-    //Cleared selected items while navigate
-    dispatch(setSelectedItemsId([]));
-
-    if(pathArry.length > 3 && jsonData.length) {
-        const staticPath = pathArry.splice(0, 3);	// truncate frist three static path, like ['/', 'app', 'filemanager']
-        
-        var finalResult = [];
-        for(let i=0; i<pathArry.length; i++) {
-            if(i < 1) {
-                finalResult = jsonData.filter(file => file.id === pathArry[i]);					
-            } else if(finalResult[0].details.length){
-                finalResult = finalResult[0].details.filter(file => file.id === pathArry[i]);					
-            }
-
-            staticPath.push(finalResult[0].id);
-            breadCrumbArray.push({
-                name: finalResult[0].name, 
-                path: staticPath.join('/')
-            });            	
-        }
-        dispatch(setBreadCrumb(breadCrumbArray));
-        return (finalResult.length && finalResult[0].details.length) ? finalResult[0].details : [];
-    }
-    dispatch(setBreadCrumb(breadCrumbArray));
-    return jsonData;
-}*/
 
 const initialState = {
     loading: 'idle',
@@ -146,7 +107,12 @@ const fileManagerSlice = createSlice({
         },
         [deleteData.pending]: (state) => {
             state.loading = 'pending';
-            state.listData = [];
+        },
+        [deleteData.fulfilled]: (state, {payload}) => {
+            state.loading = 'idle';
+            if(payload.list_data){
+                state.listData = payload.list_data;
+            }
         },
     }
 });
