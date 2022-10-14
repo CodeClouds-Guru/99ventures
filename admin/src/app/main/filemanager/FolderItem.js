@@ -1,30 +1,16 @@
-import { Typography, IconButton, Checkbox } from '@mui/material';
-import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import { Typography, IconButton, Checkbox, Link } from '@mui/material';
 import { Box } from '@mui/system';
 import ItemIcon from './ItemIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setBreadCrumb } from 'app/store/filemanager';
-import { useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { setSelectedItemsId, setSelectedItem, setPathObject } from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 
 function FolderItem(props) {
-	const location = useLocation();
 	const dispatch = useDispatch();
 	const viewType = useSelector(state=> state.filemanager.viewType);
 	const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-	const [ path, setPath ] = useState(location.pathname);
+	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const navigate = useNavigate();
-
-	useEffect(()=> {
-		const currentPath = location.pathname.replace(/\/$/, "");
-		const pathArry = currentPath.split('/');
-		setPath(
-			[...new Set([...pathArry, props.file.id])].join('/')
-		)
-	}, [location.pathname])
-
 		
 	const handleChange = (event) => {
         if(!event.target.checked && selectedItemsId.includes(props.file.id)){
@@ -62,8 +48,10 @@ function FolderItem(props) {
 	}
 
 	const navigateTochild = ()=>{
-		// console.log(path)		
-		return navigate(path);
+		const path = [...pathObject, props.file.name];
+		dispatch(setPathObject(path));
+		dispatch(setSelectedItem(null));
+		return navigate(path.join('/'));
 	}
 
 	return (
@@ -81,7 +69,7 @@ function FolderItem(props) {
 					onChange={handleChange} 
 				/>
 			</IconButton>
-			<a
+			<Link
 				className={`flex h-full w-full ${style[viewType].nav_icon_adapter}`}
 				to="#"
 				role="button"
@@ -106,7 +94,7 @@ function FolderItem(props) {
 						</>
 					)
 				}				
-			</a>
+			</Link>
 		</Box>
 	);
 }

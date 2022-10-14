@@ -7,6 +7,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
 import { setViewType, deleteData } from '../../store/filemanager'
+import { setSelectedItemsId } from 'app/store/filemanager'
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -41,6 +42,7 @@ const Header = () => {
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        dispatch(setSelectedItemsId([]));
     }
   
     const onConfirmAlertDialogHandle = async () => {

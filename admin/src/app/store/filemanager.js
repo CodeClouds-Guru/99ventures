@@ -1,36 +1,22 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import axios from 'axios';
-import { isEmpty } from 'lodash';
-
 
 export const getList = createAsyncThunk(
     'filemanager/getList',
-    async(params, {dispatch, getState}) => {   
-        const { filemanager } = getState();
-        if(filemanager.listData.length && params) {
-            const result = navigateToNested(filemanager.jsonData, dispatch);
-            return {
-                'list_data': result,
-            };
-        }
-        
-        const result = await axios.post('file-manager/list')
+    async(params, {dispatch}) => {
+        const result = await axios.post('file-manager/list', {path: params })
         .then(res => {
             if(res.status === 200 && res.data.results.data) {
-                const result = res.data.results.data;
-                return {
-                    'list_data': navigateToNested(result, dispatch),
-                    'json_data': result
-                }
+                dispatch(setSelectedItemsId([]));
+                return res.data.results.data;
             }
-            return {};
+            return [];
         })
         .catch(error => {
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
-            return {};
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));            
+            return error.response;
         })
-
         return result;
     }
 );
@@ -38,30 +24,26 @@ export const getList = createAsyncThunk(
 export const deleteData = createAsyncThunk(
     'filemanager/deleteData',
     async(params, {dispatch, getState}) => {
-        if(isEmpty(params)) {
+        if(!params.length) {
             dispatch(showMessage({ variant: 'error', message: 'Unable to process your request!' }));
             return {'status': false};
         }
-        const { filemanager } = getState();        
-        const currentListData = filemanager.listData;
-        const listData  = currentListData.filter(file => !params.includes(file.id));        
-        console.log(listData)
-        return {
-            'status': true,
-            'list_data':  listData
-        }
-
+        
         const result = await axios.post('file-manager/delete', {modelIds: params})
         .then(result => {
             if(result.status === 200 && result.data.results.status) {
                 dispatch(showMessage({ variant: 'success', message: result.data.results.message }));
-                const { filemanager } = getState();        
-                const currentListData = filemanager.listData;
-                const listData  = currentListData.filter(file => !params.includes(file.id));        
-                return {
-                    'status': true,
-                    'list_data':  listData
-                }
+                const { filemanager } = getState();
+                /**
+                 * setTimeout has used to delay the api call
+                 * It's taking time to delete file from S3
+                 */                
+                setTimeout(()=>{
+                    dispatch(
+                        getList(filemanager.pathObject.join('/'))
+                    );
+                }, 5000)
+                return {'status': true};
             } else {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
                 return {'status': false};
@@ -69,14 +51,13 @@ export const deleteData = createAsyncThunk(
         })
         .catch(error => {
             dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
-            return {'status': false};
-        })
-
+            return error.response;
+        });
         return result;
     }
 )
 
-function navigateToNested(jsonData, dispatch){    
+/*function navigateToNested(jsonData, dispatch){    
     const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
     const pathArry = pathname.split('/');
     const breadCrumbArray = [];
@@ -106,9 +87,10 @@ function navigateToNested(jsonData, dispatch){
     }
     dispatch(setBreadCrumb(breadCrumbArray));
     return jsonData;
-}
+}*/
 
 const initialState = {
+    loading: 'idle',
     show_sidebar: false,
     selectedItem: null,
     selectAll: false,
@@ -117,7 +99,8 @@ const initialState = {
     viewType: 'grid',
     jsonData: [],
     listData: [],
-    breadCrumb: []
+    breadCrumb: [],
+    pathObject: []
 }
 
 const fileManagerSlice = createSlice({
@@ -144,21 +127,27 @@ const fileManagerSlice = createSlice({
         },
         setBreadCrumb: (state, action) => {
             state.breadCrumb = action.payload
+        },
+        setPathObject: (state, action) => {
+            state.pathObject = action.payload
         }
     },
     extraReducers: {
-        [getList.fulfilled]: (state, {payload}) => {
-            state.listData = payload.list_data;
-            if(payload.json_data){
-                state.jsonData = payload.json_data;
-            }
+        [getList.pending]: (state) => {            
+            state.loading = 'pending';
+            state.listData = [];
         },
-        [deleteData.fulfilled]: (state, { payload }) => {
-            if(payload.status === true){
-                state.listData = payload.list_data;
-                console.log(state.jsonData)
-            }
-        }
+        [getList.fulfilled]: (state, {payload}) => {
+            state.listData = payload;
+            state.loading = 'idle'
+        },
+        [getList.rejected]: (state) => {
+            state.loading = 'failed'
+        },
+        [deleteData.pending]: (state) => {
+            state.loading = 'pending';
+            state.listData = [];
+        },
     }
 });
 
@@ -169,7 +158,8 @@ export const {
     setSelectedItemsId,
     setlightBoxStatus,
     setViewType,
-    setBreadCrumb
+    setBreadCrumb,
+    setPathObject
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

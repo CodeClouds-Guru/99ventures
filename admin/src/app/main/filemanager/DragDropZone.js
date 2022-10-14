@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, LinearProgress } from '@mui/material';
 import axios from 'axios'
 import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
@@ -8,22 +8,8 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import { getList } from '../../store/filemanager'
 import { useParams, useLocation } from 'react-router-dom';
-
-const baseStyle1 = {
-	flex: 1,
-	display: 'flex',
-	flexDirection: 'column',
-	alignItems: 'center',
-	padding: '60px',
-	borderWidth: 2,
-	borderRadius: 2,
-	borderColor: '#eeeeee',
-	borderStyle: 'dashed',
-	backgroundColor: '#fafafa',
-	color: '#bdbdbd',
-	outline: 'none',
-	transition: 'border .24s ease-in-out'
-};
+import { setPathObject } from 'app/store/filemanager';
+import { useNavigate } from "react-router-dom";
 
 const baseStyle = {
 	justifyContent: 'center',
@@ -98,8 +84,9 @@ function DragDropzone() {
     // const jsonData = useSelector(state=> state.filemanager.jsonData)
     const listing = useSelector(state=> state.filemanager.listData)
     // const [ listing, setListing ] = useState([]);
-
-	// console.log(listing)
+	const pathObject = useSelector(state=> state.filemanager.pathObject);
+	const loading = useSelector(state=> state.filemanager.loading);
+	const navigate = useNavigate();
 
 	const [files, setFiles] = useState([]);
 	const {
@@ -160,47 +147,28 @@ function DragDropzone() {
 	));
 
 	useEffect(() => {
-		dispatch(getList(location.pathname));
-
+		var path = pathObject;		
+		
+		if(!pathObject.length){
+			const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
+			const pathArry = decodeURI(pathname).split('/');
+			pathArry.splice(0, 3);
+			path = pathArry
+			dispatch(setPathObject(pathArry));
+		}
+		
+		dispatch(
+			getList(path.join('/'))
+		).then(response => {
+			if(response.payload.status === 409){
+				dispatch(setPathObject([]));
+				return navigate('/app/filemanager');
+			}
+		});
+		
 		// Make sure to revoke the data uris to avoid memory leaks, will run on unmount
 		return () => files.forEach(file => URL.revokeObjectURL(file.preview));
 	}, [location.pathname]);
-
-
-	/**
-	 * Used to navigate inside folder
-	 * And return files | folder data
-	 */
-	/*useEffect(()=>{
-		setListing(jsonData);
-		// console.log(jsonData)
-
-		const pathname = location.pathname.replace(/\/$/, "");	// Remove trailing slash
-		const pathArry = pathname.split('/');
-		const breadCrumbArray = [];
-
-		if(pathArry.length > 3 && jsonData.length) {
-			const staticPath = pathArry.splice(0, 3);	// truncate frist three static path, like /app/filemanager
-			
-			var finalResult = [];
-			for(let i=0; i<pathArry.length; i++) {
-				if(i < 1) {
-					finalResult = jsonData.filter(file => file.id === pathArry[i]);					
-				} else if(finalResult[0].details.length){
-					finalResult = finalResult[0].details.filter(file => file.id === pathArry[i]);					
-				}		
-				staticPath.push(finalResult[0].id);
-				breadCrumbArray.push({
-					name: finalResult[0].name, 
-					path: staticPath.join('/')
-				})	
-			}
-			if(finalResult.length && finalResult[0].details.length){				
-				setListing(finalResult[0].details);
-			}
-		}
-		dispatch(setBreadCrumb(breadCrumbArray))
-	}, [jsonData, location.pathname]);*/
 
 	
 	const handleFile = (e) => {
@@ -209,44 +177,52 @@ function DragDropzone() {
 	}; 
 
 	return (
-        <section className="container flex flex-col h-full  md:p-24 sm:p-24 lg:p-24 w-full border filemanager-file-box ">
-            <Box 
-                className="dropzone h-full"
-                {...getRootProps({ style })}
-            >
-                <div className='flex flex-wrap items-center' >
-                    {
-                        listing.length ? listing.map((el, i) => {
-                            if(el.type === 'folder') {
-                                return <FolderItem key={i} file={ el }/>
-                            }
-                        }) : ''
-                    }
-                    {
-                        listing.length ? listing.map((el, i) => {
-                            if(el.type === 'file') {
-                                return <FileItems key={i} file={ el } />
-                            }
-                        }) : ''
-                    } 
-                    <input {...getInputProps({
-                        onChange: handleFile,
-                    })} />
-                </div>
-                {
-					!listing.length && (
-						<div style={centerStyle}>
-							<div className='relative flex items-center relative flex-col justify-between'>
-								<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
-								<FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
-								<Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
-							</div>
-						</div> 
-					)
-				}
-            </Box>
-            
-        </section>
+		<>
+			{
+				loading == 'pending' && <LinearProgress />
+			}
+			<section className={`
+				${loading == 'pending' && `opacity-25 pointer-events-none`} container flex flex-col h-full  md:p-24 sm:p-24 lg:p-24 w-full border filemanager-file-box`
+			}>
+				<Box 
+					className="dropzone h-full"
+					{...getRootProps({ style })}
+				>
+					
+					<div className='flex flex-wrap items-center' >
+						{
+							listing.length ? listing.map((el, i) => {
+								if(el.type === 'folder') {
+									return <FolderItem key={i} file={ el }/>
+								}
+							}) : ''
+						}
+						{
+							listing.length ? listing.map((el, i) => {
+								if(el.type === 'file') {
+									return <FileItems key={i} file={ el } />
+								}
+							}) : ''
+						} 
+						<input {...getInputProps({
+							onChange: handleFile,
+						})} />
+					</div>
+					{
+						!listing.length && loading == 'idle' && (
+							<div style={centerStyle}>
+								<div className='relative flex items-center relative flex-col justify-between'>
+									<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
+									<FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
+									<Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
+								</div>
+							</div> 
+						)
+					}
+				</Box>
+				
+			</section>
+		</>
 	);
 
 }

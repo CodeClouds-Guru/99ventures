@@ -1,40 +1,29 @@
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, IconButton, Button, Tooltip, Typography } from '@mui/material';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import ItemIcon from './ItemIcon';
-import { setSelectedItem } from 'app/store/filemanager';
 import { lighten } from '@mui/material/styles';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import { motion } from 'framer-motion';
+import { setlightBoxStatus, deleteData, setSelectedItem } from 'app/store/filemanager';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { useEffect, useState } from 'react';
-import AltTag from './AltTag';
-import { setlightBoxStatus, deleteData } from 'app/store/filemanager';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import ItemIcon from './ItemIcon';
 import { copyUrl } from './helper'
+import AltTag from './AltTag';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-	const [ tooltipTitle, setToolTipTitle ] = useState('Copy URL');
 	const [ msg, setMsg ] = useState('');
 
 	if (!selectedItem) {
 		return null;
 	}
 
-	console.log(selectedItem)
-
-	/**
-	 * It has used to change the tooltip title when 
-	 * user click any items by opening the sidebar.
-	 */
-	// useEffect(()=>{
-	// 	setToolTipTitle('Copy URL');
-	// }, [selectedItem])
-
   	const copyFilePath = () => {
 		copyUrl(selectedItem.file_path);
-		setToolTipTitle('Copied')
+        dispatch(showMessage({ variant: 'success', message: 'URL Copied' }));
   	}
 
 	/**
@@ -59,7 +48,6 @@ const SidebarContent = (props) => {
 
 	const disabledSideBar = () => {
 		dispatch(setSelectedItem(null));
-		setToolTipTitle('Copy URL');
 	}
 
 
@@ -93,11 +81,7 @@ const SidebarContent = (props) => {
 			<Typography className="text-18 font-medium">{selectedItem.name}</Typography>
 
 			<div className="text-16 font-medium mt-32">Information</div>
-			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">			
-				{/* <div className="flex items-center justify-between py-14">
-					<Typography color="text.secondary">Created At</Typography>
-					<Typography></Typography>
-				</div> */}
+			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
 					<Typography>{selectedItem.last_modified}</Typography>
@@ -112,7 +96,7 @@ const SidebarContent = (props) => {
 				</div>	
 				<div className="flex items-center justify-between py-8">
 					<Typography color="text.secondary">Copy URL</Typography>
-					<Tooltip title={tooltipTitle}>
+					<Tooltip title="Copy URL">
 						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
 							<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
 						</IconButton>

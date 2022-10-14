@@ -14,7 +14,6 @@ const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-    const selectAll = useSelector(state=> state.filemanager.selectAll);
     const [anchorEl, setAnchorEl] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const viewType = useSelector(state=> state.filemanager.viewType);
@@ -124,7 +123,7 @@ const FileItems = (props) => {
                 </div>
                 
                 <div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
-                    <Tooltip title={ props.file.name }>
+                    <Tooltip title={ props.file.name } placement="bottom-start">
                         <Typography className="pr-5 truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file))}>{ props.file.name }</Typography>
                     </Tooltip>
                     <div className="item-list-icon">
@@ -148,12 +147,16 @@ const FileItems = (props) => {
                                 </ListItemIcon>
                                 <ListItemText primary="Details" />
                             </MenuItem>
-                            <MenuItem onClick={ copyFilePath }>
-                                <ListItemIcon className="min-w-40">
-                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
-                                </ListItemIcon>
-                                <ListItemText primary="Copy" />
-                            </MenuItem>
+                            {
+                                props.file.access === 'public' && (
+                                    <MenuItem onClick={ copyFilePath }>
+                                        <ListItemIcon className="min-w-40">
+                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                        </ListItemIcon>
+                                        <ListItemText primary="Copy" />
+                                    </MenuItem>
+                                )
+                            }                            
                             <MenuItem onClick={ handleOpenPreview }>
                                 <ListItemIcon className="min-w-40">
                                     <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
