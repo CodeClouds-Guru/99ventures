@@ -13,6 +13,7 @@ const TypeBadge = styled(Box)(
 			PPT: orange[500],
 			TXT: grey[600],
 			JPG: amber[600],
+			JPEG: amber[600],
 			PNG: purple[700],
 			GIF: grey[900]
 		}[props.color],
@@ -35,31 +36,37 @@ const badgeComponent = (type) => {
 	)
 }
 
-const renderItem = (type)=> {
-	switch(type) {
+const renderItem = (file)=> {
+	switch(file.mime_type) {
 		case 'application/pdf':
 			return badgeComponent('PDF');
 		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 			return badgeComponent('XLS');
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-			return badgeComponent('DOC');;
+			return badgeComponent('DOC');
 		case 'image/jpg':
-			return (	
-				<div className='img-div'>		
-					<img
-						src="https://picsum.photos/200"
-						alt="lorem ipsum"
-						loading="lazy"
-						className='rounded-md'
-						style={{
-							borderBottomLeftRadius: 4,
-							borderBottomRightRadius: 4,
-							display: 'block',
-							width: '100%',
-						}}
-					/>		
-				</div>			
-			);
+		case 'image/jpeg':
+		case 'image/png':
+		case 'image/gif':
+		case 'image/svg':
+			const type = file.mime_type.split('/')[1];
+			return badgeComponent(type.toUpperCase());
+			// return (	
+			// 	<div className='img-div'>		
+			// 		<img
+			// 			src={file.file_path}
+			// 			alt="lorem ipsum"
+			// 			loading="lazy"
+			// 			className='rounded-md'
+			// 			style={{
+			// 				borderBottomLeftRadius: 4,
+			// 				borderBottomRightRadius: 4,
+			// 				display: 'block',
+			// 				width: '100%',
+			// 			}}
+			// 		/>		
+			// 	</div>			
+			// );
 		default:
 			return '';
 	}
@@ -67,17 +74,16 @@ const renderItem = (type)=> {
 
 
 function ItemIcon(props) {
-	const { type } = props;
-
-	if (type === 'folder') {
+	const { file } = props;
+	if (file.type === 'folder') {
 		return (
+			<div className="relative">
 			<FuseSvgIcon className="fuse--icon" size={56} color="disabled">
 				material-outline:folder_open
-			</FuseSvgIcon>
+			</FuseSvgIcon></div>
 		);
 	}
-
-	return renderItem(type);
+	return renderItem(file);
 }
 
 export default ItemIcon;

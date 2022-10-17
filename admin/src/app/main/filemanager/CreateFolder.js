@@ -58,7 +58,7 @@ export default function CreateFolder() {
         <>
             <Tooltip title="Create Folder">
                 <IconButton color="primary" aria-label="Filter" component="label" onClick={handleOpen}>
-                    <FuseSvgIcon className="text-48" size={30} color="action">material-outline:create_new_folder</FuseSvgIcon>
+                    <FuseSvgIcon className="text-48" size={26} color="action">material-outline:create_new_folder</FuseSvgIcon>
                 </IconButton>
             </Tooltip>
             <Modal

@@ -1,40 +1,55 @@
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, IconButton, Button, Tooltip, Typography } from '@mui/material';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import ItemIcon from './ItemIcon';
-import { setSelectedItem } from 'app/store/filemanager';
 import { lighten } from '@mui/material/styles';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import { motion } from 'framer-motion';
+import { setlightBoxStatus, deleteData, setSelectedItem } from 'app/store/filemanager';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { useState } from 'react';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import ItemIcon from './ItemIcon';
+import { copyUrl } from './helper'
 import AltTag from './AltTag';
-import { setlightBoxStatus } from 'app/store/filemanager';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-	
+	const [ msg, setMsg ] = useState('');
+
 	if (!selectedItem) {
 		return null;
 	}
 
-  	const copyUrl = () => {
-		const el = document.createElement('input');
-		el.value = window.location.href;
-		document.body.appendChild(el);
-		el.select();
-		document.execCommand('copy');
-		document.body.removeChild(el);
+  	const copyFilePath = () => {
+		copyUrl(selectedItem.file_path);
+        dispatch(showMessage({ variant: 'success', message: 'URL Copied' }));
   	}
 
-	const onConfirmAlertDialogHandle = () => {
-        console.log('sss')
+	/**
+     * Alert box open, close & confirm delete
+	*/
+	const onOpenAlertDialogHandle = () => {
+        setMsg(`Do you want to delete ${selectedItem.name}?`);
+        setOpenAlertDialog(true);
     }
 
-	const onCloseAlertDialogHandle = () => {
+    const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
     }
+  
+    const onConfirmAlertDialogHandle = async () => {        
+        dispatch(deleteData([selectedItem.id]))
+        .then(result => {
+            setOpenAlertDialog(false);
+			disabledSideBar()
+        })        
+    }
+
+	const disabledSideBar = () => {
+		dispatch(setSelectedItem(null));
+	}
+
 
 	return (
 		<motion.div
@@ -44,7 +59,7 @@ const SidebarContent = (props) => {
 		>
 			<div className="flex items-center justify-between w-full">
 				<Typography variant="h5">Details</Typography>
-				<IconButton className="" size="large" onClick={() => dispatch(setSelectedItem(null))}>
+				<IconButton size="small" onClick={ disabledSideBar }>
 					<FuseSvgIcon>heroicons-outline:x</FuseSvgIcon>
 				</IconButton>
 			</div>
@@ -59,30 +74,30 @@ const SidebarContent = (props) => {
 				}}
 			>
 				<motion.div initial={{ scale: 0 }} animate={{ scale: 1, transition: { delay: 0.3 } }}>
-					<ItemIcon className="" type={selectedItem.mime_type} />
+					<ItemIcon file={selectedItem} />
 				</motion.div>
 			</Box> 
 
 			<Typography className="text-18 font-medium">{selectedItem.name}</Typography>
 
 			<div className="text-16 font-medium mt-32">Information</div>
-			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">			
-				{/* <div className="flex items-center justify-between py-14">
-					<Typography color="text.secondary">Created At</Typography>
-					<Typography></Typography>
-				</div> */}
+			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
-					<Typography></Typography>
+					<Typography>{selectedItem.last_modified}</Typography>
 				</div>
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Size</Typography>
-					<Typography>{selectedItem.size}</Typography>
+					<Typography>{ (selectedItem.size/1024).toFixed(2) } KB</Typography>
+				</div>	
+				<div className="flex items-center justify-between py-14">
+					<Typography color="text.secondary">Access</Typography>
+					<Typography>{ selectedItem.access }</Typography>
 				</div>	
 				<div className="flex items-center justify-between py-8">
 					<Typography color="text.secondary">Copy URL</Typography>
 					<Tooltip title="Copy URL">
-						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyUrl }>
+						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
 							<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
 						</IconButton>
 					</Tooltip>
@@ -94,13 +109,17 @@ const SidebarContent = (props) => {
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">
 				<Button className="" color="secondary" variant="contained">Download</Button>
-				<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: '//placekitten.com/1500/500'})) }>Preview</Button>
-				<Button className="" color="error" variant="outlined" onClick={ ()=>setOpenAlertDialog(true) }>Delete</Button>
+				{
+					selectedItem.access === 'public' && (
+						<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path})) }>Preview</Button>
+					)
+				}
+				<Button className="" color="error" variant="outlined" onClick={ onOpenAlertDialogHandle }>Delete</Button>
 			</div>
 			{
 				openAlertDialog && (
 					<AlertDialog
-						content="Do you delete this item?"
+						content={ msg }
 						open={openAlertDialog}
 						onConfirm={onConfirmAlertDialogHandle}
 						onClose={onCloseAlertDialogHandle}
