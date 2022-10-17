@@ -1,15 +1,12 @@
-import Typography from '@mui/material/Typography';
+import {Typography, LinearProgress} from '@mui/material';
 import { motion } from 'framer-motion';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
 import { Link } from 'react-router-dom';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { useTheme } from '@mui/material/styles';
 import Header from './Header';
 import BreadCrumb from './BreadCrumb';
+import { useSelector } from 'react-redux'
 
 function FileManagerHeader(props) {
-  const theme = useTheme();
+  const loading = useSelector(state=> state.filemanager.loading);
 
   return (
 	<div className='w-full'>
@@ -36,6 +33,19 @@ function FileManagerHeader(props) {
 		
 		<Header/>
 		<BreadCrumb/>
+		{
+			loading == 'pending' && (
+				<LinearProgress sx={{				
+					borderTopLeftRadius: '2rem',
+					borderTopRightRadius: '2rem',
+					top: '5px',
+					zIndex: '99',
+					margin: '0 6px',
+					height: '6px'
+				}}/>
+			)
+		}		
+		
 	</div>
   );
 }

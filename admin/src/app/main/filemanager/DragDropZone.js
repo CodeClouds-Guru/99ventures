@@ -202,7 +202,7 @@ function DragDropzone() {
 	const handleFile = (config, files) => {
 		const params = new FormData();
 		params.append('file_path', pathObject.join('/'));
-		files.forEach(file => {
+		files.forEach((file) => {
 			params.append('file', file);
 		});
 		dispatch(setLoading('pending'));
@@ -219,56 +219,52 @@ function DragDropzone() {
 				dispatch(showMessage({ variant: 'error', message: response.data.errors }));
 			}
 		})
-		.catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+		.catch(error => {
+			dispatch(setLoading('idle'));
+			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+		});
 	}; 
 
-	return (
-		<div className='w-full h-full'>			
-			{
-				loading == 'pending' && <LinearProgress />
-			}
-			<section className={`
-				${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col  h-full w-full md:p-24 sm:p-24 lg:p-24 w-full `
-			}>
-				<Box 
-					className="dropzone h-full"
-					{...getRootProps({ style })}
-				>
-					
-					<div className='flex flex-wrap items-center' >
-						{
-							listing.length ? listing.map((el, i) => {
-								if(el.type === 'folder') {
-									return <FolderItem key={i} file={ el }/>
-								}
-							}) : ''
-						}
-						{
-							listing.length ? listing.map((el, i) => {
-								if(el.type === 'file') {
-									return <FileItems key={i} file={ el } />
-								}
-							}) : ''
-						} 
-						<input {...getInputProps({
-							onChange: handleFile,
-						})} />
-					</div>
+	return (		
+		<section className={`
+			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-24 sm:p-24 lg:p-24 w-full`
+		}>
+			<Box 
+				className="dropzone h-full"
+				{...getRootProps({ style })}
+			>					
+				<div className='flex flex-wrap items-center' >
 					{
-						!listing.length && loading == 'idle' && (
-							<div style={centerStyle}>
-								<div className='relative flex items-center relative flex-col justify-between'>
-									<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
-									<FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
-									<Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
-								</div>
-							</div> 
-						)
+						listing.length ? listing.map((el, i) => {
+							if(el.type === 'folder') {
+								return <FolderItem key={i} file={ el }/>
+							}
+						}) : ''
 					}
-				</Box>
-				
-			</section>
-		</div>		
+					{
+						listing.length ? listing.map((el, i) => {
+							if(el.type === 'file') {
+								return <FileItems key={i} file={ el } />
+							}
+						}) : ''
+					} 
+					<input {...getInputProps({
+						onChange: handleFile,
+					})} />
+				</div>
+				{
+					!listing.length && loading == 'idle' && (
+						<div style={centerStyle}>
+							<div className='relative flex items-center relative flex-col justify-between'>
+								<FuseSvgIcon style={{zIndex: '-1'}} className="text-48 absolute origin-center rotate-45 mt-auto mb-auto bottom-5 top-5 text-gray-200" size={150} color="action">heroicons-solid:photograph</FuseSvgIcon>
+								<FuseSvgIcon style={{ margin: '0 auto'}} className="text-48 text-gray-500" size={50} color="action">material-outline:add_to_drive</FuseSvgIcon>
+								<Typography className='text-gray-700' variant="body2">Drop files here</Typography>                     
+							</div>
+						</div>
+					)
+				}
+			</Box>				
+		</section>
 	);
 }
 

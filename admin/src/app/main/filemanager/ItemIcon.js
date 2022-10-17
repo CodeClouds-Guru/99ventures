@@ -44,6 +44,8 @@ const renderItem = (file)=> {
 			return badgeComponent('XLS');
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
 			return badgeComponent('DOC');
+		case 'text/csv':
+			return badgeComponent('CSV');
 		case 'image/jpg':
 		case 'image/jpeg':
 		case 'image/png':

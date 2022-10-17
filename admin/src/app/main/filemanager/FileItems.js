@@ -9,6 +9,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './helper'
 import './FileManager.css';
+import Helper from '../../../app/helper'
 
 const FileItems = (props) => {
     const dispatch = useDispatch();
@@ -195,7 +196,7 @@ const FileItems = (props) => {
                     viewType === 'list' && (
                         <>
                             <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].modify}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
-                                <Typography className="truncate text-12 font-medium">{ props.file.last_modified }</Typography>
+                                <Typography className="truncate text-12 font-medium">{ Helper.parseTimeStamp(props.file.last_modified) }</Typography>
                             </div>
                             <div className={`flex shrink flex-col justify-center text-left basis-1/5 ${style[viewType].size}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
                                 <Typography className="truncate text-12 font-medium">{ convertFileSizeToKB(props.file.size) } KB</Typography>
