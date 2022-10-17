@@ -10,6 +10,7 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import ItemIcon from './ItemIcon';
 import { copyUrl, matchMimeType , downloadFile} from './helper';
 import AltTag from './AltTag';
+import Helper from 'src/app/helper';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
@@ -83,7 +84,7 @@ const SidebarContent = (props) => {
 			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
-					<Typography>{selectedItem.last_modified}</Typography>
+					<Typography>{Helper.parseTimeStamp(selectedItem.last_modified)}</Typography>
 				</div>
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Size</Typography>
