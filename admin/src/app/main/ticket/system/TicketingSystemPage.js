@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import AlertDialog from 'app/shared-components/AlertDialog';
+import Helper from 'src/app/helper';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -53,11 +53,11 @@ function TicketingSystemPage(props) {
         setTicketStatus(event.target.value);
     };
     const handleChangeQuickResponse = (event) => {
-        setQuickResponse('');
-        setChatField(chatField + ' ' + event.target.value);
+        setQuickResponse(event.target.value);
+        setChatField(event.target.value);
     };
     const handleMemberStatus = (event) => {
-        setMemberStatus(event.target.value);
+        // setMemberStatus(event.target.value);
         setOpenAlertDialog(true);
     };
     const handleNote = (event) => {
@@ -90,8 +90,6 @@ function TicketingSystemPage(props) {
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
                 <Paper className="flex h-full md:items-center md:justify-center w-full  p-10 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <Dialog
-                        // className="w-10/12"
-                        // maxWidth={false}
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}
                         onBackdropClick={handleDialogBackdrop}
@@ -115,10 +113,13 @@ function TicketingSystemPage(props) {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button variant="outlined" onClick={() => { setOpenAlertDialog(false) }}>Cancel</Button>
-                            <Button variant="outlined" color="success" autoFocus>
-                                Save
-                            </Button>
+                            <div className="px-20">
+                                <Button variant="outlined" onClick={() => { setOpenAlertDialog(false) }}>Skip</Button>
+                                <Button variant="outlined" color="error">Cancel</Button>
+                                <Button variant="outlined" color="success" autoFocus>
+                                    Save
+                                </Button>
+                            </div>
                         </DialogActions>
                     </Dialog>
                     <div className="flex w-full h-full mx-auto sm:mx-0">
@@ -148,7 +149,7 @@ function TicketingSystemPage(props) {
                                         <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
                                             <div className="flex flex-row justify-between">
                                                 <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b>
-                                                <div className="flex justify-end">{new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}</div>
+                                                <div className="flex justify-end">{Helper.parseTimeStamp(val.created_at)}</div>
                                             </div>
                                             <div>
                                                 <p>
@@ -176,7 +177,7 @@ function TicketingSystemPage(props) {
                                         </MenuItem>
                                         {quickResponseOptions.map((val, key) => {
                                             return (
-                                                <MenuItem key={key} value={val.name}>{val.name}</MenuItem>
+                                                <MenuItem key={key} value={val.body}>{val.name}</MenuItem>
                                             )
                                         })
                                         }
@@ -292,7 +293,7 @@ function TicketingSystemPage(props) {
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
                                                         <b>{val.Member.first_name + ' ' + val.Member.last_name}</b>
-                                                        <div className="flex justify-end">{new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}</div>
+                                                        <div className="flex justify-end">{Helper.parseTimeStamp(val.created_at)}</div>
                                                     </div>
                                                     <div>
                                                         <p>
@@ -319,7 +320,7 @@ function TicketingSystemPage(props) {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
                                                 <div className="flex flex-row justify-end">
-                                                    {new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}
+                                                    {Helper.parseTimeStamp(val.created_at)}
                                                 </div>
                                                 <div>
                                                     <p>
