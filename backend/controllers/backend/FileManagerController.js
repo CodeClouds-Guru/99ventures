@@ -12,16 +12,16 @@ class FileManagerController {
     let file_list = await fileHelper.getList();
     let file_objects = this.objectStructure(file_list)
     
-    if(file_objects.length){
+    // if(file_objects.length){
       return {
         data:file_objects
       }
-    }else{
-      const errorObj = new Error("Request failed.");
-      errorObj.statusCode = 409;
-      errorObj.data = "No data found.";
-      throw errorObj;
-    }
+    // }else{
+    //   const errorObj = new Error("Request failed.");
+    //   errorObj.statusCode = 409;
+    //   errorObj.data = "No data found.";
+    //   throw errorObj;
+    // }
   }
   objectStructure(file_list){
     let file_objects = []
