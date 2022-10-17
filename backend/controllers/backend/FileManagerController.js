@@ -1,5 +1,5 @@
 const FileHelper = require("../../helpers/fileHelper");
-
+const mime = require("mime-types");
 class FileManagerController {
   constructor() {
   }
@@ -40,7 +40,7 @@ class FileManagerController {
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
         if(file_structure[file_structure.length - 1] != '')
-          file_objects.push({id:this.generateId(object_key.Key,'',''),type:'file',name:file_structure[file_structure.length - 1],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg',access:'public'})
+          file_objects.push({id:this.generateId(object_key.Key,'',''),type:'file',name:file_structure[file_structure.length - 1],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:mime.lookup(process.env.S3_BUCKET_OBJECT_URL+object_key.Key),access:'public'})
       }
     }
     return file_objects
