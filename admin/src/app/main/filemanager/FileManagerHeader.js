@@ -1,13 +1,11 @@
 import {Typography, LinearProgress} from '@mui/material';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useTheme } from '@mui/material/styles';
 import Header from './Header';
 import BreadCrumb from './BreadCrumb';
 import { useSelector } from 'react-redux'
 
 function FileManagerHeader(props) {
-  const theme = useTheme();
   const loading = useSelector(state=> state.filemanager.loading);
 
   return (
