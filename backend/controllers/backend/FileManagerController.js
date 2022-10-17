@@ -65,8 +65,12 @@ class FileManagerController {
     }
     let files = []
     let file_name = []
+    
     if (req.files) {
-      files[0] = req.files.file;
+      if(req.files.file.length)
+        files = req.files.file;
+      else
+        files[0] = req.files.file;
       const fileHelper = new FileHelper(files, file_path, req);
       file_name = await fileHelper.upload();
     }else{
