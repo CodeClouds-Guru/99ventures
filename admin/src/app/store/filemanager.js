@@ -48,7 +48,7 @@ export const deleteData = createAsyncThunk(
         });
         return result;
     }
-)
+);
 
 const initialState = {
     loading: 'idle',
@@ -91,6 +91,12 @@ const fileManagerSlice = createSlice({
         },
         setPathObject: (state, action) => {
             state.pathObject = action.payload
+        },
+        setLoading: (state, action) => {
+            state.loading = action.payload
+        },
+        setListData: (state, action) => {
+            state.listData = action.payload
         }
     },
     extraReducers: {
@@ -113,7 +119,7 @@ const fileManagerSlice = createSlice({
             if(payload.list_data){
                 state.listData = payload.list_data;
             }
-        },
+        }
     }
 });
 
@@ -125,7 +131,9 @@ export const {
     setlightBoxStatus,
     setViewType,
     setBreadCrumb,
-    setPathObject
+    setPathObject,
+    setLoading,
+    setListData
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

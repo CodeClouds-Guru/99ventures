@@ -7,14 +7,14 @@ import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData } fr
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { copyUrl, convertFileSizeToKB } from './helper'
+import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './helper'
 import './FileManager.css';
 
 const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [ anchorEl, setAnchorEl ] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const viewType = useSelector(state=> state.filemanager.viewType);
     const [ msg, setMsg ] = useState('');
@@ -66,8 +66,12 @@ const FileItems = (props) => {
      * Open lightbox for preview
      */
     const handleOpenPreview = () => {
-        dispatch(setlightBoxStatus({isOpen: true, src: props.file.file_path}));
-        handleMenuClose();
+        if(matchMimeType(props.file.mimy_type) === true) {
+            window.open(props.file.file_path, '_blank')
+        } else {
+            dispatch(setlightBoxStatus({isOpen: true, src: props.file.file_path}));
+            handleMenuClose();
+        }
     }
     
     const style = {
@@ -96,6 +100,11 @@ const FileItems = (props) => {
 		copyUrl(props.file.file_path);
         dispatch(showMessage({ variant: 'success', message: 'URL Copied' }));
   	}
+
+    const handleFileDownload = () => {
+        downloadFile(props.file.file_path, props.file.name);
+        handleMenuClose();
+    }
 
     return (
         <Box
@@ -128,7 +137,7 @@ const FileItems = (props) => {
                     </Tooltip>
                     <div className="item-list-icon">
                         <IconButton color="primary" aria-label="Filter" component="label"  onClick={ handleMenuClick }>
-                            <FuseSvgIcon className="text-32" size={20} color="action">heroicons-outline:dots-vertical</FuseSvgIcon>  
+                            <FuseSvgIcon className="text-20" size={15} color="action">heroicons-outline:dots-vertical</FuseSvgIcon>  
                         </IconButton>
 
                         <Menu
@@ -156,19 +165,29 @@ const FileItems = (props) => {
                                         <ListItemText primary="Copy" />
                                     </MenuItem>
                                 )
-                            }                            
-                            <MenuItem onClick={ handleOpenPreview }>
-                                <ListItemIcon className="min-w-40">
-                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
-                                </ListItemIcon>
-                                <ListItemText primary="Preview" />
-                            </MenuItem>
+                            }
+                            {
+                                props.file.access === 'public' && (
+                                    <MenuItem onClick={ handleOpenPreview }>
+                                        <ListItemIcon className="min-w-40">
+                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
+                                        </ListItemIcon>
+                                        <ListItemText primary="Preview" />
+                                    </MenuItem>
+                                )
+                            }
                             <MenuItem onClick={ onOpenAlertDialogHandle }>
                                 <ListItemIcon className="min-w-40">
                                     <FuseSvgIcon size={20}>heroicons-outline:trash</FuseSvgIcon>
                                 </ListItemIcon>
                                 <ListItemText primary="Delete" />
-                            </MenuItem>                        
+                            </MenuItem>
+                            <MenuItem onClick={ handleFileDownload }>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon size={20}>material-outline:file_download</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Download" />
+                            </MenuItem> 
                         </Menu>                     
                     </div>
                 </div>

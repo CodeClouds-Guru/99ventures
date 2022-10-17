@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, IconButton, Button, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Button, Tooltip, Typography, Link } from '@mui/material';
 import { lighten } from '@mui/material/styles';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { motion } from 'framer-motion';
@@ -8,8 +8,9 @@ import { setlightBoxStatus, deleteData, setSelectedItem } from 'app/store/filema
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import ItemIcon from './ItemIcon';
-import { copyUrl } from './helper'
+import { copyUrl, matchMimeType , downloadFile} from './helper';
 import AltTag from './AltTag';
+import Helper from 'src/app/helper';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
@@ -50,7 +51,6 @@ const SidebarContent = (props) => {
 		dispatch(setSelectedItem(null));
 	}
 
-
 	return (
 		<motion.div
 			initial={{ y: 50, opacity: 0.8 }}
@@ -84,7 +84,7 @@ const SidebarContent = (props) => {
 			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
-					<Typography>{selectedItem.last_modified}</Typography>
+					<Typography>{Helper.parseTimeStamp(selectedItem.last_modified)}</Typography>
 				</div>
 				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Size</Typography>
@@ -94,27 +94,40 @@ const SidebarContent = (props) => {
 					<Typography color="text.secondary">Access</Typography>
 					<Typography>{ selectedItem.access }</Typography>
 				</div>	
-				<div className="flex items-center justify-between py-8">
-					<Typography color="text.secondary">Copy URL</Typography>
-					<Tooltip title="Copy URL">
-						<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
-							<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
-						</IconButton>
-					</Tooltip>
-				</div>		
+				{
+					selectedItem.access === 'public'  && (
+						<div className="flex items-center justify-between py-8">
+							<Typography color="text.secondary">Copy URL</Typography>
+							<Tooltip title="Copy URL">
+								<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
+									<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+								</IconButton>
+							</Tooltip>
+						</div>	
+					)
+				}
+
 				<div className="flex w-full py-10 items-center justify-between">
 					<AltTag />
 				</div>
 			</div>
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">
-				<Button className="" color="secondary" variant="contained">Download</Button>
+				<Button color="secondary" variant="contained" onClick={ ()=> downloadFile(selectedItem.file_path, selectedItem.name) }>Download</Button>
 				{
-					selectedItem.access === 'public' && (
-						<Button className="" color="primary" variant="contained" onClick={ ()=> dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path})) }>Preview</Button>
+					selectedItem.access === 'public'  && (
+						<Button 
+							color="primary" 
+							variant="contained" 
+							onClick={ ()=> {
+								matchMimeType(selectedItem.mime_type) 
+								? dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path}))
+								: window.open(selectedItem.file_path, '_blank')
+							}}
+						>Preview</Button>
 					)
 				}
-				<Button className="" color="error" variant="outlined" onClick={ onOpenAlertDialogHandle }>Delete</Button>
+				<Button color="error" variant="outlined" onClick={ onOpenAlertDialogHandle }>Delete</Button>
 			</div>
 			{
 				openAlertDialog && (

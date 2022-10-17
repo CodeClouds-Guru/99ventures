@@ -16,3 +16,23 @@ export const copyUrl = (value) => {
 export const convertFileSizeToKB = (size) => {
     return (size/1024).toFixed(2)
 }
+
+export const matchMimeType = (mimyeType) => {
+    switch(mimyeType) {			
+        case 'image/jpg':
+        case 'image/jpeg':
+        case 'image/png':
+        case 'image/gif':
+        case 'image/svg':
+            return true;
+        default:
+            return false;
+    }
+}
+
+export const downloadFile = (url, filename) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+}
