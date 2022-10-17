@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack } from '@mui/material';
+import { useState, useEffect, useRef } from 'react';
+import {
+    FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack, Dialog,
+    DialogActions, DialogContent, DialogContentText, DialogTitle
+} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import SendIcon from '@mui/icons-material/Send';
 import { motion } from 'framer-motion';
@@ -13,30 +16,64 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
+    const inputFileRef = useRef(null);
+    const [inputFiles, setInputFiles] = useState([]);
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponseOptions, setQuickResponseOptions] = useState([]);
     const [quickResponse, setQuickResponse] = useState('');
+    const [chatField, setChatField] = useState('');
     const [memberStatus, setMemberStatus] = useState('');
     const [ticketConversations, setTicketConversations] = useState([]);
     const [memberDetails, setMemberDetails] = useState({});
     const [previousTickets, setPreviousTIckets] = useState([]);
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [memberNote, setMemberNote] = useState('');
+
     useEffect(() => {
         getTicketDetails();
-    }, [])
+    }, []);
+    const onAttachmentButtonClick = () => {
+        inputFileRef.current.click();
+    };
+    const handleFileUpload = e => {
+        const { files } = e.target;
+        if (files && Object.keys(files).length) {
+            // console.log(typeof (files), files);
+            // Object.keys(files).map((val, key) => {
+            //     const filename = val.name;
+            //     var parts = filename.split(".");
+            //     const fileType = parts[parts.length - 1];
+            //     console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
+            // })
+            setInputFiles(files);
+        }
+    };
+    // console.log(inputFiles)
     const handleChangeTicketStatus = (event) => {
         setTicketStatus(event.target.value);
     };
     const handleChangeQuickResponse = (event) => {
-        setQuickResponse(event.target.value);
+        setQuickResponse('');
+        setChatField(chatField + ' ' + event.target.value);
     };
     const handleMemberStatus = (event) => {
         setMemberStatus(event.target.value);
+        setOpenAlertDialog(true);
     };
+    const handleNote = (event) => {
+        setMemberNote(event.target.value);
+    }
+    const handleChatField = (event) => {
+        setChatField(event.target.value);
+    }
+    const handleDialogBackdrop = (event) => {
+        event.stopPropagation();
+        return false;
+    }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
             .then(response => {
                 if (response.data.results.status) {
-                    // console.log(response.data.results.data);
                     setTicketStatus(response.data.results.data.status);
                     setTicketConversations(response.data.results.data.TicketConversations);
                     setMemberDetails(response.data.results.data.Member);
@@ -52,6 +89,38 @@ function TicketingSystemPage(props) {
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-10">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
                 <Paper className="flex h-full md:items-center md:justify-center w-full  p-10 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                    <Dialog
+                        // className="w-10/12"
+                        // maxWidth={false}
+                        open={openAlertDialog}
+                        onClose={() => { setOpenAlertDialog(false) }}
+                        onBackdropClick={handleDialogBackdrop}
+                        disableEscapeKeyDown
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">
+                            Add Note
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+
+                            </DialogContentText>
+                            <TextareaAutosize className="w-full border-1"
+                                aria-label="empty textarea"
+                                placeholder=""
+                                minRows={3}
+                                onChange={handleNote}
+                                value={memberNote}
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button variant="outlined" onClick={() => { setOpenAlertDialog(false) }}>Cancel</Button>
+                            <Button variant="outlined" color="success" autoFocus>
+                                Save
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                     <div className="flex w-full h-full mx-auto sm:mx-0">
                         <div className="h-full w-1/2 border-2">
                             <div className="flex flex-row justify-end p-0 m-0">
@@ -78,8 +147,8 @@ function TicketingSystemPage(props) {
                                     return (
                                         <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
                                             <div className="flex flex-row justify-between">
-                                                <b>Milly Hopkins</b>
-                                                <div className="flex justify-end">25th Sep 2022</div>
+                                                <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b>
+                                                <div className="flex justify-end">{new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}</div>
                                             </div>
                                             <div>
                                                 <p>
@@ -118,6 +187,8 @@ function TicketingSystemPage(props) {
                                     placeholder=""
                                     minRows={6}
                                     sx={{ background: '#dcdcdc' }}
+                                    value={chatField}
+                                    onChange={handleChatField}
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
                                     <div className="flex flex-col justify-start">
@@ -125,7 +196,14 @@ function TicketingSystemPage(props) {
                                     </div>
                                     <div className="flex flex-col justify-end">
                                         <Stack direction="row" spacing={1}>
-                                            <IconButton aria-label="fingerprint" color="secondary">
+                                            <input
+                                                style={{ display: "none" }}
+                                                ref={inputFileRef}
+                                                onChange={handleFileUpload}
+                                                type="file"
+                                                multiple
+                                            />
+                                            <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
                                                 <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                             </IconButton>
                                             <Button variant="contained" color="secondary" endIcon={<SendIcon />}>
@@ -149,7 +227,7 @@ function TicketingSystemPage(props) {
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Username:</b>
                                             </Typography>
-                                            milly101
+                                            {memberDetails.username}
                                         </div>
                                     </div>
                                     <div className="flex justify-start">
@@ -195,105 +273,63 @@ function TicketingSystemPage(props) {
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Total Earnings:</b>
                                             </Typography>
-                                            56 USD
+                                            {memberDetails.total_earnings} USD
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <Divider />
-                            <div className="flex flex-col justify-start p-0 m-0">
-                                <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
-                                    <Typography component={'h2'}>
-                                        <b>Notes (4)</b>
-                                    </Typography>
-                                </div>
-                                <div style={{ overflow: 'scroll', height: '12.25rem' }}>
-                                    <div className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">11th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
+                            {'MemberNotes' in memberDetails ?
+                                <div className="flex flex-col justify-start p-0 m-0">
+                                    <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
+                                        <Typography component={'h2'}>
+                                            <b>Notes ({memberDetails.MemberNotes.length})</b>
+                                        </Typography>
                                     </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">11th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">11th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-between">
-                                            <b>John Doe</b>
-                                            <div className="flex justify-end">11th Sep 2022</div>
-                                        </div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
+                                    <div style={{ overflow: 'scroll', height: '12.25rem' }}>
+                                        {memberDetails.MemberNotes.map((val, key) => {
+                                            return (
+                                                <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                                    <div className="flex flex-row justify-between">
+                                                        <b>{val.Member.first_name + ' ' + val.Member.last_name}</b>
+                                                        <div className="flex justify-end">{new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}</div>
+                                                    </div>
+                                                    <div>
+                                                        <p>
+                                                            {val.note}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })
+                                        }
                                     </div>
                                 </div>
-                            </div>
+                                : ''
+                            }
                             <Divider />
                             <div className="flex flex-col justify-start p-0 m-0 mt-5" >
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
-                                        <b>Previous Tickets (4)</b>
+                                        <b>Previous Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
                                 <div style={{ overflow: 'scroll', height: '12.25rem' }}>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-end">11th Sep 2022</div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                        <div className="flex flex-row justify-end">12th Sep 2022</div>
-                                        <div>
-                                            <p>
-                                                Hi, we looking on this and keep you posted.
-                                            </p>
-                                        </div>
-                                    </div>
+                                    {previousTickets.map((val, key) => {
+                                        return (
+                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                                <div className="flex flex-row justify-end">
+                                                    {new Date(val.created_at).toLocaleDateString('en-US', { year: "numeric", month: "short", day: "numeric" })}
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        {val.subject}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                    }
                                 </div>
                             </div>
                         </div>
