@@ -6,9 +6,9 @@ import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
-import { setViewType, deleteData } from '../../store/filemanager'
-import { setSelectedItemsId, setSelectedItem } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData } from 'app/store/filemanager'
 import { downloadFile } from './helper';
+import _ from 'lodash';
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -81,6 +81,12 @@ const Header = () => {
         return;
     }
 
+    const sortingFiles = (column, sortType) => {
+       const result = _.orderBy(listing, [column], [sortType]);
+       dispatch(setListData(result));
+       handleMenuClose();
+    }
+
     return (
         <>
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
@@ -137,16 +143,16 @@ const Header = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                         >
-                        <MenuItem>
+                        <MenuItem onClick={()=> sortingFiles('last_modified', 'desc')}>
                             <ListItemText primary="Newest First" />
                         </MenuItem>
-                        <MenuItem >
+                        <MenuItem onClick={()=> sortingFiles('last_modified', 'asc')}>
                             <ListItemText primary="Oldest First" />
                         </MenuItem>
-                        <MenuItem>
+                        <MenuItem onClick={()=> sortingFiles('name', 'asc')}>
                             <ListItemText primary="Asc Filename" />
                         </MenuItem>
-                        <MenuItem >
+                        <MenuItem onClick={()=> sortingFiles('name', 'desc')}>
                             <ListItemText primary="Desc Filename" />
                         </MenuItem>
                     </Menu> 
