@@ -1,5 +1,5 @@
 const FileHelper = require("../../helpers/fileHelper");
-
+const mime = require("mime-types");
 class FileManagerController {
   constructor() {
   }
@@ -10,6 +10,20 @@ class FileManagerController {
     }
     const fileHelper = new FileHelper('',file_path,req);
     let file_list = await fileHelper.getList();
+    let file_objects = this.objectStructure(file_list)
+    
+    // if(file_objects.length){
+      return {
+        data:file_objects
+      }
+    // }else{
+    //   const errorObj = new Error("Request failed.");
+    //   errorObj.statusCode = 409;
+    //   errorObj.data = "No data found.";
+    //   throw errorObj;
+    // }
+  }
+  objectStructure(file_list){
     let file_objects = []
     if(file_list.CommonPrefixes.length){
       for(let i = 0; i < file_list.CommonPrefixes.length; i++){
@@ -26,19 +40,10 @@ class FileManagerController {
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
         if(file_structure[file_structure.length - 1] != '')
-          file_objects.push({id:this.generateId(object_key.Key,'',''),type:'file',name:file_structure[file_structure.length - 1],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:'image/jpeg',access:'public'})
+          file_objects.push({id:this.generateId(object_key.Key,'',''),type:'file',name:file_structure[file_structure.length - 1],file_path:process.env.S3_BUCKET_OBJECT_URL+object_key.Key,size:object_key.Size,last_modified:object_key.LastModified,mime_type:mime.lookup(process.env.S3_BUCKET_OBJECT_URL+object_key.Key),access:'public'})
       }
     }
-    if(file_objects.length){
-      return {
-        data:file_objects
-      }
-    }else{
-      const errorObj = new Error("Request failed.");
-      errorObj.statusCode = 409;
-      errorObj.data = "No data found.";
-      throw errorObj;
-    }
+    return file_objects
   }
   //generate id
   generateId(object_key,folder_names,folder_index){
@@ -60,19 +65,28 @@ class FileManagerController {
     }
     let files = []
     let file_name = []
+    
     if (req.files) {
-      files[0] = req.files.file;
+      if(req.files.file.length)
+        files = req.files.file;
+      else
+        files[0] = req.files.file;
       const fileHelper = new FileHelper(files, file_path, req);
       file_name = await fileHelper.upload();
     }else{
       let folder_name = req.body.folder_name
-      file_path = file_path+'/'+folder_name
-      const fileHelper = new FileHelper('', file_path, req);
+      let folder_path = file_path+'/'+folder_name
+      const fileHelper = new FileHelper('', folder_path, req);
       file_name = await fileHelper.createFolder();
     }
+    //get path object list
+    const fileHelper = new FileHelper('',file_path,req);
+    let file_list = await fileHelper.getList();
+    let file_objects = this.objectStructure(file_list)
+    
     return {
       status:true,
-      data:file_name
+      data:file_objects
     }
   }
   //delete file

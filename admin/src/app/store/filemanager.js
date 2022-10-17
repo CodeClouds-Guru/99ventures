@@ -1,64 +1,67 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import axios from 'axios';
 
-const jsonData = [
-    {
-        id: 1,
-        type: 'file',
-        mime_type: 'application/pdf',
-        size: 18879,
-        path: "/",
-        name: "document.pdf"
-    },
-    {
-        id: 2,
-        type: 'file',
-        mime_type: 'image/jpg',
-        size: 18879,
-        path: "/",
-        name: "main_logo.png"
-    },
-    {
-        id: 3,
-        type: 'file',
-        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        size: 18879,
-        path: "/",
-        name: "sheet.xlsx"
-    },
-    {
-        id: 4,
-        type: 'folder',
-        mime_type: '',
-        size: 18879,
-        path: "/",
-        name: "Photos"
-    },
-    {
-        id: 5,
-        type: 'file',
-        mime_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        size: 18879,
-        path: "/",
-        name: "word.docx"
-    },
-    {
-        id: 6,
-        type: 'folder',
-        mime_type: '',
-        size: 18879,
-        path: "/",
-        name: "Demo"
+export const getList = createAsyncThunk(
+    'filemanager/getList',
+    async(params, {dispatch}) => {
+        const result = await axios.post('file-manager/list', {path: params })
+        .then(res => {
+            if(res.status === 200 && res.data.results.data) {
+                dispatch(setSelectedItemsId([]));
+                return res.data.results.data;
+            }
+            return [];
+        })
+        .catch(error => {
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));            
+            return error.response;
+        })
+        return result;
     }
-]
+);
+
+export const deleteData = createAsyncThunk(
+    'filemanager/deleteData',
+    async(params, {dispatch, getState}) => {
+        if(!params.length) {
+            dispatch(showMessage({ variant: 'error', message: 'Unable to process your request!' }));
+            return {'status': false};
+        }
+                
+        const result = await axios.post('file-manager/delete', {modelIds: params})
+        .then(result => {
+            if(result.status === 200 && result.data.results.status) {
+                dispatch(showMessage({ variant: 'success', message: result.data.results.message }));
+                const { filemanager } = getState();
+                const listData = filemanager.listData;
+                const newlistData = listData.filter(file => !params.includes(file.id));
+                return {'status': true, 'list_data': newlistData};
+            } else {
+                dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+                return {'status': false};
+            }
+        })
+        .catch(error => {
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+            return error.response;
+        });
+        return result;
+    }
+);
 
 const initialState = {
+    loading: 'idle',
     show_sidebar: false,
     selectedItem: null,
     selectAll: false,
     selectedItemsId: [],
     lightBox: {isOpen: false, src: null},
     viewType: 'grid',
-    jsonData
+    jsonData: [],
+    listData: [],
+    breadCrumb: [],
+    pathObject: []
 }
 
 const fileManagerSlice = createSlice({
@@ -82,6 +85,40 @@ const fileManagerSlice = createSlice({
         },
         setViewType: (state, action) => {
             state.viewType = action.payload
+        },
+        setBreadCrumb: (state, action) => {
+            state.breadCrumb = action.payload
+        },
+        setPathObject: (state, action) => {
+            state.pathObject = action.payload
+        },
+        setLoading: (state, action) => {
+            state.loading = action.payload
+        },
+        setListData: (state, action) => {
+            state.listData = action.payload
+        }
+    },
+    extraReducers: {
+        [getList.pending]: (state) => {            
+            state.loading = 'pending';
+            state.listData = [];
+        },
+        [getList.fulfilled]: (state, {payload}) => {
+            state.listData = payload;
+            state.loading = 'idle'
+        },
+        [getList.rejected]: (state) => {
+            state.loading = 'failed'
+        },
+        [deleteData.pending]: (state) => {
+            state.loading = 'pending';
+        },
+        [deleteData.fulfilled]: (state, {payload}) => {
+            state.loading = 'idle';
+            if(payload.list_data){
+                state.listData = payload.list_data;
+            }
         }
     }
 });
@@ -92,7 +129,11 @@ export const {
     setSelectAll, 
     setSelectedItemsId,
     setlightBoxStatus,
-    setViewType
+    setViewType,
+    setBreadCrumb,
+    setPathObject,
+    setLoading,
+    setListData
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

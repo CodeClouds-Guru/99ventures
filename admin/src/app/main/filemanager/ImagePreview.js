@@ -11,8 +11,8 @@ const ImagePreview = () => {
 
     return isOpen && previewLink && (
         <Lightbox
-            mainSrc='//placekitten.com/1500/500'
-            onCloseRequest={() => dispatch(setlightBoxStatus({isOpen: false, src: '//placekitten.com/1500/500'})) }
+            mainSrc={previewLink}
+            onCloseRequest={() => dispatch(setlightBoxStatus({isOpen: false, src: ''})) }
         />
     )
 }

@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-// import { lighten } from '@mui/material/styles';
 import { Tooltip, IconButton, Paper, Input, ListItemText, Menu, MenuItem} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
-import { setViewType } from '../../store/filemanager'
+import { setViewType, deleteData } from '../../store/filemanager'
+import { setSelectedItemsId, setSelectedItem } from 'app/store/filemanager'
+import { downloadFile } from './helper';
 
 const baseStyle = {
-    marginBottom: '1rem',
     borderTop: '3px solid #77777763',
     borderBottom: '3px solid #ddd',
     padding: '5px 0',
@@ -21,29 +21,64 @@ const Header = () => {
     const viewType = useSelector(state=> state.filemanager.viewType);
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemIdArry = useSelector(state=> state.filemanager.selectedItemsId);
+    const listing = useSelector(state=> state.filemanager.listData);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [ msg, setMsg ] = useState('');
     
+    /**
+     * Alert box open, close & confirm delete
+	*/
+	const onOpenAlertDialogHandle = () => {
+        var message = '';
+        if(selectedItemIdArry.length > 1)
+            message = `Do you want to delete ${selectedItemIdArry.length} item(s)?`;
+        else if(selectedItemIdArry.length == 1)
+            message = `Do you want to delete this item?`;
+        else if(selectedItem)
+            message = `Do you want to delete ${selectedItem.name}?`;
+
+        setMsg(message);
+        setOpenAlertDialog(true);
+    }
+
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        dispatch(setSelectedItemsId([]));
     }
   
-    const onConfirmAlertDialogHandle = () => {
-        console.log('sss')
+    const onConfirmAlertDialogHandle = async () => {
+        var params = [];
+        if(selectedItemIdArry.length)
+            params = selectedItemIdArry;
+        else if(selectedItem)
+            params = [selectedItem.id]
+
+        dispatch(deleteData(params))
+        .then(result => {
+            setOpenAlertDialog(false);
+            dispatch(setSelectedItemsId([]));
+            dispatch(setSelectedItem(null));
+        });
     }
 
-    // useEffect(() => {
-    //     if ( anchorEl) {
-    //       setAnchorEl(null);
-    //     }
-    // }, [anchorEl]);
-
-    function handleMenuClick(event) {
+    const handleMenuClick = (event) =>{
         setAnchorEl(event.currentTarget);
     }
 
-    function handleMenuClose() {
+    const handleMenuClose = () => {
         setAnchorEl(null);
+    }
+
+    const handleFileDownload = () => {
+        if(selectedItemIdArry.length && selectedItemIdArry.length < 2) {
+            const index = listing.findIndex(file => file.id === selectedItemIdArry[0]);
+            const fileData = listing[index];
+            downloadFile(fileData.file_path, fileData.mime_type);
+        } else if(selectedItem) {
+            downloadFile(selectedItem.file_path, selectedItem.mime_type);
+        }
+        return;
     }
 
     return (
@@ -51,24 +86,24 @@ const Header = () => {
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
                 <SelectAll />
                 <div className='flex justify-between'>
-                    {
-                        (selectedItemIdArry.length || selectedItem) ? (
-                            <Tooltip title="Delete">
-                                <IconButton color="primary" aria-label="Filter" component="label" onClick={ ()=> setOpenAlertDialog(true) }>
-                                    <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:trash</FuseSvgIcon>
-                                </IconButton>
-                            </Tooltip>
-                        ) : ''
-                    }
-                    
                     <CreateFolder />
-                    <Tooltip title="Download">
-                        <IconButton color="primary" aria-label="Filter" component="label" >
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:file_download</FuseSvgIcon>
-                        </IconButton>
-                    </Tooltip>
-                </div>
-                
+                    {
+                        (selectedItemIdArry.length || selectedItem) && (
+                            <>
+                                <Tooltip title="Delete">
+                                    <IconButton color="primary" aria-label="Filter" component="label" onClick={ onOpenAlertDialogHandle }>
+                                        <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Download">
+                                    <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleFileDownload }>
+                                        <FuseSvgIcon className="text-48" size={26} color="action">material-outline:file_download</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )
+                    }
+                </div>                
                 <div className="flex " variant="outlined">
                     <Paper
                         component={motion.div}
@@ -92,7 +127,7 @@ const Header = () => {
                 <div className='flex'>                
                     <Tooltip title="Filter">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleMenuClick } >
-                            <FuseSvgIcon className="text-48" size={30} color="action">heroicons-outline:filter</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:filter</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>                    
 
@@ -119,12 +154,12 @@ const Header = () => {
                 <div className='flex view--type'>
                     <Tooltip title="Grid">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('grid'))} className={ viewType === 'grid' ? 'active' : '' }>
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:grid_view</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:grid_view</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="List">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('list'))} className={ viewType === 'list' ? 'active' : ''}>
-                            <FuseSvgIcon className="text-48" size={30} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                 </div>            
@@ -132,7 +167,7 @@ const Header = () => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content="Do you delete the item(s)?"
+                        content={msg}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
