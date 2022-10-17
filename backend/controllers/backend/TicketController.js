@@ -14,6 +14,8 @@ const {
 const { Op } = require("sequelize");
 const moment = require("moment");
 const FileHelper = require("../../helpers/fileHelper");
+const mime = require("mime-types");
+const path = require("path");
 
 class TicketController extends Controller {
   constructor() {
@@ -145,7 +147,7 @@ class TicketController extends Controller {
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
     let ticket_id = req.params.id || null;
-    console.log(ticket_id);
+    // console.log(ticket_id);
     if (ticket_id) {
       try {
         let options = {};
@@ -160,7 +162,7 @@ class TicketController extends Controller {
         options.include = [
           {
             model: TicketConversation,
-            attributes: ["message", "member_id", "user_id",'created_at'],
+            attributes: ["message", "member_id", "user_id", "created_at"],
             include: [
               {
                 model: TicketAttachment,
@@ -219,7 +221,7 @@ class TicketController extends Controller {
         //final query to get ticket details
         let result = await Ticket.findOne(options);
         result.Member.setDataValue("total_earnings", 0);
-        console.log(result);
+        // console.log(result);
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({
@@ -228,17 +230,17 @@ class TicketController extends Controller {
             [Op.and]: { member_id: result.member_id },
             id: { [Op.ne]: ticket_id },
           },
-          include: {
-            model: TicketConversation,
-            attributes: ["message", "member_id", "user_id", "created_at"],
-          },
+          // include: {
+          //   model: TicketConversation,
+          //   attributes: ["message", "member_id", "user_id", "created_at"],
+          // },
         });
 
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
           attributes: ["name", "body"],
         });
-        console.log(auto_responders);
+        // console.log(auto_responders);
         result.setDataValue("previous_tickets", prev_tickets);
         result.setDataValue("auto_responders", auto_responders);
 
@@ -256,16 +258,17 @@ class TicketController extends Controller {
 
   //update for all type of updation
   async update(req, res) {
+    console.log(req);
     let value = req.body.value || "";
     let field_name = req.body.field_name || "";
     let ticket_id = req.body.id || null;
     let member_id = req.body.member_id || null;
     let user_id = req.body.user_id || null;
-    let attachments = req.files.attachments || [];
+    let attachments = req.files ? req.files.attachments : [];
     const type = req.body.type || "";
 
     let change = false;
-    console.log(req.files);
+    // console.log(req.files);
     switch (type) {
       case "is_read":
         change = await this.changeStatus(value, field_name, ticket_id);
@@ -273,8 +276,9 @@ class TicketController extends Controller {
       case "ticket_status":
         change = await this.changeStatus(value, field_name, ticket_id);
         break;
-      // case "member_status":
-
+      case "member_status":
+        change = await Member.changeStatus(field_name, value, member_id);
+        break;
       case "ticket_chat":
         change = await this.saveTicketConversations(
           value,
@@ -299,10 +303,10 @@ class TicketController extends Controller {
   // //update for all type of updation
 
   async changeStatus(value, field_name, ticket_id) {
-    console.log(value, field_name, ticket_id, "--------------");
+    // console.log(value, field_name, ticket_id, "--------------");
     try {
       let update = await Ticket.changeStatus(field_name, value, ticket_id);
-      console.log(update);
+      // console.log(update);
       if (update > 0) return true;
     } catch (error) {
       throw error;
@@ -318,7 +322,7 @@ class TicketController extends Controller {
     attachments,
     req
   ) {
-    console.log(value, field_name, ticket_id, "--------------");
+    // console.log(value, field_name, ticket_id, "--------------");
     try {
       const data = {
         ticket_id: ticket_id,
@@ -328,24 +332,27 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let saved = await TicketConversation.create(data);
-      console.log(attachments.length);
+
       if (saved.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
         const fileHelper = new FileHelper(files, "tickets/" + saved.id, req);
         const file_name = await fileHelper.upload();
-        console.log("--------", file_name);
+
         const dataFiles = file_name.files.map((values) => {
-          console.log("--------", values.filename);
+          // console.log(
+          //   "--------mime.lookup",
+          //   mime.lookup(path.basename(values.filename))
+          // );
+          // const mime = mime.lookup(path.basename(values.filename));
           return {
             ticket_conversation_id: saved.id,
-            file_name: values.filename,
-            mime_type: ".txt",
+            file_name: values.filename.replace(/ /g, "_"),
+            mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
 
-        console.log(dataFiles);
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
       // console.log(saved.id);
