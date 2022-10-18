@@ -84,6 +84,7 @@ const centerStyle = {
 function DragDropzone() {
 	const dispatch = useDispatch();
     const listing = useSelector(state=> state.filemanager.listData);
+    const jsonData = useSelector(state=> state.filemanager.jsonData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const navigate = useNavigate();

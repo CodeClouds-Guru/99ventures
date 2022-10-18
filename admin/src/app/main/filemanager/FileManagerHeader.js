@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import Header from './Header';
 import BreadCrumb from './BreadCrumb';
 import { useSelector } from 'react-redux'
+import SelectAll from './components/SelectAll';
+import CreateFolder from './components/CreateFolder';
+import Search from './components/Search';
 
 function FileManagerHeader(props) {
   const loading = useSelector(state=> state.filemanager.loading);
@@ -31,7 +34,12 @@ function FileManagerHeader(props) {
 			</div>
 		</div>
 		
-		<Header/>
+		<Header 
+			selectAll={<SelectAll/>}
+			createFolder={<CreateFolder/>}
+			search={<Search/>}
+			>
+		</Header>
 		<BreadCrumb/>
 		{
 			loading == 'pending' && (
@@ -41,7 +49,7 @@ function FileManagerHeader(props) {
 					top: '5px',
 					zIndex: '99',
 					margin: '0 6px',
-					height: '6px'
+					height: '5px'
 				}}/>
 			)
 		}		

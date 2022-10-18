@@ -9,7 +9,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import ItemIcon from './ItemIcon';
 import { copyUrl, matchMimeType , downloadFile} from './helper';
-import AltTag from './AltTag';
+import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
 
 const SidebarContent = (props) => {
@@ -106,10 +106,13 @@ const SidebarContent = (props) => {
 						</div>	
 					)
 				}
-
-				<div className="flex w-full py-10 items-center justify-between">
-					<AltTag />
-				</div>
+				{
+					matchMimeType(selectedItem.mime_type) && (
+						<div className="flex w-full py-10 items-center justify-between">
+							<AltTag />
+						</div>
+					)
+				}				
 			</div>
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">

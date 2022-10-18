@@ -5,9 +5,11 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import axios from 'axios';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import { setLoading, setListData, setJsonData } from 'app/store/filemanager';
+import { useDispatch, useSelector } from 'react-redux';
 
 const style = {
     position: 'absolute',
@@ -29,9 +31,11 @@ const defaultValues = {
     folder: ''
 }
 
-export default function CreateFolder() {
+const CreateFolder = () => {
+    const dispatch = useDispatch();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
+	const pathObject = useSelector(state=> state.filemanager.pathObject);
     
     const { 
         control,
@@ -45,15 +49,36 @@ export default function CreateFolder() {
     }); 
 
     const createFolder = (data) => {
-        console.log(data)
+        const params = {
+            "folder_name": data.folder,
+            "file_path": pathObject.join('/')
+        }
+        dispatch(setLoading('pending'));
+        handleClose();
+        axios.post(jwtServiceConfig.filemanagerUploadFile, params)
+		.then((response) => {
+			dispatch(setLoading('idle'));
+			if (response.data.results.status) {
+				dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));                
+				if(response.data.results.data){
+					dispatch(setListData(response.data.results.data));
+					dispatch(setJsonData(response.data.results.data));
+				}
+			} else {
+				dispatch(showMessage({ variant: 'error', message: response.data.errors }));
+			}
+		})
+		.catch(error => {
+			dispatch(setLoading('idle'));
+			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+		});
     }
 
     const handleClose = () => {
         setOpen(false);
         reset(defaultValues)
     }
-
-
+    
     return (
         <>
             <Tooltip title="Create Folder">
@@ -116,3 +141,5 @@ export default function CreateFolder() {
         </>
     );
 }
+
+export default CreateFolder;

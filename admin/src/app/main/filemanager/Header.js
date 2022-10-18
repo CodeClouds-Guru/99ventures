@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Tooltip, IconButton, Paper, Input, ListItemText, Menu, MenuItem} from '@mui/material';
+import { useState } from 'react';
+import { Tooltip, IconButton, ListItemText, Menu, MenuItem} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
-import { setViewType, deleteData } from '../../store/filemanager'
-import { setSelectedItemsId, setSelectedItem } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData, setLoading } from 'app/store/filemanager'
 import { downloadFile } from './helper';
+import { orderBy } from 'lodash';
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -16,16 +13,17 @@ const baseStyle = {
     padding: '5px 0',
 }
 
-const Header = () => {
+const Header = (props) => {
     const dispatch = useDispatch();
     const viewType = useSelector(state=> state.filemanager.viewType);
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemIdArry = useSelector(state=> state.filemanager.selectedItemsId);
     const listing = useSelector(state=> state.filemanager.listData);
+
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [ anchorEl, setAnchorEl ] = useState(null);
     const [ msg, setMsg ] = useState('');
-    
+
     /**
      * Alert box open, close & confirm delete
 	*/
@@ -81,12 +79,18 @@ const Header = () => {
         return;
     }
 
+    const sortingFiles = (column, sortType) => {
+       const result = orderBy(listing, [column], [sortType]);
+       dispatch(setListData(result));
+       handleMenuClose();
+    }
+    
     return (
         <>
-            <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
-                <SelectAll />
+            <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">
+                { props.selectAll }
                 <div className='flex justify-between'>
-                    <CreateFolder />
+                    { props.createFolder }
                     {
                         (selectedItemIdArry.length || selectedItem) && (
                             <>
@@ -103,28 +107,11 @@ const Header = () => {
                             </>
                         )
                     }
-                </div>                
-                <div className="flex " variant="outlined">
-                    <Paper
-                        component={motion.div}
-                        initial={{ y: -20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-                        className="flex items-center w-full sm:max-w-320 space-x-8 px-16 rounded-full border-1 shadow-0"
-                    >
-                        <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
-                        <Input
-                            placeholder={`Search `}
-                            className="flex flex-1"
-                            disableUnderline
-                            fullWidth
-                            
-                            inputProps={{
-                                'aria-label': `Search `,
-                            }}                                
-                        />
-                    </Paper>
                 </div>
-                <div className='flex'>                
+                <div className="flex " variant="outlined">                  
+                    { props.search }
+                </div>
+                <div className='flex'>
                     <Tooltip title="Filter">
                         <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleMenuClick } >
                             <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:filter</FuseSvgIcon>
@@ -137,16 +124,16 @@ const Header = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                         >
-                        <MenuItem>
+                        <MenuItem onClick={()=> sortingFiles('last_modified', 'desc')}>
                             <ListItemText primary="Newest First" />
                         </MenuItem>
-                        <MenuItem >
+                        <MenuItem onClick={()=> sortingFiles('last_modified', 'asc')}>
                             <ListItemText primary="Oldest First" />
                         </MenuItem>
-                        <MenuItem>
+                        <MenuItem onClick={()=> sortingFiles('name', 'asc')}>
                             <ListItemText primary="Asc Filename" />
                         </MenuItem>
-                        <MenuItem >
+                        <MenuItem onClick={()=> sortingFiles('name', 'desc')}>
                             <ListItemText primary="Desc Filename" />
                         </MenuItem>
                     </Menu> 

@@ -259,13 +259,14 @@ class TicketController extends Controller {
   //update for all type of updation
   async update(req, res) {
     console.log(req);
-    let value = req.body.value || "";
-    let field_name = req.body.field_name || "";
-    let ticket_id = req.body.id || null;
-    let member_id = req.body.member_id || null;
-    let user_id = req.body.user_id || null;
-    let attachments = req.files ? req.files.attachments : [];
+    const value = req.body.value || "";
+    const field_name = req.body.field_name || "";
+    const ticket_id = req.body.id || null;
+    const member_id = req.body.member_id || null;
+    const user_id = req.body.user_id || null;
+    const attachments = req.files ? req.files.attachments : [];
     const type = req.body.type || "";
+    const notes = req.body.member_notes || null;
 
     let change = false;
     // console.log(req.files);
@@ -277,7 +278,23 @@ class TicketController extends Controller {
         change = await this.changeStatus(value, field_name, ticket_id);
         break;
       case "member_status":
+        let member = await Member.findOne({
+          attributes: ["status"],
+          where: { id: member_id },
+        });
+        console.log("-----------------------member", member);
         change = await Member.changeStatus(field_name, value, member_id);
+        if (notes !== null) {
+          let data = {
+            user_id: req.user.id,
+            member_id: member_id,
+            previous_status: member.status,
+            current_status: value,
+            note:notes
+          };
+
+          change = await MemberNote.create(data);
+        }
         break;
       case "ticket_chat":
         change = await this.saveTicketConversations(

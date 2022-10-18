@@ -50,6 +50,16 @@ export const deleteData = createAsyncThunk(
     }
 );
 
+/**
+ * jsonData is the replicate of the listData Array.
+ * It has been used to filter the listData.
+ * After filtering the data, when we reset the filter, 
+ * original value from jsonData will be taken and assigned to listData.
+ * 
+ * jsonData will be updating whenever file/folder will be deleted & new data will be fetched.
+ * 
+ */
+
 const initialState = {
     loading: 'idle',
     show_sidebar: false,
@@ -97,6 +107,9 @@ const fileManagerSlice = createSlice({
         },
         setListData: (state, action) => {
             state.listData = action.payload
+        },
+        setJsonData: (state, action) => {
+            state.jsonData = action.payload
         }
     },
     extraReducers: {
@@ -105,6 +118,7 @@ const fileManagerSlice = createSlice({
             state.listData = [];
         },
         [getList.fulfilled]: (state, {payload}) => {
+            state.jsonData = payload;
             state.listData = payload;
             state.loading = 'idle'
         },
@@ -118,6 +132,7 @@ const fileManagerSlice = createSlice({
             state.loading = 'idle';
             if(payload.list_data){
                 state.listData = payload.list_data;
+                state.jsonData = payload.list_data;
             }
         }
     }
@@ -133,7 +148,8 @@ export const {
     setBreadCrumb,
     setPathObject,
     setLoading,
-    setListData
+    setListData,
+    setJsonData
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer
