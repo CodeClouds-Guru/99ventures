@@ -9,7 +9,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import ItemIcon from './ItemIcon';
 import { copyUrl, matchMimeType , downloadFile} from './helper';
-import AltTag from './AltTag';
+import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
 
 const SidebarContent = (props) => {
