@@ -41,7 +41,7 @@ function FileManagerHeader(props) {
 					top: '5px',
 					zIndex: '99',
 					margin: '0 6px',
-					height: '6px'
+					height: '5px'
 				}}/>
 			)
 		}		

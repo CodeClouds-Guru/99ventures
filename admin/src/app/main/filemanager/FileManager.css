@@ -9,6 +9,7 @@
 .img-div{width: 10rem;}
 .file-details .img-div{width: 100%;}
 .list--view--section .img-div{flex-basis: 40px; width: 4.8rem;}
+.list--view--section .img-div img{height: 40px !important;}
 
 .loader {
     width: 48px;

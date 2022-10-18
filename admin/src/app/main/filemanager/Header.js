@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Tooltip, IconButton, Paper, Input, ListItemText, Menu, MenuItem} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -6,9 +6,9 @@ import CreateFolder from './CreateFolder';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import SelectAll from './SelectAll';
 import { useSelector, useDispatch } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData, setLoading } from 'app/store/filemanager'
 import { downloadFile } from './helper';
-import _ from 'lodash';
+import { orderBy, debounce } from 'lodash';
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -22,8 +22,12 @@ const Header = () => {
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemIdArry = useSelector(state=> state.filemanager.selectedItemsId);
     const listing = useSelector(state=> state.filemanager.listData);
+    const jsonData = useSelector(state=> state.filemanager.jsonData);
+	const loading = useSelector(state=> state.filemanager.loading);
+
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [ inputValue, setInputValue ] = useState('');
+    const [ anchorEl, setAnchorEl ] = useState(null);
     const [ msg, setMsg ] = useState('');
     
     /**
@@ -82,11 +86,44 @@ const Header = () => {
     }
 
     const sortingFiles = (column, sortType) => {
-       const result = _.orderBy(listing, [column], [sortType]);
+       const result = orderBy(listing, [column], [sortType]);
        dispatch(setListData(result));
        handleMenuClose();
     }
 
+    const delayedSearch = useCallback(
+        debounce((q) => {
+            const srchTxt = q.toLowerCase();
+            const result = jsonData.filter(el => {
+                const name = el.name.toLowerCase();
+                return name.includes(srchTxt);
+            });
+            dispatch(setListData(result));
+            dispatch(setLoading('idle'))
+        }, 600),
+        [jsonData]
+    );
+
+    const handleSearch = (event) => {
+        if(loading === 'idle') {
+            dispatch(setLoading('pending'))
+        }
+        setInputValue(event.target.value);
+        delayedSearch(event.target.value);
+    }
+
+    const clearedSearch = () => {
+        setInputValue('');
+        dispatch(setListData(jsonData));
+    }
+
+    /**
+     * When route has changed, search field will be blank
+     */
+    useEffect(()=> {
+        setInputValue('');
+    }, [location.pathname]);
+    
     return (
         <>
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">                     
@@ -123,11 +160,17 @@ const Header = () => {
                             className="flex flex-1"
                             disableUnderline
                             fullWidth
-                            
+                            onChange={ handleSearch }
+                            value={ inputValue }
                             inputProps={{
                                 'aria-label': `Search `,
                             }}                                
                         />
+                        { inputValue && (
+                            <Tooltip title="Reset">
+                                <FuseSvgIcon onClick={ clearedSearch } className="text-48 cursor-pointer" size={24} color="disabled">material-outline:cancel</FuseSvgIcon>
+                            </Tooltip>
+                        )}
                     </Paper>
                 </div>
                 <div className='flex'>                

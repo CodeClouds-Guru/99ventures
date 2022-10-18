@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import axios from 'axios';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import { setLoading, setListData } from 'app/store/filemanager';
+import { setLoading, setListData, setJsonData } from 'app/store/filemanager';
 import { useDispatch, useSelector } from 'react-redux';
 
 const style = {
@@ -31,7 +31,7 @@ const defaultValues = {
     folder: ''
 }
 
-export default function CreateFolder() {
+const CreateFolder = () => {
     const dispatch = useDispatch();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -62,6 +62,7 @@ export default function CreateFolder() {
 				dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));                
 				if(response.data.results.data){
 					dispatch(setListData(response.data.results.data));
+					dispatch(setJsonData(response.data.results.data));
 				}
 			} else {
 				dispatch(showMessage({ variant: 'error', message: response.data.errors }));
@@ -77,8 +78,7 @@ export default function CreateFolder() {
         setOpen(false);
         reset(defaultValues)
     }
-
-
+    
     return (
         <>
             <Tooltip title="Create Folder">
@@ -141,3 +141,5 @@ export default function CreateFolder() {
         </>
     );
 }
+
+export default CreateFolder;

@@ -106,10 +106,13 @@ const SidebarContent = (props) => {
 						</div>	
 					)
 				}
-
-				<div className="flex w-full py-10 items-center justify-between">
-					<AltTag />
-				</div>
+				{
+					matchMimeType(selectedItem.mime_type) && (
+						<div className="flex w-full py-10 items-center justify-between">
+							<AltTag />
+						</div>
+					)
+				}				
 			</div>
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">
