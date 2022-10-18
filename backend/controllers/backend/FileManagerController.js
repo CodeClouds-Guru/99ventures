@@ -108,17 +108,20 @@ class FileManagerController {
   //rename folder name
   async update(req,res){
     let id = req.body.id
-    let folder_name = req.body.folder_name
+    let file_name = req.body.folder_name
+    if(req.body.type == 'copy-file'){
+      file_name = req.body.file_name
+    }
 
     let object_key = Buffer.from(id, "base64");
     object_key = object_key.toString("utf8"); 
 
-    const fileHelper = new FileHelper('', object_key, req,folder_name);
+    const fileHelper = new FileHelper('', object_key, req,file_name);
     let file_copy = await fileHelper.copyObjects(req.body.type)
     
     return{
       status: true,
-      message: "Folder Updated."
+      message: "File Updated."
     };
   }
 }

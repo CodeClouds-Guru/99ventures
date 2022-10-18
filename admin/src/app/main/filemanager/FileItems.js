@@ -11,6 +11,30 @@ import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './hel
 import './FileManager.css';
 import Helper from '../../../app/helper'
 
+/**
+ * Grid & List Style
+ */
+const style = {
+    grid: {
+        box: 'sm:w-160 h-160 flex-col p-16',
+        icon_btn: 'absolute',
+        nav_icon_adapter: 'flex-col',
+        icon: 'flex-auto w-full justify-center',
+        title: 'text-center',
+        modify: 'text-center',
+        size: 'text-center'
+    },
+    list: {
+        box: 'sm:w-full flex items-center flex-row row-style p-6',
+        icon_btn: '',
+        nav_icon_adapter: 'flex-row items-center justify-between',
+        icon: 'mr-3',
+        title: 'text-left grow w-20',
+        modify: 'text-left basis-1/5',
+        size: 'text-left basis-1/5'
+    }
+}
+
 const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
@@ -75,27 +99,6 @@ const FileItems = (props) => {
         }
     }
     
-    const style = {
-		grid: {
-			box: 'sm:w-160 h-160 flex-col p-16',
-			icon_btn: 'absolute',
-			nav_icon_adapter: 'flex-col',
-			icon: 'flex-auto w-full justify-center',
-			title: 'text-center',
-			modify: 'text-center',
-			size: 'text-center'
-		},
-		list: {
-			box: 'sm:w-full flex items-center flex-row row-style p-6',
-			icon_btn: '',
-			nav_icon_adapter: 'flex-row items-center justify-between',
-			icon: 'mr-3',
-			title: 'text-left grow w-20',
-			modify: 'text-left basis-1/5',
-			size: 'text-left basis-1/5'
-		}
-	}
-
     const copyFilePath = () => {
         handleMenuClose()
 		copyUrl(props.file.file_path);

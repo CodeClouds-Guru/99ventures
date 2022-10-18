@@ -5,6 +5,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedItemsId, setSelectedItem, setPathObject } from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Grid & List Style
+ */
+const style = {
+	grid: {
+		box: 'sm:w-160 h-160 p-16 flex-col',
+		icon_btn: 'absolute',
+		nav_icon_adapter: 'flex-col',
+		icon: 'flex-auto w-full justify-center',
+		title: 'text-center',
+		modify: 'text-center',
+		size: 'text-center'
+	},
+	list: {
+		box: 'sm:w-full items-center row-style p-6',
+		icon_btn: '',
+		nav_icon_adapter: 'flex-row items-center justify-between',
+		icon: 'mr-3',
+		title: 'text-left grow w-20',
+		modify: 'text-left basis-1/5',
+		size: 'text-left basis-1/5'
+	}
+}
+
 function FolderItem(props) {
 	const dispatch = useDispatch();
 	const viewType = useSelector(state=> state.filemanager.viewType);
@@ -23,29 +47,7 @@ function FolderItem(props) {
         }
     }
 
-	/**
-	 * Grid & List Style
-	 */
-	const style = {
-		grid: {
-			box: 'sm:w-160 h-160 p-16 flex-col',
-			icon_btn: 'absolute',
-			nav_icon_adapter: 'flex-col',
-			icon: 'flex-auto w-full justify-center',
-			title: 'text-center',
-			modify: 'text-center',
-			size: 'text-center'
-		},
-		list: {
-			box: 'sm:w-full items-center row-style p-6',
-			icon_btn: '',
-			nav_icon_adapter: 'flex-row items-center justify-between',
-			icon: 'mr-3',
-			title: 'text-left grow w-20',
-			modify: 'text-left basis-1/5',
-			size: 'text-left basis-1/5'
-		}
-	}
+	
 
 	const navigateTochild = ()=>{
 		const path = [...pathObject, props.file.name];

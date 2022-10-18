@@ -1,7 +1,7 @@
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { styled } from '@mui/material/styles';
 import { Box } from '@mui/system';
-import { amber, blue, green, grey, red, purple, orange } from '@mui/material/colors';
+import { amber, blue, green, grey, red, purple, orange, blueGrey } from '@mui/material/colors';
 
 const TypeBadge = styled(Box)(
 	({ theme, ...props }) => ({
@@ -15,7 +15,8 @@ const TypeBadge = styled(Box)(
 			JPG: amber[600],
 			JPEG: amber[600],
 			PNG: purple[700],
-			GIF: grey[900]
+			GIF: grey[900],
+			UNKNOWN: blueGrey[900]
 		}[props.color],
 	})
 );
@@ -51,26 +52,28 @@ const renderItem = (file)=> {
 		case 'image/png':
 		case 'image/gif':
 		case 'image/svg':
-			const type = file.mime_type.split('/')[1];
-			return badgeComponent(type.toUpperCase());
-			// return (	
-			// 	<div className='img-div'>		
-			// 		<img
-			// 			src={file.file_path}
-			// 			alt="lorem ipsum"
-			// 			loading="lazy"
-			// 			className='rounded-md'
-			// 			style={{
-			// 				borderBottomLeftRadius: 4,
-			// 				borderBottomRightRadius: 4,
-			// 				display: 'block',
-			// 				width: '100%',
-			// 			}}
-			// 		/>		
-			// 	</div>			
-			// );
+			// const type = file.mime_type.split('/')[1];
+			// return badgeComponent(type.toUpperCase());
+			return (	
+				<div className='img-div'>		
+					<img
+						src={file.file_path}
+						alt="lorem ipsum"
+						loading="lazy"
+						className='rounded-md'
+						style={{
+							borderBottomLeftRadius: 4,
+							borderBottomRightRadius: 4,
+							display: 'block',
+							width: '100%',
+							height: '60px',
+							objectFit: 'cover'
+						}}
+					/>		
+				</div>			
+			);
 		default:
-			return '';
+			return badgeComponent('UNKNOWN');
 	}
 }
 
@@ -80,7 +83,7 @@ function ItemIcon(props) {
 	if (file.type === 'folder') {
 		return (
 			<div className="relative">
-			<FuseSvgIcon className="fuse--icon" size={56} color="disabled">
+			<FuseSvgIcon className="fuse--icon" size={70} color="disabled">
 				material-outline:folder_open
 			</FuseSvgIcon></div>
 		);

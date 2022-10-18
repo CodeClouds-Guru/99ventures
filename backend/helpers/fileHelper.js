@@ -6,10 +6,13 @@ class FileHelper {
     this.company_id = ''
     this.site_id = ''
     this.new_filename = ''
+    this.private_file = 0
     if(req){
       this.company_id = req.headers.company_id
       this.site_id = req.headers.site_id
       this.new_filename = new_filename
+      if(req.body.private_file)
+        this.private_file = req.body.private_file
     }
     this.files = files
     this.model = model
@@ -40,13 +43,13 @@ class FileHelper {
         const blob = fs.readFileSync(imagePath)
 
         // const uploadedImage = await s3.upload({
+          // if(this.private_file == '1'){}
           const uploadedImage = await s3.putObject({
             Bucket: process.env.S3_BUCKET_NAME,
             Key: path.concat(new_filename),
             Body: blob,
-            ACL: "public-read"
+            ACL: this.file_acl
         }).promise()
-
         this.response.status = true
         this.response.files[key] = {
           filename: path.concat(new_filename),
@@ -159,9 +162,15 @@ class FileHelper {
   async copyObjects(req_type){
     let s3 = this.s3Connect()
     let model_structure = this.model.split('/')
-    model_structure[model_structure.length-2] = this.new_filename
+    if(req_type == 'copy-file'){
+      model_structure[model_structure.length-1] = this.new_filename
+    }else{
+      model_structure[model_structure.length-2] = this.new_filename
+    }
+    
     model_structure = model_structure.join('/')
     let pre_model = this.model
+    
     await s3.listObjects({Bucket: process.env.S3_BUCKET_NAME,Prefix: this.model}, function(err, data) {
       
       if (data.Contents.length) {
@@ -171,6 +180,7 @@ class FileHelper {
             CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
             Key: Key.replace(pre_model,model_structure)
           };
+          console.log(params)
           s3.copyObject(params, function(copyErr, copyData){
             if (copyErr) {
               console.log(copyErr);
