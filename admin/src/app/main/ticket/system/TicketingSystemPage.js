@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
     FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack, Dialog,
-    DialogActions, DialogContent, DialogContentText, DialogTitle
+    DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip
 } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import SendIcon from '@mui/icons-material/Send';
@@ -17,7 +17,7 @@ import Helper from 'src/app/helper';
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const inputFileRef = useRef(null);
-    const [inputFiles, setInputFiles] = useState([]);
+    const [inputFiles, setInputFiles] = useState({});
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponseOptions, setQuickResponseOptions] = useState([]);
     const [quickResponse, setQuickResponse] = useState('');
@@ -35,20 +35,23 @@ function TicketingSystemPage(props) {
     const onAttachmentButtonClick = () => {
         inputFileRef.current.click();
     };
-    const handleFileUpload = e => {
+    const handleFileUpload = (e) => {
+        setInputFiles([]);
         const { files } = e.target;
-        if (files && Object.keys(files).length) {
+        if (files && Object.keys(files).length <= 5) {
             // console.log(typeof (files), files);
-            // Object.keys(files).map((val, key) => {
-            //     const filename = val.name;
-            //     var parts = filename.split(".");
-            //     const fileType = parts[parts.length - 1];
-            //     console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
+            // Object.values(files).map((val, key) => {
+            //     console.log(val.name);
+            // const filename = val.name;
+            // var parts = filename.split(".");
+            // const fileType = parts[parts.length - 1];
+            // console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
             // })
             setInputFiles(files);
+        } else {
+            dispatch(showMessage({ variant: 'error', message: 'Allowed upto 5 files at a time.' }));
         }
     };
-    // console.log(inputFiles)
     const handleChangeTicketStatus = (event) => {
         setTicketStatus(event.target.value);
     };
@@ -86,9 +89,9 @@ function TicketingSystemPage(props) {
             })
     }
     return (
-        <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-10">
+        <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-0">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
-                <Paper className="flex h-full md:items-center md:justify-center w-full  p-10 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                <Paper className="flex h-full md:items-center md:justify-center w-full  p-5 rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <Dialog
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}
@@ -122,8 +125,8 @@ function TicketingSystemPage(props) {
                             </div>
                         </DialogActions>
                     </Dialog>
-                    <div className="flex w-full h-full mx-auto sm:mx-0">
-                        <div className="h-full w-1/2 border-2">
+                    <div className="flex w-full h-full mx-auto sm:mx-0" style={{ height: '45rem' }}>
+                        <div className="h-full w-1/2 border-2 rounded-l-2xl">
                             <div className="flex flex-row justify-end p-0 m-0">
                                 <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
                                     <InputLabel id="demo-select-small">Ticket Status</InputLabel>
@@ -143,7 +146,7 @@ function TicketingSystemPage(props) {
                                     </Select>
                                 </FormControl>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '13rem', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '16rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
@@ -186,16 +189,29 @@ function TicketingSystemPage(props) {
                                 <TextareaAutosize className="w-full border-1"
                                     aria-label="empty textarea"
                                     placeholder=""
-                                    minRows={6}
+                                    minRows={4}
                                     sx={{ background: '#dcdcdc' }}
                                     value={chatField}
                                     onChange={handleChatField}
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
-                                    <div className="flex flex-col justify-start">
-                                        attached file
+                                    <div className="flex flex-col justify-start" style={{ marginLeft: '-1rem', width: '70%' }}>
+                                        <b className="m-0 p-0">
+                                            Files({Object.keys(inputFiles).length})
+                                        </b>
+                                        <Stack direction="row" spacing={1} sx={{ overflow: 'scroll', height: '6.1rem' }}>
+                                            {
+                                                Object.values(inputFiles).map((val, key) => {
+                                                    return (
+                                                        <>
+                                                            {val.name} <br />
+                                                        </>
+                                                    )
+                                                })
+                                            }
+                                        </Stack>
                                     </div>
-                                    <div className="flex flex-col justify-end">
+                                    <div className="flex flex-col justify-end pb-8">
                                         <Stack direction="row" spacing={1}>
                                             <input
                                                 style={{ display: "none" }}
@@ -203,10 +219,13 @@ function TicketingSystemPage(props) {
                                                 onChange={handleFileUpload}
                                                 type="file"
                                                 multiple
+                                                accept="image/*"
                                             />
-                                            <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
-                                                <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
-                                            </IconButton>
+                                            <Tooltip title="Attach upto 5 files" placement="left">
+                                                <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
+                                                    <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
                                             <Button variant="contained" color="secondary" endIcon={<SendIcon />}>
                                                 Send
                                             </Button>
@@ -215,7 +234,7 @@ function TicketingSystemPage(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-full w-1/2 border-2">
+                        <div className="h-full w-1/2 border-2 rounded-r-2xl">
                             <div className="flex flex-row justify-start p-0 m-0 pl-5 mt-5">
                                 <Typography component={'h2'}>
                                     <b>Member details</b>
@@ -287,7 +306,7 @@ function TicketingSystemPage(props) {
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflow: 'scroll', height: '12.25rem' }}>
+                                    <div style={{ overflow: 'scroll', height: '15.25rem' }}>
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
