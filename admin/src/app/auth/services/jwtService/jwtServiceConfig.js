@@ -33,7 +33,8 @@ const jwtServiceConfig = {
   roleEdit: 'roles/edit',
   roleUpdate: 'roles/update',
   getSingleTickketDetails: 'tickets/view',
-  filemanagerUploadFile: 'file-manager/save'
+  filemanagerUploadFile: 'file-manager/save',
+  ticketUpdate: 'tickets/update'
 };
 
 export default jwtServiceConfig;

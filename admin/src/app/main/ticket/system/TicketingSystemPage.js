@@ -23,8 +23,10 @@ function TicketingSystemPage(props) {
     const [quickResponse, setQuickResponse] = useState('');
     const [chatField, setChatField] = useState('');
     const [memberStatus, setMemberStatus] = useState('');
+    const [tempMemberStatus, setTempMemberStatus] = useState('');
     const [ticketConversations, setTicketConversations] = useState([]);
     const [memberDetails, setMemberDetails] = useState({});
+    const [memberId, setMemberId] = useState(0);
     const [previousTickets, setPreviousTIckets] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [memberNote, setMemberNote] = useState('');
@@ -53,14 +55,20 @@ function TicketingSystemPage(props) {
         }
     };
     const handleChangeTicketStatus = (event) => {
-        setTicketStatus(event.target.value);
+        // setTicketStatus(event.target.value);
+        updateTicket({
+            value: event.target.value,
+            field_name: 'status',
+            id: props.ticketId,
+            type: 'ticket_status'
+        });
     };
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
         setChatField(event.target.value);
     };
     const handleMemberStatus = (event) => {
-        // setMemberStatus(event.target.value);
+        setTempMemberStatus(event.target.value);
         setOpenAlertDialog(true);
     };
     const handleNote = (event) => {
@@ -73,6 +81,27 @@ function TicketingSystemPage(props) {
         event.stopPropagation();
         return false;
     }
+    const skipAndResetNote = () => {
+        setTempMemberStatus('');
+        setOpenAlertDialog(false);
+        setMemberNote('');
+
+    }
+    const addNote = (note_type) => (event) => {
+        event.preventDefault();
+        let data_set = {
+            value: tempMemberStatus,
+            field_name: 'status',
+            member_id: memberId,
+            type: 'member_status'
+        }
+        if (note_type === 'save') {
+            memberNote.trim() ?
+                data_set.member_notes = memberNote.trim() : dispatch(showMessage({ variant: 'error', message: 'Fill with some note for Save' }));
+        }
+        updateTicket(data_set);
+        skipAndResetNote();
+    }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
             .then(response => {
@@ -80,12 +109,26 @@ function TicketingSystemPage(props) {
                     setTicketStatus(response.data.results.data.status);
                     setTicketConversations(response.data.results.data.TicketConversations);
                     setMemberDetails(response.data.results.data.Member);
+                    setMemberId(response.data.results.data.member_id)
                     setMemberStatus(response.data.results.data.Member.status);
                     setPreviousTIckets(response.data.results.data.previous_tickets);
                     setQuickResponseOptions(response.data.results.data.auto_responders)
                 }
             }).catch(err => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+            })
+    }
+    const updateTicket = (data_set) => {
+        axios.post(`${jwtServiceConfig.ticketUpdate}`, data_set)
+            .then(response => {
+                if (response.data.results.status) {
+                    getTicketDetails();
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            }).catch(error => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
             })
     }
     return (
@@ -116,10 +159,10 @@ function TicketingSystemPage(props) {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <div className="px-20">
-                                <Button variant="outlined" onClick={() => { setOpenAlertDialog(false) }}>Skip</Button>
-                                <Button variant="outlined" color="error">Cancel</Button>
-                                <Button variant="outlined" color="success" autoFocus>
+                            <div className="flex justify-between px-20">
+                                <Button className="mx-10" variant="outlined" onClick={skipAndResetNote}>Skip</Button>
+                                <Button className="mx-10" variant="outlined" onClick={addNote('cancel')} color="error">Cancel</Button>
+                                <Button className="mx-10" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote}>
                                     Save
                                 </Button>
                             </div>
