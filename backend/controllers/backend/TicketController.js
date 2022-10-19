@@ -157,6 +157,7 @@ class TicketController extends Controller {
           "created_at",
           "status",
           "member_id",
+          "is_read",
         ];
         options.where = { [Op.and]: { id: ticket_id } };
         options.include = [
@@ -263,58 +264,56 @@ class TicketController extends Controller {
     const field_name = req.body.field_name || "";
     const ticket_id = req.body.id || null;
     const member_id = req.body.member_id || null;
-    const user_id = req.body.user_id || null;
-    const attachments = req.files ? req.files.attachments : [];
+    // const user_id = req.body.user_id || null;
+    // const attachments = req.files ? req.files.attachments : [];
     const type = req.body.type || "";
     const notes = req.body.member_notes || null;
 
     let change = false;
     // console.log(req.files);
-    switch (type) {
-      case "is_read":
-        change = await this.changeStatus(value, field_name, ticket_id);
-        break;
-      case "ticket_status":
-        change = await this.changeStatus(value, field_name, ticket_id);
-        break;
-      case "member_status":
-        let member = await Member.findOne({
-          attributes: ["status"],
-          where: { id: member_id },
-        });
-        console.log("-----------------------member", member);
-        change = await Member.changeStatus(field_name, value, member_id);
-        if (notes !== null) {
-          let data = {
-            user_id: req.user.id,
-            member_id: member_id,
-            previous_status: member.status,
-            current_status: value,
-            note:notes
-          };
+    try {
+      switch (type) {
+        case "is_read":
+          change = await this.changeStatus(value, field_name, ticket_id);
+          break;
+        case "ticket_status":
+          change = await this.changeStatus(value, field_name, ticket_id);
+          break;
+        case "member_status":
+          let member = await Member.findOne({
+            attributes: ["status"],
+            where: { id: member_id },
+          });
+          console.log("-----------------------member", member);
+          change = await Member.changeStatus(field_name, value, member_id);
+          if (notes !== null) {
+            let data = {
+              user_id: req.user.id,
+              member_id: member_id,
+              previous_status: member.status,
+              current_status: value,
+              note: notes,
+            };
 
-          change = await MemberNote.create(data);
-        }
-        break;
-      case "ticket_chat":
-        change = await this.saveTicketConversations(
-          value,
-          field_name,
-          ticket_id,
-          member_id,
-          user_id,
-          attachments,
-          req
-        );
-        break;
-      default:
-        this.throwCustomError("Unable to get data", 500);
+            change = await MemberNote.create(data);
+          }
+          break;
+        case "ticket_chat":
+          change = await this.saveTicketConversations(req);
+          break;
+        default:
+          const errorObj = new Error("Request failed.");
+          throw errorObj;
+      }
+    } catch (error) {
+      this.throwCustomError("Unable to get data", 500);
+    } finally {
+      if (change)
+        return {
+          status: true,
+          message: "Data updated.",
+        };
     }
-    if (change)
-      return {
-        status: true,
-        message: "Data updated.",
-      };
   }
 
   // //update for all type of updation
@@ -330,15 +329,14 @@ class TicketController extends Controller {
     }
   }
 
-  async saveTicketConversations(
-    value,
-    field_name,
-    ticket_id,
-    member_id,
-    user_id,
-    attachments,
-    req
-  ) {
+  async saveTicketConversations(req) {
+    const value = req.body.value || "";
+    const field_name = req.body.field_name || "";
+    const ticket_id = req.body.id || null;
+    const member_id = req.body.member_id || null;
+    const user_id = req.body.user_id || null;
+    const attachments = req.files ? req.files.attachments : [];
+
     // console.log(value, field_name, ticket_id, "--------------");
     try {
       const data = {
@@ -358,11 +356,6 @@ class TicketController extends Controller {
         const file_name = await fileHelper.upload();
 
         const dataFiles = file_name.files.map((values) => {
-          // console.log(
-          //   "--------mime.lookup",
-          //   mime.lookup(path.basename(values.filename))
-          // );
-          // const mime = mime.lookup(path.basename(values.filename));
           return {
             ticket_conversation_id: saved.id,
             file_name: values.filename.replace(/ /g, "_"),
@@ -372,7 +365,7 @@ class TicketController extends Controller {
 
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-      // console.log(saved.id);
+
       return true;
     } catch (error) {
       throw error;
