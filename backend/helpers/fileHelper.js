@@ -170,7 +170,7 @@ class FileHelper {
     
     model_structure = model_structure.join('/')
     let pre_model = this.model
-    
+
     await s3.listObjects({Bucket: process.env.S3_BUCKET_NAME,Prefix: this.model}, function(err, data) {
       
       if (data.Contents.length) {
@@ -180,7 +180,6 @@ class FileHelper {
             CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
             Key: Key.replace(pre_model,model_structure)
           };
-          console.log(params)
           s3.copyObject(params, function(copyErr, copyData){
             if (copyErr) {
               console.log(copyErr);
@@ -192,7 +191,10 @@ class FileHelper {
     if(req_type == 'rename'){
       this.deleteFile(this.model)
     }
-    return true
+    return {
+      status:true,
+      path:model_structure
+    }
   }
 }
 
