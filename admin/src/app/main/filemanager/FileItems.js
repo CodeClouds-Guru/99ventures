@@ -3,14 +3,12 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem, Tooltip, Modal, Button, TextField } from '@mui/material';
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, setLoading } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, copyAndCreateFile } from 'app/store/filemanager'
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './helper'
 import Helper from '../../../app/helper'
-import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import axios from 'axios'
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
@@ -63,11 +61,12 @@ const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
+    const listing = useSelector(state=> state.filemanager.listData);
+    const viewType = useSelector(state=> state.filemanager.viewType);
+
     const [ anchorEl, setAnchorEl ] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    const viewType = useSelector(state=> state.filemanager.viewType);
     const [ msg, setMsg ] = useState('');
-    const loading = useSelector(state=> state.filemanager.loading);
     const [open, setOpen] = useState(false);
 
     function handleMenuClick(event) {
@@ -148,34 +147,30 @@ const FileItems = (props) => {
     }); 
 
     const handleFileCopy = (data) => {
-        handleClose();
-        dispatch(setLoading('pending'));
-        const fileExt = props.file.name.split('.').pop()
+        const fileExt = props.file.name.split('.').pop();
+        const fileName = data.file_name + '.' + fileExt;
+        const checkFileName = listing.some(fl => fl.name === fileName && fl.type === 'file');
+        if(checkFileName) {
+            dispatch(showMessage({ variant: 'error', message: 'File name already exists!' }));
+            return;
+        }
+        
+        handlePopupClose();
         const params = {
             id: props.file.id,
             type: 'copy-file',
-            file_name: data.file_name + '.' + fileExt
+            file_name: fileName
         }
-        axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
-		.then((response) => {
-			dispatch(setLoading('idle'));
-			// if (response.data.results.status) {
-			// 	dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));
-			// 	if(response.data.results.data){
-			// 		dispatch(setListData(response.data.results.data));
-			// 	}
-			// } else {
-			// 	dispatch(showMessage({ variant: 'error', message: response.data.errors }));
-			// }
-            console.log(response)
-		})
-		.catch(error => {
-			dispatch(setLoading('idle'));
-			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
-		});
+        dispatch(copyAndCreateFile(params));
     }
 
-    const handleClose = () => {
+    const handlePopupOpen = () => {
+        setOpen(true);
+        handleMenuClose();
+        dispatch(setSelectedItem(null));
+    }
+
+    const handlePopupClose = () => {
         setOpen(false);
         reset(defaultValues)
     }
@@ -231,9 +226,7 @@ const FileItems = (props) => {
                                 <ListItemText primary="Details" />
                             </MenuItem>
                             <MenuItem 
-                                onClick={()=> {
-                                    setOpen(true)
-                                }}>
+                                onClick={handlePopupOpen}>
                                 <ListItemIcon className="min-w-40">
                                     <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
                                 </ListItemIcon>
@@ -333,7 +326,7 @@ const FileItems = (props) => {
                                 component="label"
                                 className=""
                                 color="primary" 
-                                onClick={ handleClose }
+                                onClick={ handlePopupClose }
                             >Close</Button>
                             <Button
                                 variant="contained"

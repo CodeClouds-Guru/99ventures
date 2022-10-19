@@ -84,7 +84,6 @@ const centerStyle = {
 function DragDropzone() {
 	const dispatch = useDispatch();
     const listing = useSelector(state=> state.filemanager.listData);
-    const jsonData = useSelector(state=> state.filemanager.jsonData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const navigate = useNavigate();
@@ -232,7 +231,7 @@ function DragDropzone() {
 
 	return (		
 		<section className={`
-			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-24 sm:p-24 lg:p-24 w-full`
+			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-20 sm:p-20 lg:p-20 w-full`
 		}>
 			<Box 
 				className="dropzone h-full"

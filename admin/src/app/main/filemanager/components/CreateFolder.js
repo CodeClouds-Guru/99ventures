@@ -6,9 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import axios from 'axios';
-import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import { setLoading, setListData, setJsonData } from 'app/store/filemanager';
+import { createNewFolder } from 'app/store/filemanager';
 import { useDispatch, useSelector } from 'react-redux';
 
 const style = {
@@ -36,6 +34,7 @@ const CreateFolder = () => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
+    const listing = useSelector(state=> state.filemanager.listData);
     
     const { 
         control,
@@ -48,30 +47,21 @@ const CreateFolder = () => {
         resolver: yupResolver(schema),
     }); 
 
-    const createFolder = (data) => {
+    const formSubmit = (data) => {
+        const folderName = data.folder;
+        const checkFileName = listing.some(fl => fl.name === folderName && fl.type === 'folder');
+        if(checkFileName) {
+            dispatch(showMessage({ variant: 'error', message: 'Folder already exists!' }));
+            return;
+        }
+
         const params = {
-            "folder_name": data.folder,
+            "folder_name": folderName,
             "file_path": pathObject.join('/')
         }
-        dispatch(setLoading('pending'));
+
         handleClose();
-        axios.post(jwtServiceConfig.filemanagerUploadFile, params)
-		.then((response) => {
-			dispatch(setLoading('idle'));
-			if (response.data.results.status) {
-				dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));                
-				if(response.data.results.data){
-					dispatch(setListData(response.data.results.data));
-					dispatch(setJsonData(response.data.results.data));
-				}
-			} else {
-				dispatch(showMessage({ variant: 'error', message: response.data.errors }));
-			}
-		})
-		.catch(error => {
-			dispatch(setLoading('idle'));
-			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
-		});
+        dispatch(createNewFolder(params));
     }
 
     const handleClose = () => {
@@ -99,7 +89,7 @@ const CreateFolder = () => {
                         name="AutoresponderForm"
                         noValidate  
                         className="flex flex-col justify-center w-full mt-32"
-                        onSubmit={ handleSubmit(createFolder) }
+                        onSubmit={ handleSubmit(formSubmit) }
                     >
                         <Controller
                             name="folder"
