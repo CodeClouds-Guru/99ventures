@@ -28,7 +28,7 @@ const BreadCrumb = () => {
             <Breadcrumbs aria-label="breadcrumb">
                 <Link to="#" role="button" onClick={()=>setPath('')}>
                     <IconButton color="primary" aria-label="Filter" component="label">
-                        <FuseSvgIcon className="text-48" size={25} color="action">material-outline:home</FuseSvgIcon>
+                        <FuseSvgIcon className="text-20" size={22} color="action">material-outline:home</FuseSvgIcon>
                     </IconButton>
                 </Link>
                 {

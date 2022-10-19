@@ -24,7 +24,7 @@ const style = {
 };
 
 const schema =  yup.object().shape({
-    folder: yup.string().required('Please enter the heading')
+    folder: yup.string().required('Please enter the foldername')
 });
 
 const defaultValues = {

@@ -172,14 +172,13 @@ function DragDropzone() {
 	));*/
 
 	useEffect(() => {
-		var path = pathObject;		
+		var path = pathObject;	
 		
 		/**
 		 * This block will execute while reloading the page
 		 */
-		if(!pathObject.length){
-			// Remove trailing slash
-			const pathname = location.pathname.replace(/\/$/, "");
+		if(!path.length){
+			const pathname = location.pathname.replace(/\/$/, "");// Remove trailing slash
 			const pathArry = decodeURI(pathname).split('/');
 			pathArry.splice(0, 3);
 			path = pathArry
@@ -196,7 +195,12 @@ function DragDropzone() {
 		});
 		
 		// Make sure to revoke the data uris to avoid memory leaks, will run on unmount
-		return () => files.forEach(file => URL.revokeObjectURL(file.preview));
+		return () => {
+			files.forEach(file => URL.revokeObjectURL(file.preview));
+			const pathname = location.pathname;
+			(pathname.split('/')[2] !== 'filemanager') && dispatch(setPathObject([]));
+
+		};
 	}, [location.pathname]);
 
 		

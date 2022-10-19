@@ -7,6 +7,7 @@ import FileManagerList from './FilemanagerList';
 import { useSelector } from 'react-redux';
 import ImagePreview from './ImagePreview';
 import DragDropzone from './DragDropZone';
+import './FileManager.css';
 
 const Index = () => {
     const selectedItem = useSelector(state=>state.filemanager.selectedItem)
