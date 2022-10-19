@@ -8,7 +8,8 @@ import SendIcon from '@mui/icons-material/Send';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectUser } from 'app/store/userSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
@@ -17,6 +18,7 @@ import Helper from 'src/app/helper';
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const inputFileRef = useRef(null);
+    const user = useSelector(selectUser);
     const [inputFiles, setInputFiles] = useState({});
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponseOptions, setQuickResponseOptions] = useState([]);
@@ -81,7 +83,7 @@ function TicketingSystemPage(props) {
         event.stopPropagation();
         return false;
     }
-    const skipAndResetNote = () => {
+    const cancelAndResetNote = () => {
         setTempMemberStatus('');
         setOpenAlertDialog(false);
         setMemberNote('');
@@ -100,7 +102,19 @@ function TicketingSystemPage(props) {
                 data_set.member_notes = memberNote.trim() : dispatch(showMessage({ variant: 'error', message: 'Fill with some note for Save' }));
         }
         updateTicket(data_set);
-        skipAndResetNote();
+        cancelAndResetNote();
+    }
+    const sendChatMessage = () => (event) => {
+        event.preventDefault();
+        let data_set = {
+            // value : string,
+            field_name: 'message',
+            ticket_id: props.ticketId,
+            user_id: user.id,
+            member_id: memberId,
+            type: 'ticket_chat',
+            //   attachments : files
+        }
     }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
@@ -160,9 +174,9 @@ function TicketingSystemPage(props) {
                         </DialogContent>
                         <DialogActions>
                             <div className="flex justify-between px-20">
-                                <Button className="mx-10" variant="outlined" onClick={skipAndResetNote}>Skip</Button>
-                                <Button className="mx-10" variant="outlined" onClick={addNote('cancel')} color="error">Cancel</Button>
-                                <Button className="mx-10" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote}>
+                                <Button className="mx-10" variant="outlined" onClick={cancelAndResetNote} color="error">Cancel</Button>
+                                <Button className="mx-10" variant="outlined" onClick={addNote('cancel')}>Skip</Button>
+                                <Button className="mx-10" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote.trim()}>
                                     Save
                                 </Button>
                             </div>
@@ -209,8 +223,8 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             <div className="flex-row h-auto w-full px-10">
-                                <FormControl variant="standard" className="w-full mt-0 mb-5" >
-                                    <InputLabel id="demo-simple-select-standard-label">Select quick response</InputLabel>
+                                <FormControl className="w-full my-5">
+                                    <InputLabel id="demo-simple-select-standard-label">Quick response</InputLabel>
                                     <Select
                                         labelId="demo-simple-select-standard-label"
                                         id="demo-simple-select-standard"
@@ -243,15 +257,15 @@ function TicketingSystemPage(props) {
                                             Files({Object.keys(inputFiles).length})
                                         </b>
                                         <Stack direction="row" spacing={1} sx={{ overflow: 'scroll', height: '6.1rem' }}>
-                                            {
-                                                Object.values(inputFiles).map((val, key) => {
-                                                    return (
-                                                        <>
-                                                            {val.name} <br />
-                                                        </>
-                                                    )
-                                                })
-                                            }
+                                            <ul className="ml-10" style={{ listStyleType: 'disc' }}>
+                                                {
+                                                    Object.values(inputFiles).map((val, key) => {
+                                                        return (
+                                                            <li key={key}> - {val.name}</li>
+                                                        )
+                                                    })
+                                                }
+                                            </ul>
                                         </Stack>
                                     </div>
                                     <div className="flex flex-col justify-end pb-8">
@@ -269,7 +283,7 @@ function TicketingSystemPage(props) {
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
-                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />}>
+                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage} disabled={!chatField.trim()} >
                                                 Send
                                             </Button>
                                         </Stack>
