@@ -39,19 +39,17 @@ function TicketingSystemPage(props) {
     const onAttachmentButtonClick = () => {
         inputFileRef.current.click();
     };
-    const handleFileUpload = (e) => {
+    const handleFiles = (e) => {
         setInputFiles([]);
         const { files } = e.target;
         if (files && Object.keys(files).length <= 5) {
-            // console.log(typeof (files), files);
-            // Object.values(files).map((val, key) => {
-            //     console.log(val.name);
-            // const filename = val.name;
-            // var parts = filename.split(".");
-            // const fileType = parts[parts.length - 1];
-            // console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
-            // })
-            setInputFiles(files);
+            var allowed_files = [];
+            Object.values(files).map((val, key) => {
+                var parts = val.name.split(".");
+                const file_type = parts[parts.length - 1];
+                ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type) ? allowed_files.push(val) : dispatch(showMessage({ variant: 'error', message: `File type ${file_type} is not allowed for ${val.name}` }));
+            })
+            setInputFiles(allowed_files);
         } else {
             dispatch(showMessage({ variant: 'error', message: 'Allowed upto 5 files at a time.' }));
         }
@@ -79,10 +77,10 @@ function TicketingSystemPage(props) {
     const handleChatField = (event) => {
         setChatField(event.target.value);
     }
-    const handleDialogBackdrop = (event) => {
-        event.stopPropagation();
-        return false;
-    }
+    // const handleDialogBackdrop = (event) => {
+    //     event.stopPropagation();
+    //     return false;
+    // }
     const cancelAndResetNote = () => {
         setTempMemberStatus('');
         setOpenAlertDialog(false);
@@ -105,16 +103,17 @@ function TicketingSystemPage(props) {
         cancelAndResetNote();
     }
     const sendChatMessage = () => (event) => {
-        event.preventDefault();
-        let data_set = {
-            // value : string,
-            field_name: 'message',
-            ticket_id: props.ticketId,
-            user_id: user.id,
-            member_id: memberId,
-            type: 'ticket_chat',
-            //   attachments : files
-        }
+        let data_set = new FormData();
+        data_set.append('field_name', 'message');
+        data_set.append('id', props.ticketId);
+        data_set.append('user_id', user.id);
+        data_set.append('member_id', memberId);
+        data_set.append('type', 'ticket_chat');
+        chatField.trim() ? data_set.append('value', chatField) : '';
+        Object.keys(inputFiles).length > 0 ? data_set.append('attachments', inputFiles) : '';
+        updateTicket(data_set);
+        setInputFiles({});
+        setChatField('')
     }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
@@ -126,7 +125,15 @@ function TicketingSystemPage(props) {
                     setMemberId(response.data.results.data.member_id)
                     setMemberStatus(response.data.results.data.Member.status);
                     setPreviousTIckets(response.data.results.data.previous_tickets);
-                    setQuickResponseOptions(response.data.results.data.auto_responders)
+                    setQuickResponseOptions(response.data.results.data.auto_responders);
+                    if (response.data.results.data.is_read === 0) {
+                        updateTicket({
+                            value: 1,
+                            field_name: 'is_read',
+                            id: props.ticketId,
+                            type: 'is_read'
+                        })
+                    }
                 }
             }).catch(err => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
@@ -137,9 +144,9 @@ function TicketingSystemPage(props) {
             .then(response => {
                 if (response.data.results.status) {
                     getTicketDetails();
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                    data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
             }).catch(error => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
@@ -152,7 +159,6 @@ function TicketingSystemPage(props) {
                     <Dialog
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}
-                        onBackdropClick={handleDialogBackdrop}
                         disableEscapeKeyDown
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
@@ -273,17 +279,17 @@ function TicketingSystemPage(props) {
                                             <input
                                                 style={{ display: "none" }}
                                                 ref={inputFileRef}
-                                                onChange={handleFileUpload}
+                                                onChange={handleFiles}
                                                 type="file"
                                                 multiple
-                                                accept="image/*"
+                                                accept="image/jpg, image/jpeg, image/png, image/gif, image/JPG, image/JPEG, image/PNG, image/GIF"
                                             />
                                             <Tooltip title="Attach upto 5 files" placement="left">
                                                 <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
-                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage} disabled={!chatField.trim()} >
+                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.trim().length === 0} >
                                                 Send
                                             </Button>
                                         </Stack>
