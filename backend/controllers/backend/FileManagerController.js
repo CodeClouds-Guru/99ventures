@@ -48,6 +48,9 @@ class FileManagerController {
         let object_key = file_list.Contents[j]
         if (file_structure[file_structure.length - 1] != '')
           var meta = await fileHelper.getMetaData(object_key.Key)
+          let metadata = []
+          if(meta && 'Metadata' in meta)
+            metadata = meta.Metadata
         file_objects.push({
           id: this.generateId(object_key.Key, '', ''),
           type: 'file',
@@ -59,7 +62,7 @@ class FileManagerController {
             process.env.S3_BUCKET_OBJECT_URL + object_key.Key
           ),
           access: 'public',
-          metadata: meta.Metadata,
+          metadata: metadata,
         })
       }
     }
@@ -147,14 +150,10 @@ class FileManagerController {
     const fileHelper = new FileHelper('', object_key, req, file_name)
     let file_copy = await fileHelper.copyObjects(req.body.type)
 
-    //get path object list
-    const fileListHelper = new FileHelper('', file_path, req)
-    let file_list = await fileListHelper.getList()
-    let file_objects = this.objectStructure(file_list)
     return {
       status: true,
-      message: 'File Updated.',
-      data: file_objects,
+      message: 'File Copied.',
+      data: [],
     }
   }
 }
