@@ -11,7 +11,6 @@ class FileManagerController {
     const fileHelper = new FileHelper('',file_path,req);
     let file_list = await fileHelper.getList();
     let file_objects = this.objectStructure(file_list)
-    
     // if(file_objects.length){
       return {
         data:file_objects
@@ -65,6 +64,7 @@ class FileManagerController {
     }
     let files = []
     let file_name = []
+    let metadata = {"x-amz-meta-alt-name":req.body.alt_name,"x-amz-meta-private":req.body.private}
     
     if (req.files) {
       if(req.files.file.length)
@@ -72,7 +72,7 @@ class FileManagerController {
       else
         files[0] = req.files.file;
       const fileHelper = new FileHelper(files, file_path, req);
-      file_name = await fileHelper.upload();
+      file_name = await fileHelper.upload(metadata);
     }else{
       let folder_name = req.body.folder_name
       let folder_path = file_path+'/'+folder_name

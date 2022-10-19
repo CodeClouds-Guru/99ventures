@@ -6,13 +6,13 @@ class FileHelper {
     this.company_id = ''
     this.site_id = ''
     this.new_filename = ''
-    this.private_file = 0
+    this.private = 'public-read-write'
     if(req){
       this.company_id = req.headers.company_id
       this.site_id = req.headers.site_id
       this.new_filename = new_filename
-      if(req.body.private_file)
-        this.private_file = req.body.private_file
+      if(req.body.private == 1)
+        this.private = 'private'
     }
     this.files = files
     this.model = model
@@ -32,7 +32,7 @@ class FileHelper {
     this.copyObjects = this.copyObjects.bind(this)
   }
   //upload file to s3 bucket  
-  async upload() {
+  async upload(metadata) {
     var path = await this.getPath(this.model)
     for (var key of Object.keys(this.files)) {
       var file = this.files[key]
@@ -48,7 +48,8 @@ class FileHelper {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: path.concat(new_filename),
             Body: blob,
-            ACL: this.file_acl
+            ACL: this.private,
+            Metadata:metadata
         }).promise()
         this.response.status = true
         this.response.files[key] = {
