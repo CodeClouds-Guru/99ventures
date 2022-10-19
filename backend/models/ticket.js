@@ -146,7 +146,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "is_read",
       type: "text",
       placeholder: "Is Read",
-      listing: true,
+      listing: false,
       show_in_form: false,
       sort: false,
       required: false,

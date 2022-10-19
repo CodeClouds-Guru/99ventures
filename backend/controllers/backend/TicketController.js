@@ -157,6 +157,7 @@ class TicketController extends Controller {
           "created_at",
           "status",
           "member_id",
+          "is_read",
         ];
         options.where = { [Op.and]: { id: ticket_id } };
         options.include = [
