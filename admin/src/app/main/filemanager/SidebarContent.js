@@ -51,6 +51,18 @@ const SidebarContent = (props) => {
 		dispatch(setSelectedItem(null));
 	}
 
+	/**
+	 * Open Preview
+	 */
+	const handleOpenPreview = () => {
+		if (matchMimeType(selectedItem.mime_type)) {
+			dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path}));
+			disabledSideBar();
+		} else {
+			window.open(selectedItem.file_path, '_blank');
+		}		
+	}
+
 	return (
 		<motion.div
 			initial={{ y: 50, opacity: 0.8 }}
@@ -82,7 +94,7 @@ const SidebarContent = (props) => {
 
 			<div className="text-16 font-medium mt-32">Information</div>
 			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
-				<div className="flex items-center justify-between py-14">
+				<div className="flex items-cdisabledSideBarenter justify-between py-14">
 					<Typography color="text.secondary">Modified At</Typography>
 					<Typography>{Helper.parseTimeStamp(selectedItem.last_modified)}</Typography>
 				</div>
@@ -90,10 +102,10 @@ const SidebarContent = (props) => {
 					<Typography color="text.secondary">Size</Typography>
 					<Typography>{ (selectedItem.size/1024).toFixed(2) } KB</Typography>
 				</div>	
-				<div className="flex items-center justify-between py-14">
+				{/* <div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Access</Typography>
 					<Typography>{ selectedItem.access }</Typography>
-				</div>	
+				</div>	 */}
 				{
 					selectedItem.access === 'public'  && (
 						<div className="flex items-center justify-between py-8">
@@ -122,11 +134,7 @@ const SidebarContent = (props) => {
 						<Button 
 							color="primary" 
 							variant="contained" 
-							onClick={ ()=> {
-								matchMimeType(selectedItem.mime_type) 
-								? dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path}))
-								: window.open(selectedItem.file_path, '_blank')
-							}}
+							onClick={ handleOpenPreview }
 						>Preview</Button>
 					)
 				}

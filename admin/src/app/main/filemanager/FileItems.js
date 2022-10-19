@@ -121,6 +121,7 @@ const FileItems = (props) => {
         } else {
             dispatch(setlightBoxStatus({isOpen: true, src: props.file.file_path}));
             handleMenuClose();
+            dispatch(setSelectedItem(null));
         }
     }
     
