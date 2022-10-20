@@ -9,7 +9,7 @@ class FileManagerController {
     }
     const fileHelper = new FileHelper('', file_path, req)
     let file_list = await fileHelper.getList()
-    let file_objects = await this.objectStructure(file_list,file_path,req)
+    let file_objects = await this.objectStructure(file_list,fileHelper)
     // if(file_objects.length){
     return {
       data: file_objects
@@ -21,7 +21,7 @@ class FileManagerController {
     //   throw errorObj;
     // }
   }
-  async objectStructure(file_list,file_path,req) {
+  async objectStructure(file_list,fileHelper) {
     let file_objects = []
     if (file_list.CommonPrefixes.length) {
       for (let i = 0; i < file_list.CommonPrefixes.length; i++) {
@@ -46,7 +46,7 @@ class FileManagerController {
         let file_structure = []
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
-        const fileHelper = new FileHelper('', file_path, req)
+        // const fileHelper = new FileHelper('', file_path, req)
         if (file_structure[file_structure.length - 1] != '')
           var meta = await fileHelper.getMetaData(object_key.Key)
           let metadata = []
@@ -114,7 +114,8 @@ class FileManagerController {
     //get path object list
     const fileHelperList = new FileHelper('', file_path, req)
     let file_list = await fileHelperList.getList()
-    let file_objects = this.objectStructure(file_list,file_path,req)
+    // return file_list
+    let file_objects = await this.objectStructure(file_list,fileHelperList)
 
     return {
       status: true,
