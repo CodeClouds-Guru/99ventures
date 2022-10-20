@@ -19,7 +19,7 @@ function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const inputFileRef = useRef(null);
     const user = useSelector(selectUser);
-    const [inputFiles, setInputFiles] = useState({});
+    const [inputFiles, setInputFiles] = useState([]);
     const [ticketStatus, setTicketStatus] = useState('');
     const [quickResponseOptions, setQuickResponseOptions] = useState([]);
     const [quickResponse, setQuickResponse] = useState('');
@@ -47,13 +47,21 @@ function TicketingSystemPage(props) {
             Object.values(files).map((val, key) => {
                 var parts = val.name.split(".");
                 const file_type = parts[parts.length - 1];
-                ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type) ? allowed_files.push(val) : dispatch(showMessage({ variant: 'error', message: `File type ${file_type} is not allowed for ${val.name}` }));
+                ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
+                    ? allowed_files.push(val) : dispatch(showMessage({
+                        variant: 'error', message
+                            : `File type ${file_type} is not allowed for ${val.name}`
+                    }));
             })
-            setInputFiles(allowed_files);
+            // setInputFiles(allowed_files);
+            setInputFiles(allowed_files.map(file => Object.assign(file, {
+                preview: URL.createObjectURL(file)
+            })));
         } else {
             dispatch(showMessage({ variant: 'error', message: 'Allowed upto 5 files at a time.' }));
         }
     };
+    console.log(inputFiles);
     const handleChangeTicketStatus = (event) => {
         // setTicketStatus(event.target.value);
         updateTicket({
@@ -107,10 +115,10 @@ function TicketingSystemPage(props) {
         data_set.append('field_name', 'message');
         data_set.append('id', props.ticketId);
         data_set.append('user_id', user.id);
-        data_set.append('member_id', memberId);
+        // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
         chatField.trim() ? data_set.append('value', chatField) : '';
-        Object.keys(inputFiles).length > 0 ? data_set.append('attachments', inputFiles) : '';
+        Object.keys(inputFiles).length > 0 ? data_set.append('attachments[]', inputFiles.map((file, key) => { return file })) : '';
         updateTicket(data_set);
         setInputFiles({});
         setChatField('')
