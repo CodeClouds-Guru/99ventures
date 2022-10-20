@@ -3,7 +3,7 @@ import { Tooltip, IconButton, ListItemText, Menu, MenuItem} from '@mui/material'
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { useSelector, useDispatch } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData, setLoading } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData, setLoading, setFolderOptions } from 'app/store/filemanager'
 import { downloadFile } from './helper';
 import { orderBy } from 'lodash';
 
@@ -90,7 +90,16 @@ const Header = (props) => {
             <div style={ baseStyle } className="flex flex-col sm:flex-row w-full sm:w-auto items-center space-y-16 sm:space-y-0 sm:space-x-16 justify-between">
                 { props.selectAll }
                 <div className='flex justify-between'>
-                    { props.createFolder }
+                    <Tooltip title="Create Folder">
+                        <IconButton 
+                            color="primary" 
+                            aria-label="Filter" 
+                            component="label" 
+                            onClick={ ()=> dispatch(setFolderOptions({type: 'new_folder', popup_mode: true, additional_params: {}}))}
+                            >
+                            <FuseSvgIcon className="text-48" size={26} color="action">material-outline:create_new_folder</FuseSvgIcon>
+                        </IconButton>
+                    </Tooltip>
                     {
                         (selectedItemIdArry.length || selectedItem) && (
                             <>

@@ -118,7 +118,12 @@ function TicketingSystemPage(props) {
         // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
         chatField.trim() ? data_set.append('value', chatField) : '';
-        Object.keys(inputFiles).length > 0 ? data_set.append('attachments[]', inputFiles.map((file, key) => { return file })) : '';
+        if (Object.keys(inputFiles).length > 0) {
+            for (const key of Object.keys(inputFiles)) {
+                data_set.append('attachments', inputFiles[key])
+            }
+        }
+        // Object.keys(inputFiles).length > 0 ? data_set.append('attachments[]', inputFiles.map((file, key) => { return file })) : '';
         updateTicket(data_set);
         setInputFiles({});
         setChatField('')

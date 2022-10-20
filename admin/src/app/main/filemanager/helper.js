@@ -17,7 +17,7 @@ export const convertFileSizeToKB = (size) => {
     return (size/1024).toFixed(2)
 }
 
-export const matchMimeType = (mimyeType) => {
+export const isImageFile = (mimyeType) => {
     switch(mimyeType) {			
         case 'image/jpg':
         case 'image/jpeg':

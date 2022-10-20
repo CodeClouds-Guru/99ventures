@@ -84,7 +84,6 @@ const centerStyle = {
 function DragDropzone() {
 	const dispatch = useDispatch();
     const listing = useSelector(state=> state.filemanager.listData);
-    const jsonData = useSelector(state=> state.filemanager.jsonData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const navigate = useNavigate();
@@ -172,14 +171,13 @@ function DragDropzone() {
 	));*/
 
 	useEffect(() => {
-		var path = pathObject;		
+		var path = pathObject;	
 		
 		/**
 		 * This block will execute while reloading the page
 		 */
-		if(!pathObject.length){
-			// Remove trailing slash
-			const pathname = location.pathname.replace(/\/$/, "");
+		if(!path.length){
+			const pathname = location.pathname.replace(/\/$/, "");// Remove trailing slash
 			const pathArry = decodeURI(pathname).split('/');
 			pathArry.splice(0, 3);
 			path = pathArry
@@ -196,13 +194,20 @@ function DragDropzone() {
 		});
 		
 		// Make sure to revoke the data uris to avoid memory leaks, will run on unmount
-		return () => files.forEach(file => URL.revokeObjectURL(file.preview));
+		return () => {
+			files.forEach(file => URL.revokeObjectURL(file.preview));
+			const pathname = location.pathname;
+			(pathname.split('/')[2] !== 'filemanager') && dispatch(setPathObject([]));
+
+		};
 	}, [location.pathname]);
 
 		
 	const handleFile = (config, files) => {
 		const params = new FormData();
 		params.append('file_path', pathObject.join('/'));
+		params.append('private', 0);
+		params.append('alt_name', "");
 		files.forEach((file) => {
 			params.append('file', file);
 		});
@@ -228,7 +233,7 @@ function DragDropzone() {
 
 	return (		
 		<section className={`
-			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-24 sm:p-24 lg:p-24 w-full`
+			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-20 sm:p-20 lg:p-20 w-full`
 		}>
 			<Box 
 				className="dropzone h-full"

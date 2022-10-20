@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import axios from 'axios';
 
@@ -50,6 +51,106 @@ export const deleteData = createAsyncThunk(
     }
 );
 
+/*export const copyAndCreateFile = createAsyncThunk(
+    'filemanager/copyAndCreateFile',
+    async(params, {dispatch, getState}) => {
+        dispatch(setLoading('pending'));
+        const result = await axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
+		.then((response) => {
+			if (response.data.results.status) {
+				dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                const { filemanager } = getState();
+				setTimeout(() => dispatch(getList(filemanager.pathObject.join('/'))), 1000);
+			} else {
+				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+			}
+            return response
+		})
+		.catch(error => {
+			dispatch(setLoading('idle'));
+			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+            return error;
+		});
+
+        return result;
+    }
+);*/
+
+export const filemanagerUpdateFile = createAsyncThunk(
+    'filemanager/filemanagerUpdateFile',
+    async(params, {dispatch, getState}) => {
+        dispatch(setLoading('pending'));
+        const result = await axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
+		.then((response) => {
+			if (response.data.results.status) {
+				dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                const { filemanager } = getState();
+                const listData = [...filemanager.listData];
+                if(params.type === 'rename') {
+                    const index = listData.findIndex(fl => fl.id === params.id && fl.type === 'folder');
+                    if(index >= 0) {
+                        const folderObj = Object.assign({}, listData[index]);
+                        folderObj.name = params.folder_name;
+                        listData.splice(index, 1, folderObj);
+                    }
+                } else if(params.type === 'copy-file') {
+                    const index = listData.findIndex(fl => fl.id === params.id && fl.type === 'file');
+				    if(index >= 0) {
+                        const pathObject = filemanager.pathObject;
+                        const newFile = Object.assign({}, listData[index]);
+                        newFile.name = params.file_name;
+                        var prefix = `CodeClouds/1/file-manager`;
+                        if(pathObject.length >= 1) {
+                            prefix += '/'+pathObject.join('/')
+                        }
+                        newFile.id = btoa(`${prefix}/${params.file_name}`);
+                        listData.push(newFile);                        
+                    }                    
+                }
+                dispatch(setListData(listData));
+                dispatch(setJsonData(listData));
+                dispatch(setLoading('idle'));
+			} else {
+				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+			}
+            return response;
+		})
+		.catch(error => {
+            console.log(error)
+			dispatch(setLoading('idle'));
+			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+            return error;
+		});
+
+        return result;
+    }
+)
+
+export const createNewFolder = createAsyncThunk(
+    'filemanager/createFolder',
+    async(params, {dispatch, getState}) => {
+        dispatch(setLoading('pending'));
+        const result = await axios.post(jwtServiceConfig.filemanagerUploadFile, params)
+            .then((response) => {
+                dispatch(setLoading('idle'));
+                if (response.data.results.status) {
+                    dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));                
+                    if(response.data.results.data){
+                        dispatch(setListData(response.data.results.data));
+                        dispatch(setJsonData(response.data.results.data));
+                    }
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
+                }
+            })
+            .catch(error => {
+                dispatch(setLoading('idle'));
+                dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+            });
+        return result;
+    }
+)
+
 /**
  * jsonData is the replicate of the listData Array.
  * It has been used to filter the listData.
@@ -71,7 +172,12 @@ const initialState = {
     jsonData: [],
     listData: [],
     breadCrumb: [],
-    pathObject: []
+    pathObject: [],
+    folderOptions: {
+        type: '',
+        popup_mode: false,
+        additional_params: {}
+    }
 }
 
 const fileManagerSlice = createSlice({
@@ -110,6 +216,9 @@ const fileManagerSlice = createSlice({
         },
         setJsonData: (state, action) => {
             state.jsonData = action.payload
+        },
+        setFolderOptions: (state, action) => {
+            state.folderOptions = action.payload
         }
     },
     extraReducers: {
@@ -149,7 +258,8 @@ export const {
     setPathObject,
     setLoading,
     setListData,
-    setJsonData
+    setJsonData,
+    setFolderOptions
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

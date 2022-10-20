@@ -1,15 +1,29 @@
 import { useState } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem, Tooltip, Modal, Button, TextField } from '@mui/material';
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, filemanagerUpdateFile } from 'app/store/filemanager'
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './helper'
-import './FileManager.css';
+import { copyUrl, convertFileSizeToKB, isImageFile, downloadFile } from './helper'
 import Helper from '../../../app/helper'
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useForm } from 'react-hook-form';
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 /**
  * Grid & List Style
@@ -35,14 +49,25 @@ const style = {
     }
 }
 
+const schema =  yup.object().shape({
+    file_name: yup.string().required('Please enter the filename')
+});
+
+const defaultValues = {
+    file_name: ''
+}
+
 const FileItems = (props) => {
     const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem);
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
+    const listing = useSelector(state=> state.filemanager.listData);
+    const viewType = useSelector(state=> state.filemanager.viewType);
+
     const [ anchorEl, setAnchorEl ] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    const viewType = useSelector(state=> state.filemanager.viewType);
     const [ msg, setMsg ] = useState('');
+    const [open, setOpen] = useState(false);
 
     function handleMenuClick(event) {
         setAnchorEl(event.currentTarget);
@@ -91,10 +116,12 @@ const FileItems = (props) => {
      * Open lightbox for preview
      */
     const handleOpenPreview = () => {
-        if(matchMimeType(props.file.mimy_type) === true) {
-            window.open(props.file.file_path, '_blank')
-        } else {
+        if(isImageFile(props.file.mime_type) === true) {
             dispatch(setlightBoxStatus({isOpen: true, src: props.file.file_path}));
+            handleMenuClose();
+            dispatch(setSelectedItem(null));
+        } else {
+            window.open(props.file.file_path, '_blank');
             handleMenuClose();
         }
     }
@@ -108,6 +135,46 @@ const FileItems = (props) => {
     const handleFileDownload = () => {
         downloadFile(props.file.file_path, props.file.name);
         handleMenuClose();
+    }
+
+    const { 
+        control,
+        formState: { isValid, dirtyFields, errors }, 
+        handleSubmit,
+        reset,
+    } = useForm({
+        mode: 'onChange',
+        defaultValues,
+        resolver: yupResolver(schema),
+    }); 
+
+    const handleFileCopy = (data) => {
+        const fileExt = props.file.name.split('.').pop();
+        const fileName = data.file_name + '.' + fileExt;
+        const checkFileName = listing.some(fl => fl.name === fileName && fl.type === 'file');
+        if(checkFileName) {
+            dispatch(showMessage({ variant: 'error', message: 'File name already exists!' }));
+            return;
+        }
+        
+        handlePopupClose();
+        const params = {
+            id: props.file.id,
+            type: 'copy-file',
+            file_name: fileName
+        }
+        dispatch(filemanagerUpdateFile(params));
+    }
+
+    const handlePopupOpen = () => {
+        setOpen(true);
+        handleMenuClose();
+        dispatch(setSelectedItem(null));
+    }
+
+    const handlePopupClose = () => {
+        setOpen(false);
+        reset(defaultValues)
     }
 
     return (
@@ -160,16 +227,14 @@ const FileItems = (props) => {
                                 </ListItemIcon>
                                 <ListItemText primary="Details" />
                             </MenuItem>
-                            {
-                                props.file.access === 'public' && (
-                                    <MenuItem onClick={ copyFilePath }>
-                                        <ListItemIcon className="min-w-40">
-                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
-                                        </ListItemIcon>
-                                        <ListItemText primary="Copy" />
-                                    </MenuItem>
-                                )
-                            }
+                            <MenuItem 
+                                onClick={handlePopupOpen}>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Copy" />
+                            </MenuItem> 
+                            
                             {
                                 props.file.access === 'public' && (
                                     <MenuItem onClick={ handleOpenPreview }>
@@ -177,6 +242,16 @@ const FileItems = (props) => {
                                             <FuseSvgIcon className="text-48" size={20} color="action">material-outline:remove_red_eye</FuseSvgIcon>
                                         </ListItemIcon>
                                         <ListItemText primary="Preview" />
+                                    </MenuItem>
+                                )
+                            }
+                            {
+                                props.file.access === 'public' && (
+                                    <MenuItem onClick={ copyFilePath }>
+                                        <ListItemIcon className="min-w-40">
+                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                        </ListItemIcon>
+                                        <ListItemText primary="Copy URL" />
                                     </MenuItem>
                                 )
                             }
@@ -218,6 +293,58 @@ const FileItems = (props) => {
                     />
                 )
             }
+            <Modal
+                open={open}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={ modalStyle }>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Add File Name
+                    </Typography>
+                    <form
+                        name="copy-filename"
+                        noValidate  
+                        className="flex flex-col justify-center w-full mt-32"
+                        onSubmit={ handleSubmit(handleFileCopy) }
+                    >
+                        <Controller
+                            name="file_name"
+                            control={ control }
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    className="mb-24"
+                                    label="Enter File Name"                            
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        <div className='flex justify-between'>
+                            <Button 
+                                variant="contained"
+                                component="label"
+                                className=""
+                                color="primary" 
+                                onClick={ handlePopupClose }
+                            >Close</Button>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                className=""
+                                aria-label="Create"
+                                disabled={ !Object.keys(dirtyFields).length || !isValid}
+                                type="submit"
+                                size="large"
+                                >
+                                Copy
+                            </Button>
+                        </div>
+                    </form>
+                </Box>
+            </Modal>
         </Box>
     )
 }
