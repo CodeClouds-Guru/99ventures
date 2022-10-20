@@ -9,10 +9,10 @@ class FileManagerController {
     }
     const fileHelper = new FileHelper('', file_path, req)
     let file_list = await fileHelper.getList()
-    let file_objects = await this.objectStructure(file_list, fileHelper)
+    let file_objects = await this.objectStructure(file_list,file_path,req)
     // if(file_objects.length){
     return {
-      data: file_objects,
+      data: file_objects
     }
     // }else{
     //   const errorObj = new Error("Request failed.");
@@ -21,7 +21,7 @@ class FileManagerController {
     //   throw errorObj;
     // }
   }
-  async objectStructure(file_list, fileHelper) {
+  async objectStructure(file_list,file_path,req) {
     let file_objects = []
     if (file_list.CommonPrefixes.length) {
       for (let i = 0; i < file_list.CommonPrefixes.length; i++) {
@@ -46,6 +46,7 @@ class FileManagerController {
         let file_structure = []
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
+        const fileHelper = new FileHelper('', file_path, req)
         if (file_structure[file_structure.length - 1] != '')
           var meta = await fileHelper.getMetaData(object_key.Key)
           let metadata = []
@@ -88,9 +89,14 @@ class FileManagerController {
     }
     let files = []
     let file_name = []
+    let acl_txt = 'public-read-write'
+    if(req.body.private == 1)
+      acl_txt = 'private'
+      
     let metadata = {
       'x-amz-meta-alt-name': req.body.alt_name,
       'x-amz-meta-private': req.body.private,
+      'x-amz-acl':acl_txt
     }
 
     if (req.files) {
@@ -104,14 +110,15 @@ class FileManagerController {
       const fileHelper = new FileHelper('', folder_path, req)
       file_name = await fileHelper.createFolder()
     }
+     
     //get path object list
-    const fileHelper = new FileHelper('', file_path, req)
-    let file_list = await fileHelper.getList()
+    const fileHelperList = new FileHelper('', file_path, req)
+    let file_list = await fileHelperList.getList()
     let file_objects = this.objectStructure(file_list)
 
     return {
       status: true,
-      data: file_objects,
+      data: file_objects
     }
   }
   //delete file
