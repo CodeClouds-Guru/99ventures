@@ -284,7 +284,7 @@ class TicketController extends Controller {
             attributes: ["status"],
             where: { id: member_id },
           });
-          console.log("-----------------------member", member);
+          // console.log("-----------------------member", member);
           change = await Member.changeStatus(field_name, value, member_id);
           if (notes !== null) {
             let data = {
@@ -337,7 +337,7 @@ class TicketController extends Controller {
     const user_id = req.body.user_id || null;
     const attachments = req.files ? req.files.attachments : [];
 
-    // console.log(value, field_name, ticket_id, "--------------");
+    console.log(req, "--------------");
     try {
       const data = {
         ticket_id: ticket_id,
@@ -346,18 +346,19 @@ class TicketController extends Controller {
       if (member_id !== null) data.member_id = member_id;
       if (user_id !== null) data.user_id = user_id;
 
-      let saved = await TicketConversation.create(data);
-
-      if (saved.id > 0 && attachments) {
+      let savedTicketConversation = await TicketConversation.create(data);
+console.log('---------------------TicketConversation',savedTicketConversation)
+console.log('---------------------attachments',attachments)
+      if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
-        const fileHelper = new FileHelper(files, "tickets/" + saved.id, req);
+        const fileHelper = new FileHelper(files, "tickets/" + savedTicketConversation.id, req);
         const file_name = await fileHelper.upload();
 
         const dataFiles = file_name.files.map((values) => {
           return {
-            ticket_conversation_id: saved.id,
+            ticket_conversation_id: savedTicketConversation.id,
             file_name: values.filename.replace(/ /g, "_"),
             mime_type: mime.lookup(path.basename(values.filename)),
           };
