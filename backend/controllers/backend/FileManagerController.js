@@ -52,19 +52,22 @@ class FileManagerController {
           let metadata = []
           if(meta && 'Metadata' in meta)
             metadata = meta.Metadata
-        file_objects.push({
-          id: this.generateId(object_key.Key, '', ''),
-          type: 'file',
-          name: file_structure[file_structure.length - 1],
-          file_path: process.env.S3_BUCKET_OBJECT_URL + object_key.Key,
-          size: object_key.Size,
-          last_modified: object_key.LastModified,
-          mime_type: mime.lookup(
-            process.env.S3_BUCKET_OBJECT_URL + object_key.Key
-          ),
-          access: 'public',
-          metadata: metadata,
-        })
+        let mime_type = mime.lookup(
+                          process.env.S3_BUCKET_OBJECT_URL + object_key.Key
+                        );
+        if(mime_type){
+          file_objects.push({
+            id: this.generateId(object_key.Key, '', ''),
+            type: 'file',
+            name: file_structure[file_structure.length - 1],
+            file_path: process.env.S3_BUCKET_OBJECT_URL + object_key.Key,
+            size: object_key.Size,
+            last_modified: object_key.LastModified,
+            mime_type: mime_type,
+            access: 'public',
+            metadata: metadata,
+          })
+        }
       }
     }
     return file_objects
@@ -142,6 +145,7 @@ class FileManagerController {
   async update(req, res) {
     let id = req.body.id
     let file_path = req.body.file_path
+    let msg = "File Copied."
     if (file_path != '') {
       file_path = 'file-manager' + '/' + file_path
     } else {
@@ -157,10 +161,15 @@ class FileManagerController {
 
     const fileHelper = new FileHelper('', object_key, req, file_name)
     let file_copy = await fileHelper.copyObjects(req.body.type)
-
+    if(req.body.type == 'copy-file')
+      msg = "File Copied."
+    else if(req.body.type == 'copy')
+      msg = "Folder Copied."
+    else if(req.body.type == 'copy-file')
+      msg = "Folder Renamed."
     return {
       status: true,
-      message: 'File Copied.',
+      message: msg,
       data: [],
     }
   }
