@@ -51,31 +51,6 @@ export const deleteData = createAsyncThunk(
     }
 );
 
-/*export const copyAndCreateFile = createAsyncThunk(
-    'filemanager/copyAndCreateFile',
-    async(params, {dispatch, getState}) => {
-        dispatch(setLoading('pending'));
-        const result = await axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
-		.then((response) => {
-			if (response.data.results.status) {
-				dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                const { filemanager } = getState();
-				setTimeout(() => dispatch(getList(filemanager.pathObject.join('/'))), 1000);
-			} else {
-				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
-			}
-            return response
-		})
-		.catch(error => {
-			dispatch(setLoading('idle'));
-			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
-            return error;
-		});
-
-        return result;
-    }
-);*/
-
 export const filemanagerUpdateFile = createAsyncThunk(
     'filemanager/filemanagerUpdateFile',
     async(params, {dispatch, getState}) => {
@@ -104,8 +79,8 @@ export const filemanagerUpdateFile = createAsyncThunk(
                             prefix += '/'+pathObject.join('/')
                         }
                         newFile.id = btoa(`${prefix}/${params.file_name}`);
-                        listData.push(newFile);                        
-                    }                    
+                        listData.push(newFile);
+                    }
                 }
                 dispatch(setListData(listData));
                 dispatch(setJsonData(listData));
@@ -157,7 +132,7 @@ export const createNewFolder = createAsyncThunk(
  * After filtering the data, when we reset the filter, 
  * original value from jsonData will be taken and assigned to listData.
  * 
- * jsonData will be updating whenever file/folder will be deleted & new data will be fetched.
+ * jsonData will be updating whenever file/folder will be deleted, new data will be fetched, copy, rename.
  * 
  */
 
@@ -222,7 +197,7 @@ const fileManagerSlice = createSlice({
         }
     },
     extraReducers: {
-        [getList.pending]: (state) => {            
+        [getList.pending]: (state) => {
             state.loading = 'pending';
             state.listData = [];
         },

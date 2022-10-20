@@ -29,9 +29,9 @@ const defaultValues = {
 
 const FolderOptions = () => {
     const dispatch = useDispatch();
-    const options = useSelector(state=> state.filemanager.folderOptions)
-	const pathObject = useSelector(state=> state.filemanager.pathObject);
-    const listing = useSelector(state=> state.filemanager.listData);
+    const selectOptions = useSelector(state=> state.filemanager.folderOptions)
+	const selectPathObject = useSelector(state=> state.filemanager.pathObject);
+    const selectListing = useSelector(state=> state.filemanager.listData);
 
     const handlePopupClose = () => {
         dispatch(setFolderOptions({popup_mode: false, type: '', additional_params: {}}));
@@ -49,40 +49,40 @@ const FolderOptions = () => {
         resolver: yupResolver(schema),
     }); 
 
-    const formSubmit = (data) => {
+    const formSubmit = (data) => { 
         const folderName = data.folder;
-        const checkFileName = listing.some(fl => fl.name === folderName && fl.type === 'folder');
+        const checkFileName = selectListing.some(fl => fl.name.toLowerCase() === folderName.toLowerCase() && fl.type === 'folder');
         if(checkFileName) {
             dispatch(showMessage({ variant: 'error', message: 'Folder already exists!' }));
             return;
         }
 
-        if(options.type === 'new_folder'){
+        if(selectOptions.type === 'new_folder'){            
             const params = {
                 folder_name: folderName,
-                file_path: pathObject.join('/')
+                file_path: selectPathObject.join('/')
             }
             dispatch(createNewFolder(params));
         }
-        else if(options.type === 'rename_folder') {
+        else if(selectOptions.type === 'rename_folder') {
             const params = {
                 type: 'rename',
                 folder_name: folderName
             };
-            dispatch(filemanagerUpdateFile({...params, ...options.additional_params}));
+            dispatch(filemanagerUpdateFile({...params, ...selectOptions.additional_params}));
         }
         handlePopupClose();
     }
 
     return (
         <Modal
-            open={ options.popup_mode }
+            open={ selectOptions.popup_mode }
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
             <Box sx={style}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                    { options.type === 'new_folder' ? 'Create' : 'Rename'} Folder
+                    { selectOptions.type === 'new_folder' ? 'Create' : 'Rename'} Folder
                 </Typography>
                 
                 <form
@@ -122,7 +122,7 @@ const FolderOptions = () => {
                             type="submit"
                             size="large"
                             >
-                            { options.type === 'new_folder' ? 'Create' : 'Rename'}
+                            { selectOptions.type === 'new_folder' ? 'Create' : 'Rename'}
                         </Button>
                     </div>
                 </form>

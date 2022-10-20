@@ -83,7 +83,7 @@ function ItemIcon(props) {
 	if (file.type === 'folder') {
 		return (
 			<div className="relative">
-			<FuseSvgIcon className="fuse--icon" size={70} color="disabled">
+			<FuseSvgIcon className="fuse--icon" size={60} color="disabled">
 				material-outline:folder_open
 			</FuseSvgIcon></div>
 		);
