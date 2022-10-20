@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import ImagePreview from './ImagePreview';
 import DragDropzone from './DragDropZone';
 import './FileManager.css';
+import FolderOptions from './components/FolderOptions';
 
 const Index = () => {
     const selectedItem = useSelector(state=>state.filemanager.selectedItem)
@@ -24,6 +25,7 @@ const Index = () => {
                 scroll={isMobile ? 'normal' : 'content'}
             />            
             <ImagePreview />
+            <FolderOptions />
         </>
     )
 }

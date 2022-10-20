@@ -206,6 +206,8 @@ function DragDropzone() {
 	const handleFile = (config, files) => {
 		const params = new FormData();
 		params.append('file_path', pathObject.join('/'));
+		params.append('private', 0);
+		params.append('alt_name', "");
 		files.forEach((file) => {
 			params.append('file', file);
 		});

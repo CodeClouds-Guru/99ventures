@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { createNewFolder } from 'app/store/filemanager';
+import { createNewFolder, setFolderOptions } from 'app/store/filemanager';
 import { useDispatch, useSelector } from 'react-redux';
 
 const style = {
@@ -72,11 +72,16 @@ const CreateFolder = () => {
     return (
         <>
             <Tooltip title="Create Folder">
-                <IconButton color="primary" aria-label="Filter" component="label" onClick={handleOpen}>
+                <IconButton 
+                    color="primary" 
+                    aria-label="Filter" 
+                    component="label" 
+                    onClick={ ()=> dispatch(setFolderOptions({type: 'new_folder', popup_mode: true, additional_params: {}}))}
+                    >
                     <FuseSvgIcon className="text-48" size={26} color="action">material-outline:create_new_folder</FuseSvgIcon>
                 </IconButton>
             </Tooltip>
-            <Modal
+            {/*<Modal
                 open={open}        
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
@@ -127,7 +132,7 @@ const CreateFolder = () => {
                         </div>
                     </form>
                 </Box>
-            </Modal>
+            </Modal>*/}
         </>
     );
 }

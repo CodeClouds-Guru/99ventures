@@ -5,7 +5,6 @@ import Header from './Header';
 import BreadCrumb from './BreadCrumb';
 import { useSelector } from 'react-redux'
 import SelectAll from './components/SelectAll';
-import CreateFolder from './components/CreateFolder';
 import Search from './components/Search';
 
 function FileManagerHeader(props) {
@@ -36,7 +35,6 @@ function FileManagerHeader(props) {
 		
 		<Header 
 			selectAll={<SelectAll/>}
-			createFolder={<CreateFolder/>}
 			search={<Search/>}
 			>
 		</Header>

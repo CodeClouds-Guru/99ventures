@@ -3,7 +3,7 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem, Tooltip, Modal, Button, TextField } from '@mui/material';
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, copyAndCreateFile } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, filemanagerUpdateFile } from 'app/store/filemanager'
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -162,7 +162,7 @@ const FileItems = (props) => {
             type: 'copy-file',
             file_name: fileName
         }
-        dispatch(copyAndCreateFile(params));
+        dispatch(filemanagerUpdateFile(params));
     }
 
     const handlePopupOpen = () => {
