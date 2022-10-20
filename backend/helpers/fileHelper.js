@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk')
 const assert = require('assert')
 var fs = require('fs')
+// const join = require('path').join
+// const s3Zip = require('s3-zip')
 class FileHelper {
   constructor(files, model, req, new_filename) {
     this.company_id = ''
@@ -30,6 +32,7 @@ class FileHelper {
     this.generateSignedUrl = this.generateSignedUrl.bind(this)
     this.deleteFile = this.deleteFile.bind(this)
     this.copyObjects = this.copyObjects.bind(this)
+    // this.zipFiles = this.zipFiles.bind(this)
   }
   //upload file to s3 bucket  
   async upload(metadata) {
@@ -181,24 +184,20 @@ class FileHelper {
 
     model_structure = model_structure.join('/')
     let pre_model = this.model
-
-    await s3.listObjects({ Bucket: process.env.S3_BUCKET_NAME, Prefix: this.model }, function (err, data) {
+    const data = await s3.listObjects({ Bucket: process.env.S3_BUCKET_NAME, Prefix: this.model }).promise();
+    // await s3.listObjects({ Bucket: process.env.S3_BUCKET_NAME, Prefix: this.model }, function (err, data) {
 
       if (data.Contents.length) {
-        data.Contents.forEach(({ Key }) => {
+          data.Contents.forEach(async ({ Key }) => {
           var params = {
             Bucket: process.env.S3_BUCKET_NAME,
             CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
             Key: Key.replace(pre_model, model_structure)
           };
-          s3.copyObject(params, function (copyErr, copyData) {
-            if (copyErr) {
-              console.log(copyErr);
-            }
-          });
+          let copy_obj = await s3.copyObject(params).promise();
         });
       }
-    });
+    // });
     if (req_type == 'rename') {
       this.deleteFile(this.model)
     }
@@ -207,6 +206,15 @@ class FileHelper {
       path: model_structure
     }
   }
+  //create zip files
+  // async zipFiles(){
+  //   const folder = 'CodeClouds/1/zip-files'
+  //   const file1 = 'CodeClouds/1/file-manager/abc/new-folder-5/folder1/1665648723532Building-a-Great-Team-for-Your-Start-up.jpg'
+  //   const file2 = 'CodeClouds/1/file-manager/1666002426150png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png'
+  //   const output = fs.createWriteStream(join(__dirname, 'use-s3-zip.zip'))
+  //   let zipped_file = s3Zip.archive({ region: process.env.AWS_DEFAULT_REGION, bucket: process.env.S3_BUCKET_NAME}, folder, [file1, file2]).pipe(output)
+  //   console.log('zipped_file',zipped_file)
+  // }
 }
 
 module.exports = FileHelper
