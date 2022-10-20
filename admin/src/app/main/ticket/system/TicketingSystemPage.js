@@ -61,7 +61,6 @@ function TicketingSystemPage(props) {
             dispatch(showMessage({ variant: 'error', message: 'Allowed upto 5 files at a time.' }));
         }
     };
-    console.log(inputFiles);
     const handleChangeTicketStatus = (event) => {
         // setTicketStatus(event.target.value);
         updateTicket({
@@ -85,10 +84,6 @@ function TicketingSystemPage(props) {
     const handleChatField = (event) => {
         setChatField(event.target.value);
     }
-    // const handleDialogBackdrop = (event) => {
-    //     event.stopPropagation();
-    //     return false;
-    // }
     const cancelAndResetNote = () => {
         setTempMemberStatus('');
         setOpenAlertDialog(false);
@@ -115,7 +110,7 @@ function TicketingSystemPage(props) {
         data_set.append('field_name', 'message');
         data_set.append('id', props.ticketId);
         data_set.append('user_id', user.id);
-        // data_set.append('member_id', memberId);
+        data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
         chatField.trim() ? data_set.append('value', chatField) : '';
         if (Object.keys(inputFiles).length > 0) {
@@ -123,10 +118,10 @@ function TicketingSystemPage(props) {
                 data_set.append('attachments', inputFiles[key])
             }
         }
-        // Object.keys(inputFiles).length > 0 ? data_set.append('attachments[]', inputFiles.map((file, key) => { return file })) : '';
         updateTicket(data_set);
         setInputFiles({});
-        setChatField('')
+        setChatField('');
+        setQuickResponse('');
     }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
@@ -157,7 +152,7 @@ function TicketingSystemPage(props) {
             .then(response => {
                 if (response.data.results.status) {
                     getTicketDetails();
-                    data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'success', message: data_set instanceof FormData ? 'Message sent' : response.data.results.message }));
                 } else {
                     data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
