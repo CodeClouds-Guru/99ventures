@@ -114,7 +114,7 @@ class FileManagerController {
     //get path object list
     const fileHelperList = new FileHelper('', file_path, req)
     let file_list = await fileHelperList.getList()
-    let file_objects = this.objectStructure(file_list)
+    let file_objects = this.objectStructure(file_list,file_path,req)
 
     return {
       status: true,
