@@ -3,7 +3,7 @@ import { Typography, IconButton, Checkbox, Link, Menu, MenuItem, ListItemText, L
 import { Box } from '@mui/system';
 import ItemIcon from './ItemIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setPathObject, setFolderOptions } from 'app/store/filemanager';
+import { setSelectedItemsId, setSelectedItem, setPathObject, setFolderOptions, deleteData } from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -42,6 +42,7 @@ function FolderItem(props) {
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
 	const [ anchorEl, setAnchorEl ] = useState(null);
 	const [ msg, setMsg ] = useState('');
+	const [ type, setType ] = useState('');
 
 	function handleMenuClick(event) {
         setAnchorEl(event.currentTarget);
@@ -70,10 +71,15 @@ function FolderItem(props) {
 	}
 
 	/**
-     * Alert box open, close & confirm delete
+     * Alert box open, close & confirm
      */
-	 const onOpenAlertDialogHandle = () => {
-        setMsg(`If you rename the folder, the file / folder path will be updated inside this folder. Do you want to proceed this?`);
+	 const onOpenAlertDialogHandle = (type) => {
+		setType(type)
+		if(type === 'rename')
+        	setMsg(`If you rename the folder, the file / folder path will be updated inside this folder. Do you want to proceed this?`);
+		else 
+			setMsg(`Do you want to delete ${props.file.name}?`);
+
         setOpenAlertDialog(true)
         handleMenuClose();        
     }
@@ -82,8 +88,12 @@ function FolderItem(props) {
         setOpenAlertDialog(false);
     }
   
-    const onConfirmAlertDialogHandle = async () => {        
-        dispatch(setFolderOptions({popup_mode: true, type: 'rename_folder', additional_params: {id: props.file.id}}));     
+    const onConfirmAlertDialogHandle = () => {
+		if(type === 'rename')
+        	dispatch(setFolderOptions({popup_mode: true, type: 'rename_folder', additional_params: {id: props.file.id}}));
+		else if(type === 'delete')
+			dispatch(deleteData([props.file.id]));
+
 		setOpenAlertDialog(false);   
     }
 
@@ -126,24 +136,24 @@ function FolderItem(props) {
 								onClose={handleMenuClose}
 								>
 								<MenuItem 
-									onClick={ onOpenAlertDialogHandle }
+									onClick={ ()=>onOpenAlertDialogHandle('rename') }
 								><ListItemIcon className="min-w-40">
 										<FuseSvgIcon className="text-48" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
 									</ListItemIcon>									
 									<ListItemText primary="Rename" /> 									
 								</MenuItem> 
-								<MenuItem >
+								<MenuItem onClick={ ()=>onOpenAlertDialogHandle('delete') }>
 									<ListItemIcon className="min-w-40">
 										<FuseSvgIcon size={20}>heroicons-outline:trash</FuseSvgIcon>
 									</ListItemIcon>
 									<ListItemText primary="Delete" />
 								</MenuItem>
-								<MenuItem >
+								{/* <MenuItem >
 									<ListItemIcon className="min-w-40">
 										<FuseSvgIcon size={20}>material-outline:file_download</FuseSvgIcon>
 									</ListItemIcon>
 									<ListItemText primary="Download" />
-								</MenuItem> 
+								</MenuItem>  */}
 							</Menu>                     
 						</div>				
 					</div>

@@ -7,7 +7,7 @@ import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, fil
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { copyUrl, convertFileSizeToKB, matchMimeType, downloadFile } from './helper'
+import { copyUrl, convertFileSizeToKB, isImageFile, downloadFile } from './helper'
 import Helper from '../../../app/helper'
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -116,12 +116,13 @@ const FileItems = (props) => {
      * Open lightbox for preview
      */
     const handleOpenPreview = () => {
-        if(matchMimeType(props.file.mimy_type) === true) {
-            window.open(props.file.file_path, '_blank')
-        } else {
+        if(isImageFile(props.file.mime_type) === true) {
             dispatch(setlightBoxStatus({isOpen: true, src: props.file.file_path}));
             handleMenuClose();
             dispatch(setSelectedItem(null));
+        } else {
+            window.open(props.file.file_path, '_blank');
+            handleMenuClose();
         }
     }
     

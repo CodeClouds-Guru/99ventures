@@ -8,7 +8,7 @@ import { setlightBoxStatus, deleteData, setSelectedItem } from 'app/store/filema
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import ItemIcon from './ItemIcon';
-import { copyUrl, matchMimeType , downloadFile} from './helper';
+import { copyUrl, isImageFile , downloadFile} from './helper';
 import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
 
@@ -55,7 +55,7 @@ const SidebarContent = (props) => {
 	 * Open Preview
 	 */
 	const handleOpenPreview = () => {
-		if (matchMimeType(selectedItem.mime_type)) {
+		if (isImageFile(selectedItem.mime_type)) {
 			dispatch(setlightBoxStatus({isOpen: true, src: selectedItem.file_path}));
 			disabledSideBar();
 		} else {
@@ -119,7 +119,7 @@ const SidebarContent = (props) => {
 					)
 				}
 				{
-					matchMimeType(selectedItem.mime_type) && (
+					isImageFile(selectedItem.mime_type) && (
 						<div className="flex w-full py-10 items-center justify-between">
 							<AltTag />
 						</div>
