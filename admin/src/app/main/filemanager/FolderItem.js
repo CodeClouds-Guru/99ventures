@@ -14,7 +14,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
  */
 const style = {
 	grid: {
-		box: 'sm:w-160 h-160 p-16 flex-col',
+		box: 'sm:w-136 h-136 p-16 flex-col',
 		icon_btn: 'absolute',
 		nav_icon_adapter: 'flex-col',
 		icon: 'flex-auto w-full justify-center',
@@ -66,7 +66,6 @@ function FolderItem(props) {
 	const navigateTochild = ()=>{
 		const path = [...pathObject, props.file.name];
 		dispatch(setPathObject(path));
-		dispatch(setSelectedItem(null));
 		return navigate(path.join('/'));
 	}
 
@@ -81,7 +80,8 @@ function FolderItem(props) {
 			setMsg(`Do you want to delete ${props.file.name}?`);
 
         setOpenAlertDialog(true)
-        handleMenuClose();        
+        handleMenuClose();
+		dispatch(setSelectedItem(null))	// To disable the sidebar
     }
 
     const onCloseAlertDialogHandle = () => {
