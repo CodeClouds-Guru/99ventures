@@ -24,13 +24,12 @@ class FileManagerController {
     var meta = await fileHelper.getMetaData(object_key)
     let metadata = []
     let file_objects = []
-    
     if(meta && 'Metadata' in meta)
       metadata = meta.Metadata
     if(req.query.type == 'metadata'){
-      file_objects.push({
-        metadata: metadata,
-      })
+      file_objects = {
+                      metadata: metadata,
+                    }
     }else{
       let file_list = await fileHelper.getObject()
       let mime_type = mime.lookup(
@@ -41,7 +40,7 @@ class FileManagerController {
         let file_structure = []
         file_structure = object_key.split('/')
   
-        file_objects.push({
+        file_objects = {
           id: id,
           type: 'file',
           name: file_structure[file_structure.length - 1],
@@ -51,7 +50,7 @@ class FileManagerController {
           mime_type: mime_type,
           access: 'public',
           metadata: metadata,
-        })
+        }
       }
     }
     return {
