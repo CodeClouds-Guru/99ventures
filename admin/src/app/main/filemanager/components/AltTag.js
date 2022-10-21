@@ -4,6 +4,7 @@ import { ClickAwayListener, IconButton, TextField, InputAdornment, Typography, T
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import _ from '@lodash';
 
 const schema = yup.object().shape({
@@ -12,6 +13,7 @@ const schema = yup.object().shape({
 
 const AltTag = () => {
 	const [formOpen, setFormOpen] = useState(false);
+	const selectMetadata = useSelector(state=>state.filemanager.metadata);
 
 	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
@@ -73,7 +75,7 @@ const AltTag = () => {
 			) : (
 				<>
 					<Typography color="text.secondary" onClick={handleOpenForm}>
-						Alt Text: Lorem Ipsum
+						Alt Text: {selectMetadata['x-amz-meta-alt-name']}
 					</Typography>
 					<Tooltip title="Edit">
 						<IconButton color="primary" aria-label="Filter" component="label" onClick={handleOpenForm}>

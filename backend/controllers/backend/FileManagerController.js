@@ -10,16 +10,52 @@ class FileManagerController {
     const fileHelper = new FileHelper('', file_path, req)
     let file_list = await fileHelper.getList()
     let file_objects = await this.objectStructure(file_list,fileHelper)
-    // if(file_objects.length){
     return {
       data: file_objects
     }
-    // }else{
-    //   const errorObj = new Error("Request failed.");
-    //   errorObj.statusCode = 409;
-    //   errorObj.data = "No data found.";
-    //   throw errorObj;
-    // }
+  }
+  //get a file details
+  async view(req,res){
+    let id = req.params.id
+    let object_key = Buffer.from(id, 'base64')
+    object_key = object_key.toString('utf8')
+    // return {k:object_key}
+    const fileHelper = new FileHelper('', object_key, req)
+    var meta = await fileHelper.getMetaData(object_key)
+    let metadata = []
+    let file_objects = []
+    if(meta && 'Metadata' in meta)
+      metadata = meta.Metadata
+    if(req.query.type == 'metadata'){
+      file_objects = {
+                      metadata: metadata,
+                    }
+    }else{
+      let file_list = await fileHelper.getObject()
+      let mime_type = mime.lookup(
+        process.env.S3_BUCKET_OBJECT_URL + object_key
+      );
+      if(mime_type){
+      
+        let file_structure = []
+        file_structure = object_key.split('/')
+  
+        file_objects = {
+          id: id,
+          type: 'file',
+          name: file_structure[file_structure.length - 1],
+          file_path: process.env.S3_BUCKET_OBJECT_URL + object_key,
+          size: file_list.ContentLength,
+          last_modified: file_list.LastModified,
+          mime_type: mime_type,
+          access: 'public',
+          metadata: metadata,
+        }
+      }
+    }
+    return {
+      data: file_objects
+    }
   }
   async objectStructure(file_list,fileHelper) {
     let file_objects = []
@@ -46,12 +82,6 @@ class FileManagerController {
         let file_structure = []
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
-        // const fileHelper = new FileHelper('', file_path, req)
-        if (file_structure[file_structure.length - 1] != '')
-          var meta = await fileHelper.getMetaData(object_key.Key)
-          let metadata = []
-          if(meta && 'Metadata' in meta)
-            metadata = meta.Metadata
         let mime_type = mime.lookup(
                           process.env.S3_BUCKET_OBJECT_URL + object_key.Key
                         );
@@ -64,8 +94,7 @@ class FileManagerController {
             size: object_key.Size,
             last_modified: object_key.LastModified,
             mime_type: mime_type,
-            access: 'public',
-            metadata: metadata,
+            access: 'public'
           })
         }
       }

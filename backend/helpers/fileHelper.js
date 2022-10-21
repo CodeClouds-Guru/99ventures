@@ -152,6 +152,19 @@ class FileHelper {
     return get_objects
 
   }
+  //get object details
+  async getObject() {
+    this.company = await this.getCompanyDetails(this.company_id)
+
+    let s3 = this.s3Connect()
+    let get_objects = await s3.getObject({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key:this.model
+    }).promise()
+
+    return get_objects
+
+  }
 
   async getMetaData(key) {
     let s3 = this.s3Connect()

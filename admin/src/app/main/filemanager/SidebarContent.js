@@ -11,10 +11,13 @@ import ItemIcon from './ItemIcon';
 import { copyUrl, isImageFile , downloadFile} from './helper';
 import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const SidebarContent = (props) => {
 	const dispatch = useDispatch();
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
+	const selectMetadata = useSelector(state=>state.filemanager.metadata)
+	const selectMetadataLoading = useSelector(state=>state.filemanager.metadataLoading)
 	const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
 	const [ msg, setMsg ] = useState('');
 
@@ -90,7 +93,7 @@ const SidebarContent = (props) => {
 				</motion.div>
 			</Box> 
 
-			<Typography className="text-18 font-medium">{selectedItem.name}</Typography>
+			<Typography className="text-18 font-medium break-all">{selectedItem.name}</Typography>
 
 			<div className="text-16 font-medium mt-32">Information</div>
 			<div className="flex flex-col mt-16 border-t border-b divide-y font-medium">
@@ -102,10 +105,21 @@ const SidebarContent = (props) => {
 					<Typography color="text.secondary">Size</Typography>
 					<Typography>{ (selectedItem.size/1024).toFixed(2) } KB</Typography>
 				</div>	
-				{/* <div className="flex items-center justify-between py-14">
+				
+				<div className="flex items-center justify-between py-14">
 					<Typography color="text.secondary">Access</Typography>
-					<Typography>{ selectedItem.access }</Typography>
-				</div>	 */}
+					<Typography>
+						{
+							(selectMetadataLoading === true) 
+							? <CircularProgress size={20} />
+							: (selectMetadata['x-amz-meta-private'] == "1") 
+							   ? 'Private' 
+							   : (selectMetadata['x-amz-meta-private'] && selectMetadata['x-amz-meta-private'] != "1") 
+							       ? 'Public' 
+								   : ''
+						}
+					</Typography>
+				</div>
 				{
 					selectedItem.access === 'public'  && (
 						<div className="flex items-center justify-between py-8">

@@ -3,7 +3,7 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Checkbox, Box, Typography, IconButton, ListItemText, ListItemIcon, Menu, MenuItem, Tooltip, Modal, Button, TextField } from '@mui/material';
 import ItemIcon from "./ItemIcon";
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, filemanagerUpdateFile } from 'app/store/filemanager'
+import { setSelectedItemsId, setSelectedItem, setlightBoxStatus, deleteData, filemanagerUpdateFile, getMetadata } from 'app/store/filemanager'
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -30,7 +30,7 @@ const modalStyle = {
  */
 const style = {
     grid: {
-        box: 'sm:w-160 h-160 flex-col p-16',
+        box: 'sm:w-136 h-136 flex-col p-16',
         icon_btn: 'absolute',
         nav_icon_adapter: 'flex-col',
         icon: 'flex-auto w-full justify-center',
@@ -63,7 +63,7 @@ const FileItems = (props) => {
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
     const listing = useSelector(state=> state.filemanager.listData);
     const viewType = useSelector(state=> state.filemanager.viewType);
-
+    
     const [ anchorEl, setAnchorEl ] = useState(null);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [ msg, setMsg ] = useState('');
@@ -177,6 +177,11 @@ const FileItems = (props) => {
         reset(defaultValues)
     }
 
+    const handleViewFile = () => {
+        dispatch(setSelectedItem(props.file));
+        dispatch(getMetadata({id: props.file.id}));
+    }
+
     return (
         <Box
             sx={{ backgroundColor: 'rgb(255, 255, 255)' }}
@@ -198,7 +203,7 @@ const FileItems = (props) => {
                 to="#"
 				role="button"
 			>
-                <div className={`flex items-center ${style[viewType].icon}`} onClick={()=> dispatch(setSelectedItem(props.file))}>
+                <div className={`flex items-center ${style[viewType].icon}`} onClick={ handleViewFile }>
                     <ItemIcon file={ props.file } />
                 </div>
                 

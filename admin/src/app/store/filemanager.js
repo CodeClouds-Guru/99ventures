@@ -6,10 +6,11 @@ import axios from 'axios';
 export const getList = createAsyncThunk(
     'filemanager/getList',
     async(params, {dispatch}) => {
+        dispatch(setSelectedItemsId([]));
+        dispatch(setSelectedItem(null));
         const result = await axios.post('file-manager/list', {path: params })
         .then(res => {
-            if(res.status === 200 && res.data.results.data) {
-                dispatch(setSelectedItemsId([]));
+            if(res.status === 200 && res.data.results.data) {                
                 return res.data.results.data;
             }
             return [];
@@ -51,31 +52,6 @@ export const deleteData = createAsyncThunk(
     }
 );
 
-/*export const copyAndCreateFile = createAsyncThunk(
-    'filemanager/copyAndCreateFile',
-    async(params, {dispatch, getState}) => {
-        dispatch(setLoading('pending'));
-        const result = await axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
-		.then((response) => {
-			if (response.data.results.status) {
-				dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                const { filemanager } = getState();
-				setTimeout(() => dispatch(getList(filemanager.pathObject.join('/'))), 1000);
-			} else {
-				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
-			}
-            return response
-		})
-		.catch(error => {
-			dispatch(setLoading('idle'));
-			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
-            return error;
-		});
-
-        return result;
-    }
-);*/
-
 export const filemanagerUpdateFile = createAsyncThunk(
     'filemanager/filemanagerUpdateFile',
     async(params, {dispatch, getState}) => {
@@ -93,23 +69,36 @@ export const filemanagerUpdateFile = createAsyncThunk(
                         folderObj.name = params.folder_name;
                         listData.splice(index, 1, folderObj);
                     }
+                    dispatch(setListData(listData));
+                    dispatch(setJsonData(listData));
+                    dispatch(setLoading('idle'));
                 } else if(params.type === 'copy-file') {
-                    const index = listData.findIndex(fl => fl.id === params.id && fl.type === 'file');
+                    const pathObject = filemanager.pathObject;
+                    /*const index = listData.findIndex(fl => fl.id === params.id && fl.type === 'file');
 				    if(index >= 0) {
-                        const pathObject = filemanager.pathObject;
+                        // const pathObject = filemanager.pathObject;
+                        const currentFileName = listData[index].name;
+                        const currentFilePath = listData[index].file_path;
+                        const newFilePath = currentFilePath.replace(currentFileName, params.file_name);
                         const newFile = Object.assign({}, listData[index]);
                         newFile.name = params.file_name;
+                        newFile.file_path = newFilePath;
+
                         var prefix = `CodeClouds/1/file-manager`;
                         if(pathObject.length >= 1) {
                             prefix += '/'+pathObject.join('/')
                         }
+                        
                         newFile.id = btoa(`${prefix}/${params.file_name}`);
-                        listData.push(newFile);                        
-                    }                    
+                        listData.push(newFile);
+                    }*/
+                    setTimeout(()=>{
+                        dispatch(setLoading('idle'));
+                        dispatch(getList(pathObject.join('/')))
+                    }, 1000)
                 }
-                dispatch(setListData(listData));
-                dispatch(setJsonData(listData));
-                dispatch(setLoading('idle'));
+                
+                
 			} else {
 				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
 			}
@@ -151,13 +140,31 @@ export const createNewFolder = createAsyncThunk(
     }
 )
 
+export const getMetadata = createAsyncThunk(
+    'filemanager/getSingleFile',
+    async(params, {dispatch}) => {
+        const result = await axios.get(`file-manager/view/${params.id}`, { params: {type: 'metadata'} })
+        .then(res => {
+            if(res.status === 200 && res.data.results.data) {
+                return res.data.results.data.metadata;
+            }
+            return [];
+        })
+        .catch(error => {
+            dispatch(showMessage({ variant: 'error', message: error.response.data.message }));            
+            return error.response;
+        })
+        return result;
+    }
+);
+
 /**
  * jsonData is the replicate of the listData Array.
  * It has been used to filter the listData.
  * After filtering the data, when we reset the filter, 
  * original value from jsonData will be taken and assigned to listData.
  * 
- * jsonData will be updating whenever file/folder will be deleted & new data will be fetched.
+ * jsonData will be updating whenever file/folder will be deleted, new data will be fetched, copy, rename.
  * 
  */
 
@@ -177,7 +184,9 @@ const initialState = {
         type: '',
         popup_mode: false,
         additional_params: {}
-    }
+    },
+    metadata: {},
+    metadataLoading: false
 }
 
 const fileManagerSlice = createSlice({
@@ -219,10 +228,13 @@ const fileManagerSlice = createSlice({
         },
         setFolderOptions: (state, action) => {
             state.folderOptions = action.payload
+        },
+        setMetafield: (state, action) => {
+            state.metadata = action.payload
         }
     },
     extraReducers: {
-        [getList.pending]: (state) => {            
+        [getList.pending]: (state) => {
             state.loading = 'pending';
             state.listData = [];
         },
@@ -243,6 +255,14 @@ const fileManagerSlice = createSlice({
                 state.listData = payload.list_data;
                 state.jsonData = payload.list_data;
             }
+        },
+        [getMetadata.pending]: (state) => {
+            state.metadataLoading = true;
+            state.metadata = {}
+        },
+        [getMetadata.fulfilled]: (state, {payload}) => {
+            state.metadata = payload;
+            state.metadataLoading = false;
         }
     }
 });
@@ -259,7 +279,8 @@ export const {
     setLoading,
     setListData,
     setJsonData,
-    setFolderOptions
+    setFolderOptions,
+    setMetafield
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer
