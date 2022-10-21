@@ -337,7 +337,7 @@ class TicketController extends Controller {
     const user_id = req.body.user_id || null;
     const attachments = req.files ? req.files.attachments : [];
 
-    console.log(req, "--------------");
+    // console.log(req, "--------------");
     try {
       const data = {
         ticket_id: ticket_id,
@@ -347,8 +347,8 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-console.log('---------------------TicketConversation',savedTicketConversation)
-console.log('---------------------attachments',attachments)
+// console.log('---------------------TicketConversation',savedTicketConversation)
+// console.log('---------------------attachments',attachments)
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
@@ -359,7 +359,7 @@ console.log('---------------------attachments',attachments)
         const dataFiles = file_name.files.map((values) => {
           return {
             ticket_conversation_id: savedTicketConversation.id,
-            file_name: values.filename.replace(/ /g, "_"),
+            file_name: values.filename,
             mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
