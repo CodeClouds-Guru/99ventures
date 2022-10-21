@@ -22,11 +22,8 @@ module.exports = (sequelize, DataTypes) => {
           let rawValue = this.getDataValue("file_name");
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
-          if (rawValue) {
-            const fileHelper = new FileHelper([], "tickets");
-            const file_name = fileHelper.generateSignedUrl(rawValue);
-            rawValue = file_name;
-          }
+
+          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
         },
       },

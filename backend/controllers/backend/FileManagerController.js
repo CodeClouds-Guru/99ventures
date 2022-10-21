@@ -84,45 +84,49 @@ class FileManagerController {
   }
   //upload file
   async save(req, res) {
-    let file_path = req.body.file_path
-    if (file_path != '') {
-      file_path = 'file-manager' + '/' + file_path
-    } else {
-      file_path = 'file-manager'
-    }
-    let files = []
-    let file_name = []
-    let acl_txt = 'public-read-write'
-    if(req.body.private == 1)
-      acl_txt = 'private'
+    if(req.body.type == 'download'){
+      let download_zip = await this.downloadFiles(req)
+    }else{
+      let file_path = req.body.file_path
+      if (file_path != '') {
+        file_path = 'file-manager' + '/' + file_path
+      } else {
+        file_path = 'file-manager'
+      }
+      let files = []
+      let file_name = []
+      let acl_txt = 'public-read-write'
+      if(req.body.private == 1)
+        acl_txt = 'private'
+        
+      let metadata = {
+        'x-amz-meta-alt-name': req.body.alt_name,
+        'x-amz-meta-private': req.body.private,
+        'x-amz-acl':acl_txt
+      }
+
+      if (req.files) {
+        if (req.files.file.length) files = req.files.file
+        else files[0] = req.files.file
+        const fileHelper = new FileHelper(files, file_path, req)
+        file_name = await fileHelper.upload(metadata)
+      } else {
+        let folder_name = req.body.folder_name
+        let folder_path = file_path + '/' + folder_name
+        const fileHelper = new FileHelper('', folder_path, req)
+        file_name = await fileHelper.createFolder()
+      }
       
-    let metadata = {
-      'x-amz-meta-alt-name': req.body.alt_name,
-      'x-amz-meta-private': req.body.private,
-      'x-amz-acl':acl_txt
-    }
+      //get path object list
+      const fileHelperList = new FileHelper('', file_path, req)
+      let file_list = await fileHelperList.getList()
+      // return file_list
+      let file_objects = await this.objectStructure(file_list,fileHelperList)
 
-    if (req.files) {
-      if (req.files.file.length) files = req.files.file
-      else files[0] = req.files.file
-      const fileHelper = new FileHelper(files, file_path, req)
-      file_name = await fileHelper.upload(metadata)
-    } else {
-      let folder_name = req.body.folder_name
-      let folder_path = file_path + '/' + folder_name
-      const fileHelper = new FileHelper('', folder_path, req)
-      file_name = await fileHelper.createFolder()
-    }
-     
-    //get path object list
-    const fileHelperList = new FileHelper('', file_path, req)
-    let file_list = await fileHelperList.getList()
-    // return file_list
-    let file_objects = await this.objectStructure(file_list,fileHelperList)
-
-    return {
-      status: true,
-      data: file_objects
+      return {
+        status: true,
+        data: file_objects
+      }
     }
   }
   //delete file
@@ -167,11 +171,17 @@ class FileManagerController {
       msg = "Folder Copied."
     else if(req.body.type == 'copy-file')
       msg = "Folder Renamed."
+    
     return {
       status: true,
       message: msg,
       data: [],
     }
+  }
+  //download files
+  async downloadFiles(req){
+    const fileHelper = new FileHelper('', 'zip-files', req)
+    let download_zip = await fileHelper.zipFiles()
   }
 }
 
