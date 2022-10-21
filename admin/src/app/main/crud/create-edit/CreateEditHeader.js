@@ -29,31 +29,7 @@ function CreateEditHeader(props) {
 
   return (
     <>
-      {module === 'tickets' ?
-        <div className="flex flex-col sm:flex-row flex-1 w-full items-center justify-between space-y-0 py-10 px-24 md:px-32">
-          <div className="flex flex-col items-center sm:items-start space-y-0 w-full min-w-0">
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1, transition: { delay: 0.3 } }}
-            >
-              <Typography
-                className="flex items-center"
-                component={Link}
-                role="button"
-                to={`/app/${module}`}
-                color="inherit"
-              >
-                <FuseSvgIcon size={20}>
-                  {theme.direction === 'ltr'
-                    ? 'heroicons-outline:arrow-sm-left'
-                    : 'heroicons-outline:arrow-sm-right'}
-                </FuseSvgIcon>
-                <span className="flex mx-4 font-medium capitalize">{module.split('-').join(' ')}</span>
-              </Typography>
-            </motion.div>
-          </div>
-        </div>
-        :
+      {module === 'tickets' ? '' :
         <div className="flex flex-col sm:flex-row flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-32 px-24 md:px-32">
           <div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0 w-full sm:max-w-full min-w-0">
             <motion.div

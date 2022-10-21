@@ -1,22 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-    FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack, Dialog,
-    DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip
+    FormControl, Paper, InputLabel, Button, Typography, Select, MenuItem, TextareaAutosize, Divider, IconButton, Stack, Dialog,
+    DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip, ImageList, ImageListItem
 } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import SendIcon from '@mui/icons-material/Send';
+import { useTheme } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectUser } from 'app/store/userSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import Helper from 'src/app/helper';
+import { setlightBoxStatus } from 'app/store/filemanager';
+import ImagePreview from '../../filemanager/ImagePreview';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
+    const theme = useTheme();
     const inputFileRef = useRef(null);
     const user = useSelector(selectUser);
     const [inputFiles, setInputFiles] = useState([]);
@@ -110,7 +114,7 @@ function TicketingSystemPage(props) {
         data_set.append('field_name', 'message');
         data_set.append('id', props.ticketId);
         data_set.append('user_id', user.id);
-        data_set.append('member_id', memberId);
+        // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
         chatField.trim() ? data_set.append('value', chatField) : '';
         if (Object.keys(inputFiles).length > 0) {
@@ -122,6 +126,10 @@ function TicketingSystemPage(props) {
         setInputFiles({});
         setChatField('');
         setQuickResponse('');
+    }
+    const handleOpenPreview = (file) => {
+        console.log(file);
+        dispatch(setlightBoxStatus({ isOpen: true, src: file }));
     }
     const getTicketDetails = () => {
         axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
@@ -164,6 +172,7 @@ function TicketingSystemPage(props) {
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-0">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
                 <Paper className="flex h-full md:items-center md:justify-center w-full  p-5 rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                    <ImagePreview />
                     <Dialog
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}
@@ -196,28 +205,43 @@ function TicketingSystemPage(props) {
                             </div>
                         </DialogActions>
                     </Dialog>
-                    <div className="flex w-full h-full mx-auto sm:mx-0" style={{ height: '45rem' }}>
+                    <div className="flex w-full h-full mx-auto sm:mx-0" style={{ height: '49.8rem' }}>
                         <div className="h-full w-1/2 border-2 rounded-l-2xl">
-                            <div className="flex flex-row justify-end p-0 m-0">
-                                <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
-                                    <InputLabel id="demo-select-small">Ticket Status</InputLabel>
-                                    <Select
-                                        labelId="demo-select-small"
-                                        id="demo-select-small"
-                                        value={ticketStatus}
-                                        label="Ticket Status"
-                                        onChange={handleChangeTicketStatus}
+                            <div className="flex flex-row justify-between p-0 m-0">
+                                <div className="flex flex-col justify-start p-0 m-16">
+                                    <Typography
+                                        className="flex items-center"
+                                        component={Link}
+                                        role="button"
+                                        to={`/app/tickets`}
+                                        color="inherit"
                                     >
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
-                                        <MenuItem value="open">Open</MenuItem>
-                                        <MenuItem value="pending">Pending</MenuItem>
-                                        <MenuItem value="closed">Closed</MenuItem>
-                                    </Select>
-                                </FormControl>
+                                        <FuseSvgIcon size={20}>
+                                            {theme.direction === 'ltr'
+                                                ? 'heroicons-outline:arrow-sm-left'
+                                                : 'heroicons-outline:arrow-sm-right'}
+                                        </FuseSvgIcon>
+                                        <span className="flex mx-4 font-medium capitalize">Tickets</span>
+                                    </Typography>
+                                </div>
+                                <div className="flex flex-col justify-end p-0 m-0 pt-5">
+                                    <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
+                                        <InputLabel id="demo-select-small">Ticket Status</InputLabel>
+                                        <Select
+                                            labelId="demo-select-small"
+                                            id="demo-select-small"
+                                            value={ticketStatus}
+                                            label="Ticket Status"
+                                            onChange={handleChangeTicketStatus}
+                                        >
+                                            <MenuItem value="open">Open</MenuItem>
+                                            <MenuItem value="pending">Pending</MenuItem>
+                                            <MenuItem value="closed">Closed</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflow: 'scroll', height: '16rem', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '21.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
@@ -230,6 +254,23 @@ function TicketingSystemPage(props) {
                                                     {val.message}
                                                 </p>
                                             </div>
+                                            {val.TicketAttachments.length > 0 ?
+                                                <ImageList sx={{ width: '100%', height: 'auto' }} cols={3} rowHeight={150}>
+                                                    {val.TicketAttachments.map((item, key) => (
+                                                        <ImageListItem key={key}>
+                                                            <img
+                                                                src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}
+                                                                srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
+                                                                alt={`File ${key + 1}`}
+                                                                loading="lazy"
+                                                                className="cursor-pointer"
+                                                                onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
+                                                            />
+                                                        </ImageListItem>
+                                                    ))}
+                                                </ImageList>
+                                                : ''
+                                            }
                                         </div>
                                     )
                                 })
@@ -237,11 +278,11 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             <div className="flex-row h-auto w-full px-10">
-                                <FormControl className="w-full my-5">
-                                    <InputLabel id="demo-simple-select-standard-label">Quick response</InputLabel>
+                                <FormControl className="w-full my-5" size="small">
+                                    <InputLabel id="demo-select-small">Quick Response</InputLabel>
                                     <Select
-                                        labelId="demo-simple-select-standard-label"
-                                        id="demo-simple-select-standard"
+                                        labelId="demo-select-small"
+                                        id="demo-select-small"
                                         value={quickResponse}
                                         label="Quick response"
                                         onChange={handleChangeQuickResponse}
@@ -270,7 +311,7 @@ function TicketingSystemPage(props) {
                                         <b className="m-0 p-0">
                                             Files({Object.keys(inputFiles).length})
                                         </b>
-                                        <Stack direction="row" spacing={1} sx={{ overflow: 'scroll', height: '6.1rem' }}>
+                                        <Stack direction="row" spacing={1} sx={{ overflowY: 'scroll', overflowX: 'hidden', height: '6.1rem' }}>
                                             <ul className="ml-10" style={{ listStyleType: 'disc' }}>
                                                 {
                                                     Object.values(inputFiles).map((val, key) => {
@@ -349,9 +390,6 @@ function TicketingSystemPage(props) {
                                                 label="Status"
                                                 onChange={handleMemberStatus}
                                             >
-                                                <MenuItem value="">
-                                                    <em>None</em>
-                                                </MenuItem>
                                                 <MenuItem value="verified">Verified</MenuItem>
                                                 <MenuItem value="validating">Validating</MenuItem>
                                                 <MenuItem value="suspended">Suspended</MenuItem>
@@ -377,7 +415,7 @@ function TicketingSystemPage(props) {
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflow: 'scroll', height: '15.25rem' }}>
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }}>
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
@@ -405,7 +443,7 @@ function TicketingSystemPage(props) {
                                         <b>Previous Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflow: 'scroll', height: '12.25rem' }}>
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '12.25rem' }}>
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
