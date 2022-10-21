@@ -21,32 +21,38 @@ class FileManagerController {
     object_key = object_key.toString('utf8')
     // return {k:object_key}
     const fileHelper = new FileHelper('', object_key, req)
-    let file_list = await fileHelper.getObject()
     var meta = await fileHelper.getMetaData(object_key)
     let metadata = []
     let file_objects = []
     
     if(meta && 'Metadata' in meta)
       metadata = meta.Metadata
-    let mime_type = mime.lookup(
-                          process.env.S3_BUCKET_OBJECT_URL + object_key
-                        );
-    if(mime_type){
-      
-      let file_structure = []
-      file_structure = object_key.split('/')
-
+    if(req.body.type == 'metadata'){
       file_objects.push({
-        id: id,
-        type: 'file',
-        name: file_structure[file_structure.length - 1],
-        file_path: process.env.S3_BUCKET_OBJECT_URL + object_key,
-        size: file_list.ContentLength,
-        last_modified: file_list.LastModified,
-        mime_type: mime_type,
-        access: 'public',
         metadata: metadata,
       })
+    }else{
+      let file_list = await fileHelper.getObject()
+      let mime_type = mime.lookup(
+        process.env.S3_BUCKET_OBJECT_URL + object_key
+      );
+      if(mime_type){
+      
+        let file_structure = []
+        file_structure = object_key.split('/')
+  
+        file_objects.push({
+          id: id,
+          type: 'file',
+          name: file_structure[file_structure.length - 1],
+          file_path: process.env.S3_BUCKET_OBJECT_URL + object_key,
+          size: file_list.ContentLength,
+          last_modified: file_list.LastModified,
+          mime_type: mime_type,
+          access: 'public',
+          metadata: metadata,
+        })
+      }
     }
     return {
       data: file_objects
