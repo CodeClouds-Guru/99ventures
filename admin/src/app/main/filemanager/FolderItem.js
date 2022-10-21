@@ -66,7 +66,6 @@ function FolderItem(props) {
 	const navigateTochild = ()=>{
 		const path = [...pathObject, props.file.name];
 		dispatch(setPathObject(path));
-		dispatch(setSelectedItem(null));
 		return navigate(path.join('/'));
 	}
 
@@ -81,7 +80,8 @@ function FolderItem(props) {
 			setMsg(`Do you want to delete ${props.file.name}?`);
 
         setOpenAlertDialog(true)
-        handleMenuClose();        
+        handleMenuClose();
+		dispatch(setSelectedItem(null))	// To disable the sidebar
     }
 
     const onCloseAlertDialogHandle = () => {
