@@ -219,6 +219,20 @@ class FileHelper {
       path: model_structure
     }
   }
+  //update metadata 
+  async updateMetadata(metadata){
+    let s3 = this.s3Connect()
+    var params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      CopySource: process.env.S3_BUCKET_NAME + '/' + this.model,
+      Key: this.model,
+      Metadata: metadata,
+      MetadataDirective:'REPLACE'
+    };
+    let copy_obj = await s3.copyObject(params).promise();
+    console.log(copy_obj)
+    return true
+  }
   //create zip files
   // async zipFiles(){
   //   const folder = 'CodeClouds/1/zip-files'
