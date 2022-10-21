@@ -27,7 +27,7 @@ class FileManagerController {
     
     if(meta && 'Metadata' in meta)
       metadata = meta.Metadata
-    if(req.body.type == 'metadata'){
+    if(req.query.type == 'metadata'){
       file_objects.push({
         metadata: metadata,
       })
