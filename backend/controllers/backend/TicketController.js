@@ -359,7 +359,7 @@ class TicketController extends Controller {
         const dataFiles = file_name.files.map((values) => {
           return {
             ticket_conversation_id: savedTicketConversation.id,
-            file_name: values.filename.replaceAll(/ /g, "_"),
+            file_name: values.filename,
             mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
