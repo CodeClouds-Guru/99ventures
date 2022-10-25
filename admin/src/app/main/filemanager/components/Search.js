@@ -4,7 +4,7 @@ import { Tooltip, Paper, Input} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useSelector, useDispatch } from 'react-redux';
 import { debounce } from 'lodash';
-import { setListData, setLoading } from 'app/store/filemanager'
+import { setListData, setLoading, setSelectedItem } from 'app/store/filemanager'
 
 const Search = () => {
     const dispatch = useDispatch();
@@ -20,7 +20,7 @@ const Search = () => {
                 return name.includes(srchTxt);
             });
             dispatch(setListData(result));
-            dispatch(setLoading('idle'))
+            dispatch(setLoading('idle'));
         }, 600),
         [jsonData]
     );
@@ -31,6 +31,7 @@ const Search = () => {
         }
         setInputValue(event.target.value);
         delayedSearch(event.target.value);
+        dispatch(setSelectedItem(null));    // Disabled search while searching
     }
 
     const clearedSearch = () => {

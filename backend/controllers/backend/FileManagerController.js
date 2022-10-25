@@ -177,23 +177,35 @@ class FileManagerController {
   //rename folder name
   async update(req, res) {
     let id = req.body.id
-    let file_path = req.body.file_path
-    let msg = "File Copied."
-    if (file_path != '') {
-      file_path = 'file-manager' + '/' + file_path
-    } else {
-      file_path = 'file-manager'
-    }
-    let file_name = req.body.folder_name
-    if (req.body.type == 'copy-file') {
-      file_name = req.body.file_name
-    }
-
     let object_key = Buffer.from(id, 'base64')
     object_key = object_key.toString('utf8')
+    let msg = "File Copied."
+    if(req.body.type != 'update-metadata'){
+      let file_path = req.body.file_path
+      if (file_path != '') {
+        file_path = 'file-manager' + '/' + file_path
+      } else {
+        file_path = 'file-manager'
+      }
+      let file_name = req.body.folder_name
+      if (req.body.type == 'copy-file') {
+        file_name = req.body.file_name
+      }
 
-    const fileHelper = new FileHelper('', object_key, req, file_name)
-    let file_copy = await fileHelper.copyObjects(req.body.type)
+      const fileHelper = new FileHelper('', object_key, req, file_name)
+      let file_copy = await fileHelper.copyObjects(req.body.type)
+    }else{
+      let acl_txt = 'public-read-write'
+      if(req.body.private == 1)
+        acl_txt = 'private'
+      let metadata = {
+        'x-amz-meta-alt-name': req.body.alt_name,
+        'x-amz-meta-private': req.body.private,
+        'x-amz-acl':acl_txt
+      }
+      const fileHelper = new FileHelper('', object_key, req)
+      let file_copy = await fileHelper.updateMetadata(metadata)
+    }
     if(req.body.type == 'copy-file')
       msg = "File Copied."
     else if(req.body.type == 'copy')
