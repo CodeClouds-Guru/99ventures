@@ -39,8 +39,9 @@ const navigationConfig = [
     icon: 'heroicons-outline:ticket',
     url: 'app/tickets',
     badge: {
-      content: 8
-    }
+      title: 0,
+      classes: 'px-8 bg-pink-600 text-white rounded-full',
+    },
   },
   {
     id: 'administration',
