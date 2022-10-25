@@ -244,10 +244,12 @@ function TicketingSystemPage(props) {
                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '21.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                        <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
                                             <div className="flex flex-row justify-between">
-                                                <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b>
-                                                <div className="flex justify-end">{Helper.parseTimeStamp(val.created_at)}</div>
+                                                <span style={{ fontSize: '12px' }}>
+                                                    <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
+                                                </span>
+                                                <div className="flex justify-end" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                             </div>
                                             <div>
                                                 <p>
@@ -263,7 +265,7 @@ function TicketingSystemPage(props) {
                                                                 srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
                                                                 alt={`File ${key + 1}`}
                                                                 loading="lazy"
-                                                                className="cursor-pointer"
+                                                                className="cursor-pointer rounded-6"
                                                                 onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
                                                             />
                                                         </ImageListItem>
@@ -420,8 +422,10 @@ function TicketingSystemPage(props) {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
-                                                        <b>{val.Member.first_name + ' ' + val.Member.last_name}</b>
-                                                        <div className="flex justify-end">{Helper.parseTimeStamp(val.created_at)}</div>
+                                                        <span style={{ fontSize: '12px' }}>
+                                                            <i>
+                                                                <b>{val.Member.first_name + ' ' + val.Member.last_name}</b></i></span>
+                                                        <div className="flex justify-end" style={{ fontSize: '10px' }}>{Helper.parseTimeStamp(val.created_at)}</div>
                                                     </div>
                                                     <div>
                                                         <p>
@@ -447,7 +451,7 @@ function TicketingSystemPage(props) {
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
-                                                <div className="flex flex-row justify-end">
+                                                <div className="flex flex-row justify-end" style={{ fontSize: '10px' }}>
                                                     {Helper.parseTimeStamp(val.created_at)}
                                                 </div>
                                                 <div>

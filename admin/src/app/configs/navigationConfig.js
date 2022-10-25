@@ -38,6 +38,9 @@ const navigationConfig = [
     type: 'item',
     icon: 'heroicons-outline:ticket',
     url: 'app/tickets',
+    badge: {
+      content: 8
+    }
   },
   {
     id: 'administration',
