@@ -55,7 +55,14 @@ export const deleteData = createAsyncThunk(
 export const filemanagerUpdateFile = createAsyncThunk(
     'filemanager/filemanagerUpdateFile',
     async(params, {dispatch, getState}) => {
-        dispatch(setLoading('pending'));
+        /**
+         * Loading statement not executing for the metadata update, 
+         * Separate inline circular loader added
+         */
+        if(params.type !== 'update-metadata') {
+            dispatch(setLoading('pending'));
+        }
+
         const result = await axios.post(jwtServiceConfig.filemanagerUpdateFile, params)
 		.then((response) => {
 			if (response.data.results.status) {
@@ -97,8 +104,6 @@ export const filemanagerUpdateFile = createAsyncThunk(
                         dispatch(getList(pathObject.join('/')))
                     }, 1000)
                 }
-                
-                
 			} else {
 				dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
 			}
@@ -123,7 +128,7 @@ export const createNewFolder = createAsyncThunk(
             .then((response) => {
                 dispatch(setLoading('idle'));
                 if (response.data.results.status) {
-                    dispatch(showMessage({ variant: 'success', message: 'File uploaded!' }));                
+                    dispatch(showMessage({ variant: 'success', message: 'Folder Created!' }));                
                     if(response.data.results.data){
                         dispatch(setListData(response.data.results.data));
                         dispatch(setJsonData(response.data.results.data));
@@ -229,7 +234,7 @@ const fileManagerSlice = createSlice({
         setFolderOptions: (state, action) => {
             state.folderOptions = action.payload
         },
-        setMetafield: (state, action) => {
+        setMetaData: (state, action) => {
             state.metadata = action.payload
         }
     },
@@ -280,7 +285,7 @@ export const {
     setListData,
     setJsonData,
     setFolderOptions,
-    setMetafield
+    setMetaData
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer

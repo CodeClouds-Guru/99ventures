@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, IconButton, Button, Tooltip, Typography, Link } from '@mui/material';
 import { lighten } from '@mui/material/styles';
@@ -13,7 +13,7 @@ import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const SidebarContent = (props) => {
+const SidebarContent = () => {
 	const dispatch = useDispatch();
 	const selectedItem = useSelector(state=>state.filemanager.selectedItem)
 	const selectMetadata = useSelector(state=>state.filemanager.metadata)
@@ -66,6 +66,12 @@ const SidebarContent = (props) => {
 		}		
 	}
 
+	const handleCopyHTML = () => {
+        const imgTag = `<img src="${ selectedItem.file_path }" alt="${ selectMetadata['x-amz-meta-alt-name'] ?? '' }" />`;
+		copyUrl(imgTag);
+        dispatch(showMessage({ variant: 'success', message: 'HTML Copied' }));
+    }
+
 	return (
 		<motion.div
 			initial={{ y: 50, opacity: 0.8 }}
@@ -111,7 +117,7 @@ const SidebarContent = (props) => {
 					<Typography>
 						{
 							(selectMetadataLoading === true) 
-							? <CircularProgress size={20} />
+							? <CircularProgress size={16} />
 							: (selectMetadata['x-amz-meta-private'] == "1") 
 							   ? 'Private' 
 							   : (selectMetadata['x-amz-meta-private'] && selectMetadata['x-amz-meta-private'] != "1") 
@@ -126,6 +132,18 @@ const SidebarContent = (props) => {
 							<Typography color="text.secondary">Copy URL</Typography>
 							<Tooltip title="Copy URL">
 								<IconButton color="primary" aria-label="Filter" component="label" onClick={ copyFilePath }>
+									<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+								</IconButton>
+							</Tooltip>
+						</div>	
+					)
+				}
+				{
+					selectedItem.access === 'public'  && (
+						<div className="flex items-center justify-between py-8">
+							<Typography color="text.secondary">Copy HTML</Typography>
+							<Tooltip title="Copy URL">
+								<IconButton color="primary" aria-label="Filter" component="label" onClick={ handleCopyHTML }>
 									<FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
 								</IconButton>
 							</Tooltip>

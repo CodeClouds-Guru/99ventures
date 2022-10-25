@@ -232,14 +232,6 @@ const FileItems = (props) => {
                                 </ListItemIcon>
                                 <ListItemText primary="Details" />
                             </MenuItem>
-                            <MenuItem 
-                                onClick={handlePopupOpen}>
-                                <ListItemIcon className="min-w-40">
-                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
-                                </ListItemIcon>
-                                <ListItemText primary="Copy" />
-                            </MenuItem> 
-                            
                             {
                                 props.file.access === 'public' && (
                                     <MenuItem onClick={ handleOpenPreview }>
@@ -250,11 +242,17 @@ const FileItems = (props) => {
                                     </MenuItem>
                                 )
                             }
+                            <MenuItem onClick={handlePopupOpen}>
+                                <ListItemIcon className="min-w-40">
+                                    <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                </ListItemIcon>
+                                <ListItemText primary="Copy" />
+                            </MenuItem> 
                             {
                                 props.file.access === 'public' && (
                                     <MenuItem onClick={ copyFilePath }>
                                         <ListItemIcon className="min-w-40">
-                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:content_copy</FuseSvgIcon>
+                                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:insert_link</FuseSvgIcon>
                                         </ListItemIcon>
                                         <ListItemText primary="Copy URL" />
                                     </MenuItem>

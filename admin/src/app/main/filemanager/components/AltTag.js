@@ -1,19 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { ClickAwayListener, IconButton, TextField, InputAdornment, Typography, Tooltip } from '@mui/material';
+import { ClickAwayListener, IconButton, TextField, InputAdornment, Typography, Tooltip, CircularProgress } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import _ from '@lodash';
+import { filemanagerUpdateFile, getMetadata, setMetaData } from 'app/store/filemanager'
 
 const schema = yup.object().shape({
-	title: yup.string().required('You must enter a title'),
+	title: yup.string().required('You must enter alt text!'),
 });
 
 const AltTag = () => {
+	const dispatch = useDispatch();
 	const [formOpen, setFormOpen] = useState(false);
 	const selectMetadata = useSelector(state=>state.filemanager.metadata);
+	const selectedItem = useSelector(state=>state.filemanager.selectedItem);
+	const [ alt, setAlt ] = useState();
+	const [ loader, setLoader ] = useState('idle');
+
+	useEffect(()=>{
+		setAlt(selectMetadata['x-amz-meta-alt-name']);
+	}, [selectMetadata['x-amz-meta-alt-name']]);
 
 	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
@@ -35,9 +44,22 @@ const AltTag = () => {
 	}
 
 	function onSubmit(newData) {
-		// dispatch(updateList({ id: list.id, newData }));
-		handleCloseForm();
+		setLoader('pending');
+		dispatch(
+			filemanagerUpdateFile({ 
+				id: selectedItem.id, 
+				type: 'update-metadata', 
+				private: '0', 
+				alt_name: newData.title 
+			})
+		)
+		.then(res => {
+			setLoader('idle');
+			handleCloseForm();
+			dispatch(setMetaData({...selectMetadata, 'x-amz-meta-alt-name': newData.title}));
+		});
 	}
+
 	return (
 		<>
 			{formOpen ? (
@@ -57,13 +79,17 @@ const AltTag = () => {
 									InputProps={{
 										endAdornment: (
 											<InputAdornment position="end">
-												<IconButton
-													type="submit"
-													disabled={_.isEmpty(dirtyFields) || !isValid}
-													size="large"
-												>
-													<FuseSvgIcon>heroicons-outline:check</FuseSvgIcon>
-												</IconButton>
+												{
+													loader === 'idle' ? (
+														<IconButton
+															type="submit"
+															disabled={_.isEmpty(dirtyFields) || !isValid}
+															size="small"
+														>
+															<FuseSvgIcon className="text-48" size={20}>heroicons-outline:check</FuseSvgIcon>
+														</IconButton>
+													) : <CircularProgress size={16} />
+												}												
 											</InputAdornment>
 										),
 									}}
@@ -75,12 +101,11 @@ const AltTag = () => {
 			) : (
 				<>
 					<Typography color="text.secondary" onClick={handleOpenForm}>
-						Alt Text: {selectMetadata['x-amz-meta-alt-name']}
+						Alt Text: { alt && (<em>{ alt }</em>) }
 					</Typography>
 					<Tooltip title="Edit">
 						<IconButton color="primary" aria-label="Filter" component="label" onClick={handleOpenForm}>
 							<FuseSvgIcon className="text-48" size={20} color="action">material-outline:edit</FuseSvgIcon>
-
 						</IconButton>
 					</Tooltip>
 				</>
