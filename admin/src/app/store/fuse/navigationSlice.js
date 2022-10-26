@@ -50,13 +50,21 @@ const navigationSlice = createSlice({
 export const { setNavigation, resetNavigation } = navigationSlice.actions;
 
 const getUserRole = (state) => state.user.role;
+const unreadTicketCount = (state) => state.user.unread_tickets;
 
 export const selectNavigation = createSelector(
-  [selectNavigationAll, ({ i18n }) => i18n.language, getUserRole],
-  (navigation, language, userRole) => {
+  [selectNavigationAll, ({ i18n }) => i18n.language, getUserRole, unreadTicketCount],
+  (navigation, language, userRole, unreadTicketCount) => {
     function setTranslationValues(data) {
       // loop through every object in the array
       return data.map((item) => {
+        if (item.id === 'tickets') {
+          if (unreadTicketCount > 0) {
+            item.badge.title = unreadTicketCount
+          } else {
+            delete item.badge
+          }
+        }
         if (item.translate && item.title) {
           item.title = i18next.t(`navigation:${item.translate}`);
         }
