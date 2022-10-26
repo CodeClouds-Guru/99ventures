@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, IconButton, Button, Tooltip, Typography, Link } from '@mui/material';
+import { Box, IconButton, Button, Tooltip, Typography, Link, CircularProgress } from '@mui/material';
 import { lighten } from '@mui/material/styles';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { motion } from 'framer-motion';
@@ -11,7 +11,6 @@ import ItemIcon from './ItemIcon';
 import { copyUrl, isImageFile , downloadFile} from './helper';
 import AltTag from './components/AltTag';
 import Helper from 'src/app/helper';
-import CircularProgress from '@mui/material/CircularProgress';
 
 const SidebarContent = () => {
 	const dispatch = useDispatch();
@@ -139,7 +138,7 @@ const SidebarContent = () => {
 					)
 				}
 				{
-					selectedItem.access === 'public'  && (
+					selectedItem.access === 'public' && isImageFile(selectedItem.mime_type) && (
 						<div className="flex items-center justify-between py-8">
 							<Typography color="text.secondary">Copy HTML</Typography>
 							<Tooltip title="Copy URL">
@@ -156,7 +155,7 @@ const SidebarContent = () => {
 							<AltTag />
 						</div>
 					)
-				}				
+				}
 			</div>
 
 			<div className=" gap-16 w-full mt-32 flex justify-between">

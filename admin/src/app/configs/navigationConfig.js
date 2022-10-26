@@ -84,6 +84,14 @@ const navigationConfig = [
         url: 'app/email-templates',
         end: true,
       },
+      {
+        id: 'settings',
+        title: 'Settings',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/settings/create',
+        end: true,
+      },
       // {
       //   id: 'permissions',
       //   title: 'Permissions',
