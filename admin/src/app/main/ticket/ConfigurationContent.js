@@ -1,11 +1,16 @@
 import List from "../crud/list/List";
 import { useState, useEffect } from 'react';
-import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Tooltip } from '@mui/material';
+import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Tooltip, Typography } from '@mui/material';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import moment from 'moment';
 import { position } from "stylis";
+import { selectUser } from 'app/store/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+
 function ConfigurationContent() {
+    const user = useSelector(selectUser);
+    const unreadTicketCount = user.unread_tickets;
     const [selectedStatus, setSelectedStatus] = useState('');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
@@ -35,7 +40,6 @@ function ConfigurationContent() {
             startDate: moment(val.startDate),
             endDate: moment(val.endDate)
         });
-        console.log(val);
     }
 
     const constructWhereclause = () => {
@@ -57,6 +61,16 @@ function ConfigurationContent() {
         <div>
             <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
+                    {unreadTicketCount > 0 ?
+                        <Grid item xs={3}>
+                            <Typography component={'span'}
+                                initial={{ x: -20 }}
+                                animate={{ x: 0, transition: { delay: 0.2 } }}
+                                delay={300}
+                                className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize">
+                                Tickets ({unreadTicketCount})
+                            </Typography>
+                        </Grid> : ''}
                     <Grid item xs={2}>
                         <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Ticket Status</InputLabel>
@@ -68,13 +82,13 @@ function ConfigurationContent() {
                                 onChange={handleChange}
                             >
                                 <MenuItem value={''}>All</MenuItem>
-                                <MenuItem value={1}>Open</MenuItem>
-                                <MenuItem value={2}>Pending</MenuItem>
-                                <MenuItem value={0}>Closed</MenuItem>
+                                <MenuItem value="open">Open</MenuItem>
+                                <MenuItem value="pending">Pending</MenuItem>
+                                <MenuItem value="closed">Closed</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={unreadTicketCount > 0 ? 5 : 8}>
                         {
                             open
                                 ?
