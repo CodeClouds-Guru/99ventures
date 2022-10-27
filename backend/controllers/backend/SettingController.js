@@ -1,19 +1,37 @@
-const Controller = require('./Controller')
-const { Setting } = require('../../models/index')
+const Controller = require("./Controller");
+const { Setting } = require("../../models/index");
 
 class SettingController extends Controller {
   constructor() {
-    super('Setting')
+    super("Setting");
   }
 
   async update(req, res) {
-    console.log(req)
-    let request_data = req.body;
-    let id = request_data.id;
-    
+    console.log(req);
+    const update_data = req.body.config_data || [];
+    const site_id = req.header("site_id") || 1;
+    const company_id = req.header("company_id") || 1;
+
     try {
-      request_data.updated_by = req.user.id;
-      let model = await Setting.update(request_data, { where: { id } });
+      let data = [];
+      data = update_data.map((values) => {
+        return {
+          settings_value: values.value,
+          settings_key: values.key,
+          id: values.id,
+        };
+      });
+
+      // await Setting.destroy({
+      //   where: { company_portal_id: site_id },
+      // });
+      console.log(data);
+
+      let model = await Setting.bulkCreate(data, {
+        updateOnDuplicate: ["id", "settings_key","settings_value"],
+        ignoreDuplicates: true,
+      });
+
       return {
         message: "Record has been updated successfully",
       };
@@ -23,4 +41,4 @@ class SettingController extends Controller {
   }
 }
 
-module.exports = SettingController
+module.exports = SettingController;

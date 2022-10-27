@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Setting extends Model {
     /**
@@ -13,35 +11,47 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Setting.init({
-    company_portal_id: DataTypes.BIGINT,
-    settings_key: DataTypes.STRING,
-    settings_value: {
-      type: DataTypes.TEXT,
-      get() {
-        return JSON.parse(this.getDataValue('settings_value')) || ''
+  Setting.init(
+    {
+      company_portal_id: DataTypes.BIGINT,
+      settings_key: {
+        type: DataTypes.STRING,
+        unique: {
+          args: true,
+          msg: "Key already in use!",
+        },
       },
-      set(value) {
-        // Storing passwords in plaintext in the database is terrible.
-        // Hashing the value with an appropriate cryptographic hash function is better.
-        this.setDataValue('settings_value', JSON.stringify(value));
-      }
+      settings_value: {
+        type: DataTypes.TEXT,
+        get() {
+          return JSON.parse(this.getDataValue("settings_value")) || "";
+        },
+        set(value) {
+          // Storing passwords in plaintext in the database is terrible.
+          // Hashing the value with an appropriate cryptographic hash function is better.
+          console.log(typeof value );
+          if (typeof value !== "string")
+            this.setDataValue("settings_value", JSON.stringify(value));
+          else this.setDataValue("settings_value", value);
+        },
+      },
+      created_by: DataTypes.BIGINT,
+      updated_by: DataTypes.BIGINT,
+      deleted_by: DataTypes.BIGINT,
+      created_at: "TIMESTAMP",
+      updated_at: "TIMESTAMP",
+      deleted_at: "TIMESTAMP",
     },
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: "TIMESTAMP",
-    updated_at: "TIMESTAMP",
-    deleted_at: "TIMESTAMP",
-  }, {
-    sequelize,
-    modelName: 'Setting',
-    timestamps: true,
-    paranoid: true,
-    createdAt: "created_at", // alias createdAt as created_date
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    tableName: "settings",
-  });
+    {
+      sequelize,
+      modelName: "Setting",
+      timestamps: true,
+      paranoid: true,
+      createdAt: "created_at", // alias createdAt as created_date
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
+      tableName: "settings",
+    }
+  );
   return Setting;
 };

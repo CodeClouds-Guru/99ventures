@@ -9,7 +9,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       company_portal_id: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       settings_key: {
         type: Sequelize.STRING
