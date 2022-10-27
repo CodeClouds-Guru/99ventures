@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -308,20 +308,24 @@ function List(props) {
                         key={n.id}
                         selected={isSelected}
                         onClick={(event) => handleClick(n)}
-                      >
+                      >{module === 'tickets' ? '' :
                         <TableCell className="w-40 md:w-64 text-center" padding="none">
                           {isDeletable(n) && <Checkbox
                             checked={isSelected}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => handleCheck(event, n.id)}
                           />}
-                        </TableCell>
+                        </TableCell>}
                         {Object.values(fields)
                           .filter(field => field.listing === true)
                           .map((field, i) => {
                             return <Fragment key={i}>
                               <TableCell className="p-4 md:p-16" component="th" scope="row">
-                                {processFieldValue(n[field.field_name], field)}
+                                {module === 'tickets' && field.field_name === 'status' ?
+                                  <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+                                  :
+                                  processFieldValue(n[field.field_name], field)
+                                }
                               </TableCell>
                             </Fragment>
                           })}
