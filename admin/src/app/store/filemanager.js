@@ -163,6 +163,42 @@ export const getMetadata = createAsyncThunk(
     }
 );
 
+export const getConfig = createAsyncThunk(
+    'filemanager/getConfig',
+    async(params, {dispatch}) => {
+        const result = await axios.get(jwtServiceConfig.settingsRead)
+        .then(res => {
+            if(res.status === 200 && res.data.results.data) {     
+                const result = res.data.results.data.config_data;
+                const acceptedTypes = {};
+                result.map(item => {
+                    if(item.settings_key === 'file_manager_configuration'){
+                        const types = {};
+                        Object.keys(item.settings_value).map((el) => {
+                            if(item.settings_value[el].length){
+                                item.settings_value[el].map(element => {
+                                    types[element] = [];
+                                });
+                            }
+                        });
+                        acceptedTypes['accept'] = types;
+                    } else {
+                        acceptedTypes[item.settings_key] = item.settings_value;
+                    }
+                });
+                // console.log(acceptedTypes)
+                return acceptedTypes;
+            }
+            return {};
+        })
+        .catch(error => {
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));            
+            return error.response;
+        })
+        return result;
+    }
+)
+
 /**
  * jsonData is the replicate of the listData Array.
  * It has been used to filter the listData.
@@ -191,7 +227,8 @@ const initialState = {
         additional_params: {}
     },
     metadata: {},
-    metadataLoading: false
+    metadataLoading: false,
+    config: {}
 }
 
 const fileManagerSlice = createSlice({
@@ -268,6 +305,9 @@ const fileManagerSlice = createSlice({
         [getMetadata.fulfilled]: (state, {payload}) => {
             state.metadata = payload;
             state.metadataLoading = false;
+        },
+        [getConfig.fulfilled]: (state, { payload }) => {
+            state.config = payload
         }
     }
 });

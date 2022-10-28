@@ -42,13 +42,19 @@ const renderItem = (file)=> {
 		case 'application/pdf':
 			return badgeComponent('PDF');
 		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+		case 'application/vnd.ms-excel':
 			return badgeComponent('XLS');
 		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+		case 'application/msword':
 			return badgeComponent('DOC');
 		case 'text/csv':
 			return badgeComponent('CSV');
+		case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+		case 'application/vnd.ms-powerpoint':
+			return badgeComponent('PPT');
 		case 'image/jpg':
 		case 'image/jpeg':
+		case 'image/bmp':
 		case 'image/png':
 		case 'image/gif':
 		case 'image/svg':

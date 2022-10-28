@@ -86,11 +86,10 @@ function DragDropzone() {
     const listing = useSelector(state=> state.filemanager.listData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
+	const selectConfig = useSelector(state => state.filemanager.config);
 	const navigate = useNavigate();
-	const [ progress, setProgress ] = useState(0);
-	const [ buffer, setBuffer ] = useState(10);
-
 	const [files, setFiles] = useState([]);
+
 	const {
 		getRootProps,
 		getInputProps,
@@ -101,20 +100,9 @@ function DragDropzone() {
 	} = useDropzone({
 		noKeyboard: true,
         noClick: true,
-		accept: {
-			'image/*': ['.png', '.gif', '.jpeg', '.jpg'],
-			'text/csv': ['.csv'],
-			'application/msword': ['.doc'],
-			'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-			'application/vnd.oasis.opendocument.presentation': ['.odp'],
-			'application/pdf': ['.pdf'],
-			'application/vnd.ms-powerpoint': ['.ppt'],
-			'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-			'application/vnd.ms-excel': ['.xls'],
-			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-			'audio/mpeg': ['.mp3'],
-			'video/mp4': ['.mp4'],
-		},
+		maxSize: selectConfig.max_file_size ? selectConfig.max_file_size * Math.pow(1024, 2) : 1024,	// Bytes convert
+		maxFiles: selectConfig.max_no_of_uploads ?? 0,
+		accept: selectConfig.accept ?? {},
 		onDrop: acceptedFiles => {
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
 				preview: URL.createObjectURL(file)
@@ -141,6 +129,18 @@ function DragDropzone() {
 				}*/
 			}
 			handleFile(config, file)
+		},
+		onDropRejected: (files) => {
+			const msgs = [];
+			files.map(el => {				
+				if(el.errors[0]['code'] === 'file-too-large'){
+					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size} MB`);
+				}
+				if(el.errors[0]['code'] === 'file-invalid-type'){
+					msgs.push(`${el.file.name} is not supported!`);
+				}
+			});
+			dispatch(showMessage({ variant: 'error', message: msgs.join('. ') }));
 		}
 	});
 
@@ -172,7 +172,7 @@ function DragDropzone() {
 
 	useEffect(() => {
 		var path = pathObject;	
-		
+
 		/**
 		 * This block will execute while reloading the page
 		 */
@@ -231,7 +231,7 @@ function DragDropzone() {
 		});
 	}; 
 
-	return (		
+	return (
 		<section className={`
 			${loading == 'pending' && `opacity-25 pointer-events-none`} filemanager-file-box container flex flex-col h-full w-full md:p-20 sm:p-20 lg:p-20 w-full`
 		}>

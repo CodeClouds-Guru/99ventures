@@ -9,10 +9,18 @@ import ImagePreview from './ImagePreview';
 import DragDropzone from './DragDropZone';
 import './FileManager.css';
 import FolderOptions from './components/FolderOptions';
+import { getConfig } from 'app/store/filemanager';
+import { useDispatch } from 'react-redux'; 
 
 const Index = () => {
+    const dispatch = useDispatch();
     const selectedItem = useSelector(state=>state.filemanager.selectedItem)
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
+
+    React.useEffect(()=>{
+		dispatch(getConfig());
+	}, []);
+
     return (
         <>
             <FusePageCarded
