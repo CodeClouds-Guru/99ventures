@@ -172,8 +172,8 @@ const modules = [
     created_at: new Date(),
   },
   {
-    slug: 'component',
-    name: 'Component',
+    slug: 'components',
+    name: 'Components',
     parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
@@ -181,8 +181,8 @@ const modules = [
     created_at: new Date(),
   },
   {
-    slug: 'layout',
-    name: 'Layout',
+    slug: 'layouts',
+    name: 'Layouts',
     parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
