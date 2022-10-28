@@ -35,7 +35,9 @@ const jwtServiceConfig = {
   getSingleTickketDetails: 'tickets/view',
   filemanagerUploadFile: 'file-manager/save',
   filemanagerUpdateFile: 'file-manager/update',
-  ticketUpdate: 'tickets/update'
+  ticketUpdate: 'tickets/update',
+  settingsUpdate: 'settings/update',
+  settingsRead: 'settings'
 };
 
 export default jwtServiceConfig;

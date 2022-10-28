@@ -90,7 +90,7 @@ const navigationConfig = [
         title: 'Settings',
         type: 'item',
         icon: 'material-outline:settings',
-        url: 'app/settings/create',
+        url: 'app/settings',
         end: true,
       },
       // {
