@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 function ConfigurationContent() {
     const user = useSelector(selectUser);
     const unreadTicketCount = user.unread_tickets;
-    const [selectedStatus, setSelectedStatus] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('all');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
@@ -46,7 +46,7 @@ function ConfigurationContent() {
         const param = {
             created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
         }
-        if (selectedStatus !== '') {
+        if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
         }
         setWhereClause(param);
@@ -81,7 +81,7 @@ function ConfigurationContent() {
                                 value={selectedStatus}
                                 onChange={handleChange}
                             >
-                                <MenuItem value={''}>All</MenuItem>
+                                <MenuItem value="all">All</MenuItem>
                                 <MenuItem value="open">Open</MenuItem>
                                 <MenuItem value="pending">Pending</MenuItem>
                                 <MenuItem value="closed">Closed</MenuItem>
