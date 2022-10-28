@@ -200,7 +200,7 @@ const FormField = () => {
                 </div>
 
                 <div className='w-full mb-20'>
-                    <Typography variant="subtitle1">Select File Types</Typography>
+                    <Typography variant="subtitle1" className="mb-10">Select File Types</Typography>
                     {
                         Object.keys(types).map((item, indx) => {
                             return (
@@ -210,7 +210,7 @@ const FormField = () => {
                                     aria-controls="panel1bh-content"
                                     id="panel1bh-header"
                                     >
-                                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                                        <Typography sx={{ width: '33%', flexShrink: 0 }} className="font-semibold">
                                             { item.toUpperCase() }
                                         </Typography>
                                     </AccordionSummary>
