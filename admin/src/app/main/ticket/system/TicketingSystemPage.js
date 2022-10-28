@@ -205,10 +205,10 @@ function TicketingSystemPage(props) {
                             </div>
                         </DialogActions>
                     </Dialog>
-                    <div className="flex w-full h-full mx-auto sm:mx-0" style={{ height: '49.8rem' }}>
-                        <div className="h-full w-1/2 border-2 rounded-l-2xl">
-                            <div className="flex flex-row justify-between p-0 m-0">
-                                <div className="flex flex-col justify-start p-0 m-16">
+                    <div className="md:flex w-full h-full mx-auto sm:mx-0" /*style={{ height: '49.8rem' }}*/>
+                        <div className="h-full w-full md:w-1/2 border-2 rounded-l-2xl mb-10 md:mb-0">
+                            <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
+                                <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
                                     <Typography
                                         className="flex items-center"
                                         component={Link}
@@ -224,7 +224,7 @@ function TicketingSystemPage(props) {
                                         <span className="flex mx-4 font-medium capitalize">Tickets</span>
                                     </Typography>
                                 </div>
-                                <div className="flex flex-col justify-end p-0 m-0 pt-5">
+                                <div className="flex flex-col justify-center sm:justify-end p-0 m-0 pt-5">
                                     <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
                                         <InputLabel id="demo-select-small">Ticket Status</InputLabel>
                                         <Select
@@ -241,15 +241,16 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '21.5rem', }}>
+                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '48.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <div key={key} className="w-10/12 flex flex-col justify-around p-5 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
-                                            <div className="flex flex-row justify-between">
+                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end'} : { justifyContent: 'flex-start' }}>
+                                        <div  className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                            <div className="flex flex-row justify-between pb-8">
                                                 <span style={{ fontSize: '12px' }}>
                                                     <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
                                                 </span>
-                                                <div className="flex justify-end" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
+                                                <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                             </div>
                                             <div>
                                                 <p>
@@ -257,7 +258,7 @@ function TicketingSystemPage(props) {
                                                 </p>
                                             </div>
                                             {val.TicketAttachments.length > 0 ?
-                                                <ImageList sx={{ width: '100%', height: 'auto' }} cols={3} rowHeight={150}>
+                                                <ImageList sx={{ width: '100%', height: 'auto' }} cols={4} rowHeight={100}>
                                                     {val.TicketAttachments.map((item, key) => (
                                                         <ImageListItem key={key}>
                                                             <img
@@ -274,6 +275,7 @@ function TicketingSystemPage(props) {
                                                 : ''
                                             }
                                         </div>
+                                    </div>
                                     )
                                 })
                                 }
@@ -348,15 +350,15 @@ function TicketingSystemPage(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-full w-1/2 border-2 rounded-r-2xl">
-                            <div className="flex flex-row justify-start p-0 m-0 pl-5 mt-5">
+                        <div className="h-full w-full md:w-1/2 border-2 rounded-r-2xl">
+                            <div className="flex flex-row justify-center sm:justify-start p-0 m-0 pl-5 mt-10 mb-5">
                                 <Typography component={'h2'}>
                                     <b>Member details</b>
                                 </Typography>
                             </div>
-                            <div className="flex flex-row justify-between p-0 m-0 pb-10">
-                                <div className="flex flex-col w-1/2 justify-start">
-                                    <div className="flex justify-start">
+                            <div className="sm:flex flex-row justify-between p-0 m-0 pb-10">
+                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
+                                    <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Username:</b>
@@ -364,7 +366,7 @@ function TicketingSystemPage(props) {
                                             {memberDetails.username}
                                         </div>
                                     </div>
-                                    <div className="flex justify-start">
+                                    <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Full name:</b>
@@ -372,7 +374,7 @@ function TicketingSystemPage(props) {
                                             {memberDetails.first_name + ' ' + memberDetails.last_name}
                                         </div>
                                     </div>
-                                    <div className="flex justify-start">
+                                    <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Email:</b>
@@ -381,8 +383,8 @@ function TicketingSystemPage(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col w-1/2 justify-end">
-                                    <div className="flex justify-end">
+                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-end">
+                                    <div className="flex justify-center sm:justify-end">
                                         <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
                                             <InputLabel id="demo-select-small">Status</InputLabel>
                                             <Select
@@ -399,7 +401,7 @@ function TicketingSystemPage(props) {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div className="flex flex-row justify-end pr-20">
+                                    <div className="flex flex-row justify-center sm:justify-end pr-20">
                                         <div className="flex">
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Total Earnings:</b>
@@ -417,7 +419,7 @@ function TicketingSystemPage(props) {
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }}>
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '41.5rem' }}>
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
@@ -425,7 +427,7 @@ function TicketingSystemPage(props) {
                                                         <span style={{ fontSize: '12px' }}>
                                                             <i>
                                                                 <b>{val.Member.first_name + ' ' + val.Member.last_name}</b></i></span>
-                                                        <div className="flex justify-end" style={{ fontSize: '10px' }}>{Helper.parseTimeStamp(val.created_at)}</div>
+                                                        <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}>{Helper.parseTimeStamp(val.created_at)}</div>
                                                     </div>
                                                     <div>
                                                         <p>
@@ -441,13 +443,13 @@ function TicketingSystemPage(props) {
                                 : ''
                             }
                             <Divider />
-                            <div className="flex flex-col justify-start p-0 m-0 mt-5" >
+                            <div className="flex flex-col justify-start p-0 m-0 mt-16" >
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
                                         <b>Previous Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '12.25rem' }}>
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }}>
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
