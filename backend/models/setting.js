@@ -27,9 +27,6 @@ module.exports = (sequelize, DataTypes) => {
           return JSON.parse(this.getDataValue("settings_value")) || "";
         },
         set(value) {
-          // Storing passwords in plaintext in the database is terrible.
-          // Hashing the value with an appropriate cryptographic hash function is better.
-          console.log(typeof value );
           if (typeof value !== "string")
             this.setDataValue("settings_value", JSON.stringify(value));
           else this.setDataValue("settings_value", value);

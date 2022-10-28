@@ -28,7 +28,7 @@ class SettingController extends Controller {
       console.log(data);
 
       let model = await Setting.bulkCreate(data, {
-        updateOnDuplicate: ["id", "settings_key","settings_value"],
+        updateOnDuplicate: ["id", "settings_key", "settings_value"],
         ignoreDuplicates: true,
       });
 
@@ -37,6 +37,30 @@ class SettingController extends Controller {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  async list(req, res) {
+    try {
+      const site_id = req.header("site_id") || 1;
+      const company_id = req.header("company_id") || 1;
+      let config_data = await Setting.findAll({
+        // attributes: [
+        //   "id",
+        //   ["settings_key", "key"],
+        //   ["settings_value", "value"],
+        // ],
+        where: {
+          company_portal_id: site_id,
+        },
+      });
+
+      return {
+        status: true,
+        data: { config_data },
+      };
+    } catch (err) {
+      this.throwCustomError("Unable to get data", 500);
     }
   }
 }
