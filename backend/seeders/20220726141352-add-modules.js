@@ -163,6 +163,15 @@ const modules = [
     created_at: new Date(),
   },
   {
+    slug: 'settings',
+    name: 'Settings',
+    parent_module: 'Administrations',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
     slug: 'component',
     name: 'Component',
     parent_module: 'Pages and Layout',
