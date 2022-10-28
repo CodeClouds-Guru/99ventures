@@ -3,7 +3,7 @@ import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
 import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
@@ -16,7 +16,7 @@ import axios from "axios"
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { selectUser } from 'app/store/userSlice';
+import { selectUser, setUser } from 'app/store/userSlice';
 
 function List(props) {
   const dispatch = useDispatch();
@@ -78,6 +78,7 @@ function List(props) {
       setTotalRecords(res.data.results.result.total)
       setLoading(false);
       setFirstCall(false);
+      module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
     }).catch(error => {
       let message = 'Something went wrong!'
       if (error && error.response.data && error.response.data.errors) {
@@ -86,6 +87,19 @@ function List(props) {
       dispatch(showMessage({ variant: 'error', message }));
       navigate('/dashboard');
     })
+  }
+
+  const ticketsReadCount = (values) => {
+    let unread = 0;
+    let user_obj = {};
+    Object.keys(user).forEach((val, key) => {
+      user_obj[val] = user[val];
+    })
+    Object.values(values).forEach((val, key) => {
+      val.is_read === 0 ? unread++ : '';
+    });
+    user_obj.unread_tickets = unread;
+    // dispatch(setUser(user_obj));
   }
 
   useEffect(() => {
@@ -213,8 +227,6 @@ function List(props) {
   const colSpan = (fields) => {
     return Object.values(fields).filter(field => field.listing === true).length + 1;
   }
-
-
 
   return (
     <div>

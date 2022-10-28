@@ -170,6 +170,24 @@ const modules = [
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
+  },
+  {
+    slug: 'components',
+    name: 'Components',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'layouts',
+    name: 'Layouts',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
   }
 ]
 module.exports = {

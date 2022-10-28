@@ -33,6 +33,7 @@ class SettingController extends Controller {
       });
 
       return {
+        status: true,
         message: "Record has been updated successfully",
       };
     } catch (error) {
