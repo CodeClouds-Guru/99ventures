@@ -103,7 +103,38 @@ const navigationConfig = [
       // },
     ]
   },
-
+  {
+    id: 'pagesAndLayouts',
+    title: 'Pages & Layouts',
+    type: 'collapse',
+    icon: 'material-outline:auto_awesome_mosaic',
+    children: [
+      {
+        id: 'components',
+        title: 'Components',
+        type: 'item',
+        icon: 'material-outline:view_agenda',
+        url: 'app/components',
+        end: true,
+      },
+      {
+        id: 'layouts',
+        title: 'Layouts',
+        type: 'item',
+        icon: 'material-outline:view_quilt',
+        url: 'app/layouts',
+        end: true,
+      },
+      {
+        id: 'pages',
+        title: 'Pages',
+        type: 'item',
+        icon: 'material-outline:description',
+        url: 'app/pages',
+        end: true,
+      },
+    ]
+  }
 ];
 
 export default navigationConfig;
