@@ -188,6 +188,15 @@ const modules = [
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
+  },
+  {
+    slug: 'pages',
+    name: 'Pages',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
   }
 ]
 module.exports = {
