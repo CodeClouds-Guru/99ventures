@@ -17,6 +17,7 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 import Helper from 'src/app/helper';
 import { setlightBoxStatus } from 'app/store/filemanager';
 import ImagePreview from '../../filemanager/ImagePreview';
+import { setUser } from "app/store/userSlice";
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -36,6 +37,8 @@ function TicketingSystemPage(props) {
     const [previousTickets, setPreviousTIckets] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [memberNote, setMemberNote] = useState('');
+
+    const stateUser = useSelector(state => state.user);
 
     useEffect(() => {
         getTicketDetails();
@@ -149,9 +152,14 @@ function TicketingSystemPage(props) {
                             id: props.ticketId,
                             type: 'is_read'
                         })
+                        if (stateUser.unread_tickets > 0) {
+                            let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (stateUser.unread_tickets - 1) }
+                            dispatch(setUser(updatedNotReadonlyUser))
+                        }
                     }
                 }
             }).catch(err => {
+                console.error(err)
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
             })
     }
