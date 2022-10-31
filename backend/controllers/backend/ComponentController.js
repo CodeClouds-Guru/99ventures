@@ -40,6 +40,10 @@ class ComponentController extends Controller {
   //override delete function
   async delete(req, res) {
     let response = await super.delete(req);
+    return {
+      status: true,
+      message: "Component deleted.",
+    };
   }
 }
 

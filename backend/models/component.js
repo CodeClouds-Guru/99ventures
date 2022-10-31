@@ -128,7 +128,7 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: Joi.required().label('Company portal'),
     })
     return schema.validate(req.body)
-}
+  }
   sequelizePaginate.paginate(Component)
 
   return Component;
