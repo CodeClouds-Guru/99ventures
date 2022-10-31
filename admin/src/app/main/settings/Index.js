@@ -1,7 +1,7 @@
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import { useDispatch, useSelector } from 'react-redux';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-import Header from 'app/shared-components/Header';
+import MainHeader from 'app/shared-components/MainHeader';
 import FormField from './FormField';
 
 function Index(props) {
@@ -14,7 +14,7 @@ function Index(props) {
     return (
         <FusePageCarded
             header={
-                <Header module={module} slug="settings" />
+                <MainHeader module={module} slug="settings" />
             }
             content={
                 <FormField />

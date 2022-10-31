@@ -242,7 +242,7 @@ const FormField = () => {
                     }
                 </div>
                 {
-                    // (hasPermission('save') || hasPermission('update')) && (
+                    (hasPermission('save') || hasPermission('update')) && (
                         <motion.div
                             className="flex"
                             initial={{ opacity: 0, x: 20 }}
@@ -260,7 +260,7 @@ const FormField = () => {
                             </LoadingButton>
                             
                         </motion.div>
-                    // )
+                    )
                 }
                 
             </form>

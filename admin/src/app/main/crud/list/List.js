@@ -263,7 +263,7 @@ function List(props) {
               onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
             />
           </Paper>}
-          {addable || module !== 'tickets' && <motion.div
+          {addable && <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
           >
