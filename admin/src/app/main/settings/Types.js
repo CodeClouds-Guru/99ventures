@@ -66,6 +66,11 @@ const types = {
             ext: '.pdf',
             mime_type: 'application/pdf',
             checked: false
+        },
+        {
+            ext: '.csv',
+            mime_type: 'text/csv',
+            checked: false
         }
     ],
     'videos': [
