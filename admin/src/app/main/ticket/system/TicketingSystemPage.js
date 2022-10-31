@@ -241,41 +241,41 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '48.5rem', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '48.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end'} : { justifyContent: 'flex-start' }}>
-                                        <div  className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
-                                            <div className="flex flex-row justify-between pb-8">
-                                                <span style={{ fontSize: '12px' }}>
-                                                    <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
-                                                </span>
-                                                <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
+                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
+                                            <div className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                                <div className="flex flex-row justify-between pb-8">
+                                                    <span style={{ fontSize: '12px' }}>
+                                                        <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
+                                                    </span>
+                                                    <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        {val.message}
+                                                    </p>
+                                                </div>
+                                                {val.TicketAttachments.length > 0 ?
+                                                    <ImageList sx={{ width: '100%', height: 'auto' }} cols={4} rowHeight={100}>
+                                                        {val.TicketAttachments.map((item, key) => (
+                                                            <ImageListItem key={key}>
+                                                                <img
+                                                                    src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}
+                                                                    srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
+                                                                    alt={`File ${key + 1}`}
+                                                                    loading="lazy"
+                                                                    className="cursor-pointer rounded-6"
+                                                                    onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
+                                                                />
+                                                            </ImageListItem>
+                                                        ))}
+                                                    </ImageList>
+                                                    : ''
+                                                }
                                             </div>
-                                            <div>
-                                                <p>
-                                                    {val.message}
-                                                </p>
-                                            </div>
-                                            {val.TicketAttachments.length > 0 ?
-                                                <ImageList sx={{ width: '100%', height: 'auto' }} cols={4} rowHeight={100}>
-                                                    {val.TicketAttachments.map((item, key) => (
-                                                        <ImageListItem key={key}>
-                                                            <img
-                                                                src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}
-                                                                srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
-                                                                alt={`File ${key + 1}`}
-                                                                loading="lazy"
-                                                                className="cursor-pointer rounded-6"
-                                                                onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
-                                                            />
-                                                        </ImageListItem>
-                                                    ))}
-                                                </ImageList>
-                                                : ''
-                                            }
                                         </div>
-                                    </div>
                                     )
                                 })
                                 }
@@ -446,7 +446,7 @@ function TicketingSystemPage(props) {
                             <div className="flex flex-col justify-start p-0 m-0 mt-16" >
                                 <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
                                     <Typography component={'h2'}>
-                                        <b>Previous Tickets ({previousTickets.length})</b>
+                                        <b>Other Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
                                 <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }}>
