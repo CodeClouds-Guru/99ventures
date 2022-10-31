@@ -19,11 +19,11 @@ function checkPermission(permissions, module, action) {
     ) {
       return true
     } else if (
-      ['fetchDropdownOptions'].indexOf(action) > -1 &&
+      ['fetchDropdownOptions','download'].indexOf(action) > -1 &&
       checkCombination(module, 'list', permission)
     ) {
       return true
-    } else if (checkCombination(module, action, permission)) {
+    }else if (checkCombination(module, action, permission)) {
       return true
     }
   }

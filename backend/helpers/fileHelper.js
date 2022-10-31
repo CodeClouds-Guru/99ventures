@@ -1,8 +1,7 @@
 const AWS = require('aws-sdk')
 const assert = require('assert')
 var fs = require('fs')
-// const join = require('path').join
-// const s3Zip = require('s3-zip')
+const ArchieverClass = require("../helpers/Archiever");
 class FileHelper {
   constructor(files, model, req, new_filename) {
     this.company_id = ''
@@ -32,7 +31,7 @@ class FileHelper {
     this.generateSignedUrl = this.generateSignedUrl.bind(this)
     this.deleteFile = this.deleteFile.bind(this)
     this.copyObjects = this.copyObjects.bind(this)
-    // this.zipFiles = this.zipFiles.bind(this)
+    this.zipFiles = this.zipFiles.bind(this)
   }
   //upload file to s3 bucket  
   async upload(metadata) {
@@ -234,14 +233,36 @@ class FileHelper {
     return true
   }
   //create zip files
-  // async zipFiles(){
-  //   const folder = 'CodeClouds/1/zip-files'
-  //   const file1 = 'CodeClouds/1/file-manager/abc/new-folder-5/folder1/1665648723532Building-a-Great-Team-for-Your-Start-up.jpg'
-  //   const file2 = 'CodeClouds/1/file-manager/1666002426150png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png'
-  //   const output = fs.createWriteStream(join(__dirname, 'use-s3-zip.zip'))
-  //   let zipped_file = s3Zip.archive({ region: process.env.AWS_DEFAULT_REGION, bucket: process.env.S3_BUCKET_NAME}, folder, [file1, file2]).pipe(output)
-  //   console.log('zipped_file',zipped_file)
-  // }
+  async zipFiles(res){
+    const archiver = new ArchieverClass('files');
+    let s3 = this.s3Connect()
+    let flag = false
+    
+    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg','CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
+    for(let i = 0; i < object_keys.length; i++){
+      let file_structure = []
+      file_structure = object_keys[i].split('/')
+      let s3File = await s3.getObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: object_keys[i]
+      }).promise()
+      if ('Body' in s3File) {
+        flag = true;
+        archiver.append(s3File.Body, file_structure[file_structure.length - 1])
+      }
+    }
+    if (flag) {
+      archiver.finalize();
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", "attachment; filename=testzip.zip");
+      archiver.zip.pipe(res);
+    } else {
+      res.json({
+        status: false,
+        message: 'No file to archieve'
+      })
+    }
+  }
 }
 
 module.exports = FileHelper

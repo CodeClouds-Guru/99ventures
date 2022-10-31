@@ -1,5 +1,7 @@
 const FileHelper = require('../../helpers/fileHelper')
 const mime = require('mime-types')
+const ArchieverClass = require("../../helpers/Archiever");
+
 class FileManagerController {
   constructor() { }
   async list(req, res) {
@@ -114,7 +116,7 @@ class FileManagerController {
   //upload file
   async save(req, res) {
     if(req.body.type == 'download'){
-      let download_zip = await this.downloadFiles(req)
+      let download_zip = await this.download(req,res)
     }else{
       let file_path = req.body.file_path
       if (file_path != '') {
@@ -220,9 +222,37 @@ class FileManagerController {
     }
   }
   //download files
-  async downloadFiles(req){
+  async download(req,res){
     const fileHelper = new FileHelper('', 'zip-files', req)
-    let download_zip = await fileHelper.zipFiles()
+    // let download_zip = await fileHelper.zipFiles(res)
+    const archiver = new ArchieverClass('files')
+    let s3 = await fileHelper.s3Connect()
+    let flag = false
+    
+    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg','CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
+    for(let i = 0; i < object_keys.length; i++){
+      let file_structure = []
+      file_structure = object_keys[i].split('/')
+      let s3File = await s3.getObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: object_keys[i]
+      }).promise()
+      if ('Body' in s3File) {
+        flag = true;
+        archiver.append(s3File.Body, file_structure[file_structure.length - 1])
+      }
+    }
+    if (flag) {
+      archiver.finalize();
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", "attachment; filename=files.zip");
+      archiver.zip.pipe(res);
+    } else {
+      res.json({
+        status: false,
+        message: 'No file to archieve'
+      })
+    }
   }
 }
 
