@@ -188,30 +188,37 @@ function TicketingSystemPage(props) {
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
                     >
-                        <DialogTitle id="alert-dialog-title">
-                            Add Note
-                        </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
+                        <div style={{width: '600px', maxWidth: '100%'}}>
+                            <DialogTitle id="alert-dialog-title">
+                                Add Note
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
 
-                            </DialogContentText>
-                            <TextareaAutosize className="w-full border-1"
-                                aria-label="empty textarea"
-                                placeholder=""
-                                minRows={3}
-                                onChange={handleNote}
-                                value={memberNote}
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            <div className="flex justify-between px-20">
-                                <Button className="mx-10" variant="outlined" onClick={cancelAndResetNote} color="error">Cancel</Button>
-                                <Button className="mx-10" variant="outlined" onClick={addNote('cancel')}>Skip</Button>
-                                <Button className="mx-10" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote.trim()}>
-                                    Save
-                                </Button>
-                            </div>
-                        </DialogActions>
+                                </DialogContentText>
+                                <TextareaAutosize className="w-full border-1"
+                                    aria-label="empty textarea"
+                                    placeholder=""
+                                    minRows={3}
+                                    onChange={handleNote}
+                                    value={memberNote}
+                                    style={{height: '130px'}}
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <div className="flex justify-between px-20 w-full">
+                                    <div>
+                                    <Button className="mr-10 px-20" variant="outlined" onClick={cancelAndResetNote} color="error">Cancel</Button>
+                                    </div>
+                                    <div>
+                                    <Button className="mx-10 px-20" variant="outlined" onClick={addNote('cancel')}>Skip</Button>
+                                    <Button className="ml-10 px-20" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote.trim()}>
+                                        Save
+                                    </Button>
+                                    </div>
+                                </div>
+                            </DialogActions>
+                        </div>
                     </Dialog>
                     <div className="md:flex w-full h-full mx-auto sm:mx-0" /*style={{ height: '49.8rem' }}*/>
                         <div className="h-full w-full md:w-1/2 border-2 rounded-l-2xl mb-10 md:mb-0">
@@ -249,41 +256,45 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '48.5rem', }}>
+                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '39.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
-                                                <div className="flex flex-row justify-between pb-8">
-                                                    <span style={{ fontSize: '12px' }}>
-                                                        <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
-                                                    </span>
-                                                    <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
-                                                </div>
-                                                <div>
-                                                    <p>
-                                                        {val.message}
-                                                    </p>
-                                                </div>
-                                                {val.TicketAttachments.length > 0 ?
-                                                    <ImageList sx={{ width: '100%', height: 'auto' }} cols={4} rowHeight={100}>
-                                                        {val.TicketAttachments.map((item, key) => (
-                                                            <ImageListItem key={key}>
-                                                                <img
-                                                                    src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}
-                                                                    srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
-                                                                    alt={`File ${key + 1}`}
-                                                                    loading="lazy"
-                                                                    className="cursor-pointer rounded-6"
-                                                                    onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
-                                                                />
-                                                            </ImageListItem>
-                                                        ))}
-                                                    </ImageList>
-                                                    : ''
-                                                }
+                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end'} : { justifyContent: 'flex-start' }}>
+                                        <div  className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                            <div className="flex flex-row justify-between pb-8">
+                                                <span style={{ fontSize: '12px' }}>
+                                                    <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
+                                                </span>
+                                                <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                             </div>
+                                            <div style={{maxWidth: '265px'}}>
+                                                <p>
+                                                    {val.message}
+                                                </p>
+                                            </div>
+                                            {val.TicketAttachments.length > 0 ?
+                                                <ImageList sx={{ width: '100%', height: 'auto'}} cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} /*rowHeight={212}*/>
+                                                    {val.TicketAttachments.map((item, key) => (
+                                                        <ImageListItem key={key} style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                                            <div style={{height: '100px', overflow: 'hidden', width: '160px', marginBottom: '4px'}}>
+                                                            <img
+                                                                src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}ß
+                                                                srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
+                                                                alt={`File ${key + 1}`}
+                                                                loading="lazy"
+                                                                className="cursor-pointer rounded-6"
+                                                                style={{objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%'}}
+                                                                onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
+                                                            />
+                                                            </div>
+                                                        </ImageListItem>
+                                                    ))}
+                                                </ImageList>
+                                                : ''
+                                               
+                                            }
                                         </div>
+                                    </div>
                                     )
                                 })
                                 }
@@ -421,16 +432,16 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0">
-                                    <div className="flex flex-row justify-start p-0 m-0 pl-5 my-5">
+                                <div className="flex flex-col justify-start p-0 m-0 px-4">
+                                    <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '41.5rem' }}>
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '31.5rem' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
-                                                <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                                <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
                                                         <span style={{ fontSize: '12px' }}>
                                                             <i>
@@ -451,16 +462,16 @@ function TicketingSystemPage(props) {
                                 : ''
                             }
                             <Divider />
-                            <div className="flex flex-col justify-start p-0 m-0 mt-16" >
-                                <div className="flex flex-row justify-start p-0 m-0 pl-5 mb-5">
+                            <div className="flex flex-col justify-start p-0 m-0 mt-16 mb-10 px-4" >
+                                <div className="flex flex-row justify-start p-0 m-0 px-4 mb-5">
                                     <Typography component={'h2'}>
                                         <b>Other Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }}>
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
-                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 mt-10" style={{ background: '#dcdcdc' }}>
+                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
                                                 <div className="flex flex-row justify-end" style={{ fontSize: '10px' }}>
                                                     {Helper.parseTimeStamp(val.created_at)}
                                                 </div>

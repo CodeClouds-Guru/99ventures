@@ -3,11 +3,25 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     // Add seed commands here.
-    var fileManagerConfigObj = {
-      images: ["jpeg", "jpg", "png", "gif"],
-      files: ["css", "js", "html"],
-      documents: ["xlsx", "pdf", "xlx", "docx", "doc", "odt"],
-      audio: ["mp3"],
+    // var fileManagerConfigObj = {
+    //   images: ["jpeg", "jpg", "png", "gif"],
+    //   files: ["css", "js", "html"],
+    //   documents: ["xlsx", "pdf", "xlx", "docx", "doc", "odt"],
+    //   audio: ["mp3"],
+    // };
+    let fileManagerConfigObj = {
+      images: ["image/jpeg", "image/png"],
+      documents: [
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/pdf",
+      ],
+      videos: [],
+      audio: [],
     };
     await queryInterface.bulkInsert(
       "settings",

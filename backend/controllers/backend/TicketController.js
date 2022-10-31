@@ -347,15 +347,19 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-// console.log('---------------------TicketConversation',savedTicketConversation)
-// console.log('---------------------attachments',attachments)
+      // console.log('---------------------TicketConversation',savedTicketConversation)
+      // console.log('---------------------attachments',attachments)
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
-        const fileHelper = new FileHelper(files, "tickets/" + savedTicketConversation.id, req);
+        const fileHelper = new FileHelper(
+          files,
+          "tickets/" + savedTicketConversation.id,
+          req
+        );
         const file_name = await fileHelper.upload();
-
+        console.log(file_name);
         const dataFiles = file_name.files.map((values) => {
           return {
             ticket_conversation_id: savedTicketConversation.id,
