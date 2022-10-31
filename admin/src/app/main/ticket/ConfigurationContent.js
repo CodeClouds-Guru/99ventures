@@ -129,6 +129,7 @@ function ConfigurationContent() {
                 moduleHeading='N/A'
                 where={whereClause}
                 key={listKey}
+                addable={false}
             />
         </div>
     );
