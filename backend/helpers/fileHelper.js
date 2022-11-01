@@ -38,7 +38,11 @@ class FileHelper {
     var path = await this.getPath(this.model)
     for (var key of Object.keys(this.files)) {
       var file = this.files[key]
-      var new_filename = Date.now() + file.name
+      let file_name = file.name;
+      let file_name_arr = file_name.split('.')
+      file_name = file_name.replaceAll('.'+file_name_arr[file_name_arr.length - 1],'')
+      file_name = file_name.replaceAll(' ','-')
+      var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
       try {
         let s3 = await this.s3Connect()
         const imagePath = file.tempFilePath

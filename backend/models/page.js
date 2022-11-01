@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
     part_url: DataTypes.STRING,
+    page_json: DataTypes.JSON,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

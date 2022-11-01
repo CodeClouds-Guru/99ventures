@@ -16,7 +16,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       html: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT('long'),
+      },
+      component_json: {
+        type: Sequelize.JSON,
       },
       code: {
         type: Sequelize.STRING

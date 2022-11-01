@@ -18,6 +18,9 @@ module.exports = {
       code: {
         type: Sequelize.STRING
       },
+      layout_json: {
+        type: Sequelize.JSON,
+      },
       created_by: {
         type: Sequelize.BIGINT,
       },

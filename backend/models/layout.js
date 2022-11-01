@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     company_portal_id: DataTypes.BIGINT,
     name: DataTypes.STRING,
     code: DataTypes.STRING,
+    layout_json: DataTypes.JSON,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -85,6 +86,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    layout_json: {
+      field_name: 'layout_json',
+      db_name: 'layout_json',
+      type: 'text',
+      placeholder: 'JSON',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
     created_at: {
       field_name: 'created_at',
       db_name: 'created_at',
@@ -105,6 +119,7 @@ module.exports = (sequelize, DataTypes) => {
       name: Joi.string().required().label('Name'),
       code: Joi.string().required().label('Code'),
       company_portal_id: Joi.required().label('Company portal'),
+      layout_json: Joi.string().required().label('JSON'),
     })
     return schema.validate(req.body)
   }

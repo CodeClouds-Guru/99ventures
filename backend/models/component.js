@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   Component.init({
     company_portal_id: DataTypes.BIGINT,
     name: DataTypes.STRING,
-    html: DataTypes.TEXT,
+    html: DataTypes.TEXT('long'),
     code: {
       type: DataTypes.STRING,
       unique: {
@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         msg: "Code already in use!",
       },
     },
+    component_json: DataTypes.JSON,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -92,6 +93,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    component_json: {
+      field_name: 'component_json',
+      db_name: 'component_json',
+      type: 'text',
+      placeholder: 'JSON',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
     code: {
       field_name: 'code',
       db_name: 'code',
@@ -125,6 +139,7 @@ module.exports = (sequelize, DataTypes) => {
       name: Joi.string().required().label('Name'),
       code: Joi.string().required().label('Code'),
       html: Joi.string().required().label('HTML'),
+      component_json: Joi.string().required().label('JSON'),
       company_portal_id: Joi.required().label('Company portal'),
     })
     return schema.validate(req.body)
