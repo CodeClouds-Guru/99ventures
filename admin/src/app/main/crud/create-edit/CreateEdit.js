@@ -23,6 +23,7 @@ import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
 import PermissionSettings from './components/PermissionSettings';
 import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
+import ComponentsCreateUpdate from '../../components/create-update/CreateUpdate';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -109,7 +110,7 @@ function CreateEdit(props) {
   }
 
   const createForm = () => { }
-
+  const module_arr = ['email-templates', 'tickets', 'components', 'pages', 'layouts']
   return (
     <FusePageCarded
       header={
@@ -119,10 +120,12 @@ function CreateEdit(props) {
       content={
         <>
           <div>
-            <div className={`${module !== 'tickets' ? 'p-16 sm:p-24' : ''} ${module === 'email-templates' || module === 'tickets' ? 'w-full' : 'max-w-3xl'}`} >
+            <div className={` ${module_arr.includes(module) ? 'w-full' : 'max-w-3xl p-16 sm:p-24'}`} >
               {errors && <Alert severity="error">{errors}</Alert>}
               {/* <CreateEditForm moduleOnSave={moduleOnSaveHandler} /> */}
-              {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> : <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
+              {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
+                module === 'components' ? <ComponentsCreateUpdate componentsId={moduleId} /> :
+                  <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
             </div>
             {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
           </div>

@@ -6,7 +6,6 @@ function ComponentsContent() {
         <>
             <List
                 module="components"
-                moduleHeading="Components"
                 where={{ company_portal_id: JwtService.getCompanySiteId().site_id }}
             />
         </>

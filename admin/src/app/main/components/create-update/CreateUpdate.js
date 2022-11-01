@@ -7,18 +7,18 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
-import '../ScriptStyle.css'
+import '../../scripts/ScriptStyle.css';
+import Helper from 'src/app/helper';
 
-const CreateUpdateForm = () => {
+const CreateUpdate = () => {
     const moduleId = useParams().id;
-    const module = 'scripts';
+    const module = 'components';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
@@ -29,14 +29,10 @@ const CreateUpdateForm = () => {
     const [changeCount, setChangeCount] = useState(0);
     const [allData, setAllData] = useState({
         name: '',
-        script_html: '',
-        script_json: '',
+        html: '',
+        component_json: '',
         status: true
     });
-
-    const handleChange = (e) => {
-        setAllData({ ...allData, status: e.target.checked });
-    };
 
     useEffect(() => {
         const editor = grapesjs.init({
@@ -209,23 +205,6 @@ const CreateUpdateForm = () => {
         return txtarea
     }
 
-
-    // useEffect(() => {
-    //     console.log(changeCount)
-    //     if(changeCount > 0)
-    //         window.addEventListener("beforeunload", handleUnload);
-    //     return () => {
-    //       window.removeEventListener("beforeunload", handleUnload);
-    //     };
-    //   }, [changeCount]);
-
-    //   const handleUnload = (e) => {
-    //     const message = "Hello";
-    //    (e || window.event).returnValue = message; //Gecko + IE
-    //     return message;
-    //   };
-
-
     const loadEditorData = async (editor) => {
         if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId, editor);
@@ -235,8 +214,8 @@ const CreateUpdateForm = () => {
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
-                script_json: editor.getProjectData(),
-                script_html: generatedHTMLValue(editor)
+                component_json: editor.getProjectData(),
+                html: generatedHTMLValue(editor)
             });
         };
     }
@@ -287,11 +266,12 @@ const CreateUpdateForm = () => {
         if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
-                script_html: generatedHTMLValue(editor),
-                script_json: editorJsonBody,
+                code: Helper.stringToSlug(allData.name),
+                html: generatedHTMLValue(editor),
+                component_json: editorJsonBody,
                 status: allData.status
             }
-            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateScriptsData + `/${moduleId}` : jwtServiceConfig.saveScriptsData;
+            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateComponents + `/${moduleId}` : jwtServiceConfig.saveComponents;
 
             setLoading(true);
             axios.post(endPoint, params)
@@ -309,10 +289,8 @@ const CreateUpdateForm = () => {
                         });
                         dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
                         if (moduleId === 'create') {
-                            navigate(`/app/scripts/${response.data.results.result.id}`);
+                            navigate(`/app/components/${response.data.results.result.id}`);
                         }
-                        // else
-                        //     getSingleRecordById(moduleId, editor);
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }
@@ -325,18 +303,18 @@ const CreateUpdateForm = () => {
     }
 
     const getSingleRecordById = (id, editor) => {
-        axios.get(jwtServiceConfig.getSingleScriptData + `/${id}`)
+        axios.get(jwtServiceConfig.getSingleComponent + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
                     const record = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
                         name: record.name,
-                        script_html: record.script_html,
-                        script_json: record.script_json,
+                        html: record.html,
+                        component_json: record.component_json,
                         status: Boolean(record.status)
                     }));
-                    editor.loadProjectData(record.script_json);
+                    editor.loadProjectData(record.component_json);
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     setChangeCount(changeCount => changeCount - 1);
@@ -382,13 +360,12 @@ const CreateUpdateForm = () => {
 
     return (
         <>
-            <CreateEditHeader module={module} moduleId={moduleId} />
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
-                        <FormControl className="w-1/2 mb-24 pr-24">
+                        <FormControl className="w-1/2 mb-24 pr-10">
                             <TextField
-                                label="Script Name"
+                                label="Name"
                                 type="text"
                                 error={!!errors.name}
                                 helperText={errors?.name?.message}
@@ -399,21 +376,19 @@ const CreateUpdateForm = () => {
                             />
                             <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                         </FormControl>
-                        <FormControl className="w-1/2 mb-24">
-                            <InputLabel shrink htmlFor="status-switch">
-                                Insets
-                            </InputLabel>
-                            <Switch
-                                size="large"
-                                id="status-switch"
-                                checked={allData.status}
-                                onChange={handleChange}
-                                inputProps={{ 'aria-label': 'controlled' }}
+                        <FormControl className="w-1/2 mb-24 pl-10">
+                            <TextField
+                                label="Code"
+                                type="text"
+                                variant="outlined"
+                                value={Helper.stringToSlug(allData.name)}
+                                readOnly
+                                disabled
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
                             <div id="gjs" />
-                            <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
+                            <FormHelperText error variant="standard">{errors.html}</FormHelperText>
                         </FormControl>
 
                         <motion.div
@@ -454,4 +429,4 @@ const CreateUpdateForm = () => {
     )
 }
 
-export default CreateUpdateForm;
+export default CreateUpdate;

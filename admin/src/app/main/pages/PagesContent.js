@@ -4,7 +4,6 @@ function PagesContent() {
     return (
         <List
             module="pages"
-            moduleHeading="Pages"
             where={{ company_portal_id: JwtService.getCompanySiteId().site_id }}
         />
     );
