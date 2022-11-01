@@ -9,7 +9,7 @@ const selectAll = () => {
 
     const handleChange = (event) => {
         if(event.target.checked){
-            const ids = listData.map(el=> el.id);
+            const ids = listData.filter(el => el.type !== 'folder').map(el=> el.id);
             dispatch(setSelectedItemsId(ids))
         } else {
             dispatch(setSelectedItemsId([]));
@@ -22,7 +22,7 @@ const selectAll = () => {
                 <Checkbox 
                     sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                     checked={ Boolean(
-                        selectedItemsId.length && selectedItemsId.length === listData.length
+                        selectedItemsId.length && selectedItemsId.length === listData.filter(el => el.type !== 'folder').length
                     ) }
                     onChange={handleChange} 
                     inputProps={{ 'aria-label': 'controlled' }}

@@ -39,6 +39,7 @@ function TicketingSystemPage(props) {
     const [memberNote, setMemberNote] = useState('');
 
     const stateUser = useSelector(state => state.user);
+    const navigate = useNavigate();
 
     useEffect(() => {
         getTicketDetails();
@@ -49,7 +50,7 @@ function TicketingSystemPage(props) {
     const handleFiles = (e) => {
         setInputFiles([]);
         const { files } = e.target;
-        if (files && Object.keys(files).length <= 5) {
+        if (files && Object.keys(files).length <= 4) {
             var allowed_files = [];
             Object.values(files).map((val, key) => {
                 var parts = val.name.split(".");
@@ -65,7 +66,7 @@ function TicketingSystemPage(props) {
                 preview: URL.createObjectURL(file)
             })));
         } else {
-            dispatch(showMessage({ variant: 'error', message: 'Allowed upto 5 files at a time.' }));
+            dispatch(showMessage({ variant: 'error', message: 'Allowed upto 4 files at a time.' }));
         }
     };
     const handleChangeTicketStatus = (event) => {
@@ -188,7 +189,7 @@ function TicketingSystemPage(props) {
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
                     >
-                        <div style={{width: '600px', maxWidth: '100%'}}>
+                        <div style={{ width: '600px', maxWidth: '100%' }}>
                             <DialogTitle id="alert-dialog-title">
                                 Add Note
                             </DialogTitle>
@@ -202,26 +203,26 @@ function TicketingSystemPage(props) {
                                     minRows={3}
                                     onChange={handleNote}
                                     value={memberNote}
-                                    style={{height: '130px'}}
+                                    style={{ height: '130px' }}
                                 />
                             </DialogContent>
                             <DialogActions>
                                 <div className="flex justify-between px-20 w-full">
                                     <div>
-                                    <Button className="mr-10 px-20" variant="outlined" onClick={cancelAndResetNote} color="error">Cancel</Button>
+                                        <Button className="mr-10 px-20" variant="outlined" onClick={cancelAndResetNote} color="error">Cancel</Button>
                                     </div>
                                     <div>
-                                    <Button className="mx-10 px-20" variant="outlined" onClick={addNote('cancel')}>Skip</Button>
-                                    <Button className="ml-10 px-20" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote.trim()}>
-                                        Save
-                                    </Button>
+                                        <Button className="mx-10 px-20" variant="outlined" onClick={addNote('cancel')}>Skip</Button>
+                                        <Button className="ml-10 px-20" variant="outlined" onClick={addNote('save')} color="success" autoFocus disabled={!memberNote.trim()}>
+                                            Save
+                                        </Button>
                                     </div>
                                 </div>
                             </DialogActions>
                         </div>
                     </Dialog>
                     <div className="md:flex w-full h-full mx-auto sm:mx-0" /*style={{ height: '49.8rem' }}*/>
-                        <div className="h-full w-full md:w-1/2 border-2 rounded-l-2xl mb-10 md:mb-0">
+                        <div className="h-full w-full md:w-8/12 border-2 rounded-l-2xl mb-10 md:mb-0">
                             <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
                                 <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
                                     <Typography
@@ -256,45 +257,45 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                             <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '39.5rem', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '39.5rem', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
-                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end'} : { justifyContent: 'flex-start' }}>
-                                        <div  className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#dcdcdc', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
-                                            <div className="flex flex-row justify-between pb-8">
-                                                <span style={{ fontSize: '12px' }}>
-                                                    <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
-                                                </span>
-                                                <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
+                                        <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
+                                            <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                                <div className="flex flex-row justify-between pb-8">
+                                                    <span style={{ fontSize: '12px' }}>
+                                                        <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
+                                                    </span>
+                                                    <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        {val.message}
+                                                    </p>
+                                                </div>
+                                                {val.TicketAttachments.length > 0 ?
+                                                    <ImageList sx={{ width: '100%', height: 'auto' }} cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} /*rowHeight={212}*/>
+                                                        {val.TicketAttachments.map((item, key) => (
+                                                            <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px' }}>
+                                                                <div style={{ height: '100px', overflow: 'hidden', width: '160px', marginBottom: '4px' }}>
+                                                                    <img
+                                                                        src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`} ß
+                                                                        srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
+                                                                        alt={`File ${key + 1}`}
+                                                                        loading="lazy"
+                                                                        className="cursor-pointer rounded-6"
+                                                                        style={{ objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%' }}
+                                                                        onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
+                                                                    />
+                                                                </div>
+                                                            </ImageListItem>
+                                                        ))}
+                                                    </ImageList>
+                                                    : ''
+
+                                                }
                                             </div>
-                                            <div style={{maxWidth: '265px'}}>
-                                                <p>
-                                                    {val.message}
-                                                </p>
-                                            </div>
-                                            {val.TicketAttachments.length > 0 ?
-                                                <ImageList sx={{ width: '100%', height: 'auto'}} cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} /*rowHeight={212}*/>
-                                                    {val.TicketAttachments.map((item, key) => (
-                                                        <ImageListItem key={key} style={{paddingLeft: '2px', paddingRight: '2px'}}>
-                                                            <div style={{height: '100px', overflow: 'hidden', width: '160px', marginBottom: '4px'}}>
-                                                            <img
-                                                                src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`}ß
-                                                                srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
-                                                                alt={`File ${key + 1}`}
-                                                                loading="lazy"
-                                                                className="cursor-pointer rounded-6"
-                                                                style={{objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%'}}
-                                                                onClick={(e) => { e.preventDefault(); handleOpenPreview(item.file_name) }}
-                                                            />
-                                                            </div>
-                                                        </ImageListItem>
-                                                    ))}
-                                                </ImageList>
-                                                : ''
-                                               
-                                            }
                                         </div>
-                                    </div>
                                     )
                                 })
                                 }
@@ -356,7 +357,7 @@ function TicketingSystemPage(props) {
                                                 multiple
                                                 accept="image/jpg, image/jpeg, image/png, image/gif, image/JPG, image/JPEG, image/PNG, image/GIF"
                                             />
-                                            <Tooltip title="Attach upto 5 files" placement="left">
+                                            <Tooltip title="Attach upto 4 files" placement="left">
                                                 <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
@@ -369,11 +370,17 @@ function TicketingSystemPage(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-full w-full md:w-1/2 border-2 rounded-r-2xl">
-                            <div className="flex flex-row justify-center sm:justify-start p-0 m-0 pl-5 mt-10 mb-5">
+                        <div className="h-full w-full md:w-4/12 border-2 rounded-r-2xl">
+                            <div className="flex flex-row  p-0 m-0 pl-5 pr-5 mt-10 mb-5 justify-between">
                                 <Typography component={'h2'}>
                                     <b>Member details</b>
                                 </Typography>
+                                <div className="flex">
+                                    <Typography component={'h4'} className="pr-5">
+                                        <b>Total Earnings: $</b>
+                                    </Typography>
+                                    {memberDetails.total_earnings}
+                                </div>
                             </div>
                             <div className="sm:flex flex-row justify-between p-0 m-0 pb-10">
                                 <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
@@ -420,14 +427,14 @@ function TicketingSystemPage(props) {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div className="flex flex-row justify-center sm:justify-end pr-20">
+                                    {/* <div className="flex flex-row justify-center sm:justify-end pr-20">
                                         <div className="flex">
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Total Earnings:</b>
                                             </Typography>
                                             {memberDetails.total_earnings} USD
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <Divider />
@@ -471,7 +478,7 @@ function TicketingSystemPage(props) {
                                 <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
-                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
+                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>
                                                 <div className="flex flex-row justify-end" style={{ fontSize: '10px' }}>
                                                     {Helper.parseTimeStamp(val.created_at)}
                                                 </div>

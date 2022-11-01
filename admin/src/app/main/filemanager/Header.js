@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedItemsId, setSelectedItem, setViewType, deleteData, setListData, setLoading, setFolderOptions } from 'app/store/filemanager'
 import { downloadFile } from './helper';
 import { orderBy } from 'lodash';
+import axios from 'axios'
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -75,6 +76,56 @@ const Header = (props) => {
             downloadFile(fileData.file_path, fileData.mime_type);
         } else if(selectedItem) {
             downloadFile(selectedItem.file_path, selectedItem.mime_type);
+        } else if(selectedItemIdArry.length && selectedItemIdArry.length >= 2) {
+            console.log('Download');
+
+            axios.post('file-manager/download')
+            .then((response) => {
+                console.log(response)        
+                const url = new Blob([response.data],{type:'application/zip'});
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'file.zip');
+                document.body.appendChild(link);
+                link.click();        
+            })
+            .catch(error => {
+                console.log(error)                
+            });
+
+            // const urls = [
+            //     // "https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/xyz/1666010535178download.jpeg",
+            //     // "https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/xyz/1665753910733person-holds-a-book-over-a-stack-and-turns-the-page.jpg"
+
+            //     "http://localhost:3000/assets/images/logo/logo.svg"
+
+            // ]
+
+            // const zip = new JSZip();
+            // const folder = zip.folder("files"); // folder name where all files will be placed in 
+        
+            // urls.forEach((url) => {
+            //     const blobPromise = fetch(url).then((r) => {
+            //         console.log(r.blob())
+            //         if (r.status === 200) return r.blob();
+            //         return Promise.reject(new Error(r.statusText));
+            //     });
+            //     const name = url.substring(url.lastIndexOf("/") + 1);
+            //     folder.file(name, blobPromise);
+                
+            // });
+
+
+        
+            // zip.generateAsync({ type: "blob" }).then((blob) => 
+            //     {
+            //         console.log(blob)
+            //     }
+            // );
+
+
+
+            
         }
         return;
     }
@@ -104,12 +155,12 @@ const Header = (props) => {
                         (selectedItemIdArry.length || selectedItem) && (
                             <>
                                 <Tooltip title="Delete">
-                                    <IconButton color="primary" aria-label="Filter" component="label" onClick={ onOpenAlertDialogHandle }>
+                                    <IconButton color="primary" aria-label="Delete" component="label" onClick={ onOpenAlertDialogHandle }>
                                         <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:trash</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Download">
-                                    <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleFileDownload }>
+                                    <IconButton color="primary" aria-label="Download" component="label" onClick={ handleFileDownload }>
                                         <FuseSvgIcon className="text-48" size={26} color="action">material-outline:file_download</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
@@ -117,15 +168,17 @@ const Header = (props) => {
                         )
                     }
                 </div>
-                <div className="flex " variant="outlined">                  
+                <div className="flex " variant="outlined">
                     { props.search }
                 </div>
                 <div className='flex'>
-                    <Tooltip title="Filter">
-                        <IconButton color="primary" aria-label="Filter" component="label" onClick={ handleMenuClick } >
-                            <FuseSvgIcon className="text-48" size={26} color="action">heroicons-outline:filter</FuseSvgIcon>
+                    <Tooltip title="Sorting">
+                        <IconButton color="primary" aria-label="Sorting" component="label" onClick={ handleMenuClick } >                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" style={{ 'fill': 'rgba(0, 0, 0, 0.54)'}} viewBox="0 0 26 26">
+                                <path d="M6 21l6-8h-4v-10h-4v10h-4l6 8zm16-12h-8v-2h8v2zm2-6h-10v2h10v-2zm-4 8h-6v2h6v-2zm-2 4h-4v2h4v-2zm-2 4h-2v2h2v-2z"/>
+                            </svg>
                         </IconButton>
-                    </Tooltip>                    
+                    </Tooltip>
 
                     <Menu
                         id="actions-menu"
@@ -149,12 +202,12 @@ const Header = (props) => {
                 </div>
                 <div className='flex view--type'>
                     <Tooltip title="Grid">
-                        <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('grid'))} className={ viewType === 'grid' ? 'active' : '' }>
+                        <IconButton color="primary" aria-label="Grid" component="label" onClick={()=> dispatch(setViewType('grid'))} className={ viewType === 'grid' ? 'active' : '' }>
                             <FuseSvgIcon className="text-48" size={26} color="action">material-outline:grid_view</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="List">
-                        <IconButton color="primary" aria-label="Filter" component="label" onClick={()=> dispatch(setViewType('list'))} className={ viewType === 'list' ? 'active' : ''}>
+                        <IconButton color="primary" aria-label="List" component="label" onClick={()=> dispatch(setViewType('list'))} className={ viewType === 'list' ? 'active' : ''}>
                             <FuseSvgIcon className="text-48" size={26} color="action">material-outline:format_list_bulleted</FuseSvgIcon>
                         </IconButton>
                     </Tooltip>

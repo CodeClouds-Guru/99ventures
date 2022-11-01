@@ -226,7 +226,7 @@ class TicketController extends Controller {
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({
-          attributes: ["subject", "status", "is_read", "created_at"],
+          attributes: ["subject", "status", "is_read", "created_at", "id"],
           where: {
             [Op.and]: { member_id: result.member_id },
             id: { [Op.ne]: ticket_id },
