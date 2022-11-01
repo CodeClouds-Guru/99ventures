@@ -153,6 +153,20 @@ const FormField = () => {
             .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
     }
 
+    const handleSelectAll = (e) => {
+        var newFileTypes = [];
+        if(!e.target.checked) {
+            newFileTypes = fileTypes[e.target.name].map(el => {
+                return {...el, checked: false}
+            })
+        } else {
+            newFileTypes = fileTypes[e.target.name].map(el => {
+                return {...el, checked: true}
+            })
+        }
+        setFileTypes({...fileTypes, [e.target.name]: newFileTypes});
+    }
+
     return (
         <Box className="p-32" >
             <form style={{ display: 'flex', flexWrap: 'wrap' }} onSubmit={ handleSubmit(formSubmit) }>
@@ -211,7 +225,17 @@ const FormField = () => {
                                     id="panel1bh-header"
                                     >
                                         <Typography sx={{ width: '33%', flexShrink: 0 }} className="font-semibold">
-                                            { item.toUpperCase() }
+                                            <FormControlLabel 
+                                                control={
+                                                    <Checkbox 
+                                                        sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }} 
+                                                        onChange={ handleSelectAll } 
+                                                        value={ item }
+                                                        name={ item }
+                                                    />
+                                                } 
+                                                label={ item.toUpperCase() } 
+                                            />
                                         </Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -222,6 +246,7 @@ const FormField = () => {
                                                         key={i} 
                                                         control={
                                                             <Checkbox 
+                                                                sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }} 
                                                                 checked={ 
                                                                     Object.keys(fileTypes).length && fileTypes[item][i].checked ? true : false
                                                                 } 

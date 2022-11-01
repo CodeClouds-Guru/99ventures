@@ -13,6 +13,7 @@ function Index(props) {
 
     return (
         <FusePageCarded
+            className="sm:px-20"
             header={
                 <MainHeader module={module} slug="settings" />
             }
