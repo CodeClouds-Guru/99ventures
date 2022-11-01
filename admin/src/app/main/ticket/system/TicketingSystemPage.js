@@ -221,7 +221,7 @@ function TicketingSystemPage(props) {
                             </DialogActions>
                         </div>
                     </Dialog>
-                    <div className="md:flex w-full h-full mx-auto sm:mx-0" /*style={{ height: '49.8rem' }}*/>
+                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{height: 'calc(100vh - 140px)', overflow: 'auto' }}>
                         <div className="h-full w-full md:w-8/12 border-2 rounded-l-2xl mb-10 md:mb-0">
                             <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
                                 <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
@@ -257,7 +257,7 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '39.5rem', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 280px)', }}>
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
@@ -274,10 +274,10 @@ function TicketingSystemPage(props) {
                                                     </p>
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
-                                                    <ImageList sx={{ width: '100%', height: 'auto' }} cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} /*rowHeight={212}*/>
+                                                    <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4} /*cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} rowHeight={212}*/>
                                                         {val.TicketAttachments.map((item, key) => (
-                                                            <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px' }}>
-                                                                <div style={{ height: '100px', overflow: 'hidden', width: '160px', marginBottom: '4px' }}>
+                                                            <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px', justifyContent: 'flex-end', flexDirection: 'inherit' }}>
+                                                                <div style={{height: '120px', overflow: 'hidden', width: '100%', marginBottom: '4px' }}>
                                                                     <img
                                                                         src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`} ß
                                                                         srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
@@ -439,13 +439,13 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4">
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{height: 'calc(100% - 325px)'}}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '31.5rem' }} className="px-4">
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 25px)' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
@@ -475,7 +475,7 @@ function TicketingSystemPage(props) {
                                         <b>Other Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }} className="px-4">
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '150px' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>
