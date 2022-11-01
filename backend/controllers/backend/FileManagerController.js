@@ -11,13 +11,13 @@ class FileManagerController {
     }
     const fileHelper = new FileHelper('', file_path, req)
     let file_list = await fileHelper.getList()
-    let file_objects = await this.objectStructure(file_list,fileHelper)
+    let file_objects = await this.objectStructure(file_list, fileHelper)
     return {
       data: file_objects
     }
   }
   //get a file details
-  async view(req,res){
+  async view(req, res) {
     let id = req.params.id
     let object_key = Buffer.from(id, 'base64')
     object_key = object_key.toString('utf8')
@@ -26,22 +26,22 @@ class FileManagerController {
     var meta = await fileHelper.getMetaData(object_key)
     let metadata = []
     let file_objects = []
-    if(meta && 'Metadata' in meta)
+    if (meta && 'Metadata' in meta)
       metadata = meta.Metadata
-    if(req.query.type == 'metadata'){
+    if (req.query.type == 'metadata') {
       file_objects = {
-                      metadata: metadata,
-                    }
-    }else{
+        metadata: metadata,
+      }
+    } else {
       let file_list = await fileHelper.getObject()
       let mime_type = mime.lookup(
         process.env.S3_BUCKET_OBJECT_URL + object_key
       );
-      if(mime_type){
-      
+      if (mime_type) {
+
         let file_structure = []
         file_structure = object_key.split('/')
-  
+
         file_objects = {
           id: id,
           type: 'file',
@@ -59,7 +59,7 @@ class FileManagerController {
       data: file_objects
     }
   }
-  async objectStructure(file_list,fileHelper) {
+  async objectStructure(file_list, fileHelper) {
     let file_objects = []
     if (file_list.CommonPrefixes.length) {
       for (let i = 0; i < file_list.CommonPrefixes.length; i++) {
@@ -85,9 +85,9 @@ class FileManagerController {
         file_structure = file_list.Contents[j].Key.split('/')
         let object_key = file_list.Contents[j]
         let mime_type = mime.lookup(
-                          process.env.S3_BUCKET_OBJECT_URL + object_key.Key
-                        );
-        if(mime_type){
+          process.env.S3_BUCKET_OBJECT_URL + object_key.Key
+        );
+        if (mime_type) {
           file_objects.push({
             id: this.generateId(object_key.Key, '', ''),
             type: 'file',
@@ -115,9 +115,9 @@ class FileManagerController {
   }
   //upload file
   async save(req, res) {
-    if(req.body.type == 'download'){
-      let download_zip = await this.download(req,res)
-    }else{
+    if (req.body.type == 'download') {
+      let download_zip = await this.download(req, res)
+    } else {
       let file_path = req.body.file_path
       if (file_path != '') {
         file_path = 'file-manager' + '/' + file_path
@@ -127,13 +127,13 @@ class FileManagerController {
       let files = []
       let file_name = []
       let acl_txt = 'public-read-write'
-      if(req.body.private == 1)
+      if (req.body.private == 1)
         acl_txt = 'private'
-        
+
       let metadata = {
         'x-amz-meta-alt-name': req.body.alt_name,
         'x-amz-meta-private': req.body.private,
-        'x-amz-acl':acl_txt
+        'x-amz-acl': acl_txt
       }
 
       if (req.files) {
@@ -147,12 +147,12 @@ class FileManagerController {
         const fileHelper = new FileHelper('', folder_path, req)
         file_name = await fileHelper.createFolder()
       }
-      
+
       //get path object list
       const fileHelperList = new FileHelper('', file_path, req)
       let file_list = await fileHelperList.getList()
       // return file_list
-      let file_objects = await this.objectStructure(file_list,fileHelperList)
+      let file_objects = await this.objectStructure(file_list, fileHelperList)
 
       return {
         status: true,
@@ -182,7 +182,7 @@ class FileManagerController {
     let object_key = Buffer.from(id, 'base64')
     object_key = object_key.toString('utf8')
     let msg = "File Copied."
-    if(req.body.type != 'update-metadata'){
+    if (req.body.type != 'update-metadata') {
       let file_path = req.body.file_path
       if (file_path != '') {
         file_path = 'file-manager' + '/' + file_path
@@ -196,25 +196,25 @@ class FileManagerController {
 
       const fileHelper = new FileHelper('', object_key, req, file_name)
       let file_copy = await fileHelper.copyObjects(req.body.type)
-    }else{
+    } else {
       let acl_txt = 'public-read-write'
-      if(req.body.private == 1)
+      if (req.body.private == 1)
         acl_txt = 'private'
       let metadata = {
         'x-amz-meta-alt-name': req.body.alt_name,
         'x-amz-meta-private': req.body.private,
-        'x-amz-acl':acl_txt
+        'x-amz-acl': acl_txt
       }
       const fileHelper = new FileHelper('', object_key, req)
       let file_copy = await fileHelper.updateMetadata(metadata)
     }
-    if(req.body.type == 'copy-file')
+    if (req.body.type == 'copy-file')
       msg = "File Copied."
-    else if(req.body.type == 'copy')
+    else if (req.body.type == 'copy')
       msg = "Folder Copied."
-    else if(req.body.type == 'copy-file')
+    else if (req.body.type == 'copy-file')
       msg = "Folder Renamed."
-    
+
     return {
       status: true,
       message: msg,
@@ -222,15 +222,15 @@ class FileManagerController {
     }
   }
   //download files
-  async download(req,res){
+  async download(req, res) {
     const fileHelper = new FileHelper('', 'zip-files', req)
     // let download_zip = await fileHelper.zipFiles(res)
     const archiver = new ArchieverClass('files')
     let s3 = await fileHelper.s3Connect()
     let flag = false
-    
-    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg','CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
-    for(let i = 0; i < object_keys.length; i++){
+
+    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg', 'CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
+    for (let i = 0; i < object_keys.length; i++) {
       let file_structure = []
       file_structure = object_keys[i].split('/')
       let s3File = await s3.getObject({
@@ -244,6 +244,7 @@ class FileManagerController {
     }
     if (flag) {
       archiver.finalize();
+      console.log(archiver.zip.pointer() + ' total bytes');
       res.setHeader("Content-Type", "application/zip");
       res.setHeader("Content-Disposition", "attachment; filename=files.zip");
       archiver.zip.pipe(res);

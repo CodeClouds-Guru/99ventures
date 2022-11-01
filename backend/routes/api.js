@@ -41,7 +41,7 @@ router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
 
 //change ticket read status
 // router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
-router.post("file-manager/download", [AuthMiddleware], FileManagerController.download);
+router.post("/file-manager/download", [AuthMiddleware], FileManagerController.download);
 router.all(
   "/:module/:action?/:id?",
   [AuthMiddleware, checkPermissionMiddleware],

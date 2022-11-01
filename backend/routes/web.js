@@ -4,7 +4,7 @@ router.get('/', (req, res) => {
   res.status(200).send('99ventures backend')
 })
 
-router.get('/test', async (req, res) => {
+router.all('/test', async (req, res) => {
   const AWS = require('aws-sdk')
   const ArchieverClass = require("../helpers/Archiever");
   const archiver = new ArchieverClass('testzip');
@@ -40,7 +40,7 @@ router.get('/test', async (req, res) => {
   if (flag) {
     archiver.finalize();
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", "attachment; filename=testzip.zip");
+    res.setHeader("Content-Disposition", "attachment; filename=files.zip");
     archiver.zip.pipe(res);
   } else {
     res.json({
