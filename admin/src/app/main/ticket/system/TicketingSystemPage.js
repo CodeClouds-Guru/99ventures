@@ -39,6 +39,7 @@ function TicketingSystemPage(props) {
     const [memberNote, setMemberNote] = useState('');
 
     const stateUser = useSelector(state => state.user);
+    const navigate = useNavigate();
 
     useEffect(() => {
         getTicketDetails();
@@ -260,14 +261,14 @@ function TicketingSystemPage(props) {
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-auto flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem' } : { background: '#dcdcdc' }}>
+                                            <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
                                                     <span style={{ fontSize: '12px' }}>
                                                         <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
                                                     </span>
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
-                                                <div style={{ maxWidth: '265px' }}>
+                                                <div>
                                                     <p>
                                                         {val.message}
                                                     </p>
@@ -477,7 +478,7 @@ function TicketingSystemPage(props) {
                                 <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '15.25rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
-                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
+                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>
                                                 <div className="flex flex-row justify-end" style={{ fontSize: '10px' }}>
                                                     {Helper.parseTimeStamp(val.created_at)}
                                                 </div>
