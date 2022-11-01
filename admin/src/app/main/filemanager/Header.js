@@ -8,6 +8,8 @@ import { downloadFile } from './helper';
 import { orderBy } from 'lodash';
 import axios from 'axios'
 import { saveAs } from 'file-saver';
+import { showMessage } from 'app/store/fuse/messageSlice';
+
 
 const baseStyle = {
     borderTop: '3px solid #77777763',
@@ -21,6 +23,7 @@ const Header = (props) => {
     const selectedItem = useSelector(state => state.filemanager.selectedItem);
     const selectedItemIdArry = useSelector(state => state.filemanager.selectedItemsId);
     const listing = useSelector(state => state.filemanager.listData);
+    const loading = useSelector(state=> state.filemanager.loading);
 
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -75,58 +78,31 @@ const Header = (props) => {
             const index = listing.findIndex(file => file.id === selectedItemIdArry[0]);
             const fileData = listing[index];
             downloadFile(fileData.file_path, fileData.mime_type);
-        } else if (selectedItem) {
-            downloadFile(selectedItem.file_path, selectedItem.mime_type);
         } else if (selectedItemIdArry.length && selectedItemIdArry.length >= 2) {
-            axios.post('/file-manager/download', {}, {
+            dispatch(showMessage({ variant: 'success', message: 'Your files are being downloading. Please wait...' }));
+            dispatch(setLoading('pending'));
+            const params = {
+                "ids": selectedItemIdArry
+            }
+            axios.post('/file-manager/download', params, {
                 responseType: "arraybuffer", headers: {
                     'Accept': 'application/zip',
-                    'Content-Type': 'application/zip'
+                    'Content-Type': 'application/json'
                 }
             })
-                .then((response) => {
-                    console.log(response.data)
-                    const url = new Blob([response.data], { type: 'application/zip' });
-                    saveAs(url, 'sss.zip')
-                })
-                .catch(error => {
-                    console.log(error)
-                });
-
-            // const urls = [
-            //     // "https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/xyz/1666010535178download.jpeg",
-            //     // "https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/xyz/1665753910733person-holds-a-book-over-a-stack-and-turns-the-page.jpg"
-
-            //     "http://localhost:3000/assets/images/logo/logo.svg"
-
-            // ]
-
-            // const zip = new JSZip();
-            // const folder = zip.folder("files"); // folder name where all files will be placed in 
-
-            // urls.forEach((url) => {
-            //     const blobPromise = fetch(url).then((r) => {
-            //         console.log(r.blob())
-            //         if (r.status === 200) return r.blob();
-            //         return Promise.reject(new Error(r.statusText));
-            //     });
-            //     const name = url.substring(url.lastIndexOf("/") + 1);
-            //     folder.file(name, blobPromise);
-
-            // });
-
-
-
-            // zip.generateAsync({ type: "blob" }).then((blob) => 
-            //     {
-            //         console.log(blob)
-            //     }
-            // );
-
-
-
-
-        }
+            .then((response) => {
+                const url = new Blob([response.data], { type: 'application/zip' });
+                saveAs(url, 'files.zip');
+                dispatch(setLoading('idle'));
+                dispatch(setSelectedItemsId([]));
+            })
+            .catch(error => {
+                console.log(error)
+                dispatch(showMessage({ variant: 'error', message: 'Unable to download File' }))
+            });
+        } else if (selectedItem) {
+            downloadFile(selectedItem.file_path, selectedItem.mime_type);
+        } 
         return;
     }
 

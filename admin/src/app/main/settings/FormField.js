@@ -15,7 +15,6 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 
 
-
 const schema = yup.object().shape({
     max_file_size: yup
         .string()
@@ -228,6 +227,12 @@ const FormField = () => {
                                             <FormControlLabel 
                                                 control={
                                                     <Checkbox 
+                                                        checked= {
+                                                            (
+                                                                Object.keys(fileTypes).length && 
+                                                                fileTypes[item].length === fileTypes[item].filter(fl => fl.checked === true).length
+                                                            ) ? true : false
+                                                        }
                                                         sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }} 
                                                         onChange={ handleSelectAll } 
                                                         value={ item }

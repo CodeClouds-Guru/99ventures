@@ -6,7 +6,7 @@ import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { getList, setPathObject, setLoading, setListData } from 'app/store/filemanager';
+import { getList, setPathObject, setLoading, setListData, setSelectedItem } from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -212,6 +212,7 @@ function DragDropzone() {
 			params.append('file', file);
 		});
 		dispatch(setLoading('pending'));
+		dispatch(setSelectedItem(null));
 
 		axios.post(jwtServiceConfig.filemanagerUploadFile, params, config)
 		.then((response) => {
