@@ -160,6 +160,11 @@ class TicketController extends Controller {
           "is_read",
         ];
         options.where = { [Op.and]: { id: ticket_id } };
+        options.order = [
+          // [Ticket, "created_at", "DESC"],
+          // [Member, "created_at", "DESC"],
+          [Member, MemberNote, "created_at", "DESC"],
+        ];
         options.include = [
           {
             model: TicketConversation,
@@ -192,6 +197,7 @@ class TicketController extends Controller {
             include: [
               {
                 model: MemberNote,
+
                 attributes: [
                   "user_id",
                   "member_id",
@@ -199,6 +205,7 @@ class TicketController extends Controller {
                   "current_status",
                   "note",
                   "created_at",
+                  "id",
                 ],
                 include: [
                   {
