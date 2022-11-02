@@ -24,7 +24,8 @@ import PermissionGrid from './components/PermissionGrid';
 import PermissionSettings from './components/PermissionSettings';
 import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
 import ComponentsCreateUpdate from '../../components/create-update/CreateUpdate';
-import LayoutsCreateUpdate from '../../components/create-update/CreateUpdate';
+import LayoutsCreateUpdate from '../../layouts/create-update/CreateUpdate';
+import PagesCreateUpdate from '../../components/create-update/CreateUpdate';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -127,7 +128,8 @@ function CreateEdit(props) {
               {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
                 module === 'components' ? <ComponentsCreateUpdate /> :
                   module === 'layouts' ? <LayoutsCreateUpdate /> :
-                    <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
+                    module === 'pages' ? <PagesCreateUpdate /> :
+                      <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
             </div>
             {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
           </div>
