@@ -20,6 +20,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      alias_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        default: Math.random().toString(2).substr(2, 5)
+      },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
