@@ -136,7 +136,7 @@ function TicketingSystemPage(props) {
         dispatch(setlightBoxStatus({ isOpen: true, src: file }));
     }
     const getTicketDetails = () => {
-        axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
+        axios.get(`${jwtServiceConfig.getSingleTicketDetails}/${props.ticketId}`)
             .then(response => {
                 if (response.data.results.status) {
                     setTicketStatus(response.data.results.data.status);
@@ -221,7 +221,7 @@ function TicketingSystemPage(props) {
                             </DialogActions>
                         </div>
                     </Dialog>
-                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
                         <div className="h-full w-full md:w-8/12 border-2 rounded-l-2xl mb-10 md:mb-0">
                             <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
                                 <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
@@ -277,7 +277,7 @@ function TicketingSystemPage(props) {
                                                     <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4} /*cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} rowHeight={212}*/>
                                                         {val.TicketAttachments.map((item, key) => (
                                                             <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px', justifyContent: 'flex-end', flexDirection: 'inherit' }}>
-                                                                <div style={{height: '120px', overflow: 'hidden', width: '100%', marginBottom: '4px' }}>
+                                                                <div style={{ height: '120px', overflow: 'hidden', width: '100%', marginBottom: '4px' }}>
                                                                     <img
                                                                         src={`${item.file_name}?w=164&h=150&fit=crop&auto=format`} ß
                                                                         srcSet={`${item.file_name}?w=164&h=150&fit=crop&auto=format&dpr=2 2x`}
@@ -439,7 +439,7 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{height: 'calc(100% - 325px)'}}>
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: 'calc(100% - 325px)' }}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
