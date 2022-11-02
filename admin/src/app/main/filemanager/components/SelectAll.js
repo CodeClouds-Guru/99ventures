@@ -19,13 +19,13 @@ const selectAll = () => {
     return (
         <FormGroup className="flex" variant="outlined">
             <FormControlLabel control={
-                <Checkbox 
+                <Checkbox                     
                     sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                     checked={ Boolean(
                         selectedItemsId.length && selectedItemsId.length === listData.filter(el => el.type !== 'folder').length
                     ) }
                     onChange={handleChange} 
-                    inputProps={{ 'aria-label': 'controlled' }}
+                    inputProps={{ 'aria-label': 'controlled', 'disabled': (listData.length < 1 ? true : false) }}
                 />
             } label="Select All" />
         </FormGroup>
