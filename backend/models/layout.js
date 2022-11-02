@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     company_portal_id: DataTypes.BIGINT,
     name: DataTypes.STRING,
     code: DataTypes.STRING,
+    html: DataTypes.TEXT('long'),
     layout_json: DataTypes.JSON,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
@@ -86,6 +87,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    html: {
+      field_name: 'html',
+      db_name: 'html',
+      type: 'text',
+      placeholder: 'HTML',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
     layout_json: {
       field_name: 'layout_json',
       db_name: 'layout_json',
@@ -119,6 +133,7 @@ module.exports = (sequelize, DataTypes) => {
       name: Joi.string().required().label('Name'),
       code: Joi.string().required().label('Code'),
       company_portal_id: Joi.required().label('Company portal'),
+      html: Joi.string().required().label('HTML'),
       layout_json: Joi.object().required().label('JSON'),
     })
     return schema.validate(req.body)

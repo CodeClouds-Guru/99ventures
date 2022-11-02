@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate')
+const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class Page extends Model {
     /**
@@ -21,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
     is_homepage: DataTypes.TINYINT,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
-    part_url: DataTypes.STRING,
     page_json: DataTypes.JSON,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
@@ -39,5 +40,111 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deleted_at',
     tableName: 'pages',
   });
+  Page.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required().label('Name'),
+      slug: Joi.string().required().label('Slug'),
+      company_portal_id: Joi.required().label('Company portal'),
+      html: Joi.string().required().label('HTML'),
+      page_json: Joi.object().required().label('JSON'),
+      status: Joi.string().required().label('status'),
+      is_homepage: Joi.required().label('Home Page')
+    })
+    return schema.validate(req.body)
+  }
+  Page.fields = {
+    id: {
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    company_portal_id: {
+      field_name: 'company_portal_id',
+      db_name: 'company_portal_id',
+      type: 'text',
+      placeholder: 'Company portal id',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    name: {
+      field_name: 'name',
+      db_name: 'name',
+      type: 'text',
+      placeholder: 'Name',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    slug: {
+      field_name: 'slug',
+      db_name: 'slug',
+      type: 'text',
+      placeholder: 'Slug',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    html: {
+      field_name: 'html',
+      db_name: 'html',
+      type: 'text',
+      placeholder: 'HTML',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    page_json: {
+      field_name: 'layout_json',
+      db_name: 'layout_json',
+      type: 'text',
+      placeholder: 'JSON',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    created_at: {
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created at',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    }
+  }
+  sequelizePaginate.paginate(Page)
   return Page;
 };
