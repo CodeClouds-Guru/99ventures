@@ -8,6 +8,7 @@ let users = [
     username: 'sourabh_cc',
     email: 'sourabh.das@codeclouds.in',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '12345678',
     phone_no: '1234567890',
     created_by: 1,
@@ -22,6 +23,7 @@ let users = [
     username: 'arindam_cc',
     email: 'arindam.samanta@codeclouds.com',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '12345678',
     phone_no: '1234567890',
     created_by: 1,
@@ -36,6 +38,7 @@ let users = [
     username: 'mritunjay_cc',
     email: 'mritunjay.patra@codeclouds.in',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '12345678',
     phone_no: '1234567890',
     created_by: 1,
@@ -50,6 +53,7 @@ let users = [
     username: 'tapa_cc',
     email: 'sourav.tapadar@codeclouds.in',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '12345678',
     phone_no: '1234567890',
     created_by: 1,
@@ -64,6 +68,7 @@ let users = [
     username: 'nandita_cc',
     email: 'nandita.bardhan@codeclouds.co.in',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '12345678',
     phone_no: '1234567890',
     created_by: 1,
@@ -78,6 +83,7 @@ let users = [
     username: 'ashley_samuel',
     email: 'ashley@99ventures.com',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '123456',
     phone_no: '',
     created_by: 1,
@@ -92,6 +98,7 @@ let users = [
     username: 'alan_stabels',
     email: 'alan@99ventures.com',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '123456',
     phone_no: '',
     created_by: 1,
@@ -106,6 +113,7 @@ let users = [
     username: 'Debosmita_CC',
     email: 'debosmita.dey@codeclouds.co.in',
     avatar: '',
+    alias_name: Math.random().toString(2).substr(2, 5),
     password: '123456',
     phone_no: '',
     created_by: 1,
@@ -113,7 +121,7 @@ let users = [
     deleted_by: null,
     created_at: new Date(),
   },
-  
+
 ]
 module.exports = {
   async up(queryInterface, Sequelize) {
