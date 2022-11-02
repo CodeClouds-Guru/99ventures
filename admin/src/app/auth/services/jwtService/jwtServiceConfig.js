@@ -37,7 +37,10 @@ const jwtServiceConfig = {
   filemanagerUpdateFile: 'file-manager/update',
   ticketUpdate: 'tickets/update',
   settingsUpdate: 'settings/update',
-  settingsRead: 'settings'
+  settingsRead: 'settings',
+  saveComponents: 'components/save',
+  updateComponents: 'components/update',
+  getSingleComponent: 'components/edit',
 };
 
 export default jwtServiceConfig;
