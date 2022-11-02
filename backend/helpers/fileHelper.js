@@ -42,6 +42,7 @@ class FileHelper {
       let file_name_arr = file_name.split('.')
       file_name = file_name.replaceAll('.'+file_name_arr[file_name_arr.length - 1],'')
       file_name = file_name.replaceAll(' ','-')
+      file_name = file_name.replaceAll(/[^a-zA-Z0-9 ]/g,'')
       var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
       try {
         let s3 = await this.s3Connect()
