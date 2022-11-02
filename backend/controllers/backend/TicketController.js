@@ -180,7 +180,7 @@ class TicketController extends Controller {
               },
               {
                 model: User,
-                attributes: ["first_name", "last_name", "username"],
+                attributes: ["first_name", "last_name", "alias_name"],
               },
             ],
           },
@@ -214,7 +214,7 @@ class TicketController extends Controller {
                   },
                   {
                     model: User,
-                    attributes: ["first_name", "last_name", "username"],
+                    attributes: ["first_name", "last_name", "alias_name"],
                   },
                 ],
               },
