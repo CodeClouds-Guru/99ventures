@@ -264,7 +264,7 @@ function TicketingSystemPage(props) {
                                             <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
                                                     <span style={{ fontSize: '12px' }}>
-                                                        <i> <b>{val.Member ? val.Member.first_name + ' ' + val.Member.last_name : val.User.first_name + ' ' + val.User.last_name}</b></i>
+                                                        <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
                                                     </span>
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
@@ -451,8 +451,10 @@ function TicketingSystemPage(props) {
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <i>
-                                                                <b>{val.Member.first_name + ' ' + val.Member.last_name}</b></i></span>
+                                                            <i><b>{`${val.User.alias_name}`}
+                                                                <span style={{ fontSize: '8px' }}> - More Surveys Support Team</span></b></i>
+                                                        </span>
+
                                                         <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}>{Helper.parseTimeStamp(val.created_at)}</div>
                                                     </div>
                                                     <div>
