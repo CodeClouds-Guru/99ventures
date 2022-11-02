@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn("layouts", "html", {
-      type: Sequelize.JSON
+      type: Sequelize.TEXT('long')
     });
   },
 
