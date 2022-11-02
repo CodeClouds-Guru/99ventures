@@ -139,7 +139,7 @@ module.exports = (sequelize, DataTypes) => {
       name: Joi.string().required().label('Name'),
       code: Joi.string().required().label('Code'),
       html: Joi.string().required().label('HTML'),
-      component_json: Joi.string().required().label('JSON'),
+      component_json: Joi.object().required().label('JSON'),
       company_portal_id: Joi.required().label('Company portal'),
     })
     return schema.validate(req.body)
