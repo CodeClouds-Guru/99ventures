@@ -1,8 +1,9 @@
-const Controller = require('./Controller')
+const Controller = require("./Controller");
 const { Op } = require("sequelize");
+const { Layout, Component } = require("../../models/index");
 class LayoutController extends Controller {
   constructor() {
-    super('Layout')
+    super("Layout");
   }
   //override save function
   async save(req, res) {
@@ -26,7 +27,7 @@ class LayoutController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { code: req.body.code,id: { [Op.ne]: req.params.id } },
+      where: { code: req.body.code, id: { [Op.ne]: req.params.id } },
     });
     if (check_code) {
       this.throwCustomError("Code already in use.", 409);
@@ -34,9 +35,23 @@ class LayoutController extends Controller {
     let response = await super.update(req);
     return {
       status: true,
-      message: "Layout updated."
+      message: "Layout updated.",
     };
   }
+
+  async add(req, res) {
+    let company_portal_id = req.headers.site_id;
+    let components = await Component.findAll({
+      attributes: ["name", "html", "code", "component_json"],
+      where: { company_portal_id: company_portal_id },
+    });
+    return {
+      status: true,
+      fields: this.model.fields,
+      components,
+    };
+  }
+
   //override delete function
   async delete(req, res) {
     let response = await super.delete(req);
@@ -47,4 +62,4 @@ class LayoutController extends Controller {
   }
 }
 
-module.exports = LayoutController
+module.exports = LayoutController;
