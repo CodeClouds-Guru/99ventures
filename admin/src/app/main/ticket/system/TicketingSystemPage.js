@@ -136,7 +136,7 @@ function TicketingSystemPage(props) {
         dispatch(setlightBoxStatus({ isOpen: true, src: file }));
     }
     const getTicketDetails = () => {
-        axios.get(`${jwtServiceConfig.getSingleTickketDetails}/${props.ticketId}`)
+        axios.get(`${jwtServiceConfig.getSingleTicketDetails}/${props.ticketId}`)
             .then(response => {
                 if (response.data.results.status) {
                     setTicketStatus(response.data.results.data.status);

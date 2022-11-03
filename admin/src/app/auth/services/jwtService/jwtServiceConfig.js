@@ -32,7 +32,7 @@ const jwtServiceConfig = {
   getSingleScriptData: 'scripts/edit',
   roleEdit: 'roles/edit',
   roleUpdate: 'roles/update',
-  getSingleTickketDetails: 'tickets/view',
+  getSingleTicketDetails: 'tickets/view',
   filemanagerUploadFile: 'file-manager/save',
   filemanagerUpdateFile: 'file-manager/update',
   ticketUpdate: 'tickets/update',
@@ -42,7 +42,13 @@ const jwtServiceConfig = {
   updateComponents: 'components/update',
   getSingleComponent: 'components/edit',
   layoutsAdd: 'layouts/add',
-  layoutsSave: 'layouts/save'
+  layoutsSave: 'layouts/save',
+  saveLayouts: 'layouts/save',
+  updateLayouts: 'layouts/update',
+  getSingleLayout: 'layouts/edit',
+  savePages: 'pages/save',
+  updatePages: 'pages/update',
+  getSinglePage: 'pages/edit',
 };
 
 export default jwtServiceConfig;
