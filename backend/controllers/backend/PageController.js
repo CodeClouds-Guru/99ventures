@@ -1,8 +1,43 @@
 const Controller = require('./Controller')
 const { Op } = require("sequelize");
-class LayoutController extends Controller {
+const {
+  Layout
+} = require("../../models/index");
+class PageController extends Controller {
   constructor() {
     super('Page')
+  }
+  //override add function
+  async add(req, res) {
+    let response = await super.add(req);
+    let fields = response.fields;
+    
+    let layouts = await Layout.findAll();
+    layouts = layouts.map(layout => {
+      return {
+          id: layout.id,
+          value: layout.name
+      }
+    });
+    
+    fields.layouts = {
+                      field_name: 'layout',
+                      db_name: 'layouts',
+                      type: 'select',
+                      placeholder: 'Layout',
+                      listing: false,
+                      show_in_form: true,
+                      sort: true,
+                      required: true,
+                      value: '',
+                      width: '50',
+                      searchable: true,
+                      options: layouts,
+                    };
+    return {
+      status: true,
+      fields,
+    };
   }
   //override save function
   async save(req, res) {
@@ -47,4 +82,4 @@ class LayoutController extends Controller {
   }
 }
 
-module.exports = LayoutController
+module.exports = PageController
