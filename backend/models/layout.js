@@ -19,17 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: DataTypes.BIGINT,
       name: {
         type: DataTypes.STRING,
-        // unique: {
-        //   args: true,
-        //   msg: "Layout name already in use!",
-        // },
       },
       code: {
         type: DataTypes.STRING,
-        // unique: {
-        //   args: true,
-        //   msg: "Code already in use!",
-        // },
       },
       html: DataTypes.TEXT("long"),
       layout_json: DataTypes.JSON,
@@ -47,11 +39,25 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: "deleted_at",
       tableName: "layouts",
       hooks: {
-        beforeCreate: (layouts, options) => {
-          layouts.code = stringToSlug(layouts.name);
+        afterValidate: (layouts, options) => {
+          let check_name_unique = Layout.findOne({
+            where: { name: layouts.name },
+          });
+          if (check_name_unique) {
+            throw new Error("Name already in use!");
+          } else {
+            layouts.code = stringToSlug(layouts.name);
+          }
         },
         // beforeUpdate: (layouts, options) => {
-        //   layouts.code = stringToSlug(layouts.name)
+        //   console.log(layouts,'===================');
+        //   let check_name_unique = Layout.findOne({
+        //     where: { name: layouts.name },
+        //   });
+          
+        //   if (check_name_unique) {
+        //     throw new Error("Name already in use!");
+        //   }
         // },
       },
     }
