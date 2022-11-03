@@ -3,6 +3,7 @@ const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
 const { stringToSlug } = require("../helpers/global");
+const { Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Layout extends Model {
     /**
@@ -43,22 +44,23 @@ module.exports = (sequelize, DataTypes) => {
           let check_name_unique = Layout.findOne({
             where: { name: layouts.name },
           });
-          if (check_name_unique) {
+
+          if (check_name_unique.length > 0) {
             throw new Error("Name already in use!");
           } else {
             layouts.code = stringToSlug(layouts.name);
           }
         },
-        beforeUpdate: (layouts, options) => {
-          console.log(layouts,'===================');
-          let check_name_unique = Layout.findOne({
-            where: { name: layouts.name },
-          });
-          
-          if (check_name_unique) {
-            throw new Error("Name already in use!");
-          }
-        },
+        // beforeBulkUpdate: (layouts, options) => {
+        //   console.log(options, "===================");
+        //   let check_name_unique = Layout.findOne({
+        //     where: { name: layouts.attributes.name },
+        //   });
+
+        //   if (check_name_unique.length > 0) {
+        //     throw new Error("Name already in use!");
+        //   }
+        // },
       },
     }
   );
