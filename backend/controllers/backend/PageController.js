@@ -49,6 +49,7 @@ class PageController extends Controller {
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);
     }
+    req.body.parmalink = req.body.slug;
     let response = await super.save(req);
     return {
       status: true,
@@ -66,6 +67,7 @@ class PageController extends Controller {
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);
     }
+    req.body.parmalink = req.body.slug;
     let response = await super.update(req);
     return {
       status: true,
