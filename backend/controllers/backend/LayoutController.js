@@ -39,6 +39,7 @@ class LayoutController extends Controller {
     };
   }
 
+  //override add function
   async add(req, res) {
     let company_portal_id = req.headers.site_id;
     let components = await Component.findAll({
@@ -52,6 +53,21 @@ class LayoutController extends Controller {
     };
   }
 
+  //override edit function
+  async edit(req, res) {
+    try {
+      let company_portal_id = req.headers.site_id;
+      let components = await Component.findAll({
+        attributes: ["name", "html", "code", "component_json"],
+        where: { company_portal_id: company_portal_id },
+      });
+      let model = await this.model.findByPk(req.params.id);
+      let fields = this.model.fields;
+      return { result: model, fields, components };
+    } catch (error) {
+      throw error;
+    }
+  }
   //override delete function
   async delete(req, res) {
     let response = await super.delete(req);
