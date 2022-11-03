@@ -4,6 +4,8 @@ const {
 } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
+const { stringToSlug } = require('../helpers/global')
+
 module.exports = (sequelize, DataTypes) => {
   class Component extends Model {
     /**
@@ -38,7 +40,15 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: "created_at", // alias createdAt as created_date
     updatedAt: "updated_at",
     deletedAt: "deleted_at",
-    tableName: "components"
+    tableName: "components",
+    hooks: {
+      beforeCreate: (component, options) => {
+        component.code = stringToSlug(component.name)
+      },
+      beforeUpdate: (component, options) => {
+        component.code = stringToSlug(component.name)
+      },
+    },
   });
   Component.fields = {
     id: {
@@ -150,7 +160,6 @@ module.exports = (sequelize, DataTypes) => {
   Component.validate = function (req) {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
-      code: Joi.string().required().label('Code'),
       html: Joi.string().required().label('HTML'),
       component_json: Joi.object().required().label('JSON'),
       company_portal_id: Joi.required().label('Company portal'),
