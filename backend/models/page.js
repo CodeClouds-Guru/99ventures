@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Page.init({
     company_portal_id: DataTypes.BIGINT,
+    layoout_id: DataTypes.BIGINT,
     html: DataTypes.TEXT,
     status: DataTypes.STRING,
     parmalink: DataTypes.STRING,
@@ -52,6 +53,7 @@ module.exports = (sequelize, DataTypes) => {
     })
     return schema.validate(req.body)
   }
+  Page.extra_fields = ['layout'];
   Page.fields = {
     id: {
       field_name: 'id',
@@ -71,6 +73,19 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'company_portal_id',
       type: 'text',
       placeholder: 'Company portal id',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    layout_id: {
+      field_name: 'layout_id',
+      db_name: 'layout_id',
+      type: 'text',
+      placeholder: 'Layout id',
       listing: false,
       show_in_form: true,
       sort: true,
