@@ -7,13 +7,7 @@ class ComponentController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    //unique code checking
-    let check_code = await this.model.findOne({
-      where: { code: req.body.code },
-    });
-    if (check_code) {
-      this.throwCustomError("Code already in use.", 409);
-    }
+    
     let response = await super.save(req);
     return {
       status: true,
@@ -24,13 +18,7 @@ class ComponentController extends Controller {
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    //unique code checking
-    let check_code = await this.model.findOne({
-      where: { code: req.body.code,id: { [Op.ne]: req.params.id } },
-    });
-    if (check_code) {
-      this.throwCustomError("Code already in use.", 409);
-    }
+    
     let response = await super.update(req);
     return {
       status: true,
