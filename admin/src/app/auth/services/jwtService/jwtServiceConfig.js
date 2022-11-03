@@ -41,6 +41,8 @@ const jwtServiceConfig = {
   saveComponents: 'components/save',
   updateComponents: 'components/update',
   getSingleComponent: 'components/edit',
+  layoutsAdd: 'layouts/add',
+  layoutsSave: 'layouts/save'
 };
 
 export default jwtServiceConfig;
