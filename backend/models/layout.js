@@ -36,10 +36,10 @@ module.exports = (sequelize, DataTypes) => {
     tableName: "layouts",
     hooks: {
       beforeCreate: (layouts, options) => {
-        layouts.slug = stringToSlug(layouts.name)
+        layouts.code = stringToSlug(layouts.name)
       },
       beforeUpdate: (layouts, options) => {
-        layouts.slug = stringToSlug(layouts.name)
+        layouts.code = stringToSlug(layouts.name)
       },
     },
   });
