@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
-import { Controller, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import * as yup from 'yup';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -88,7 +85,7 @@ const CreateEditForm = () => {
     }
 
     /**
-     * Save layout
+     * Save / Update layout
      */
     const formSubmit = (e) => {
         e.preventDefault();
@@ -102,9 +99,10 @@ const CreateEditForm = () => {
             layout_json: layoutCode
         };
 
+        const url = (moduleId === 'create') ? jwtServiceConfig.layoutsSave : jwtServiceConfig.updateLayouts + '/' + moduleId;
 
         setLoading(true);
-        axios.post(jwtServiceConfig.layoutsSave, params)
+        axios.post(url, params)
         .then(res => {
             if(res.data.results.status === true){
                 dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
@@ -113,13 +111,16 @@ const CreateEditForm = () => {
         })
         .catch(errors => {
             console.log(errors);
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+            dispatch(showMessage({ variant: 'error', message: errors.response.data.message }));
         })
         .finally(() => {
             setLoading(false)
         });
     }
 
+    /**
+     * Drag & Drop components
+     */
     const onDrop = ({ removedIndex, addedIndex }) => {
         setLayoutCode(layoutCode => arrayMoveImmutable(layoutCode, removedIndex, addedIndex));
     };
@@ -159,7 +160,7 @@ const CreateEditForm = () => {
                     </legend>
                     <div className='p-32'>
                         <List
-                            sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}                        
+                            sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}                        
                             >
                                 <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
                                     {
