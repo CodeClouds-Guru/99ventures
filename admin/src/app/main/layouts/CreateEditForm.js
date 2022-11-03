@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, Typography, FormControl, Button, Chip, Stack, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,6 +13,9 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
+import {arrayMoveImmutable} from "array-move";
+import { Container, Draggable } from "react-smooth-dnd";
+
 
 const CreateEditForm = () => {
     const navigate = useNavigate();
@@ -31,6 +34,7 @@ const CreateEditForm = () => {
 
     useEffect(()=>{
         getComponents();
+        getData();
     }, []);
 
     /**
@@ -51,19 +55,41 @@ const CreateEditForm = () => {
         })
     }
 
+    /**
+     * get Layout data
+     */
+    const getData = () => {
+        axios.post(jwtServiceConfig.getSingleLayout + '/' + moduleId)
+        .then(res => {
+            if(res.data.results.result){
+                const result = res.data.results.result;
+                setLayoutname(result.name);
+                setLayoutCode(result.layout_json);
+            } 
+        })
+        .catch(errors => {
+            console.log(errors);
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+        })
+    }
+
     const handleSelectComponent = (e) => {
         const selectedValue = e.target.value;
         if(selectedValue){
             const componentCode = components.filter(el=> el.name === selectedValue);
-            setLayoutCode(layoutCode => [...layoutCode, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}]);
+            const uniqueObjArray = [...new Map([...layoutCode, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}].map((item) => [item["name"], item])).values()];            
+            setLayoutCode(uniqueObjArray);
         }
     }
 
     const handleDelete = (element) => {
-        const newData = data.filter(el => el !== element);
-        setData(newData)
+        const newData = layoutCode.filter(el => el.name !== element);
+        setLayoutCode(newData);
     }
 
+    /**
+     * Save layout
+     */
     const formSubmit = (e) => {
         e.preventDefault();
         if(!layoutname) {
@@ -72,21 +98,31 @@ const CreateEditForm = () => {
         }
         const params = {
             name: layoutname,
-            html: layoutCode.map(el => el.code).join(' ')
+            html: layoutCode.map(el => el.code).join(' '),
+            layout_json: layoutCode
         };
+
+
+        setLoading(true);
         axios.post(jwtServiceConfig.layoutsSave, params)
         .then(res => {
             if(res.data.results.status === true){
-                if(res.data.results.components) {
-                    setComponents(res.data.results.components)
-                }
-            }            
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                navigate(`/app/layouts`);
+            }
         })
         .catch(errors => {
             console.log(errors);
             dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
         })
+        .finally(() => {
+            setLoading(false)
+        });
     }
+
+    const onDrop = ({ removedIndex, addedIndex }) => {
+        setLayoutCode(layoutCode => arrayMoveImmutable(layoutCode, removedIndex, addedIndex));
+    };
 
     return (
         <Box className="p-32" >
@@ -125,38 +161,32 @@ const CreateEditForm = () => {
                         <List
                             sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}                        
                             >
-                                <>
-                                    {/* <ListItem>
-                                        <ListItemIcon>
-                                            <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
-                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
-                                            </IconButton>
-                                        </ListItemIcon>
-                                        <ListItemText id="switch-list-label-wifi" primary="Content" />
-                                    </ListItem>
-                                    <Divider variant="inset" component="li" className="ml-12" /> */}
-                                </>
-                                {
-                                    layoutCode.map((el, indx) => {
-                                        return(
-                                            <React.Fragment key={indx}>
-                                                <ListItem>
-                                                    <ListItemIcon>
-                                                        <IconButton className="cursor-move" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
-                                                            <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
-                                                        </IconButton>
-                                                    </ListItemIcon>
-                                                    <ListItemText id="switch-list-label-wifi" primary={ el.name } />
-                                                    
-                                                    <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el)}>
-                                                        <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
-                                                    </IconButton>
-                                                </ListItem>
-                                                <Divider variant="inset" component="li" className="ml-12" />
-                                            </React.Fragment> 
-                                        )
-                                    })
-                                }
+                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                    {
+                                        layoutCode.map((el, indx) => {
+                                            return(
+                                                <Draggable key={indx}>
+                                                    <ListItem>
+                                                        <ListItemIcon className="drag-handle">
+                                                            <IconButton className="cursor-move" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
+                                                            </IconButton>
+                                                        </ListItemIcon>
+                                                        <ListItemText id="switch-list-label-wifi" primary={ el.name } />
+                                                        {
+                                                            el.name !== 'Content' && (
+                                                                <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                    <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                </IconButton>
+                                                            )
+                                                        }                                                    
+                                                    </ListItem>
+                                                    <Divider variant="inset" component="li" className="ml-12" />
+                                                </Draggable> 
+                                            )
+                                        })
+                                    }
+                                </Container>
                         </List>
                     </div>
                 </fieldset>
@@ -165,6 +195,14 @@ const CreateEditForm = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
                 >
+                    <Button
+                        className="whitespace-nowrap mx-4"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => navigate(`/app/layouts`)}
+                    >
+                        Preview
+                    </Button>
                     {
                         (hasPermission('save') || hasPermission('update')) && (
                             <LoadingButton
@@ -187,6 +225,7 @@ const CreateEditForm = () => {
                     >
                         Cancel
                     </Button>
+                    
                 </motion.div>
             </form>
         </Box>
