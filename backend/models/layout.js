@@ -4,6 +4,7 @@ const {
 } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
+const { stringToSlug } = require('../helpers/global')
 module.exports = (sequelize, DataTypes) => {
   class Layout extends Model {
     /**
