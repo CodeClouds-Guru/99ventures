@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: "deleted_at",
       tableName: "layouts",
       hooks: {
-        afterValidate: (layouts, options) => {
+        beforeCreate: (layouts, options) => {
           let check_name_unique = Layout.findOne({
             where: { name: layouts.name },
           });
@@ -49,16 +49,16 @@ module.exports = (sequelize, DataTypes) => {
             layouts.code = stringToSlug(layouts.name);
           }
         },
-        // beforeUpdate: (layouts, options) => {
-        //   console.log(layouts,'===================');
-        //   let check_name_unique = Layout.findOne({
-        //     where: { name: layouts.name },
-        //   });
+        beforeUpdate: (layouts, options) => {
+          console.log(layouts,'===================');
+          let check_name_unique = Layout.findOne({
+            where: { name: layouts.name },
+          });
           
-        //   if (check_name_unique) {
-        //     throw new Error("Name already in use!");
-        //   }
-        // },
+          if (check_name_unique) {
+            throw new Error("Name already in use!");
+          }
+        },
       },
     }
   );
