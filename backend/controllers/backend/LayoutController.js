@@ -15,6 +15,7 @@ class LayoutController extends Controller {
     // if (check_code) {
     //   this.throwCustomError("Code already in use.", 409);
     // }
+    console.log(req)
     let response = await super.save(req);
     return {
       status: true,
@@ -63,7 +64,12 @@ class LayoutController extends Controller {
       });
       let model = await this.model.findByPk(req.params.id);
       let fields = this.model.fields;
-      return { result: model, fields, components };
+      return {
+        status: true,
+        result: model,
+        fields,
+        components,
+      };
     } catch (error) {
       throw error;
     }
