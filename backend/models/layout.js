@@ -4,6 +4,7 @@ const {
 } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
+const { stringToSlug } = require('../helpers/global')
 module.exports = (sequelize, DataTypes) => {
   class Layout extends Model {
     /**
@@ -33,6 +34,14 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: "updated_at",
     deletedAt: "deleted_at",
     tableName: "layouts",
+    hooks: {
+      beforeCreate: (layouts, options) => {
+        layouts.code = stringToSlug(layouts.name)
+      },
+      beforeUpdate: (layouts, options) => {
+        layouts.code = stringToSlug(layouts.name)
+      },
+    },
   });
   Layout.fields = {
     id: {
@@ -144,10 +153,10 @@ module.exports = (sequelize, DataTypes) => {
   Layout.validate = function (req) {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
-      code: Joi.string().required().label('Code'),
+      // code: Joi.string().required().label('Code'),
       company_portal_id: Joi.required().label('Company portal'),
       html: Joi.string().required().label('HTML'),
-      layout_json: Joi.required().label('JSON'),
+      // layout_json: Joi.required().label('JSON'),
     })
     return schema.validate(req.body)
   }

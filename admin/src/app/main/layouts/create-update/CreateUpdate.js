@@ -18,7 +18,7 @@ import Helper from 'src/app/helper';
 
 const CreateUpdate = () => {
     const moduleId = useParams().moduleId;
-    const module = 'components';
+    const module = 'layouts';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
@@ -30,7 +30,7 @@ const CreateUpdate = () => {
     const [allData, setAllData] = useState({
         name: '',
         html: '',
-        component_json: ''
+        layout_json: ''
     });
 
     useEffect(() => {
@@ -213,7 +213,7 @@ const CreateUpdate = () => {
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
-                component_json: editor.getProjectData(),
+                layout_json: editor.getProjectData(),
                 html: generatedHTMLValue(editor)
             });
         };
@@ -267,9 +267,9 @@ const CreateUpdate = () => {
                 ...allData,
                 code: Helper.stringToSlug(allData.name),
                 html: generatedHTMLValue(editor),
-                component_json: editorJsonBody
+                layout_json: editorJsonBody
             }
-            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateComponents + `/${moduleId}` : jwtServiceConfig.saveComponents;
+            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + `/${moduleId}` : jwtServiceConfig.saveLayouts;
 
             setLoading(true);
             axios.post(endPoint, params)
@@ -287,7 +287,7 @@ const CreateUpdate = () => {
                         });
                         dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
                         if (moduleId === 'create') {
-                            navigate(`/app/components/${response.data.results.result.id}`);
+                            navigate(`/app/layouts/${response.data.results.result.id}`);
                         }
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
@@ -301,7 +301,7 @@ const CreateUpdate = () => {
     }
 
     const getSingleRecordById = (id, editor) => {
-        axios.get(jwtServiceConfig.getSingleComponent + `/${id}`)
+        axios.get(jwtServiceConfig.getSingleLayout + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
                     const record = response.data.results.result;
@@ -309,9 +309,9 @@ const CreateUpdate = () => {
                         ...allData,
                         name: record.name,
                         html: record.html,
-                        component_json: record.component_json
+                        layout_json: record.layout_json
                     }));
-                    editor.loadProjectData(record.component_json);
+                    editor.loadProjectData(record.layout_json);
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     setChangeCount(changeCount => changeCount - 1);

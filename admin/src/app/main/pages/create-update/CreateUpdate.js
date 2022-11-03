@@ -18,7 +18,7 @@ import Helper from 'src/app/helper';
 
 const CreateUpdate = () => {
     const moduleId = useParams().moduleId;
-    const module = 'components';
+    const module = 'pages';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
@@ -30,8 +30,13 @@ const CreateUpdate = () => {
     const [allData, setAllData] = useState({
         name: '',
         html: '',
-        component_json: ''
+        pages_json: '',
+        status: true
     });
+
+    const handleChange = (e) => {
+        setAllData({ ...allData, status: e.target.checked });
+    };
 
     useEffect(() => {
         const editor = grapesjs.init({
@@ -213,8 +218,8 @@ const CreateUpdate = () => {
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
-                component_json: editor.getProjectData(),
-                html: generatedHTMLValue(editor)
+                pages_json: editor.getProjectData(),
+                html: generatedHTMLValue(editor),
             });
         };
     }
@@ -267,9 +272,10 @@ const CreateUpdate = () => {
                 ...allData,
                 code: Helper.stringToSlug(allData.name),
                 html: generatedHTMLValue(editor),
-                component_json: editorJsonBody
+                pages_json: editorJsonBody,
+                status: allData.status
             }
-            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateComponents + `/${moduleId}` : jwtServiceConfig.saveComponents;
+            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updatePages + `/${moduleId}` : jwtServiceConfig.savePages;
 
             setLoading(true);
             axios.post(endPoint, params)
@@ -287,7 +293,7 @@ const CreateUpdate = () => {
                         });
                         dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
                         if (moduleId === 'create') {
-                            navigate(`/app/components/${response.data.results.result.id}`);
+                            navigate(`/app/pages/${response.data.results.result.id}`);
                         }
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
@@ -301,7 +307,7 @@ const CreateUpdate = () => {
     }
 
     const getSingleRecordById = (id, editor) => {
-        axios.get(jwtServiceConfig.getSingleComponent + `/${id}`)
+        axios.get(jwtServiceConfig.getSinglePage + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
                     const record = response.data.results.result;
@@ -309,9 +315,10 @@ const CreateUpdate = () => {
                         ...allData,
                         name: record.name,
                         html: record.html,
-                        component_json: record.component_json
+                        pages_json: record.pages_json,
+                        status: Boolean(record.status)
                     }));
-                    editor.loadProjectData(record.component_json);
+                    editor.loadProjectData(record.pages_json);
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     setChangeCount(changeCount => changeCount - 1);
@@ -381,6 +388,18 @@ const CreateUpdate = () => {
                                 value={Helper.stringToSlug(allData.name)}
                                 readOnly
                                 disabled
+                            />
+                        </FormControl>
+                        <FormControl className="w-1/2 mb-24">
+                            <InputLabel shrink htmlFor="status-switch">
+                                Insets
+                            </InputLabel>
+                            <Switch
+                                size="large"
+                                id="status-switch"
+                                checked={allData.status}
+                                onChange={handleChange}
+                                inputProps={{ 'aria-label': 'controlled' }}
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
