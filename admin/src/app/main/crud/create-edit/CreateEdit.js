@@ -25,7 +25,7 @@ import PermissionSettings from './components/PermissionSettings';
 import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
 import ComponentsCreateUpdate from '../../components/create-update/CreateUpdate';
 import LayoutsCreateUpdate from '../../layouts/create-update/CreateUpdate';
-import PagesCreateUpdate from '../../components/create-update/CreateUpdate';
+import PagesCreateUpdate from '../../pages/create-update/CreateUpdate';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();

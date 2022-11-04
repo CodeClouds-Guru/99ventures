@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button } from '@mui/material';
+import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Select, MenuItem } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
@@ -17,6 +17,7 @@ import '../../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
 
 const CreateUpdate = () => {
+    const fields = useSelector(state => state.crud.module.fields);
     const moduleId = useParams().moduleId;
     const module = 'pages';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
@@ -28,15 +29,12 @@ const CreateUpdate = () => {
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
     const [allData, setAllData] = useState({
+        layout: '',
         name: '',
+        slug: '',
         html: '',
         pages_json: '',
-        status: true
     });
-
-    const handleChange = (e) => {
-        setAllData({ ...allData, status: e.target.checked });
-    };
 
     useEffect(() => {
         const editor = grapesjs.init({
@@ -255,7 +253,9 @@ const CreateUpdate = () => {
 
     const onNameChange = (event) => {
         setAllData(allData => ({
-            ...allData, name: event.target.value
+            ...allData,
+            name: event.target.value,
+            slug: Helper.stringToSlug(event.target.value)
         }));
         dynamicErrorMsg('name', event.target.value);
     }
@@ -270,10 +270,10 @@ const CreateUpdate = () => {
         if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
-                code: Helper.stringToSlug(allData.name),
+                layout: allData.layout,
+                slug: Helper.stringToSlug(allData.slug),
                 html: generatedHTMLValue(editor),
                 pages_json: editorJsonBody,
-                status: allData.status
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updatePages + `/${moduleId}` : jwtServiceConfig.savePages;
 
@@ -313,10 +313,11 @@ const CreateUpdate = () => {
                     const record = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
+                        layout: record.layout,
                         name: record.name,
+                        slug: record.slug,
                         html: record.html,
                         pages_json: record.pages_json,
-                        status: Boolean(record.status)
                     }));
                     editor.loadProjectData(record.pages_json);
 
@@ -362,12 +363,45 @@ const CreateUpdate = () => {
         navigate(`/app/${module}`)
     }
 
+    const handleChangeLayout = (event) => {
+        setAllData({
+            ...allData,
+            layout: event.target.value,
+        });
+        dynamicErrorMsg('layout', event.target.value);
+    };
+    const onSlugChange = (event) => {
+        setAllData(allData => ({
+            ...allData, slug: Helper.stringToSlug(event.target.value)
+        }));
+        dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
+    }
     return (
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
-                        <FormControl className="w-1/2 mb-24 pr-10">
+                        <FormControl className="w-4/12 mb-24 pr-10">
+                            <InputLabel id="demo-simple-select-label">Layout</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={allData.layout}
+                                label="Layout"
+                                onChange={handleChangeLayout}
+                                required
+                            >
+                                <MenuItem value=""> <em>None</em> </MenuItem>
+                                {fields.layouts.options.map((val, key) => {
+                                    return (
+                                        <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
+                                    )
+                                })
+                                }
+                            </Select>
+                            <FormHelperText error variant="standard">{errors.name}</FormHelperText>
+                        </FormControl>
+                        <FormControl className="w-4/12 mb-24 px-10">
                             <TextField
                                 label="Name"
                                 type="text"
@@ -380,27 +414,25 @@ const CreateUpdate = () => {
                             />
                             <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                         </FormControl>
-                        <FormControl className="w-1/2 mb-24 pl-10">
+                        <FormControl className="w-4/12 mb-24 pl-10">
                             <TextField
-                                label="Code"
+                                label="Slug"
                                 type="text"
                                 variant="outlined"
-                                value={Helper.stringToSlug(allData.name)}
+                                value={allData.slug}
+                                onChange={onSlugChange}
+                            />
+                        </FormControl>
+                        <FormControl className="w-full mb-24">
+                            <TextField
+                                label="Permalink"
+                                type="text"
+                                variant="outlined"
+                                value={Helper.stringToSlug(allData.slug)}
                                 readOnly
                                 disabled
                             />
-                        </FormControl>
-                        <FormControl className="w-1/2 mb-24">
-                            <InputLabel shrink htmlFor="status-switch">
-                                Insets
-                            </InputLabel>
-                            <Switch
-                                size="large"
-                                id="status-switch"
-                                checked={allData.status}
-                                onChange={handleChange}
-                                inputProps={{ 'aria-label': 'controlled' }}
-                            />
+                            <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                         </FormControl>
                         <FormControl className="w-full mb-24">
                             <div id="gjs" />
