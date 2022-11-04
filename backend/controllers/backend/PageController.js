@@ -39,6 +39,35 @@ class PageController extends Controller {
       fields,
     };
   }
+  //override edit function
+  async edit(req, res) {
+    let response = await super.edit(req);
+    let fields = response.fields;
+    
+    let layouts = await Layout.findAll();
+    layouts = layouts.map(layout => {
+      return {
+          id: layout.id,
+          value: layout.name
+      }
+    });
+    
+    fields.layouts = {
+                      field_name: 'layout',
+                      db_name: 'layouts',
+                      type: 'select',
+                      placeholder: 'Layout',
+                      listing: false,
+                      show_in_form: true,
+                      sort: true,
+                      required: true,
+                      value: '',
+                      width: '50',
+                      searchable: true,
+                      options: layouts,
+                    };
+    return response;
+  }
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
