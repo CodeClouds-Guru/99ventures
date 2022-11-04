@@ -200,7 +200,7 @@ const CreateEditForm = () => {
                         className="whitespace-nowrap mx-4"
                         variant="contained"
                         color="primary"
-                        onClick={() => navigate(`/app/layouts`)}
+                        disabled={ true }
                     >
                         Preview
                     </Button>
