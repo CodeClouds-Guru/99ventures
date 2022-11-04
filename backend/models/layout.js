@@ -3,6 +3,7 @@ const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
 const { stringToSlug } = require("../helpers/global");
+const { Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Layout extends Model {
     /**
@@ -19,17 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: DataTypes.BIGINT,
       name: {
         type: DataTypes.STRING,
-        // unique: {
-        //   args: true,
-        //   msg: "Layout name already in use!",
-        // },
       },
       code: {
         type: DataTypes.STRING,
-        // unique: {
-        //   args: true,
-        //   msg: "Code already in use!",
-        // },
       },
       html: DataTypes.TEXT("long"),
       layout_json: DataTypes.JSON,
@@ -49,10 +42,17 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         beforeCreate: (layouts, options) => {
           layouts.code = stringToSlug(layouts.name);
+          // let check_name_unique = Layout.findOne({
+          //   where: { name: layouts.name },
+          // });
+          // check_name_unique = JSON.stringify(check_name_unique)
+          // // console.log('============',JSON.stringify(check_name_unique))
+          // if (check_name_unique.length > 0) {
+          //   throw new Error("Name already in use!");
+          // } else {
+          //   layouts.code = stringToSlug(layouts.name);
+          // }
         },
-        // beforeUpdate: (layouts, options) => {
-        //   layouts.code = stringToSlug(layouts.name)
-        // },
       },
     }
   );
