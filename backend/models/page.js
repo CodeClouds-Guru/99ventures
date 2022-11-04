@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       html: Joi.string().required().label('HTML'),
       page_json: Joi.object().required().label('JSON'),
       status: Joi.string().required().label('status'),
-      is_homepage: Joi.required().label('Home Page'),
+      // is_homepage: Joi.required().label('Home Page'),
       layout_id: Joi.required().label('Layout ID')
     })
     return schema.validate(req.body)
