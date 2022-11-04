@@ -8,7 +8,7 @@ class LayoutController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    //unique code checking
+    //unique name checking
     let check_name_unique = await this.model.findOne({
       where: { name: req.body.name },
     });
@@ -16,6 +16,7 @@ class LayoutController extends Controller {
     if (check_name_unique) {
       throw new Error("Name already in use!");
     }
+    
     // console.log(req);
     let response = await super.save(req);
     return {
