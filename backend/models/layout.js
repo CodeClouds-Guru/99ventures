@@ -40,19 +40,30 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: "deleted_at",
       tableName: "layouts",
       hooks: {
-        beforeCreate: (layouts, options) => {
-          layouts.code = stringToSlug(layouts.name);
-          // let check_name_unique = Layout.findOne({
-          //   where: { name: layouts.name },
-          // });
-          // check_name_unique = JSON.stringify(check_name_unique)
-          // // console.log('============',JSON.stringify(check_name_unique))
-          // if (check_name_unique.length > 0) {
-          //   throw new Error("Name already in use!");
-          // } else {
-          //   layouts.code = stringToSlug(layouts.name);
-          // }
+        beforeCreate: async (layouts, options) => {
+          let code = stringToSlug(layouts.name);
+          console.log('===================',code)
+          let check_code_unique = await Layout.findOne({
+            where: { code: code },
+          });
+          // check_code_unique = JSON.stringify(check_code_unique);
+          console.log('============',check_code_unique)
+          if (check_code_unique) {
+            throw new Error("Code already in use!");
+          } else {
+            layouts.code = code;
+          }
         },
+        // beforeBulkUpdate: (layouts, options) => {
+        //   let check_code_unique = Layout.findOne({
+        //     where: { code: layouts.code },
+        //   });
+        //   check_code_unique = JSON.stringify(check_code_unique);
+        //   // console.log('============',JSON.stringify(check_name_unique))
+        //   if (check_code_unique.length > 0) {
+        //     throw new Error("Code already in use!");
+        //   }
+        // },
       },
     }
   );
@@ -173,6 +184,8 @@ module.exports = (sequelize, DataTypes) => {
     });
     return schema.validate(req.body);
   };
+  //validation function
+  Layout.uniqueCheck = function (req) {};
   sequelizePaginate.paginate(Layout);
   return Layout;
 };
