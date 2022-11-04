@@ -15,9 +15,11 @@ import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 import '../../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
+import { selectUser } from 'app/store/userSlice';
 
 const CreateUpdate = () => {
     const fields = useSelector(state => state.crud.module.fields);
+    const user = useSelector(selectUser);
     const moduleId = useParams().moduleId;
     const module = 'pages';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
@@ -28,15 +30,19 @@ const CreateUpdate = () => {
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
+    const [layoutOptions, setLayoutOptions] = useState([]);
     const [allData, setAllData] = useState({
-        layout: '',
+        layout_id: '',
+        status: '',
         name: '',
         slug: '',
+        permalink: '',
         html: '',
-        pages_json: '',
+        page_json: '',
     });
 
     useEffect(() => {
+        moduleId === 'create' ? setLayoutOptions(fields.layouts.options) : '';
         const editor = grapesjs.init({
             container: '#gjs',
             protectedCss: '',   // disabled default CSS
@@ -216,7 +222,7 @@ const CreateUpdate = () => {
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
-                pages_json: editor.getProjectData(),
+                page_json: editor.getProjectData(),
                 html: generatedHTMLValue(editor),
             });
         };
@@ -255,7 +261,8 @@ const CreateUpdate = () => {
         setAllData(allData => ({
             ...allData,
             name: event.target.value,
-            slug: Helper.stringToSlug(event.target.value)
+            slug: Helper.stringToSlug(event.target.value),
+            permalink: `https://${user.loggedin_portal.domain}/${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('name', event.target.value);
     }
@@ -270,10 +277,12 @@ const CreateUpdate = () => {
         if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
-                layout: allData.layout,
-                slug: Helper.stringToSlug(allData.slug),
+                layout_id: allData.layout_id,
+                status: allData.status,
+                slug: allData.slug,
+                permalink: allData.permalink,
                 html: generatedHTMLValue(editor),
-                pages_json: editorJsonBody,
+                page_json: editorJsonBody,
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updatePages + `/${moduleId}` : jwtServiceConfig.savePages;
 
@@ -310,16 +319,19 @@ const CreateUpdate = () => {
         axios.get(jwtServiceConfig.getSinglePage + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
+                    setLayoutOptions(response.data.results.fields.layouts.options);
                     const record = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
-                        layout: record.layout,
+                        layout_id: record.layout_id,
+                        status: record.status,
                         name: record.name,
                         slug: record.slug,
+                        permalink: record.permalink,
                         html: record.html,
-                        pages_json: record.pages_json,
+                        page_json: record.page_json,
                     }));
-                    editor.loadProjectData(record.pages_json);
+                    editor.loadProjectData(record.page_json);
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     setChangeCount(changeCount => changeCount - 1);
@@ -366,13 +378,22 @@ const CreateUpdate = () => {
     const handleChangeLayout = (event) => {
         setAllData({
             ...allData,
-            layout: event.target.value,
+            layout_id: event.target.value,
         });
-        dynamicErrorMsg('layout', event.target.value);
+        dynamicErrorMsg('layout_id', event.target.value);
+    };
+    const handleChangeStatus = (event) => {
+        setAllData({
+            ...allData,
+            status: event.target.value,
+        });
+        dynamicErrorMsg('status', event.target.value);
     };
     const onSlugChange = (event) => {
         setAllData(allData => ({
-            ...allData, slug: Helper.stringToSlug(event.target.value)
+            ...allData,
+            slug: Helper.stringToSlug(event.target.value),
+            permalink: `https://${user.loggedin_portal.domain}/${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
     }
@@ -381,27 +402,45 @@ const CreateUpdate = () => {
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
-                        <FormControl className="w-4/12 mb-24 pr-10">
+                        <FormControl className="w-1/2 mb-24 pr-10">
                             <InputLabel id="demo-simple-select-label">Layout</InputLabel>
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                value={allData.layout}
+                                value={allData.layout_id}
                                 label="Layout"
                                 onChange={handleChangeLayout}
                                 required
                             >
                                 <MenuItem value=""> <em>None</em> </MenuItem>
-                                {fields.layouts.options.map((val, key) => {
+                                {layoutOptions.length > 0 ? layoutOptions.map((val, key) => {
                                     return (
                                         <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
                                     )
-                                })
+                                }) : ''
                                 }
                             </Select>
-                            <FormHelperText error variant="standard">{errors.name}</FormHelperText>
+                            <FormHelperText error variant="standard">{errors.layout_id}</FormHelperText>
                         </FormControl>
-                        <FormControl className="w-4/12 mb-24 px-10">
+                        <FormControl className="w-1/2 mb-24 pl-10">
+                            <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={allData.status}
+                                label="Status"
+                                onChange={handleChangeStatus}
+                                required
+                            >
+                                <MenuItem value=""> <em>None</em> </MenuItem>
+                                <MenuItem value="pending"> Pending</MenuItem>
+                                <MenuItem value="draft"> Draft</MenuItem>
+                                <MenuItem value="published">Published </MenuItem>
+                                <MenuItem value="archived">Archived </MenuItem>
+                            </Select>
+                            <FormHelperText error variant="standard">{errors.status}</FormHelperText>
+                        </FormControl>
+                        <FormControl className="w-1/2 mb-24 pr-10">
                             <TextField
                                 label="Name"
                                 type="text"
@@ -414,7 +453,7 @@ const CreateUpdate = () => {
                             />
                             <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                         </FormControl>
-                        <FormControl className="w-4/12 mb-24 pl-10">
+                        <FormControl className="w-1/2 mb-24 pl-10">
                             <TextField
                                 label="Slug"
                                 type="text"
@@ -428,11 +467,11 @@ const CreateUpdate = () => {
                                 label="Permalink"
                                 type="text"
                                 variant="outlined"
-                                value={Helper.stringToSlug(allData.slug)}
+                                value={allData.permalink}
                                 readOnly
                                 disabled
                             />
-                            <FormHelperText error variant="standard">{errors.name}</FormHelperText>
+                            <FormHelperText error variant="standard">{errors.permalink}</FormHelperText>
                         </FormControl>
                         <FormControl className="w-full mb-24">
                             <div id="gjs" />
