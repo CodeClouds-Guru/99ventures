@@ -214,6 +214,8 @@ class FileManagerController {
       msg = "Folder Copied."
     else if (req.body.type == 'copy-file')
       msg = "Folder Renamed."
+    else if (req.body.type == 'update-metadata')
+      msg = "Metadata Updated."
 
     return {
       status: true,
