@@ -41,26 +41,18 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "layouts",
       hooks: {
         beforeCreate: (layouts, options) => {
-          let check_name_unique = Layout.findOne({
-            where: { name: layouts.name },
-          });
-
-          if (check_name_unique.length > 0) {
-            throw new Error("Name already in use!");
-          } else {
-            layouts.code = stringToSlug(layouts.name);
-          }
+          layouts.code = stringToSlug(layouts.name);
+          // let check_name_unique = Layout.findOne({
+          //   where: { name: layouts.name },
+          // });
+          // check_name_unique = JSON.stringify(check_name_unique)
+          // // console.log('============',JSON.stringify(check_name_unique))
+          // if (check_name_unique.length > 0) {
+          //   throw new Error("Name already in use!");
+          // } else {
+          //   layouts.code = stringToSlug(layouts.name);
+          // }
         },
-        // beforeBulkUpdate: (layouts, options) => {
-        //   console.log(options, "===================");
-        //   let check_name_unique = Layout.findOne({
-        //     where: { name: layouts.attributes.name },
-        //   });
-
-        //   if (check_name_unique.length > 0) {
-        //     throw new Error("Name already in use!");
-        //   }
-        // },
       },
     }
   );
