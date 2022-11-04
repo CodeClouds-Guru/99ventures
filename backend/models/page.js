@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     layout_id: DataTypes.BIGINT,
     html: DataTypes.TEXT,
     status: DataTypes.STRING,
-    parmalink: DataTypes.STRING,
+    permalink: DataTypes.STRING,
     is_homepage: DataTypes.TINYINT,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
       slug: Joi.string().required().label('Slug'),
-      parmalink: Joi.string().required().label('parmalink'),
+      permalink: Joi.string().required().label('permalink'),
       company_portal_id: Joi.required().label('Company portal'),
       html: Joi.string().required().label('HTML'),
       page_json: Joi.object().required().label('JSON'),

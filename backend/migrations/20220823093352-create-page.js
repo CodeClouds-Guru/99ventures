@@ -21,7 +21,7 @@ module.exports = {
         defaultValue: "draft",
         comment: "pending, draft, published, archived"
       },
-      parmalink: {
+      permalink: {
         type: Sequelize.STRING,
         allowNull: false,
       },
