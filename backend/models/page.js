@@ -55,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
     })
     return schema.validate(req.body)
   }
-  Page.extra_fields = ['layout'];
+  //Page.extra_fields = ['layout'];
   Page.fields = {
     id: {
       field_name: 'id',
