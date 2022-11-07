@@ -99,7 +99,7 @@ const CreateEditForm = () => {
             layout_json: layoutCode
         };
 
-        const url = (moduleId === 'create') ? jwtServiceConfig.layoutsSave : jwtServiceConfig.updateLayouts + '/' + moduleId;
+        const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave ;
 
         setLoading(true);
         axios.post(url, params)
@@ -169,7 +169,7 @@ const CreateEditForm = () => {
                                                 <Draggable key={indx}>
                                                     <ListItem>
                                                         <ListItemIcon className="drag-handle">
-                                                            <IconButton className="cursor-move" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                            <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
                                                                 <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
                                                             </IconButton>
                                                         </ListItemIcon>
