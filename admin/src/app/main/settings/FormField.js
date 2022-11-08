@@ -90,17 +90,22 @@ const FormField = () => {
                 if(result[uploadIndx].settings_value){
                     setValue('max_no_of_uploads', result[uploadIndx].settings_value, { shouldDirty: true, shouldValidate: true });
                 }
-
+                
                 const filesData = {};
                 Object.keys(types).map((item, key) => {
                     filesData[item] = []
                     types[item].map(el => {
-                        filesData[item].push({
-                            ...el,
-                            checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type)) ? true : false
-                        })
+                        if(result[configIndx]['settings_value'][item]){
+                            filesData[item].push({
+                                ...el,
+                                checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type)) ? true : false
+                            })
+                        } else {
+                            filesData[item].push({
+                                ...el
+                            })
+                        }
                     })
-
                 });
                 setFileTypes(filesData);
             } else {
