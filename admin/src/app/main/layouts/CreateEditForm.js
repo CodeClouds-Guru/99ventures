@@ -90,8 +90,13 @@ const CreateEditForm = () => {
     }
 
     const handleDelete = (element) => {
-        const newData = layoutCode.filter(el => el.name !== element);
-        setLayoutCode(newData);
+        const newData = layoutCode.body.value.filter(el => el.name !== element);
+        setLayoutCode({
+            ...layoutCode,
+            body: {
+                value: newData
+            }
+        });
     }
 
     /**
