@@ -42,14 +42,13 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         beforeCreate: async (layouts, options) => {
           let code = stringToSlug(layouts.name);
-          console.log('===================',code)
           let check_code_unique = await Layout.findOne({
             where: { code: code },
           });
-          // check_code_unique = JSON.stringify(check_code_unique);
-          console.log('============',check_code_unique)
+
           if (check_code_unique) {
-            throw new Error("Code already in use!");
+            var date = new Date();
+            layouts.code = code + "-" + date.getTime();
           } else {
             layouts.code = code;
           }

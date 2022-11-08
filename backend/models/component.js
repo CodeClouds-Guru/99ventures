@@ -42,12 +42,22 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: "deleted_at",
     tableName: "components",
     hooks: {
-      beforeCreate: (component, options) => {
-        component.code = stringToSlug(component.name)
+      beforeCreate: async (component, options) => {
+        let code = stringToSlug(component.name)
+        let check_code_unique = await Component.findOne({
+          where: { code: code },
+        });
+
+        if (check_code_unique) {
+          var date = new Date();
+          component.code = code + "-" + date.getTime();
+        } else {
+          component.code = code;
+        }
       },
-      beforeUpdate: (component, options) => {
-        component.code = stringToSlug(component.name)
-      },
+      // beforeUpdate: (component, options) => {
+      //   component.code = stringToSlug(component.name)
+      // },
     },
   });
   Component.fields = {

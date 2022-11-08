@@ -9,13 +9,13 @@ class LayoutController extends Controller {
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
     //unique name checking
-    let check_name_unique = await this.model.findOne({
-      where: { name: req.body.name },
-    });
+    // let check_name_unique = await this.model.findOne({
+    //   where: { name: req.body.name },
+    // });
     
-    if (check_name_unique) {
-      throw new Error("Name already in use!");
-    }
+    // if (check_name_unique) {
+    //   throw new Error("Name already in use!");
+    // }
     
     // console.log(req);
     let response = await super.save(req);
@@ -29,13 +29,13 @@ class LayoutController extends Controller {
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
     //unique name checking
-    let check_name_unique = await this.model.findOne({
-      where: { name: req.body.name, id: { [Op.ne]: req.params.id } },
-    });
-    // console.log('===============',check_name_unique)
-    if (check_name_unique) {
-      throw new Error("Name already in use.");
-    }
+    // let check_name_unique = await this.model.findOne({
+    //   where: { name: req.body.name, id: { [Op.ne]: req.params.id } },
+    // });
+    // // console.log('===============',check_name_unique)
+    // if (check_name_unique) {
+    //   throw new Error("Name already in use.");
+    // }
     let response = await super.update(req);
     return {
       status: true,
