@@ -101,6 +101,25 @@ const types = {
             mime_type: 'audio/wav',
             checked: false
         }
+    ],
+    'stylesheet': [
+        {
+            ext: '.css',
+            mime_type: 'text/css',
+            checked: false
+        },
+    ],
+    'script': [
+        {
+            ext: '.json',
+            mime_type: 'application/json',
+            checked: false
+        },
+        {
+            ext: '.js',
+            mime_type: 'text/javascript',
+            checked: false
+        },
     ]
 }
 

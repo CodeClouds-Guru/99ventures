@@ -134,7 +134,7 @@ function DragDropzone() {
 			const msgs = [];
 			files.map(el => {				
 				if(el.errors[0]['code'] === 'file-too-large'){
-					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size} MB`);
+					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size ? selectConfig.max_file_size : 1} MB`);
 				}
 				if(el.errors[0]['code'] === 'file-invalid-type'){
 					msgs.push(`${el.file.name} is not supported!`);

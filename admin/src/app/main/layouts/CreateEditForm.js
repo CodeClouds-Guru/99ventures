@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
@@ -13,7 +13,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {arrayMoveImmutable} from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 
-
 const CreateEditForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -22,12 +21,18 @@ const CreateEditForm = () => {
     const [ loading, setLoading ] = useState(false);
     const [ components, setComponents ] = useState([]);
     const [ layoutname, setLayoutname ] = useState('');
-    const [ layoutCode, setLayoutCode ] = useState([
-        {
-            name: 'Content',
-            code: '{{content}}'
+    const [ headBlock, setHeadBlock ] = useState('');
+    const [ layoutCode, setLayoutCode ] = useState({
+        header: {
+            value: ''
+        },
+        body: {
+            value: [{
+                name: 'Content',
+                code: '{{content}}'
+            }]
         }
-    ]);
+    });
 
     useEffect(()=>{
         getComponents();
@@ -74,8 +79,13 @@ const CreateEditForm = () => {
         const selectedValue = e.target.value;
         if(selectedValue){
             const componentCode = components.filter(el=> el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}].map((item) => [item["name"], item])).values()];            
-            setLayoutCode(uniqueObjArray);
+            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}].map((item) => [item["name"], item])).values()];            
+            setLayoutCode({
+                ...layoutCode,
+                body: {
+                    value: uniqueObjArray
+                }
+            });
         }
     }
 
@@ -93,11 +103,24 @@ const CreateEditForm = () => {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
         }
+
+        const htmlCode = `<html>
+            <head>
+                <title>{{ page_title}}</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                ${layoutCode.header.value}
+            </head>
+            <body>${layoutCode.body.value.map(el => el.code).join(' ')}</body>
+        </html>`;
+
         const params = {
             name: layoutname,
-            html: layoutCode.map(el => el.code).join(' '),
+            html: htmlCode,
             layout_json: layoutCode
         };
+
+        // console.log(params);
+        // return;
 
         const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave ;
 
@@ -122,8 +145,14 @@ const CreateEditForm = () => {
      * Drag & Drop components
      */
     const onDrop = ({ removedIndex, addedIndex }) => {
-        setLayoutCode(layoutCode => arrayMoveImmutable(layoutCode, removedIndex, addedIndex));
+        setLayoutCode({
+            ...layoutCode,
+            body: {
+                value: arrayMoveImmutable(layoutCode.body.value, removedIndex, addedIndex)
+            }
+        });
     };
+ 
 
     return (
         <Box className="p-32" >
@@ -138,58 +167,90 @@ const CreateEditForm = () => {
                         />
                     </FormControl>
                 </div>
-                <fieldset className='border mb-24'>
-                    <legend className='w-1/3 ml-24'>
-                        <FormControl className="w-full">
-                            <InputLabel id="select-component-label">Select Component</InputLabel>
-                            <Select
-                                name="components"
-                                labelId="select-component-label"
-                                id="select-component"
-                                label="Select Component"
-                                onChange={ handleSelectComponent }
-                                defaultValue=""
-                                >
-                                    <MenuItem value="">Select</MenuItem>
-                                    {
-                                        components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{ el.name }</MenuItem>)
-                                    }
-                                
-                            </Select>
-                        </FormControl>
+                <fieldset className='border mb-24 p-32'>
+                    <legend className='ml-24 px-10'>
+                        <Typography variant="h6">Layout</Typography>
                     </legend>
-                    <div className='p-32'>
-                        <List
-                            sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}                        
-                            >
-                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                    {
-                                        layoutCode.map((el, indx) => {
-                                            return(
-                                                <Draggable key={indx}>
-                                                    <ListItem>
-                                                        <ListItemIcon className="drag-handle">
-                                                            <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
-                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
-                                                            </IconButton>
-                                                        </ListItemIcon>
-                                                        <ListItemText id="switch-list-label-wifi" primary={ el.name } />
-                                                        {
-                                                            el.name !== 'Content' && (
-                                                                <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
-                                                                    <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
+                    <fieldset className='border mb-10'>
+                        <legend className='ml-24 px-10'>
+                            <Typography variant="subtitle1">Header</Typography>
+                        </legend>
+                        <div className='p-32'>
+                            <pre>
+                                <code>
+                                    <TextareaAutosize
+                                        maxRows={ 10 }
+                                        aria-label="maximum height"
+                                        placeholder="#Add your external style and script here"
+                                        defaultValue={ layoutCode.header.value }
+                                        style={{minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
+                                        onChange={
+                                            (e)=>setLayoutCode({
+                                                ...layoutCode,
+                                                header: {
+                                                    value: e.target.value
+                                                }
+                                            })
+                                        }
+                                    />
+                                </code>
+                            </pre>
+                        </div>
+                    </fieldset>
+                    <fieldset className='border'>
+                        <legend className='ml-24  px-10'>
+                            <Typography variant="subtitle1">Body</Typography>
+                        </legend>
+                        <div className='p-32'>
+                            <FormControl sx={{ m: 1, minWidth: 350 }} size="small">
+                                <InputLabel id="select-component-label">Select Component</InputLabel>
+                                <Select
+                                    name="components"
+                                    labelId="select-component-label"
+                                    id="select-component"
+                                    label="Select Component"
+                                    onChange={ handleSelectComponent }
+                                    defaultValue=""
+                                    >
+                                        <MenuItem value="">Select</MenuItem>
+                                        {
+                                            components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{ el.name }</MenuItem>)
+                                        }
+                                    
+                                </Select>
+                            </FormControl>
+                            <List
+                                sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}                        
+                                >
+                                    <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                        {
+                                            layoutCode.body.value.map((el, indx) => {
+                                                return(
+                                                    <Draggable key={indx}>
+                                                        <ListItem>
+                                                            <ListItemIcon className="drag-handle">
+                                                                <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
+                                                                    <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
                                                                 </IconButton>
-                                                            )
-                                                        }                                                    
-                                                    </ListItem>
-                                                    <Divider variant="inset" component="li" className="ml-12" />
-                                                </Draggable> 
-                                            )
-                                        })
-                                    }
-                                </Container>
-                        </List>
-                    </div>
+                                                            </ListItemIcon>
+                                                            <ListItemText id="switch-list-label-wifi" primary={ el.name } />
+                                                            {
+                                                                el.name !== 'Content' && (
+                                                                    <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                        <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                    </IconButton>
+                                                                )
+                                                            }                                                    
+                                                        </ListItem>
+                                                        <Divider variant="inset" component="li" className="ml-12" />
+                                                    </Draggable> 
+                                                )
+                                            })
+                                        }
+                                    </Container>
+                            </List>
+                        </div>
+                    </fieldset>
                 </fieldset>
                 <motion.div
                     className="flex"
