@@ -18,15 +18,14 @@ import Helper from 'src/app/helper';
 import { selectUser } from 'app/store/userSlice';
 
 const CreateUpdate = () => {
-    const fields = useSelector(state => state.crud.module.fields);
+    const module = 'pages';
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const user = useSelector(selectUser);
     const moduleId = useParams().moduleId;
-    const module = 'pages';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
@@ -42,7 +41,7 @@ const CreateUpdate = () => {
     });
 
     useEffect(() => {
-        moduleId === 'create' ? setLayoutOptions(fields.layouts.options) : '';
+        moduleId === 'create' ? getLayoutOptions() : '';
         const editor = grapesjs.init({
             container: '#gjs',
             protectedCss: '',   // disabled default CSS
@@ -266,7 +265,19 @@ const CreateUpdate = () => {
         }));
         dynamicErrorMsg('name', event.target.value);
     }
-
+    const getLayoutOptions = () => {
+        axios.get(`/${module}/add`)
+            .then((response) => {
+                if (response.data.results) {
+                    setLayoutOptions(response.data.results.fields.layouts.options);
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
         if (editorJsonBody.styles.length < 1) {
@@ -291,8 +302,6 @@ const CreateUpdate = () => {
                 .then((response) => {
                     setLoading(false);
                     if (response.data.results.status) {
-                        // After successfully saved the changes, need to remove the local storage value and change state to 0.
-                        // New Localstorage value will be set after that.
                         setChangeCount(0);
                         localStorage.removeItem(storageKey);
 
@@ -301,9 +310,7 @@ const CreateUpdate = () => {
                             ...params
                         });
                         dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                        if (moduleId === 'create') {
-                            navigate(`/app/pages/${response.data.results.result.id}`);
-                        }
+                        navigate(`/app/${module}`);
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }
