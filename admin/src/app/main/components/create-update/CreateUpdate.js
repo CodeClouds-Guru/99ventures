@@ -275,8 +275,6 @@ const CreateUpdate = () => {
                 .then((response) => {
                     setLoading(false);
                     if (response.data.results.status) {
-                        // After successfully saved the changes, need to remove the local storage value and change state to 0.
-                        // New Localstorage value will be set after that.
                         setChangeCount(0);
                         localStorage.removeItem(storageKey);
 
@@ -285,9 +283,7 @@ const CreateUpdate = () => {
                             ...params
                         });
                         dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                        if (moduleId === 'create') {
-                            navigate(`/app/components/${response.data.results.result.id}`);
-                        }
+                        navigate(`/app/${module}`);
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }

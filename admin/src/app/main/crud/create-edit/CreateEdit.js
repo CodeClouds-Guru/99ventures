@@ -45,7 +45,7 @@ function CreateEdit(props) {
     function updateModuleState() {
 
       if (moduleId === 'create') {
-        dispatch(getModuleFields({ module }));
+        module !== 'pages' ? dispatch(getModuleFields({ module })) : '';
       } else {
         dispatch(getModule({ moduleId, module })).then((action) => {
           if (!action.payload) {
