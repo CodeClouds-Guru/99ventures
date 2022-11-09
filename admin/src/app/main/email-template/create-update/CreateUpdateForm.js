@@ -348,7 +348,7 @@ const CreateUpdateForm = ({ input, meta }) => {
     const onSubmit = () => {
         let end_point = moduleId === 'create' ? jwtServiceConfig.saveEmailTemplates : jwtServiceConfig.updateEmailTemplates + `/${moduleId}`;       
         const editorJsonBody = editor.getProjectData();
-        if(editorJsonBody.styles.length < 1){
+        if(!editorJsonBody.pages[0].frames[0].component.components){
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in the email body' }));
             return;
         };
@@ -456,7 +456,7 @@ const CreateUpdateForm = ({ input, meta }) => {
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                value={allData.action}
+                                value={+allData.action}
                                 label="Action"
                                 onChange={handleChangeAction}
                             >

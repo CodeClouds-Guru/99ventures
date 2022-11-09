@@ -279,7 +279,7 @@ const CreateUpdateForm = () => {
 
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
-        if (editorJsonBody.styles.length < 1) {
+        if (!editorJsonBody.pages[0].frames[0].component.components) {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
             return;
         }
