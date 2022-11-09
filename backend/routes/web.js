@@ -5,13 +5,13 @@ const router = express.Router()
 // })
 router.get('/', (req, res) => {
   const user = {
-    name: 'User',
+    name: 'Demo User',
     email: 'user@gmail.com',
 }
 
 var layout = "${convert_component('header')} {{content}} ${convert_component('footer')}";
 
-var page_body = "<section Body><p>This is body. Hi ${user.email}</p></section>";
+var page_body = "<section Body><p>This is body. Hi ${user.name}, email: <b>${user.email}</b></p></section>";
 
 layout = layout.replace("{{content}}", page_body);
 
