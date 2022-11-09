@@ -121,8 +121,18 @@ class EmailTemplateController extends Controller {
   async edit(req, res) {
     try {
       let response = await super.edit(req);
+      let fields = response.fields;
       if (response.result) {
-        let email_actions = await response.result.getEmailActions();
+        // let email_actions = await response.result.getEmailActions();
+        let email_actions = await db.sequelize.query(
+          "SELECT * FROM `email_actions` as ea WHERE NOT EXISTS (SELECT * FROM `email_action_email_template` as eaet WHERE eaet.email_action_id = ea.id AND eaet.email_template_id !=? )",
+          {
+            type: QueryTypes.SELECT,
+            replacements: [req.params.id],
+          }
+        );
+        fields.email_actions.options = email_actions;
+        console.log('=============================',email_actions)
         response.result.setDataValue("EmailActions", email_actions);
         return response;
       } else {
