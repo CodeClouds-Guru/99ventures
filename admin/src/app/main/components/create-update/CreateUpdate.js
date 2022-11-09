@@ -19,7 +19,7 @@ import Helper from 'src/app/helper';
 const CreateUpdate = () => {
     const moduleId = useParams().moduleId;
     const module = 'components';
-    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
+    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-component-${moduleId}` : `gjs-component-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const navigate = useNavigate();
