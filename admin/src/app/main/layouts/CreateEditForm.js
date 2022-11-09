@@ -186,7 +186,7 @@ const CreateEditForm = () => {
                                     <TextareaAutosize
                                         maxRows={ 10 }
                                         aria-label="maximum height"
-                                        placeholder="#Add your external style and script here"
+                                        placeholder="#Add your external style and script here, e.g., <link rel='stylesheet' href='/style.css' />"
                                         defaultValue={ layoutCode.header.value }
                                         style={{minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
                                         onChange={
