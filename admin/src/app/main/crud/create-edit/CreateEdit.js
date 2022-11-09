@@ -126,10 +126,10 @@ function CreateEdit(props) {
               {errors && <Alert severity="error">{errors}</Alert>}
               {/* <CreateEditForm moduleOnSave={moduleOnSaveHandler} /> */}
               {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
-                module === 'components' ? <ComponentsCreateUpdate /> :
-                  module === 'layouts' ? <LayoutsCreateUpdate /> :
-                    module === 'pages' ? <PagesCreateUpdate /> :
-                      <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
+                // module === 'components' ? <ComponentsCreateUpdate /> :
+                module === 'layouts' ? <LayoutsCreateUpdate /> :
+                  module === 'pages' ? <PagesCreateUpdate /> :
+                    <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
             </div>
             {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
           </div>
