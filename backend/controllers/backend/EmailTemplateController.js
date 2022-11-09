@@ -9,8 +9,9 @@ const {
   CompanyPortal,
   sequelize,
 } = require("../../models/index");
+const db = require("../../models/index");
 const queryInterface = sequelize.getQueryInterface();
-const { Op } = require("sequelize");
+const { QueryTypes, Op } = require("sequelize");
 const EmailHelper = require("../../helpers/EmailHelper");
 
 class EmailTemplateController extends Controller {
