@@ -4,9 +4,31 @@ const router = express.Router()
 //   res.status(200).send('99ventures backend')
 // })
 router.get('/', (req, res) => {
-  res.render('page');
-});
+  const user = {
+    name: 'User',
+    email: 'user@gmail.com',
+}
 
+var layout = "${convert_component('header')} {{content}} ${convert_component('footer')}";
+
+var page_body = "<section Body><p>This is body. Hi ${user.email}</p></section>";
+
+layout = layout.replace("{{content}}", page_body);
+
+let page_content = eval('`'+layout+'`');
+console.log(page_content)
+  res.render('page',{page_content:page_content});
+});
+function convert_component(component) {
+  switch(component) {
+      case 'header': 
+          return "<section Header><ul><li>Home</li><li>About</li></ul></section>";
+      case 'footer':
+          return "<section Footer><div class='footer'>Copyright 99 ventures</div></section>";
+      default:
+          return '';
+  }
+}
 router.all('/test', async (req, res) => {
   const AWS = require('aws-sdk')
   const ArchieverClass = require("../helpers/Archiever");
