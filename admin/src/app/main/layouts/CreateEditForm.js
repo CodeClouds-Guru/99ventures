@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
@@ -15,7 +15,7 @@ import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
 
 
-const CreateEditForm = () => {
+const CreateEditForm = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
@@ -210,7 +210,6 @@ const CreateEditForm = () => {
      * Reset the layout
      */
     const handleResetLayout = () => {
-        console.log(records)
         setLayoutname(records.name);
         setLayoutCode(records.layout_json);
         setChangeStatus({name_changed: false, header_changes: false, body_changed: false});
@@ -232,7 +231,7 @@ const CreateEditForm = () => {
     return (
         <Box className="p-32" >
             <form onSubmit={ formSubmit }>
-                <div className='flex mb-24'>
+                <div className='flex mb-24 justify-between'>
                     <FormControl className="w-1/2">
                         <TextField
                             id="outlined-name"
@@ -241,6 +240,23 @@ const CreateEditForm = () => {
                             onChange={ handleSetLayoutName }
                         />
                     </FormControl>
+                    <div>
+                        {
+                            !props.sidebarStatus ? (
+                                <Tooltip title="Show History">
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.showSidebar}>
+                                        <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:cog</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title="Close History">
+                                    <IconButton size="small" color="primary" aria-label="Close History" component="label" onClick={ props.showSidebar}>
+                                        <FuseSvgIcon size={20}>heroicons-outline:x</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            )
+                        }
+                    </div>
                 </div>
                 <fieldset className='border mb-24 p-32'>
                     <legend className='ml-24 px-10'>
@@ -297,14 +313,14 @@ const CreateEditForm = () => {
                                                     <Draggable key={indx}>
                                                         <ListItem>
                                                             <ListItemIcon className="drag-handle">
-                                                                <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
+                                                                <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
                                                                     <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
                                                                 </IconButton>
                                                             </ListItemIcon>
                                                             <ListItemText id="switch-list-label-wifi" primary={ el.name } />
                                                             {
                                                                 el.name !== 'Content' && (
-                                                                    <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                    <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
                                                                         <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                     </IconButton>
                                                                 )
