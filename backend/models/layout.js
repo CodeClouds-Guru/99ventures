@@ -41,16 +41,18 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "layouts",
       hooks: {
         beforeCreate: async (layouts, options) => {
-          let code = stringToSlug(layouts.name);
-          let check_code_unique = await Layout.findOne({
-            where: { code: code },
-          });
+          if (layouts.code == null) {
+            let code = stringToSlug(layouts.name);
+            let check_code_unique = await Layout.findOne({
+              where: { code: code },
+            });
 
-          if (check_code_unique) {
-            var date = new Date();
-            layouts.code = code + "-" + date.getTime();
-          } else {
-            layouts.code = code;
+            if (check_code_unique) {
+              var date = new Date();
+              layouts.code = code + "-" + date.getTime();
+            } else {
+              layouts.code = code;
+            }
           }
         },
         // beforeBulkUpdate: (layouts, options) => {
@@ -184,7 +186,7 @@ module.exports = (sequelize, DataTypes) => {
     return schema.validate(req.body);
   };
   //validation function
-  Layout.uniqueCheck = function (req) {};
+
   sequelizePaginate.paginate(Layout);
   return Layout;
 };
