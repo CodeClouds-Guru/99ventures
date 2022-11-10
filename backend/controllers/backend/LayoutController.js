@@ -4,6 +4,7 @@ const { Layout, Component } = require("../../models/index");
 class LayoutController extends Controller {
   constructor() {
     super("Layout");
+    this.layoutRevisionUpdate = this.layoutRevisionUpdate.bind(this)
   }
   //override save function
   async save(req, res) {
@@ -19,39 +20,23 @@ class LayoutController extends Controller {
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
+    let rev_layout_id = req.body.rev_layout_id || null;
     let previous = await this.model.findByPk(req.params.id);
     const countBackups = await this.model.count({
       where: {
         code: {
-          [Op.like]: "%" + previous.code + "-del-%",
+          [Op.like]: "%" + previous.code + "-rev-%",
         },
       },
     });
-
-    let updateData = {
-      name: req.body.name,
-      html: req.body.html,
-      layout_json: req.body.layout_json,
-      updated_by: req.user.id,
-    };
-    
-    this.model.update(updateData, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    // let updateResponse = await super.update(previous);
-
-    let createData = {
-      name: previous.name,
-      html: previous.html,
-      layout_json: previous.layout_json,
-      code: previous.code + "-del-" + (parseInt(countBackups) + 1),
-      company_portal_id: req.headers.site_id,
-      created_by: req.user.id,
-    };
-    let model = await Layout.create(createData);
-    // let saveResponse = await super.save(createData);
+    req.countBackups = countBackups;
+    let current = {};
+    if (rev_layout_id !== null) {
+      current = await this.model.findByPk(rev_layout_id);
+    } else {
+      current = req.body;
+    }
+    let response = await this.layoutRevisionUpdate(req, current, previous);
 
     return {
       status: true,
@@ -84,9 +69,10 @@ class LayoutController extends Controller {
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
+        attributes: ["id", "name"],
         where: {
           code: {
-            [Op.like]: "%" + model.code + "-del-%",
+            [Op.like]: "%" + model.code + "-rev-%",
           },
         },
       });
@@ -116,7 +102,7 @@ class LayoutController extends Controller {
     var options = super.getQueryOptions(req);
     options.where = {
       code: {
-        [Op.notLike]: "%-del-%",
+        [Op.notLike]: "%-rev-%",
       },
     };
 
@@ -126,6 +112,34 @@ class LayoutController extends Controller {
       result: { data: docs, pages, total },
       fields: this.model.fields,
     };
+  }
+
+  async layoutRevisionUpdate(req, current, previous) {
+    let update_data = {
+      name: current.name,
+      html: current.html,
+      layout_json: current.layout_json,
+      updated_by: req.user.id,
+    };
+
+    let model_update = this.model.update(update_data, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    // let updateResponse = await super.update(previous);
+
+    let create_data = {
+      name: previous.name,
+      html: previous.html,
+      layout_json: previous.layout_json,
+      code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
+      company_portal_id: req.headers.site_id,
+      created_by: req.user.id,
+    };
+    let model = await Layout.create(create_data);
+    // let saveResponse = await super.save(createData);
+    return true;
   }
 }
 
