@@ -24,13 +24,14 @@ const CreateUpdate = () => {
     const dispatch = useDispatch();
     const user = useSelector(selectUser);
     const moduleId = useParams().moduleId;
-    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
+    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-pages-${moduleId}` : `gjs-pages-new`;
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
     const [layoutOptions, setLayoutOptions] = useState([]);
+    const [components, setComponents] = useState([]);
     const [allData, setAllData] = useState({
         layout_id: '',
         status: '',
@@ -97,6 +98,19 @@ const CreateUpdate = () => {
                 },
             },
         });
+
+        components.map((val) => {
+            editor.BlockManager.add(`block-${val.value}`, {
+                label: val.value,
+                category: 'Custom Component',
+                attributes: {
+                    class: 'fa fa-square'
+                },
+                content:
+                    val.html
+            });
+        })
+
         setEditor(editor);
 
         const pfx = editor.getConfig().stylePrefix
@@ -274,6 +288,7 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
+                    setComponents(response.data.results.fields.components.options)
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -294,8 +309,8 @@ const CreateUpdate = () => {
                 ...allData,
                 layout_id: allData.layout_id,
                 status: allData.status,
-                slug: allData.slug,
-                permalink: allData.permalink,
+                slug: !allData.slug ? '/' : allData.slug,
+                permalink: `https://${user.loggedin_portal.domain}/${allData.permalink}`,
                 html: generatedHTMLValue(editor),
                 page_json: editorJsonBody,
             }
@@ -331,6 +346,7 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results.result) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
+                    setComponents(response.data.results.fields.components.options);
                     const record = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
@@ -341,6 +357,9 @@ const CreateUpdate = () => {
                         permalink: record.permalink,
                         html: record.html,
                         page_json: record.page_json,
+                        keywords: record.keywords,
+                        descriptions: record.descriptions,
+                        meta_code: record.meta_code
                     }));
                     editor.loadProjectData(record.page_json);
 
@@ -400,7 +419,7 @@ const CreateUpdate = () => {
             slug: Helper.stringToSlug(event.target.value),
             permalink: `${Helper.stringToSlug(event.target.value)}`
         }));
-        dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
+        // dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
     }
     const handleKeywords = (event) => {
         setAllData({
@@ -500,7 +519,11 @@ const CreateUpdate = () => {
                                 </FormControl>
                                 <FormControl className="w-full mb-24 pl-10">
                                     <Typography component={'p'}>
-                                        Permalink: <b> https://{user.loggedin_portal.domain}/{allData.permalink}</b>
+                                        Permalink: &nbsp;&nbsp;
+                                        <b>
+                                            {moduleId === 'create' ? `https://${user.loggedin_portal.domain}/` : ''}
+                                            {allData.permalink}
+                                        </b>
                                     </Typography>
                                 </FormControl>
 
