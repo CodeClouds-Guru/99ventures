@@ -88,7 +88,7 @@ class ComponentController extends Controller {
             [Op.like]: "%" + model.code + "-rev-%",
           },
         },
-        order: ["updated_at", "DESC"],
+        order: [["updated_at", "DESC"]],
       });
 
       let fields = this.model.fields;
