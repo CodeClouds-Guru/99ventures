@@ -111,6 +111,7 @@ class PageController extends Controller {
       searchable: true,
       options: components,
     };
+    response.fields = fields
     return response;
   }
   //override save function
