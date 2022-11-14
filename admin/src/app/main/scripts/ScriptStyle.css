@@ -20,3 +20,16 @@
 }
 .gjs-rte-action:last-child{width: auto;}
 select.gjs-field option{background-color: #111827;}
+.gjs-pn-views{border-bottom: 0;}
+.gjs-mdl-container{position: absolute; width: 100%; left: 50%; bottom: auto; right: auto; -webkit-transform: translate(-50%, 0%); transform: translate(-50%, 0%);}
+.gjs-mdl-dialog{width: 100%; margin: 0 auto;}
+.gjs-pn-views-container{padding: 2px 0 0; margin: 40px 0 0; height: calc(100% - 40px);}
+@media only screen and (max-width: 1360px) {
+    .gjs-pn-views{width: 18%;}
+    .gjs-pn-options{right: 18%;}
+    .gjs-pn-views-container{width: 20%;}
+    .gjs-cv-canvas{width: 80%;}
+}
+@media only screen and (max-width: 767px) {
+    .gjs-mdl-dialog{width: 90%; margin: auto;}
+}

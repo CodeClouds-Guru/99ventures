@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
     page_json: DataTypes.JSON,
+    meta_code: DataTypes.TEXT,
+    keyword: DataTypes.STRING,
+    description: DataTypes.TEXT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -50,7 +53,9 @@ module.exports = (sequelize, DataTypes) => {
       html: Joi.string().required().label('HTML'),
       page_json: Joi.object().required().label('JSON'),
       status: Joi.string().required().label('status'),
-      // is_homepage: Joi.required().label('Home Page'),
+      keyword: Joi.optional().allow('').label('Keyword'),
+      description: Joi.optional().allow('').label('Description'),
+      meta_code: Joi.optional().allow('').label('Meta Code'),
       layout_id: Joi.required().label('Layout ID')
     })
     return schema.validate(req.body)
