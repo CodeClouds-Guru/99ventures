@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
@@ -12,16 +12,20 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
 import {arrayMoveImmutable} from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
+import AlertDialog from 'app/shared-components/AlertDialog';
 
-const CreateEditForm = () => {
+
+const CreateEditForm = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
     const { hasPermission } = usePermission('layouts');
     const [ loading, setLoading ] = useState(false);
     const [ components, setComponents ] = useState([]);
-    const [ layoutname, setLayoutname ] = useState('');
-    const [ headBlock, setHeadBlock ] = useState('');
+    const [ layoutname, setLayoutname ] = useState('');    
+    const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
+    const [ records, setRecords ] = useState({});
+    const [ changeStatus, setChangeStatus ] = useState({name_changed: false, header_changes: false, body_changed: false});
     const [ layoutCode, setLayoutCode ] = useState({
         header: {
             value: ''
@@ -38,7 +42,7 @@ const CreateEditForm = () => {
         getComponents();
         getData();
     }, []);
-
+    
     /**
      * Components API
      */
@@ -65,6 +69,7 @@ const CreateEditForm = () => {
         .then(res => {
             if(res.data.results.result){
                 const result = res.data.results.result;
+                setRecords(result);
                 setLayoutname(result.name);
                 setLayoutCode(result.layout_json);
             } 
@@ -109,6 +114,15 @@ const CreateEditForm = () => {
             return;
         }
 
+        if(Object.values(changeStatus).includes(true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+            setOpenAlertDialog(true);
+        } else {
+            handleLayoutSubmit();
+        }
+        
+    }
+
+    const handleLayoutSubmit = () => {
         const htmlCode = `<html>
             <head>
                 <title>{{ page_title}}</title>
@@ -123,9 +137,6 @@ const CreateEditForm = () => {
             html: htmlCode,
             layout_json: layoutCode
         };
-
-        // console.log(params);
-        // return;
 
         const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave ;
 
@@ -157,20 +168,95 @@ const CreateEditForm = () => {
             }
         });
     };
+
+    const onCloseAlertDialogHandle = () => {
+        setOpenAlertDialog(false);
+    }
+
+    /**
+     * Confirm Alert Dialog.
+     * It will redirect user to list page.
+     * At the same time need to clear the auto save value from local storage.
+     * ChangeCount value set to 0.
+     */
+    const onConfirmAlertDialogHandle = () => {
+        handleLayoutSubmit();
+    }
+
+    const handleSetLayoutName = (e) => {
+        setLayoutname(e.target.value);
+        if(records.name !== e.target.value) {
+            setChangeStatus({...changeStatus, name_changed: true});
+        } else {
+            setChangeStatus({...changeStatus, name_changed: false});
+        }
+    }
+
+    const handleHeader = (e) => {
+        setLayoutCode({
+            ...layoutCode,
+            header: {
+                value: e.target.value
+            }
+        });
+        if(records.layout_json.header.value !== e.target.value) {
+            setChangeStatus({...changeStatus, header_changes: true});
+        } else {
+            setChangeStatus({...changeStatus, header_changes: false});
+        }
+    }
+
+    /**
+     * Reset the layout
+     */
+    const handleResetLayout = () => {
+        setLayoutname(records.name);
+        setLayoutCode(records.layout_json);
+        setChangeStatus({name_changed: false, header_changes: false, body_changed: false});
+    }
+
+    /**
+     * To determine whether the layout body has been modified or not
+     */
+    useEffect(()=>{
+        if(Object.keys(records).length && JSON.stringify(records.layout_json.body) !== JSON.stringify(layoutCode.body)) {
+            setChangeStatus({...changeStatus, body_changed: true});
+        } else {
+            setChangeStatus({...changeStatus, body_changed: false});
+        }
+
+    }, [layoutCode.body, records]);
  
 
     return (
         <Box className="p-32" >
             <form onSubmit={ formSubmit }>
-                <div className='flex mb-24'>
+                <div className='flex mb-24 justify-between'>
                     <FormControl className="w-1/2">
                         <TextField
                             id="outlined-name"
                             label="Layout Name"
                             value={ layoutname }
-                            onChange={ (e)=>setLayoutname(e.target.value) }
+                            onChange={ handleSetLayoutName }
                         />
                     </FormControl>
+                    <div>
+                        {
+                            !props.sidebarStatus ? (
+                                <Tooltip title="Show History">
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.showSidebar}>
+                                        <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:cog</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title="Close History">
+                                    <IconButton size="small" color="primary" aria-label="Close History" component="label" onClick={ props.showSidebar}>
+                                        <FuseSvgIcon size={20}>heroicons-outline:x</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            )
+                        }
+                    </div>
                 </div>
                 <fieldset className='border mb-24 p-32'>
                     <legend className='ml-24 px-10'>
@@ -186,17 +272,10 @@ const CreateEditForm = () => {
                                     <TextareaAutosize
                                         maxRows={ 10 }
                                         aria-label="maximum height"
-                                        placeholder="#Add your external style and script here"
+                                        placeholder="#Add your external style and script here, e.g., <link rel='stylesheet' href='/style.css' />"
                                         defaultValue={ layoutCode.header.value }
                                         style={{minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
-                                        onChange={
-                                            (e)=>setLayoutCode({
-                                                ...layoutCode,
-                                                header: {
-                                                    value: e.target.value
-                                                }
-                                            })
-                                        }
+                                        onChange={ handleHeader }
                                     />
                                 </code>
                             </pre>
@@ -234,14 +313,14 @@ const CreateEditForm = () => {
                                                     <Draggable key={indx}>
                                                         <ListItem>
                                                             <ListItemIcon className="drag-handle">
-                                                                <IconButton className="cursor-move" color="primary" aria-label="List" component="label">
+                                                                <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
                                                                     <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
                                                                 </IconButton>
                                                             </ListItemIcon>
                                                             <ListItemText id="switch-list-label-wifi" primary={ el.name } />
                                                             {
                                                                 el.name !== 'Content' && (
-                                                                    <IconButton color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                    <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
                                                                         <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                     </IconButton>
                                                                 )
@@ -262,14 +341,20 @@ const CreateEditForm = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
                 >
-                    {/* <Button
-                        className="whitespace-nowrap mx-4"
-                        variant="contained"
-                        color="primary"
-                        disabled={ true }
-                    >
-                        Preview
-                    </Button> */}
+                    {
+                        (moduleId !== 'create' && !isNaN(moduleId)) && (
+                            <Button
+                                className="whitespace-nowrap mx-4"
+                                variant="contained"
+                                color="primary"
+                                onClick={ handleResetLayout }
+                                disabled={ Object.values(changeStatus).includes(true) ? false : true }
+                            >
+                                Reset
+                            </Button>
+                        )
+                    }
+                    
                     {
                         (hasPermission('save') || hasPermission('update')) && (
                             <LoadingButton
@@ -278,6 +363,7 @@ const CreateEditForm = () => {
                                 aria-label="Register"
                                 type="submit"
                                 loading={loading}
+                                disabled={ Object.values(changeStatus).includes(true) ? false : true }
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
@@ -295,6 +381,12 @@ const CreateEditForm = () => {
                     
                 </motion.div>
             </form>
+            <AlertDialog
+                content="Do you want to update the changes?"
+                open={openAlertDialog}
+                onConfirm={onConfirmAlertDialogHandle}
+                onClose={onCloseAlertDialogHandle}
+            />
         </Box>
     )
 }

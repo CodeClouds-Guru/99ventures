@@ -11,6 +11,7 @@ const {
   CaptchaOptionCompanyPortal,
   AutoResponder,
   SiteLayout,
+  Layout,
 } = require("../../models");
 const db = require("../../models/index");
 const { QueryTypes, Op } = require("sequelize");
@@ -34,8 +35,13 @@ class GeneralConfigurationController {
         attributes: ["id", "name", "is_homepage"],
         where: { company_portal_id: site_id },
       });
-      const layout_options = await SiteLayout.findAll({
+      const layout_options = await Layout.findAll({
         attributes: ["id", "name"],
+        where: {
+          code: {
+            [Op.notLike]: "%-rev-%",
+          },
+        },
       });
       const captcha_options = await CaptchaOption.findAll({
         attributes: ["id", "name"],

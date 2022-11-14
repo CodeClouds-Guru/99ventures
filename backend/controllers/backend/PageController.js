@@ -10,30 +10,30 @@ class PageController extends Controller {
   //override add function
   async add(req, res) {
     let response = await super.add(req);
-    let fields = response.fields;
-    
+    let fields = { ...response.fields };
+
     let layouts = await Layout.findAll();
     layouts = layouts.map(layout => {
       return {
-          id: layout.id,
-          value: layout.name
+        id: layout.id,
+        value: layout.name
       }
     });
-    
+
     fields.layouts = {
-                      field_name: 'layout',
-                      db_name: 'layouts',
-                      type: 'select',
-                      placeholder: 'Layout',
-                      listing: false,
-                      show_in_form: true,
-                      sort: true,
-                      required: true,
-                      value: '',
-                      width: '50',
-                      searchable: true,
-                      options: layouts,
-                    };
+      field_name: 'layout',
+      db_name: 'layouts',
+      type: 'select',
+      placeholder: 'Layout',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+      options: layouts,
+    };
     return {
       status: true,
       fields,
@@ -42,30 +42,30 @@ class PageController extends Controller {
   //override edit function
   async edit(req, res) {
     let response = await super.edit(req);
-    let fields = response.fields;
-    
+    let fields = { ...response.fields };
+
     let layouts = await Layout.findAll();
     layouts = layouts.map(layout => {
       return {
-          id: layout.id,
-          value: layout.name
+        id: layout.id,
+        value: layout.name
       }
     });
-    
+
     fields.layouts = {
-                      field_name: 'layout',
-                      db_name: 'layouts',
-                      type: 'select',
-                      placeholder: 'Layout',
-                      listing: false,
-                      show_in_form: true,
-                      sort: true,
-                      required: true,
-                      value: '',
-                      width: '50',
-                      searchable: true,
-                      options: layouts,
-                    };
+      field_name: 'layout',
+      db_name: 'layouts',
+      type: 'select',
+      placeholder: 'Layout',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+      options: layouts,
+    };
     return response;
   }
   //override save function
@@ -90,7 +90,7 @@ class PageController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug,id: { [Op.ne]: req.params.id } },
+      where: { slug: req.body.slug, id: { [Op.ne]: req.params.id } },
     });
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);

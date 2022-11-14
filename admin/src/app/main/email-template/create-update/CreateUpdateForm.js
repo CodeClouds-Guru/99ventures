@@ -387,6 +387,7 @@ const CreateUpdateForm = ({ input, meta }) => {
             .then((response) => {
                 if (response.data.results.result) {
                     const result = response.data.results.result;
+                    setActionOptions(actionOptions => [{id: result.EmailActions[0].id, action: result.EmailActions[0].action}, ...actionOptions]);
                     setAllData(allData => ({
                         ...allData,
                         action: result.EmailActions[0].id,

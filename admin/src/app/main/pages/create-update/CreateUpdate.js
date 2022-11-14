@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, Select, MenuItem } from '@mui/material';
+import { Typography, FormControl, TextField, Paper, FormHelperText, InputLabel, Button, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, TextareaAutosize } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -38,6 +39,9 @@ const CreateUpdate = () => {
         permalink: '',
         html: '',
         page_json: '',
+        keywords: '',
+        descriptions: '',
+        meta_code: ''
     });
 
     useEffect(() => {
@@ -261,7 +265,7 @@ const CreateUpdate = () => {
             ...allData,
             name: event.target.value,
             slug: Helper.stringToSlug(event.target.value),
-            permalink: `https://${user.loggedin_portal.domain}/${Helper.stringToSlug(event.target.value)}`
+            permalink: `${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('name', event.target.value);
     }
@@ -369,12 +373,6 @@ const CreateUpdate = () => {
         setOpenAlertDialog(false);
     }
 
-    /**
-     * Confirm Alert Dialog.
-     * It will redirect user to list page.
-     * At the same time need to clear the auto save value from local storage.
-     * ChangeCount value set to 0.
-     */
     const onConfirmAlertDialogHandle = () => {
         localStorage.removeItem(storageKey);
         setChangeCount(0);
@@ -400,91 +398,167 @@ const CreateUpdate = () => {
         setAllData(allData => ({
             ...allData,
             slug: Helper.stringToSlug(event.target.value),
-            permalink: `https://${user.loggedin_portal.domain}/${Helper.stringToSlug(event.target.value)}`
+            permalink: `${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
     }
+    const handleKeywords = (event) => {
+        setAllData({
+            ...allData,
+            keywords: event.target.value,
+        });
+    };
+    const handleDescriptions = (event) => {
+        setAllData({
+            ...allData,
+            descriptions: event.target.value,
+        });
+    };
+    const handleExternalMeta = (event) => {
+        setAllData({
+            ...allData,
+            meta_code: event.target.value,
+        });
+    };
     return (
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-2 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
-                        <FormControl className="w-1/2 mb-24 pr-10">
-                            <InputLabel id="demo-simple-select-label">Layout</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={allData.layout_id}
-                                label="Layout"
-                                onChange={handleChangeLayout}
-                                required
+                        <div className="flex justify-end">
+                            <FormControl className="w-2/12 mb-0 pr-10">
+                                <InputLabel id="demo-simple-select-label">Layout</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={allData.layout_id}
+                                    label="Layout"
+                                    onChange={handleChangeLayout}
+                                    required
+                                >
+                                    <MenuItem value=""> <em>None</em> </MenuItem>
+                                    {layoutOptions.length > 0 ? layoutOptions.map((val, key) => {
+                                        return (
+                                            <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
+                                        )
+                                    }) : ''
+                                    }
+                                </Select>
+                                <FormHelperText error variant="standard">{errors.layout_id}</FormHelperText>
+                            </FormControl>
+                            <FormControl className="w-2/12 mb-0 px-10">
+                                <InputLabel id="demo-simple-select-label" className="pl-10">Status</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={allData.status}
+                                    label="Status"
+                                    onChange={handleChangeStatus}
+                                    required
+                                >
+                                    <MenuItem value=""> <em>None</em> </MenuItem>
+                                    <MenuItem value="pending"> Pending</MenuItem>
+                                    <MenuItem value="draft"> Draft</MenuItem>
+                                    <MenuItem value="published">Published </MenuItem>
+                                    <MenuItem value="archived">Archived </MenuItem>
+                                </Select>
+                                <FormHelperText error variant="standard">{errors.status}</FormHelperText>
+                            </FormControl>
+                        </div>
+                        <Accordion>
+                            <AccordionSummary
+                                expanded={'true'}
+                                defaultexpanded={'true'}
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
                             >
-                                <MenuItem value=""> <em>None</em> </MenuItem>
-                                {layoutOptions.length > 0 ? layoutOptions.map((val, key) => {
-                                    return (
-                                        <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
-                                    )
-                                }) : ''
-                                }
-                            </Select>
-                            <FormHelperText error variant="standard">{errors.layout_id}</FormHelperText>
-                        </FormControl>
-                        <FormControl className="w-1/2 mb-24 pl-10">
-                            <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={allData.status}
-                                label="Status"
-                                onChange={handleChangeStatus}
-                                required
+                                <Typography>Details Section</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <FormControl className="w-full mb-24">
+                                    <TextField
+                                        label="Name"
+                                        type="text"
+                                        error={!!errors.name}
+                                        helperText={errors?.name?.message}
+                                        variant="outlined"
+                                        required
+                                        value={allData.name}
+                                        onChange={onNameChange}
+                                    />
+                                    <FormHelperText error variant="standard">{errors.name}</FormHelperText>
+                                </FormControl>
+                                <FormControl className="w-full mb-24 pr-10">
+                                    <TextField
+                                        label="Slug"
+                                        type="text"
+                                        variant="outlined"
+                                        value={allData.slug}
+                                        onChange={onSlugChange}
+                                    />
+                                </FormControl>
+                                <FormControl className="w-full mb-24 pl-10">
+                                    <Typography component={'p'}>
+                                        Permalink: <b> https://{user.loggedin_portal.domain}/{allData.permalink}</b>
+                                    </Typography>
+                                </FormControl>
+
+                            </AccordionDetails>
+                        </Accordion>
+                        <Accordion>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel2a-content"
+                                id="panel1a-header"
                             >
-                                <MenuItem value=""> <em>None</em> </MenuItem>
-                                <MenuItem value="pending"> Pending</MenuItem>
-                                <MenuItem value="draft"> Draft</MenuItem>
-                                <MenuItem value="published">Published </MenuItem>
-                                <MenuItem value="archived">Archived </MenuItem>
-                            </Select>
-                            <FormHelperText error variant="standard">{errors.status}</FormHelperText>
-                        </FormControl>
-                        <FormControl className="w-1/2 mb-24 pr-10">
-                            <TextField
-                                label="Name"
-                                type="text"
-                                error={!!errors.name}
-                                helperText={errors?.name?.message}
-                                variant="outlined"
-                                required
-                                value={allData.name}
-                                onChange={onNameChange}
-                            />
-                            <FormHelperText error variant="standard">{errors.name}</FormHelperText>
-                        </FormControl>
-                        <FormControl className="w-1/2 mb-24 pl-10">
-                            <TextField
-                                label="Slug"
-                                type="text"
-                                variant="outlined"
-                                value={allData.slug}
-                                onChange={onSlugChange}
-                            />
-                        </FormControl>
-                        <FormControl className="w-full mb-24">
-                            <TextField
-                                label="Permalink"
-                                type="text"
-                                variant="outlined"
-                                value={allData.permalink}
-                                readOnly
-                                disabled
-                            />
-                            <FormHelperText error variant="standard">{errors.permalink}</FormHelperText>
-                        </FormControl>
-                        <FormControl className="w-full mb-24">
+                                <Typography>Meta Tag Section</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <FormControl className="w-full mb-24">
+                                    <TextField
+                                        label="Keywords"
+                                        id="fullWidth"
+                                        className="mb-24"
+                                        multiline
+                                        rows={4}
+                                        fullWidth
+                                        value={allData.keywords}
+                                        onChange={handleKeywords}
+                                    />
+                                </FormControl>
+                                <FormControl className="w-full mb-24">
+                                    <TextField
+                                        label="Description"
+                                        id="fullWidth"
+                                        className="mb-24"
+                                        multiline
+                                        rows={4}
+                                        fullWidth
+                                        value={allData.descriptions}
+                                        onChange={handleDescriptions}
+                                    />
+                                </FormControl>
+                                <FormControl className="w-full mb-24">
+                                    <pre>
+                                        <code>
+                                            <TextareaAutosize
+                                                maxRows={10}
+                                                aria-label="maximum height"
+                                                placeholder="#Add your external Meta details as needed"
+                                                defaultValue={allData.meta_code}
+                                                style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
+                                                onChange={handleExternalMeta}
+                                            />
+                                        </code>
+                                    </pre>
+                                </FormControl>
+                            </AccordionDetails>
+                        </Accordion>
+                        <FormControl className="w-full my-24">
                             <div id="gjs" />
                             <FormHelperText error variant="standard">{errors.html}</FormHelperText>
                         </FormControl>
-
                         <motion.div
                             className="flex"
                             initial={{ opacity: 0, x: 20 }}
