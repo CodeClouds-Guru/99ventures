@@ -119,18 +119,20 @@ class ComponentController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
-    if (req.body.rev_component_id === null) {
-    let create_data = {
-      name: previous.name,
-      html: previous.html,
-      component_json: previous.component_json,
-      code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
-      company_portal_id: req.headers.site_id,
-      created_by: req.user.id,
-    };
-    console.log("===========================", create_data);
-    let model = await Component.create(create_data);
-  }
+    let rev_layout_id = req.body.rev_layout_id || null;
+    // let updateResponse = await super.update(previous);
+    if (rev_layout_id === null) {
+      let create_data = {
+        name: previous.name,
+        html: previous.html,
+        component_json: previous.component_json,
+        code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
+        company_portal_id: req.headers.site_id,
+        created_by: req.user.id,
+      };
+      console.log("===========================", create_data);
+      let model = await Component.create(create_data);
+    }
     // let saveResponse = await super.save(createData);
     return true;
   }

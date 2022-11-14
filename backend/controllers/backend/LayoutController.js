@@ -129,8 +129,10 @@ class LayoutController extends Controller {
         id: req.params.id,
       },
     });
+    console.log("==================", req);
+    let rev_layout_id = req.body.rev_layout_id || null;
     // let updateResponse = await super.update(previous);
-    if (req.body.rev_layout_id === null) {
+    if (rev_layout_id === null) {
       let create_data = {
         name: previous.name,
         html: previous.html,
