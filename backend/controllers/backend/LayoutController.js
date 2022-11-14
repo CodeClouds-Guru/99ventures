@@ -4,7 +4,7 @@ const { Layout, Component } = require("../../models/index");
 class LayoutController extends Controller {
   constructor() {
     super("Layout");
-    this.layoutRevisionUpdate = this.layoutRevisionUpdate.bind(this)
+    this.layoutRevisionUpdate = this.layoutRevisionUpdate.bind(this);
   }
   //override save function
   async save(req, res) {
@@ -75,6 +75,7 @@ class LayoutController extends Controller {
             [Op.like]: "%" + model.code + "-rev-%",
           },
         },
+        order: ["updated_at", "DESC"],
       });
 
       let fields = this.model.fields;
@@ -129,17 +130,19 @@ class LayoutController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
+    if (req.body.rev_layout_id === null) {
+      let create_data = {
+        name: previous.name,
+        html: previous.html,
+        layout_json: previous.layout_json,
+        code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
+        company_portal_id: req.headers.site_id,
+        created_by: req.user.id,
+      };
+      let model = await Layout.create(create_data);
+      // let saveResponse = await super.save(createData);
+    }
 
-    let create_data = {
-      name: previous.name,
-      html: previous.html,
-      layout_json: previous.layout_json,
-      code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
-      company_portal_id: req.headers.site_id,
-      created_by: req.user.id,
-    };
-    let model = await Layout.create(create_data);
-    // let saveResponse = await super.save(createData);
     return true;
   }
 }

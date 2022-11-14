@@ -88,6 +88,7 @@ class ComponentController extends Controller {
             [Op.like]: "%" + model.code + "-rev-%",
           },
         },
+        order: ["updated_at", "DESC"],
       });
 
       let fields = this.model.fields;
@@ -118,7 +119,7 @@ class ComponentController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
-
+    if (req.body.rev_component_id === null) {
     let create_data = {
       name: previous.name,
       html: previous.html,
@@ -129,6 +130,7 @@ class ComponentController extends Controller {
     };
     console.log("===========================", create_data);
     let model = await Component.create(create_data);
+  }
     // let saveResponse = await super.save(createData);
     return true;
   }
