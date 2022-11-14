@@ -41,7 +41,7 @@ const CreateUpdate = () => {
         page_json: '',
         keywords: '',
         descriptions: '',
-        metaCode: ''
+        meta_code: ''
     });
 
     useEffect(() => {
@@ -417,7 +417,7 @@ const CreateUpdate = () => {
     const handleExternalMeta = (event) => {
         setAllData({
             ...allData,
-            metaCode: event.target.value,
+            meta_code: event.target.value,
         });
     };
     return (
@@ -520,7 +520,6 @@ const CreateUpdate = () => {
                                         label="Keywords"
                                         id="fullWidth"
                                         className="mb-24"
-                                        required
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -533,7 +532,6 @@ const CreateUpdate = () => {
                                         label="Description"
                                         id="fullWidth"
                                         className="mb-24"
-                                        required
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -548,7 +546,7 @@ const CreateUpdate = () => {
                                                 maxRows={10}
                                                 aria-label="maximum height"
                                                 placeholder="#Add your external Meta details as needed"
-                                                defaultValue={allData.metaCode}
+                                                defaultValue={allData.meta_code}
                                                 style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
                                                 onChange={handleExternalMeta}
                                             />
