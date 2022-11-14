@@ -114,6 +114,7 @@ class LayoutController extends Controller {
     };
   }
 
+  //Function for Layout Revision Update
   async layoutRevisionUpdate(req, current, previous) {
     let update_data = {
       name: current.name,
