@@ -2,10 +2,10 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("pages", "keyword", {
+    await queryInterface.addColumn("pages", "keywords", {
       type: Sequelize.STRING
     });
-    await queryInterface.addColumn("pages", "description", {
+    await queryInterface.addColumn("pages", "descriptions", {
       type: Sequelize.TEXT('long'),
     });
     await queryInterface.addColumn("pages", "meta_code", {

@@ -26,8 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     page_json: DataTypes.JSON,
     meta_code: DataTypes.TEXT,
-    keyword: DataTypes.STRING,
-    description: DataTypes.TEXT,
+    keywords: DataTypes.STRING,
+    descriptions: DataTypes.TEXT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -53,8 +53,8 @@ module.exports = (sequelize, DataTypes) => {
       html: Joi.string().required().label('HTML'),
       page_json: Joi.object().required().label('JSON'),
       status: Joi.string().required().label('status'),
-      keyword: Joi.optional().allow('').label('Keyword'),
-      description: Joi.optional().allow('').label('Description'),
+      keywords: Joi.optional().allow('').label('Keywords'),
+      descriptions: Joi.optional().allow('').label('Descriptions'),
       meta_code: Joi.optional().allow('').label('Meta Code'),
       layout_id: Joi.required().label('Layout ID')
     })
