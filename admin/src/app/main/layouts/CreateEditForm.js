@@ -110,7 +110,11 @@ const CreateEditForm = () => {
             return;
         }
 
-        if(Object.values(changeStatus).includes(true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+        // if(Object.values(changeStatus).includes(true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+        /**
+         * Confirmation popup will only show when header / body has been changed
+         */
+        if((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
             setOpenAlertDialog(true);
         } else {
             handleLayoutSubmit();
