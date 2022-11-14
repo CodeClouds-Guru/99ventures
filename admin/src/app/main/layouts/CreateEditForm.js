@@ -6,26 +6,29 @@ import { usePermission } from '@fuse/hooks';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
 import {arrayMoveImmutable} from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
+import { getLayout, setSidebarStatus } from 'app/store/layout'
 
 
-const CreateEditForm = (props) => {
+const CreateEditForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
     const { hasPermission } = usePermission('layouts');
+    const selectRevisionCount = useSelector(state=> state.layout.revisions_count);
+    const selectLayout = useSelector(state => state.layout.layout_data);
     const [ loading, setLoading ] = useState(false);
     const [ components, setComponents ] = useState([]);
     const [ layoutname, setLayoutname ] = useState('');    
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [ records, setRecords ] = useState({});
-    const [ changeStatus, setChangeStatus ] = useState({name_changed: false, header_changes: false, body_changed: false});
+    const [ changeStatus, setChangeStatus ] = useState({name_changed: false, header_changed: false, body_changed: false});
     const [ layoutCode, setLayoutCode ] = useState({
         header: {
             value: ''
@@ -37,11 +40,22 @@ const CreateEditForm = (props) => {
             }]
         }
     });
-
+ 
     useEffect(()=>{
         getComponents();
-        getData();
+        if(moduleId !== 'create' && !isNaN(moduleId)){
+            dispatch(getLayout({module_id: moduleId}));
+        }
     }, []);
+
+
+    useEffect(()=>{
+        if(Object.keys(selectLayout).length && moduleId !== 'create' && !isNaN(moduleId)){
+            setRecords(selectLayout);
+            setLayoutname(selectLayout.name);
+            setLayoutCode(selectLayout.layout_json);
+        }
+    }, [selectLayout])
     
     /**
      * Components API
@@ -54,25 +68,6 @@ const CreateEditForm = (props) => {
                     setComponents(res.data.results.components)
                 }
             }            
-        })
-        .catch(errors => {
-            console.log(errors);
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
-        })
-    }
-
-    /**
-     * get Layout data
-     */
-    const getData = () => {
-        axios.post(jwtServiceConfig.getSingleLayout + '/' + moduleId)
-        .then(res => {
-            if(res.data.results.result){
-                const result = res.data.results.result;
-                setRecords(result);
-                setLayoutname(result.name);
-                setLayoutCode(result.layout_json);
-            } 
         })
         .catch(errors => {
             console.log(errors);
@@ -109,12 +104,17 @@ const CreateEditForm = (props) => {
      */
     const formSubmit = (e) => {
         e.preventDefault();
+        dispatch(setSidebarStatus(false));
         if(!layoutname) {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
         }
 
-        if(Object.values(changeStatus).includes(true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+        // if(Object.values(changeStatus).includes(true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+        /**
+         * Confirmation popup will only show when header / body has been changed
+         */
+        if((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
             setOpenAlertDialog(true);
         } else {
             handleLayoutSubmit();
@@ -137,9 +137,7 @@ const CreateEditForm = (props) => {
             html: htmlCode,
             layout_json: layoutCode
         };
-
         const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave ;
-
         setLoading(true);
         axios.post(url, params)
         .then(res => {
@@ -200,9 +198,9 @@ const CreateEditForm = (props) => {
             }
         });
         if(records.layout_json.header.value !== e.target.value) {
-            setChangeStatus({...changeStatus, header_changes: true});
+            setChangeStatus({...changeStatus, header_changed: true});
         } else {
-            setChangeStatus({...changeStatus, header_changes: false});
+            setChangeStatus({...changeStatus, header_changed: false});
         }
     }
 
@@ -212,7 +210,7 @@ const CreateEditForm = (props) => {
     const handleResetLayout = () => {
         setLayoutname(records.name);
         setLayoutCode(records.layout_json);
-        setChangeStatus({name_changed: false, header_changes: false, body_changed: false});
+        setChangeStatus({name_changed: false, header_changed: false, body_changed: false});
     }
 
     /**
@@ -240,23 +238,17 @@ const CreateEditForm = (props) => {
                             onChange={ handleSetLayoutName }
                         />
                     </FormControl>
-                    <div>
-                        {
-                            !props.sidebarStatus ? (
+                    {
+                        (selectRevisionCount > 0) && (
+                            <div>
                                 <Tooltip title="Show History">
-                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.showSidebar}>
-                                        <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:cog</FuseSvgIcon>
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>dispatch(setSidebarStatus(true)) }>
+                                        <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
-                            ) : (
-                                <Tooltip title="Close History">
-                                    <IconButton size="small" color="primary" aria-label="Close History" component="label" onClick={ props.showSidebar}>
-                                        <FuseSvgIcon size={20}>heroicons-outline:x</FuseSvgIcon>
-                                    </IconButton>
-                                </Tooltip>
-                            )
-                        }
-                    </div>
+                            </div>
+                        )
+                    }
                 </div>
                 <fieldset className='border mb-24 p-32'>
                     <legend className='ml-24 px-10'>
@@ -374,7 +366,10 @@ const CreateEditForm = (props) => {
                         className="whitespace-nowrap mx-4"
                         variant="contained"
                         color="error"
-                        onClick={() => navigate(`/app/layouts`)}
+                        onClick={() => {
+                            dispatch(setSidebarStatus(false))
+                            navigate(`/app/layouts`)
+                        }}
                     >
                         Cancel
                     </Button>

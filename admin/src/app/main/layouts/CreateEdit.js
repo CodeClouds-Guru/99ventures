@@ -1,18 +1,26 @@
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import MainHeader from 'app/shared-components/MainHeader';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import CreateEditForm from './CreateEditForm';
 import History from './History';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSidebarStatus, setRevisionData } from 'app/store/layout'
+import { useParams } from 'react-router-dom';
+
 
 const CreateEdit = () => {
+    const dispatch = useDispatch();
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const [ sidebarStatus, setSidebarStatus ] = useState(false)
+    const selectSidebarStatus = useSelector(state=> state.layout.layout_sidebar);
+    const selectRevisionCount = useSelector(state=> state.layout.revisions_count);
+    const { moduleId } = useParams();
     const module = 'Layouts'
 
-    const showSidebar = () => {
-        setSidebarStatus(!sidebarStatus)
-    }
+    useEffect(()=>{
+        dispatch(setSidebarStatus(false));
+        dispatch(setRevisionData([]));
+    }, [])
 
     return (
         <FusePageCarded
@@ -21,9 +29,9 @@ const CreateEdit = () => {
                 <MainHeader module={module} slug="settings" />
             }
             content={
-                <CreateEditForm showSidebar={showSidebar} sidebarStatus={ sidebarStatus } />
+                <CreateEditForm />
             }
-            rightSidebarOpen={ sidebarStatus }
+            rightSidebarOpen={ (moduleId == 'create' ) ? false : (selectSidebarStatus && selectRevisionCount > 0)  }
             rightSidebarContent={ <History />}
             rightSidebarWidth={400}
             scroll={isMobile ? 'normal' : 'content'}
