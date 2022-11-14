@@ -1,7 +1,7 @@
 const Controller = require('./Controller')
 const { Op } = require("sequelize");
 const {
-  Layout
+  Layout,Component
 } = require("../../models/index");
 class PageController extends Controller {
   constructor() {
@@ -11,12 +11,20 @@ class PageController extends Controller {
   async add(req, res) {
     let response = await super.add(req);
     let fields = { ...response.fields };
-
-    let layouts = await Layout.findAll();
+    const site_id = req.header('site_id')
+    let layouts = await Layout.findAll({where:{company_portal_id:site_id}});
+    let components = await Component.findAll({where:{company_portal_id:site_id}});
     layouts = layouts.map(layout => {
       return {
         id: layout.id,
         value: layout.name
+      }
+    });
+    components = components.map(component => {
+      return {
+        id: component.id,
+        value: component.name,
+        html:component.html
       }
     });
 
@@ -33,6 +41,20 @@ class PageController extends Controller {
       width: '50',
       searchable: true,
       options: layouts,
+    };
+    fields.components = {
+      field_name: 'component',
+      db_name: 'components',
+      type: 'select',
+      placeholder: 'Component',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+      options: components,
     };
     return {
       status: true,
@@ -44,11 +66,20 @@ class PageController extends Controller {
     let response = await super.edit(req);
     let fields = { ...response.fields };
 
-    let layouts = await Layout.findAll();
+    const site_id = req.header('site_id')
+    let layouts = await Layout.findAll({where:{company_portal_id:site_id}});
+    let components = await Component.findAll({where:{company_portal_id:site_id}});
     layouts = layouts.map(layout => {
       return {
         id: layout.id,
         value: layout.name
+      }
+    });
+    components = components.map(component => {
+      return {
+        id: component.id,
+        value: component.name,
+        html:component.html
       }
     });
 
@@ -65,6 +96,20 @@ class PageController extends Controller {
       width: '50',
       searchable: true,
       options: layouts,
+    };
+    fields.components = {
+      field_name: 'component',
+      db_name: 'components',
+      type: 'select',
+      placeholder: 'Component',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+      options: components,
     };
     return response;
   }
