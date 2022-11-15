@@ -3,12 +3,12 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 import { showMessage } from 'app/store/fuse/messageSlice';
 import axios from 'axios';
 
-export const getLayout = createAsyncThunk(
-    'layout/getLayout',
+export const getComponentData = createAsyncThunk(
+    'components/getComponentData',
     async (params, { dispatch }) => {
-        const result = axios.post(jwtServiceConfig.getSingleLayout + '/' + params.module_id)
+        const result = axios.post(jwtServiceConfig.getSingleComponent + '/' + params.module_id)
         .then(res => {
-            if(res.data.results.result){
+            if(res.data.results){
                 return res.data.results;                
             }
         })
@@ -22,12 +22,11 @@ export const getLayout = createAsyncThunk(
 );
 
 export const applyRevision = createAsyncThunk(
-    'layout/updateLayout',
-    async (params, { dispatch }) => {
-        
-        const result = axios.post(jwtServiceConfig.updateLayouts + '/' + params.module_id, {rev_layout_id: params.rev_layout_id})
+    'components/applyRevision',
+    async (params, { dispatch }) => {        
+        const result = axios.post(jwtServiceConfig.updateComponents + '/' + params.module_id, {rev_component_id: params.rev_component_id})
         .then(res => {
-            dispatch(getLayout({module_id: params.module_id}));
+            dispatch(getComponentData({module_id: params.module_id}));
             dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
             return res.data.results;
         })
@@ -43,11 +42,11 @@ export const applyRevision = createAsyncThunk(
 const initialState = {
     revisions_data: [],
     revisions_count: 0,
-    layout_data: {}
+    component_data: {}
 }
 
-const layoutSlice = createSlice({
-    name: 'layoutslice',
+const componentSlice = createSlice({
+    name: 'componentslice',
     initialState,
     reducers: {
         setRevisionData: (state, action) => {
@@ -56,9 +55,9 @@ const layoutSlice = createSlice({
         }
     },
     extraReducers: {
-        [getLayout.fulfilled]: (state, { payload }) => {
+        [getComponentData.fulfilled]: (state, { payload }) => {
             if(payload.result) {
-                state.layout_data = payload.result
+                state.component_data = payload.result
             }
             if(payload.revisions) {
                 state.revisions_data = payload.revisions.rows
@@ -70,6 +69,6 @@ const layoutSlice = createSlice({
 
 export const {
     setRevisionData
-} = layoutSlice.actions;
+} = componentSlice.actions;
 
-export default layoutSlice.reducer;
+export default componentSlice.reducer;

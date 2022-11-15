@@ -23,7 +23,7 @@ import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
 import PermissionSettings from './components/PermissionSettings';
 import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
-import ComponentsCreateUpdate from '../../components/create-update/CreateUpdate';
+import ComponentsCreateUpdate from '../../components/create-update/CreateUpdateForm';
 import LayoutsCreateUpdate from '../../layouts/create-update/CreateUpdate';
 import PagesCreateUpdate from '../../pages/create-update/CreateUpdate';
 

@@ -13,10 +13,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {arrayMoveImmutable} from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { getLayout, setSidebarStatus } from 'app/store/layout'
+import { getLayout, setRevisionData } from 'app/store/layout'
 
 
-const CreateEditForm = () => {
+const CreateEditForm = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
@@ -43,6 +43,7 @@ const CreateEditForm = () => {
  
     useEffect(()=>{
         getComponents();
+        dispatch(setRevisionData([]));
         if(moduleId !== 'create' && !isNaN(moduleId)){
             dispatch(getLayout({module_id: moduleId}));
         }
@@ -104,7 +105,7 @@ const CreateEditForm = () => {
      */
     const formSubmit = (e) => {
         e.preventDefault();
-        dispatch(setSidebarStatus(false));
+        props.toggleSidebar();
         if(!layoutname) {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
@@ -242,7 +243,7 @@ const CreateEditForm = () => {
                         (selectRevisionCount > 0) && (
                             <div>
                                 <Tooltip title="Show History">
-                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>dispatch(setSidebarStatus(true)) }>
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.toggleSidebar }>
                                         <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
@@ -367,7 +368,6 @@ const CreateEditForm = () => {
                         variant="contained"
                         color="error"
                         onClick={() => {
-                            dispatch(setSidebarStatus(false))
                             navigate(`/app/layouts`)
                         }}
                     >

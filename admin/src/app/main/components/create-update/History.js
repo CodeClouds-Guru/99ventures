@@ -4,20 +4,20 @@ import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineC
 import { IconButton, Tooltip, Typography} from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { applyRevision } from 'app/store/layout';
+import { applyRevision } from 'app/store/components';
 import { useParams } from 'react-router-dom';
 import Helper from 'src/app/helper';
-import './Layouts.css'
+
 
 const History = (props) => {
     const dispatch = useDispatch();
     const { moduleId } = useParams();
-    const selectRevision = useSelector(state => state.layout.revisions_data);
-    const selectLayout = useSelector(state => state.layout.layout_data);
+    const selectRevision = useSelector(state => state.components.revisions_data);
+    const selectComponentData = useSelector(state => state.components.component_data);
     const handleApplyRevision = (id) => {
         dispatch(applyRevision({
             module_id: moduleId,
-            rev_layout_id: id
+            rev_component_id: id
         }))
     }
 
@@ -29,7 +29,7 @@ const History = (props) => {
 		>
             <div className="flex flex-row border-b-1 mb-10 items-center justify-between w-full">
                 <div className='p-10 '>
-                    <Typography className="sm:text-base lg:text-lg" variant="h6">Layout Versions</Typography>                
+                    <Typography className="sm:text-base lg:text-lg" variant="h6">Components Versions</Typography>                
                     <Typography variant="caption">Choose any version in your history to restore to previous edits.</Typography>
                 </div>
 				<div>
@@ -41,7 +41,7 @@ const History = (props) => {
             <Timeline className="p-0">
                 {
 
-                    selectLayout.layout_json && (
+                    selectComponentData && (
                         <TimelineItem
                             className="timeline-li p-10 xborder-b-2 rounded-md" sx={{ py: '10px', '&::before': {padding: 0, flex: 0}, "&:hover": {backgroundColor: 'rgb(243 244 246)'} }}
                         >
@@ -55,7 +55,7 @@ const History = (props) => {
                                     Current Version 
                                     </Typography>
                                     <Typography variant="caption" className="italic" color="text.secondary" >
-                                        Last Updated At: { Helper.parseTimeStamp(selectLayout.updated_at) }
+                                        Last Updated At: { Helper.parseTimeStamp(selectComponentData.updated_at) }
                                     </Typography>
                                 </div>
                                 
