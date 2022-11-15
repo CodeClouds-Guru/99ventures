@@ -49,7 +49,12 @@ class LayoutController extends Controller {
     let company_portal_id = req.headers.site_id;
     let components = await Component.findAll({
       attributes: ["name", "html", "code", "component_json"],
-      where: { company_portal_id: company_portal_id },
+      where: {
+        company_portal_id: company_portal_id,
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      },
     });
     return {
       status: true,
