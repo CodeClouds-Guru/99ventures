@@ -119,7 +119,7 @@ class ComponentController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
-    let rev_layout_id = req.body.rev_layout_id || null;
+    let rev_layout_id = req.body.rev_component_id || null;
     // let updateResponse = await super.update(previous);
     if (rev_layout_id === null) {
       let create_data = {
