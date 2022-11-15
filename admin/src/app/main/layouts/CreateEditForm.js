@@ -105,7 +105,7 @@ const CreateEditForm = (props) => {
      */
     const formSubmit = (e) => {
         e.preventDefault();
-        props.toggleSidebar();
+        props.toggleSidebar(false);
         if(!layoutname) {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
@@ -243,7 +243,7 @@ const CreateEditForm = (props) => {
                         (selectRevisionCount > 0) && (
                             <div>
                                 <Tooltip title="Show History">
-                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.toggleSidebar }>
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>props.toggleSidebar(true) }>
                                         <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>

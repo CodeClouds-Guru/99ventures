@@ -33,7 +33,7 @@ const History = (props) => {
                     <Typography variant="caption">Choose any version in your history to restore to previous edits.</Typography>
                 </div>
 				<div>
-                    <IconButton size="small" onClick={ props.toggleSidebar }>
+                    <IconButton size="small" onClick={ ()=>props.toggleSidebar(false) }>
                         <FuseSvgIcon size={20}>heroicons-outline:x</FuseSvgIcon>
                     </IconButton>
                 </div>

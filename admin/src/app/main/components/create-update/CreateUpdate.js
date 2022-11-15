@@ -11,7 +11,7 @@ const CreateUpdate = () => {
     const [ sidebar, setSidebar ] = useState(false);
     const module = 'Components'
 
-    const toggleSidebar = () => setSidebar(!sidebar)
+    const toggleSidebar = (val) => setSidebar(val)
 
     return (
         <FusePageCarded

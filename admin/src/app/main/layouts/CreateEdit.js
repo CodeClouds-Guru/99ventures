@@ -10,7 +10,7 @@ const CreateEdit = () => {
     const [ sidebar, setSidebar ] = useState(false);
     const module = 'Layouts'
 
-    const toggleSidebar = () => setSidebar(!sidebar)
+    const toggleSidebar = (val) => setSidebar(val)
 
     return (
         <FusePageCarded

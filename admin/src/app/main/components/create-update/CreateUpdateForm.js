@@ -30,6 +30,8 @@ const CreateUpdate = (props) => {
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
+    const [msg, setMsg] = useState('');
+    const [alertFor, setAlertFor] = useState('');
     const selectRevisionCount = useSelector(state=> state.components.revisions_count);
     const [allData, setAllData] = useState({
         name: '',
@@ -281,13 +283,19 @@ const CreateUpdate = (props) => {
     }
 
     const onSubmit = () => {
-        props.toggleSidebar();
+        props.toggleSidebar(false);
         const editorJsonBody = editor.getProjectData();
         if (!editorJsonBody.pages[0].frames[0].component.components) {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in the editor' }));
             return;
         }
 
+        setAlertFor('update');
+        setMsg('Do you want to update the changes?');
+        setOpenAlertDialog(true);
+    }
+
+    const handleFormSubmit = () => {
         if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
@@ -328,6 +336,8 @@ const CreateUpdate = (props) => {
      */
     const handleCancel = () => {
         if (changeCount > 0) {
+            setAlertFor('cancel');
+            setMsg('Do you want to discard the changes?');
             setOpenAlertDialog(true);
         } else {
             navigate(`/app/${module}`);
@@ -337,19 +347,28 @@ const CreateUpdate = (props) => {
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        setAlertFor('');
     }
 
     /**
      * Confirm Alert Dialog.
-     * It will redirect user to list page.
-     * At the same time need to clear the auto save value from local storage.
-     * ChangeCount value set to 0.
+     * If the alert box related to the Cancel
+        * It will redirect user to list page.
+        * At the same time need to clear the auto save value from local storage.
+        * ChangeCount value set to 0.
+     *
+     * If the alert box related to the Update
+        * Submit the form
      */
     const onConfirmAlertDialogHandle = () => {
-        localStorage.removeItem(storageKey);
-        setChangeCount(0);
-        setOpenAlertDialog(true);
-        navigate(`/app/${module}`)
+        if(alertFor === 'cancel'){
+            localStorage.removeItem(storageKey);
+            setChangeCount(0);
+            setOpenAlertDialog(true);
+            navigate(`/app/${module}`);
+        } else if(alertFor === 'update') {
+            handleFormSubmit();
+        }
     }
 
     return (
@@ -375,13 +394,13 @@ const CreateUpdate = (props) => {
                                 (selectRevisionCount > 0) && (
                                     <div>
                                         <Tooltip title="Show History">
-                                            <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ props.toggleSidebar }>
+                                            <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>props.toggleSidebar(true) }>
                                                 <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                             </IconButton>
                                         </Tooltip>
                                     </div>
                                 )
-                            }                            
+                            }
                         </div>
                         <FormControl className="w-full mb-24">
                             <div id="gjs" />
@@ -417,7 +436,7 @@ const CreateUpdate = (props) => {
                 </Paper>
             </div>
             <AlertDialog
-                content="Do you want to discard the changes?"
+                content={ msg }
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={onCloseAlertDialogHandle}
