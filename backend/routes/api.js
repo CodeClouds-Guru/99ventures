@@ -14,6 +14,9 @@ const InvitationController = new InvitationControllerClass();
 const FileManagerControllerClass = require("../controllers/backend/FileManagerController");
 const FileManagerController = new FileManagerControllerClass();
 
+const PageControllerClass = require("../controllers/backend/PageController");
+const PageController = new PageControllerClass();
+
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
 
 router.get("/", (req, res) => {
@@ -42,6 +45,7 @@ router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
 //change ticket read status
 // router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
 router.post("/file-manager/download", [AuthMiddleware], FileManagerController.download);
+router.get("/pages/preview/:id?", [AuthMiddleware], PageController.preview);
 router.all(
   "/:module/:action?/:id?",
   [AuthMiddleware, checkPermissionMiddleware],

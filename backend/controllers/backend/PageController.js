@@ -1,7 +1,7 @@
 const Controller = require('./Controller')
 const { Op } = require("sequelize");
 const {
-  Layout,Component
+  Layout,Component,Page
 } = require("../../models/index");
 class PageController extends Controller {
   constructor() {
@@ -154,6 +154,47 @@ class PageController extends Controller {
       status: true,
       message: "Page deleted.",
     };
+  }
+  //page preview
+  async preview(req,res){
+    let id = req.params.id
+    let page_details = await Page.findAll({where:{
+      id:id
+    }});
+
+    //fetch layout details
+    let layout_details = await Layout.findAll({where:{
+      id:page_details[0].layout_id
+    }});
+    let layout_content = ''
+    let layout_value = layout_details[0].layout_json.body['value']
+    
+    layout_value.forEach(async (value) => {
+      
+      if(value.code == '{{content}}'){
+        // layout_content = layout_content+value.code+' '
+        layout_content = layout_content+page_details[0].html+' '
+      }else{
+        let component_code = value.code.replaceAll('{','')
+        component_code = component_code.replaceAll('}','')
+        let component_details = await Component.findAll({where:{
+          code:component_code
+        }});
+        layout_content = layout_content+" "+component_details[0].html
+        // layout_content = layout_content+"${convert_component('"+component_code+"')} "
+        console.log(value.code)
+        console.log(component_details[0].html)
+      }
+    })
+    var page_body = page_details[0].html;
+    console.log('layout_content',layout_content)
+    // layout_content = layout_content.replace("{{content}}", page_body);
+    let page_content = eval('`'+layout_content+'`');
+
+    // res.json({
+    //   result:page_content
+    // })
+    res.render('page',{page_content:page_content});
   }
 }
 
