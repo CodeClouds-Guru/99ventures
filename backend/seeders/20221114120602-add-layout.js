@@ -34,16 +34,7 @@ module.exports = {
           created_by: 1,
           created_at: new Date(),
         },
-        {
-          id: 2,
-          html: "<html><head><title>{{ page_title}}</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>{{content}}</body></html>",
-          name: "Default Layout",
-          code:"default-layout1",
-          company_portal_id:2,
-          layout_json:JSON.stringify(layout_json),
-          created_by: 1,
-          created_at: new Date(),
-        },
+        
       ],
       {}
     );

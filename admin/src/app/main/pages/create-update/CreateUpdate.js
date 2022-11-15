@@ -46,7 +46,6 @@ const CreateUpdate = () => {
     });
 
     useEffect(() => {
-        moduleId === 'create' ? getLayoutOptions() : '';
         const editor = grapesjs.init({
             container: '#gjs',
             protectedCss: '',   // disabled default CSS
@@ -98,19 +97,7 @@ const CreateUpdate = () => {
                 },
             },
         });
-
-        components.map((val) => {
-            editor.BlockManager.add(`block-${val.value}`, {
-                label: val.value,
-                category: 'Custom Component',
-                attributes: {
-                    class: 'fa fa-square'
-                },
-                content:
-                    val.html
-            });
-        })
-
+        moduleId === 'create' ? getLayoutOptions(editor) : '';
         setEditor(editor);
 
         const pfx = editor.getConfig().stylePrefix
@@ -283,12 +270,26 @@ const CreateUpdate = () => {
         }));
         dynamicErrorMsg('name', event.target.value);
     }
-    const getLayoutOptions = () => {
+    const createCustomComponentForEditor = (components_val, editor) => {
+        components_val.map((val) => {
+            editor.BlockManager.add(`block-${val.value}`, {
+                label: val.value,
+                category: 'Custom Component',
+                attributes: {
+                    class: 'fa fa-square'
+                },
+                content:
+                    val.html
+            });
+        })
+    }
+    const getLayoutOptions = (editor) => {
         axios.get(`/${module}/add`)
             .then((response) => {
                 if (response.data.results) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
-                    setComponents(response.data.results.fields.components.options)
+                    setComponents(response.data.results.fields.components.options);
+                    createCustomComponentForEditor(response.data.results.fields.components.options, editor);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -361,6 +362,7 @@ const CreateUpdate = () => {
                         descriptions: record.descriptions,
                         meta_code: record.meta_code
                     }));
+                    createCustomComponentForEditor(response.data.results.fields.components.options, editor);
                     editor.loadProjectData(record.page_json);
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
