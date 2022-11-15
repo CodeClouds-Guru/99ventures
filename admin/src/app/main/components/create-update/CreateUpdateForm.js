@@ -39,6 +39,7 @@ const CreateUpdate = (props) => {
         component_json: ''
     });
 
+    
     useEffect(() => {
         dispatch(setRevisionData([]));
         const editor = grapesjs.init({
@@ -289,14 +290,21 @@ const CreateUpdate = (props) => {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in the editor' }));
             return;
         }
-
-        setAlertFor('update');
-        setMsg('Do you want to update the changes?');
-        setOpenAlertDialog(true);
+        /**
+         * Confirmation popup will only show when editor body has been changed & updating time
+         */
+        if (changeCount > 0 && (moduleId !== 'create' && !isNaN(moduleId))) {
+            setAlertFor('update');
+            setMsg('Do you want to update the changes?');
+            setOpenAlertDialog(true);
+        } else {
+            handleFormSubmit();
+        }
     }
 
     const handleFormSubmit = () => {
         if (!Object.keys(errors).length) {
+            const editorJsonBody = editor.getProjectData();
             const params = {
                 ...allData,
                 html: generatedHTMLValue(editor),
@@ -419,7 +427,7 @@ const CreateUpdate = (props) => {
                                 type="submit"
                                 loading={loading}
                                 onClick={onSubmit}
-                                disabled={(Object.values(errors).length || !allData.name) ? true : false}
+                                disabled={ (Object.values(errors).length || !allData.name || (changeCount < 1 && selectComponentData.name === allData.name)) ? true : false}
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
