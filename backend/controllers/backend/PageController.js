@@ -7,6 +7,19 @@ class PageController extends Controller {
   constructor() {
     super('Page')
   }
+  //override list function
+  async list(req,res){
+    let response = await super.list(req);
+    let pages = response.result.data
+    await pages.forEach(function(page,key){
+      if(page.slug == '404' || page.slug == '500'){
+        response.result.data[key].setDataValue('deletable',false)
+      }else{
+        response.result.data[key].setDataValue('deletable',true)
+      }
+    })
+    return response
+  } 
   //override add function
   async add(req, res) {
     let response = await super.add(req);
