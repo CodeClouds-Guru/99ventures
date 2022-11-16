@@ -253,16 +253,15 @@ const CreateUpdate = (props) => {
 
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
+            const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
+            const htmlData = editor.getHtml().match( reg )[1];
             generatedHTML +=
                 `<section>
                     ${css}
-                    ${editor.getHtml()}            
+                    ${htmlData}            
                 </section>`;
         }
-        const reg = /\<body[^>]*\>([^]*)\<\/body/m;
-        const htmlData = generatedHTML.match( reg )[1];
-        
-        return htmlData;
+        return generatedHTML;
     }
 
     const dynamicErrorMsg = (field, value) => {

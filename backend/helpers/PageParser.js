@@ -1,9 +1,8 @@
-const { Layout, Component, Page } = require("../models");
+const { Layout, Component, Page, CompanyPortalMetaTag } = require("../models");
 class PageParser {
     constructor(slug) {
         this.slug = slug;
         this.page = null;
-        this.layout = null;
         this.preview = this.preview.bind(this);
         this.getPageNLayout = this.getPageNLayout.bind(this);
     }
@@ -28,6 +27,14 @@ class PageParser {
         const page_keywords = this.page.keywords;
         const page_descriptions = this.page.descriptions;
         const page_meta_code = this.page.meta_code;
+        let layout_keywords = await CompanyPortalMetaTag.findOne({
+            where: { tag_name: 'Keywords', company_portal_id: this.page.company_portal_id },
+        });
+        let layout_descriptions = await CompanyPortalMetaTag.findOne({
+            where: { tag_name: 'Description', company_portal_id: this.page.company_portal_id },
+        });
+        layout_keywords = layout_keywords ? layout_keywords.tag_content : '';
+        layout_descriptions = layout_descriptions ? layout_descriptions.tag_content : '';
         layout_html = eval('`' + layout_html + '`')
         return layout_html;
     }
