@@ -13,6 +13,7 @@ router.get('/:slug?', async (req, res) => {
         return;
       default:
         res.redirect('/500');
+        console.error(e)
         return;
     }
     page_content = await pagePerser.preview();
