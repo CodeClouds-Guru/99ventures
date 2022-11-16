@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button} from '@mui/material';
+import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -14,28 +14,28 @@ import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
-import '../ScriptStyle.css' 
+import '../ScriptStyle.css'
 
 const CreateUpdateForm = () => {
     const moduleId = useParams().id;
     const module = 'scripts';
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
-    const [ loading, setLoading ] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const navigate = useNavigate();    
-    const dispatch = useDispatch();    
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
     const [allData, setAllData] = useState({
-        name: '',        
+        name: '',
         script_html: '',
         script_json: '',
         status: true
     });
 
     const handleChange = (e) => {
-        setAllData({...allData, status: e.target.checked});
+        setAllData({ ...allData, status: e.target.checked });
     };
 
     useEffect(() => {
@@ -60,25 +60,25 @@ const CreateUpdateForm = () => {
             },
             deviceManager: {
                 devices:
-                [
-                    {
-                        id: 'desktop',
-                        name: 'Desktop',
-                        width: '',
-                    },
-                    {
-                        id: 'tablet',
-                        name: 'Tablet',
-                        width: '768px',
-                        widthMedia: '992px',
-                    },
-                    {
-                        id: 'mobilePortrait',
-                        name: 'Mobile portrait',
-                        width: '320px',
-                        widthMedia: '575px',
-                    },
-                ]
+                    [
+                        {
+                            id: 'desktop',
+                            name: 'Desktop',
+                            width: '',
+                        },
+                        {
+                            id: 'tablet',
+                            name: 'Tablet',
+                            width: '768px',
+                            widthMedia: '992px',
+                        },
+                        {
+                            id: 'mobilePortrait',
+                            name: 'Mobile portrait',
+                            width: '320px',
+                            widthMedia: '575px',
+                        },
+                    ]
             },
             pluginsOpts: {
                 'grapesjs-preset-webpage': {
@@ -89,7 +89,7 @@ const CreateUpdateForm = () => {
                     blocks: ['link-block', 'quote', 'text-basic'],
                 },
             },
-        });        
+        });
         setEditor(editor);
 
         const pfx = editor.getConfig().stylePrefix
@@ -110,7 +110,7 @@ const CreateUpdateForm = () => {
             styleActiveLine: true,
             smartIndent: true,
             indentWithTabs: true
-        }       
+        }
 
         htmlCodeViewer.set({
             codeName: 'htmlmixed',
@@ -134,14 +134,14 @@ const CreateUpdateForm = () => {
             editor.setStyle(css)
             modal.close()
         }
-        
+
         cmdm.add('edit-code', {
             run: function (editor, sender) {
                 sender && sender.set('active', 0)
                 var htmlViewer = htmlCodeViewer.editor
                 var cssViewer = cssCodeViewer.editor
                 modal.setTitle('Edit code')
-                var InnerHtml = editor.getHtml()                
+                var InnerHtml = editor.getHtml()
                 var Css = editor.getCss();
                 if (!htmlViewer && !cssViewer) {
                     const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
@@ -151,13 +151,13 @@ const CreateUpdateForm = () => {
                     htmlCodeViewer.init(txtarea)
                     cssCodeViewer.init(cssarea)
                     htmlViewer = htmlCodeViewer.editor
-                    cssViewer = cssCodeViewer.editor              
+                    cssViewer = cssCodeViewer.editor
                 }
                 modal.setContent('')
-                modal.setContent(rootContainer)                
-                htmlCodeViewer.setContent(InnerHtml)                
+                modal.setContent(rootContainer)
+                htmlCodeViewer.setContent(InnerHtml)
                 cssCodeViewer.setContent(Css)
-                modal.open({attributes: { class: 'custom-code-editor' }})
+                modal.open({ attributes: { class: 'custom-code-editor' } })
                 htmlViewer.refresh()
                 cssViewer.refresh()
             }
@@ -186,7 +186,7 @@ const CreateUpdateForm = () => {
         editor.on('change:changesCount', (model) => {
             const changes = model.get('changesCount');
             if (changes) {
-                setChangeCount(changeCount => changeCount +1)
+                setChangeCount(changeCount => changeCount + 1)
             }
         });
     }, []);
@@ -196,7 +196,7 @@ const CreateUpdateForm = () => {
         const childContainer = document.createElement('div')
         const titleContainer = document.createElement('div')
         const txtarea = document.createElement('textarea')
-        
+
         container.setAttribute('class', 'gjs-cm-editor-c')
         childContainer.setAttribute('id', 'gjs-cm-css')
         childContainer.setAttribute('class', 'gjs-cm-editor')
@@ -209,7 +209,7 @@ const CreateUpdateForm = () => {
         return txtarea
     }
 
-    
+
     // useEffect(() => {
     //     console.log(changeCount)
     //     if(changeCount > 0)
@@ -218,36 +218,36 @@ const CreateUpdateForm = () => {
     //       window.removeEventListener("beforeunload", handleUnload);
     //     };
     //   }, [changeCount]);
-    
+
     //   const handleUnload = (e) => {
     //     const message = "Hello";
     //    (e || window.event).returnValue = message; //Gecko + IE
     //     return message;
     //   };
-    
 
-    const loadEditorData = async(editor) => {        
-        if (moduleId !== 'create' && !isNaN(moduleId)) { 
+
+    const loadEditorData = async (editor) => {
+        if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId, editor);
         } else {
             const storageManager = editor.Storage;
             const data = storageManager.load();
             editor.loadProjectData(data);
             setAllData({
-                ...allData, 
+                ...allData,
                 script_json: editor.getProjectData(),
                 script_html: generatedHTMLValue(editor)
             });
         };
     }
 
-    const generatedHTMLValue = (editor) =>{
+    const generatedHTMLValue = (editor) => {
         let generatedHTML = '';
 
-        if(editor.getHtml()) {
-            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
-            generatedHTML += 
-            `<html>
+        if (editor.getHtml()) {
+            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
+            generatedHTML +=
+                `<html>
                 <head>
                     <title>${allData.name}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -260,7 +260,7 @@ const CreateUpdateForm = () => {
     }
 
     const dynamicErrorMsg = (field, value) => {
-        if(value){
+        if (value) {
             delete errors[field];
             setErrors(errors);
         } else {
@@ -270,83 +270,83 @@ const CreateUpdateForm = () => {
         }
     }
 
-    const onNameChange = (event) => {        
+    const onNameChange = (event) => {
         setAllData(allData => ({
             ...allData, name: event.target.value
         }));
         dynamicErrorMsg('name', event.target.value);
     }
-    
+
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
-        if(editorJsonBody.styles.length < 1){
+        if (!editorJsonBody.pages[0].frames[0].component.components) {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
             return;
         }
 
-        if(!Object.keys(errors).length){
+        if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
                 script_html: generatedHTMLValue(editor),
                 script_json: editorJsonBody,
                 status: allData.status
             }
-            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateScriptsData + `/${moduleId}` : jwtServiceConfig.saveScriptsData;            
+            const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateScriptsData + `/${moduleId}` : jwtServiceConfig.saveScriptsData;
 
             setLoading(true);
             axios.post(endPoint, params)
-            .then((response) => {
-                setLoading(false);
-                if (response.data.results.status) {
-                    // After successfully saved the changes, need to remove the local storage value and change state to 0.
-                    // New Localstorage value will be set after that.
-                    setChangeCount(0);
-                    localStorage.removeItem(storageKey);
+                .then((response) => {
+                    setLoading(false);
+                    if (response.data.results.status) {
+                        // After successfully saved the changes, need to remove the local storage value and change state to 0.
+                        // New Localstorage value will be set after that.
+                        setChangeCount(0);
+                        localStorage.removeItem(storageKey);
 
-                    setAllData({
-                        ...allData,
-                        ...params
-                    });
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    if(moduleId === 'create') {
-                        navigate(`/app/scripts/${response.data.results.result.id}`);
+                        setAllData({
+                            ...allData,
+                            ...params
+                        });
+                        dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                        if (moduleId === 'create') {
+                            navigate(`/app/scripts/${response.data.results.result.id}`);
+                        }
+                        // else
+                        //     getSingleRecordById(moduleId, editor);
+                    } else {
+                        dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }
-                    // else
-                    //     getSingleRecordById(moduleId, editor);
-                } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
-                }
-            })
-            .catch((error) => {
-                setLoading(false)
-                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
-            })
+                })
+                .catch((error) => {
+                    setLoading(false)
+                    dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+                })
         }
     }
 
     const getSingleRecordById = (id, editor) => {
         axios.get(jwtServiceConfig.getSingleScriptData + `/${id}`)
-        .then((response) => {
-            if (response.data.results.result) {
-                const record = response.data.results.result;               
-                setAllData(allData => ({
-                    ...allData,
-                    name: record.name,
-                    script_html: record.script_html,
-                    script_json: record.script_json,
-                    status: Boolean(record.status)
-                }));
-                editor.loadProjectData(record.script_json);
+            .then((response) => {
+                if (response.data.results.result) {
+                    const record = response.data.results.result;
+                    setAllData(allData => ({
+                        ...allData,
+                        name: record.name,
+                        script_html: record.script_html,
+                        script_json: record.script_json,
+                        status: Boolean(record.status)
+                    }));
+                    editor.loadProjectData(record.script_json);
 
-                //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
-                setChangeCount(changeCount=> changeCount-1);
-            } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
-            }
-        })
-        .catch((error) => {
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
-        })
+                    //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
+                    setChangeCount(changeCount => changeCount - 1);
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
     }
 
     /**
@@ -355,7 +355,7 @@ const CreateUpdateForm = () => {
      * Else, clear the existing local storage value and rediect to list pagw.
      */
     const handleCancel = () => {
-        if(changeCount > 0) {
+        if (changeCount > 0) {
             setOpenAlertDialog(true);
         } else {
             navigate(`/app/${module}`);
@@ -366,7 +366,7 @@ const CreateUpdateForm = () => {
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
     }
-    
+
     /**
      * Confirm Alert Dialog.
      * It will redirect user to list page.
@@ -393,9 +393,9 @@ const CreateUpdateForm = () => {
                                 error={!!errors.name}
                                 helperText={errors?.name?.message}
                                 variant="outlined"
-                                required                                
+                                required
                                 value={allData.name}
-                                onChange={ onNameChange }
+                                onChange={onNameChange}
                             />
                             <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                         </FormControl>
@@ -405,7 +405,7 @@ const CreateUpdateForm = () => {
                             </InputLabel>
                             <Switch
                                 size="large"
-                                id="status-switch" 
+                                id="status-switch"
                                 checked={allData.status}
                                 onChange={handleChange}
                                 inputProps={{ 'aria-label': 'controlled' }}
@@ -415,7 +415,7 @@ const CreateUpdateForm = () => {
                             <div id="gjs" />
                             <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
                         </FormControl>
-                                  
+
                         <motion.div
                             className="flex"
                             initial={{ opacity: 0, x: 20 }}
@@ -426,9 +426,9 @@ const CreateUpdateForm = () => {
                                 color="secondary"
                                 aria-label="Register"
                                 type="submit"
-                                loading={loading}                                
+                                loading={loading}
                                 onClick={onSubmit}
-                                disabled={ ( Object.values(errors).length || !allData.name) ? true : false } 
+                                disabled={(Object.values(errors).length || !allData.name) ? true : false}
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
@@ -436,7 +436,7 @@ const CreateUpdateForm = () => {
                                 className="whitespace-nowrap mx-4"
                                 variant="contained"
                                 color="error"
-                                onClick={ handleCancel }
+                                onClick={handleCancel}
                             >
                                 Cancel
                             </Button>

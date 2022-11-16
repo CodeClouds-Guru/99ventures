@@ -12,8 +12,8 @@ module.exports = {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
-      attachment: {
-        type: Sequelize.TEXT,
+      file_name: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
       mime_type: {

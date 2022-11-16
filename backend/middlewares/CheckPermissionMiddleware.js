@@ -19,11 +19,11 @@ function checkPermission(permissions, module, action) {
     ) {
       return true
     } else if (
-      ['fetchDropdownOptions'].indexOf(action) > -1 &&
+      ['fetchDropdownOptions','download'].indexOf(action) > -1 &&
       checkCombination(module, 'list', permission)
     ) {
       return true
-    } else if (checkCombination(module, action, permission)) {
+    }else if (checkCombination(module, action, permission)) {
       return true
     }
   }
@@ -95,7 +95,7 @@ module.exports = async function (req, res, next) {
   permissions = [...new Set(permissions)]
   req.user.roles = roles
   req.user.permissions = permissions
-  module = module.replace('-', '').trim()
+  module = module.replaceAll('-', '').trim()
   if (checkPermission(permissions, module, action)) {
     next()
   } else {

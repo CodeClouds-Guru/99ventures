@@ -10,9 +10,11 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       slug: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       parent_module: {
         type: Sequelize.STRING,

@@ -1,9 +1,9 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
@@ -16,7 +16,7 @@ import axios from "axios"
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { selectUser } from 'app/store/userSlice';
+import { selectUser, setUser } from 'app/store/userSlice';
 
 function List(props) {
   const dispatch = useDispatch();
@@ -28,6 +28,7 @@ function List(props) {
   const addable = props.addable ?? true;
   const deletable = props.deletable ?? true;
   const where = props.where ?? {};
+  const showModuleHeading = props.moduleHeading ?? '';
   const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
   const [modules, setModules] = useState([]);
@@ -77,6 +78,7 @@ function List(props) {
       setTotalRecords(res.data.results.result.total)
       setLoading(false);
       setFirstCall(false);
+      module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
     }).catch(error => {
       let message = 'Something went wrong!'
       if (error && error.response.data && error.response.data.errors) {
@@ -85,6 +87,19 @@ function List(props) {
       dispatch(showMessage({ variant: 'error', message }));
       navigate('/dashboard');
     })
+  }
+
+  const ticketsReadCount = (values) => {
+    let unread = 0;
+    let user_obj = {};
+    Object.keys(user).forEach((val, key) => {
+      user_obj[val] = user[val];
+    })
+    Object.values(values).forEach((val, key) => {
+      val.is_read === 0 ? unread++ : '';
+    });
+    user_obj.unread_tickets = unread;
+    // dispatch(setUser(user_obj));
   }
 
   useEffect(() => {
@@ -124,7 +139,9 @@ function List(props) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      setSelected(data.map((n) => n.id));
+      setSelected(data.map((n) => {
+        return module === 'pages' && (n.slug === '500' || n.slug === '404') ? null : n.id
+      }));
       return;
     }
     setSelected([]);
@@ -195,7 +212,7 @@ function List(props) {
   }
 
   const processFieldValue = (value, fieldConfig) => {
-    if (fieldConfig.field_name === 'created_at') {
+    if (value && (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at')) {
       value = moment(value).format('DD-MMM-YYYY')
     }
     return value;
@@ -213,13 +230,11 @@ function List(props) {
     return Object.values(fields).filter(field => field.listing === true).length + 1;
   }
 
-
-
   return (
     <div>
       {/* // header */}
       <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
-        <Typography
+        {showModuleHeading === '' ? <Typography
           component={motion.span}
           initial={{ x: -20 }}
           animate={{ x: 0, transition: { delay: 0.2 } }}
@@ -227,7 +242,7 @@ function List(props) {
           className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
         >
           {module.split('-').join(' ')}
-        </Typography>
+        </Typography> : <></>}
 
         <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
           {searchable && <Paper
@@ -271,7 +286,6 @@ function List(props) {
       {/* // body */}
       <div className="w-full flex flex-col min-h-full">
         <FuseScrollbars className="grow overflow-x-auto">
-
           <Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
             <ListTableHead
               selectedOrderIds={selected}
@@ -307,20 +321,24 @@ function List(props) {
                         key={n.id}
                         selected={isSelected}
                         onClick={(event) => handleClick(n)}
-                      >
+                      >{module === 'tickets' ? '' :
                         <TableCell className="w-40 md:w-64 text-center" padding="none">
-                          {isDeletable(n) && <Checkbox
+                          {(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
                             checked={isSelected}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => handleCheck(event, n.id)}
                           />}
-                        </TableCell>
+                        </TableCell>}
                         {Object.values(fields)
                           .filter(field => field.listing === true)
                           .map((field, i) => {
                             return <Fragment key={i}>
                               <TableCell className="p-4 md:p-16" component="th" scope="row">
-                                {processFieldValue(n[field.field_name], field)}
+                                {module === 'tickets' && field.field_name === 'status' ?
+                                  <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+                                  :
+                                  processFieldValue(n[field.field_name], field)
+                                }
                               </TableCell>
                             </Fragment>
                           })}

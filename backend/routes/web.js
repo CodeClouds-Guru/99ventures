@@ -1,20 +1,25 @@
 const express = require('express')
 const router = express.Router()
-router.get('/', (req, res) => {
-  res.status(200).send('99ventures backend')
-})
-
-router.get('/test', async (req, res) => {
-  const { Permission } = require('../models')
-  let permissions = await Permission.findAll({
-    where: {},
-    attributes: ['id'],
-  })
-  permissions = permissions.map((item) => {
-    return { permission_id: item.id, role_id: 1 }
-  })
-  res.send(permissions)
-})
+const PageParser = require('../helpers/PageParser')
+router.get('/:slug?', async (req, res) => {
+  console.log(req.params.slug || '/');
+  var pagePerser = new PageParser(req.params.slug || '/');
+  try {
+    var page_content = await pagePerser.preview();
+  } catch (e) {
+    switch (e.statusCode) {
+      case 404:
+        res.redirect('/404');
+        return;
+      default:
+        res.redirect('/500');
+        console.error(e)
+        return;
+    }
+    page_content = await pagePerser.preview();
+  }
+  res.render('page', { page_content });
+});
 module.exports = {
   prefix: '/',
   router,

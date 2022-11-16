@@ -24,6 +24,26 @@ const navigationConfig = [
     url: 'app/scripts',
   },
   {
+    id: 'filemanager',
+    title: 'File Manager',
+    // translate: 'File Manager',
+    type: 'item',
+    icon: 'heroicons-outline:folder',
+    url: 'app/filemanager',
+  },
+  {
+    id: 'tickets',
+    title: 'Tickets',
+    translate: 'Tickets',
+    type: 'item',
+    icon: 'heroicons-outline:ticket',
+    url: 'app/tickets',
+    badge: {
+      title: 0,
+      classes: 'px-8 bg-pink-600 text-white rounded-full',
+    },
+  },
+  {
     id: 'administration',
     title: 'Administration',
     translate: 'Administration',
@@ -65,6 +85,14 @@ const navigationConfig = [
         url: 'app/email-templates',
         end: true,
       },
+      {
+        id: 'settings',
+        title: 'Settings',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/settings',
+        end: true,
+      },
       // {
       //   id: 'permissions',
       //   title: 'Permissions',
@@ -75,7 +103,38 @@ const navigationConfig = [
       // },
     ]
   },
-
+  {
+    id: 'pagesAndLayouts',
+    title: 'Pages & Layouts',
+    type: 'collapse',
+    icon: 'material-outline:auto_awesome_mosaic',
+    children: [
+      {
+        id: 'components',
+        title: 'Components',
+        type: 'item',
+        icon: 'material-outline:view_agenda',
+        url: 'app/components',
+        end: true,
+      },
+      {
+        id: 'layouts',
+        title: 'Layouts',
+        type: 'item',
+        icon: 'material-outline:view_quilt',
+        url: 'app/layouts',
+        end: true,
+      },
+      {
+        id: 'pages',
+        title: 'Pages',
+        type: 'item',
+        icon: 'material-outline:description',
+        url: 'app/pages',
+        end: true,
+      },
+    ]
+  }
 ];
 
 export default navigationConfig;

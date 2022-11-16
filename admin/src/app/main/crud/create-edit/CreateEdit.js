@@ -22,6 +22,10 @@ import CreateEditForm from './CreateEditForm';
 import Alert from '@mui/material/Alert';
 import PermissionGrid from './components/PermissionGrid';
 import PermissionSettings from './components/PermissionSettings';
+import TicketingSystemPage from '../../ticket/system/TicketingSystemPage';
+import ComponentsCreateUpdate from '../../components/create-update/CreateUpdateForm';
+import LayoutsCreateUpdate from '../../layouts/create-update/CreateUpdate';
+import PagesCreateUpdate from '../../pages/create-update/CreateUpdate';
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
@@ -41,7 +45,7 @@ function CreateEdit(props) {
     function updateModuleState() {
 
       if (moduleId === 'create') {
-        dispatch(getModuleFields({ module }));
+        module !== 'pages' ? dispatch(getModuleFields({ module })) : '';
       } else {
         dispatch(getModule({ moduleId, module })).then((action) => {
           if (!action.payload) {
@@ -108,18 +112,30 @@ function CreateEdit(props) {
   }
 
   const createForm = () => { }
-
+  const module_arr = ['email-templates', 'tickets', 'components', 'pages', 'layouts']
   return (
     <FusePageCarded
-      header={<CreateEditHeader module={module} moduleId={moduleId} />}
+      header={
+        // (module !== 'tickets') ? <CreateEditHeader module={module} moduleId={moduleId} /> : ''
+        <CreateEditHeader module={module} moduleId={moduleId} />
+      }
       content={
         <>
-          <div className={`p-16 sm:p-24 ${module === 'email-templates' ? 'w-full' : 'max-w-3xl'}`} >
-            {errors && <Alert severity="error">{errors}</Alert>}
-            <CreateEditForm moduleOnSave={moduleOnSaveHandler} />
+          <div>
+            <div className={` ${module_arr.includes(module) ? 'w-full' : 'max-w-3xl p-16 sm:p-24'}`} >
+              {errors && <Alert severity="error">{errors}</Alert>}
+              {/* <CreateEditForm moduleOnSave={moduleOnSaveHandler} /> */}
+              {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
+                // module === 'components' ? <ComponentsCreateUpdate /> :
+                module === 'layouts' ? <LayoutsCreateUpdate /> :
+                  module === 'pages' ? <PagesCreateUpdate /> :
+                    <CreateEditForm moduleOnSave={moduleOnSaveHandler} />}
+            </div>
+            {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
           </div>
-          {(module === 'roles' && moduleId !== 'create') ? <PermissionSettings roleId={moduleId} /> : ''}
+
         </>
+
       }
       scroll={isMobile ? 'normal' : 'content'}
     />

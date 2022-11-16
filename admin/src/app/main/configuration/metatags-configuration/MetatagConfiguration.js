@@ -10,26 +10,26 @@ import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
-const schema =  yup.object().shape({
+const schema = yup.object().shape({
     keywords: yup.string().required('Please enter the meta keywords'),
     description: yup.string().required('Please enter meta description'),
 });
 
 function MetatagConfiguration(props) {
     const dispatch = useDispatch();
-    const [ loading, setLoading ] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [permission, setPermission] = useState(false);
-    
 
-    useEffect(() => { 
+
+    useEffect(() => {
         setPermission(
             (props.permission('save') || props.permission('update'))
         )
     }, [props.permission])
 
-    const { 
-        control, 
-        formState: {isValid, dirtyFields, errors}, 
+    const {
+        control,
+        formState: { isValid, dirtyFields, errors },
         handleSubmit,
         setValue
     } = useForm({
@@ -41,7 +41,7 @@ function MetatagConfiguration(props) {
         resolver: yupResolver(schema),
     });
 
-    useEffect(() => { 
+    useEffect(() => {
         setValue('keywords', '', { shouldDirty: true, shouldValidate: false });
         setValue('description', '', { shouldDirty: true, shouldValidate: false });
         fetchData();
@@ -49,8 +49,8 @@ function MetatagConfiguration(props) {
 
     const fetchData = () => {
         axios.get(jwtServiceConfig.getMetaTagsConfiguration).then((response) => {
-            if (response.data.status) {
-                const result = response.data.data;
+            if (response.data.results.status) {
+                const result = response.data.results.data;
                 setValue('keywords', result.Keywords, { shouldDirty: false, shouldValidate: true });
                 setValue('description', result.Description, { shouldDirty: false, shouldValidate: true });
             } else {
@@ -67,25 +67,25 @@ function MetatagConfiguration(props) {
         const params = [{
             content: data.keywords,
             tag_name: 'Keywords'
-        },{
+        }, {
             content: data.description,
             tag_name: 'Description'
         }];
         setLoading(true);
-        axios.post(jwtServiceConfig.saveMetaTagsConfiguration, {meta: params})
-        .then((response) => {
-            if (response.data.status) {
-                setLoading(false);
-                setValue('keywords', data.keywords)
-                setValue('description', data.description)
-                dispatch(showMessage({ variant: 'success', message: response.data.message }))
-            } else {
-                dispatch(showMessage({ variant: 'error', message: response.data.message }))
-            }
-        })
-        .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
-    }    
-    
+        axios.post(jwtServiceConfig.saveMetaTagsConfiguration, { meta: params })
+            .then((response) => {
+                if (response.data.results.status) {
+                    setLoading(false);
+                    setValue('keywords', data.keywords)
+                    setValue('description', data.description)
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                }
+            })
+            .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+    }
+
     return (
         <div>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
@@ -95,9 +95,9 @@ function MetatagConfiguration(props) {
                         <Typography variant="body2">Add your meta keywords and description</Typography>
                         <Divider className="mb-32 mt-10" />
 
-                        <form 
+                        <form
                             name="metatagsFormControl"
-                            noValidate  
+                            noValidate
                             className="flex flex-col justify-center w-full"
                             onSubmit={handleSubmit(onSubmit)}
                         >
@@ -105,16 +105,16 @@ function MetatagConfiguration(props) {
                                 name="keywords"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField 
+                                    <TextField
                                         {...field}
                                         label="Keywords"
-                                        id="fullWidth" 
+                                        id="fullWidth"
                                         className="mb-24"
                                         required
                                         multiline
                                         rows={4}
                                         fullWidth
-                                        disabled={ !permission }
+                                        disabled={!permission}
                                     />
                                 )}
                             />
@@ -123,23 +123,23 @@ function MetatagConfiguration(props) {
                                 name="description"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField 
+                                    <TextField
                                         {...field}
                                         label="Description"
-                                        id="fullWidth" 
+                                        id="fullWidth"
                                         className="mb-24"
                                         required
                                         multiline
                                         rows={4}
                                         fullWidth
-                                        disabled={ !permission }                                        
+                                        disabled={!permission}
                                     />
                                 )}
                             />
-                            
+
                             {
-                                (permission) ? 
-                                    <div className='flex items-center justify-center'> 
+                                (permission) ?
+                                    <div className='flex items-center justify-center'>
                                         <LoadingButton
                                             variant="contained"
                                             color="secondary"
@@ -148,12 +148,12 @@ function MetatagConfiguration(props) {
                                             type="submit"
                                             size="large"
                                             loading={loading}
-                                            disabled={ !Object.keys(dirtyFields).length || !isValid}
+                                            disabled={!Object.keys(dirtyFields).length || !isValid}
                                         >
                                             Save
                                         </LoadingButton>
                                     </div>
-                                : ''
+                                    : ''
                             }
                         </form>
                     </div>

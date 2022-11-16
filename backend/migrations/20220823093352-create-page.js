@@ -18,17 +18,17 @@ module.exports = {
       status: {
         type: Sequelize.STRING,
         allowNull: false,
-        default: "draft",
+        defaultValue: "draft",
         comment: "pending, draft, published, archived"
       },
-      parmalink: {
+      permalink: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       is_homepage: {
         type: Sequelize.TINYINT,
         allowNull: false,
-        default: 0,
+        defaultValue: 0,
       },
       slug: {
         type: Sequelize.STRING,

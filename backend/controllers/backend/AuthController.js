@@ -13,6 +13,8 @@ const {
   Permission,
   Group,
   Company,
+  Ticket,
+  CompanyPortal
 } = require("../../models/index");
 const { QueryTypes, Op } = require("sequelize");
 const db = require("../../models/index");
@@ -197,9 +199,18 @@ class AuthController {
     var permissions = [];
     let user = req.user;
     const header_company_id = req.header("company_id") || 0;
+    const header_company_portal_id = req.header("site_id") || 0;
 
     const userResourcesObj = new UserResources(user, header_company_id);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
+
+    var unread_ticket_count = await Ticket.getTicketCount(
+      0,
+      header_company_portal_id
+    );
+    var company_portal = await CompanyPortal.findByPk(header_company_portal_id)
+    userResourcesData.setDataValue("unread_tickets", unread_ticket_count);
+    userResourcesData.setDataValue("loggedin_portal", company_portal);
     return userResourcesData;
   }
   async logout(req, res) {

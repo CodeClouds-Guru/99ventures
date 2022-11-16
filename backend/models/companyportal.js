@@ -2,6 +2,7 @@
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
+const {Layout} = require('../models/index')
 module.exports = (sequelize, DataTypes) => {
   class CompanyPortal extends Model {
     /**
@@ -61,6 +62,28 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
       tableName: 'company_portals',
+      hooks: {
+        afterCreate: async (portal, options) => {
+          let layout_details = {
+            name: "Default Layout",
+            html: "<html><head><title>{{ page_title}}</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>{{content}}</body></html>",
+            layout_json: {
+              header: {
+                value: ""
+              },
+              body: {
+                value: [
+                  {
+                    name: "Content",
+                    code: "{{content}}"
+                  }
+                ]
+              }
+            }
+          }
+          await Layout.create(layout_details)
+        },
+      },
     }
   )
   CompanyPortal.fields = {

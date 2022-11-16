@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
+      alias_name: Joi.string().max(250).required().label("Alias"),
       email: Joi.string().email().required().label("Email"),
       username: Joi.string().min(3).max(30).required().label("Username"),
       password: Joi.string().allow("").optional(),
@@ -37,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       first_name: { type: DataTypes.STRING },
       last_name: DataTypes.STRING,
       username: DataTypes.STRING,
+      alias_name: DataTypes.STRING,
       email: {
         type: DataTypes.STRING,
         unique: {
@@ -148,6 +150,19 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "username",
       type: "text",
       placeholder: "Username",
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    alias_name: {
+      field_name: "alias_name",
+      db_name: "alias_name",
+      type: "text",
+      placeholder: "Alias",
       listing: false,
       show_in_form: true,
       sort: true,

@@ -1,9 +1,11 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors')
-const path = require('path')
-const fileUpload = require('express-fileupload')
-const db = require('./config/database')
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const path = require("path");
+const fileUpload = require("express-fileupload");
+const db = require("./config/database");
+const { engine } = require('express-handlebars');
+
 
 /**
  * This functions initialize an express app
@@ -28,8 +30,10 @@ function setup(app) {
 
   app.use(express.static(path.join(__dirname, '/public')))
 
-  app.use(bodyParser.json({ limit: '5mb' }))
-  app.use(bodyParser.urlencoded({ extended: true }))
+
+  app.use(bodyParser.json({ limit: "5mb" }));
+  app.use(bodyParser.urlencoded({ extended: true }));
+
   app.use(
     cors({
       origin: true,
@@ -38,14 +42,11 @@ function setup(app) {
   )
 }
 
-// function connectDB(app) {
-//   try {
-//     db.authenticate()
-//     console.log('Connected to DB')
-//   } catch (e) {
-//     console.error('Unable to connect to DB', e)
-//   }
-// }
+function initializeHandlebars(app) {
+  app.engine('handlebars', engine());
+  app.set('view engine', 'handlebars');
+  app.set("views", "./views");
+}
 
 /**
  * This function will automatically chains all the middleware that are registered in the middlewares/index.js
@@ -79,9 +80,11 @@ module.exports = function () {
   const app = init()
   setup(app)
   // connectDB(app)
-  chainMiddlewares(app)
-  chainRoutes(app)
-  console.log('testing pipeline')
+  
+  chainMiddlewares(app);
+  chainRoutes(app);
+  initializeHandlebars(app);
+
   //General exception handler
   app.use((err, req, res, next) => {
     console.error(err.stack)
