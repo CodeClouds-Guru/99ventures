@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
-import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl } from '@mui/material';
+
+import {Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl, ListItemSecondaryAction,ListItemIcon } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
@@ -10,6 +11,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import DragHandleIcon from '@mui/icons-material/DragHandle';
+import {arrayMoveImmutable} from "array-move";
+import { Container, Draggable } from "react-smooth-dnd";
 
 const modalStyle = {
     position: 'absolute',
@@ -88,7 +92,13 @@ function GeneralConfiguration(props) {
         })
     }
 
-    useEffect(() => {
+
+    const onDrop = ({ removedIndex, addedIndex }) => {
+        console.log({ removedIndex, addedIndex });
+        setGeneralReplies(items => arrayMoveImmutable(items, removedIndex, addedIndex));
+    };
+
+    useEffect(() => { 
         setPermission(
             (props.permission('save') || props.permission('update'))
         );
@@ -121,30 +131,40 @@ function GeneralConfiguration(props) {
     const getReplies = (replies) => {
         return replies.map((reply, indx) => {
             return (
-                <React.Fragment key={Math.random()}>
-                    <ListItem key={Math.random()}
-                        secondaryAction={
-                            <IconButton key={Math.random()} edge="end" aria-label="delete" onClick={() => removeListItem(indx)}>
-                                <DeleteIcon />
-                            </IconButton>
-                        }
-                    >
-                        <ListItemText key={Math.random()}
-                            primary={reply.name}
-                            secondary={
-                                <Typography
-                                    key={Math.random()}
-                                    variant="body2"
-                                    color="text.secondary"
-                                    noWrap
-                                >
-                                    {reply.body}
-                                </Typography>
+                    <Draggable key={Math.random()}>
+                        <ListItem key={ Math.random() }  
+                            secondaryAction= {
+                                <>
+                                    <IconButton key={ Math.random() } edge="end" aria-label="delete" onClick={()=> removeListItem(indx)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </>
                             }
-                        />
-                    </ListItem>
-                    <Divider variant="inset" component="li" className="ml-12" key={Math.random()} />
-                </React.Fragment>
+                        >
+                            <ListItemIcon className="drag-handle mt-4">
+                                        <DragHandleIcon />
+                                    </ListItemIcon>
+                            <ListItemText key={ Math.random() } 
+                                primary={reply.name}
+                                secondary={ 
+                                    <Typography
+                                        key={ Math.random() }
+                                        variant="body2"
+                                        color="text.secondary"
+                                        noWrap
+                                    >
+                                        {reply.body}
+                                    </Typography>
+                                }
+                            />
+                            {/* <ListItemSecondaryAction>
+                                <ListItemIcon className="drag-handle">
+                                    <DragHandleIcon />
+                                </ListItemIcon>
+                            </ListItemSecondaryAction> */}
+                        </ListItem>
+                        <Divider variant="inset" component="li" className="ml-12" key={ Math.random() }/>
+                    </Draggable>
             )
         })
     }
@@ -391,7 +411,9 @@ function GeneralConfiguration(props) {
 
                             <CardContent>
                                 <List>
-                                    {getReplies(generalReplies)}
+                                    <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                        {getReplies(generalReplies)}
+                                    </Container>
                                 </List>
                             </CardContent>
 

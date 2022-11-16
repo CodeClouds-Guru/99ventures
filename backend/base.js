@@ -6,13 +6,14 @@ const fileUpload = require("express-fileupload");
 const db = require("./config/database");
 const { engine } = require('express-handlebars');
 
+
 /**
  * This functions initialize an express app
  * @returns Object (Express)
  */
 function init() {
-  const app = express();
-  return app;
+  const app = express()
+  return app
 }
 
 /**
@@ -23,20 +24,22 @@ function setup(app) {
   app.use(
     fileUpload({
       useTempFiles: true,
-      tempFileDir: "/tmp/",
+      tempFileDir: '/tmp/',
     })
-  );
+  )
 
-  app.use(express.static(path.join(__dirname, "/public")));
+  app.use(express.static(path.join(__dirname, '/public')))
+
 
   app.use(bodyParser.json({ limit: "5mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
+
   app.use(
     cors({
       origin: true,
       optionsSuccessStatus: 200,
     })
-  );
+  )
 }
 
 function initializeHandlebars(app) {
@@ -50,13 +53,13 @@ function initializeHandlebars(app) {
  * @param {Express} app
  */
 function chainMiddlewares(app) {
-  const Middlewares = require("./middlewares");
+  const Middlewares = require('./middlewares')
   Object.values(Middlewares).forEach((element) => {
-    const middleObj = new element();
-    if ("run" in middleObj && typeof middleObj.run === "function") {
-      app.use(middleObj.run);
+    const middleObj = new element()
+    if ('run' in middleObj && typeof middleObj.run === 'function') {
+      app.use(middleObj.run)
     }
-  });
+  })
 }
 
 /**
@@ -64,30 +67,32 @@ function chainMiddlewares(app) {
  * @param {Express} app
  */
 function chainRoutes(app) {
-  var normalizedPath = require("path").join(__dirname, "routes");
-  require("fs")
+  var normalizedPath = require('path').join(__dirname, 'routes')
+  require('fs')
     .readdirSync(normalizedPath)
     .forEach(function (file) {
-      const { prefix, router } = require("./routes/" + file);
-      app.use(prefix, router);
-    });
+      const { prefix, router } = require('./routes/' + file)
+      app.use(prefix, router)
+    })
 }
 
 module.exports = function () {
-  const app = init();
-  setup(app);
+  const app = init()
+  setup(app)
   // connectDB(app)
+  
   chainMiddlewares(app);
   chainRoutes(app);
   initializeHandlebars(app);
+
   //General exception handler
   app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error(err.stack)
     res.status(500).json({
       status: false,
-      errors: ["Oops! Something went wrong"],
+      errors: ['Oops! Something went wrong'],
       trace: err.stack,
-    });
-  });
-  return app;
-};
+    })
+  })
+  return app
+}

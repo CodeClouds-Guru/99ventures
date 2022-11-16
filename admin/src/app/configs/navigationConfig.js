@@ -78,7 +78,7 @@ const navigationConfig = [
         end: true,
       },
       {
-        id: 'email-templates',
+        id: 'emailtemplates',
         title: 'Email Templates',
         type: 'item',
         icon: 'heroicons-outline:mail',

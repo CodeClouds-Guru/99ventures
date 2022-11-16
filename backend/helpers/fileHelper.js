@@ -141,7 +141,6 @@ class FileHelper {
     await s3.deleteObjects(deleteParams).promise();
     return true
   }
-
   //get folder list
   async getList() {
     this.company = await this.getCompanyDetails(this.company_id)
@@ -181,6 +180,7 @@ class FileHelper {
 
   //get company details
   async getCompanyDetails(company_id) {
+
     //company details
     const { Company } = require('../models/index')
     let company = await Company.findOne({
