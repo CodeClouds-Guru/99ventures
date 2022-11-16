@@ -286,7 +286,6 @@ function List(props) {
       {/* // body */}
       <div className="w-full flex flex-col min-h-full">
         <FuseScrollbars className="grow overflow-x-auto">
-          {console.log(selected)}
           <Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
             <ListTableHead
               selectedOrderIds={selected}
