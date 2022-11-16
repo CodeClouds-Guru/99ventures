@@ -5,6 +5,7 @@ import user from './userSlice';
 import account from './accountSlice'
 import filemanager from './filemanager';
 import layout from './layout';
+import components from './components';
 
 const createReducer = (asyncReducers) => (state, action) => {
   const combinedReducer = combineReducers({
@@ -14,6 +15,7 @@ const createReducer = (asyncReducers) => (state, action) => {
     account,
     filemanager,
     layout,
+    components,
     ...asyncReducers,
   });
 

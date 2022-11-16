@@ -32,6 +32,12 @@ const CreateUpdate = () => {
     const [changeCount, setChangeCount] = useState(0);
     const [layoutOptions, setLayoutOptions] = useState([]);
     const [components, setComponents] = useState([]);
+    const domain = `https://${user.loggedin_portal.domain}/`;
+    const [expanded, setExpanded] = useState('panel1');
+
+    const handleChangeExpand = (panel) => (event, newExpanded) => {
+        setExpanded(newExpanded ? panel : false);
+    };
     const [allData, setAllData] = useState({
         layout_id: '',
         status: '',
@@ -237,15 +243,13 @@ const CreateUpdate = () => {
 
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
+            const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
+            const htmlData = editor.getHtml().match(reg)[1];
             generatedHTML +=
-                `<html>
-                <head>
-                    <title>${allData.name}</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                `<section>
                     ${css}
-                </head>
-                ${editor.getHtml()}            
-            </html>`;
+                    ${htmlData}            
+                </section>`;
         }
         return generatedHTML;
     }
@@ -266,7 +270,7 @@ const CreateUpdate = () => {
             ...allData,
             name: event.target.value,
             slug: Helper.stringToSlug(event.target.value),
-            permalink: `${Helper.stringToSlug(event.target.value)}`
+            permalink: `${domain}${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('name', event.target.value);
     }
@@ -311,7 +315,7 @@ const CreateUpdate = () => {
                 layout_id: allData.layout_id,
                 status: allData.status,
                 slug: !allData.slug ? '/' : allData.slug,
-                permalink: `https://${user.loggedin_portal.domain}/${allData.permalink}`,
+                permalink: allData.permalink,
                 html: generatedHTMLValue(editor),
                 page_json: editorJsonBody,
             }
@@ -419,7 +423,7 @@ const CreateUpdate = () => {
         setAllData(allData => ({
             ...allData,
             slug: Helper.stringToSlug(event.target.value),
-            permalink: `${Helper.stringToSlug(event.target.value)}`
+            permalink: `${domain}${Helper.stringToSlug(event.target.value)}`
         }));
         // dynamicErrorMsg('slug', Helper.stringToSlug(event.target.value));
     }
@@ -486,10 +490,8 @@ const CreateUpdate = () => {
                                 <FormHelperText error variant="standard">{errors.status}</FormHelperText>
                             </FormControl>
                         </div>
-                        <Accordion>
+                        <Accordion expanded={expanded === 'panel1'} onChange={handleChangeExpand('panel1')}>
                             <AccordionSummary
-                                expanded={'true'}
-                                defaultexpanded={'true'}
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls="panel1a-content"
                                 id="panel1a-header"
@@ -510,7 +512,7 @@ const CreateUpdate = () => {
                                     />
                                     <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                                 </FormControl>
-                                <FormControl className="w-full mb-24 pr-10">
+                                <FormControl className="w-full mb-24">
                                     <TextField
                                         label="Slug"
                                         type="text"
@@ -523,7 +525,6 @@ const CreateUpdate = () => {
                                     <Typography component={'p'}>
                                         Permalink: &nbsp;&nbsp;
                                         <b>
-                                            {moduleId === 'create' ? `https://${user.loggedin_portal.domain}/` : ''}
                                             {allData.permalink}
                                         </b>
                                     </Typography>
@@ -531,11 +532,11 @@ const CreateUpdate = () => {
 
                             </AccordionDetails>
                         </Accordion>
-                        <Accordion>
+                        <Accordion expanded={expanded === 'panel2'} onChange={handleChangeExpand('panel2')}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls="panel2a-content"
-                                id="panel1a-header"
+                                id="panel2a-header"
                             >
                                 <Typography>Meta Tag Section</Typography>
                             </AccordionSummary>

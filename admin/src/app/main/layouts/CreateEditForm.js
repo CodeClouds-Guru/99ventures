@@ -13,10 +13,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {arrayMoveImmutable} from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
-import { getLayout, setSidebarStatus } from 'app/store/layout'
+import { getLayout, setRevisionData } from 'app/store/layout'
 
 
-const CreateEditForm = () => {
+const CreateEditForm = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
@@ -36,13 +36,14 @@ const CreateEditForm = () => {
         body: {
             value: [{
                 name: 'Content',
-                code: '{{content}}'
+                code: '${content}'
             }]
         }
     });
  
     useEffect(()=>{
         getComponents();
+        dispatch(setRevisionData([]));
         if(moduleId !== 'create' && !isNaN(moduleId)){
             dispatch(getLayout({module_id: moduleId}));
         }
@@ -79,7 +80,7 @@ const CreateEditForm = () => {
         const selectedValue = e.target.value;
         if(selectedValue){
             const componentCode = components.filter(el=> el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}].map((item) => [item["name"], item])).values()];            
+            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: '${'+componentCode[0].code +'}' }].map((item) => [item["name"], item])).values()];            
             setLayoutCode({
                 ...layoutCode,
                 body: {
@@ -104,7 +105,7 @@ const CreateEditForm = () => {
      */
     const formSubmit = (e) => {
         e.preventDefault();
-        dispatch(setSidebarStatus(false));
+        props.toggleSidebar(false);
         if(!layoutname) {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
@@ -123,14 +124,18 @@ const CreateEditForm = () => {
     }
 
     const handleLayoutSubmit = () => {
-        const htmlCode = `<html>
-            <head>
-                <title>{{ page_title}}</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                ${layoutCode.header.value}
-            </head>
-            <body>${layoutCode.body.value.map(el => el.code).join(' ')}</body>
-        </html>`;
+        const htmlCode = '<html>\n'+
+                '<head>\n'+
+                    '<title>${page_title}</title>\n'+
+                    '<meta charset="UTF-8">\n'+
+                    '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'+
+                    '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n'+
+                    '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n'+
+                    '${page_meta_code}\n'+
+                    layoutCode.header.value+
+                '\n</head>\n'+
+                '<body>'+ layoutCode.body.value.map(el => el.code).join(' ') +'</body>\n'+
+            '</html>';
 
         const params = {
             name: layoutname,
@@ -183,7 +188,8 @@ const CreateEditForm = () => {
 
     const handleSetLayoutName = (e) => {
         setLayoutname(e.target.value);
-        if(records.name !== e.target.value) {
+
+        if((moduleId !== 'create' && !isNaN(moduleId) && records.name !== e.target.value) || (moduleId === 'create' && e.target.value)) {
             setChangeStatus({...changeStatus, name_changed: true});
         } else {
             setChangeStatus({...changeStatus, name_changed: false});
@@ -197,7 +203,7 @@ const CreateEditForm = () => {
                 value: e.target.value
             }
         });
-        if(records.layout_json.header.value !== e.target.value) {
+        if((records.layout_json && records.layout_json.header.value !== e.target.value) || (moduleId === 'create' && e.target.value)){
             setChangeStatus({...changeStatus, header_changed: true});
         } else {
             setChangeStatus({...changeStatus, header_changed: false});
@@ -242,7 +248,7 @@ const CreateEditForm = () => {
                         (selectRevisionCount > 0) && (
                             <div>
                                 <Tooltip title="Show History">
-                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>dispatch(setSidebarStatus(true)) }>
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>props.toggleSidebar(true) }>
                                         <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
@@ -367,7 +373,6 @@ const CreateEditForm = () => {
                         variant="contained"
                         color="error"
                         onClick={() => {
-                            dispatch(setSidebarStatus(false))
                             navigate(`/app/layouts`)
                         }}
                     >

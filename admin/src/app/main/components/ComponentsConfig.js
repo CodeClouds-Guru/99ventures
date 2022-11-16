@@ -31,11 +31,11 @@ const ComponentsConfig = {
       element: <Components />,
       auth: settingsConfig.defaultAuth
     },
-    {
-      path: 'app/components/create',
-      element: <CreateUpdate />,
-      auth: settingsConfig.defaultAuth
-    },
+    // {
+    //   path: 'app/components/create',
+    //   element: <CreateUpdate />,
+    //   auth: settingsConfig.defaultAuth
+    // },
     {
       path: 'app/components/:moduleId',
       element: <CreateUpdate />,
