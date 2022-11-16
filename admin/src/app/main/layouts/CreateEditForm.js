@@ -36,7 +36,7 @@ const CreateEditForm = (props) => {
         body: {
             value: [{
                 name: 'Content',
-                code: '{{content}}'
+                code: '${content}'
             }]
         }
     });
@@ -80,7 +80,7 @@ const CreateEditForm = (props) => {
         const selectedValue = e.target.value;
         if(selectedValue){
             const componentCode = components.filter(el=> el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: `{{${ componentCode[0].code }}}`}].map((item) => [item["name"], item])).values()];            
+            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: '${'+componentCode[0].code +'}' }].map((item) => [item["name"], item])).values()];            
             setLayoutCode({
                 ...layoutCode,
                 body: {
@@ -124,14 +124,18 @@ const CreateEditForm = (props) => {
     }
 
     const handleLayoutSubmit = () => {
-        const htmlCode = `<html>
-            <head>
-                <title>{{ page_title}}</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                ${layoutCode.header.value}
-            </head>
-            <body>${layoutCode.body.value.map(el => el.code).join(' ')}</body>
-        </html>`;
+        const htmlCode = '<html>\n'+
+                '<head>\n'+
+                    '<title>${page_title}</title>\n'+
+                    '<meta charset="UTF-8">\n'+
+                    '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'+
+                    '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n'+
+                    '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n'+
+                    '${page_meta_code}\n'+
+                    layoutCode.header.value+
+                '\n</head>\n'+
+                '<body>'+ layoutCode.body.value.map(el => el.code).join(' ') +'</body>\n'+
+            '</html>';
 
         const params = {
             name: layoutname,
@@ -184,7 +188,8 @@ const CreateEditForm = (props) => {
 
     const handleSetLayoutName = (e) => {
         setLayoutname(e.target.value);
-        if(records.name !== e.target.value) {
+
+        if((moduleId !== 'create' && !isNaN(moduleId) && records.name !== e.target.value) || (moduleId === 'create' && e.target.value)) {
             setChangeStatus({...changeStatus, name_changed: true});
         } else {
             setChangeStatus({...changeStatus, name_changed: false});
@@ -198,7 +203,7 @@ const CreateEditForm = (props) => {
                 value: e.target.value
             }
         });
-        if(records.layout_json.header.value !== e.target.value) {
+        if((records.layout_json && records.layout_json.header.value !== e.target.value) || (moduleId === 'create' && e.target.value)){
             setChangeStatus({...changeStatus, header_changed: true});
         } else {
             setChangeStatus({...changeStatus, header_changed: false});
