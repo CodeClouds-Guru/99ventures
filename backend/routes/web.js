@@ -1,18 +1,19 @@
 const express = require('express')
 const router = express.Router()
 const PageParser = require('../helpers/PageParser')
-router.get('/', async (req, res) => {
-  var pagePerser = new PageParser('products-a');
+router.get('/:slug?', async (req, res) => {
+  console.log(req.params.slug || '/');
+  var pagePerser = new PageParser(req.params.slug || '/');
   try {
     var page_content = await pagePerser.preview();
   } catch (e) {
     switch (e.statusCode) {
       case 404:
-        pagePerser = new PageParser('404');
-        break;
+        res.redirect('/404');
+        return;
       default:
-        pagePerser = new PageParser('500');
-        break;
+        res.redirect('/500');
+        return;
     }
     page_content = await pagePerser.preview();
   }
