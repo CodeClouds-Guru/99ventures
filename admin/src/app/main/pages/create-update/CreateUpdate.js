@@ -33,6 +33,11 @@ const CreateUpdate = () => {
     const [layoutOptions, setLayoutOptions] = useState([]);
     const [components, setComponents] = useState([]);
     const domain = `https://${user.loggedin_portal.domain}/`;
+    const [expanded, setExpanded] = useState('panel1');
+
+    const handleChangeExpand = (panel) => (event, newExpanded) => {
+        setExpanded(newExpanded ? panel : false);
+    };
     const [allData, setAllData] = useState({
         layout_id: '',
         status: '',
@@ -485,10 +490,8 @@ const CreateUpdate = () => {
                                 <FormHelperText error variant="standard">{errors.status}</FormHelperText>
                             </FormControl>
                         </div>
-                        <Accordion>
+                        <Accordion expanded={expanded === 'panel1'} onChange={handleChangeExpand('panel1')}>
                             <AccordionSummary
-                                expanded={'true'}
-                                defaultexpanded={'true'}
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls="panel1a-content"
                                 id="panel1a-header"
@@ -509,7 +512,7 @@ const CreateUpdate = () => {
                                     />
                                     <FormHelperText error variant="standard">{errors.name}</FormHelperText>
                                 </FormControl>
-                                <FormControl className="w-full mb-24 pr-10">
+                                <FormControl className="w-full mb-24">
                                     <TextField
                                         label="Slug"
                                         type="text"
@@ -529,11 +532,11 @@ const CreateUpdate = () => {
 
                             </AccordionDetails>
                         </Accordion>
-                        <Accordion>
+                        <Accordion expanded={expanded === 'panel2'} onChange={handleChangeExpand('panel2')}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls="panel2a-content"
-                                id="panel1a-header"
+                                id="panel2a-header"
                             >
                                 <Typography>Meta Tag Section</Typography>
                             </AccordionSummary>
