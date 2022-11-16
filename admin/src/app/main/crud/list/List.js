@@ -139,7 +139,9 @@ function List(props) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      setSelected(data.map((n) => n.id));
+      setSelected(data.map((n) => {
+        return module === 'pages' && (n.slug === '500' || n.slug === '404') ? null : n.id
+      }));
       return;
     }
     setSelected([]);
@@ -284,7 +286,7 @@ function List(props) {
       {/* // body */}
       <div className="w-full flex flex-col min-h-full">
         <FuseScrollbars className="grow overflow-x-auto">
-
+          {console.log(selected)}
           <Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
             <ListTableHead
               selectedOrderIds={selected}
@@ -322,7 +324,7 @@ function List(props) {
                         onClick={(event) => handleClick(n)}
                       >{module === 'tickets' ? '' :
                         <TableCell className="w-40 md:w-64 text-center" padding="none">
-                          {isDeletable(n) && <Checkbox
+                          {(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
                             checked={isSelected}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => handleCheck(event, n.id)}
