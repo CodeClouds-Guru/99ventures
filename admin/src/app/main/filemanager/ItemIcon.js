@@ -77,12 +77,14 @@ const renderItem = (file)=> {
 			return badgeComponent('MPEG');
 		case 'video/avi':
 			return badgeComponent('AVI');
+		case 'image/svg+xml':
+			return badgeComponent('SVG');
 		case 'image/jpg':
 		case 'image/jpeg':
 		case 'image/bmp':
 		case 'image/png':
 		case 'image/gif':
-		case 'image/svg':
+		// case 'image/svg+xml':
 		case 'image/webp':
 			// const type = file.mime_type.split('/')[1];
 			// return badgeComponent(type.toUpperCase());
