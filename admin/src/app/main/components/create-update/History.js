@@ -51,11 +51,14 @@ const History = (props) => {
                             </TimelineSeparator>
                             <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between">
                                 <div className="flex flex-col">
-                                    <Typography variant="body1" className="sm:text-sm" component="span">
-                                    Current Version 
+                                    <Typography variant="h6" className="sm:text-sm" component="span">
+                                        Current Version 
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" className="sm:text-sm italic" component="span">
+                                        Component Name: { selectComponentData.name }
                                     </Typography>
                                     <Typography variant="caption" className="italic" color="text.secondary" >
-                                        Last Updated At: { Helper.parseTimeStamp(selectComponentData.updated_at) }
+                                        Last Updated At: { Helper.parseTimeStamp(selectComponentData.created_at) }
                                     </Typography>
                                 </div>
                                 
@@ -74,13 +77,16 @@ const History = (props) => {
                                     <TimelineDot />
                                     <TimelineConnector />
                                 </TimelineSeparator>
-                                <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between">
+                                <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between items-center">
                                     <div className="flex flex-col">
-                                        <Typography variant="body1" className="sm:text-sm" component="span">
+                                        <Typography variant="h6" className="sm:text-sm" component="span">
                                             Version { selectRevision.length - (indx)}
                                         </Typography>
+                                        <Typography variant="body2" className="sm:text-sm italic" color="text.secondary" component="span">
+                                            Component Name: { item.name }
+                                        </Typography>
                                         <Typography variant="caption" className="italic" color="text.secondary" >
-                                           Last Updated At: { Helper.parseTimeStamp(item.updated_at) }
+                                           Last Updated At: { Helper.parseTimeStamp(item.created_at) }
                                         </Typography>
                                     </div>
                                     <div className='icon-div'>
