@@ -22,8 +22,8 @@ class ComponentController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
 
     //modification
-    let rev_component_id = req.body.rev_component_id || null;
-    let previous = await this.model.findByPk(req.params.id);
+    let rev_component_id = req.body.rev_component_id || null;//2
+    let previous = await this.model.findByPk(req.params.id);//1
     const countBackups = await this.model.count({
       where: {
         code: {
@@ -119,9 +119,9 @@ class ComponentController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
-    let rev_layout_id = req.body.rev_component_id || null;
+    let rev_component_id = req.body.rev_component_id || null;
     // let updateResponse = await super.update(previous);
-    if (rev_layout_id === null) {
+    if (rev_component_id === null) {
       let create_data = {
         name: previous.name,
         html: previous.html,
@@ -132,6 +132,19 @@ class ComponentController extends Controller {
       };
       console.log("===========================", create_data);
       let model = await Component.create(create_data);
+    }else {
+      let update_data = {
+        name: previous.name,
+        html: previous.html,
+        layout_json: previous.component_json,
+        updated_by: req.user.id,
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: rev_component_id, //1
+        },
+      });
     }
     // let saveResponse = await super.save(createData);
     return true;

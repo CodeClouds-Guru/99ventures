@@ -20,8 +20,8 @@ class LayoutController extends Controller {
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    let rev_layout_id = req.body.rev_layout_id || null;
-    let previous = await this.model.findByPk(req.params.id);
+    let rev_layout_id = req.body.rev_layout_id || null; //5
+    let previous = await this.model.findByPk(req.params.id); //1
     const countBackups = await this.model.count({
       where: {
         code: {
@@ -32,7 +32,7 @@ class LayoutController extends Controller {
     req.countBackups = countBackups;
     let current = {};
     if (rev_layout_id !== null) {
-      current = await this.model.findByPk(rev_layout_id);
+      current = await this.model.findByPk(rev_layout_id); //5
     } else {
       current = req.body;
     }
@@ -121,7 +121,7 @@ class LayoutController extends Controller {
   }
 
   //Function for Layout Revision Update
-  async layoutRevisionUpdate(req, current, previous) {
+  async layoutRevisionUpdate(req, current /*5*/, previous /*1*/) {
     let update_data = {
       name: current.name,
       html: current.html,
@@ -131,7 +131,7 @@ class LayoutController extends Controller {
 
     let model_update = this.model.update(update_data, {
       where: {
-        id: req.params.id,
+        id: req.params.id, //1
       },
     });
     console.log("==================", req);
@@ -148,6 +148,19 @@ class LayoutController extends Controller {
       };
       let model = await Layout.create(create_data);
       // let saveResponse = await super.save(createData);
+    } else {
+      let update_data = {
+        name: previous.name,
+        html: previous.html,
+        layout_json: previous.layout_json,
+        updated_by: req.user.id,
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: rev_layout_id, //1
+        },
+      });
     }
 
     return true;
