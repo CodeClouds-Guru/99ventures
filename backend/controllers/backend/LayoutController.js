@@ -32,7 +32,7 @@ class LayoutController extends Controller {
     req.countBackups = countBackups;
     let current = {};
     if (rev_layout_id !== null) {
-      current = await this.model.findByPk(rev_layout_id); //5
+      current = await this.model.findByPk(rev_layout_id);
     } else {
       current = req.body;
     }
@@ -121,23 +121,26 @@ class LayoutController extends Controller {
   }
 
   //Function for Layout Revision Update
-  async layoutRevisionUpdate(req, current /*5*/, previous /*1*/) {
-    let update_data = {
-      name: current.name,
-      html: current.html,
-      layout_json: current.layout_json,
-      updated_by: req.user.id,
-      created_at: new Date(),
-    };
-
-    let model_update = this.model.update(update_data, {
-      where: {
-        id: req.params.id, //1
-      },
-    });
+  async layoutRevisionUpdate(req, current, previous) {
     let rev_layout_id = req.body.rev_layout_id || null;
-    // let updateResponse = await super.update(previous);
+
     if (rev_layout_id === null) {
+      //updating the existing row with new modification
+      let update_data = {
+        name: current.name,
+        html: current.html,
+        layout_json: current.layout_json,
+        updated_by: req.user.id,
+        created_at: new Date(),
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Creating a new row for backup
       let create_data = {
         name: previous.name,
         html: previous.html,
@@ -152,15 +155,33 @@ class LayoutController extends Controller {
       let model = await Layout.create(create_data);
       // let saveResponse = await super.save(createData);
     } else {
+      //Updating the current row with selected row
       let update_data = {
+        name: current.name,
+        html: current.html,
+        layout_json: current.layout_json,
+        updated_by: req.user.id,
+        updated_at: current.updated_at,
+        created_at: current.created_at,
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Updating the selected row with working id
+      let update_previous_data = {
         name: previous.name,
         html: previous.html,
         layout_json: previous.layout_json,
         updated_by: req.user.id,
-        // updated_at: previous.updated_at,
+        updated_at: previous.updated_at,
+        created_at: previous.created_at,
       };
 
-      let model_update = this.model.update(update_data, {
+      let prev_update = this.model.update(update_previous_data, {
         where: {
           id: rev_layout_id, //1
         },

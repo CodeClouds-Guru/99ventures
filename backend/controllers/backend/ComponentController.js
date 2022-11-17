@@ -104,53 +104,73 @@ class ComponentController extends Controller {
   }
 
   //Function for Layout Revision Update
-  async componentRevisionUpdate(req, current, previous) {
-    let update_data = {
-      name: current.name,
-      html: current.html,
-      component_json: current.component_json,
-      updated_by: req.user.id,
-      created_at: new Date(),
-      // updated_at: current.created_at,
-    };
-    console.log("===========================", update_data);
 
-    let model_update = this.model.update(update_data, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    // let updateResponse = await super.update(previous);
+  async componentRevisionUpdate(req, current, previous) {
     let rev_component_id = req.body.rev_component_id || null;
-    // let updateResponse = await super.update(previous);
+
     if (rev_component_id === null) {
+      //updating the existing row with new modification
+      let update_data = {
+        name: current.name,
+        html: current.html,
+        component_json: current.layout_json,
+        updated_by: req.user.id,
+        created_at: new Date(),
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Creating a new row for backup
       let create_data = {
         name: previous.name,
         html: previous.html,
-        component_json: previous.component_json,
+        component_json: previous.layout_json,
         code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
         created_at: previous.created_at,
+        // updated_at: previous.created_at,
       };
-      console.log("===========================", create_data);
+      console.log("==================", create_data);
       let model = await Component.create(create_data);
+      // let saveResponse = await super.save(createData);
     } else {
+      //Updating the current row with selected row
       let update_data = {
-        name: previous.name,
-        html: previous.html,
-        layout_json: previous.component_json,
+        name: current.name,
+        html: current.html,
+        component_json: current.layout_json,
         updated_by: req.user.id,
-        // updated_at: previous.updated_at,
+        updated_at: current.updated_at,
+        created_at: current.created_at,
       };
 
       let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Updating the selected row with working id
+      let update_previous_data = {
+        name: previous.name,
+        html: previous.html,
+        component_json: previous.layout_json,
+        updated_by: req.user.id,
+        updated_at: previous.updated_at,
+        created_at: previous.created_at,
+      };
+      let prev_update = this.model.update(update_previous_data, {
         where: {
           id: rev_component_id, //1
         },
       });
     }
-    // let saveResponse = await super.save(createData);
+
     return true;
   }
 }
