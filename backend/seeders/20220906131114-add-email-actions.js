@@ -13,28 +13,28 @@ module.exports = {
           action: "Invitation",
         },
         {
-            id: "2",
-            action: "Welcome",
+          id: "2",
+          action: "Welcome",
         },
         {
-            id: "3",
-            action: "Forgot Password",
+          id: "3",
+          action: "Forgot Password",
         },
         {
-            id: "4",
-            action: "Account Deactivated",
+          id: "4",
+          action: "Account Deactivated",
         },
         {
-            id: "5",
-            action: "Withdraw Request",
+          id: "5",
+          action: "Withdraw Request",
         },
         {
-            id: "6",
-            action: "Payment Confirmation",
+          id: "6",
+          action: "Payment Confirmation",
         },
         {
-            id: "7",
-            action: "Contact Us",
+          id: "7",
+          action: "Contact Us",
         },
       ],
       {}
