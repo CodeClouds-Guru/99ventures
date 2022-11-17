@@ -22,12 +22,12 @@ class ComponentController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
 
     //modification
-    let rev_component_id = req.body.rev_component_id || null;
-    let previous = await this.model.findByPk(req.params.id);
+    let rev_component_id = req.body.rev_component_id || null; //2
+    let previous = await this.model.findByPk(req.params.id); //1
     const countBackups = await this.model.count({
       where: {
         code: {
-          [Op.like]: "%" + previous.code + "-rev-%",
+          [Op.like]: previous.code + "-rev-%",
         },
       },
     });
@@ -82,13 +82,13 @@ class ComponentController extends Controller {
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
-        attributes: ["id", "name", "updated_at"],
+        attributes: ["id", "name", "created_at"],
         where: {
           code: {
-            [Op.like]: "%" + model.code + "-rev-%",
+            [Op.like]: model.code + "-rev-%",
           },
         },
-        order: [["updated_at", "DESC"]],
+        order: [["created_at", "DESC"]],
       });
 
       let fields = this.model.fields;
@@ -110,6 +110,7 @@ class ComponentController extends Controller {
       html: current.html,
       component_json: current.component_json,
       updated_by: req.user.id,
+      // updated_at: current.created_at,
     };
     console.log("===========================", update_data);
 
@@ -119,9 +120,9 @@ class ComponentController extends Controller {
       },
     });
     // let updateResponse = await super.update(previous);
-    let rev_layout_id = req.body.rev_component_id || null;
+    let rev_component_id = req.body.rev_component_id || null;
     // let updateResponse = await super.update(previous);
-    if (rev_layout_id === null) {
+    if (rev_component_id === null) {
       let create_data = {
         name: previous.name,
         html: previous.html,
@@ -132,6 +133,20 @@ class ComponentController extends Controller {
       };
       console.log("===========================", create_data);
       let model = await Component.create(create_data);
+    } else {
+      let update_data = {
+        name: previous.name,
+        html: previous.html,
+        layout_json: previous.component_json,
+        updated_by: req.user.id,
+        // updated_at: previous.updated_at,
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: rev_component_id, //1
+        },
+      });
     }
     // let saveResponse = await super.save(createData);
     return true;
