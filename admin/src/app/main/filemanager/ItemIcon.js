@@ -18,8 +18,8 @@ const TypeBadge = styled(Box)(
 			GIF: grey[900],
 			SVG: blueGrey[900],
 			CSS: blue[500],
-			JS: yellow[500],
-			JSON: grey[900],
+			JS: yellow[700],
+			JSON: yellow[900],
 			MP3: deepOrange[500],
 			WAV: lightBlue[600],
 			MP4: deepOrange[900],
@@ -66,7 +66,10 @@ const renderItem = (file)=> {
 		case 'text/css':
 			return badgeComponent('CSS');
 		case 'text/javascript':
+		case 'application/javascript':
 			return badgeComponent('JS');
+		case 'application/json':
+			return badgeComponent('JSON');
 		case 'audio/mpeg':
 			return badgeComponent('MP3');
 		case 'audio/wav':
