@@ -110,6 +110,7 @@ class ComponentController extends Controller {
       html: current.html,
       component_json: current.component_json,
       updated_by: req.user.id,
+      created_at: new Date(),
       // updated_at: current.created_at,
     };
     console.log("===========================", update_data);
@@ -130,6 +131,7 @@ class ComponentController extends Controller {
         code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
+        created_at: previous.created_at,
       };
       console.log("===========================", create_data);
       let model = await Component.create(create_data);

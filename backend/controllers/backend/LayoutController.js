@@ -127,7 +127,7 @@ class LayoutController extends Controller {
       html: current.html,
       layout_json: current.layout_json,
       updated_by: req.user.id,
-      // updated_at: current.updated_at,
+      created_at: new Date(),
     };
 
     let model_update = this.model.update(update_data, {
@@ -145,7 +145,7 @@ class LayoutController extends Controller {
         code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
-        // created_at: previous.created_at,
+        created_at: previous.created_at,
         // updated_at: previous.created_at,
       };
       console.log("==================", create_data);
