@@ -40,7 +40,7 @@ const CreateUpdate = () => {
     };
     const [allData, setAllData] = useState({
         layout_id: '',
-        status: '',
+        status: 'pending',
         name: '',
         slug: '',
         permalink: '',
@@ -292,6 +292,10 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
+                    setAllData({
+                        ...allData,
+                        layout_id: response.data.results.fields.layout_id.value
+                    });
                     setComponents(response.data.results.fields.components.options);
                     createCustomComponentForEditor(response.data.results.fields.components.options, editor);
                 } else {
@@ -304,8 +308,8 @@ const CreateUpdate = () => {
     }
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
-        if (editorJsonBody.styles.length < 1) {
-            dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
+        if (!editorJsonBody.pages[0].frames[0].component.components) {
+            dispatch(showMessage({ variant: 'error', message: 'Please add the value in page body' }));
             return;
         }
 
@@ -359,7 +363,7 @@ const CreateUpdate = () => {
                         status: record.status,
                         name: record.name,
                         slug: record.slug,
-                        permalink: record.permalink,
+                        permalink: !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,
@@ -406,6 +410,7 @@ const CreateUpdate = () => {
     }
 
     const handleChangeLayout = (event) => {
+        event.preventDefault();
         setAllData({
             ...allData,
             layout_id: event.target.value,
