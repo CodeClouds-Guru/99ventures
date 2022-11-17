@@ -31,6 +31,10 @@ class PageController extends Controller {
         },
       },
     });
+    let default_layout = await Layout.findOne({
+                                        where: { code: 'default-layout',company_portal_id:site_id },
+                                      });
+    fields.layout_id.value = default_layout.id;
     let components = await Component.findAll({
       where: {
         company_portal_id: site_id,
@@ -100,6 +104,10 @@ class PageController extends Controller {
         },
       },
     });
+    let default_layout = await Layout.findOne({
+      where: { code: 'default-layout',company_portal_id:site_id },
+    });
+    fields.layout_id.value = default_layout.id;
     let components = await Component.findAll({
       where: {
         company_portal_id: site_id,
