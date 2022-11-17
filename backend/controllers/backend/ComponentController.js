@@ -103,7 +103,7 @@ class ComponentController extends Controller {
     }
   }
 
-  //Function for Layout Revision Update
+  //Function for Component Revision Update
 
   async componentRevisionUpdate(req, current, previous) {
     let rev_component_id = req.body.rev_component_id || null;
@@ -113,7 +113,7 @@ class ComponentController extends Controller {
       let update_data = {
         name: current.name,
         html: current.html,
-        component_json: current.layout_json,
+        component_json: current.component_json,
         updated_by: req.user.id,
         created_at: new Date(),
       };
@@ -128,7 +128,7 @@ class ComponentController extends Controller {
       let create_data = {
         name: previous.name,
         html: previous.html,
-        component_json: previous.layout_json,
+        component_json: previous.component_json,
         code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
@@ -143,7 +143,7 @@ class ComponentController extends Controller {
       let update_data = {
         name: current.name,
         html: current.html,
-        component_json: current.layout_json,
+        component_json: current.component_json,
         updated_by: req.user.id,
         updated_at: current.updated_at,
         created_at: current.created_at,
@@ -159,7 +159,7 @@ class ComponentController extends Controller {
       let update_previous_data = {
         name: previous.name,
         html: previous.html,
-        component_json: previous.layout_json,
+        component_json: previous.component_json,
         updated_by: req.user.id,
         updated_at: previous.updated_at,
         created_at: previous.created_at,
