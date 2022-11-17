@@ -1,7 +1,7 @@
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { styled } from '@mui/material/styles';
 import { Box } from '@mui/system';
-import { amber, blue, green, grey, red, purple, orange, blueGrey } from '@mui/material/colors';
+import { amber, blue, green, grey, red, purple, orange, deepOrange, blueGrey, yellow, lightBlue } from '@mui/material/colors';
 
 const TypeBadge = styled(Box)(
 	({ theme, ...props }) => ({
@@ -16,6 +16,15 @@ const TypeBadge = styled(Box)(
 			JPEG: amber[600],
 			PNG: purple[700],
 			GIF: grey[900],
+			SVG: blueGrey[900],
+			CSS: blue[500],
+			JS: yellow[500],
+			JSON: grey[900],
+			MP3: deepOrange[500],
+			WAV: lightBlue[600],
+			MP4: deepOrange[900],
+			MPEG: blueGrey[900],
+			AVI: blueGrey[900],
 			UNKNOWN: blueGrey[900]
 		}[props.color],
 	})
@@ -39,6 +48,8 @@ const badgeComponent = (type) => {
 
 const renderItem = (file)=> {
 	switch(file.mime_type) {
+		case 'text/plain':
+			return badgeComponent('TXT');
 		case 'application/pdf':
 			return badgeComponent('PDF');
 		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -52,12 +63,29 @@ const renderItem = (file)=> {
 		case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
 		case 'application/vnd.ms-powerpoint':
 			return badgeComponent('PPT');
+		case 'text/css':
+			return badgeComponent('CSS');
+		case 'text/javascript':
+			return badgeComponent('JS');
+		case 'audio/mpeg':
+			return badgeComponent('MP3');
+		case 'audio/wav':
+			return badgeComponent('WAV');
+		case 'video/mp4':
+			return badgeComponent('MP4');
+		case 'video/mpeg':
+			return badgeComponent('MPEG');
+		case 'video/avi':
+			return badgeComponent('AVI');
+		case 'image/svg+xml':
+			return badgeComponent('SVG');
 		case 'image/jpg':
 		case 'image/jpeg':
 		case 'image/bmp':
 		case 'image/png':
 		case 'image/gif':
-		case 'image/svg':
+		// case 'image/svg+xml':
+		case 'image/webp':
 			// const type = file.mime_type.split('/')[1];
 			// return badgeComponent(type.toUpperCase());
 			return (	

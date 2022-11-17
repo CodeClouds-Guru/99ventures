@@ -23,7 +23,9 @@ export const isImageFile = (mimyeType) => {
         case 'image/jpeg':
         case 'image/png':
         case 'image/gif':
-        case 'image/svg':
+        case 'image/webp':
+        case 'image/bmp':
+        //case 'image/svg+xml':
             return true;
         default:
             return false;
