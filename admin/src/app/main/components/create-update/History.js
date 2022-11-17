@@ -86,7 +86,7 @@ const History = (props) => {
                                             Component Name: { item.name }
                                         </Typography>
                                         <Typography variant="caption" className="italic" color="text.secondary" >
-                                           Last Updated At: { Helper.parseTimeStamp(item.created_at) }
+                                            Created At: { Helper.parseTimeStamp(item.created_at) }
                                         </Typography>
                                     </div>
                                     <div className='icon-div'>

@@ -49,10 +49,10 @@ const History = (props) => {
                                 <TimelineDot sx={{ backgroundColor: 'rgb(34 197 94)' }} />
                                 <TimelineConnector />
                             </TimelineSeparator>
-                            <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between items-center">
+                            <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between">
                                 <div className="flex flex-col">
                                     <Typography variant="h6" className="sm:text-sm" component="span">
-                                    Current Version 
+                                        Current Version 
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" className="sm:text-sm italic" component="span">
                                         Layout Name: { selectLayout.name }
@@ -77,7 +77,7 @@ const History = (props) => {
                                     <TimelineDot />
                                     <TimelineConnector />
                                 </TimelineSeparator>
-                                <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between">
+                                <TimelineContent sx={{ py: '12px', px: 2 }} className="flex justify-between items-center">
                                     <div className="flex flex-col">
                                         <Typography variant="h6" className="sm:text-sm" component="span">
                                             Version { selectRevision.length - (indx)}
@@ -86,7 +86,7 @@ const History = (props) => {
                                             Layout Name: { item.name }
                                         </Typography>
                                         <Typography variant="caption" className="italic" color="text.secondary" >
-                                           Last Updated At: { Helper.parseTimeStamp(item.created_at) }
+                                            Created At: { Helper.parseTimeStamp(item.created_at) }
                                         </Typography>
                                     </div>
                                     <div className='icon-div'>
