@@ -36,7 +36,7 @@ const CreateEditForm = (props) => {
         body: {
             value: [{
                 name: 'Content',
-                code: '${content}'
+                code: '{{content}}'
             }]
         }
     });
@@ -80,7 +80,7 @@ const CreateEditForm = (props) => {
         const selectedValue = e.target.value;
         if(selectedValue){
             const componentCode = components.filter(el=> el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: '${'+componentCode[0].code +'}' }].map((item) => [item["name"], item])).values()];            
+            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: '{{'+componentCode[0].code +'}}' }].map((item) => [item["name"], item])).values()];            
             setLayoutCode({
                 ...layoutCode,
                 body: {

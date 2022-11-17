@@ -24,6 +24,11 @@ const types = {
             ext: '.webp',
             mime_type: 'image/webp',
             checked: false
+        },
+        {
+            ext: '.svg',
+            mime_type: 'image/svg+xml',
+            checked: false
         }
     ],
     'documents': [
