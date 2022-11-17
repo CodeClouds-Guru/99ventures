@@ -7,18 +7,32 @@ import { useDispatch, useSelector } from 'react-redux';
 import { applyRevision } from 'app/store/components';
 import { useParams } from 'react-router-dom';
 import Helper from 'src/app/helper';
-
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 const History = (props) => {
     const dispatch = useDispatch();
     const { moduleId } = useParams();
+    const [ openAlertDialog, setOpenAlertDialog ] = React.useState(false);
+    const [ revisionId, setRevisionId ] = React.useState(0);
     const selectRevision = useSelector(state => state.components.revisions_data);
     const selectComponentData = useSelector(state => state.components.component_data);
-    const handleApplyRevision = (id) => {
+    
+    const handleShowConfirmPopup = (id) => {
+        setOpenAlertDialog(true);
+        setRevisionId(id);
+    }
+
+    const onCloseAlertDialogHandle = () => {
+        setOpenAlertDialog(false);
+        setRevisionId(0);
+    }
+    
+    const onConfirmAlertDialogHandle = () => {
         dispatch(applyRevision({
             module_id: moduleId,
-            rev_component_id: id
-        }))
+            rev_component_id: revisionId
+        }));
+        onCloseAlertDialogHandle();
     }
 
     return (
@@ -91,7 +105,7 @@ const History = (props) => {
                                     </div>
                                     <div className='icon-div'>
                                         <Tooltip title="Revert Changes">
-                                            <IconButton size="small" onClick={ ()=> handleApplyRevision(item.id) }>
+                                            <IconButton size="small" onClick={ ()=> handleShowConfirmPopup(item.id) }>
                                                 <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:check</FuseSvgIcon>
                                             </IconButton>
                                         </Tooltip>
@@ -103,6 +117,12 @@ const History = (props) => {
                 }
 
             </Timeline>
+            <AlertDialog
+                content="Please Note that this event will swap the current layout with the selected revision. If you want to revert back this change you have to swap again with the same version number."
+                open={openAlertDialog}
+                onConfirm={onConfirmAlertDialogHandle}
+                onClose={onCloseAlertDialogHandle}
+            />
         </motion.div>
     );
 }
