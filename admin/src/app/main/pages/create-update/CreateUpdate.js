@@ -39,7 +39,7 @@ const CreateUpdate = () => {
         setExpanded(newExpanded ? panel : false);
     };
     const [allData, setAllData] = useState({
-        layout_id: '',
+        layout_id: 0,
         status: 'pending',
         name: '',
         slug: '',
@@ -230,11 +230,13 @@ const CreateUpdate = () => {
             const storageManager = editor.Storage;
             const data = storageManager.load();
             editor.loadProjectData(data);
-            setAllData({
-                ...allData,
-                page_json: editor.getProjectData(),
-                html: generatedHTMLValue(editor),
-            });
+            setAllData(prevData => {
+                return {
+                    ...prevData,
+                    page_json: editor.getProjectData(),
+                    html: generatedHTMLValue(editor),
+                }
+            })
         };
     }
 
@@ -466,7 +468,7 @@ const CreateUpdate = () => {
                                     onChange={handleChangeLayout}
                                     required
                                 >
-                                    <MenuItem value=""> <em>None</em> </MenuItem>
+                                    <MenuItem value="0"> <em>None</em> </MenuItem>
                                     {layoutOptions.length > 0 ? layoutOptions.map((val, key) => {
                                         return (
                                             <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
