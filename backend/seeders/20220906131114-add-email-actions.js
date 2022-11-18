@@ -9,32 +9,25 @@ module.exports = {
       "email_actions",
       [
         {
-          id: "1",
           action: "Invitation",
         },
         {
-            id: "2",
-            action: "Welcome",
+          action: "Welcome",
         },
         {
-            id: "3",
-            action: "Forgot Password",
+          action: "Forgot Password",
         },
         {
-            id: "4",
-            action: "Account Deactivated",
+          action: "Account Deactivated",
         },
         {
-            id: "5",
-            action: "Withdraw Request",
+          action: "Withdraw Request",
         },
         {
-            id: "6",
-            action: "Payment Confirmation",
+          action: "Payment Confirmation",
         },
         {
-            id: "7",
-            action: "Contact Us",
+          action: "Contact Us",
         },
       ],
       {}

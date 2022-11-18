@@ -20,12 +20,12 @@ class LayoutController extends Controller {
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    let rev_layout_id = req.body.rev_layout_id || null;
-    let previous = await this.model.findByPk(req.params.id);
+    let rev_layout_id = req.body.rev_layout_id || null; //5
+    let previous = await this.model.findByPk(req.params.id); //1
     const countBackups = await this.model.count({
       where: {
         code: {
-          [Op.like]: "%" + previous.code + "-rev-%",
+          [Op.like]: previous.code + "-rev-%",
         },
       },
     });
@@ -74,13 +74,13 @@ class LayoutController extends Controller {
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
-        attributes: ["id", "name", "updated_at"],
+        attributes: ["id", "name", "created_at"],
         where: {
           code: {
-            [Op.like]: "%" + model.code + "-rev-%",
+            [Op.like]: model.code + "-rev-%",
           },
         },
-        order: [["updated_at", "DESC"]],
+        order: [["created_at", "DESC"]],
       });
 
       let fields = this.model.fields;
@@ -143,22 +143,25 @@ class LayoutController extends Controller {
 
   //Function for Layout Revision Update
   async layoutRevisionUpdate(req, current, previous) {
-    let update_data = {
-      name: current.name,
-      html: current.html,
-      layout_json: current.layout_json,
-      updated_by: req.user.id,
-    };
-
-    let model_update = this.model.update(update_data, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    console.log("==================", req);
     let rev_layout_id = req.body.rev_layout_id || null;
-    // let updateResponse = await super.update(previous);
+
     if (rev_layout_id === null) {
+      //updating the existing row with new modification
+      let update_data = {
+        name: current.name,
+        html: current.html,
+        layout_json: current.layout_json,
+        updated_by: req.user.id,
+        created_at: new Date(),
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Creating a new row for backup
       let create_data = {
         name: previous.name,
         html: previous.html,
@@ -166,9 +169,44 @@ class LayoutController extends Controller {
         code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
+        created_at: previous.created_at,
+        // updated_at: previous.created_at,
       };
+      console.log("==================", create_data);
       let model = await Layout.create(create_data);
       // let saveResponse = await super.save(createData);
+    } else {
+      //Updating the current row with selected row
+      let update_data = {
+        name: current.name,
+        html: current.html,
+        layout_json: current.layout_json,
+        updated_by: req.user.id,
+        updated_at: current.updated_at,
+        created_at: current.created_at,
+      };
+
+      let model_update = this.model.update(update_data, {
+        where: {
+          id: req.params.id, //1
+        },
+      });
+
+      //Updating the selected row with working id
+      let update_previous_data = {
+        name: previous.name,
+        html: previous.html,
+        layout_json: previous.layout_json,
+        updated_by: req.user.id,
+        updated_at: previous.updated_at,
+        created_at: previous.created_at,
+      };
+
+      let prev_update = this.model.update(update_previous_data, {
+        where: {
+          id: rev_layout_id, //1
+        },
+      });
     }
 
     return true;

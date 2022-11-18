@@ -39,8 +39,8 @@ const CreateUpdate = () => {
         setExpanded(newExpanded ? panel : false);
     };
     const [allData, setAllData] = useState({
-        layout_id: '',
-        status: '',
+        layout_id: 0,
+        status: 'pending',
         name: '',
         slug: '',
         permalink: '',
@@ -230,11 +230,13 @@ const CreateUpdate = () => {
             const storageManager = editor.Storage;
             const data = storageManager.load();
             editor.loadProjectData(data);
-            setAllData({
-                ...allData,
-                page_json: editor.getProjectData(),
-                html: generatedHTMLValue(editor),
-            });
+            setAllData(prevData => {
+                return {
+                    ...prevData,
+                    page_json: editor.getProjectData(),
+                    html: generatedHTMLValue(editor),
+                }
+            })
         };
     }
 
@@ -292,6 +294,10 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
+                    setAllData({
+                        ...allData,
+                        layout_id: response.data.results.fields.layout_id.value
+                    });
                     setComponents(response.data.results.fields.components.options);
                     createCustomComponentForEditor(response.data.results.fields.components.options, editor);
                 } else {
@@ -304,8 +310,8 @@ const CreateUpdate = () => {
     }
     const onSubmit = () => {
         const editorJsonBody = editor.getProjectData();
-        if (editorJsonBody.styles.length < 1) {
-            dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
+        if (!editorJsonBody.pages[0].frames[0].component.components) {
+            dispatch(showMessage({ variant: 'error', message: 'Please add the value in page body' }));
             return;
         }
 
@@ -359,7 +365,7 @@ const CreateUpdate = () => {
                         status: record.status,
                         name: record.name,
                         slug: record.slug,
-                        permalink: record.permalink,
+                        permalink: !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,
@@ -406,6 +412,7 @@ const CreateUpdate = () => {
     }
 
     const handleChangeLayout = (event) => {
+        event.preventDefault();
         setAllData({
             ...allData,
             layout_id: event.target.value,
@@ -461,7 +468,7 @@ const CreateUpdate = () => {
                                     onChange={handleChangeLayout}
                                     required
                                 >
-                                    <MenuItem value=""> <em>None</em> </MenuItem>
+                                    <MenuItem value="0"> <em>None</em> </MenuItem>
                                     {layoutOptions.length > 0 ? layoutOptions.map((val, key) => {
                                         return (
                                             <MenuItem key={key} value={val.id}>{val.value}</MenuItem>
