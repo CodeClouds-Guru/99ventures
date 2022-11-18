@@ -13,7 +13,7 @@ function FileManagerHeader(props) {
 
   return (
 	<div className='w-full'>
-		<MainHeader module="Filemanager" slug="filemanager" />
+		<MainHeader module="File Manager" slug="filemanager" />
 		
 		<Header 
 			selectAll={<SelectAll/>}

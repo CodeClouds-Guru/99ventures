@@ -144,7 +144,7 @@ const Header = (props) => {
                         )
                     }
                 </div>
-                <div className="flex " variant="outlined">
+                <div className="flex lg:w-400 " variant="outlined">
                     {props.search}
                 </div>
                 <div className='flex'>
