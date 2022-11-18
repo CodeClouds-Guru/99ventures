@@ -106,12 +106,33 @@ class LayoutController extends Controller {
 
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    options.where = {
-      code: {
-        [Op.notLike]: "%-rev-%",
-      },
-    };
-
+    if ("where" in options){
+      if(Op.and in options['where']){
+        options['where'] = {
+          [Op.and]: {
+            ...options['where'][Op.and],
+            code: {
+              [Op.notLike]: "%-rev-%",
+            },
+          }
+        }
+      }else{
+        options['where'] = {
+          [Op.and]: {
+            ...options['where'],
+            code: {
+              [Op.notLike]: "%-rev-%",
+            },
+          }
+        }
+      }
+    }else{
+      options.where = {
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      };
+    }
     const { docs, pages, total } = await this.model.paginate(options);
 
     return {
