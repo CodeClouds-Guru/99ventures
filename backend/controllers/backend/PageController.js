@@ -166,7 +166,7 @@ class PageController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug },
+      where: { slug: req.body.slug,company_portal_id:req.headers.site_id },
     });
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);
@@ -183,7 +183,7 @@ class PageController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug, id: { [Op.ne]: req.params.id } },
+      where: { slug: req.body.slug, company_portal_id:req.headers.site_id, id: { [Op.ne]: req.params.id} },
     });
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);
