@@ -29,10 +29,10 @@ router.get('/preview/:slug?', async (req, res) => {
   } catch (e) {
     switch (e.statusCode) {
       case 404:
-        res.redirect('/404');
+        res.redirect('/preview/404');
         return;
       default:
-        res.redirect('/500');
+        res.redirect('/preview/500');
         console.error(e)
         return;
     }
