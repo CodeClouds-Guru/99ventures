@@ -132,12 +132,16 @@ function DragDropzone() {
 		},
 		onDropRejected: (files) => {
 			const msgs = [];
-			files.map(el => {				
+			files.every(el => {				
 				if(el.errors[0]['code'] === 'file-too-large'){
-					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size ? selectConfig.max_file_size : 1} MB`);
+					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size ? selectConfig.max_file_size : 1} MB!`);
 				}
 				if(el.errors[0]['code'] === 'file-invalid-type'){
 					msgs.push(`${el.file.name} is not supported!`);
+				}
+				if(el.errors[0]['code'] === 'too-many-files'){
+					msgs.push(`${el.errors[0]['message']}. Maximum ${selectConfig.max_no_of_uploads} files can be uploaded at a time!`);
+					return false;
 				}
 			});
 			dispatch(showMessage({ variant: 'error', message: msgs.join('. ') }));
