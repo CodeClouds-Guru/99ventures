@@ -54,7 +54,19 @@ class Controller {
         }),
       };
     }
-
+    var query_where = req.query.where ? JSON.parse(req.query.where) : null;
+    if ("where" in options && query_where) {
+      options['where'] = {
+        [Op.and]: {
+          ...query_where,
+          ...options['where']
+        }
+      }
+    }else if (query_where != null) {
+      options['where'] = {
+          ...query_where
+      }
+    }
     return options;
   }
 
