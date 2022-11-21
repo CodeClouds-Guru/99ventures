@@ -88,7 +88,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     name: {
       field_name: "name",
@@ -114,7 +114,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     component_json: {
       field_name: "component_json",
@@ -127,7 +127,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     code: {
       field_name: "code",

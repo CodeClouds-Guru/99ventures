@@ -88,7 +88,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: '',
       width: '50',
-      searchable: true,
+      searchable: false,
     },
     layout_id: {
       field_name: 'layout_id',
@@ -140,7 +140,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: '',
       width: '50',
-      searchable: true,
+      searchable: false,
     },
     page_json: {
       field_name: 'layout_json',
