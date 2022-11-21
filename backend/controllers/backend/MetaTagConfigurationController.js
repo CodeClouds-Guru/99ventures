@@ -1,5 +1,8 @@
 const Controller = require("./Controller");
-const { CompanyPortalMetaTag } = require("../../models/index");
+const {
+  CompanyPortalMetaTag,
+  CompanyPortalAdditionalHeader,
+} = require("../../models/index");
 
 class MetaTagConfigurationController extends Controller {
   constructor() {
@@ -16,6 +19,10 @@ class MetaTagConfigurationController extends Controller {
         where: { company_portal_id: site_id },
         attributes: ["id", "tag_name", "tag_content"],
       });
+      let additional_headers = await CompanyPortalAdditionalHeader.findOne({
+        where: { company_portal_id: site_id },
+        attributes: ["id", "tag_content"],
+      });
       var data = [];
       var result = [];
       data = meta_tag_list.map((values) => {
@@ -23,15 +30,15 @@ class MetaTagConfigurationController extends Controller {
           [values.tag_name]: values.tag_content,
         };
       });
-      data = Object.assign({}, ...data)
-
+      data = Object.assign({}, ...data);
+      data.additional_headers = additional_headers;
       // console.log(data);
       return {
         status: true,
-        data:data,
+        data: data,
       };
     } catch (err) {
-      this.throwCustomError('Unable to get data', 500);
+      this.throwCustomError("Unable to get data", 500);
     }
   }
 
@@ -40,6 +47,7 @@ class MetaTagConfigurationController extends Controller {
       const site_id = req.header("site_id") || 1;
       const company_id = req.header("company_id") || 1;
       const meta_update = req.body.meta || "";
+      const header_update = req.body.header_script || null;
 
       await CompanyPortalMetaTag.destroy({
         where: { company_portal_id: site_id },
@@ -56,6 +64,21 @@ class MetaTagConfigurationController extends Controller {
       });
       // console.log(data);
       const company_portal_meta = CompanyPortalMetaTag.bulkCreate(data);
+      console.log(header_update);
+      if (header_update) {
+        await CompanyPortalAdditionalHeader.destroy({
+          where: { company_portal_id: site_id },
+        });
+
+        let header_data = {
+          tag_content: header_update.content,
+          company_portal_id: site_id,
+          created_by: req.user.id,
+        };
+        console.log(header_data);
+        const company_portal_header =
+          CompanyPortalAdditionalHeader.create(header_data);
+      }
 
       if (company_portal_meta) {
         return {
@@ -64,7 +87,7 @@ class MetaTagConfigurationController extends Controller {
         };
       }
     } catch (err) {
-      this.throwCustomError('Unable to save data', 500);
+      this.throwCustomError("Unable to save data", 500);
     }
   }
 }
