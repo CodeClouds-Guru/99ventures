@@ -46,7 +46,7 @@ function ConfigurationContent() {
         const param = {
             created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
         }
-        if (selectedStatus !== '' && selectedStatus !== 'open') {
+        if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
         }
         setWhereClause(param);

@@ -274,7 +274,7 @@ const CreateUpdate = () => {
             slug: Helper.stringToSlug(event.target.value),
             permalink: `${domain}${Helper.stringToSlug(event.target.value)}`
         }));
-        dynamicErrorMsg('name', event.target.value);
+        dynamicErrorMsg('name', event.target.value.trim());
     }
     const createCustomComponentForEditor = (components_val, editor) => {
         components_val.map((val) => {
@@ -318,6 +318,7 @@ const CreateUpdate = () => {
         if (!Object.keys(errors).length) {
             const params = {
                 ...allData,
+                name: allData.name.trim(),
                 layout_id: allData.layout_id,
                 status: allData.status,
                 slug: !allData.slug ? '/' : allData.slug,
@@ -579,7 +580,7 @@ const CreateUpdate = () => {
                                                 maxRows={10}
                                                 aria-label="maximum height"
                                                 placeholder="#Add your external Meta details as needed"
-                                                defaultValue={allData.meta_code}
+                                                value={allData.meta_code}
                                                 style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
                                                 onChange={handleExternalMeta}
                                             />
