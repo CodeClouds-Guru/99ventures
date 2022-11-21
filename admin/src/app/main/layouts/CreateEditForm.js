@@ -133,6 +133,9 @@ const CreateEditForm = (props) => {
             '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n' +
             '${page_meta_code}\n' +
             layoutCode.header.value +
+            '<!-- Additional Script Start-->\n'+
+            '${additional_header_script}\n'+
+            '<!-- Additional Script End -->\n'+
             '\n</head>\n' +
             '<body>' + layoutCode.body.value.map(el => el.code).join(' ') + '</body>\n' +
             '</html>';
@@ -272,7 +275,7 @@ const CreateEditForm = (props) => {
                                         aria-label="maximum height"
                                         placeholder="#Add your external style and script here, e.g., <link rel='stylesheet' href='/style.css' />"
                                         value={layoutCode.header.value}
-                                        style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
+                                        className="custom-code-editor"
                                         onChange={handleHeader}
                                     />
                                 </code>
