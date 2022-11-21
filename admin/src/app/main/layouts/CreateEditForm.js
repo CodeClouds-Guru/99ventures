@@ -131,13 +131,13 @@ const CreateEditForm = (props) => {
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
             '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n' +
             '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n' +
-            '${page_meta_code}\n' +
+            '${page_meta_code}\n\n' +
             layoutCode.header.value +
-            '<!-- Additional Script Start-->\n'+
+            '\n\n<!-- Additional Script Start-->\n'+
             '${additional_header_script}\n'+
             '<!-- Additional Script End -->\n'+
-            '\n</head>\n' +
-            '<body>' + layoutCode.body.value.map(el => el.code).join(' ') + '</body>\n' +
+            '</head>\n' +
+            '<body>\n' + layoutCode.body.value.map(el => el.code).join('\n') + '\n</body>\n' +
             '</html>';
 
         const params = {
