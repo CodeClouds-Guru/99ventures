@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
-import {arrayMoveImmutable} from "array-move";
+import { arrayMoveImmutable } from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { getLayout, setRevisionData } from 'app/store/layout'
@@ -21,15 +21,15 @@ const CreateEditForm = (props) => {
     const dispatch = useDispatch();
     const { moduleId } = useParams();
     const { hasPermission } = usePermission('layouts');
-    const selectRevisionCount = useSelector(state=> state.layout.revisions_count);
+    const selectRevisionCount = useSelector(state => state.layout.revisions_count);
     const selectLayout = useSelector(state => state.layout.layout_data);
-    const [ loading, setLoading ] = useState(false);
-    const [ components, setComponents ] = useState([]);
-    const [ layoutname, setLayoutname ] = useState('');    
-    const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
-    const [ records, setRecords ] = useState({});
-    const [ changeStatus, setChangeStatus ] = useState({name_changed: false, header_changed: false, body_changed: false});
-    const [ layoutCode, setLayoutCode ] = useState({
+    const [loading, setLoading] = useState(false);
+    const [components, setComponents] = useState([]);
+    const [layoutname, setLayoutname] = useState('');
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [records, setRecords] = useState({});
+    const [changeStatus, setChangeStatus] = useState({ name_changed: false, header_changed: false, body_changed: false });
+    const [layoutCode, setLayoutCode] = useState({
         header: {
             value: ''
         },
@@ -40,47 +40,47 @@ const CreateEditForm = (props) => {
             }]
         }
     });
- 
-    useEffect(()=>{
+
+    useEffect(() => {
         getComponents();
         dispatch(setRevisionData([]));
-        if(moduleId !== 'create' && !isNaN(moduleId)){
-            dispatch(getLayout({module_id: moduleId}));
+        if (moduleId !== 'create' && !isNaN(moduleId)) {
+            dispatch(getLayout({ module_id: moduleId }));
         }
     }, []);
 
 
-    useEffect(()=>{
-        if(Object.keys(selectLayout).length && moduleId !== 'create' && !isNaN(moduleId)){
+    useEffect(() => {
+        if (Object.keys(selectLayout).length && moduleId !== 'create' && !isNaN(moduleId)) {
             setRecords(selectLayout);
             setLayoutname(selectLayout.name);
             setLayoutCode(selectLayout.layout_json);
         }
     }, [selectLayout])
-    
+
     /**
      * Components API
      */
     const getComponents = () => {
         axios.post(jwtServiceConfig.layoutsAdd)
-        .then(res => {
-            if(res.data.results.status === true){
-                if(res.data.results.components) {
-                    setComponents(res.data.results.components)
+            .then(res => {
+                if (res.data.results.status === true) {
+                    if (res.data.results.components) {
+                        setComponents(res.data.results.components)
+                    }
                 }
-            }            
-        })
-        .catch(errors => {
-            console.log(errors);
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
-        })
+            })
+            .catch(errors => {
+                console.log(errors);
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+            })
     }
 
     const handleSelectComponent = (e) => {
         const selectedValue = e.target.value;
-        if(selectedValue){
-            const componentCode = components.filter(el=> el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, {name: selectedValue, code: '{{'+componentCode[0].code +'}}' }].map((item) => [item["name"], item])).values()];            
+        if (selectedValue) {
+            const componentCode = components.filter(el => el.name === selectedValue);
+            const uniqueObjArray = [...new Map([...layoutCode.body.value, { name: selectedValue, code: '{{' + componentCode[0].code + '}}' }].map((item) => [item["name"], item])).values()];
             setLayoutCode({
                 ...layoutCode,
                 body: {
@@ -106,7 +106,7 @@ const CreateEditForm = (props) => {
     const formSubmit = (e) => {
         e.preventDefault();
         props.toggleSidebar(false);
-        if(!layoutname) {
+        if (!layoutname.trim()) {
             dispatch(showMessage({ variant: 'error', message: 'Please enter layout name!' }));
             return;
         }
@@ -115,49 +115,49 @@ const CreateEditForm = (props) => {
         /**
          * Confirmation popup will only show when header / body has been changed
          */
-        if((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
+        if ((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
             setOpenAlertDialog(true);
         } else {
             handleLayoutSubmit();
         }
-        
+
     }
 
     const handleLayoutSubmit = () => {
-        const htmlCode = '<html>\n'+
-                '<head>\n'+
-                    '<title>${page_title}</title>\n'+
-                    '<meta charset="UTF-8">\n'+
-                    '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'+
-                    '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n'+
-                    '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n'+
-                    '${page_meta_code}\n'+
-                    layoutCode.header.value+
-                '\n</head>\n'+
-                '<body>'+ layoutCode.body.value.map(el => el.code).join(' ') +'</body>\n'+
+        const htmlCode = '<html>\n' +
+            '<head>\n' +
+            '<title>${page_title}</title>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+            '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n' +
+            '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n' +
+            '${page_meta_code}\n' +
+            layoutCode.header.value +
+            '\n</head>\n' +
+            '<body>' + layoutCode.body.value.map(el => el.code).join(' ') + '</body>\n' +
             '</html>';
 
         const params = {
-            name: layoutname,
+            name: layoutname.trim(),
             html: htmlCode,
             layout_json: layoutCode
         };
-        const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave ;
+        const url = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateLayouts + '/' + moduleId : jwtServiceConfig.layoutsSave;
         setLoading(true);
         axios.post(url, params)
-        .then(res => {
-            if(res.data.results.status === true){
-                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
-                navigate(`/app/layouts`);
-            }
-        })
-        .catch(errors => {
-            console.log(errors);
-            dispatch(showMessage({ variant: 'error', message: errors.response.data.message }));
-        })
-        .finally(() => {
-            setLoading(false)
-        });
+            .then(res => {
+                if (res.data.results.status === true) {
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                    navigate(`/app/layouts`);
+                }
+            })
+            .catch(errors => {
+                console.log(errors);
+                dispatch(showMessage({ variant: 'error', message: errors.response.data.message }));
+            })
+            .finally(() => {
+                setLoading(false)
+            });
     }
 
     /**
@@ -189,10 +189,10 @@ const CreateEditForm = (props) => {
     const handleSetLayoutName = (e) => {
         setLayoutname(e.target.value);
 
-        if((moduleId !== 'create' && !isNaN(moduleId) && records.name !== e.target.value) || (moduleId === 'create' && e.target.value)) {
-            setChangeStatus({...changeStatus, name_changed: true});
+        if ((moduleId !== 'create' && !isNaN(moduleId) && records.name !== e.target.value) || (moduleId === 'create' && e.target.value.trim())) {
+            setChangeStatus({ ...changeStatus, name_changed: true });
         } else {
-            setChangeStatus({...changeStatus, name_changed: false});
+            setChangeStatus({ ...changeStatus, name_changed: false });
         }
     }
 
@@ -203,10 +203,10 @@ const CreateEditForm = (props) => {
                 value: e.target.value
             }
         });
-        if((records.layout_json && records.layout_json.header.value !== e.target.value) || (moduleId === 'create' && e.target.value)){
-            setChangeStatus({...changeStatus, header_changed: true});
+        if ((records.layout_json && records.layout_json.header.value !== e.target.value) || (moduleId === 'create' && e.target.value)) {
+            setChangeStatus({ ...changeStatus, header_changed: true });
         } else {
-            setChangeStatus({...changeStatus, header_changed: false});
+            setChangeStatus({ ...changeStatus, header_changed: false });
         }
     }
 
@@ -216,39 +216,39 @@ const CreateEditForm = (props) => {
     const handleResetLayout = () => {
         setLayoutname(records.name);
         setLayoutCode(records.layout_json);
-        setChangeStatus({name_changed: false, header_changed: false, body_changed: false});
+        setChangeStatus({ name_changed: false, header_changed: false, body_changed: false });
     }
 
     /**
      * To determine whether the layout body has been modified or not
      */
-    useEffect(()=>{
-        if(Object.keys(records).length && JSON.stringify(records.layout_json.body) !== JSON.stringify(layoutCode.body)) {
-            setChangeStatus({...changeStatus, body_changed: true});
+    useEffect(() => {
+        if (Object.keys(records).length && JSON.stringify(records.layout_json.body) !== JSON.stringify(layoutCode.body)) {
+            setChangeStatus({ ...changeStatus, body_changed: true });
         } else {
-            setChangeStatus({...changeStatus, body_changed: false});
+            setChangeStatus({ ...changeStatus, body_changed: false });
         }
 
     }, [layoutCode.body, records]);
- 
+
 
     return (
         <Box className="p-32" >
-            <form onSubmit={ formSubmit }>
+            <form onSubmit={formSubmit}>
                 <div className='flex mb-24 justify-between'>
                     <FormControl className="w-1/2">
                         <TextField
                             id="outlined-name"
                             label="Layout Name"
-                            value={ layoutname }
-                            onChange={ handleSetLayoutName }
+                            value={layoutname}
+                            onChange={handleSetLayoutName}
                         />
                     </FormControl>
                     {
                         (selectRevisionCount > 0) && (
                             <div>
                                 <Tooltip title="Show History">
-                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>props.toggleSidebar(true) }>
+                                    <IconButton size="small" color="primary" aria-label="History" component="label" onClick={() => props.toggleSidebar(true)}>
                                         <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                     </IconButton>
                                 </Tooltip>
@@ -268,12 +268,12 @@ const CreateEditForm = (props) => {
                             <pre>
                                 <code>
                                     <TextareaAutosize
-                                        maxRows={ 10 }
+                                        maxRows={10}
                                         aria-label="maximum height"
                                         placeholder="#Add your external style and script here, e.g., <link rel='stylesheet' href='/style.css' />"
-                                        defaultValue={ layoutCode.header.value }
-                                        style={{minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
-                                        onChange={ handleHeader }
+                                        value={layoutCode.header.value}
+                                        style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
+                                        onChange={handleHeader}
                                     />
                                 </code>
                             </pre>
@@ -291,45 +291,45 @@ const CreateEditForm = (props) => {
                                     labelId="select-component-label"
                                     id="select-component"
                                     label="Select Component"
-                                    onChange={ handleSelectComponent }
+                                    onChange={handleSelectComponent}
                                     defaultValue=""
-                                    >
-                                        <MenuItem value="">Select</MenuItem>
-                                        {
-                                            components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{ el.name }</MenuItem>)
-                                        }
-                                    
+                                >
+                                    <MenuItem value="">Select</MenuItem>
+                                    {
+                                        components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{el.name}</MenuItem>)
+                                    }
+
                                 </Select>
                             </FormControl>
                             <List
-                                sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}                        
-                                >
-                                    <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                        {
-                                            layoutCode.body.value.map((el, indx) => {
-                                                return(
-                                                    <Draggable key={indx}>
-                                                        <ListItem>
-                                                            <ListItemIcon className="drag-handle">
-                                                                <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
-                                                                    <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
+                                sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}
+                            >
+                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                    {
+                                        layoutCode.body.value.map((el, indx) => {
+                                            return (
+                                                <Draggable key={indx}>
+                                                    <ListItem>
+                                                        <ListItemIcon className="drag-handle">
+                                                            <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
+                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
+                                                            </IconButton>
+                                                        </ListItemIcon>
+                                                        <ListItemText id="switch-list-label-wifi" primary={el.name} />
+                                                        {
+                                                            el.name !== 'Content' && (
+                                                                <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
+                                                                    <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                 </IconButton>
-                                                            </ListItemIcon>
-                                                            <ListItemText id="switch-list-label-wifi" primary={ el.name } />
-                                                            {
-                                                                el.name !== 'Content' && (
-                                                                    <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
-                                                                        <FuseSvgIcon  className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
-                                                                    </IconButton>
-                                                                )
-                                                            }                                                    
-                                                        </ListItem>
-                                                        <Divider variant="inset" component="li" className="ml-12" />
-                                                    </Draggable> 
-                                                )
-                                            })
-                                        }
-                                    </Container>
+                                                            )
+                                                        }
+                                                    </ListItem>
+                                                    <Divider variant="inset" component="li" className="ml-12" />
+                                                </Draggable>
+                                            )
+                                        })
+                                    }
+                                </Container>
                             </List>
                         </div>
                     </fieldset>
@@ -345,14 +345,14 @@ const CreateEditForm = (props) => {
                                 className="whitespace-nowrap mx-4"
                                 variant="contained"
                                 color="primary"
-                                onClick={ handleResetLayout }
-                                disabled={ Object.values(changeStatus).includes(true) ? false : true }
+                                onClick={handleResetLayout}
+                                disabled={Object.values(changeStatus).includes(true) ? false : true}
                             >
                                 Reset
                             </Button>
                         )
                     }
-                    
+
                     {
                         (hasPermission('save') || hasPermission('update')) && (
                             <LoadingButton
@@ -361,13 +361,13 @@ const CreateEditForm = (props) => {
                                 aria-label="Register"
                                 type="submit"
                                 loading={loading}
-                                disabled={ Object.values(changeStatus).includes(true) ? false : true }
+                                disabled={Object.values(changeStatus).includes(true) ? false : true}
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
                         )
                     }
-                    
+
                     <Button
                         className="whitespace-nowrap mx-4"
                         variant="contained"
@@ -378,7 +378,7 @@ const CreateEditForm = (props) => {
                     >
                         Cancel
                     </Button>
-                    
+
                 </motion.div>
             </form>
             <AlertDialog
