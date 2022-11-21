@@ -32,14 +32,14 @@ const CreateUpdate = (props) => {
     const [changeCount, setChangeCount] = useState(0);
     const [msg, setMsg] = useState('');
     const [alertFor, setAlertFor] = useState('');
-    const selectRevisionCount = useSelector(state=> state.components.revisions_count);
+    const selectRevisionCount = useSelector(state => state.components.revisions_count);
     const [allData, setAllData] = useState({
         name: '',
         html: '',
         component_json: ''
     });
 
-    
+
     useEffect(() => {
         dispatch(setRevisionData([]));
         const editor = grapesjs.init({
@@ -94,7 +94,7 @@ const CreateUpdate = (props) => {
                 },
             }
         });
-        
+
         setEditor(editor);
 
         const pfx = editor.getConfig().stylePrefix
@@ -230,11 +230,11 @@ const CreateUpdate = (props) => {
     }
 
     const getSingleRecordById = (id, editor) => {
-        dispatch(getComponentData({module_id: id}))
+        dispatch(getComponentData({ module_id: id }))
     }
 
-    useEffect(()=>{
-        if(Object.keys(editor).length && Object.keys(selectComponentData).length && moduleId !== 'create' && !isNaN(moduleId)){
+    useEffect(() => {
+        if (Object.keys(editor).length && Object.keys(selectComponentData).length && moduleId !== 'create' && !isNaN(moduleId)) {
             setAllData(allData => ({
                 ...allData,
                 name: selectComponentData.name,
@@ -254,7 +254,7 @@ const CreateUpdate = (props) => {
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match( reg )[1];
+            const htmlData = editor.getHtml().match(reg)[1];
             generatedHTML +=
                 `<section>
                     ${css}
@@ -279,7 +279,7 @@ const CreateUpdate = (props) => {
         setAllData(allData => ({
             ...allData, name: event.target.value
         }));
-        dynamicErrorMsg('name', event.target.value);
+        dynamicErrorMsg('name', event.target.value.trim());
     }
 
     const onSubmit = () => {
@@ -307,10 +307,11 @@ const CreateUpdate = (props) => {
             const params = {
                 ...allData,
                 html: generatedHTMLValue(editor),
-                component_json: editorJsonBody
+                component_json: editorJsonBody,
+                name: allData.name.trim()
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateComponents + `/${moduleId}` : jwtServiceConfig.saveComponents;
-            
+
             setLoading(true);
             axios.post(endPoint, params)
                 .then((response) => {
@@ -368,12 +369,12 @@ const CreateUpdate = (props) => {
         * Submit the form
      */
     const onConfirmAlertDialogHandle = () => {
-        if(alertFor === 'cancel'){
+        if (alertFor === 'cancel') {
             localStorage.removeItem(storageKey);
             setChangeCount(0);
             setOpenAlertDialog(true);
             navigate(`/app/${module}`);
-        } else if(alertFor === 'update') {
+        } else if (alertFor === 'update') {
             handleFormSubmit();
         }
     }
@@ -401,7 +402,7 @@ const CreateUpdate = (props) => {
                                 (selectRevisionCount > 0) && (
                                     <div>
                                         <Tooltip title="Show History">
-                                            <IconButton size="small" color="primary" aria-label="History" component="label" onClick={ ()=>props.toggleSidebar(true) }>
+                                            <IconButton size="small" color="primary" aria-label="History" component="label" onClick={() => props.toggleSidebar(true)}>
                                                 <FuseSvgIcon className="text-48" size={24} color="action">feather:git-branch</FuseSvgIcon>
                                             </IconButton>
                                         </Tooltip>
@@ -426,7 +427,7 @@ const CreateUpdate = (props) => {
                                 type="submit"
                                 loading={loading}
                                 onClick={onSubmit}
-                                disabled={ (Object.values(errors).length || !allData.name || (changeCount < 1 && selectComponentData.name === allData.name)) ? true : false}
+                                disabled={(Object.values(errors).length || !allData.name || (changeCount < 1 && selectComponentData.name === allData.name)) ? true : false}
                             >
                                 {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
@@ -443,7 +444,7 @@ const CreateUpdate = (props) => {
                 </Paper>
             </div>
             <AlertDialog
-                content={ msg }
+                content={msg}
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={onCloseAlertDialogHandle}

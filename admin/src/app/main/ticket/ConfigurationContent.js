@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 function ConfigurationContent() {
     const user = useSelector(selectUser);
     const unreadTicketCount = user.unread_tickets;
-    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [selectedStatus, setSelectedStatus] = useState('open');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
@@ -23,7 +23,7 @@ function ConfigurationContent() {
     const toggle = () => setOpen(!open);
 
     const clearFilter = () => {
-        setSelectedStatus('')
+        setSelectedStatus('open')
         setDateRange({
             startDate: moment().subtract(7, 'd').startOf('day'),
             endDate: moment(),

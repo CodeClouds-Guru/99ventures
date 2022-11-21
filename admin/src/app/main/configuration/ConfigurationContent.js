@@ -72,7 +72,7 @@ const tabs = [
         module: 'paymentconfigurations'
     },
     {
-        name: "Meta Tags Configuration",
+        name: "Header Configuration",
         component: MetatagConfiguration,
         module: 'metatagconfigurations'
     },

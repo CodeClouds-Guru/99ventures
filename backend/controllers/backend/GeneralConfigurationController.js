@@ -38,6 +38,7 @@ class GeneralConfigurationController {
       const layout_options = await Layout.findAll({
         attributes: ["id", "name"],
         where: {
+          company_portal_id: site_id,
           code: {
             [Op.notLike]: "%-rev-%",
           },

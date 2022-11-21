@@ -106,9 +106,23 @@ const Header = (props) => {
         return;
     }
 
+    /**
+     * 
+     * File sorting only
+     */
     const sortingFiles = (column, sortType) => {
-        const result = orderBy(listing, [column], [sortType]);
-        dispatch(setListData(result));
+        const fileData = [];
+        const folderData = [];
+
+        listing.map(el => {
+            if(el.type === 'file') 
+                fileData.push(el);
+            else 
+                folderData.push(el);
+        })
+        
+        const result = orderBy(fileData, [column], [sortType]);
+        dispatch(setListData([...folderData, ...result]));
         handleMenuClose();
     }
 
@@ -144,7 +158,7 @@ const Header = (props) => {
                         )
                     }
                 </div>
-                <div className="flex " variant="outlined">
+                <div className="flex lg:w-400 " variant="outlined">
                     {props.search}
                 </div>
                 <div className='flex'>

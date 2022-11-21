@@ -313,6 +313,7 @@ class TicketController extends Controller {
           throw errorObj;
       }
     } catch (error) {
+      console.error(error);
       this.throwCustomError("Unable to get data", 500);
     } finally {
       if (change)
@@ -342,9 +343,8 @@ class TicketController extends Controller {
     const ticket_id = req.body.id || null;
     const member_id = req.body.member_id || null;
     const user_id = req.body.user_id || null;
-    const attachments = req.files ? req.files.attachments : [];
+    const attachments = req.files ? req.files.attachments : null;
 
-    // console.log(req, "--------------");
     try {
       const data = {
         ticket_id: ticket_id,
@@ -354,8 +354,7 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-      // console.log('---------------------TicketConversation',savedTicketConversation)
-      // console.log('---------------------attachments',attachments)
+      
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
