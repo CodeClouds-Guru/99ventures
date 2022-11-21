@@ -248,10 +248,10 @@ const CreateUpdate = () => {
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
             const htmlData = editor.getHtml().match(reg)[1];
             generatedHTML +=
-                `<section>
+                `<main>
                     ${css}
                     ${htmlData}            
-                </section>`;
+                </main>`;
         }
         return generatedHTML;
     }

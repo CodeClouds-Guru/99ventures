@@ -5,11 +5,11 @@
     margin: 6px 0;
 }
 .permission--section .uncategorized--accordian{cursor: auto !important;}
-.custom-code-editor{
+textarea.custom-code-editor{
     height: 200px !important; 
     width: 100%; 
     padding: 15px; 
     background-color: #000; 
     color: #ffeeba; 
 }
-.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
+textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
