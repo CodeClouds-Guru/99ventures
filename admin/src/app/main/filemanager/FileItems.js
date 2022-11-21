@@ -30,7 +30,7 @@ const modalStyle = {
  */
 const style = {
     grid: {
-        box: 'sm:w-136 h-136 flex-col p-16',
+        box: 'sm:w-128 md:w-136 h-136 flex-col p-16',
         icon_btn: 'absolute',
         nav_icon_adapter: 'flex-col',
         icon: 'flex-auto w-full justify-center',
