@@ -106,9 +106,23 @@ const Header = (props) => {
         return;
     }
 
+    /**
+     * 
+     * File sorting only
+     */
     const sortingFiles = (column, sortType) => {
-        const result = orderBy(listing, [column], [sortType]);
-        dispatch(setListData(result));
+        const fileData = [];
+        const folderData = [];
+
+        listing.map(el => {
+            if(el.type === 'file') 
+                fileData.push(el);
+            else 
+                folderData.push(el);
+        })
+        
+        const result = orderBy(fileData, [column], [sortType]);
+        dispatch(setListData([...folderData, ...result]));
         handleMenuClose();
     }
 
