@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     meta_code: DataTypes.TEXT,
     keywords: DataTypes.STRING,
     descriptions: DataTypes.TEXT,
+    auth_required: DataTypes.TINYINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -58,7 +59,8 @@ module.exports = (sequelize, DataTypes) => {
       keywords: Joi.optional().allow('').label('Keywords'),
       descriptions: Joi.optional().allow('').label('Descriptions'),
       meta_code: Joi.optional().allow('').label('Meta Code'),
-      layout_id: Joi.required().label('Layout ID')
+      layout_id: Joi.required().label('Layout ID'),
+      auth_required: Joi.optional().allow('').label('Auth required'),
     })
     return schema.validate(req.body)
   }
@@ -147,6 +149,19 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'layout_json',
       type: 'text',
       placeholder: 'JSON',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    auth_required: {
+      field_name: 'auth_required',
+      db_name: 'auth_required',
+      type: 'text',
+      placeholder: 'Auth Required',
       listing: false,
       show_in_form: true,
       sort: true,
