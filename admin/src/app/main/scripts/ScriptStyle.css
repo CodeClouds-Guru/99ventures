@@ -23,15 +23,18 @@
 .gjs-pn-views{border-bottom: 0;}
 /* .gjs-mdl-container{position: absolute; width: 100%; left: 280px; bottom: auto; right: auto; -webkit-transform: translate(-50%, 0%); transform: translate(-50%, 0%);} */
 /* .gjs-mdl-dialog{width: 100%; margin: 0 auto;} */
-.gjs-pn-views-container{padding: 2px 0 0; margin: 40px 0 0; height: calc(100% - 40px);} 
+/* .gjs-pn-views-container{padding: 2px 0 0; margin: 40px 0 0; height: calc(100% - 40px);}  */
+.gjs-pn-panel.gjs-pn-options.gjs-one-bg.gjs-two-color{z-index: 9;}
 @media only screen and (max-width: 1360px) {
-    .gjs-pn-views{width: 18%;}
-    .gjs-pn-options{right: 18%;}
+    .gjs-pn-views{width: 20%;}
+    .gjs-pn-options{right: 20%;}
     .gjs-pn-views-container{width: 20%;}
     .gjs-cv-canvas{width: 80%;}
     .gjs-mdl-dialog{max-width: 700px;width: 100%;}
 } 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 768px) {
+    .gjs-pn-views-container{width: 25%;}
+    .gjs-cv-canvas{width: 75%;}
     .gjs-mdl-dialog{width: 90%; margin: auto;}
 }
 .gjs-editor, .gjs-block-label, .gjs-clm-tags, .gjs-sm-properties, .gjs-layer, .gjs-trt-traits{font-size: 0.9rem !important;}
