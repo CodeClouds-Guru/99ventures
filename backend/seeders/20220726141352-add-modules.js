@@ -138,7 +138,7 @@ const modules = [
   {
     slug: 'scripts',
     name: 'Scripts',
-    parent_module: null,
+    parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -147,7 +147,7 @@ const modules = [
   {
     slug: 'filemanager',
     name: 'File Manager',
-    parent_module: null,
+    parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -165,7 +165,7 @@ const modules = [
   {
     slug: 'settings',
     name: 'Settings',
-    parent_module: 'Administrations',
+    parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
