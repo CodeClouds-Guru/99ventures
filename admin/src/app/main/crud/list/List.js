@@ -340,7 +340,6 @@ function List(props) {
                                     <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} /> :
                                     processFieldValue(n[field.field_name], field)
                                 }
-                                {/* {module === 'pages' && field.field_name === 'auth_required' && processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} */}
                               </TableCell>
                             </Fragment>
                           })}
