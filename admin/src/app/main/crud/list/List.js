@@ -336,9 +336,11 @@ function List(props) {
                               <TableCell className="p-4 md:p-16" component="th" scope="row">
                                 {module === 'tickets' && field.field_name === 'status' ?
                                   <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
-                                  :
-                                  processFieldValue(n[field.field_name], field)
+                                  : module === 'pages' && field.field_name === 'auth_required' ?
+                                    <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} /> :
+                                    processFieldValue(n[field.field_name], field)
                                 }
+                                {/* {module === 'pages' && field.field_name === 'auth_required' && processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} */}
                               </TableCell>
                             </Fragment>
                           })}

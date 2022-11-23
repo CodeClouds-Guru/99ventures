@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Typography, FormControl, TextField, Paper, FormHelperText, InputLabel, Button, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, TextareaAutosize } from '@mui/material';
+import { Typography, FormControl, TextField, Paper, FormHelperText, InputLabel, Button, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, TextareaAutosize, FormGroup, FormControlLabel, Switch } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -39,6 +39,7 @@ const CreateUpdate = () => {
         setExpanded(newExpanded ? panel : false);
     };
     const [allData, setAllData] = useState({
+        auth_required: false,
         layout_id: 0,
         status: 'pending',
         name: '',
@@ -325,6 +326,7 @@ const CreateUpdate = () => {
                 permalink: allData.permalink,
                 html: generatedHTMLValue(editor),
                 page_json: editorJsonBody,
+                auth_required: allData.auth_required ? 1 : 0
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updatePages + `/${moduleId}` : jwtServiceConfig.savePages;
 
@@ -371,7 +373,8 @@ const CreateUpdate = () => {
                         page_json: record.page_json,
                         keywords: record.keywords,
                         descriptions: record.descriptions,
-                        meta_code: record.meta_code
+                        meta_code: record.meta_code,
+                        auth_required: !!record.auth_required,
                     }));
                     createCustomComponentForEditor(response.data.results.fields.components.options, editor);
                     editor.loadProjectData(record.page_json);
@@ -386,7 +389,6 @@ const CreateUpdate = () => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-
     /**
      * Cancel and go back to list page
      * If editor changes have been made then show the alert dialog.
@@ -453,6 +455,12 @@ const CreateUpdate = () => {
             meta_code: event.target.value,
         });
     };
+    const handleAuthRequired = (event) => {
+        setAllData({
+            ...allData,
+            auth_required: event.target.checked,
+        });
+    }
     return (
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
@@ -460,6 +468,20 @@ const CreateUpdate = () => {
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
                         <div className="flex justify-end">
                             <FormControl className="w-2/12 mb-0 pr-10">
+                                <FormGroup aria-label="position" row>
+                                    <FormControlLabel
+                                        value="top"
+                                        control={<Switch
+                                            className="mb-24"
+                                            checked={allData.auth_required}
+                                            onChange={handleAuthRequired}
+                                        />}
+                                        label="Authenticable"
+                                        labelPlacement="top"
+                                    />
+                                </FormGroup>
+                            </FormControl>
+                            <FormControl className="w-2/12 mb-0 px-10">
                                 <InputLabel id="demo-simple-select-label">Layout</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
@@ -580,7 +602,7 @@ const CreateUpdate = () => {
                                                 maxRows={10}
                                                 aria-label="maximum height"
                                                 placeholder="#Add your external Meta details as needed"
-                                                value={allData.meta_code}
+                                                value={allData.meta_code ? allData.meta_code : ''}
                                                 style={{ minHeight: '80px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
                                                 onChange={handleExternalMeta}
                                             />
