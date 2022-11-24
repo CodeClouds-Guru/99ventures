@@ -78,11 +78,18 @@ exports.cartesian = (...a) =>
   a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())))
 
 exports.replaceAllWithReplacements = (str, replacements) => {
-    var replacedString = str;
-    const find = Object.keys(replacements)
-    const replace = Object.values(replacements)
-    for (var i = 0; i < find.length; i++) {
-      replacedString = replacedString.replaceAll(find[i], replace[i]);
-    }
-    return replacedString;
+  var replacedString = str;
+  const find = Object.keys(replacements)
+  const replace = Object.values(replacements)
+  for (var i = 0; i < find.length; i++) {
+    replacedString = replacedString.replaceAll(find[i], replace[i]);
+  }
+  return replacedString;
+}
+
+exports.createCommentSignature = (code) => {
+  return {
+    'start': `<!-- ${code} starts -->`,
+    'end': `<!-- ${code} ends -->`
+  }
 }
