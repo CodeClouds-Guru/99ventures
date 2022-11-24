@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const sequelizePaginate = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -46,6 +47,11 @@ module.exports = (sequelize, DataTypes) => {
       created_at: "TIMESTAMP",
       updated_at: "TIMESTAMP",
       deleted_at: "TIMESTAMP",
+      avatar: DataTypes.STRING,
+      referral_code: DataTypes.STRING,
+      address_1: DataTypes.STRING,
+      address_2: DataTypes.STRING,
+      address_3: DataTypes.STRING,
     },
     {
       sequelize,
@@ -58,7 +64,115 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "members",
     }
   );
+  
+  Member.fields = {
+    id: {
+      field_name: "id",
+      db_name: "id",
+      type: "text",
+      placeholder: "Id",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    first_name: {
+      field_name: "first_name",
+      db_name: "first_name",
+      type: "text",
+      placeholder: "First Name",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    last_name: {
+      field_name: "last_name",
+      db_name: "last_name",
+      type: "text",
+      placeholder: "Last Name",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    username: {
+      field_name: "username",
+      db_name: "username",
+      type: "text",
+      placeholder: "User Name",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    email: {
+      field_name: "email",
+      db_name: "email",
+      type: "text",
+      placeholder: "Email",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    status: {
+      field_name: "status",
+      db_name: "status",
+      type: "text",
+      placeholder: "Status",
+      listing: true,
+      show_in_form: false,
+      sort: false,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    phone_no: {
+      field_name: "phone_no",
+      db_name: "phone_no",
+      type: "text",
+      placeholder: "Phone No",
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+    created_at: {
+      field_name: "created_at",
+      db_name: "created_at",
+      type: "text",
+      placeholder: "Created at",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
+  };
 
+  sequelizePaginate.paginate(Member);
   Member.changeStatus = async (field_name, val, id) => {
     let update_data = {
       [field_name]: val,

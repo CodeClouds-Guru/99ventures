@@ -6,6 +6,7 @@ const {
   Permission,
   sequelize,
 } = require("../../models/index");
+const { Op } = require("sequelize");
 const queryInterface = sequelize.getQueryInterface();
 class RoleController extends Controller {
   constructor() {
@@ -29,7 +30,6 @@ class RoleController extends Controller {
           name: role_permission.name,
         };
       });
-
       //actions
       let all_actions = await Action.findAll({
         attributes: ["id", "name", "slug", "parent_action"],
@@ -57,6 +57,11 @@ class RoleController extends Controller {
       //modules
       let all_modules = await Module.findAll({
         attributes: ["id", "name", "slug", "parent_module"],
+        where: {
+          id: {
+            [Op.notIn]: [3, 4, 5, 7, 8],
+          },
+        },
         order: ["name"],
       });
 
@@ -87,7 +92,7 @@ class RoleController extends Controller {
   async update(req, res) {
     let role_details = await this.model.findByPk(req.params.id);
     let module_data = req.body.role_permissions || [];
-    
+
     const types = ["all", "group", "owner"];
 
     let all_actions = await Action.findAll({
@@ -106,12 +111,11 @@ class RoleController extends Controller {
     let keys = Object.keys(module_data);
     let selected_permissions = [];
     keys.map((key) => {
-    for (let i = 0; i < module_data[key].length; i++) {
-     
-      for (let j = 0; j < module_data[key][i].action.length; j++) {
-        // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
+      for (let i = 0; i < module_data[key].length; i++) {
+        for (let j = 0; j < module_data[key][i].action.length; j++) {
+          // Object.entries(module_data[key][i].action[j]).find(([key, value]) => {
           if (module_data[key][i].action.length > 0) {
-            let action_key = module_data[key][i].action[j]
+            let action_key = module_data[key][i].action[j];
             for (let k = 0; k < actions_in_group[action_key].length; k++) {
               for (let l = 0; l < types.length; l++) {
                 selected_permissions.push(
@@ -124,11 +128,11 @@ class RoleController extends Controller {
               }
             }
           }
-        // });
+          // });
+        }
       }
-    }
-  });
-  // console.log("================selected_permissions", selected_permissions);
+    });
+    // console.log("================selected_permissions", selected_permissions);
     req.body.role_permissions = selected_permissions;
     if (role_details) {
       if (req.body.requestType == "apply-permission") {
@@ -200,7 +204,7 @@ class RoleController extends Controller {
         }
 
         let keys = Object.keys(result);
-        
+
         if (keys.length > 0 && keys.includes(curr_parent_data)) {
           result[curr_parent_data].push({
             id: all_action.id,
@@ -221,7 +225,6 @@ class RoleController extends Controller {
             },
           ];
         }
-        
       });
     }
     return result;
