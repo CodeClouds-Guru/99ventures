@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('member_security_informations', {
+    await queryInterface.createTable('member_payment_informations', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,20 +12,17 @@ module.exports = {
       member_id: {
         type: Sequelize.BIGINT
       },
-      geo_location: {
+      payment_method_id: {
+        type: Sequelize.BIGINT
+      },
+      name: {
         type: Sequelize.STRING
       },
-      ip: {
+      value: {
         type: Sequelize.STRING
       },
-      isp: {
-        type: Sequelize.STRING
-      },
-      browser: {
-        type: Sequelize.STRING
-      },
-      browser_language: {
-        type: Sequelize.STRING
+      status: {
+        type: Sequelize.TINYINT
       },
       created_by: {
         type: Sequelize.BIGINT
@@ -47,9 +44,8 @@ module.exports = {
         type: "TIMESTAMP",
       }
     });
-    
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('member_security_informations');
+    await queryInterface.dropTable('member_payment_informations');
   }
 };
