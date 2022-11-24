@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('member_security_informations', {
+    await queryInterface.createTable('member_activity_logs', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,29 +12,18 @@ module.exports = {
       member_id: {
         type: Sequelize.BIGINT
       },
-      geo_location: {
-        type: Sequelize.STRING
-      },
-      ip: {
-        type: Sequelize.STRING
-      },
-      isp: {
-        type: Sequelize.STRING
-      },
-      browser: {
-        type: Sequelize.STRING
-      },
-      browser_language: {
+      action: {
         type: Sequelize.STRING
       },
       created_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       updated_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       deleted_by: {
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       created_at: {
         type: "TIMESTAMP",
@@ -45,11 +34,10 @@ module.exports = {
       },
       deleted_at: {
         type: "TIMESTAMP",
-      }
+      },
     });
-    
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('member_security_informations');
+    await queryInterface.dropTable('member_activity_logs');
   }
 };
