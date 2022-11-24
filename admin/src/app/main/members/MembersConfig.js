@@ -28,7 +28,7 @@ const UserConfig = {
     },
     routes: [
         {
-            path: 'app/users/:moduleId',
+            path: 'app/members/:moduleId',
             element: <Index />,
             auth: settingsConfig.defaultAuth
         },

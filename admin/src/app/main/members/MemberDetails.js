@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import { useParams, useNavigate } from 'react-router-dom';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
+import axios from 'axios'
 
 
 const buttonStyle = {
@@ -28,25 +31,55 @@ const labelStyling = {
 } 
 
 const MemberDetails = () => {
+    const { moduleId } = useParams();
     const [ editMode, setEditMode ] = useState(false);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
     const [ alertType, setAlertType ] = useState('');
     const [ msg, setMsg ] = useState('');
+    const [ memberData, setMemberData ] = useState({});
 
 
-    const onOpenAlertDialogHandle = () => {
+    const onOpenAlertDialogHandle = (type) => {
+        var msg = '';
+        if(type === 'delete')
+            msg = 'Do you want to delete your account?';
+        else if(type === 'save_profile')
+            msg = 'Do you want to save changes?';
         
+
+        setMsg(msg);
         setOpenAlertDialog(true);
     }
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        setMsg('');
     }
   
-    const onConfirmAlertDialogHandle = async () => {        
-        
-        
+    const onConfirmAlertDialogHandle = async () => {
+                
     }
+
+    /**
+     * Get Member Details
+     */
+     const getMemberData = () => {
+        axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
+            .then(res => {
+                console.log(res.data.results.result)
+                if (res.data.results.result) {
+                    setMemberData(res.data.results.result)
+                }
+            })
+            .catch(errors => {
+                console.log(errors);
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+            })
+    }
+
+    useEffect(()=>{
+        getMemberData();
+    }, [])
 
 
     return (
@@ -65,7 +98,7 @@ const MemberDetails = () => {
                                     fontSize: '2.5rem'
                                 }
                             }}
-                        ><strong>Username</strong> </Typography>
+                        ><strong>{memberData.username}</strong> </Typography>
                         {
                             !editMode ? (
                                 <Tooltip title="Click to edit" placement="top-start">
@@ -93,14 +126,14 @@ const MemberDetails = () => {
                                     height: 60,                                    
                                 },
                                 '@media screen and (max-width: 1300px)': {
-                                    width: 80, 
-                                    height: 80,                                    
+                                    width: 120,
+                                    height: 120,                                    
                                 }
                         }}>SD</Avatar>
                         {
                             editMode && (
                                 <IconButton color="primary" aria-label="Filter" component="div" sx={{position: 'absolute', top: '80px', left: '70%'}}>
-                                    <FuseSvgIcon className="text-48" size={22} color="light">heroicons-outline:camera</FuseSvgIcon>
+                                    <FuseSvgIcon className="text-48" size={22} color="primary">heroicons-outline:camera</FuseSvgIcon>
                                 </IconButton>
                             )
                         }
@@ -112,19 +145,7 @@ const MemberDetails = () => {
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <>
-                            {
-                                editMode ? (
-                                    <TextField
-                                        id="standard-helperText"                                
-                                        defaultValue="Default Value"                                
-                                        variant="standard"
-                                    />
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">123456</Typography>
-                                )
-                            }
-                            </>
+                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.id }</Typography>
                         }/>
                     </ListItem>
                     <ListItem disablePadding>
@@ -161,7 +182,7 @@ const MemberDetails = () => {
                                         variant="standard"
                                     />
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">XXXXXX XXXXXX</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name}</Typography>
                                 )
                             }
                             </>                            
@@ -269,7 +290,7 @@ const MemberDetails = () => {
 
                 <div>
                     <Typography variant="body1">Login as this account</Typography>
-                    <Button variant="text" color="error" size="small">DELETE ACCOUNT</Button>
+                    <Button variant="text" color="error" size="small" onClick={ ()=>onOpenAlertDialogHandle('delete') }>DELETE ACCOUNT</Button>
                 </div>
             </div>
             <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-20 xl:24" />
@@ -463,7 +484,7 @@ const MemberDetails = () => {
                 </div>
             </div>
             <AlertDialog
-                content="hello"
+                content={ msg }
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={onCloseAlertDialogHandle}
