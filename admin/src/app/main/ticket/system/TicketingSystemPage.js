@@ -53,13 +53,19 @@ function TicketingSystemPage(props) {
         if (files && Object.keys(files).length <= 4) {
             var allowed_files = [];
             Object.values(files).map((val, key) => {
-                var parts = val.name.split(".");
-                const file_type = parts[parts.length - 1];
-                ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
-                    ? allowed_files.push(val) : dispatch(showMessage({
-                        variant: 'error', message
-                            : `File type ${file_type} is not allowed for ${val.name}`
-                    }));
+                if (val.size <= 2048) {
+                    var parts = val.name.split(".");
+                    const file_type = parts[parts.length - 1];
+                    ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
+                        ? allowed_files.push(val) : dispatch(showMessage({
+                            variant: 'error', message
+                                : `File type ${file_type} is not allowed for ${val.name}`
+                        }));
+                } else {
+                    dispatch(showMessage({
+                        variant: 'error', message: `File size allowed upto 2MB`
+                    }))
+                }
             })
             // setInputFiles(allowed_files);
             setInputFiles(allowed_files.map(file => Object.assign(file, {
@@ -132,7 +138,6 @@ function TicketingSystemPage(props) {
         setQuickResponse('');
     }
     const handleOpenPreview = (file) => {
-        console.log(file);
         dispatch(setlightBoxStatus({ isOpen: true, src: file }));
     }
     const getTicketDetails = () => {
@@ -357,7 +362,7 @@ function TicketingSystemPage(props) {
                                                 multiple
                                                 accept="image/jpg, image/jpeg, image/png, image/gif, image/JPG, image/JPEG, image/PNG, image/GIF"
                                             />
-                                            <Tooltip title="Attach upto 4 files" placement="left">
+                                            <Tooltip title="Attach upto 4 files (Max Filesize 2MB each)" placement="left">
                                                 <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
