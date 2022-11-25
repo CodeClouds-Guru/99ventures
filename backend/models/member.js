@@ -1,6 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
+const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -25,6 +26,24 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
+  Member.validate = function (req) {
+    const schema = Joi.object({
+      first_name: Joi.string().required().label("First Name"),
+      last_name: Joi.string().required().label("Last Name"),
+      email: Joi.string().email().required().label("Email"),
+      username: Joi.string().min(3).max(30).required().label("Username"),
+      password: Joi.string().allow("").optional(),
+      phone_no: Joi.string().allow("").optional().label("Phone No"),
+      country_id: Joi.string().allow("").optional().label("Country"),
+      address_1: Joi.string().allow("").optional().label("Address 1"),
+      address_2: Joi.string().allow("").optional().label("Address 2"),
+      address_3: Joi.string().allow("").optional().label("Address 3"),
+      zip_code: Joi.string().allow("").optional().label("Zip Code"),
+      country_code: Joi.string().allow("").optional().label("Country Code"),
+    });
+    return schema.validate(req.body);
+  };
+
   Member.init(
     {
       company_portal_id: DataTypes.BIGINT,
@@ -58,8 +77,8 @@ module.exports = (sequelize, DataTypes) => {
       address_1: DataTypes.STRING,
       address_2: DataTypes.STRING,
       address_3: DataTypes.STRING,
-      zip_code:DataTypes.STRING,
-      country_code:DataTypes.INTEGER,
+      zip_code: DataTypes.STRING,
+      country_code: DataTypes.INTEGER,
     },
     {
       sequelize,
