@@ -58,6 +58,8 @@ module.exports = (sequelize, DataTypes) => {
       address_1: DataTypes.STRING,
       address_2: DataTypes.STRING,
       address_3: DataTypes.STRING,
+      zip_code:DataTypes.STRING,
+      country_code:DataTypes.INTEGER,
     },
     {
       sequelize,

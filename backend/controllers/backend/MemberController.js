@@ -21,16 +21,21 @@ class MemberController extends Controller {
         let options = {};
         options.attributes = [
           "id",
+          "first_name",
+          "last_name",
+          "email",
+          "country_code",
           "username",
           "referer",
           "status",
-          // "membership_tier_id",
+          "zip_code",
           "phone_no",
           "avatar",
           "address_1",
           "address_2",
           "address_3",
           "last_active_on",
+          "country_id",
         ];
 
         options.where = { [Op.and]: { id: member_id } };
@@ -41,7 +46,7 @@ class MemberController extends Controller {
           },
           {
             model: Country,
-            attributes: [["nicename",'name']],
+            attributes: [["nicename", "name"]],
           },
           {
             model: MemberSecurityInformation,
@@ -55,10 +60,11 @@ class MemberController extends Controller {
           },
         ];
         let result = await this.model.findOne(options);
-        // result.setDataValue("MembershipTier", result.MembershipTier.name);
-        let additional_details;
-
-        // result.setDataValue("additional_details", additional_details);
+        let country_list = await Country.findAll({
+          attributes: ["id", ["nicename", "name"], "phonecode"],
+        });
+        result.setDataValue("country_list", country_list);
+        
         return {
           status: true,
           data: result,
