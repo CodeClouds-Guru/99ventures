@@ -83,6 +83,8 @@ function TicketingSystemPage(props) {
             id: props.ticketId,
             type: 'ticket_status'
         });
+        let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (event.target.value !== 'open' ? stateUser.unread_tickets - 1 : stateUser.unread_tickets + 1) }
+        dispatch(setUser(updatedNotReadonlyUser))
     };
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
@@ -126,7 +128,9 @@ function TicketingSystemPage(props) {
         data_set.append('user_id', user.id);
         // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
-        chatField.trim() ? data_set.append('value', chatField) : '';
+        chatField.trim() ? data_set.append('value', chatField + `
+            Thanks,
+            ${user.alias_name} - More Surveys Support Team`) : '';
         if (Object.keys(inputFiles).length > 0) {
             for (const key of Object.keys(inputFiles)) {
                 data_set.append('attachments', inputFiles[key])
@@ -158,11 +162,15 @@ function TicketingSystemPage(props) {
                             id: props.ticketId,
                             type: 'is_read'
                         })
-                        if (stateUser.unread_tickets > 0) {
-                            let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (stateUser.unread_tickets - 1) }
-                            dispatch(setUser(updatedNotReadonlyUser))
-                        }
+                        //     if (stateUser.unread_tickets > 0) {
+                        //         let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (stateUser.unread_tickets - 1) }
+                        //         dispatch(setUser(updatedNotReadonlyUser))
+                        //     }
                     }
+                    setTimeout(() => {
+                        let main_chat = document.getElementById('main_chat');
+                        main_chat.scrollTop = main_chat.scrollHeight;
+                    }, 500)
                 }
             }).catch(err => {
                 console.error(err)
@@ -182,6 +190,7 @@ function TicketingSystemPage(props) {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
             })
     }
+
     return (
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-0">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
@@ -262,7 +271,7 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 280px)', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 280px)', }} id="main_chat">
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
@@ -381,14 +390,14 @@ function TicketingSystemPage(props) {
                                     <b>Member details</b>
                                 </Typography>
                                 <div className="flex">
-                                    <Typography component={'h4'} className="pr-5">
-                                        <b>Total Earnings: $</b>
+                                    <Typography component={'h4'} className="pr-10">
+                                        <b>Total Earnings: ${memberDetails.total_earnings}</b>
                                     </Typography>
-                                    {memberDetails.total_earnings}
+
                                 </div>
                             </div>
                             <div className="sm:flex flex-row justify-between p-0 m-0 pb-10">
-                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
+                                <div className="flex flex-col w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
@@ -400,7 +409,7 @@ function TicketingSystemPage(props) {
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
-                                                <b>Full name:</b>
+                                                <b>Name:</b>
                                             </Typography>
                                             {memberDetails.first_name + ' ' + memberDetails.last_name}
                                         </div>
@@ -414,9 +423,9 @@ function TicketingSystemPage(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-end">
+                                <div className="flex flex-col w-1/2 justify-center sm:justify-end">
                                     <div className="flex justify-center sm:justify-end">
-                                        <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
+                                        <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
                                             <InputLabel id="demo-select-small">Status</InputLabel>
                                             <Select
                                                 labelId="demo-select-small"
@@ -425,7 +434,7 @@ function TicketingSystemPage(props) {
                                                 label="Status"
                                                 onChange={handleMemberStatus}
                                             >
-                                                <MenuItem value="verified">Verified</MenuItem>
+                                                <MenuItem value="member">Member</MenuItem>
                                                 <MenuItem value="validating">Validating</MenuItem>
                                                 <MenuItem value="suspended">Suspended</MenuItem>
                                                 <MenuItem value="deleted">Deleted</MenuItem>
