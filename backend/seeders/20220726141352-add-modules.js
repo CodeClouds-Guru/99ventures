@@ -253,7 +253,7 @@ const modules = [
     created_at: new Date(),
   },
   {
-    slug: "memberreferrsls",
+    slug: "memberreferrals",
     name: "Member Referrals",
     parent_module: "Members",
     created_by: 1,
