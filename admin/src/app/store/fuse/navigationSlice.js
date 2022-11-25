@@ -58,6 +58,8 @@ const unreadTicketCount = (state) => state.user.unread_tickets;
 export const selectNavigation = createSelector(
 	[selectNavigationAll, ({ i18n }) => i18n.language, getUserRole, unreadTicketCount, getUserPermissions],
 	(navigation, language, userRole, unreadTicketCount, userPermissions) => {
+
+		/*** This area is related to permission checking ***/
 		const filterNav = [];		
 		navigation.map(el => {	
 			if(el.id === 'dashboard') {
@@ -89,6 +91,7 @@ export const selectNavigation = createSelector(
 				filterNav.push(el)
 			}
 		});
+		/*** Permission checking end ***/
 
 		function setTranslationValues(data) {
 			// loop through every object in the array

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -107,11 +107,18 @@ const MemberDetails = () => {
                                     </IconButton>
                                 </Tooltip>
                             ) : (
-                                <Tooltip title="Click to save" placement="top-start">
-                                    <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(false)}>
-                                        (<FuseSvgIcon className="text-48" size={20} color="action">feather:save</FuseSvgIcon>)
-                                    </IconButton>
-                                </Tooltip>
+                                <>
+                                    <Tooltip title="Click to save" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(false)}>
+                                            (<FuseSvgIcon className="text-48" size={20} color="action">feather:save</FuseSvgIcon>)
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Click to cancel" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(false)}>
+                                            (<FuseSvgIcon className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>)
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
                             )
                         }
                     </div>
@@ -162,7 +169,7 @@ const MemberDetails = () => {
                                         variant="standard"
                                     />
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Member</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.status }</Typography>
                                 )
                             }
                             </>
@@ -258,7 +265,7 @@ const MemberDetails = () => {
                                         variant="standard"
                                     />
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">+44 123 456 789</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ `(${memberData.country_code}) ` + memberData.phone_no }</Typography>
                                 )
                             }
                             </>                             
@@ -290,7 +297,7 @@ const MemberDetails = () => {
 
                 <div>
                     <Typography variant="body1">Login as this account</Typography>
-                    <Button variant="text" color="error" size="small" onClick={ ()=>onOpenAlertDialogHandle('delete') }>DELETE ACCOUNT</Button>
+                    <Button variant="text" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '8px 15px'}}>DELETE ACCOUNT</Button>
                 </div>
             </div>
             <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-20 xl:24" />
@@ -393,9 +400,9 @@ const MemberDetails = () => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Typography variant="subtitle">1st Line</Typography><br/>
-                                                    <Typography variant="subtitle">2nd Line</Typography><br/>
-                                                    <Typography variant="subtitle">3rd Line</Typography>
+                                                    <Typography variant="subtitle">{ memberData.address_1 }</Typography><br/>
+                                                    <Typography variant="subtitle">{ memberData.address_2 }</Typography><br/>
+                                                    <Typography variant="subtitle">{ memberData.address_3 }</Typography>
                                                 </>
                                             )
                                         }
@@ -453,20 +460,9 @@ const MemberDetails = () => {
                                         <Typography variant="subtitle" className="font-semibold">Email:</Typography>
                                     } />
                                     <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                                        <>
-                                        {
-                                            // editMode ? (
-                                            //     <TextField
-                                            //         type="tel"
-                                            //         id="standard-helperText"                                
-                                            //         defaultValue="Default Value"                                
-                                            //         variant="standard"
-                                            //     />
-                                            // ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">someone@gmail.com</Typography>
-                                            // )
-                                        }
-                                        </> 
+                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                            <Link href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</Link>
+                                        </Typography>
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
