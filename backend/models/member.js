@@ -14,8 +14,14 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberNote, {
         foreignKey: "member_id",
       });
+      Member.hasMany(models.MemberSecurityInformation, {
+        foreignKey: "member_id",
+      });
       Member.belongsTo(models.MembershipTier, {
         foreignKey: "membership_tier_id",
+      });
+      Member.belongsTo(models.Country, {
+        foreignKey: "country_id",
       });
     }
   }
@@ -64,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "members",
     }
   );
-  
+
   Member.fields = {
     id: {
       field_name: "id",
