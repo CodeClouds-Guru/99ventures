@@ -2,7 +2,7 @@
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
-const { stringToSlug } = require("../helpers/global");
+const { stringToSlug, createCommentSignature } = require("../helpers/global");
 
 module.exports = (sequelize, DataTypes) => {
   class Component extends Model {
@@ -56,10 +56,28 @@ module.exports = (sequelize, DataTypes) => {
               component.code = code;
             }
           }
+          const { start, end } = createCommentSignature(component.code);
+          if (component.code.indexOf('-rev-') < 0) {
+            if (component.html.indexOf(start) < 0) {
+              component.html = `${start} \n ${component.html}`;
+            }
+            if (component.html.indexOf(end) < 0) {
+              component.html = `${component.html} \n ${end}`;
+            }
+          }
         },
-        // beforeUpdate: (component, options) => {
-        //   component.code = stringToSlug(component.name)
-        // },
+        beforeBulkUpdate: (component, options) => {
+          if (component.attributes.code.indexOf('-rev-') < 0) {
+            const { start, end } = createCommentSignature(component.attributes.code);
+            if (component.attributes.html.indexOf(start) < 0) {
+              component.attributes.html = `${start} \n ${component.attributes.html}`;
+            }
+            if (component.attributes.html.indexOf(end) < 0) {
+              component.attributes.html = `${component.attributes.html} \n ${end}`;
+            }
+          }
+          delete component.attributes.code;
+        },
       },
     }
   );

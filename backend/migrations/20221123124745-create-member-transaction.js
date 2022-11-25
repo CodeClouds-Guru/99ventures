@@ -2,29 +2,38 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('member_security_informations', {
+    await queryInterface.createTable('member_transactions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      member_id: {
+      member_payment_information_id: {
         type: Sequelize.BIGINT
       },
-      geo_location: {
+      type: {
+        type: Sequelize.ENUM('credited', 'withdraw'),
+        defaultValue:'credited'
+      },
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
+      },
+      balance: {
+        type: Sequelize.DECIMAL(10, 2),
+      },
+      completed_at: {
+        type: "TIMESTAMP",
+        allowNull: false,
+      },
+      transaction_id:{
         type: Sequelize.STRING
       },
-      ip: {
-        type: Sequelize.STRING
+      status: {
+        type: Sequelize.TINYINT,
+        comment: "0=initiated, 1=processing, 2=completed, 3=failed, 4=declined"
       },
-      isp: {
-        type: Sequelize.STRING
-      },
-      browser: {
-        type: Sequelize.STRING
-      },
-      browser_language: {
+      note:{
         type: Sequelize.STRING
       },
       created_by: {
@@ -47,9 +56,8 @@ module.exports = {
         type: "TIMESTAMP",
       }
     });
-    
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('member_security_informations');
+    await queryInterface.dropTable('member_transactions');
   }
 };
