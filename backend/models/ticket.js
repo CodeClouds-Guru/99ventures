@@ -172,7 +172,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Ticket.getTicketCount = async (read, company_portal_id) => {
     let result = await Ticket.findAndCountAll({
-      where: { is_read: read, company_portal_id: company_portal_id },
+      where: { status: 'open', company_portal_id: company_portal_id },
     });
     return result.count;
   };
