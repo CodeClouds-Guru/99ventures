@@ -201,7 +201,7 @@ const modules = [
   {
     slug: "members",
     name: "Members",
-    parent_module: "Administrations",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -210,7 +210,7 @@ const modules = [
   {
     slug: "memberbalances",
     name: "Member Balances",
-    parent_module: "Administrations",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -219,7 +219,7 @@ const modules = [
   {
     slug: "memberactivitylogs",
     name: "Member Activity Logs",
-    parent_module: "Administrations",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -228,7 +228,7 @@ const modules = [
   {
     slug: "memberpaymentinformations",
     name: "Member Payment Informations",
-    parent_module: "Administrations",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -237,7 +237,7 @@ const modules = [
   {
     slug: "membersecurityinformations",
     name: "Member Security Informations",
-    parent_module: "Administrations",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
@@ -246,7 +246,16 @@ const modules = [
   {
     slug: "membertransactions",
     name: "Member Transactions",
-    parent_module: "Administrations",
+    parent_module: "Members",
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: "memberreferrsls",
+    name: "Member Referrals",
+    parent_module: "Members",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
