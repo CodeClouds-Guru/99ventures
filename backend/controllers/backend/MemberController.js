@@ -1,6 +1,11 @@
 const Controller = require("./Controller");
 const { Op } = require("sequelize");
-const { MembershipTier, sequelize } = require("../../models/index");
+const {
+  MembershipTier,
+  MemberSecurityInformation,
+  Country,
+  sequelize,
+} = require("../../models/index");
 class MemberController extends Controller {
   constructor() {
     super("Member");
@@ -16,24 +21,50 @@ class MemberController extends Controller {
         let options = {};
         options.attributes = [
           "id",
+          "first_name",
+          "last_name",
+          "email",
+          "country_code",
           "username",
           "referer",
           "status",
-          "membership_tier_id",
+          "zip_code",
           "phone_no",
           "avatar",
+          "address_1",
+          "address_2",
+          "address_3",
+          "last_active_on",
+          "country_id",
         ];
 
         options.where = { [Op.and]: { id: member_id } };
-        options.include = {
-          model: MembershipTier,
-          attributes: ["name"],
-        };
+        options.include = [
+          {
+            model: MembershipTier,
+            attributes: ["name"],
+          },
+          {
+            model: Country,
+            attributes: [["nicename", "name"]],
+          },
+          {
+            model: MemberSecurityInformation,
+            attributes: [
+              "geo_location",
+              "ip",
+              "isp",
+              "browser",
+              "browser_language",
+            ],
+          },
+        ];
         let result = await this.model.findOne(options);
-        // result.setDataValue("MembershipTier", result.MembershipTier.name);
-        let additional_details;
+        let country_list = await Country.findAll({
+          attributes: ["id", ["nicename", "name"], "phonecode"],
+        });
+        result.setDataValue("country_list", country_list);
         
-        // result.setDataValue("additional_details", additional_details);
         return {
           status: true,
           data: result,
