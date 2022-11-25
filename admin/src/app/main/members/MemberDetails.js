@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import axios from 'axios'
-
+import CountryData from 'src/app/CountryData';
 
 const buttonStyle = {
     borderRadius: '5px', 
@@ -30,6 +30,12 @@ const labelStyling = {
     }
 } 
 
+const textFieldStyle = {
+    '& .muiltr-r11gs3-MuiInputBase-root-MuiInput-root': {
+        minHeight: '30px'
+    }
+}
+
 const MemberDetails = () => {
     const { moduleId } = useParams();
     const [ editMode, setEditMode ] = useState(false);
@@ -37,7 +43,7 @@ const MemberDetails = () => {
     const [ alertType, setAlertType ] = useState('');
     const [ msg, setMsg ] = useState('');
     const [ memberData, setMemberData ] = useState({});
-
+    const [ countryData, setCountryData ] = useState([]);
 
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
@@ -46,7 +52,7 @@ const MemberDetails = () => {
         else if(type === 'save_profile')
             msg = 'Do you want to save changes?';
         
-
+        setAlertType(type);
         setMsg(msg);
         setOpenAlertDialog(true);
     }
@@ -54,10 +60,13 @@ const MemberDetails = () => {
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
         setMsg('');
+        setAlertType('');
     }
   
-    const onConfirmAlertDialogHandle = async () => {
-                
+    const onConfirmAlertDialogHandle = () => {
+        if(alertType === 'save_profile') {
+            handleFormSubmit();
+        }
     }
 
     /**
@@ -66,9 +75,9 @@ const MemberDetails = () => {
      const getMemberData = () => {
         axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
-                console.log(res.data.results.result)
-                if (res.data.results.result) {
-                    setMemberData(res.data.results.result)
+                if (res.data.results.data) {
+                    setMemberData(res.data.results.data);
+                    setCountryData(res.data.results.data.country_list);
                 }
             })
             .catch(errors => {
@@ -79,8 +88,36 @@ const MemberDetails = () => {
 
     useEffect(()=>{
         getMemberData();
-    }, [])
+    }, []);
 
+
+    /**
+     * Phone no. Validation
+     */
+    const handlePhoneValidation = (e) => {
+        const reg = /^[0-9\b]+$/;
+        if (e.target.value === '' || reg.test(e.target.value)) 
+            setMemberData({...memberData, phone_no: e.target.value })        
+        else 
+            e.target.value = memberData.phone_no;
+    }
+
+    /**
+     * Member's Data Update
+     */
+    const handleFormSubmit = () => {
+        console.log(memberData)
+    }
+
+    const countryProps = {
+        options: countryData,
+        getOptionLabel: (option) => option.name,
+    };
+
+    const countryCodeProps = {
+        options: countryData,
+        getOptionLabel: (option) => option.phonecode,
+    };
 
     return (
         <Box className="sm:p-16 lg:p-24 xl:p-32 flex sm:flex-col lg:flex-row" >
@@ -107,9 +144,9 @@ const MemberDetails = () => {
                                     </IconButton>
                                 </Tooltip>
                             ) : (
-                                <>
+                                <div>
                                     <Tooltip title="Click to save" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(false)}>
+                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=>onOpenAlertDialogHandle('save_profile') }>
                                             (<FuseSvgIcon className="text-48" size={20} color="action">feather:save</FuseSvgIcon>)
                                         </IconButton>
                                     </Tooltip>
@@ -118,13 +155,13 @@ const MemberDetails = () => {
                                             (<FuseSvgIcon className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>)
                                         </IconButton>
                                     </Tooltip>
-                                </>
+                                </div>
                             )
                         }
                     </div>
                     <div className='relative'>
                         <Avatar 
-                            src="https://ui-avatars.com/api/?name=Sourabh+Das"
+                            src={memberData.avatar ? memberData.avatar :  `https://ui-avatars.com/api/?name=${ memberData.first_name}+${ memberData.last_name}`}
                             sx={{ 
                                 width: 120, 
                                 height: 120 ,
@@ -136,10 +173,22 @@ const MemberDetails = () => {
                                     width: 120,
                                     height: 120,                                    
                                 }
-                        }}>SD</Avatar>
+                        }}></Avatar>
                         {
                             editMode && (
-                                <IconButton color="primary" aria-label="Filter" component="div" sx={{position: 'absolute', top: '80px', left: '70%'}}>
+                                <IconButton 
+                                    color="primary" 
+                                    aria-label="Filter" 
+                                    component="div" 
+                                    sx={{
+                                        position: 'absolute', 
+                                        top: '80px', 
+                                        left: '70%',
+                                        '@media screen and (max-width: 1300px)': {
+
+                                        }
+                                    }}
+                                    >
                                     <FuseSvgIcon className="text-48" size={22} color="primary">heroicons-outline:camera</FuseSvgIcon>
                                 </IconButton>
                             )
@@ -163,11 +212,24 @@ const MemberDetails = () => {
                             <>
                             {
                                 editMode ? (
-                                    <TextField
-                                        id="standard-helperText"                                
-                                        defaultValue="Default Value"                                
-                                        variant="standard"
-                                    />
+                                    <div >
+                                        <TextField
+                                            sx={{ minWidth: 220, ...textFieldStyle }}
+                                            id="standard-select-currency-native"
+                                            select
+                                            value={ memberData.status }             
+                                            SelectProps={{
+                                                native: true,
+                                            }}
+                                            variant="standard"
+                                            >
+                                            <option value="">--Select--</option>
+                                            <option value="verified">Verified</option>
+                                            <option value="suspended">Suspended</option>
+                                            <option value="validating">Validating</option>
+                                            <option value="deleted">Deleted</option>
+                                        </TextField>
+                                    </div>
                                 ) : (
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.status }</Typography>
                                 )
@@ -183,13 +245,25 @@ const MemberDetails = () => {
                             <>
                             {
                                 editMode ? (
-                                    <TextField
-                                        id="standard-helperText"                                
-                                        defaultValue="Default Value"                                
-                                        variant="standard"
-                                    />
+                                    <>
+                                        <TextField
+                                            id="standard-helperText"                                
+                                            defaultValue={memberData.first_name}                               
+                                            variant="standard"
+                                            placeholder="First Name"
+                                            sx={textFieldStyle}
+                                            className="mr-10"
+                                        />
+                                        <TextField
+                                            id="standard-helperText"                                
+                                            defaultValue={memberData.last_name}                                
+                                            variant="standard"
+                                            placeholder="Last Name"
+                                            sx={textFieldStyle}
+                                        />
+                                    </>
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name}</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
                                 )
                             }
                             </>                            
@@ -208,8 +282,9 @@ const MemberDetails = () => {
                                 editMode ? (
                                     <TextField
                                         id="standard-helperText"                                
-                                        defaultValue="Default Value"                                
+                                        defaultValue={ memberData.referer }                              
                                         variant="standard"
+                                        sx={textFieldStyle}
                                     />
                                 ) : (
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Example Refer ip</Typography>
@@ -229,22 +304,25 @@ const MemberDetails = () => {
                                 editMode ? (
                                     <div >
                                         <TextField
-                                            sx={{ minWidth: 220 }}
+                                            sx={{ minWidth: 220, ...textFieldStyle }}
                                             id="standard-select-currency-native"
                                             select
-                                            // label="Level"
-                                            value=""              
+                                            value={ memberData.membership_tier_id }
                                             SelectProps={{
                                                 native: true,
                                             }}
                                             variant="standard"
                                             >
                                             <option value="">--Select--</option>
-                                            <option value="A">Level A</option>
+                                            <option value="1">Level 1</option>
+                                            <option value="2">Level 2</option>
+                                            <option value="3">Level 3</option>
+                                            <option value="4">Level 4</option>
+                                            <option value="5">Level 5</option>
                                         </TextField>
                                     </div>
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Level 1</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Level { memberData.membership_tier_id }</Typography>
                                 )
                             }
                             </>
@@ -258,12 +336,16 @@ const MemberDetails = () => {
                             <>
                             {
                                 editMode ? (
-                                    <TextField
-                                        type="tel"
-                                        id="standard-helperText"                                
-                                        defaultValue="Default Value"                                
-                                        variant="standard"
-                                    />
+                                    <>
+                                        <TextField
+                                            type="tel"
+                                            id="standard-helperText"
+                                            defaultValue={ memberData.phone_no }
+                                            variant="standard"
+                                            sx={textFieldStyle}
+                                            onKeyUp={ handlePhoneValidation }
+                                        />
+                                    </>
                                 ) : (
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ `(${memberData.country_code}) ` + memberData.phone_no }</Typography>
                                 )
@@ -373,7 +455,7 @@ const MemberDetails = () => {
                                 }}
                             >Address</Typography>
                             <List>
-                                <ListItem disablePadding >
+                                {/* <ListItem disablePadding >
                                     <ListItemText className="w-full" primary={
                                         <>
                                         {
@@ -382,20 +464,23 @@ const MemberDetails = () => {
                                                     <TextField
                                                         type="tel"
                                                         id="standard-helperText"                                
-                                                        defaultValue="Default Value"                                
+                                                        defaultValue=""                                
                                                         variant="standard"
+                                                        placeholder="Address Line 1"
                                                     />
                                                     <TextField
                                                         type="tel"
                                                         id="standard-helperText"                                
-                                                        defaultValue="Default Value"                                
+                                                        defaultValue=""                                
                                                         variant="standard"
+                                                        placeholder="Address Line 2"
                                                     />
                                                     <TextField
                                                         type="tel"
                                                         id="standard-helperText"                                
-                                                        defaultValue="Default Value"                                
+                                                        defaultValue=""                                
                                                         variant="standard"
+                                                        placeholder="Address Line 3"
                                                     />
                                                 </>
                                             ) : (
@@ -407,6 +492,81 @@ const MemberDetails = () => {
                                             )
                                         }
                                         </>  
+                                    } />
+                                </ListItem> */}
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                        <Typography variant="subtitle">Address Line 1:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                        <>
+                                        {
+                                            editMode ? (
+                                                <TextField
+                                                    type="tel"
+                                                    id="standard-helperText"                                
+                                                    defaultValue={ memberData.address_1 }                              
+                                                    variant="standard"
+                                                    sx={textFieldStyle}
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, address_1: e.target.value })
+                                                    }
+                                                />
+                                            ) : (
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                            )
+                                        }
+                                        </>
+                                    } />
+                                </ListItem>                                
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                        <Typography variant="subtitle">Address Line 2:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                        <>
+                                        {
+                                            editMode ? (
+                                                <TextField
+                                                    type="tel"
+                                                    id="standard-helperText"                                
+                                                    defaultValue={ memberData.address_2 }                              
+                                                    variant="standard"
+                                                    sx={textFieldStyle}
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, address_2: e.target.value })
+                                                    }
+                                                />
+                                            ) : (
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                            )
+                                        }
+                                        </>
+                                    } />
+                                </ListItem>
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                        <Typography variant="subtitle">Address Line 3:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                        <>
+                                        {
+                                            editMode ? (
+                                                <TextField
+                                                    type="tel"
+                                                    id="standard-helperText"                                
+                                                    defaultValue={ memberData.address_3 }                              
+                                                    variant="standard"
+                                                    sx={textFieldStyle}
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, address_3: e.target.value })
+                                                    }
+                                                />
+                                            ) : (
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                            )
+                                        }
+                                        </>
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
@@ -420,11 +580,15 @@ const MemberDetails = () => {
                                                 <TextField
                                                     type="tel"
                                                     id="standard-helperText"                                
-                                                    defaultValue="Default Value"                                
+                                                    defaultValue={ memberData.zip_code }                              
                                                     variant="standard"
+                                                    sx={textFieldStyle}
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, zip_code: e.target.value })
+                                                    }
                                                 />
                                             ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">12345</Typography>
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
                                             )
                                         }
                                         </>
@@ -438,19 +602,22 @@ const MemberDetails = () => {
                                         <>
                                         {
                                             editMode ? (
-                                                <TextField
-                                                    type="tel"
-                                                    id="standard-helperText"                                
-                                                    defaultValue="Default Value"                                
-                                                    variant="standard"
-                                                />
+                                                    <Autocomplete
+                                                        {...countryProps}
+                                                        id="clear-on-escape"
+                                                        clearOnEscape
+                                                        renderInput={(params) => (
+                                                            <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                        )}
+                                                    />
+                                                
                                             ) : (
                                                 <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">XXXX</Typography>
                                             )
                                         }
                                         </>
                                     } />
-                                </ListItem>                            
+                                </ListItem> 
                             </List>
                         </div>
                         <div className='w-1/2'>
@@ -479,12 +646,17 @@ const MemberDetails = () => {
                     </Box>
                 </div>
             </div>
-            <AlertDialog
-                content={ msg }
-                open={openAlertDialog}
-                onConfirm={onConfirmAlertDialogHandle}
-                onClose={onCloseAlertDialogHandle}
-            />
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content={ msg }
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
+            
         </Box>
     )
 }
