@@ -14,6 +14,7 @@ const navigationConfig = [
     type: 'item',
     icon: 'heroicons-outline:cog',
     url: 'configuration',
+    depends_on: ['generalconfigurations', 'emailconfigurations', 'ipconfigurations', 'metatagconfigurations', 'paymentconfigurations', 'downtime']
   },
   {
     id: 'tickets',
@@ -41,6 +42,15 @@ const navigationConfig = [
         type: 'item',
         icon: 'heroicons-outline:user-circle',
         url: 'app/users',
+        end: true,
+      },
+      {
+        id: 'members',
+        title: 'Members',
+        translate: 'Members',
+        type: 'item',
+        icon: 'heroicons-outline:user-circle',
+        url: 'app/members',
         end: true,
       },
       {

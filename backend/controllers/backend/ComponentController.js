@@ -60,8 +60,8 @@ class ComponentController extends Controller {
   //override list function
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    if ("where" in options){
-      if(Op.and in options['where']){
+    if ("where" in options) {
+      if (Op.and in options['where']) {
         options['where'] = {
           [Op.and]: {
             ...options['where'][Op.and],
@@ -70,7 +70,7 @@ class ComponentController extends Controller {
             },
           }
         }
-      }else{
+      } else {
         options['where'] = {
           [Op.and]: {
             ...options['where'],
@@ -80,7 +80,7 @@ class ComponentController extends Controller {
           }
         }
       }
-    }else{
+    } else {
       options.where = {
         code: {
           [Op.notLike]: "%-rev-%",
@@ -134,6 +134,7 @@ class ComponentController extends Controller {
       let update_data = {
         name: current.name,
         html: current.html,
+        code: previous.code,
         component_json: current.component_json,
         updated_by: req.user.id,
         created_at: new Date(),
@@ -164,6 +165,7 @@ class ComponentController extends Controller {
       let update_data = {
         name: current.name,
         html: current.html,
+        code: current.code,
         component_json: current.component_json,
         updated_by: req.user.id,
         updated_at: current.updated_at,
@@ -174,6 +176,7 @@ class ComponentController extends Controller {
         where: {
           id: req.params.id, //1
         },
+        individualHooks: true,
       });
 
       //Updating the selected row with working id
@@ -181,6 +184,7 @@ class ComponentController extends Controller {
         name: previous.name,
         html: previous.html,
         component_json: previous.component_json,
+        code: previous.code,
         updated_by: req.user.id,
         updated_at: previous.updated_at,
         created_at: previous.created_at,

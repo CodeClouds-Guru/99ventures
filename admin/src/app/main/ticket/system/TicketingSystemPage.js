@@ -53,7 +53,7 @@ function TicketingSystemPage(props) {
         if (files && Object.keys(files).length <= 4) {
             var allowed_files = [];
             Object.values(files).map((val, key) => {
-                if (val.size <= 2048) {
+                if (val.size <= 2048000) {
                     var parts = val.name.split(".");
                     const file_type = parts[parts.length - 1];
                     ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
