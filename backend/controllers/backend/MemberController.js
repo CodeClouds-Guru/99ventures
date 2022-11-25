@@ -64,7 +64,7 @@ class MemberController extends Controller {
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
         result.setDataValue("country_list", country_list);
-        
+
         return {
           status: true,
           data: result,
@@ -78,6 +78,103 @@ class MemberController extends Controller {
       this.throwCustomError("Unable to get data", 500);
     }
   }
+
+  // async update(req, res) {
+  //   let id = req.params.id;
+  //   let request_data = req.body;
+  //   console.log(request_data);
+
+  //   try {
+  //     if (req.body.type == "basic_details") {
+  //       delete req.body.type;
+  //       this.updateBasicDetails(req, res);
+  //     } else if (req.body.type == "change_avatar") {
+  //       delete req.body.type;
+  //       this.changeAvatar(req, res);
+  //     } else {
+  //       res.status(401).json({
+  //         status: false,
+  //         errors: "Type is required.",
+  //       });
+  //     }
+  //     request_data.updated_by = req.user.id;
+  //     let model = await this.model.update(request_data, { where: { id } });
+  //     return {
+  //       message: "Record has been updated successfully",
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+
+  //  //update user basic details
+  //  async updateBasicDetails(req, res) {
+  //   let member = req.user;
+  //   const schema = Joi.object({
+  //     first_name: Joi.string().required(),
+  //     last_name: Joi.string().required(),
+  //     phone_no: Joi.required(),
+  //     avatar: Joi.optional(),
+  //   });
+  //   const { error, value } = schema.validate(req.body);
+  //   if (error) {
+  //     let error_msg = error.details.map((err) => err.message);
+  //     res.status(422).json({
+  //       status: false,
+  //       errors: error_msg.join(","),
+  //     });
+  //     return;
+  //   }
+  //   //update details
+  //   try {
+  //     //update basic details
+  //     await User.update(
+  //       {
+  //         ...value,
+  //       },
+  //       { where: { id: user.id } }
+  //     );
+  //     // let profile_details = await this.profileDetails(req)
+  //     res.status(200).json({
+  //       status: true,
+  //       message: "Profile Updated.",
+  //       // user: profile_details
+  //     });
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+  // //change avatar
+  // async changeAvatar(req, res) {
+  //   let user = req.user;
+  //   if (req.files) {
+  //     let pre_avatar = user.avatar;
+  //     let files = [];
+  //     files[0] = req.files.avatar;
+  //     const fileHelper = new FileHelper(files, "users", req);
+  //     const file_name = await fileHelper.upload();
+  //     await User.update(
+  //       {
+  //         avatar: file_name.files[0].filename,
+  //       },
+  //       { where: { id: user.id } }
+  //     );
+  //     if (pre_avatar != "") {
+  //       let file_delete = await fileHelper.deleteFile(pre_avatar);
+  //     }
+  //     // let profile_details = await this.profileDetails(req)
+  //     res.status(200).json({
+  //       status: true,
+  //       message: "Avatar Updated.",
+  //       // user: profile_details
+  //     });
+  //   } else {
+  //     res.status(422).json({
+  //       status: false,
+  //       errors: "Avatar is required.",
+  //     });
+  //   }
+  // }
 }
 
 module.exports = MemberController;
