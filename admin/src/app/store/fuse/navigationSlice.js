@@ -79,12 +79,12 @@ export const selectNavigation = createSelector(
 			else if(el.depends_on){
 				const childNav = [];
 				el.depends_on.map(dp => {
-					if(checkPermission(dp.id, userPermissions)) {
+					if(checkPermission(dp, userPermissions)) {
 						childNav.push(dp)
 					}
 				});
 				if (childNav.length) {
-					filterNav.push({ ...el, children: childNav })
+					filterNav.push({ ...el})
 				}
 			}
 			else if(checkPermission(el.id, userPermissions)){
