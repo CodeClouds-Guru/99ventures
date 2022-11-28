@@ -4,6 +4,7 @@ import List from './list/List'
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { usePermission } from '@fuse/hooks';
+import Listing from '../members/listing/Listing';
 
 function ListPage() {
   const { module } = useParams();
@@ -11,12 +12,17 @@ function ListPage() {
   const { hasPermission } = usePermission(module);
   return <FusePageCarded
     content={
-      <>
+      <>{module === 'members' ?
+        <Listing module='members'
+          editable={hasPermission('update')}
+          addable={hasPermission('save')}
+          deletable={hasPermission('delete')}
+        /> :
         <List module={module}
           editable={hasPermission('update')}
           addable={hasPermission('save')}
           deletable={hasPermission('delete')}
-        />
+        />}
         {/* <br /><br /><br />
         <List module="roles"/> */}
       </>
