@@ -6,6 +6,7 @@ const {
   Country,
   sequelize,
 } = require("../../models/index");
+const FileHelper = require("../../helpers/fileHelper");
 class MemberController extends Controller {
   constructor() {
     super("Member");
@@ -63,6 +64,7 @@ class MemberController extends Controller {
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
+        console.log(country_list)
         result.setDataValue("country_list", country_list);
 
         return {
@@ -79,102 +81,86 @@ class MemberController extends Controller {
     }
   }
 
-  // async update(req, res) {
-  //   let id = req.params.id;
-  //   let request_data = req.body;
-  //   console.log(request_data);
+  async update(req, res) {
+    let id = req.params.id;
+    let request_data = req.body;
+    console.log(request_data);
 
-  //   try {
-  //     if (req.body.type == "basic_details") {
-  //       delete req.body.type;
-  //       this.updateBasicDetails(req, res);
-  //     } else if (req.body.type == "change_avatar") {
-  //       delete req.body.type;
-  //       this.changeAvatar(req, res);
-  //     } else {
-  //       res.status(401).json({
-  //         status: false,
-  //         errors: "Type is required.",
-  //       });
-  //     }
-  //     request_data.updated_by = req.user.id;
-  //     let model = await this.model.update(request_data, { where: { id } });
-  //     return {
-  //       message: "Record has been updated successfully",
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
+    }
+    try {
+      if (req.body.type == "basic_details") {
+        delete req.body.type;
+        this.updateBasicDetails(req, res);
+      } else if (req.body.type == "change_avatar") {
+        delete req.body.type;
+        this.changeAvatar(req, res);
+      } else {
+        res.status(401).json({
+          status: false,
+          errors: "Type is required.",
+        });
+      }
 
-  //  //update user basic details
-  //  async updateBasicDetails(req, res) {
-  //   let member = req.user;
-  //   const schema = Joi.object({
-  //     first_name: Joi.string().required(),
-  //     last_name: Joi.string().required(),
-  //     phone_no: Joi.required(),
-  //     avatar: Joi.optional(),
-  //   });
-  //   const { error, value } = schema.validate(req.body);
-  //   if (error) {
-  //     let error_msg = error.details.map((err) => err.message);
-  //     res.status(422).json({
-  //       status: false,
-  //       errors: error_msg.join(","),
-  //     });
-  //     return;
-  //   }
-  //   //update details
-  //   try {
-  //     //update basic details
-  //     await User.update(
-  //       {
-  //         ...value,
-  //       },
-  //       { where: { id: user.id } }
-  //     );
-  //     // let profile_details = await this.profileDetails(req)
-  //     res.status(200).json({
-  //       status: true,
-  //       message: "Profile Updated.",
-  //       // user: profile_details
-  //     });
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-  // //change avatar
-  // async changeAvatar(req, res) {
-  //   let user = req.user;
-  //   if (req.files) {
-  //     let pre_avatar = user.avatar;
-  //     let files = [];
-  //     files[0] = req.files.avatar;
-  //     const fileHelper = new FileHelper(files, "users", req);
-  //     const file_name = await fileHelper.upload();
-  //     await User.update(
-  //       {
-  //         avatar: file_name.files[0].filename,
-  //       },
-  //       { where: { id: user.id } }
-  //     );
-  //     if (pre_avatar != "") {
-  //       let file_delete = await fileHelper.deleteFile(pre_avatar);
-  //     }
-  //     // let profile_details = await this.profileDetails(req)
-  //     res.status(200).json({
-  //       status: true,
-  //       message: "Avatar Updated.",
-  //       // user: profile_details
-  //     });
-  //   } else {
-  //     res.status(422).json({
-  //       status: false,
-  //       errors: "Avatar is required.",
-  //     });
-  //   }
-  // }
+      return {
+        message: "Record has been updated successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //update member basic details
+  async updateBasicDetails(req, res) {
+    let request_data = req.body.data;
+    
+    try {
+      request_data.updated_by = req.user.id;
+      let model = await this.model.update(request_data, {
+        where: { id: req.params.id },
+      });
+      return {
+        message: "Record has been updated successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  //change avatar
+  async changeAvatar(req, res) {
+    if (req.files) {
+      let member = await this.model.findOne({ where: { id: req.params.id } });
+      let pre_avatar = member.avatar;
+      let files = [];
+      files[0] = req.files.avatar;
+      const fileHelper = new FileHelper(files, "members", req);
+      const file_name = await fileHelper.upload();
+      await this.model.update(
+        {
+          avatar: file_name.files[0].filename,
+        },
+        { where: { id: req.params.id } }
+      );
+      if (pre_avatar != "") {
+        let file_delete = await fileHelper.deleteFile(pre_avatar);
+      }
+      // let profile_details = await this.profileDetails(req)
+      res.status(200).json({
+        status: true,
+        message: "Avatar Updated.",
+      });
+    } else {
+      res.status(422).json({
+        status: false,
+        errors: "Avatar is required.",
+      });
+    }
+  }
 }
 
 module.exports = MemberController;

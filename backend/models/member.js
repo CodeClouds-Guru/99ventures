@@ -30,18 +30,19 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      email: Joi.string().email().required().label("Email"),
-      username: Joi.string().min(3).max(30).required().label("Username"),
+      status: Joi.string().allow("").optional().label("Status"),
+      // username: Joi.string().min(3).max(30).required().label("Username"),
       password: Joi.string().allow("").optional(),
       phone_no: Joi.string().allow("").optional().label("Phone No"),
       country_id: Joi.string().allow("").optional().label("Country"),
+      membership_tier_id: Joi.string().allow("").optional().label("Level"),
       address_1: Joi.string().allow("").optional().label("Address 1"),
       address_2: Joi.string().allow("").optional().label("Address 2"),
       address_3: Joi.string().allow("").optional().label("Address 3"),
       zip_code: Joi.string().allow("").optional().label("Zip Code"),
       country_code: Joi.string().allow("").optional().label("Country Code"),
     });
-    return schema.validate(req.body);
+    return schema.validate(req.body.data);
   };
 
   Member.init(
