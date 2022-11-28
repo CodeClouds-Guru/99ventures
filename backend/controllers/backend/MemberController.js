@@ -64,6 +64,7 @@ class MemberController extends Controller {
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
+        console.log(country_list)
         result.setDataValue("country_list", country_list);
 
         return {
@@ -85,6 +86,13 @@ class MemberController extends Controller {
     let request_data = req.body;
     console.log(request_data);
 
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
+    }
     try {
       if (req.body.type == "basic_details") {
         delete req.body.type;
@@ -109,14 +117,8 @@ class MemberController extends Controller {
 
   //update member basic details
   async updateBasicDetails(req, res) {
-    let request_data = req.body;
-    const { error, value } = this.model.validate(req);
-    if (error) {
-      const errorObj = new Error("Validation failed.");
-      errorObj.statusCode = 422;
-      errorObj.data = error.details.map((err) => err.message);
-      throw errorObj;
-    }
+    let request_data = req.body.data;
+    
     try {
       request_data.updated_by = req.user.id;
       let model = await this.model.update(request_data, {
@@ -151,7 +153,6 @@ class MemberController extends Controller {
       res.status(200).json({
         status: true,
         message: "Avatar Updated.",
-       
       });
     } else {
       res.status(422).json({

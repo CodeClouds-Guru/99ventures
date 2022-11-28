@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      email: Joi.string().email().required().label("Email"),
+      status: Joi.string().allow("").optional().label("Status"),
       username: Joi.string().min(3).max(30).required().label("Username"),
       password: Joi.string().allow("").optional(),
       phone_no: Joi.string().allow("").optional().label("Phone No"),
@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       zip_code: Joi.string().allow("").optional().label("Zip Code"),
       country_code: Joi.string().allow("").optional().label("Country Code"),
     });
-    return schema.validate(req.body);
+    return schema.validate(req.body.data);
   };
 
   Member.init(
