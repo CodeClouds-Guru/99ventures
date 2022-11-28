@@ -134,7 +134,7 @@ class MemberController extends Controller {
   //change avatar
   async changeAvatar(req, res) {
     if (req.files) {
-      let member = await this.model.findOne(options);
+      let member = await this.model.findOne({ where: { id: req.params.id } });
       let pre_avatar = member.avatar;
       let files = [];
       files[0] = req.files.avatar;
