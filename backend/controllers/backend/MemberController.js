@@ -15,6 +15,8 @@ const FileHelper = require("../../helpers/fileHelper");
 class MemberController extends Controller {
   constructor() {
     super("Member");
+    this.view = this.view.bind(this);
+    this.update = this.update.bind(this);
   }
 
   async view(req, res) {
@@ -88,13 +90,17 @@ class MemberController extends Controller {
         });
         console.log(country_list);
 
-        let payment_email = MemberTransaction.findOne({
+        let payment_email = await MemberTransaction.findOne({
+          attributes: ["member_payment_information_id", "created_at"],
           limit: 1,
           where: {
             member_id: member_id,
           },
-          order: [["createdAt", "DESC"]],
-          include: { model: MemberPaymentInformation },
+          order: [["created_at", "DESC"]],
+          include: {
+            model: MemberPaymentInformation,
+            attributes: ["name", "value"],
+          },
         });
         result.setDataValue("country_list", country_list);
         result.setDataValue("payment_email", payment_email);
@@ -132,7 +138,7 @@ class MemberController extends Controller {
         result = this.updateBasicDetails(req, res);
       } else if (req.body.type == "member_status") {
         delete req.body.type;
-        result = await Member.changeStatus(req);
+        result = await this.model.changeStatus(req);
       }
       if (result) {
         return {
@@ -140,7 +146,6 @@ class MemberController extends Controller {
           message: "Record has been updated successfully",
         };
       } else {
-        console.error(error);
         this.throwCustomError("Unable to save data", 500);
       }
     } catch (error) {
