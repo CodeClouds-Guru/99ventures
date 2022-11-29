@@ -2,6 +2,7 @@
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
+const { MemberNote } = require("../index");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -27,13 +28,16 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberTransaction, {
         foreignKey: "member_id",
       });
+      Member.hasMany(models.MemberPaymentInformation, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.validate = function (req) {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      status: Joi.string().optional().label("Status"),
+      // status: Joi.string().optional().label("Status"),
       // username: Joi.string().min(3).max(30).required().label("Username"),
       password: Joi.string().optional(),
       phone_no: Joi.string().optional().label("Phone No"),
@@ -43,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       address_2: Joi.string().allow(null).optional().label("Address 2"),
       address_3: Joi.string().allow(null).optional().label("Address 3"),
       zip_code: Joi.string().allow(null).optional().label("Zip Code"),
+      avatar: Joi.string().allow(null).optional().label("Avatar"),
       country_code: Joi.optional().label("Country Code"),
     });
     return schema.validate(req.body);
@@ -214,15 +219,35 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   sequelizePaginate.paginate(Member);
-  Member.changeStatus = async (field_name, val, id) => {
-    let update_data = {
-      [field_name]: val,
-    };
-    console.log(update_data);
-    let result = await Member.update(update_data, {
-      where: { id: id },
-      return: true,
+  Member.changeStatus = async (req) => {
+    const value = req.body.value || "";
+    const field_name = req.body.field_name || "";
+    const id = req.body.id || null;
+    const notes = req.body.member_notes || null;
+    let member = await Member.findOne({
+      attributes: ["status"],
+      where: { id: member_id },
     });
+    console.log(update_data);
+    let result = await Member.update(
+      {
+        [field_name]: val,
+      },
+      {
+        where: { id: id },
+        return: true,
+      }
+    );
+    if (notes !== null) {
+      let data = {
+        user_id: req.user.id,
+        member_id: member_id,
+        previous_status: member.status,
+        current_status: value,
+        note: notes,
+      };
+      change = await MemberNote.create(data);
+    }
     return result[0];
   };
   return Member;
