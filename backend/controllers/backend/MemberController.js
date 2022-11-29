@@ -88,10 +88,10 @@ class MemberController extends Controller {
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
-        console.log(country_list);
+        // console.log(country_list);
 
         let payment_email = await MemberTransaction.findOne({
-          attributes: ["member_payment_information_id", "created_at"],
+          attributes: ["member_payment_information_id"],
           limit: 1,
           where: {
             member_id: member_id,
