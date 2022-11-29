@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
       address_2: Joi.string().allow(null).optional().label("Address 2"),
       address_3: Joi.string().allow(null).optional().label("Address 3"),
       zip_code: Joi.string().allow(null).optional().label("Zip Code"),
-      country_code: Joi.string().allow(null).optional().label("Country Code"),
+      country_code: Joi.optional().label("Country Code"),
     });
-    return schema.validate(req.body.data);
+    return schema.validate(req.body);
   };
 
   Member.init(

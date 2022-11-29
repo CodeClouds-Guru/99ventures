@@ -64,7 +64,7 @@ class MemberController extends Controller {
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
-        console.log(country_list)
+        console.log(country_list);
         result.setDataValue("country_list", country_list);
 
         return {
@@ -94,71 +94,48 @@ class MemberController extends Controller {
       throw errorObj;
     }
     try {
-      if (req.body.type == "basic_details") {
-        delete req.body.type;
-        this.updateBasicDetails(req, res);
-      } else if (req.body.type == "change_avatar") {
-        delete req.body.type;
-        this.changeAvatar(req, res);
-      } else {
-        res.status(401).json({
-          status: false,
-          errors: "Type is required.",
-        });
-      }
+      let result = this.updateBasicDetails(req, res);
 
-      return {
-        message: "Record has been updated successfully",
-      };
+      if (result) {
+        return {
+          status: true,
+          message: "Record has been updated successfully",
+        };
+      } else {
+        console.error(error);
+        this.throwCustomError("Unable to save data", 500);
+      }
     } catch (error) {
-      throw error;
+      console.error(error);
+      this.throwCustomError("Unable to save data", 500);
     }
   }
 
-  //update member basic details
+  //update member details and avatar
   async updateBasicDetails(req, res) {
-    let request_data = req.body.data;
-    
+    let request_data = req.body;
     try {
       request_data.updated_by = req.user.id;
+      if (req.files) {
+        let member = await this.model.findOne({ where: { id: req.params.id } });
+        let pre_avatar = member.avatar;
+        let files = [];
+        files[0] = req.files.avatar;
+        const fileHelper = new FileHelper(files, "members", req);
+        const file_name = await fileHelper.upload();
+        request_data.avatar = file_name.files[0].filename;
+
+        if (pre_avatar != "") {
+          let file_delete = await fileHelper.deleteFile(pre_avatar);
+        }
+      }
       let model = await this.model.update(request_data, {
         where: { id: req.params.id },
       });
-      return {
-        message: "Record has been updated successfully",
-      };
+      return true;
     } catch (error) {
-      throw error;
-    }
-  }
-  //change avatar
-  async changeAvatar(req, res) {
-    if (req.files) {
-      let member = await this.model.findOne({ where: { id: req.params.id } });
-      let pre_avatar = member.avatar;
-      let files = [];
-      files[0] = req.files.avatar;
-      const fileHelper = new FileHelper(files, "members", req);
-      const file_name = await fileHelper.upload();
-      await this.model.update(
-        {
-          avatar: file_name.files[0].filename,
-        },
-        { where: { id: req.params.id } }
-      );
-      if (pre_avatar != "") {
-        let file_delete = await fileHelper.deleteFile(pre_avatar);
-      }
-      // let profile_details = await this.profileDetails(req)
-      res.status(200).json({
-        status: true,
-        message: "Avatar Updated.",
-      });
-    } else {
-      res.status(422).json({
-        status: false,
-        errors: "Avatar is required.",
-      });
+      console.error(error);
+      this.throwCustomError("Unable to get data", 500);
     }
   }
 }
