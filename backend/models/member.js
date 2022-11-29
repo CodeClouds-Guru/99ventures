@@ -24,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
       Member.belongsTo(models.Country, {
         foreignKey: "country_id",
       });
+      Member.hasMany(models.MemberTransaction, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.validate = function (req) {

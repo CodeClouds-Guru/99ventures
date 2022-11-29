@@ -5,7 +5,8 @@ class MemberTransactionController extends Controller {
     super("MemberTransaction");
   }
   //override save function
-  async list(req, res) {
-  }
+  // async list(req, res) {
+
+  // }
 }
 module.exports = MemberTransactionController;
