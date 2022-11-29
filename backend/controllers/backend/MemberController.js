@@ -5,6 +5,10 @@ const {
   MemberSecurityInformation,
   Country,
   MemberNote,
+  MemberTransaction,
+  MemberPaymentInformation,
+  PaymentMethod,
+  User,
   sequelize,
 } = require("../../models/index");
 const FileHelper = require("../../helpers/fileHelper");
@@ -40,7 +44,7 @@ class MemberController extends Controller {
           "country_id",
         ];
 
-        options.where = { [Op.and]: { id: member_id } };
+        options.where = { id: member_id };
         options.include = [
           {
             model: MembershipTier,
@@ -63,20 +67,37 @@ class MemberController extends Controller {
           {
             model: MemberNote,
             attributes: [
+              "user_id",
+              "member_id",
               "previous_status",
               "current_status",
               "note",
               "created_at",
+              "id",
             ],
-            limit: 20
+            include: {
+              model: User,
+              attributes: ["first_name", "last_name", "alias_name"],
+            },
           },
         ];
+        // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
         console.log(country_list);
+
+        let payment_email = MemberTransaction.findOne({
+          limit: 1,
+          where: {
+            member_id: member_id,
+          },
+          order: [["createdAt", "DESC"]],
+          include: { model: MemberPaymentInformation },
+        });
         result.setDataValue("country_list", country_list);
+        result.setDataValue("payment_email", payment_email);
 
         return {
           status: true,
@@ -97,16 +118,22 @@ class MemberController extends Controller {
     let request_data = req.body;
     console.log(request_data);
 
-    const { error, value } = this.model.validate(req);
-    if (error) {
-      const errorObj = new Error("Validation failed.");
-      errorObj.statusCode = 422;
-      errorObj.data = error.details.map((err) => err.message);
-      throw errorObj;
-    }
     try {
-      let result = this.updateBasicDetails(req, res);
-
+      let result = false;
+      if (req.body.type == "basic_details") {
+        delete req.body.type;
+        const { error, value } = this.model.validate(req);
+        if (error) {
+          const errorObj = new Error("Validation failed.");
+          errorObj.statusCode = 422;
+          errorObj.data = error.details.map((err) => err.message);
+          throw errorObj;
+        }
+        result = this.updateBasicDetails(req, res);
+      } else if (req.body.type == "member_status") {
+        delete req.body.type;
+        result = await Member.changeStatus(req);
+      }
       if (result) {
         return {
           status: true,
