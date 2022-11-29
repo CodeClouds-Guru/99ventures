@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
@@ -6,7 +6,6 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import axios from 'axios'
-import CountryData from 'src/app/CountryData';
 import { useDispatch } from 'react-redux'
 
 const buttonStyle = {
@@ -17,10 +16,11 @@ const buttonStyle = {
         fontSize: '1rem',
         width: '70px',
     },
-    '@media screen and (max-width: 1300px)': {
-        width: '100px',
-        paddingLeft: '25px', 
-        paddingRight: '25px',
+    '@media screen and (max-width: 1400px)': {
+        width: '105px',
+        paddingLeft: '18px', 
+        paddingRight: '18px',
+        fontSize: '1.2rem'
         
     }
 }
@@ -37,8 +37,39 @@ const textFieldStyle = {
     }
 }
 
+const iconStyle = {
+    '@media screen and (max-width: 1400px)': {
+        width: '17px',
+        height: '17px',
+        minWidth: '17px',
+        minHeight: '17px',
+        fontSize: '17px',
+        lineHeight: 17
+    }
+}
+
+const selectStyle = {
+    minWidth: '220px',
+    '@media screen and (max-width: 1400px)': {
+        minWidth: '100%'
+    }
+}
+
+const listItemTextStyle = {
+    '& .MuiListItemText-primary': {
+        display: 'flex',
+        justifyContent: 'space-between'
+    },
+    '@media screen and (max-width: 1400px)': {
+        '& .left-textbox': {
+            paddingRight: '10px'
+        }
+    }
+}
+
 const MemberDetails = () => {
     const dispatch = useDispatch();
+    const avatarRef = useRef();
     const { moduleId } = useParams();
     const [ editMode, setEditMode ] = useState(false);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
@@ -46,6 +77,8 @@ const MemberDetails = () => {
     const [ msg, setMsg ] = useState('');
     const [ memberData, setMemberData ] = useState({});
     const [ countryData, setCountryData ] = useState([]);
+    const [ avatar, setAvatar ] = useState('');
+    const [ avatarFile, setAvatarFile ] = useState('');
 
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
@@ -78,8 +111,14 @@ const MemberDetails = () => {
         axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
                 if (res.data.results.data) {
-                    setMemberData(res.data.results.data);
-                    setCountryData(res.data.results.data.country_list);
+                    const result = res.data.results.data;
+                    setMemberData({...result, membership_tier_id: result.MembershipTier.name});
+                    setCountryData(result.country_list);
+                
+                    if(result.avatar)
+                        setAvatar(result.avatar);
+                    else 
+                        setAvatar(`https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`)
                 }
             })
             .catch(errors => {
@@ -108,24 +147,22 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
-        const params = {
-            "type": "basic_details",
-            "data": {
-                "first_name": memberData.first_name,
-                "last_name": memberData.last_name,
-                "country_code": memberData.country_code,
-                "status": memberData.status,
-                "zip_code": memberData.zip_code,
-                "phone_no": memberData.phone_no,
-                "address_1": memberData.address_1,
-                "address_2": memberData.address_2,
-                "address_3": memberData.address_3,
-                "country_id": memberData.country_id,
-                "membership_tier_id": memberData.membership_tier_id
-            }
-        }
+        const formdata = new FormData();
+        formdata.append("first_name", memberData.first_name);
+        formdata.append("last_name", memberData.last_name);
+        formdata.append("country_code", memberData.country_code);
+        formdata.append("status", memberData.status);
+        formdata.append("zip_code", memberData.zip_code);
+        formdata.append("phone_no", memberData.phone_no);
+        formdata.append("address_1", memberData.address_1);
+        formdata.append("address_2", memberData.address_2);
+        formdata.append("address_3", memberData.address_3);
+        formdata.append("country_id", memberData.country_id);
+        formdata.append("membership_tier_id", memberData.membership_tier_id);
+        formdata.append("avatar", avatarFile);
 
-        axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, params)
+
+        axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, formdata)
         .then(res => {
             onCloseAlertDialogHandle()
             if (res.data.results.message) {
@@ -162,147 +199,141 @@ const MemberDetails = () => {
 
     async function readFileAsync(e) {
         const response = await new Promise((resolve, reject) => {
-            const file = e.target.files[0];
-            
+            const file = e.target.files[0];       
+            setAvatarFile(file);     
             if (!file) {
                 return;
             }
             const reader = new FileReader();
-
             reader.onload = () => {
                 resolve(`data:${file.type};base64,${btoa(reader.result)}`);
             };
-
             reader.onerror = reject;
-
             reader.readAsBinaryString(file);
         });
-
-        setMemberData({...memberData, avatar: response})
+        
+        setAvatar(response);
     }
 
     return (
-        <Box className="sm:p-16 lg:p-24 xl:p-32 flex sm:flex-col lg:flex-row" >
+        <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
-                <div className='flex justify-between xitems-center'>
-                    <div className='flex justify-between items-center'>
+                <div className='flex justify-between xitems-center flex-col'>
+                    <div className='flex xjustify-between items-center flex-wrap mb-24'>
                         <Typography 
                             variant="h4"
                             sx={{
                                 marginRight: '10px',
                                 '@media screen and (max-width: 768px)': {
-                                    fontSize: '2rem'
+                                    fontSize: '1.5rem'
                                 },
-                                '@media screen and (max-width: 1300px)': {
-                                    fontSize: '2.5rem'
+                                '@media screen and (max-width: 1400px)': {
+                                    fontSize: '2rem'
                                 }
                             }}
                         ><strong>{memberData.username}</strong> </Typography>
-                        {
-                            !editMode ? (
-                                <Tooltip title="Click to edit" placement="top-start">
-                                    <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(true)}>
-                                        (<FuseSvgIcon className="text-48" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>)
-                                    </IconButton>
-                                </Tooltip>
-                            ) : (
-                                <div>
-                                    <Tooltip title="Click to save" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=>onOpenAlertDialogHandle('save_profile') }>
-                                            (<FuseSvgIcon className="text-48" size={20} color="action">feather:save</FuseSvgIcon>)
+                        <sub>
+                            {
+                                !editMode ? (
+                                    <Tooltip title="Click to edit" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(true)}>
+                                            <FuseSvgIcon sx={iconStyle} className="text-28" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Click to cancel" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="div" onClick={ ()=> setEditMode(false)}>
-                                            (<FuseSvgIcon className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>)
-                                        </IconButton>
-                                    </Tooltip>
-                                </div>
-                            )
-                        }
+                                ) : (
+                                    <>
+                                        <Tooltip title="Click to save" placement="top-start">
+                                            <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=>onOpenAlertDialogHandle('save_profile') }>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">feather:save</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Click to cancel" placement="top-start">
+                                            <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(false)}>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </>
+                                )
+                            }
+                        </sub>
                     </div>
-                    <div className='relative'>
-                        
-                    <Box
-                    sx={{
-                        borderWidth: 4,
-                        borderStyle: 'solid',
-                        borderColor: 'background.paper',
-                    }}
-                    className="relative flex items-center justify-center w-128 h-128 rounded-full overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-black bg-opacity-50 z-10" />
-                        <div className="absolute inset-0 flex items-center justify-center z-20">
-                            <div>
-                                <label htmlFor="button-avatar" className="flex p-8 cursor-pointer">
-                                    <input
-                                    accept="image/*"
-                                    className="hidden"
-                                    id="button-avatar"
-                                    type="file"
-                                    onChange={(e) => {                                        
-                                        readFileAsync(e);
-                                    }}
-                                    />
-                                    <FuseSvgIcon className="text-white">heroicons-outline:camera</FuseSvgIcon>
-                                </label>
-                            </div>
-                        <div>
-                        <IconButton
-                            onClick={() => {
-                                onChange('');
-                            }}
-                        >
-                            <FuseSvgIcon className="text-white">heroicons-solid:trash</FuseSvgIcon>
-                        </IconButton>
-                        </div>
-                    </div>
-                    <Avatar
-                        sx={{
-                        backgroundColor: 'background.default',
-                        color: 'text.secondary',
-                        }}
-                        className="object-cover w-full h-full text-64 font-bold"
-                        src={ memberData.avatar }
-                        alt=""
-                    >
-                        SD
-                    </Avatar>
-                    </Box>
-
-                        {/* <Avatar 
-                            src={memberData.avatar ? memberData.avatar :  `https://ui-avatars.com/api/?name=${ memberData.first_name}+${ memberData.last_name}`}
-                            sx={{ 
-                                width: 120, 
-                                height: 120 ,
-                                '@media screen and (max-width: 768px)': {
-                                    width: 60, 
-                                    height: 60,                                    
+                    <div className='relative m-auto'>                        
+                        <Box
+                            sx={{
+                                borderWidth: 4,
+                                borderStyle: 'solid',
+                                borderColor: 'background.paper',
+                                width: '14rem',
+                                height: '14rem',  
+                                '@media screen and (max-width: 1400px)': {
+                                    width: '10rem',
+                                    height: '10rem',
                                 },
-                                '@media screen and (max-width: 1300px)': {
-                                    width: 120,
-                                    height: 120,                                    
+                                '@media screen and (max-width: 768px)': {
+                                    width: '15rem',
+                                    height: '15rem',
                                 }
-                        }}></Avatar>
-                        {
-                            editMode && (
-                                <IconButton 
-                                    color="primary" 
-                                    aria-label="Filter" 
-                                    component="div" 
-                                    sx={{
-                                        position: 'absolute', 
-                                        top: '80px', 
-                                        left: '70%',
-                                        '@media screen and (max-width: 1300px)': {
-
-                                        }
-                                    }}
-                                    >
-                                    <FuseSvgIcon className="text-48" size={22} color="primary">heroicons-outline:camera</FuseSvgIcon>
-                                </IconButton>
-                            )
-                        }  */}
+                            }}
+                            className="shadow-md relative flex items-center justify-center rounded-full overflow-hidden"
+                        >
+                            {
+                                editMode && (
+                                    <>
+                                        <div className="absolute inset-0 bg-black bg-opacity-50 z-10" />
+                                        <div className="absolute inset-0 flex items-center justify-center z-20">
+                                            <div>
+                                                <label htmlFor="button-avatar" className="flex p-8 cursor-pointer">
+                                                    <input
+                                                        ref={avatarRef}
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        id="button-avatar"
+                                                        type="file"
+                                                        onChange={(e) => {                                        
+                                                            readFileAsync(e);
+                                                        }}
+                                                    />
+                                                    <Tooltip title="Upload" placement="bottom-start">
+                                                        <FuseSvgIcon  sx={iconStyle} className="text-white">heroicons-outline:camera</FuseSvgIcon>
+                                                    </Tooltip>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <Tooltip title="Reset" placement="bottom-start">
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setAvatar(memberData.avatar);
+                                                            avatarRef.current.value = ''; // To remove the value from input file
+                                                        }}
+                                                    >
+                                                        <FuseSvgIcon sx={iconStyle} className="text-white text-48" size={24} color="action">feather:rotate-ccw</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) 
+                            }     
+                            <Avatar
+                                sx={{
+                                    backgroundColor: 'background.default',
+                                    color: 'text.secondary',
+                                    '@media screen and (max-width: 768px)': {
+                                        width: 60, 
+                                        height: 60,                                    
+                                    },
+                                    '@media screen and (max-width: 1400px)': {
+                                        width: 120,
+                                        height: 120,                                    
+                                    }
+                                }}
+                                className="object-cover w-full h-full text-20 font-bold"
+                                src={ avatar }
+                                alt={ `${memberData.first_name} ${memberData.last_name}` }
+                            >
+                                { avatar }
+                            </Avatar>
+                        </Box>
                     </div>
                 </div>
                 <List className="sm:mb-16 lg:mb-32">
@@ -324,7 +355,10 @@ const MemberDetails = () => {
                                 editMode ? (
                                     <div >
                                         <TextField
-                                            sx={{ minWidth: 220, ...textFieldStyle }}
+                                            sx={{ 
+                                                ...selectStyle,
+                                                ...textFieldStyle 
+                                            }}
                                             id="standard-select-currency-native"
                                             select
                                             value={ memberData.status }             
@@ -354,7 +388,7 @@ const MemberDetails = () => {
                         <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
                         } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                        <ListItemText sx={listItemTextStyle} className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
                             <>
                             {
                                 editMode ? (
@@ -365,7 +399,7 @@ const MemberDetails = () => {
                                             variant="standard"
                                             placeholder="First Name"
                                             sx={textFieldStyle}
-                                            className="mr-10"
+                                            className="left-textbox"
                                             onChange={
                                                 (e)=> setMemberData({...memberData, first_name: e.target.value})
                                             }
@@ -408,7 +442,7 @@ const MemberDetails = () => {
                             editMode ? (
                                 <div >
                                     <TextField
-                                        sx={{ minWidth: 220, ...textFieldStyle }}
+                                        sx={{ ...selectStyle, ...textFieldStyle }}
                                         id="standard-select-currency-native"
                                         select
                                         value={ memberData.MembershipTier ?  memberData.MembershipTier.name : ''}
@@ -446,11 +480,13 @@ const MemberDetails = () => {
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
                             editMode ? (
-                                <div className='flex'>
+                                <div 
+                                    className='flex lg:flex-col xl:flex-row justify-between'
+                                >
                                     <Autocomplete
                                         {...countryCodeProps}
-                                        className="mr-10"
-                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
+                                        className="xmr-10"
+                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
                                         id="clear-on-escape"
                                         value={ countryData.filter(c => c.phonecode == memberData.country_code)[0]}
                                         clearOnEscape
@@ -502,7 +538,7 @@ const MemberDetails = () => {
                     <Button variant="text" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '8px 15px'}}>DELETE ACCOUNT</Button>
                 </div>
             </div>
-            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-20 xl:24" />
+            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
                     <Button variant="contained" size="large" sx={buttonStyle}>Profile</Button>
@@ -522,7 +558,7 @@ const MemberDetails = () => {
                                             fontSize: '1.5rem',
                                             fontWeight: '600'
                                         },
-                                        '@media screen and (max-width: 1300px)': {
+                                        '@media screen and (max-width: 1400px)': {
                                             fontSize: '1.8rem',
                                             fontWeight: '600'
                                         }
@@ -568,7 +604,7 @@ const MemberDetails = () => {
                                         fontSize: '1.5rem',
                                         fontWeight: '600'
                                     },
-                                    '@media screen and (max-width: 1300px)': {
+                                    '@media screen and (max-width: 1400px)': {
                                         fontSize: '1.8rem',
                                         fontWeight: '600'
                                     }
@@ -576,10 +612,10 @@ const MemberDetails = () => {
                             >Address</Typography>
                             <List>
                                 <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                         <Typography variant="subtitle">Address Line 1:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
                                         <>
                                         {
                                             editMode ? (
@@ -601,10 +637,10 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>                                
                                 <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                         <Typography variant="subtitle">Address Line 2:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
                                         <>
                                         {
                                             editMode ? (
@@ -626,10 +662,10 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                         <Typography variant="subtitle">Address Line 3:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
                                         <>
                                         {
                                             editMode ? (
@@ -651,10 +687,10 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                         <Typography variant="subtitle">ZIP Code:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
                                         <>
                                         {
                                             editMode ? (
@@ -676,26 +712,26 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                         <Typography variant="subtitle">Country:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-2/3" primary={
+                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
                                         <>
                                         {
                                             editMode ? (
-                                                    <Autocomplete
-                                                        {...countryProps}
-                                                        value={ countryData.filter(c => c.id == memberData.country_id)[0]}
-                                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
-                                                        id="clear-on-escape"
-                                                        onChange={
-                                                            (e, newValue)=>setMemberData({...memberData, country_id: newValue.id})
-                                                        }
-                                                        clearOnEscape
-                                                        renderInput={(params) => (
-                                                            <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
-                                                        )}
-                                                    />
+                                                <Autocomplete
+                                                    {...countryProps}
+                                                    value={ countryData.filter(c => c.id == memberData.country_id)[0]}
+                                                    sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
+                                                    id="clear-on-escape"
+                                                    onChange={
+                                                        (e, newValue)=>setMemberData({...memberData, country_id: newValue.id})
+                                                    }
+                                                    clearOnEscape
+                                                    renderInput={(params) => (
+                                                        <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                    )}
+                                                />
                                                 
                                             ) : (
                                                 <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
