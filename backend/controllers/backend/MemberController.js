@@ -4,6 +4,7 @@ const {
   MembershipTier,
   MemberSecurityInformation,
   Country,
+  MemberNote,
   sequelize,
 } = require("../../models/index");
 const FileHelper = require("../../helpers/fileHelper");
@@ -58,6 +59,16 @@ class MemberController extends Controller {
               "browser",
               "browser_language",
             ],
+          },
+          {
+            model: MemberNote,
+            attributes: [
+              "previous_status",
+              "current_status",
+              "note",
+              "created_at",
+            ],
+            limit: 20
           },
         ];
         let result = await this.model.findOne(options);
