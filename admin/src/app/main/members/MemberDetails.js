@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -7,6 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import axios from 'axios'
 import CountryData from 'src/app/CountryData';
+import { useDispatch } from 'react-redux'
 
 const buttonStyle = {
     borderRadius: '5px', 
@@ -37,6 +38,7 @@ const textFieldStyle = {
 }
 
 const MemberDetails = () => {
+    const dispatch = useDispatch();
     const { moduleId } = useParams();
     const [ editMode, setEditMode ] = useState(false);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
@@ -82,7 +84,7 @@ const MemberDetails = () => {
             })
             .catch(errors => {
                 console.log(errors);
-                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+                dispatch(showMessage({ variant: 'error', message: errors.message}));
             })
     }
 
@@ -106,7 +108,35 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
-        console.log(memberData)
+        const params = {
+            "type": "basic_details",
+            "data": {
+                "first_name": memberData.first_name,
+                "last_name": memberData.last_name,
+                "country_code": memberData.country_code,
+                "status": memberData.status,
+                "zip_code": memberData.zip_code,
+                "phone_no": memberData.phone_no,
+                "address_1": memberData.address_1,
+                "address_2": memberData.address_2,
+                "address_3": memberData.address_3,
+                "country_id": memberData.country_id,
+                "membership_tier_id": memberData.membership_tier_id
+            }
+        }
+
+        axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, params)
+        .then(res => {
+            onCloseAlertDialogHandle()
+            if (res.data.results.message) {
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                setEditMode(false);
+            }
+        })
+        .catch(errors => {
+            console.log(errors);
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+        });
     }
 
     const countryProps = {
@@ -116,8 +146,40 @@ const MemberDetails = () => {
 
     const countryCodeProps = {
         options: countryData,
-        getOptionLabel: (option) => option.phonecode,
+        getOptionLabel: (option) => option.name + ' ('+ option.phonecode +')',
     };
+
+    const showStatus = (status) => {
+        if(status === 'verified') 
+            return <Chip component="span" label={status} className="capitalize" color="success" />
+        else if(status === 'suspended') 
+            return <Chip component="span" label={status} className="capitalize" color="primary" />
+        else if(status === 'validating') 
+            return <Chip component="span" label={status} className="capitalize" color="warning" />
+        else if(status === 'deleted') 
+            return <Chip component="span" label={status} className="capitalize" color="error" />
+    }
+
+    async function readFileAsync(e) {
+        const response = await new Promise((resolve, reject) => {
+            const file = e.target.files[0];
+            
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                resolve(`data:${file.type};base64,${btoa(reader.result)}`);
+            };
+
+            reader.onerror = reject;
+
+            reader.readAsBinaryString(file);
+        });
+
+        setMemberData({...memberData, avatar: response})
+    }
 
     return (
         <Box className="sm:p-16 lg:p-24 xl:p-32 flex sm:flex-col lg:flex-row" >
@@ -160,7 +222,55 @@ const MemberDetails = () => {
                         }
                     </div>
                     <div className='relative'>
-                        <Avatar 
+                        
+                    <Box
+                    sx={{
+                        borderWidth: 4,
+                        borderStyle: 'solid',
+                        borderColor: 'background.paper',
+                    }}
+                    className="relative flex items-center justify-center w-128 h-128 rounded-full overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-black bg-opacity-50 z-10" />
+                        <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <div>
+                                <label htmlFor="button-avatar" className="flex p-8 cursor-pointer">
+                                    <input
+                                    accept="image/*"
+                                    className="hidden"
+                                    id="button-avatar"
+                                    type="file"
+                                    onChange={(e) => {                                        
+                                        readFileAsync(e);
+                                    }}
+                                    />
+                                    <FuseSvgIcon className="text-white">heroicons-outline:camera</FuseSvgIcon>
+                                </label>
+                            </div>
+                        <div>
+                        <IconButton
+                            onClick={() => {
+                                onChange('');
+                            }}
+                        >
+                            <FuseSvgIcon className="text-white">heroicons-solid:trash</FuseSvgIcon>
+                        </IconButton>
+                        </div>
+                    </div>
+                    <Avatar
+                        sx={{
+                        backgroundColor: 'background.default',
+                        color: 'text.secondary',
+                        }}
+                        className="object-cover w-full h-full text-64 font-bold"
+                        src={ memberData.avatar }
+                        alt=""
+                    >
+                        SD
+                    </Avatar>
+                    </Box>
+
+                        {/* <Avatar 
                             src={memberData.avatar ? memberData.avatar :  `https://ui-avatars.com/api/?name=${ memberData.first_name}+${ memberData.last_name}`}
                             sx={{ 
                                 width: 120, 
@@ -192,7 +302,7 @@ const MemberDetails = () => {
                                     <FuseSvgIcon className="text-48" size={22} color="primary">heroicons-outline:camera</FuseSvgIcon>
                                 </IconButton>
                             )
-                        }
+                        }  */}
                     </div>
                 </div>
                 <List className="sm:mb-16 lg:mb-32">
@@ -221,6 +331,9 @@ const MemberDetails = () => {
                                             SelectProps={{
                                                 native: true,
                                             }}
+                                            onChange={
+                                                (e)=> setMemberData({...memberData, status: e.target.value})
+                                            }
                                             variant="standard"
                                             >
                                             <option value="">--Select--</option>
@@ -231,7 +344,7 @@ const MemberDetails = () => {
                                         </TextField>
                                     </div>
                                 ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.status }</Typography>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
                                 )
                             }
                             </>
@@ -253,6 +366,9 @@ const MemberDetails = () => {
                                             placeholder="First Name"
                                             sx={textFieldStyle}
                                             className="mr-10"
+                                            onChange={
+                                                (e)=> setMemberData({...memberData, first_name: e.target.value})
+                                            }
                                         />
                                         <TextField
                                             id="standard-helperText"                                
@@ -260,6 +376,9 @@ const MemberDetails = () => {
                                             variant="standard"
                                             placeholder="Last Name"
                                             sx={textFieldStyle}
+                                            onChange={
+                                                (e)=> setMemberData({...memberData, last_name: e.target.value})
+                                            }
                                         />
                                     </>
                                 ) : (
@@ -277,20 +396,7 @@ const MemberDetails = () => {
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <>
-                            {
-                                editMode ? (
-                                    <TextField
-                                        id="standard-helperText"                                
-                                        defaultValue={ memberData.referer }                              
-                                        variant="standard"
-                                        sx={textFieldStyle}
-                                    />
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Example Refer ip</Typography>
-                                )
-                            }
-                            </>   
+                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.referer }</Typography>
                         }/>
                     </ListItem>                    
                     
@@ -299,33 +405,39 @@ const MemberDetails = () => {
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Level:</Typography>
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <>
-                            {
-                                editMode ? (
-                                    <div >
-                                        <TextField
-                                            sx={{ minWidth: 220, ...textFieldStyle }}
-                                            id="standard-select-currency-native"
-                                            select
-                                            value={ memberData.membership_tier_id }
-                                            SelectProps={{
-                                                native: true,
-                                            }}
-                                            variant="standard"
-                                            >
-                                            <option value="">--Select--</option>
-                                            <option value="1">Level 1</option>
-                                            <option value="2">Level 2</option>
-                                            <option value="3">Level 3</option>
-                                            <option value="4">Level 4</option>
-                                            <option value="5">Level 5</option>
-                                        </TextField>
-                                    </div>
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">Level { memberData.membership_tier_id }</Typography>
-                                )
-                            }
-                            </>
+                            editMode ? (
+                                <div >
+                                    <TextField
+                                        sx={{ minWidth: 220, ...textFieldStyle }}
+                                        id="standard-select-currency-native"
+                                        select
+                                        value={ memberData.MembershipTier ?  memberData.MembershipTier.name : ''}
+                                        SelectProps={{
+                                            native: true,
+                                        }}
+                                        variant="standard"
+                                        onChange={
+                                            (e)=>setMemberData({
+                                                ...memberData, 
+                                                'MembershipTier': {
+                                                    name: e.target.value
+                                                },
+                                                'membership_tier_id': e.target.value
+                                            })
+                                        }
+                                        >
+                                        <option value="">--Select--</option>
+                                        <option value="1">Level 1</option>
+                                        <option value="2">Level 2</option>
+                                        <option value="3">Level 3</option>
+                                        <option value="4">Level 4</option>
+                                        <option value="5">Level 5</option>
+                                    </TextField>
+                                </div>
+                            ) : (
+                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : '' }</Typography>
+                            )
+                            
                         }/>
                     </ListItem>
                     <ListItem disablePadding>
@@ -333,24 +445,32 @@ const MemberDetails = () => {
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Phone:</Typography>
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <>
-                            {
-                                editMode ? (
-                                    <>
-                                        <TextField
-                                            type="tel"
-                                            id="standard-helperText"
-                                            defaultValue={ memberData.phone_no }
-                                            variant="standard"
-                                            sx={textFieldStyle}
-                                            onKeyUp={ handlePhoneValidation }
-                                        />
-                                    </>
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ `(${memberData.country_code}) ` + memberData.phone_no }</Typography>
-                                )
-                            }
-                            </>                             
+                            editMode ? (
+                                <div className='flex'>
+                                    <Autocomplete
+                                        {...countryCodeProps}
+                                        className="mr-10"
+                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
+                                        id="clear-on-escape"
+                                        value={ countryData.filter(c => c.phonecode == memberData.country_code)[0]}
+                                        clearOnEscape
+                                        onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.phonecode}) }
+                                        renderInput={(params) => (
+                                            <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                        )}
+                                    />
+                                    <TextField
+                                        type="tel"
+                                        id="standard-helperText"
+                                        defaultValue={ memberData.phone_no }
+                                        variant="standard"
+                                        sx={textFieldStyle}
+                                        onKeyUp={ handlePhoneValidation }
+                                    />
+                                </div>
+                            ) : (
+                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ `(${memberData.country_code}) ` + memberData.phone_no }</Typography>
+                            )                    
                         } />
                     </ListItem>
                 </List>
@@ -455,45 +575,6 @@ const MemberDetails = () => {
                                 }}
                             >Address</Typography>
                             <List>
-                                {/* <ListItem disablePadding >
-                                    <ListItemText className="w-full" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <>
-                                                    <TextField
-                                                        type="tel"
-                                                        id="standard-helperText"                                
-                                                        defaultValue=""                                
-                                                        variant="standard"
-                                                        placeholder="Address Line 1"
-                                                    />
-                                                    <TextField
-                                                        type="tel"
-                                                        id="standard-helperText"                                
-                                                        defaultValue=""                                
-                                                        variant="standard"
-                                                        placeholder="Address Line 2"
-                                                    />
-                                                    <TextField
-                                                        type="tel"
-                                                        id="standard-helperText"                                
-                                                        defaultValue=""                                
-                                                        variant="standard"
-                                                        placeholder="Address Line 3"
-                                                    />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Typography variant="subtitle">{ memberData.address_1 }</Typography><br/>
-                                                    <Typography variant="subtitle">{ memberData.address_2 }</Typography><br/>
-                                                    <Typography variant="subtitle">{ memberData.address_3 }</Typography>
-                                                </>
-                                            )
-                                        }
-                                        </>  
-                                    } />
-                                </ListItem> */}
                                 <ListItem disablePadding>
                                     <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/3" primary={
                                         <Typography variant="subtitle">Address Line 1:</Typography>
@@ -503,8 +584,8 @@ const MemberDetails = () => {
                                         {
                                             editMode ? (
                                                 <TextField
-                                                    type="tel"
-                                                    id="standard-helperText"                                
+                                                    type="text"
+                                                    id="standard-helperText" 
                                                     defaultValue={ memberData.address_1 }                              
                                                     variant="standard"
                                                     sx={textFieldStyle}
@@ -513,7 +594,7 @@ const MemberDetails = () => {
                                                     }
                                                 />
                                             ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_1 }</Typography>
                                             )
                                         }
                                         </>
@@ -538,7 +619,7 @@ const MemberDetails = () => {
                                                     }
                                                 />
                                             ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_2 }</Typography>
                                             )
                                         }
                                         </>
@@ -563,7 +644,7 @@ const MemberDetails = () => {
                                                     }
                                                 />
                                             ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_3 }</Typography>
                                             )
                                         }
                                         </>
@@ -604,7 +685,12 @@ const MemberDetails = () => {
                                             editMode ? (
                                                     <Autocomplete
                                                         {...countryProps}
+                                                        value={ countryData.filter(c => c.id == memberData.country_id)[0]}
+                                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
                                                         id="clear-on-escape"
+                                                        onChange={
+                                                            (e, newValue)=>setMemberData({...memberData, country_id: newValue.id})
+                                                        }
                                                         clearOnEscape
                                                         renderInput={(params) => (
                                                             <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
@@ -612,7 +698,9 @@ const MemberDetails = () => {
                                                     />
                                                 
                                             ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">XXXX</Typography>
+                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                                    {memberData.country_id && countryData.filter(c => c.id == memberData.country_id)[0].name}
+                                                </Typography>
                                             )
                                         }
                                         </>

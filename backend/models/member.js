@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
-const Joi = require('joi')
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -33,16 +33,17 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      email: Joi.string().email().required().label("Email"),
-      username: Joi.string().min(3).max(30).required().label("Username"),
-      password: Joi.string().allow("").optional(),
-      phone_no: Joi.string().allow("").optional().label("Phone No"),
-      country_id: Joi.string().allow("").optional().label("Country"),
-      address_1: Joi.string().allow("").optional().label("Address 1"),
-      address_2: Joi.string().allow("").optional().label("Address 2"),
-      address_3: Joi.string().allow("").optional().label("Address 3"),
-      zip_code: Joi.string().allow("").optional().label("Zip Code"),
-      country_code: Joi.string().allow("").optional().label("Country Code"),
+      status: Joi.string().optional().label("Status"),
+      // username: Joi.string().min(3).max(30).required().label("Username"),
+      password: Joi.string().optional(),
+      phone_no: Joi.string().optional().label("Phone No"),
+      country_id: Joi.optional().label("Country"),
+      membership_tier_id: Joi.string().optional().label("Level"),
+      address_1: Joi.string().allow(null).optional().label("Address 1"),
+      address_2: Joi.string().allow(null).optional().label("Address 2"),
+      address_3: Joi.string().allow(null).optional().label("Address 3"),
+      zip_code: Joi.string().allow(null).optional().label("Zip Code"),
+      country_code: Joi.optional().label("Country Code"),
     });
     return schema.validate(req.body);
   };

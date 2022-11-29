@@ -49,7 +49,8 @@ const jwtServiceConfig = {
   savePages: 'pages/save',
   updatePages: 'pages/update',
   getSinglePage: 'pages/edit',
-  getSingleMember: 'members/view'
+  getSingleMember: 'members/view',
+  memberUpdate: 'members/update'
 };
 
 export default jwtServiceConfig;
