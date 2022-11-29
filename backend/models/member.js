@@ -76,7 +76,17 @@ module.exports = (sequelize, DataTypes) => {
       created_at: "TIMESTAMP",
       updated_at: "TIMESTAMP",
       deleted_at: "TIMESTAMP",
-      avatar: DataTypes.STRING,
+      avatar: {
+        type: DataTypes.STRING,
+        get() {
+          let rawValue = this.getDataValue("avatar");
+          const publicURL =
+            process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
+
+          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+        },
+      },
       referral_code: DataTypes.STRING,
       address_1: DataTypes.STRING,
       address_2: DataTypes.STRING,
