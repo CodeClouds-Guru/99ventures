@@ -65,6 +65,8 @@ class MemberController extends Controller {
               "browser",
               "browser_language",
             ],
+            limit: 1,
+            order: [["created_at", "DESC"]],
           },
           {
             model: MemberNote,
@@ -77,6 +79,8 @@ class MemberController extends Controller {
               "created_at",
               "id",
             ],
+            limit: 20,
+            order: [["created_at", "DESC"]],
             include: {
               model: User,
               attributes: ["first_name", "last_name", "alias_name"],
@@ -171,7 +175,7 @@ class MemberController extends Controller {
           let file_delete = await fileHelper.deleteFile(pre_avatar);
         }
       }
-      console.log(request_data)
+      console.log(request_data);
       let model = await this.model.update(request_data, {
         where: { id: req.params.id },
       });
