@@ -267,43 +267,25 @@ class TicketController extends Controller {
   //update for all type of updation
   async update(req, res) {
     console.log(req);
-    const value = req.body.value || "";
-    const field_name = req.body.field_name || "";
-    const ticket_id = req.body.id || null;
+
     const member_id = req.body.member_id || null;
     // const user_id = req.body.user_id || null;
     // const attachments = req.files ? req.files.attachments : [];
     const type = req.body.type || "";
-    const notes = req.body.member_notes || null;
 
     let change = false;
     // console.log(req.files);
     try {
       switch (type) {
         case "is_read":
-          change = await this.changeStatus(value, field_name, ticket_id);
+          change = await this.changeStatus(req);
           break;
         case "ticket_status":
-          change = await this.changeStatus(value, field_name, ticket_id);
+          change = await this.changeStatus(req);
           break;
         case "member_status":
-          let member = await Member.findOne({
-            attributes: ["status"],
-            where: { id: member_id },
-          });
           // console.log("-----------------------member", member);
-          change = await Member.changeStatus(field_name, value, member_id);
-          if (notes !== null) {
-            let data = {
-              user_id: req.user.id,
-              member_id: member_id,
-              previous_status: member.status,
-              current_status: value,
-              note: notes,
-            };
-
-            change = await MemberNote.create(data);
-          }
+          change = await Member.changeStatus(req);
           break;
         case "ticket_chat":
           change = await this.saveTicketConversations(req);
@@ -354,7 +336,7 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-      
+
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;

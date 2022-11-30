@@ -2,6 +2,7 @@
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
+// const {MemberNote} = require("../models/index");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -27,22 +28,26 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberTransaction, {
         foreignKey: "member_id",
       });
+      Member.hasMany(models.MemberPaymentInformation, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.validate = function (req) {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      status: Joi.string().optional().label("Status"),
+      // status: Joi.string().optional().label("Status"),
       // username: Joi.string().min(3).max(30).required().label("Username"),
       password: Joi.string().optional(),
       phone_no: Joi.string().optional().label("Phone No"),
       country_id: Joi.optional().label("Country"),
-      membership_tier_id: Joi.string().optional().label("Level"),
-      address_1: Joi.string().allow(null).optional().label("Address 1"),
-      address_2: Joi.string().allow(null).optional().label("Address 2"),
-      address_3: Joi.string().allow(null).optional().label("Address 3"),
-      zip_code: Joi.string().allow(null).optional().label("Zip Code"),
+      membership_tier_id: Joi.optional().label("Level"),
+      address_1: Joi.string().allow("").optional().label("Address 1"),
+      address_2: Joi.string().allow("").optional().label("Address 2"),
+      address_3: Joi.string().allow("").optional().label("Address 3"),
+      zip_code: Joi.string().allow("").optional().label("Zip Code"),
+      avatar: Joi.string().allow("").optional().label("Avatar"),
       country_code: Joi.optional().label("Country Code"),
     });
     return schema.validate(req.body);
@@ -65,7 +70,14 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       status: DataTypes.STRING,
       phone_no: DataTypes.STRING,
-      country_code: DataTypes.STRING,
+      country_code: {
+        type: DataTypes.INTEGER,
+        set(value) {
+          if (value == "" || value == null)
+            this.setDataValue("country_code", null);
+          else this.setDataValue("country_code", value);
+        },
+      },
       dob: DataTypes.DATE,
       referer: DataTypes.STRING,
       password: DataTypes.STRING,
@@ -79,12 +91,21 @@ module.exports = (sequelize, DataTypes) => {
       avatar: {
         type: DataTypes.STRING,
         get() {
-          let rawValue = this.getDataValue("avatar");
-          const publicURL =
-            process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
-
-          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
-          return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+          let rawValue = this.getDataValue("avatar") || null;
+          console.log("rawValue", typeof rawValue);
+          if (rawValue == null || rawValue == "") {
+            const publicURL =
+              process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
+            rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+          } else {
+            rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          }
+          return rawValue;
+        },
+        set(value) {
+          if (value == "" || value == null) {
+            this.setDataValue("avatar", null);
+          }
         },
       },
       referral_code: DataTypes.STRING,
@@ -92,7 +113,15 @@ module.exports = (sequelize, DataTypes) => {
       address_2: DataTypes.STRING,
       address_3: DataTypes.STRING,
       zip_code: DataTypes.STRING,
-      country_code: DataTypes.INTEGER,
+      country_id: {
+        type: DataTypes.INTEGER,
+        set(value) {
+          console.log("country_id", value);
+          if (value == "" || value == null)
+            this.setDataValue("country_id", null);
+          else this.setDataValue("country_id", value);
+        },
+      },
     },
     {
       sequelize,
@@ -214,16 +243,45 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   sequelizePaginate.paginate(Member);
-  Member.changeStatus = async (field_name, val, id) => {
-    let update_data = {
-      [field_name]: val,
-    };
-    console.log(update_data);
-    let result = await Member.update(update_data, {
-      where: { id: id },
-      return: true,
-    });
-    return result[0];
+
+  Member.changeStatus = async (req) => {
+    const { MemberNote } = require("../models/index");
+
+    const value = req.body.value || "";
+    const field_name = req.body.field_name || "";
+    const id = req.params.id || null;
+    const notes = req.body.member_notes || null;
+    try {
+      let member = await Member.findOne({
+        attributes: ["status"],
+        where: { id: id },
+      });
+      console.log(req);
+      let result = await Member.update(
+        {
+          [field_name]: value,
+        },
+        {
+          where: { id: id },
+          return: true,
+        }
+      );
+      if (notes !== null) {
+        let data = {
+          user_id: req.user.id,
+          member_id: id,
+          previous_status: member.status,
+          current_status: value,
+          note: notes,
+        };
+        console.log("MemberNote===========", MemberNote);
+        await MemberNote.create(data);
+      }
+      return result[0];
+    } catch (error) {
+      console.error(error);
+      // this.throwCustomError("Unable to save data", 500);
+    }
   };
   return Member;
 };
