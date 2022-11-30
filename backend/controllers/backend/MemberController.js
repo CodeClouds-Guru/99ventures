@@ -122,7 +122,6 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-    console.log(request_data);
 
     try {
       let result = false;
@@ -172,6 +171,7 @@ class MemberController extends Controller {
           let file_delete = await fileHelper.deleteFile(pre_avatar);
         }
       }
+      console.log(request_data)
       let model = await this.model.update(request_data, {
         where: { id: req.params.id },
       });
