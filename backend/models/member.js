@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       password: Joi.string().optional(),
       phone_no: Joi.string().optional().label("Phone No"),
       country_id: Joi.optional().label("Country"),
-      membership_tier_id: Joi.string().optional().label("Level"),
+      membership_tier_id: Joi.optional().label("Level"),
       address_1: Joi.string().allow("").optional().label("Address 1"),
       address_2: Joi.string().allow("").optional().label("Address 2"),
       address_3: Joi.string().allow("").optional().label("Address 3"),
@@ -70,7 +70,14 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       status: DataTypes.STRING,
       phone_no: DataTypes.STRING,
-      country_code: DataTypes.STRING,
+      country_code: {
+        type: DataTypes.INTEGER,
+        set(value) {
+          if (value == "" || value == null) {
+            this.setDataValue("country_code", null);
+          }
+        },
+      },
       dob: DataTypes.DATE,
       referer: DataTypes.STRING,
       password: DataTypes.STRING,
@@ -84,13 +91,21 @@ module.exports = (sequelize, DataTypes) => {
       avatar: {
         type: DataTypes.STRING,
         get() {
-          let rawValue = this.getDataValue("avatar");
-          const publicURL =
-            process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
-          if (rawValue !== null || rawValue != "")
+          let rawValue = this.getDataValue("avatar") || null;
+          console.log("rawValue", typeof rawValue);
+          if (rawValue == null || rawValue == "") {
+            const publicURL =
+              process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
+            rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+          } else {
             rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
-          else rawValue = null;
-          return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+          }
+          return rawValue;
+        },
+        set(value) {
+          if (value == "" || value == null) {
+            this.setDataValue("avatar", null);
+          }
         },
       },
       referral_code: DataTypes.STRING,
@@ -98,7 +113,14 @@ module.exports = (sequelize, DataTypes) => {
       address_2: DataTypes.STRING,
       address_3: DataTypes.STRING,
       zip_code: DataTypes.STRING,
-      country_code: DataTypes.INTEGER,
+      country_id: {
+        type: DataTypes.INTEGER,
+        set(value) {
+          if (value == "" || value == null) {
+            this.setDataValue("country_id", null);
+          }
+        },
+      },
     },
     {
       sequelize,
