@@ -1,5 +1,6 @@
 import settingsConfig from 'app/configs/settingsConfig';
 import Index from './Index';
+import IPLogs from './IPlogs';
  
 const UserConfig = {
     settings: {
@@ -28,8 +29,13 @@ const UserConfig = {
     },
     routes: [
         {
-            path: 'app/members/:moduleId',
+            path: 'app/members/:moduleId/',
             element: <Index />,
+            auth: settingsConfig.defaultAuth
+        },
+        {
+            path: 'app/members/:moduleId/iplogs',
+            element: <IPLogs />,
             auth: settingsConfig.defaultAuth
         },
     ],

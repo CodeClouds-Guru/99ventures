@@ -29,6 +29,15 @@ const navigationConfig = [
     },
   },
   {
+    id: 'members',
+    title: 'Members',
+    translate: 'Members',
+    type: 'item',
+    icon: 'heroicons-outline:user-group',
+    url: 'app/members',
+    end: true,
+  },
+  {
     id: 'administration',
     title: 'Administration',
     translate: 'Administration',
@@ -43,16 +52,7 @@ const navigationConfig = [
         icon: 'heroicons-outline:user-circle',
         url: 'app/users',
         end: true,
-      },
-      {
-        id: 'members',
-        title: 'Members',
-        translate: 'Members',
-        type: 'item',
-        icon: 'heroicons-outline:user-circle',
-        url: 'app/members',
-        end: true,
-      },
+      },      
       {
         id: 'roles',
         title: 'Roles',

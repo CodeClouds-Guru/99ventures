@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
@@ -22,6 +22,13 @@ const buttonStyle = {
         paddingLeft: '18px', 
         paddingRight: '18px',
         fontSize: '1.2rem'
+        
+    },
+    '@media screen and (max-width: 1700px)': {
+        width: '130px',
+        paddingLeft: '22px', 
+        paddingRight: '22px',
+        fontSize: '1.3rem'
         
     }
 }
@@ -121,14 +128,12 @@ const MemberDetails = () => {
             .then(res => {
                 if (res.data.results.data) {
                     const result = res.data.results.data;
-                    setMemberData({...result, membership_tier_id: result.MembershipTier.name});
+                    const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
-                    setStatus(result.status);
-                    if(result.avatar)
-                        setAvatar(result.avatar);
-                    else 
-                        setAvatar(`https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`)
+                    setStatus(result.status); 
+                    setAvatar(avatarUrl);
+                    setMemberData({...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl});
                 }
             })
             .catch(errors => {
@@ -157,7 +162,7 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
-        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "address_3", "country_id", "membership_tier_id"];
+        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "address_3", "country_id", "membership_tier_id", "phone_no"];
         const formdata = new FormData();
         formdata.append("avatar", avatarFile);
         formdata.append("type", 'basic_details');
@@ -180,7 +185,7 @@ const MemberDetails = () => {
                 } else {
                     setEditMode(false);
                 }
-                // getMemberData();
+                getMemberData();
             }
         })
         .catch(errors => {
@@ -201,8 +206,6 @@ const MemberDetails = () => {
 
     const showStatus = (status) => {
         if(status === 'member') 
-            return <Chip component="span" label={status} className="capitalize" color="secondary" />
-        if(status === 'verified') 
             return <Chip component="span" label={status} className="capitalize" color="success" />
         else if(status === 'suspended') 
             return <Chip component="span" label={status} className="capitalize" color="primary" />
@@ -266,6 +269,24 @@ const MemberDetails = () => {
             console.log(errors);
             dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
         });
+    }
+
+    const notesList = () => {
+        return accountNotes.map(note => {            
+            return (
+                <ListItem disablePadding key={note.id}>
+                    <ListItemText className="bg-gray-300 p-10 rounded" primary={
+                        <>
+                            <div className='flex justify-between mb-5'>
+                                <Typography variant="caption" className="text-xs italic font-bold">{note.User.alias_name} - More Surveys Support Team</Typography>
+                                <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>
+                            </div>
+                            <Typography variant="body2">{note.note}</Typography>
+                        </>
+                    }/>
+                </ListItem>
+            )
+        })
     }
 
     return (
@@ -430,7 +451,6 @@ const MemberDetails = () => {
                                                 >
                                                 <option value="">--Select--</option>
                                                 <option value="member">Member</option>
-                                                <option value="verified">Verified</option>
                                                 <option value="suspended">Suspended</option>
                                                 <option value="validating">Validating</option>
                                                 <option value="deleted">Deleted</option>
@@ -584,7 +604,7 @@ const MemberDetails = () => {
                             ) : (
                                 <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
                                     {
-                                        memberData.country_code && `(${countryData.filter(c => c.id == memberData.country_code)[0].id}) ` + memberData.phone_no 
+                                        memberData.country_code && `(${countryData.filter(c => c.id == memberData.country_code)[0].phonecode}) ` + memberData.phone_no 
                                     }
                                 </Typography>
                             )                    
@@ -622,10 +642,10 @@ const MemberDetails = () => {
             <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
-                    <Button variant="contained" size="large" sx={buttonStyle}>Profile</Button>
+                    <Button variant="outlined" size="large" sx={buttonStyle}>Profile</Button>
                     <Button variant="contained" size="large" sx={buttonStyle}>History</Button>
                     <Button variant="contained" size="large" sx={buttonStyle}>Downtime</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle}>IP Log</Button>
+                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/iplogs')}>IP Log</Button>
                     <Button variant="contained" size="large" sx={buttonStyle}>Withdraws</Button>
                 </Stack>
                 <div className='flex flex-col'>
@@ -650,13 +670,13 @@ const MemberDetails = () => {
                                         <ListItemText className="w-2/5" primary={
                                             <Typography variant="subtitle">Geo Location:</Typography>
                                         } />
-                                        <ListItemText className="w-3/5" primary="Kolkata, West bengal" />
+                                        <ListItemText className="w-3/5" primary={ memberData.IpLogs && memberData.IpLogs.length && memberData.IpLogs[0].geo_location } />
                                     </ListItem>
                                     <ListItem disablePadding>
                                         <ListItemText className="w-2/5" primary={
                                             <Typography variant="subtitle">IP:</Typography>
                                         } />
-                                        <ListItemText className="w-3/5" primary="192.168.1.1" />
+                                        <ListItemText className="w-3/5" primary={ memberData.IpLogs && memberData.IpLogs.length && memberData.IpLogs[0].ip } />
                                     </ListItem>                            
                                 </List>
                             </div>
@@ -838,37 +858,25 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
-                                    <ListItemText className="w-2/5" primary={
+                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                                         <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
                                     } />
-                                    <ListItemText className="w-3/5" primary="" />
+                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                            { memberData.payment_email ? memberData.payment_email.MemberPaymentInformation.value : '' }
+                                        </Typography>
+                                    } />
                                 </ListItem>                            
                             </List>
                         </div>
                     </div>
                     <Divider sx={{ borderWidth: 2}}/>
                     <Box component="div" sx={{ p: 2 }} className="w-full flex flex-col px-0">
-                        <Typography variant="h6" >Account notes section</Typography>
+                        <Typography variant="h6" >Account Notes Section</Typography>
                         {
                             (accountNotes.length != 0) ? (
-                                <List sx={{ height: 300 }} className="mt-5 notes-list overflow-y-auto">
-                                    {
-                                        accountNotes.map(note => {
-                                            return (
-                                                <ListItem disablePadding key={note.id}>
-                                                    <ListItemText className="bg-gray-300 p-10 rounded" primary={
-                                                        <>
-                                                            <div className='flex justify-between mb-5'>
-                                                                <Typography variant="caption" className="text-xs italic font-bold">{note.User.alias_name} - More Surveys Support Team</Typography>
-                                                                <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>
-                                                            </div>
-                                                            <Typography variant="body2">{note.note}</Typography>
-                                                        </>
-                                                    }/>
-                                                </ListItem>
-                                            )
-                                        })
-                                    }
+                                <List sx={{ height: 300 }} className="mt-5 notes-list overflow-auto">
+                                    { notesList() }
                                 </List>
                             ) : (
                                 <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
@@ -887,25 +895,29 @@ const MemberDetails = () => {
                     />
                 )
             }
-            <Dialog open={ dialogStatus } onClose={()=>setDialogStatus(false)} fullWidth={ true }>
-                <DialogTitle>Add Note</DialogTitle>
-                <DialogContent className="p-32 mt-10">                    
-                    <TextareaAutosize
-                        maxRows={8}
-                        aria-label="maximum height"
-                        placeholder="Add note"
-                        defaultValue={ statusNote }
-                        style={{ width: '100%', height: '100px' }}
-                        className="border"
-                        onChange={ (e)=>setStatusNote(e.target.value) }
-                    />
-                </DialogContent>
-                <DialogActions className="px-32 py-20">
-                    <Button className="mr-auto" variant="outlined" color="error" onClick={ handleCancelStatus }>Cancel</Button>
-                    <Button variant="outlined" color="primary" onClick={ handleChangeStatus }>Skip</Button>
-                    <Button color="primary" variant="contained" onClick={ handleChangeStatus } disabled={ statusNote ? false : true }>Save</Button>
-                </DialogActions>
-            </Dialog>
+            {
+                dialogStatus && (
+                    <Dialog open={ dialogStatus } onClose={()=>setDialogStatus(false)} fullWidth={ true }>
+                        <DialogTitle>Add Note</DialogTitle>
+                        <DialogContent className="p-32 mt-10">                    
+                            <TextareaAutosize
+                                maxRows={8}
+                                aria-label="maximum height"
+                                placeholder="Add note"
+                                defaultValue={ statusNote }
+                                style={{ width: '100%', height: '100px' }}
+                                className="border"
+                                onChange={ (e)=>setStatusNote(e.target.value) }
+                            />
+                        </DialogContent>
+                        <DialogActions className="px-32 py-20">
+                            <Button className="mr-auto" variant="outlined" color="error" onClick={ handleCancelStatus }>Cancel</Button>
+                            <Button variant="outlined" color="primary" onClick={ handleChangeStatus }>Skip</Button>
+                            <Button color="primary" variant="contained" onClick={ handleChangeStatus } disabled={ statusNote ? false : true }>Save</Button>
+                        </DialogActions>
+                    </Dialog>
+                )
+            }
         </Box>
     )
 }
