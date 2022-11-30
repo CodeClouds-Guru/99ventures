@@ -73,9 +73,9 @@ module.exports = (sequelize, DataTypes) => {
       country_code: {
         type: DataTypes.INTEGER,
         set(value) {
-          if (value == "" || value == null) {
+          if (value == "" || value == null)
             this.setDataValue("country_code", null);
-          }
+          else this.setDataValue("country_code", value);
         },
       },
       dob: DataTypes.DATE,
@@ -116,9 +116,10 @@ module.exports = (sequelize, DataTypes) => {
       country_id: {
         type: DataTypes.INTEGER,
         set(value) {
-          if (value == "" || value == null) {
+          console.log("country_id", value);
+          if (value == "" || value == null)
             this.setDataValue("country_id", null);
-          }
+          else this.setDataValue("country_id", value);
         },
       },
     },
