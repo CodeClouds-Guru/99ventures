@@ -43,11 +43,11 @@ module.exports = (sequelize, DataTypes) => {
       phone_no: Joi.string().optional().label("Phone No"),
       country_id: Joi.optional().label("Country"),
       membership_tier_id: Joi.string().optional().label("Level"),
-      address_1: Joi.string().allow(null).optional().label("Address 1"),
-      address_2: Joi.string().allow(null).optional().label("Address 2"),
-      address_3: Joi.string().allow(null).optional().label("Address 3"),
-      zip_code: Joi.string().allow(null).optional().label("Zip Code"),
-      avatar: Joi.string().allow(null).optional().label("Avatar"),
+      address_1: Joi.string().allow("").optional().label("Address 1"),
+      address_2: Joi.string().allow("").optional().label("Address 2"),
+      address_3: Joi.string().allow("").optional().label("Address 3"),
+      zip_code: Joi.string().allow("").optional().label("Zip Code"),
+      avatar: Joi.string().allow("").optional().label("Avatar"),
       country_code: Joi.optional().label("Country Code"),
     });
     return schema.validate(req.body);
@@ -87,8 +87,9 @@ module.exports = (sequelize, DataTypes) => {
           let rawValue = this.getDataValue("avatar");
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
-
-          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          if (rawValue !== null || rawValue != "")
+            rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          else rawValue = null;
           return rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
         },
       },
