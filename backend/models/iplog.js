@@ -5,7 +5,7 @@ const {
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
 module.exports = (sequelize, DataTypes) => {
-  class MemberSecurityInformation extends Model {
+  class IpLog extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -15,9 +15,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  MemberSecurityInformation.init({
+  IpLog.init({
     member_id: DataTypes.BIGINT,
     geo_location: DataTypes.STRING,
+    latitude: DataTypes.STRING,
+    longitude: DataTypes.STRING,
     ip: DataTypes.STRING,
     isp: DataTypes.STRING,
     browser: DataTypes.STRING,
@@ -30,17 +32,17 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: "TIMESTAMP",
   }, {
     sequelize,
-    modelName: 'MemberSecurityInformation',
+    modelName: 'IpLog',
     timestamps: true,
     paranoid: true,
     createdAt: "created_at", // alias createdAt as created_date
     updatedAt: "updated_at",
     deletedAt: "deleted_at",
-    tableName: "member_security_informations",
+    tableName: "ip_logs",
   });
 
   //fields
-  MemberSecurityInformation.fields = {
+  IpLog.fields = {
     id: {
       field_name: 'id',
       db_name: 'id',
@@ -72,6 +74,32 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'geo_location',
       type: 'text',
       placeholder: 'Geo Location',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    latitude: {
+      field_name: 'latitude',
+      db_name: 'latitude',
+      type: 'text',
+      placeholder: 'Latitude',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    longitude: {
+      field_name: 'longitude',
+      db_name: 'longitude',
+      type: 'text',
+      placeholder: 'Longitude',
       listing: true,
       show_in_form: true,
       sort: true,
@@ -159,6 +187,6 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     }
   }
-  sequelizePaginate.paginate(MemberSecurityInformation)
-  return MemberSecurityInformation;
+  sequelizePaginate.paginate(IpLog)
+  return IpLog;
 };
