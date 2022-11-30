@@ -2,7 +2,7 @@ const Controller = require("./Controller");
 const { Op } = require("sequelize");
 const {
   MembershipTier,
-  MemberSecurityInformation,
+  IpLog,
   Country,
   MemberNote,
   MemberTransaction,
@@ -57,7 +57,7 @@ class MemberController extends Controller {
             attributes: [["nicename", "name"]],
           },
           {
-            model: MemberSecurityInformation,
+            model: IpLog,
             attributes: [
               "geo_location",
               "ip",
