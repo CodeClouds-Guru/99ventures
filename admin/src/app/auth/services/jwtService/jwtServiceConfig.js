@@ -50,7 +50,8 @@ const jwtServiceConfig = {
   updatePages: 'pages/update',
   getSinglePage: 'pages/edit',
   getSingleMember: 'members/view',
-  memberUpdate: 'members/update'
+  memberUpdate: 'members/update',
+  memberDelete: 'members/delete'
 };
 
 export default jwtServiceConfig;

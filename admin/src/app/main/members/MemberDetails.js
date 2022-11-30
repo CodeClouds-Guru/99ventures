@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
-import axios from 'axios'
 import { useDispatch } from 'react-redux'
+import Helper from 'src/app/helper';
+import axios from 'axios'
 
 const buttonStyle = {
     borderRadius: '5px', 
@@ -68,6 +69,7 @@ const listItemTextStyle = {
 }
 
 const MemberDetails = () => {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const avatarRef = useRef();
     const { moduleId } = useParams();
@@ -79,6 +81,11 @@ const MemberDetails = () => {
     const [ countryData, setCountryData ] = useState([]);
     const [ avatar, setAvatar ] = useState('');
     const [ avatarFile, setAvatarFile ] = useState('');
+    const [ accountNotes, setAccountNotes ] = useState([]);
+    const [ dialogStatus, setDialogStatus ] = useState(false);
+    const [ editStatus, setEditStatus ] = useState(false);
+    const [ statusNote, setStatusNote ] = useState('');
+    const [ status, setStatus ] = useState('');
 
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
@@ -101,6 +108,8 @@ const MemberDetails = () => {
     const onConfirmAlertDialogHandle = () => {
         if(alertType === 'save_profile') {
             handleFormSubmit();
+        } else if(alertType === 'delete') {
+            deleteAccount();
         }
     }
 
@@ -114,7 +123,8 @@ const MemberDetails = () => {
                     const result = res.data.results.data;
                     setMemberData({...result, membership_tier_id: result.MembershipTier.name});
                     setCountryData(result.country_list);
-                
+                    setAccountNotes(result.MemberNotes);
+                    setStatus(result.status);
                     if(result.avatar)
                         setAvatar(result.avatar);
                     else 
@@ -147,32 +157,35 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
+        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "address_3", "country_id", "membership_tier_id"];
         const formdata = new FormData();
-        formdata.append("first_name", memberData.first_name);
-        formdata.append("last_name", memberData.last_name);
-        formdata.append("country_code", memberData.country_code);
-        formdata.append("status", memberData.status);
-        formdata.append("zip_code", memberData.zip_code);
-        formdata.append("phone_no", memberData.phone_no);
-        formdata.append("address_1", memberData.address_1);
-        formdata.append("address_2", memberData.address_2);
-        formdata.append("address_3", memberData.address_3);
-        formdata.append("country_id", memberData.country_id);
-        formdata.append("membership_tier_id", memberData.membership_tier_id);
         formdata.append("avatar", avatarFile);
+        formdata.append("type", 'basic_details');
+        for(const field of fields) {
+            formdata.append(field, memberData[field] ? memberData[field] : '');
+        }
+        onCloseAlertDialogHandle();
+        updateMemberData(formdata, 'basic_details');        
+    }
 
-
+    const updateMemberData = (formdata, type) => {
         axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, formdata)
         .then(res => {
-            onCloseAlertDialogHandle()
             if (res.data.results.message) {
                 dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
-                setEditMode(false);
+                if(type === "member_status"){
+                    setEditStatus(false);
+                    setDialogStatus(false);
+                    setStatusNote('');
+                } else {
+                    setEditMode(false);
+                }
+                // getMemberData();
             }
         })
         .catch(errors => {
             console.log(errors);
-            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
+            dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
         });
     }
 
@@ -187,6 +200,8 @@ const MemberDetails = () => {
     };
 
     const showStatus = (status) => {
+        if(status === 'member') 
+            return <Chip component="span" label={status} className="capitalize" color="secondary" />
         if(status === 'verified') 
             return <Chip component="span" label={status} className="capitalize" color="success" />
         else if(status === 'suspended') 
@@ -213,6 +228,44 @@ const MemberDetails = () => {
         });
         
         setAvatar(response);
+    }
+
+    /**
+     * Change member's status
+     */
+    const handleChangeStatus = () => {
+        const params = {
+            value: status, 
+            field_name: "status", 
+            member_id: memberData.id, 
+            type: "member_status", 
+            member_notes: statusNote ? statusNote : null
+        }
+        updateMemberData(params, "member_status");
+    }
+
+    const handleCancelStatus = () => {
+        setEditStatus(false);
+        setDialogStatus(false);
+        setStatus(memberData.status);
+        setStatusNote('');
+    }
+
+    /**
+     * Delete Account
+     */
+    const deleteAccount = () => {
+         axios.delete(jwtServiceConfig.memberDelete, { data: { modelIds: [moduleId] } })
+        .then(res => {
+            if (res.data.results.message) {
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                navigate('/app/members');
+            }
+        })
+        .catch(errors => {
+            console.log(errors);
+            dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
+        });
     }
 
     return (
@@ -336,7 +389,7 @@ const MemberDetails = () => {
                         </Box>
                     </div>
                 </div>
-                <List className="sm:mb-16 lg:mb-32">
+                <List className="sm:mb-16 lg:mb-20">
                     <ListItem disablePadding>
                         <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
@@ -349,38 +402,62 @@ const MemberDetails = () => {
                         <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Status:</Typography>
                         } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={ 
                             <>
-                            {
-                                editMode ? (
-                                    <div >
-                                        <TextField
-                                            sx={{ 
-                                                ...selectStyle,
-                                                ...textFieldStyle 
-                                            }}
-                                            id="standard-select-currency-native"
-                                            select
-                                            value={ memberData.status }             
-                                            SelectProps={{
-                                                native: true,
-                                            }}
-                                            onChange={
-                                                (e)=> setMemberData({...memberData, status: e.target.value})
-                                            }
-                                            variant="standard"
-                                            >
-                                            <option value="">--Select--</option>
-                                            <option value="verified">Verified</option>
-                                            <option value="suspended">Suspended</option>
-                                            <option value="validating">Validating</option>
-                                            <option value="deleted">Deleted</option>
-                                        </TextField>
-                                    </div>
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
-                                )
-                            }
+                                {
+                                    editStatus ? (
+                                        <div className='flex items-center'>
+                                            <TextField
+                                                sx={{ 
+                                                    ...selectStyle,
+                                                    ...textFieldStyle 
+                                                }}
+                                                id="standard-select-currency-native"
+                                                select
+                                                value={ status }             
+                                                SelectProps={{
+                                                    native: true,
+                                                }}
+                                                onChange={ 
+                                                    (e)=> {
+                                                        if(e.target.value){
+                                                            setStatus(e.target.value);
+                                                            setDialogStatus(true);
+                                                        }
+                                                    }
+                                                }
+                                                variant="standard"
+                                                >
+                                                <option value="">--Select--</option>
+                                                <option value="member">Member</option>
+                                                <option value="verified">Verified</option>
+                                                <option value="suspended">Suspended</option>
+                                                <option value="validating">Validating</option>
+                                                <option value="deleted">Deleted</option>
+                                            </TextField>
+                                            {/* <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
+                                                <IconButton color="primary" aria-label="Filter" component="span">
+                                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:check</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip> */}
+                                            <Tooltip title="Cancel" placement="top-start" onClick={ handleCancelStatus }>
+                                                <IconButton color="primary" aria-label="Filter" component="span">
+                                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:cancel</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    ) : (
+                                        <div className='flex'>
+                                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
+                                            <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
+                                                <IconButton color="primary" aria-label="Filter" component="span">
+                                                    <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    )
+                                }
+                                
                             </>
                         } />
                     </ListItem>
@@ -424,7 +501,7 @@ const MemberDetails = () => {
                     </ListItem>
                 </List>
 
-                <List className="sm:mb-16 lg:mb-32">
+                <List className="sm:mb-16 lg:mb-20">
                     <ListItem disablePadding>
                         <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
@@ -488,9 +565,9 @@ const MemberDetails = () => {
                                         className="xmr-10"
                                         sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
                                         id="clear-on-escape"
-                                        value={ countryData.filter(c => c.phonecode == memberData.country_code)[0]}
+                                        value={ countryData.filter(c => c.id == memberData.country_code)[0]}
                                         clearOnEscape
-                                        onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.phonecode}) }
+                                        onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.id}) }
                                         renderInput={(params) => (
                                             <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
                                         )}
@@ -505,7 +582,11 @@ const MemberDetails = () => {
                                     />
                                 </div>
                             ) : (
-                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ `(${memberData.country_code}) ` + memberData.phone_no }</Typography>
+                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                    {
+                                        memberData.country_code && `(${countryData.filter(c => c.id == memberData.country_code)[0].id}) ` + memberData.phone_no 
+                                    }
+                                </Typography>
                             )                    
                         } />
                     </ListItem>
@@ -550,7 +631,7 @@ const MemberDetails = () => {
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
                         <div className='w-1/2'> 
-                            <div className='mb-96'>
+                            <div className='mb-92'>
                                 <Typography 
                                     variant="h6"
                                     sx={{
@@ -758,15 +839,41 @@ const MemberDetails = () => {
                                 </ListItem>
                                 <ListItem disablePadding>
                                     <ListItemText className="w-2/5" primary={
-                                        <Typography variant="subtitle" className="font-semibold">Payment Details:</Typography>
+                                        <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
                                     } />
                                     <ListItemText className="w-3/5" primary="" />
                                 </ListItem>                            
                             </List>
                         </div>
                     </div>
-                    <Box component="div" sx={{ p: 2, border: '1px dashed grey', height: 200 }} className="mt-24 flex justify-center items-center">
-                        <Typography variant="body1">Account notes section</Typography>
+                    <Divider sx={{ borderWidth: 2}}/>
+                    <Box component="div" sx={{ p: 2 }} className="w-full flex flex-col px-0">
+                        <Typography variant="h6" >Account notes section</Typography>
+                        {
+                            (accountNotes.length != 0) ? (
+                                <List sx={{ height: 300 }} className="mt-5 notes-list overflow-y-auto">
+                                    {
+                                        accountNotes.map(note => {
+                                            return (
+                                                <ListItem disablePadding key={note.id}>
+                                                    <ListItemText className="bg-gray-300 p-10 rounded" primary={
+                                                        <>
+                                                            <div className='flex justify-between mb-5'>
+                                                                <Typography variant="caption" className="text-xs italic font-bold">{note.User.alias_name} - More Surveys Support Team</Typography>
+                                                                <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>
+                                                            </div>
+                                                            <Typography variant="body2">{note.note}</Typography>
+                                                        </>
+                                                    }/>
+                                                </ListItem>
+                                            )
+                                        })
+                                    }
+                                </List>
+                            ) : (
+                                <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
+                            )
+                        }                            
                     </Box>
                 </div>
             </div>
@@ -780,7 +887,25 @@ const MemberDetails = () => {
                     />
                 )
             }
-            
+            <Dialog open={ dialogStatus } onClose={()=>setDialogStatus(false)} fullWidth={ true }>
+                <DialogTitle>Add Note</DialogTitle>
+                <DialogContent className="p-32 mt-10">                    
+                    <TextareaAutosize
+                        maxRows={8}
+                        aria-label="maximum height"
+                        placeholder="Add note"
+                        defaultValue={ statusNote }
+                        style={{ width: '100%', height: '100px' }}
+                        className="border"
+                        onChange={ (e)=>setStatusNote(e.target.value) }
+                    />
+                </DialogContent>
+                <DialogActions className="px-32 py-20">
+                    <Button className="mr-auto" variant="outlined" color="error" onClick={ handleCancelStatus }>Cancel</Button>
+                    <Button variant="outlined" color="primary" onClick={ handleChangeStatus }>Skip</Button>
+                    <Button color="primary" variant="contained" onClick={ handleChangeStatus } disabled={ statusNote ? false : true }>Save</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     )
 }
