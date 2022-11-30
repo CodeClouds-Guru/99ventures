@@ -92,7 +92,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         get() {
           let rawValue = this.getDataValue("avatar") || null;
-          console.log("rawValue", typeof rawValue);
           if (rawValue == null || rawValue == "") {
             const publicURL =
               process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
