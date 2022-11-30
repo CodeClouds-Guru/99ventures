@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     amount: DataTypes.DECIMAL(10, 2),
     completed_at: "TIMESTAMP",
     transaction_id: DataTypes.STRING,
+    member_id: DataTypes.BIGINT,
     status: DataTypes.TINYINT,
     note: DataTypes.STRING,
     created_by: DataTypes.BIGINT,

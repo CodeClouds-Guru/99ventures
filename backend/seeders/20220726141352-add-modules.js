@@ -235,8 +235,8 @@ const modules = [
     created_at: new Date(),
   },
   {
-    slug: "membersecurityinformations",
-    name: "Member Security Informations",
+    slug: "iplogs",
+    name: "IP Logs",
     parent_module: "Members",
     created_by: 1,
     updated_by: null,

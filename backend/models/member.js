@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberNote, {
         foreignKey: "member_id",
       });
-      Member.hasMany(models.MemberSecurityInformation, {
+      Member.hasMany(models.IpLog, {
         foreignKey: "member_id",
       });
       Member.belongsTo(models.MembershipTier, {
