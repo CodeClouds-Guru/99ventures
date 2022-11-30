@@ -2,7 +2,7 @@
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
 const Joi = require("joi");
-const { MemberNote } = require("../index");
+// const {MemberNote} = require("../models/index");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -219,36 +219,45 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   sequelizePaginate.paginate(Member);
+
   Member.changeStatus = async (req) => {
+    const { MemberNote } = require("../models/index");
+
     const value = req.body.value || "";
     const field_name = req.body.field_name || "";
-    const id = req.body.id || null;
+    const id = req.params.id || null;
     const notes = req.body.member_notes || null;
-    let member = await Member.findOne({
-      attributes: ["status"],
-      where: { id: member_id },
-    });
-    console.log(update_data);
-    let result = await Member.update(
-      {
-        [field_name]: val,
-      },
-      {
+    try {
+      let member = await Member.findOne({
+        attributes: ["status"],
         where: { id: id },
-        return: true,
+      });
+      console.log(req);
+      let result = await Member.update(
+        {
+          [field_name]: value,
+        },
+        {
+          where: { id: id },
+          return: true,
+        }
+      );
+      if (notes !== null) {
+        let data = {
+          user_id: req.user.id,
+          member_id: id,
+          previous_status: member.status,
+          current_status: value,
+          note: notes,
+        };
+        console.log("MemberNote===========", MemberNote);
+        await MemberNote.create(data);
       }
-    );
-    if (notes !== null) {
-      let data = {
-        user_id: req.user.id,
-        member_id: member_id,
-        previous_status: member.status,
-        current_status: value,
-        note: notes,
-      };
-      change = await MemberNote.create(data);
+      return result[0];
+    } catch (error) {
+      console.error(error);
+      // this.throwCustomError("Unable to save data", 500);
     }
-    return result[0];
   };
   return Member;
 };
