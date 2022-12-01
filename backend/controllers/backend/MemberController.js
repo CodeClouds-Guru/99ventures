@@ -1,5 +1,5 @@
 const Controller = require("./Controller");
-const { Op } = require("sequelize");
+const { QueryTypes, Op } = require("sequelize");
 const {
   MembershipTier,
   IpLog,
@@ -8,9 +8,12 @@ const {
   MemberTransaction,
   MemberPaymentInformation,
   PaymentMethod,
+  MemberReferral,
+  MemberBalance,
   User,
   sequelize,
 } = require("../../models/index");
+const db = require("../../models/index");
 const FileHelper = require("../../helpers/fileHelper");
 class MemberController extends Controller {
   constructor() {
@@ -34,7 +37,6 @@ class MemberController extends Controller {
           "email",
           "country_code",
           "username",
-          "referer",
           "status",
           "zip_code",
           "phone_no",
@@ -44,6 +46,8 @@ class MemberController extends Controller {
           "address_3",
           "last_active_on",
           "country_id",
+          "referral_code",
+          "member_referral_id",
         ];
 
         options.where = { id: member_id };
@@ -89,7 +93,7 @@ class MemberController extends Controller {
           {
             model: MemberTransaction,
             attributes: ["member_payment_information_id"],
-            limit: 1,
+            limit: 5,
             where: {
               member_id: member_id,
               status: 2,
@@ -100,51 +104,28 @@ class MemberController extends Controller {
               attributes: ["name", "value"],
             },
           },
+          {
+            model: MemberReferral,
+            attributes: ["referral_email", "ip"],
+          },
+         
         ];
         // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
         let country_list = await Country.findAll({
           attributes: ["id", ["nicename", "name"], "phonecode"],
         });
-        // console.log(country_list);
-
-        // let payment_email = await MemberTransaction.findOne({
-        //   attributes: ["member_payment_information_id"],
-        //   limit: 1,
-        //   where: {
-        //     member_id: member_id,
-        //     status: 2,
-        //   },
-        //   order: [["created_at", "DESC"]],
-        //   include: {
-        //     model: MemberPaymentInformation,
-        //     attributes: ["name", "value"],
-        //   },
-        // });
-        let transaction_options = {};
-        transaction_options.attributes = ["type", "amount", "completed_at"];
-        transaction_options.limit = 5;
-        transaction_options.where = {
-          member_id: member_id,
-          status: 2,
-        };
-        transaction_options.order = [["created_at", "DESC"]];
-        let transaction_history = await this.getTransactionDetails(
-          transaction_options
+        
+        let total_earnings = await db.sequelize.query(
+          "SELECT SUM(amount) as total_amount FROM `member_balances` WHERE amount_type='cash'",
+          {
+            type: QueryTypes.SELECT,
+          }
         );
-        // let transaction_details = await MemberTransaction.findAll({
-        //   attributes: ["type",'amount','completed_at'],
-        //   limit: 5,
-        //   where: {
-        //     member_id: member_id,
-        //     status: 2,
-        //   },
-        //   order: [["created_at", "DESC"]],
-
-        // });
+        // console.log("total_earnings", total_earnings);
         result.setDataValue("country_list", country_list);
         // result.setDataValue("payment_email", payment_email);
-        result.setDataValue("transaction_history", transaction_history);
+        result.setDataValue("total_earnings", total_earnings);
 
         return {
           status: true,
@@ -163,14 +144,14 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-    
+
     try {
       let result = false;
       if (req.body.type == "basic_details") {
         delete req.body.type;
         const { error, value } = this.model.validate(req);
         if (error) {
-          console.log(error)
+          console.log(error);
           const errorObj = new Error("Validation failed.");
           errorObj.statusCode = 422;
           errorObj.data = error.details.map((err) => err.message);
@@ -205,14 +186,18 @@ class MemberController extends Controller {
         let pre_avatar = member.avatar;
         let files = [];
         files[0] = req.files.avatar;
-        const fileHelper = new FileHelper(files, "members", req);
+        const fileHelper = new FileHelper(
+          files,
+          "members/" + req.params.id,
+          req
+        );
         const file_name = await fileHelper.upload();
         request_data.avatar = file_name.files[0].filename;
 
         if (pre_avatar != "") {
           let file_delete = await fileHelper.deleteFile(pre_avatar);
         }
-      }else request_data.avatar = null;
+      } else request_data.avatar = null;
       let model = await this.model.update(request_data, {
         where: { id: req.params.id },
       });
@@ -225,8 +210,8 @@ class MemberController extends Controller {
 
   //get transaction details
   async getTransactionDetails(options) {
-   let result = await MemberTransaction.findAll(options);
-   return result;
+    let result = await MemberTransaction.findAll(options);
+    return result;
   }
 }
 
