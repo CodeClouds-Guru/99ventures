@@ -1,15 +1,24 @@
+import { useParams } from 'react-router-dom';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-import { Box } from '@mui/material';
-import CommonHeader from './CommonHeader';
 import List from '../crud/list/List';
-import { useParams } from 'react-router-dom';
+import CommonHeader from './CommonHeader';
+import { useState } from 'react';
+import { Box } from '@mui/material';
 
-const UserDetails = () => {
+
+const Submodule = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const module = 'IP Logs';
-    const { moduleId } = useParams();
- 
+    const params = useParams();
+    const moduleId = params.moduleId;
+    const module = params.submodule;
+    const [clause, setClause] = useState({member_id: moduleId})
+    
+    if(module == 'Withdraws'){
+        setClause({...clause, type: "withdraw"});
+    }
+
+
     return (
         <FusePageCarded
             className="sm:px-20"
@@ -18,8 +27,8 @@ const UserDetails = () => {
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
-                    <List module="ip-logs"
-                        where={{member_id: moduleId}}
+                    <List module="member-transactions"
+                        where={ clause }
                         editable={ false }
                         addable={ false }
                         deletable={ false }
@@ -32,4 +41,4 @@ const UserDetails = () => {
     );
 }
 
-export default UserDetails;
+export default Submodule;

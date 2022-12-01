@@ -5,9 +5,10 @@ import CommonHeader from './CommonHeader';
 import List from '../crud/list/List';
 import { useParams } from 'react-router-dom';
 
+
 const UserDetails = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const module = 'IP Logs';
+    const module = 'Withdraws';
     const { moduleId } = useParams();
  
     return (
@@ -18,8 +19,8 @@ const UserDetails = () => {
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
-                    <List module="ip-logs"
-                        where={{member_id: moduleId}}
+                    <List module="member-transactions"
+                        where={{member_id: moduleId, type: "withdraw"}}
                         editable={ false }
                         addable={ false }
                         deletable={ false }

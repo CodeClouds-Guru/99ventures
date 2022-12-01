@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -8,6 +8,8 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.
 import { useDispatch } from 'react-redux'
 import Helper from 'src/app/helper';
 import axios from 'axios'
+import AccountNotes from './components/AccountNotes';
+import MemberTxn from './components/MemberTxn';
 
 const buttonStyle = {
     borderRadius: '5px', 
@@ -146,7 +148,6 @@ const MemberDetails = () => {
         getMemberData();
     }, []);
 
-
     /**
      * Phone no. Validation
      */
@@ -271,24 +272,6 @@ const MemberDetails = () => {
         });
     }
 
-    const notesList = () => {
-        return accountNotes.map(note => {            
-            return (
-                <ListItem disablePadding key={note.id}>
-                    <ListItemText className="bg-gray-300 p-10 rounded" primary={
-                        <>
-                            <div className='flex justify-between mb-5'>
-                                <Typography variant="caption" className="text-xs italic font-bold">{note.User.alias_name} - More Surveys Support Team</Typography>
-                                <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>
-                            </div>
-                            <Typography variant="body2">{note.note}</Typography>
-                        </>
-                    }/>
-                </ListItem>
-            )
-        })
-    }
-
     return (
         <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
@@ -331,7 +314,7 @@ const MemberDetails = () => {
                             }
                         </sub>
                     </div>
-                    <div className='relative m-auto'>                        
+                    <div className='relative m-auto'>
                         <Box
                             sx={{
                                 borderWidth: 4,
@@ -625,7 +608,6 @@ const MemberDetails = () => {
                         // },
                     }}
                 >
-                    
                     <Typography variant="body1" className="mb-24 text-white">Balance: $1234.00 (Total Earnings)</Typography>
                     <div>
                         <Typography variant="body1" className="text-white">Adjustment: $0000.00</Typography>
@@ -644,9 +626,9 @@ const MemberDetails = () => {
                 <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
                     <Button variant="outlined" size="large" sx={buttonStyle}>Profile</Button>
                     <Button variant="contained" size="large" sx={buttonStyle}>History</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle}>Downtime</Button>
+                    <Button variant="contained" size="large" sx={buttonStyle}>Downline</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/iplogs')}>IP Log</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle}>Withdraws</Button>
+                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/withdraws')}>Withdraws</Button>
                 </Stack>
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
@@ -683,16 +665,16 @@ const MemberDetails = () => {
                         </div>
                         <div className='w-1/2'> 
                             <Box
-                                className="mb-32 text-center"
+                                className="text-left"
                                 sx={{
                                     width: '100%',
                                     height: 'auto',
-                                    backgroundColor: '#777777',
-                                    p: 6
+                                    border: '2px solid #eee',
+                                    p: 1
                                 }}
                             >
-                                <Typography variant="body1" className="text-white">Previous 5 Completions</Typography>
-                                <Typography variant="body1" className="text-white">(Name, Date, Amount)</Typography>
+                                <Typography variant="body1 font-bold" >Previous 5 Completions</Typography>
+                                <MemberTxn />
                             </Box>
                         </div>
                     </div>
@@ -875,9 +857,7 @@ const MemberDetails = () => {
                         <Typography variant="h6" >Account Notes Section</Typography>
                         {
                             (accountNotes.length != 0) ? (
-                                <List sx={{ height: 300 }} className="mt-5 notes-list overflow-auto">
-                                    { notesList() }
-                                </List>
+                                <AccountNotes accountNotes={ accountNotes } />
                             ) : (
                                 <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
                             )
