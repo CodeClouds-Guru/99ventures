@@ -130,7 +130,8 @@ const MemberDetails = () => {
             .then(res => {
                 if (res.data.results.data) {
                     const result = res.data.results.data;
-                    const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
+                    // const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
+                    const avatarUrl = `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status); 
@@ -625,8 +626,8 @@ const MemberDetails = () => {
             <div className="lg:w-2/3 xl:w-3/5">
                 <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
                     <Button variant="outlined" size="large" sx={buttonStyle}>Profile</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle}>History</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle}>Downline</Button>
+                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/history')}>History</Button>
+                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/downline')}>Downline</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/iplogs')}>IP Log</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/withdraws')}>Withdraws</Button>
                 </Stack>
