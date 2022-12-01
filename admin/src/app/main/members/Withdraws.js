@@ -1,9 +1,9 @@
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { Box } from '@mui/material';
-import CommonHeader from './CommonHeader';
 import List from '../crud/list/List';
 import { useParams } from 'react-router-dom';
+import PageHeader from './PageHeader';
 
 
 const UserDetails = () => {
@@ -15,7 +15,7 @@ const UserDetails = () => {
         <FusePageCarded
             className="sm:px-20"
             header={
-                <CommonHeader module={module} />
+                <PageHeader module={module} button="withdraws" />
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >

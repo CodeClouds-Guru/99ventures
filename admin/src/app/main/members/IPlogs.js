@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import CommonHeader from './CommonHeader';
 import List from '../crud/list/List';
 import { useParams } from 'react-router-dom';
+import PageHeader from './PageHeader';
 
 const UserDetails = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
@@ -14,7 +15,7 @@ const UserDetails = () => {
         <FusePageCarded
             className="sm:px-20"
             header={
-                <CommonHeader module={module} />
+                <PageHeader module={module} button="iplogs" />
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >

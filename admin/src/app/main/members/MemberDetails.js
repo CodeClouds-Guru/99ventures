@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
+import { useState, useEffect, useRef} from 'react';
 import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
-import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
-import { useDispatch } from 'react-redux'
-import Helper from 'src/app/helper';
-import axios from 'axios'
 import AccountNotes from './components/AccountNotes';
 import MemberTxn from './components/MemberTxn';
+import { useDispatch } from 'react-redux';
+import Helper from 'src/app/helper';
+import axios from 'axios'
 
-const buttonStyle = {
+/*const buttonStyle = {
     borderRadius: '5px', 
     paddingLeft: 6, 
     paddingRight: 6,
@@ -33,7 +33,7 @@ const buttonStyle = {
         fontSize: '1.3rem'
         
     }
-}
+}*/
 
 const labelStyling = {
     '@media screen and (max-width: 768px)': {
@@ -624,13 +624,13 @@ const MemberDetails = () => {
             </div>
             <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
             <div className="lg:w-2/3 xl:w-3/5">
-                <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
+                {/* <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
                     <Button variant="outlined" size="large" sx={buttonStyle}>Profile</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/history')}>History</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/downline')}>Downline</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/iplogs')}>IP Log</Button>
                     <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/withdraws')}>Withdraws</Button>
-                </Stack>
+                </Stack> */}
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
                         <div className='w-1/2'> 
