@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       address_2: Joi.string().allow("").optional().label("Address 2"),
       address_3: Joi.string().allow("").optional().label("Address 3"),
       zip_code: Joi.string().allow("").optional().label("Zip Code"),
-      avatar: Joi.string().allow("").optional().label("Avatar"),
+      avatar: Joi.optional().label("Avatar"),
       country_code: Joi.optional().label("Country Code"),
     });
     return schema.validate(req.body);
@@ -102,9 +102,9 @@ module.exports = (sequelize, DataTypes) => {
           return rawValue;
         },
         set(value) {
-          if (value == "" || value == null) {
-            this.setDataValue("avatar", null);
-          }
+          console.log("avatar",value)
+          if (value == "" || value == null) this.setDataValue("avatar", null);
+          else this.setDataValue("avatar", value);
         },
       },
       referral_code: DataTypes.STRING,
