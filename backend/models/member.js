@@ -31,6 +31,13 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberPaymentInformation, {
         foreignKey: "member_id",
       });
+      Member.belongsTo(models.MemberReferral, {
+        foreignKey: "member_referral_id",
+      });
+      Member.hasMany(models.MemberBalance, {
+        foreignKey: "member_id",
+        as: 'member_amounts',
+      });
     }
   }
   Member.validate = function (req) {
@@ -79,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       dob: DataTypes.DATE,
-      referer: DataTypes.STRING,
+      member_referral_id: DataTypes.INTEGER,
       password: DataTypes.STRING,
       last_active_on: "TIMESTAMP",
       created_by: DataTypes.BIGINT,
@@ -102,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
           return rawValue;
         },
         set(value) {
-          console.log("avatar",value)
+          console.log("avatar", value);
           if (value == "" || value == null) this.setDataValue("avatar", null);
           else this.setDataValue("avatar", value);
         },

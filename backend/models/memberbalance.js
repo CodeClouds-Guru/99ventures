@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   MemberBalance.init({
     member_id: DataTypes.BIGINT,
-    type: DataTypes.ENUM('admin_adjustment', 'survey', 'referral'),
+    // type: DataTypes.ENUM('admin_adjustment', 'survey', 'referral'),
     amount: DataTypes.DECIMAL,
     amount_type: DataTypes.ENUM('cash', 'point'),
     created_by: DataTypes.BIGINT,
