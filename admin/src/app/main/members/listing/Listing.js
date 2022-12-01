@@ -230,15 +230,15 @@ function Listing(props) {
         <div>
             {/* // header */}
             <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
-                {showModuleHeading === '' ? <Typography
+                <Typography
                     component={motion.span}
                     initial={{ x: -20 }}
                     animate={{ x: 0, transition: { delay: 0.2 } }}
                     delay={300}
                     className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
                 >
-                    {module.split('-').join(' ')}
-                </Typography> : <></>}
+                    Members
+                </Typography>
 
                 <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
                     {searchable && <Paper
@@ -250,13 +250,13 @@ function Listing(props) {
                         <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
                         <Input
-                            placeholder={`Search ${module.split('-').join(' ')}`}
+                            placeholder="Search members"
                             className="flex flex-1"
                             disableUnderline
                             fullWidth
                             value={searchText}
                             inputProps={{
-                                'aria-label': `Search ${module}`,
+                                'aria-label': 'Search members',
                             }}
                             onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
                         />
@@ -330,12 +330,7 @@ function Listing(props) {
                                                     .map((field, i) => {
                                                         return <Fragment key={i}>
                                                             <TableCell className="p-4 md:p-16" component="th" scope="row">
-                                                                {module === 'tickets' && field.field_name === 'status' ?
-                                                                    <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
-                                                                    : module === 'pages' && field.field_name === 'auth_required' ?
-                                                                        <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} /> :
-                                                                        processFieldValue(n[field.field_name], field)
-                                                                }
+                                                                {processFieldValue(n[field.field_name], field)}
                                                             </TableCell>
                                                         </Fragment>
                                                     })}
