@@ -86,6 +86,20 @@ class MemberController extends Controller {
               attributes: ["first_name", "last_name", "alias_name"],
             },
           },
+          {
+            model: MemberTransaction,
+            attributes: ["member_payment_information_id"],
+            limit: 1,
+            where: {
+              member_id: member_id,
+              status: 2,
+            },
+            order: [["created_at", "DESC"]],
+            include: {
+              model: MemberPaymentInformation,
+              attributes: ["name", "value"],
+            },
+          },
         ];
         // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
@@ -94,20 +108,43 @@ class MemberController extends Controller {
         });
         // console.log(country_list);
 
-        let payment_email = await MemberTransaction.findOne({
-          attributes: ["member_payment_information_id"],
-          limit: 1,
-          where: {
-            member_id: member_id,
-          },
-          order: [["created_at", "DESC"]],
-          include: {
-            model: MemberPaymentInformation,
-            attributes: ["name", "value"],
-          },
-        });
+        // let payment_email = await MemberTransaction.findOne({
+        //   attributes: ["member_payment_information_id"],
+        //   limit: 1,
+        //   where: {
+        //     member_id: member_id,
+        //     status: 2,
+        //   },
+        //   order: [["created_at", "DESC"]],
+        //   include: {
+        //     model: MemberPaymentInformation,
+        //     attributes: ["name", "value"],
+        //   },
+        // });
+        let transaction_options = {};
+        transaction_options.attributes = ["type", "amount", "completed_at"];
+        transaction_options.limit = 5;
+        transaction_options.where = {
+          member_id: member_id,
+          status: 2,
+        };
+        transaction_options.order = [["created_at", "DESC"]];
+        let transaction_history = await this.getTransactionDetails(
+          transaction_options
+        );
+        // let transaction_details = await MemberTransaction.findAll({
+        //   attributes: ["type",'amount','completed_at'],
+        //   limit: 5,
+        //   where: {
+        //     member_id: member_id,
+        //     status: 2,
+        //   },
+        //   order: [["created_at", "DESC"]],
+
+        // });
         result.setDataValue("country_list", country_list);
-        result.setDataValue("payment_email", payment_email);
+        // result.setDataValue("payment_email", payment_email);
+        result.setDataValue("transaction_history", transaction_history);
 
         return {
           status: true,
@@ -126,13 +163,14 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-
+    
     try {
       let result = false;
       if (req.body.type == "basic_details") {
         delete req.body.type;
         const { error, value } = this.model.validate(req);
         if (error) {
+          console.log(error)
           const errorObj = new Error("Validation failed.");
           errorObj.statusCode = 422;
           errorObj.data = error.details.map((err) => err.message);
@@ -174,8 +212,7 @@ class MemberController extends Controller {
         if (pre_avatar != "") {
           let file_delete = await fileHelper.deleteFile(pre_avatar);
         }
-      }
-      console.log(request_data);
+      }else request_data.avatar = null;
       let model = await this.model.update(request_data, {
         where: { id: req.params.id },
       });
@@ -184,6 +221,12 @@ class MemberController extends Controller {
       console.error(error);
       this.throwCustomError("Unable to get data", 500);
     }
+  }
+
+  //get transaction details
+  async getTransactionDetails(options) {
+   let result = await MemberTransaction.findAll(options);
+   return result;
   }
 }
 
