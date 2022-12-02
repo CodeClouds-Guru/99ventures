@@ -10,6 +10,7 @@ import MemberTxn from './components/MemberTxn';
 import { useDispatch } from 'react-redux';
 import Helper from 'src/app/helper';
 import axios from 'axios'
+import Adjustment from './components/Adjustment';
 
 /*const buttonStyle = {
     borderRadius: '5px', 
@@ -102,7 +103,9 @@ const MemberDetails = () => {
             msg = 'Do you want to delete your account?';
         else if(type === 'save_profile')
             msg = 'Do you want to save changes?';
-        
+        else if(type === 'adjustment')
+            msg = 'Do you want to adjust the amount?'
+
         setAlertType(type);
         setMsg(msg);
         setOpenAlertDialog(true);
@@ -130,8 +133,8 @@ const MemberDetails = () => {
             .then(res => {
                 if (res.data.results.data) {
                     const result = res.data.results.data;
-                    // const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
-                    const avatarUrl = `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
+                    const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
+                    // const avatarUrl = `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status); 
@@ -158,6 +161,14 @@ const MemberDetails = () => {
             setMemberData({...memberData, phone_no: e.target.value })        
         else 
             e.target.value = memberData.phone_no;
+    }
+
+    /**
+     * Show Phone Country Code
+     */
+    const phoneCountryCode = () => {
+        const filterData = countryData.filter(c => c.id == memberData.country_code);
+        return filterData.length ? filterData[0].phonecode : ''
     }
 
     /**
@@ -260,7 +271,7 @@ const MemberDetails = () => {
      * Delete Account
      */
     const deleteAccount = () => {
-         axios.delete(jwtServiceConfig.memberDelete, { data: { modelIds: [moduleId] } })
+        axios.delete(jwtServiceConfig.memberDelete, { data: { modelIds: [moduleId] } })
         .then(res => {
             if (res.data.results.message) {
                 dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
@@ -588,7 +599,7 @@ const MemberDetails = () => {
                             ) : (
                                 <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
                                     {
-                                        memberData.country_code && `(${countryData.filter(c => c.id == memberData.country_code)[0].phonecode}) ` + memberData.phone_no 
+                                        memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no 
                                     }
                                 </Typography>
                             )                    
@@ -597,11 +608,10 @@ const MemberDetails = () => {
                 </List>
 
                 <Box
-                    className="mb-32"
+                    className="mb-32 bg-gray-300"
                     sx={{
                         width: '100%',
-                        height: 'auto',
-                        backgroundColor: '#777777',
+                        height: 'auto',                        
                         p: 3
                         // '&:hover': {
                         //     backgroundColor: 'primary.main',
@@ -609,12 +619,9 @@ const MemberDetails = () => {
                         // },
                     }}
                 >
-                    <Typography variant="body1" className="mb-24 text-white">Balance: $1234.00 (Total Earnings)</Typography>
-                    <div>
-                        <Typography variant="body1" className="text-white">Adjustment: $0000.00</Typography>
-                        <Typography variant="body1" className="text-white">Description: ffff</Typography>
-                        <Typography variant="body1" className="text-white">- 123.46 +</Typography>
-                    </div>                    
+                    <Typography variant="h6" className="mb-16 text-xl xtext-white">Balance: { memberData.total_earnings && memberData.total_earnings.total_amount } (Total Earnings)</Typography>
+                    <Typography variant="h6" className="text-xl xtext-white">Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment }</Typography>                    
+                    <Adjustment updateMemberData={ updateMemberData }/>        
                 </Box>
 
                 <div>
@@ -624,13 +631,6 @@ const MemberDetails = () => {
             </div>
             <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
             <div className="lg:w-2/3 xl:w-3/5">
-                {/* <Stack spacing={{sm:1, lg:2}} direction="row" className="justify-between mb-24">
-                    <Button variant="outlined" size="large" sx={buttonStyle}>Profile</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/history')}>History</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/downline')}>Downline</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/iplogs')}>IP Log</Button>
-                    <Button variant="contained" size="large" sx={buttonStyle} onClick={()=>navigate('/app/members/'+moduleId+'/withdraws')}>Withdraws</Button>
-                </Stack> */}
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
                         <div className='w-1/2'> 
@@ -665,18 +665,7 @@ const MemberDetails = () => {
                             </div>
                         </div>
                         <div className='w-1/2'> 
-                            <Box
-                                className="text-left"
-                                sx={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    border: '2px solid #eee',
-                                    p: 1
-                                }}
-                            >
-                                <Typography variant="body1 font-bold" >Previous 5 Completions</Typography>
-                                <MemberTxn />
-                            </Box>
+                            <MemberTxn />
                         </div>
                     </div>
                     <div className='flex flex-row'>
@@ -846,7 +835,7 @@ const MemberDetails = () => {
                                     } />
                                     <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
                                         <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                            { memberData.payment_email ? memberData.payment_email.MemberPaymentInformation.value : '' }
+                                            { memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '' }
                                         </Typography>
                                     } />
                                 </ListItem>                            

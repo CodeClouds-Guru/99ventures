@@ -1,4 +1,4 @@
-import { Typography, List, ListItem, ListItemText} from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText} from '@mui/material';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux'
@@ -34,27 +34,42 @@ const MemberTxn = () => {
         })
     }
 
-
     return (
-        <List sx={{ height: 200 }} className="overflow-auto">            
+        <Box
+            className="text-left p-5"
+            sx={{
+                width: '100%',
+                height: '240px',
+                border: '2px solid #eee'
+            }}
+            >
+            <Typography variant="body1" className="font-bold py-5">Previous 5 Completions</Typography>
             {
-                txns.map(txn => {
-                    return (
-                        <ListItem key={txn.id} className="bg-gray-300 p-10 rounded mb-7" disablePadding>
-                            <ListItemText primary={
-                                <>
-                                    <div className='flex justify-between mb-2'>
-                                        <Typography variant="caption" className="text-xs italic font-bold">Lorem Ipsum</Typography>
-                                        <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(txn.completed_at)}</Typography>
-                                    </div>
-                                    <Typography variant="body2">{ txn.amount }</Typography>
-                                </>
-                            } />
-                        </ListItem>
-                    )
-                })
+                txns.length ? (
+                    <List sx={{ height: 200, p:0 }} className="overflow-auto">
+                        {
+                            txns.map(txn => {
+                                return (
+                                    <ListItem key={txn.id} className="bg-gray-300 p-10 rounded mb-7" disablePadding>
+                                        <ListItemText primary={
+                                            <>
+                                                <div className='flex justify-between mb-2'>
+                                                    <Typography variant="caption" className="text-xs italic font-bold">Lorem Ipsum</Typography>
+                                                    <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(txn.completed_at)}</Typography>
+                                                </div>
+                                                <Typography variant="body2" className="text-xs">{ txn.amount }</Typography>
+                                            </>
+                                        } />
+                                    </ListItem>
+                                )
+                            })
+                        }
+                    </List>
+                ) : (
+                    <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
+                )
             }
-        </List>
+        </Box>
     )
 }
 
