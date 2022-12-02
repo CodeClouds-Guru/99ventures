@@ -148,7 +148,7 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-    console.log('request_data',request_data)
+    console.log("request_data", request_data);
     try {
       let result = false;
       if (req.body.type == "basic_details") {
@@ -166,7 +166,7 @@ class MemberController extends Controller {
         result = await this.model.changeStatus(req);
         delete req.body.type;
       } else if (req.body.type == "admin_adjustment") {
-        console.log('req.body',req.body)
+        console.log("req.body", req.body);
         result = await this.adminAdjustment(req);
         delete req.body.type;
       }
@@ -218,6 +218,7 @@ class MemberController extends Controller {
 
   //get member total balance
   async getTotalEarnings(member_id) {
+    let result = {};
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount FROM `member_balances` WHERE amount_type='cash' AND member_id=?",
       {
@@ -225,7 +226,17 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-    return total_earnings;
+    let total_adjustment = await db.sequelize.query(
+      "SELECT SUM(amount) as total_adjustment FROM `member_transactions` WHERE type='credited' AND amount_action='admin_adjustment' AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    console.log("total_adjustment", total_adjustment);
+    result = total_earnings[0];
+    result.total_adjustment = total_adjustment[0].total_adjustment;
+    return result;
   }
   //get transaction details
   async adminAdjustment(req) {
@@ -234,12 +245,12 @@ class MemberController extends Controller {
     try {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
-      let admin_note = req.body.admin_note || '';
+      let admin_note = req.body.admin_note || "";
       let total_earnings = await this.getTotalEarnings(member_id);
       console.log("total_earnings", total_earnings);
 
       let modified_total_earnings =
-        parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
+        parseFloat(total_earnings.total_amount) + parseFloat(admin_amount);
       let transaction_data = {
         type: "credited",
         amount: parseFloat(admin_amount),
@@ -257,7 +268,7 @@ class MemberController extends Controller {
       let balance = await MemberBalance.update(
         { amount: modified_total_earnings },
         {
-          where: { id: total_earnings[0].id },
+          where: { id: total_earnings.id },
         }
       );
       if (transaction && balance) {
