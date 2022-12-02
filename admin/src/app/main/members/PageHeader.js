@@ -48,7 +48,7 @@ function PageHeader(props) {
                         className="flex items-center sm:mb-12"
                         component={Link}
                         role="button"
-                        to={`/app/members/${moduleId}`}
+                        to={`/app/members`}
                         color="inherit"
                     >
                         <FuseSvgIcon size={20}>

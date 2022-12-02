@@ -1,10 +1,10 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, useRef} from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Link, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText,  TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import AccountNotes from './components/AccountNotes';
 import MemberTxn from './components/MemberTxn';
 import { useDispatch } from 'react-redux';
@@ -79,6 +79,7 @@ const listItemTextStyle = {
 }
 
 const MemberDetails = () => {
+    const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const avatarRef = useRef();
@@ -150,7 +151,7 @@ const MemberDetails = () => {
 
     useEffect(()=>{
         getMemberData();
-    }, []);
+    }, [location]);
 
     /**
      * Phone no. Validation
@@ -521,8 +522,19 @@ const MemberDetails = () => {
                         <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                         } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.referer }</Typography>
+                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={                                
+                            memberData.MemberReferral ? (
+                                <div className='flex items-center'>
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                        { memberData.MemberReferral.Member.referral_code }
+                                    </Typography>
+                                    <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
+                                        <IconButton color="primary" aria-label="Filter" component="span">
+                                            <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                        </IconButton>
+                                    </Link>
+                                </div>
+                            ): '--'                                                            
                         }/>
                     </ListItem>                    
                     
@@ -825,7 +837,7 @@ const MemberDetails = () => {
                                     } />
                                     <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
                                         <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                            <Link href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</Link>
+                                            <a href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</a>
                                         </Typography>
                                     } />
                                 </ListItem>
