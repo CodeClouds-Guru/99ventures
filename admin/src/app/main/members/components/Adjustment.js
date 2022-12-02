@@ -22,6 +22,7 @@ const Adjustment = (props) => {
         }
         props.updateMemberData(params, "adjustment");
         handleCancelStatus();
+        onCloseAlertDialogHandle();
     }
 
     const handleCancelStatus = () => {
@@ -40,10 +41,7 @@ const Adjustment = (props) => {
 
     return (
         <div className='flex items-center mt-20'>
-            <Button variant="contained" color="primary" onClick={()=>setDialogStatus(true)}>Adjustment</Button>
-            {/* <Button variant="outlined" size="small" sx={{minWidth: '50px'}} onClick={()=>setDialogStatus(true)}>
-                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:arrow_forward</FuseSvgIcon>
-            </Button> */}
+            <Button variant="contained" color="primary" onClick={()=>setDialogStatus(true)}>Adjustment</Button>            
             {
                 dialogStatus && (
                     <Dialog open={ dialogStatus } onClose={()=>setDialogStatus(false)} fullWidth={ true }>
