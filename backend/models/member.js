@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "member_id",
         as: 'member_amounts',
       });
+      Member.hasMany(models.MemberReferral, {
+        foreignKey: "referral_id",
+        // as: 'referee'
+      });
     }
   }
   Member.validate = function (req) {
