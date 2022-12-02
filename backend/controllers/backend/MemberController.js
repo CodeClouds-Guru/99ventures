@@ -93,10 +93,11 @@ class MemberController extends Controller {
           {
             model: MemberTransaction,
             attributes: ["member_payment_information_id"],
-            limit: 5,
+            limit: 1,
             where: {
               member_id: member_id,
               status: 2,
+              type: "credited",
             },
             order: [["created_at", "DESC"]],
             include: {
@@ -104,27 +105,30 @@ class MemberController extends Controller {
               attributes: ["name", "value"],
             },
           },
+
+          // {
+          //   model: MemberTransaction,
+          //   attributes: ["note", "amount"],
+          //   limit: 1,
+          //   where: {
+          //     member_id: member_id,
+          //     type: "credited",
+          //   },
+          //   order: [["created_at", "DESC"]],
+          // },
           {
             model: MemberReferral,
-            attributes: ["referral_email", "ip"],
+            attributes: ["referral_email", "ip", "member_id"],
           },
-         
         ];
         // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
-        let country_list = await Country.findAll({
-          attributes: ["id", ["nicename", "name"], "phonecode"],
-        });
-        
-        let total_earnings = await db.sequelize.query(
-          "SELECT SUM(amount) as total_amount FROM `member_balances` WHERE amount_type='cash'",
-          {
-            type: QueryTypes.SELECT,
-          }
-        );
-        // console.log("total_earnings", total_earnings);
+        let country_list = await Country.getAllCountryList();
+
+        //get total earnings
+        let total_earnings = await this.getTotalEarnings(member_id);
+
         result.setDataValue("country_list", country_list);
-        // result.setDataValue("payment_email", payment_email);
         result.setDataValue("total_earnings", total_earnings);
 
         return {
@@ -144,11 +148,10 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-
+    console.log("request_data", request_data);
     try {
       let result = false;
       if (req.body.type == "basic_details") {
-        delete req.body.type;
         const { error, value } = this.model.validate(req);
         if (error) {
           console.log(error);
@@ -158,9 +161,14 @@ class MemberController extends Controller {
           throw errorObj;
         }
         result = this.updateBasicDetails(req, res);
-      } else if (req.body.type == "member_status") {
         delete req.body.type;
+      } else if (req.body.type == "member_status") {
         result = await this.model.changeStatus(req);
+        delete req.body.type;
+      } else if (req.body.type == "admin_adjustment") {
+        console.log("req.body", req.body);
+        result = await this.adminAdjustment(req);
+        delete req.body.type;
       }
       if (result) {
         return {
@@ -208,10 +216,70 @@ class MemberController extends Controller {
     }
   }
 
-  //get transaction details
-  async getTransactionDetails(options) {
-    let result = await MemberTransaction.findAll(options);
+  //get member total balance
+  async getTotalEarnings(member_id) {
+    let result = {};
+    let total_earnings = await db.sequelize.query(
+      "SELECT id, amount as total_amount FROM `member_balances` WHERE amount_type='cash' AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    let total_adjustment = await db.sequelize.query(
+      "SELECT SUM(amount) as total_adjustment FROM `member_transactions` WHERE type='credited' AND amount_action='admin_adjustment' AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    console.log("total_adjustment", total_adjustment);
+    result = total_earnings[0];
+    result.total_adjustment = total_adjustment[0].total_adjustment;
     return result;
+  }
+  //get transaction details
+  async adminAdjustment(req) {
+    console.log("req", req);
+
+    try {
+      let member_id = req.params.id;
+      let admin_amount = req.body.admin_amount || 0;
+      let admin_note = req.body.admin_note || "";
+      let total_earnings = await this.getTotalEarnings(member_id);
+      console.log("total_earnings", total_earnings);
+
+      let modified_total_earnings =
+        parseFloat(total_earnings.total_amount) + parseFloat(admin_amount);
+      let transaction_data = {
+        type: "credited",
+        amount: parseFloat(admin_amount),
+        status: 2,
+        note: admin_note,
+        created_by: req.user.id,
+        member_id: member_id,
+        amount_action: "admin_adjustment",
+        completed_at: new Date(),
+      };
+      console.log("transaction_data", transaction_data);
+      let transaction = await MemberTransaction.create(transaction_data, {
+        silent: true,
+      });
+      let balance = await MemberBalance.update(
+        { amount: modified_total_earnings },
+        {
+          where: { id: total_earnings.id },
+        }
+      );
+      if (transaction && balance) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError("Unable to get data", 500);
+    }
   }
 }
 

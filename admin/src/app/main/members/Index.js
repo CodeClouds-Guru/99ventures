@@ -1,18 +1,18 @@
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import MemberDetails from './MemberDetails'
-import CreateEditHeader from '../crud/create-edit/CreateEditHeader';
+import PageHeader from './PageHeader';
 
 const UserDetails = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const module = 'members'
+    const module = 'Members'
  
 
     return (
         <FusePageCarded
             className="sm:px-20"
             header={
-                <CreateEditHeader module={module}  moduleId={ 1 } />
+                <PageHeader module={module}  button="profile" />
             }
             content={
                 <MemberDetails />
