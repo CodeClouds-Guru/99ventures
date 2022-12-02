@@ -281,20 +281,7 @@ function GeneralConfiguration(props) {
                         <Controller
                             name="messageBody"
                             control={replyControl}
-                            render={({ field }) => (
-                                // <TextField
-                                //     {...field}
-                                //     id="outlined-multiline-static"
-                                //     label="Message Body"
-                                //     className="mb-24"
-                                //     multiline
-                                //     rows={4}
-                                //     fullWidth
-                                //     required
-                                // />
-                                <><h2>{field.value}</h2>
-                                    <WYSIWYGEditor {...field} /></>
-                            )}
+                            render={({ field }) => (<WYSIWYGEditor {...field} />)}
                         />
                         <div className='flex justify-between'>
                             <Button

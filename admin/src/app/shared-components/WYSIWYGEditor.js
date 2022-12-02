@@ -23,7 +23,11 @@ const Root = styled('div')({
 const WYSIWYGEditor = forwardRef((props, ref) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const mutateOnChange = (val) => {
-    return props.onChange(draftToHtml(val))
+    let str = draftToHtml(val)
+    if (!str || /^<p>(&nbsp;)*<\/p>$/.test(str.trim())) {
+      return props.onChange('');
+    }
+    return props.onChange(str);
   };
   const mutatedProps = {
     ...props,
