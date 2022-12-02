@@ -9,7 +9,7 @@ const {
   MemberPaymentInformation,
   PaymentMethod,
   MemberReferral,
-  MemberBalance,
+  MemberBalance,Member,
   User,
   sequelize,
 } = require("../../models/index");
@@ -119,6 +119,10 @@ class MemberController extends Controller {
           {
             model: MemberReferral,
             attributes: ["referral_email", "ip", "member_id"],
+            include: {
+              model: Member,
+              attributes: ["referral_code", "first_name",'last_name','email'],
+            },
           },
         ];
         // options.include = [{ all: true, nested: true }];
