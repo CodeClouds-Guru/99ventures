@@ -15,7 +15,7 @@ class MemberReferralController extends Controller {
       model: Member,
       required: false,
       // as: "referee",
-      attributes: ["id", "first_name", "last_name", "email"],
+      attributes: ["id", "first_name", "last_name", "email","avatar"],
       // where: {
       //   referral_id: {
       //     [Op.ne]: null,
@@ -23,14 +23,14 @@ class MemberReferralController extends Controller {
       // },
     }
     const { docs, pages, total } = await this.model.paginate(options);
-    return docs
-    let response = await super.list(req)
+    // return docs
+    // let response = await super.list(req)
     // let ref_list = { ...response.result.data };
     let ref_list = []
     let temp_list = []
     let date_group = ''
     let count = 0
-    response.result.data.forEach(function (record,key) {
+    docs.forEach(function (record,key) {
       if(date_group != moment(record.dataValues.activity_date).format('YYYY-MM')){
         if(date_group != ''){
           ref_list[count]['data'] = temp_list
@@ -44,17 +44,17 @@ class MemberReferralController extends Controller {
         }
       }
       temp_list.push(record.dataValues)
-      if(key == response.result.total - 1){
+      if(key == total - 1){
         ref_list[count]['data'] = temp_list
       }
     })
     return {
       result:{
         data:ref_list,
-        pages:response.result.pages,
-        total:response.result.total
+        pages:pages,
+        total:total
       },
-      fields: response.fields
+      fields: this.model.fields
     }
   }
   
