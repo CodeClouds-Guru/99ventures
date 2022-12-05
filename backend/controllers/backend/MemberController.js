@@ -9,7 +9,8 @@ const {
   MemberPaymentInformation,
   PaymentMethod,
   MemberReferral,
-  MemberBalance,Member,
+  MemberBalance,
+  Member,
   User,
   sequelize,
 } = require("../../models/index");
@@ -121,7 +122,7 @@ class MemberController extends Controller {
             attributes: ["referral_email", "ip", "member_id"],
             include: {
               model: Member,
-              attributes: ["referral_code", "first_name",'last_name','email'],
+              attributes: ["referral_code", "first_name", "last_name", "email"],
             },
           },
         ];
@@ -166,7 +167,6 @@ class MemberController extends Controller {
           throw errorObj;
         }
         result = this.updateBasicDetails(req, res);
-        
       } else if (req.body.type == "member_status") {
         result = await this.model.changeStatus(req);
         delete req.body.type;
@@ -174,7 +174,10 @@ class MemberController extends Controller {
         console.log("req.body", req.body);
         result = await this.adminAdjustment(req);
         delete req.body.type;
-      }else
+      } else {
+        console.error(error);
+        this.throwCustomError("Type is required", 401);
+      }
       if (result) {
         return {
           status: true,
@@ -189,6 +192,25 @@ class MemberController extends Controller {
     }
   }
 
+  //override list function
+  async list(req, res) {
+    const options = this.getQueryOptions(req);
+    let company_id = req.headers.company_id;
+    let site_id = req.headers.site_id;
+    console.log("--------------------------,req.user",req.user)
+    options.where = { company_portal_id: site_id };
+    let page = req.query.page || 1;
+    let limit = parseInt(req.query.show) || 10; // per page record
+    let offset = (page - 1) * limit;
+    options.limit = limit;
+    options.offset = offset;
+    let result = await this.model.findAndCountAll(options);
+    let pages = Math.ceil(result.count / limit);
+    return {
+      result: { data: result.rows, pages, total: result.count },
+      fields: this.model.fields,
+    };
+  }
   //update member details and avatar
   async updateBasicDetails(req, res) {
     let request_data = req.body;
