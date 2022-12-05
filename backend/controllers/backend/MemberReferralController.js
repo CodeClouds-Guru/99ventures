@@ -31,15 +31,25 @@ class MemberReferralController extends Controller {
     let date_group = ''
     let count = 0
     docs.forEach(function (record,key) {
-      if(date_group != moment(record.dataValues.activity_date).format('YYYY-MM')){
+      if(record.dataValues.Member != null && record.dataValues.Member.dataValues.avatar != ''){
+        record.dataValues.Member.dataValues.avatar = process.env.S3_BUCKET_OBJECT_URL+record.dataValues.Member.dataValues.avatar
+      }
+      if(record.dataValues.join_date == ''){
+        record.dataValues.status = 'Pending';
+      }else if(record.dataValues.activity_date != ''){
+        record.dataValues.status = 'Success';
+      }else{
+        record.dataValues.status = 'Accepted';
+      }
+      if(date_group != moment(record.dataValues.created_at).format('YYYY-MM')){
         if(date_group != ''){
           ref_list[count]['data'] = temp_list
           count++
           temp_list = []
         }
-        date_group = moment(record.dataValues.activity_date).format('YYYY-MM')
+        date_group = moment(record.dataValues.created_at).format('YYYY-MM')
         ref_list[count] = {
-          date_group : moment(record.dataValues.activity_date).format('MMMM YYYY'),
+          date_group : moment(record.dataValues.created_at).format('MMMM YYYY'),
           data:[]
         }
       }
