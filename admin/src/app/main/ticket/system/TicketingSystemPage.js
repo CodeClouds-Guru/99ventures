@@ -18,6 +18,8 @@ import Helper from 'src/app/helper';
 import { setlightBoxStatus } from 'app/store/filemanager';
 import ImagePreview from '../../filemanager/ImagePreview';
 import { setUser } from "app/store/userSlice";
+import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
+import parse from 'html-react-parser';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -89,6 +91,7 @@ function TicketingSystemPage(props) {
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
         setChatField(event.target.value);
+        // console.log(event.target.value)
     };
     const handleMemberStatus = (event) => {
         setTempMemberStatus(event.target.value);
@@ -98,7 +101,7 @@ function TicketingSystemPage(props) {
         setMemberNote(event.target.value);
     }
     const handleChatField = (event) => {
-        setChatField(event.target.value);
+        setChatField(event);
     }
     const cancelAndResetNote = () => {
         setTempMemberStatus('');
@@ -128,7 +131,7 @@ function TicketingSystemPage(props) {
         data_set.append('user_id', user.id);
         // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
-        chatField.trim() ? data_set.append('value', chatField) : '';
+        chatField ? data_set.append('value', chatField) : '';
         // `Thanks,
         //     ${user.alias_name} - More Surveys Support Team`
         if (Object.keys(inputFiles).length > 0) {
@@ -283,9 +286,9 @@ function TicketingSystemPage(props) {
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
                                                 <div>
-                                                    <p>
-                                                        {val.message}
-                                                    </p>
+
+                                                    {parse(val.message)}
+
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
                                                     <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4} /*cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} rowHeight={212}*/>
@@ -336,13 +339,18 @@ function TicketingSystemPage(props) {
                                         }
                                     </Select>
                                 </FormControl>
-                                <TextareaAutosize className="w-full border-1"
+                                {/* <TextareaAutosize className="w-full border-1"
                                     aria-label="empty textarea"
                                     placeholder=""
                                     minRows={4}
                                     sx={{ background: '#dcdcdc' }}
                                     value={chatField}
                                     onChange={handleChatField}
+                                /> */}
+                                <WYSIWYGEditor
+                                    className="w-full border-1"
+                                    onChange={handleChatField}
+                                    value={chatField}
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
                                     <div className="flex flex-col justify-start" style={{ marginLeft: '-1rem', width: '70%' }}>
@@ -376,7 +384,7 @@ function TicketingSystemPage(props) {
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
-                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.trim().length === 0} >
+                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.length === 0} >
                                                 Send
                                             </Button>
                                         </Stack>
