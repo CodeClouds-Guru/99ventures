@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       MemberTransaction.belongsTo(models.MemberPaymentInformation, {
         foreignKey: "member_payment_information_id",
       });
+      MemberTransaction.belongsTo(models.Member, {
+        foreignKey: 'member_id',
+      })
     }
   }
   MemberTransaction.init(
@@ -61,6 +64,19 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: false,
     },
+    transaction_id: {
+      field_name: "transaction_id",
+      db_name: "transaction_id",
+      type: "text",
+      placeholder: "Transaction ID",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
     member_payment_information_id: {
       field_name: "member_payment_information_id",
       db_name: "member_payment_information_id",
@@ -104,20 +120,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: "completed_at",
       db_name: "completed_at",
       type: "text",
-      placeholder: "Completed At",
-      listing: true,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-    },
-    transaction_id: {
-      field_name: "transaction_id",
-      db_name: "transaction_id",
-      type: "text",
-      placeholder: "Transaction ID",
+      placeholder: "Transaction Date",
       listing: true,
       show_in_form: true,
       sort: true,
@@ -157,7 +160,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "created_at",
       type: "text",
       placeholder: "Created at",
-      listing: true,
+      listing: false,
       show_in_form: false,
       sort: true,
       required: true,
@@ -170,7 +173,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "updated_at",
       type: "text",
       placeholder: "Updated at",
-      listing: true,
+      listing: false,
       show_in_form: false,
       sort: true,
       required: true,
