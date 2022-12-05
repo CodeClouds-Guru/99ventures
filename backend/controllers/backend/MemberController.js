@@ -156,6 +156,7 @@ class MemberController extends Controller {
     try {
       let result = false;
       if (req.body.type == "basic_details") {
+        delete req.body.type;
         const { error, value } = this.model.validate(req);
         if (error) {
           console.log(error);
@@ -165,7 +166,7 @@ class MemberController extends Controller {
           throw errorObj;
         }
         result = this.updateBasicDetails(req, res);
-        delete req.body.type;
+        
       } else if (req.body.type == "member_status") {
         result = await this.model.changeStatus(req);
         delete req.body.type;
@@ -173,7 +174,7 @@ class MemberController extends Controller {
         console.log("req.body", req.body);
         result = await this.adminAdjustment(req);
         delete req.body.type;
-      }
+      }else
       if (result) {
         return {
           status: true,
