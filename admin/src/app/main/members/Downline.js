@@ -16,6 +16,7 @@ import axios from 'axios';
 import PageHeader from './PageHeader';
 import Helper from 'src/app/helper';
 import { Link } from 'react-router-dom';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 const Downline = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
@@ -48,6 +49,7 @@ const Downline = () => {
     }, []);
     
     const memberAvtar = (member) => {
+        console.log(member.avatar)
         return member.avatar ? member.avatar : `https://ui-avatars.com/api/?name=${ member.first_name}+${ member.last_name}`
     }
 
@@ -59,65 +61,74 @@ const Downline = () => {
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex " >
-                    <Timeline >
-                        {
-                            downlineHistory.map((history, indx) => {
-                                return history.data.map((item, itemIndx) => {
-                                    return (
-                                        <TimelineItem key={indx}>                                            
-                                            <TimelineOppositeContent
-                                                sx={{ m: 'auto 0' }}
-                                                align="right"
-                                                variant="body2"
-                                                color="text.secondary"
-                                                className="flex-none w-192"
-                                            >
-                                                { itemIndx < 1 && history.date_group }
-                                            </TimelineOppositeContent>                                            
-                                                
-                                            <TimelineSeparator>
-                                                <TimelineConnector sx={ (indx < 1 && itemIndx < 1) && { backgroundColor: '#fff'}} />                     
-                                                <TimelineDot color="primary">
-                                                    <ShareIcon />
-                                                </TimelineDot>
-                                                <TimelineConnector sx={ (downlineHistory.length < 2 || (history.data.length-1 === itemIndx && indx !=0)) ? { backgroundColor: '#fff'} : {}} />
-                                            </TimelineSeparator>
-                                            <TimelineContent sx={{ py: '12px', px: 2 }}>
-                                                <div className="bg-gray-200 p-16 rounded-md w-1/2">
-                                                    <div className='flex items-center mb-7'>                                                        
-                                                        {
-                                                            item.Member && (
-                                                                <>
-                                                                    <Avatar 
-                                                                        alt="Remy Sharp" 
-                                                                        src={ memberAvtar(item.Member) } 
-                                                                        className="mr-7" 
-                                                                    />
-                                                                    <Link to={ `/app/members/${item.Member.id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
-                                                                        <Typography variant="body1 font-bold" component="span">
-                                                                            { item.Member.first_name +' '+ item.Member.last_name }
-                                                                        </Typography>
-                                                                    </Link>
-                                                                </>
-                                                            )
-                                                        }        
-                                                        <Typography variant="caption" component="p" className="ml-auto">
-                                                            {Helper.parseTimeStamp(item.created_at)}
-                                                        </Typography>                                                
-                                                    </div>
-                                                    
-                                                    <Divider className="my-5" />
-                                                    <Typography variant="caption">Status: </Typography>
-                                                </div>
-                                            </TimelineContent>
-                                        </TimelineItem>
-    
-                                    )
-                                })                                
-                            })
-                        }
-                       
-                    </Timeline>
+                    {
+                        downlineHistory.length ? (
+                            <Timeline >
+                                {
+                                    downlineHistory.map((history, indx) => {
+                                        return history.data.map((item, itemIndx) => {
+                                            return (
+                                                <TimelineItem key={item.id}>                                            
+                                                    <TimelineOppositeContent
+                                                        sx={{ m: 'auto 0' }}
+                                                        align="right"
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                        className="flex-none w-192"
+                                                    >
+                                                        { itemIndx < 1 && history.date_group }
+                                                    </TimelineOppositeContent>                                            
+                                                        
+                                                    <TimelineSeparator>
+                                                        <TimelineConnector/>                     
+                                                        <TimelineDot color="primary">
+                                                            <ShareIcon />
+                                                        </TimelineDot>
+                                                        <TimelineConnector />
+                                                    </TimelineSeparator>
+                                                    <TimelineContent sx={{ py: '12px', px: 2 }}>
+                                                        <div className="bg-gray-200 p-16 rounded-md w-1/2">
+                                                            <div className='flex items-center mb-7'>                                                        
+                                                                {
+                                                                    item.Member && (
+                                                                        <Link className='flex items-center' to={ `/app/members/${item.Member.id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
+                                                                            <Avatar 
+                                                                                alt={ item.Member.first_name +' '+ item.Member.last_name }
+                                                                                src={ memberAvtar(item.Member) } 
+                                                                                className="mr-7" 
+                                                                            />
+                                                                            <Typography variant="body1 font-bold" component="span">
+                                                                                { item.Member.first_name +' '+ item.Member.last_name }
+                                                                            </Typography>
+                                                                        </Link>                                                                
+                                                                    )
+                                                                }        
+                                                                <Typography variant="caption" component="p" className="ml-auto">
+                                                                    {Helper.parseTimeStamp(item.activity_date)}
+                                                                </Typography>                                                
+                                                            </div>                                                    
+                                                            <Divider className="my-5" />
+                                                            <Typography variant="caption">Status: <strong>{item.status}</strong> </Typography>
+                                                        </div>
+                                                    </TimelineContent>
+                                                </TimelineItem>
+            
+                                            )
+                                        })                                
+                                    })
+                                }
+                            
+                            </Timeline>
+                        ) : (
+                            <div className='flex flex-col items-center justify-between w-full absolute inset-y-1/2'>
+                                <div>
+                                    <FuseSvgIcon className="text-grey-300 text-48 m-auto" size={90} color="action">feather:alert-triangle</FuseSvgIcon>
+                                </div>
+                                <Typography variant="body1">No Record found!</Typography>
+                            </div>
+                        )
+                    }
+                    
                 </Box>
             }
             rightSidebarOpen={ false }
