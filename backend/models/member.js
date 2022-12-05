@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-
       Member.hasMany(models.MemberNote, {
         foreignKey: "member_id",
       });
@@ -36,11 +35,13 @@ module.exports = (sequelize, DataTypes) => {
       });
       Member.hasMany(models.MemberBalance, {
         foreignKey: "member_id",
-        as: 'member_amounts',
+        as: "member_amounts",
       });
       Member.hasMany(models.MemberReferral, {
         foreignKey: "referral_id",
-        // as: 'referee'
+      });
+      Member.belongsTo(models.CompanyPortal, {
+        foreignKey: "company_portal_id",
       });
     }
   }
@@ -144,6 +145,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "members",
     }
   );
+  
 
   Member.fields = {
     id: {
@@ -250,6 +252,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: false,
     },
+    
   };
 
   sequelizePaginate.paginate(Member);
