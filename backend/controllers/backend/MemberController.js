@@ -9,8 +9,10 @@ const {
   MemberPaymentInformation,
   PaymentMethod,
   MemberReferral,
-  MemberBalance,Member,
+  MemberBalance,
+  Member,
   User,
+  CompanyPortal,
   sequelize,
 } = require("../../models/index");
 const db = require("../../models/index");
@@ -121,7 +123,7 @@ class MemberController extends Controller {
             attributes: ["referral_email", "ip", "member_id"],
             include: {
               model: Member,
-              attributes: ["referral_code", "first_name",'last_name','email'],
+              attributes: ["referral_code", "first_name", "last_name", "email"],
             },
           },
         ];
@@ -156,6 +158,7 @@ class MemberController extends Controller {
     try {
       let result = false;
       if (req.body.type == "basic_details") {
+        delete req.body.type;
         const { error, value } = this.model.validate(req);
         if (error) {
           console.log(error);
@@ -165,7 +168,6 @@ class MemberController extends Controller {
           throw errorObj;
         }
         result = this.updateBasicDetails(req, res);
-        delete req.body.type;
       } else if (req.body.type == "member_status") {
         result = await this.model.changeStatus(req);
         delete req.body.type;
@@ -173,6 +175,9 @@ class MemberController extends Controller {
         console.log("req.body", req.body);
         result = await this.adminAdjustment(req);
         delete req.body.type;
+      } else {
+        console.error(error);
+        this.throwCustomError("Type is required", 401);
       }
       if (result) {
         return {
@@ -188,6 +193,54 @@ class MemberController extends Controller {
     }
   }
 
+  //override list function
+  async list(req, res) {
+    const options = this.getQueryOptions(req);
+    let company_id = req.headers.company_id;
+    let site_id = req.headers.site_id;
+    let roles = req.user.roles.map((role) => {
+      if (role.id == 1) return role.id;
+    });
+    let fields = this.model.fields;
+    console.log(roles)
+    if (roles == 1) {
+      options.include = { model: CompanyPortal, attributes: ["name"] };
+    } else {
+      options.where = { company_portal_id: site_id };
+    }
+    let page = req.query.page || 1;
+    let limit = parseInt(req.query.show) || 10; // per page record
+    let offset = (page - 1) * limit;
+    options.limit = limit;
+    options.offset = offset;
+    let result = await this.model.findAndCountAll(options);
+    let pages = Math.ceil(result.count / limit);
+    
+    if (roles == 1) {
+      for (let i = 0; i < result.rows.length; i++) {
+        result.rows[i].setDataValue("company_portal_id", result.rows[i].CompanyPortal.name);
+      }
+      this.model.extra_fields = ["company_portal_id"];
+      fields.company_portal_id= {
+        field_name: "company_portal_id",
+        db_name: "company_portal_id",
+        type: "text",
+        placeholder: "Company Portal",
+        listing: true,
+        show_in_form: false,
+        sort: true,
+        required: false,
+        value: "",
+        width: "50",
+        searchable: true,
+      };
+    }
+    console.log(result.rows);
+    return {
+      result: { data: result.rows, pages, total: result.count },
+      fields: fields,
+    };
+  }
   //update member details and avatar
   async updateBasicDetails(req, res) {
     let request_data = req.body;
