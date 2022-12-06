@@ -25,6 +25,7 @@ function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const theme = useTheme();
     const inputFileRef = useRef(null);
+    const wysiwygEditorRef = useRef();
     const user = useSelector(selectUser);
     const [inputFiles, setInputFiles] = useState([]);
     const [ticketStatus, setTicketStatus] = useState('');
@@ -93,6 +94,7 @@ function TicketingSystemPage(props) {
         setChatField(event.target.value);
         // WYSIWYGEditor.onEditorStateChange(event.target.value)
         // console.log(event.target.value)
+        wysiwygEditorRef.current.innerHTML = event.target.value
     };
     // console.log(chatField)
     const handleMemberStatus = (event) => {
@@ -354,6 +356,7 @@ function TicketingSystemPage(props) {
                                     className="w-full border-1"
                                     onChange={handleChatField}
                                     value={chatField}
+                                    ref={ wysiwygEditorRef }
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
                                     <div className="flex flex-col justify-start" style={{ marginLeft: '-1rem', width: '70%' }}>
