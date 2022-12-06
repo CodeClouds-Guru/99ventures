@@ -8,33 +8,9 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import AccountNotes from './components/AccountNotes';
 import MemberTxn from './components/MemberTxn';
 import { useDispatch } from 'react-redux';
-import Helper from 'src/app/helper';
 import axios from 'axios'
 import Adjustment from './components/Adjustment';
 
-/*const buttonStyle = {
-    borderRadius: '5px', 
-    paddingLeft: 6, 
-    paddingRight: 6,
-    '@media screen and (max-width: 768px)': {
-        fontSize: '1rem',
-        width: '70px',
-    },
-    '@media screen and (max-width: 1400px)': {
-        width: '105px',
-        paddingLeft: '18px', 
-        paddingRight: '18px',
-        fontSize: '1.2rem'
-        
-    },
-    '@media screen and (max-width: 1700px)': {
-        width: '130px',
-        paddingLeft: '22px', 
-        paddingRight: '22px',
-        fontSize: '1.3rem'
-        
-    }
-}*/
 
 const labelStyling = {
     '@media screen and (max-width: 768px)': {
@@ -523,7 +499,7 @@ const MemberDetails = () => {
                             <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                         } />
                         <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={                                
-                            memberData.MemberReferral ? (
+                            (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
                                 <div className='flex items-center'>
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
                                         { memberData.MemberReferral.Member.referral_code }
@@ -534,7 +510,7 @@ const MemberDetails = () => {
                                         </IconButton>
                                     </Link>
                                 </div>
-                            ): '--'                                                            
+                            ) : '--'                                                            
                         }/>
                     </ListItem>                    
                     
