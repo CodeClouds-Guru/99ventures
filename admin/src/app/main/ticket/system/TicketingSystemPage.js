@@ -91,8 +91,10 @@ function TicketingSystemPage(props) {
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
         setChatField(event.target.value);
+        // WYSIWYGEditor.onEditorStateChange(event.target.value)
         // console.log(event.target.value)
     };
+    // console.log(chatField)
     const handleMemberStatus = (event) => {
         setTempMemberStatus(event.target.value);
         setOpenAlertDialog(true);
@@ -101,6 +103,7 @@ function TicketingSystemPage(props) {
         setMemberNote(event.target.value);
     }
     const handleChatField = (event) => {
+        // console.log(event)
         setChatField(event);
     }
     const cancelAndResetNote = () => {
