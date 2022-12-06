@@ -88,8 +88,9 @@ exports.replaceAllWithReplacements = (str, replacements) => {
 }
 
 exports.createCommentSignature = (code) => {
-  return {
-    'start': `<!-- ${code} starts -->`,
-    'end': `<!-- ${code} ends -->`
-  }
+  // return {
+  //   'start': `<!-- ${code} starts -->`,
+  //   'end': `<!-- ${code} ends -->`
+  // }
+  return { 'start': '', 'end': '' }
 }

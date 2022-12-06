@@ -285,8 +285,7 @@ const CreateUpdate = () => {
                 attributes: {
                     class: 'fa fa-square'
                 },
-                content:
-                    val.html
+                content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
             });
         })
     }

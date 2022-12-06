@@ -235,6 +235,7 @@ const CreateUpdate = (props) => {
 
     useEffect(() => {
         if (Object.keys(editor).length && Object.keys(selectComponentData).length && moduleId !== 'create' && !isNaN(moduleId)) {
+            console.log(selectComponentData.html)
             setAllData(allData => ({
                 ...allData,
                 name: selectComponentData.name,
@@ -304,11 +305,23 @@ const CreateUpdate = (props) => {
     const handleFormSubmit = () => {
         if (!Object.keys(errors).length) {
             const editorJsonBody = editor.getProjectData();
+            const componentName = allData.name.trim();
+            
+            // to add the comment in html 
+            const components = editorJsonBody.pages[0].frames[0].component.components;
+            const finalComponents = [
+                {tagName: 'NULL', type: 'comment', content: ` Start ${componentName} comment `},
+                ...components,
+                {tagName: 'NULL', type: 'comment', content: ` End ${componentName} comment `}
+            ]
+            editorJsonBody.pages[0].frames[0].component.components = finalComponents;
+            //--------
+
             const params = {
                 ...allData,
-                html: generatedHTMLValue(editor),
+                html: `<!-- Start ${componentName} comment -->\n ${generatedHTMLValue(editor)}\n <!-- End ${componentName} comment -->`,
                 component_json: editorJsonBody,
-                name: allData.name.trim()
+                name: componentName
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateComponents + `/${moduleId}` : jwtServiceConfig.saveComponents;
 
