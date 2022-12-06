@@ -243,7 +243,7 @@ function TicketingSystemPage(props) {
                             </DialogActions>
                         </div>
                     </Dialog>
-                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{ height: '82rem', overflow: 'auto' }}>
                         <div className="h-full w-full md:w-8/12 border-2 rounded-l-2xl mb-10 md:mb-0">
                             <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
                                 <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
@@ -279,7 +279,7 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 280px)', }} id="main_chat">
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '30rem', }} id="main_chat">
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
@@ -353,17 +353,17 @@ function TicketingSystemPage(props) {
                                     onChange={handleChatField}
                                 /> */}
                                 <WYSIWYGEditor
-                                    className="w-full border-1"
+                                    className="w-full h-auto border-1"
                                     onChange={handleChatField}
                                     value={chatField}
-                                    ref={ wysiwygEditorRef }
+                                    ref={wysiwygEditorRef}
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
                                     <div className="flex flex-col justify-start" style={{ marginLeft: '-1rem', width: '70%' }}>
                                         <b className="m-0 p-0">
                                             Files({Object.keys(inputFiles).length})
                                         </b>
-                                        <Stack direction="row" spacing={1} sx={{ overflowY: 'scroll', overflowX: 'hidden', height: '6.1rem' }}>
+                                        <Stack direction="row" spacing={1} sx={{ overflowY: 'scroll', overflowX: 'hidden', height: '6rem' }}>
                                             <ul className="ml-10" style={{ listStyleType: 'disc' }}>
                                                 {
                                                     Object.values(inputFiles).map((val, key) => {
@@ -467,13 +467,13 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: 'calc(100% - 325px)' }}>
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '40rem' }}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 25px)' }} className="px-4">
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
