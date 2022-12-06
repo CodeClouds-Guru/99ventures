@@ -105,17 +105,20 @@ const MemberDetails = () => {
     /**
      * Get Member Details
      */
-     const getMemberData = () => {
+    const getMemberData = (updateAvatar = true) => {
         axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
                 if (res.data.results.data) {
                     const result = res.data.results.data;
                     const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
-                    // const avatarUrl = `https://ui-avatars.com/api/?name=${ result.first_name}+${ result.last_name}`;
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status); 
-                    setAvatar(avatarUrl);
+
+                    // updateAvatar params has been set to not to change the avatar url after updating the value. 
+                    // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
+                    updateAvatar && setAvatar(avatarUrl);
+
                     setMemberData({...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl});
                 }
             })
@@ -175,7 +178,7 @@ const MemberDetails = () => {
                 } else {
                     setEditMode(false);
                 }
-                getMemberData();
+                getMemberData(false);
             }
         })
         .catch(errors => {
