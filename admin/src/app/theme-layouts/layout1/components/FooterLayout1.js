@@ -24,14 +24,14 @@ function FooterLayout1(props) {
         }}
       >
         <Toolbar className="min-h-48 md:min-h-64 px-8 sm:px-12 py-0 flex items-center overflow-x-auto">
-        <Grid container spacing={2}>
-          <Grid item xs={10}>
-            <p>&#xA9; {year} | 99 Ventures</p>
+          <Grid container spacing={2}>
+            <Grid item xs={10}>
+              <p>&#xA9; {year} | Scripteed</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p>All rights reserved.</p>
+            </Grid>
           </Grid>
-          <Grid item xs={2}>
-            <p>All rights reserved.</p>
-          </Grid>
-        </Grid>
         </Toolbar>
       </AppBar>
     </ThemeProvider>

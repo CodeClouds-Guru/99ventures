@@ -18,7 +18,7 @@ function FooterLayout2(props) {
         sx={{ backgroundColor: footerTheme.palette.background.paper }}
       >
         <Toolbar className="container min-h-48 md:min-h-64 px-8 sm:px-12 py-0 flex items-center overflow-x-auto">
-          &#xA9; 2022 99 Ventures. All rights reserved.
+          &#xA9; 2022 Scripteed. All rights reserved.
         </Toolbar>
       </AppBar>
     </ThemeProvider>
