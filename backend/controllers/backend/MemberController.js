@@ -13,6 +13,8 @@ const {
   Member,
   User,
   CompanyPortal,
+  Survey,
+  SurveyProvider,
   sequelize,
 } = require("../../models/index");
 const db = require("../../models/index");
@@ -108,22 +110,22 @@ class MemberController extends Controller {
             },
           },
 
-          // {
-          //   model: MemberTransaction,
-          //   attributes: ["note", "amount"],
-          //   limit: 1,
-          //   where: {
-          //     member_id: member_id,
-          //     type: "credited",
-          //   },
-          //   order: [["created_at", "DESC"]],
-          // },
           {
             model: MemberReferral,
             attributes: ["referral_email", "ip", "member_id"],
             include: {
               model: Member,
               attributes: ["referral_code", "first_name", "last_name", "email"],
+            },
+          },
+          {
+            model: Survey,
+       
+            attributes: ["id"],
+            
+            include: {
+              model: SurveyProvider,
+              attributes: ["name", "logo", "status"],
             },
           },
         ];
@@ -202,7 +204,7 @@ class MemberController extends Controller {
       if (role.id == 1) return role.id;
     });
     let fields = this.model.fields;
-    console.log(roles)
+    console.log(roles);
     if (roles == 1) {
       options.include = { model: CompanyPortal, attributes: ["name"] };
     } else {
@@ -215,13 +217,16 @@ class MemberController extends Controller {
     options.offset = offset;
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
-    
+
     if (roles == 1) {
       for (let i = 0; i < result.rows.length; i++) {
-        result.rows[i].setDataValue("company_portal_id", result.rows[i].CompanyPortal.name);
+        result.rows[i].setDataValue(
+          "company_portal_id",
+          result.rows[i].CompanyPortal.name
+        );
       }
       this.model.extra_fields = ["company_portal_id"];
-      fields.company_portal_id= {
+      fields.company_portal_id = {
         field_name: "company_portal_id",
         db_name: "company_portal_id",
         type: "text",

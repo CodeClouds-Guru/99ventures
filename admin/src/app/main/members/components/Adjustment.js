@@ -52,7 +52,7 @@ const Adjustment = (props) => {
                                 <Button variant="contained" color="primary" size="small" sx={btnStyle} onClick={()=>setAdjustmentAmount(adjustmentAmount => adjustmentAmount - 1)}>
                                     -
                                 </Button>
-                                <TextField type="tel" value={ adjustmentAmount } id="outlined-basic" label="Amount" variant="outlined" sx={{  margin: '0 10px'}} onChange={(e)=> setAdjustmentAmount(e.target.value)} />
+                                <TextField type="number" value={ adjustmentAmount } id="outlined-basic" label="Amount" variant="outlined" sx={{  margin: '0 10px'}} onChange={(e)=> setAdjustmentAmount(e.target.value)} />
                                 <Button variant="contained" color="primary" size="small" sx={btnStyle} onClick={()=>setAdjustmentAmount(adjustmentAmount => adjustmentAmount + 1)}>
                                     +
                                 </Button>

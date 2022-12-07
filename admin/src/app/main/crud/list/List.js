@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, Tooltip, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,6 +17,8 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
+import Helper from 'src/app/helper';
+
 
 function List(props) {
   const dispatch = useDispatch();
@@ -230,6 +232,41 @@ function List(props) {
     return Object.values(fields).filter(field => field.listing === true).length + 1;
   }
 
+  /**
+   * Customized any row value
+   */
+  const customizedField = (module, n, field) =>{
+    if(module === 'tickets' && field.field_name === 'status') {
+      return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+    } else if(module === 'pages' && field.field_name === 'auth_required') {
+      return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
+    } else if(module === 'member-transactions' && field.field_name === 'type') {
+      return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "error" } />
+    } else if(module === 'member-transactions' && field.field_name === 'completed_at') {
+      return Helper.parseTimeStamp(processFieldValue(n[field.field_name], field))
+    } else if(module === 'member-transactions' && field.field_name === 'note') {
+      return processFieldValue(n[field.field_name], field) ? (
+        <Tooltip title={ processFieldValue(n[field.field_name], field) } placement="top-start" arrow>
+            <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:chat-alt</FuseSvgIcon>
+        </Tooltip>
+      ) : '--'
+    } else if(module === 'member-transactions' && field.field_name === 'status') {
+      const status = processFieldValue(n[field.field_name], field);
+      if(status === 'initiated')
+        return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="primary" />
+      else if(status === 'processing')
+        return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
+      else if(status === 'completed')
+        return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+      else if(status === 'failed')
+        return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+      else if(status === 'declined')
+        return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+    } else {
+      return processFieldValue(n[field.field_name], field)
+    }
+  }
+
   return (
     <div>
       {/* // header */}
@@ -334,11 +371,8 @@ function List(props) {
                           .map((field, i) => {
                             return <Fragment key={i}>
                               <TableCell className="p-4 md:p-16" component="th" scope="row">
-                                {module === 'tickets' && field.field_name === 'status' ?
-                                  <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
-                                  : module === 'pages' && field.field_name === 'auth_required' ?
-                                    <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} /> :
-                                    processFieldValue(n[field.field_name], field)
+                                {
+                                  customizedField(module, n, field)
                                 }
                               </TableCell>
                             </Fragment>

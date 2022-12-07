@@ -43,6 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       Member.belongsTo(models.CompanyPortal, {
         foreignKey: "company_portal_id",
       });
+      Member.belongsToMany(models.Survey, {
+        through: 'member_surveys',
+        timestamps: false,
+        foreignKey: 'member_id',
+        otherKey: 'survey_id',
+      })
     }
   }
   Member.validate = function (req) {

@@ -24,6 +24,7 @@ const MemberTransaction = () => {
                         editable={ false }
                         addable={ false }
                         deletable={ false }
+                        moduleHeading={ false }
                     />
                 </Box>
             }
