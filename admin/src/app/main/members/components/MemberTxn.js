@@ -11,7 +11,7 @@ const MemberTxn = () => {
     const [ txns, setTxns ] = useState([]);
 
     useEffect(()=>{
-        getTransaction();
+        //getTransaction();
     }, []);
 
     const getTransaction = () => {
