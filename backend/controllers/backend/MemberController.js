@@ -118,16 +118,16 @@ class MemberController extends Controller {
               attributes: ["referral_code", "first_name", "last_name", "email"],
             },
           },
-          {
-            model: Survey,
-       
-            attributes: ["id"],
-            
-            include: {
-              model: SurveyProvider,
-              attributes: ["name", "logo", "status"],
-            },
-          },
+          // {
+          //   model: Survey,
+
+          //   attributes: ["payout"],
+
+          //   include: {
+          //     model: SurveyProvider,
+          //     attributes: ["name", "logo", "status"],
+          //   },
+          // },
         ];
         // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
@@ -136,8 +136,33 @@ class MemberController extends Controller {
         //get total earnings
         let total_earnings = await this.getTotalEarnings(member_id);
 
+        let survey_list = await MemberTransaction.findAll({
+          attributes: ["amount", "completed_at"],
+          limit: 5,
+          order: [["completed_at", "DESC"]],
+          where: {
+            type: "credited",
+            status: 2,
+            amount_action: "survey",
+            member_id: member_id,
+          },
+          include: {
+            model: Survey,
+            attributes: ["id"],
+            include: { model: SurveyProvider, attributes: ["name"] },
+          },
+        });
+        for (let i = 0; i < survey_list.length; i++) {
+          survey_list[i].setDataValue(
+            "name",
+            survey_list[i].Surveys[0].SurveyProvider.name
+          );
+          survey_list[i].Surveys = null;
+        }
+        console.log("survey_list=============", survey_list);
         result.setDataValue("country_list", country_list);
         result.setDataValue("total_earnings", total_earnings);
+        result.setDataValue("survey", survey_list);
 
         return {
           status: true,
@@ -295,9 +320,17 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-    console.log("total_adjustment", total_adjustment);
     result = total_earnings[0];
-    result.total_adjustment = total_adjustment[0].total_adjustment;
+
+    console.log("total_adjustment", total_adjustment[0].total_adjustment);
+
+    // result.total_adjustment = total_adjustment
+    result.total_adjustment =
+      total_adjustment[0].total_adjustment &&
+      total_adjustment[0].total_adjustment == null
+        ? 0
+        : total_adjustment[0].total_adjustment;
+
     return result;
   }
   //get transaction details
