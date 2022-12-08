@@ -14,18 +14,12 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
 
-function Listing(props) {
+function Listing() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector(selectUser);
-    const { module } = props;
-    const searchable = props.searchable ?? true;
-    const editable = props.editable ?? true;
-    const addable = props.addable ?? true;
-    const deletable = props.deletable ?? true;
-    const where = props.where ?? {};
-    const showModuleHeading = props.moduleHeading ?? '';
-    const customAddURL = props.customAddURL ?? `/app/${module}/create`;
+    const module = "members";
+    const customAddURL = `/app/${module}/create`;
 
     const [modules, setModules] = useState([]);
     const [searchText, setSearchText] = useState('');
@@ -59,8 +53,8 @@ function Listing(props) {
             search: searchText,
             page: page + 1,
             show: rowsPerPage,
-            module,
-            where
+            module: module,
+            where: {}
         }
         /* order is added if it's not the very first call os API listing */
         if (!firstCall) {
@@ -74,7 +68,6 @@ function Listing(props) {
             setTotalRecords(res.data.results.result.total)
             setLoading(false);
             setFirstCall(false);
-            module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
         }).catch(error => {
             let message = 'Something went wrong!'
             if (error && error.response.data && error.response.data.errors) {
@@ -136,7 +129,7 @@ function Listing(props) {
     function handleSelectAllClick(event) {
         if (event.target.checked) {
             setSelected(data.map((n) => {
-                return module === 'pages' && (n.slug === '500' || n.slug === '404') ? null : n.id
+                n.id
             }));
             return;
         }
@@ -155,24 +148,11 @@ function Listing(props) {
     }
 
     function handleClick(item) {
-        editable ? handelNavigate(item) : '';
+        handelNavigate(item);
     }
 
     function handelNavigate(item) {
-        if (module === 'users' && item.id == user.id) {
-            dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
-            return '';
-        } else {
-            props.navigate(`/app/${module}/${item.id}`);
-        }
-    }
-
-    function isDeletable(item) {
-        if ((module === 'users' && item.id == user.id) || !deletable) {
-            return false;
-        } else {
-            return true;
-        }
+        navigate(`/app/${module}/${item.id}`);
     }
 
     function handleCheck(event, id) {
@@ -241,7 +221,7 @@ function Listing(props) {
                 </Typography>
 
                 <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
-                    {searchable && <Paper
+                    <Paper
                         component={motion.div}
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
@@ -260,8 +240,8 @@ function Listing(props) {
                             }}
                             onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
                         />
-                    </Paper>}
-                    {addable && <motion.div
+                    </Paper>
+                    <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
                     >
@@ -275,7 +255,7 @@ function Listing(props) {
                         >
                             Add
                         </Button>
-                    </motion.div>}
+                    </motion.div>
                 </div>
             </div>
 
@@ -290,7 +270,7 @@ function Listing(props) {
                             onRequestSort={handleRequestSort}
                             rowCount={data.length}
                             onMenuItemClick={handleDeselect}
-                            {...props}
+                            // {...props}
                             fields={fields}
                         />
                         {data.length === 0 ? <TableBody>
@@ -317,14 +297,14 @@ function Listing(props) {
                                                 key={n.id}
                                                 selected={isSelected}
                                                 onClick={(event) => handleClick(n)}
-                                            >{module === 'tickets' ? '' :
+                                            >
                                                 <TableCell className="w-40 md:w-64 text-center" padding="none">
-                                                    {(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
+                                                    <Checkbox
                                                         checked={isSelected}
                                                         onClick={(event) => event.stopPropagation()}
                                                         onChange={(event) => handleCheck(event, n.id)}
-                                                    />}
-                                                </TableCell>}
+                                                    />
+                                                </TableCell>
                                                 {Object.values(fields)
                                                     .filter(field => field.listing === true)
                                                     .map((field, i) => {

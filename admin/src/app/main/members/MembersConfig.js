@@ -4,6 +4,7 @@ import Index from './Index';
 import IPLogs from './IPlogs';
 import MemberTransaction from './MemberTransaction';
 import Withdraws from './Withdraws'
+import MembersList from './listing/Listing';
 
 const UserConfig = {
     settings: {
@@ -31,6 +32,11 @@ const UserConfig = {
         },
     },
     routes: [
+        {
+            path: 'app/members',
+            element: <MembersList />,
+            auth: settingsConfig.defaultAuth
+        },
         {
             path: 'app/members/:moduleId/',
             element: <Index />,

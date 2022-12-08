@@ -12,7 +12,8 @@ function ListPage() {
   const { hasPermission } = usePermission(module);
   return <FusePageCarded
     content={
-      <>{module === 'members' ?
+      <>
+        {/* {module === 'members' ?
         <Listing module='members'
           editable={hasPermission('update')}
           addable={hasPermission('save')}
@@ -22,7 +23,12 @@ function ListPage() {
           editable={hasPermission('update')}
           addable={hasPermission('save')}
           deletable={hasPermission('delete')}
-        />}
+        />} */}
+        <List module={module}
+          editable={hasPermission('update')}
+          addable={hasPermission('save')}
+          deletable={hasPermission('delete')}
+        />
         {/* <br /><br /><br />
         <List module="roles"/> */}
       </>

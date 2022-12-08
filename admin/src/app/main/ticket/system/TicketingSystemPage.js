@@ -296,7 +296,7 @@ function TicketingSystemPage(props) {
 
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
-                                                    <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4} /*cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} rowHeight={212}*/>
+                                                    <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4}>
                                                         {val.TicketAttachments.map((item, key) => (
                                                             <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px', justifyContent: 'flex-end', flexDirection: 'inherit' }}>
                                                                 <div style={{ height: '120px', overflow: 'hidden', width: '100%', marginBottom: '4px' }}>
@@ -455,14 +455,6 @@ function TicketingSystemPage(props) {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    {/* <div className="flex flex-row justify-center sm:justify-end pr-20">
-                                        <div className="flex">
-                                            <Typography component={'h4'} className="pr-5">
-                                                <b>Total Earnings:</b>
-                                            </Typography>
-                                            {memberDetails.total_earnings} USD
-                                        </div>
-                                    </div> */}
                                 </div>
                             </div>
                             <Divider />
