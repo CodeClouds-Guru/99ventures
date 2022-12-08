@@ -1,6 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,7 +23,7 @@ function Listing(props) {
     const editable = props.editable ?? true;
     const addable = props.addable ?? true;
     const deletable = props.deletable ?? true;
-    const where = props.where ?? {};
+    // const where = props.where ?? {};
     const showModuleHeading = props.moduleHeading ?? '';
     const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
@@ -43,6 +43,9 @@ function Listing(props) {
     });
     const [moduleDeleted, setModuleDeleted] = useState(false);
     const [firstCall, setFirstCall] = useState(true);
+    const [memberStatus, setMemberStatus] = useState('');
+    const [where, setWhere] = useState({});
+
     const resetModulesListConfig = () => {
         setSearchText('');
         setOrder({
@@ -100,7 +103,7 @@ function Listing(props) {
 
     useEffect(() => {
         fetchModules();
-    }, [searchText, page, rowsPerPage, order]);
+    }, [searchText, page, rowsPerPage, order, where]);
 
     useEffect(() => {
         resetModulesListConfig();
@@ -226,6 +229,31 @@ function Listing(props) {
         return Object.values(fields).filter(field => field.listing === true).length + 1;
     }
 
+    const customizedRowValue = (n, field) => {
+        if(field.field_name === 'status') {
+            const status = processFieldValue(n[field.field_name], field);
+            if(status === 'member')
+                return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+            else if(status === 'suspended')
+                return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="primary" />
+            else if(status === 'validating')
+                return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+            else if(status === 'deleted')
+                return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+        } else {
+            return processFieldValue(n[field.field_name], field)
+        }
+    }
+
+    const handleChangeStatus = (e) => {
+        setMemberStatus(e.target.value);
+        if(e.target.value){
+            setWhere({status: e.target.value});
+        }else {
+            setWhere({});
+        }
+    }
+
     return (
         <div>
             {/* // header */}
@@ -240,12 +268,32 @@ function Listing(props) {
                     Members
                 </Typography>
 
-                <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
+                <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
+                    <FormControl sx={{ minWidth: 120 }} size="small">
+                        <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                        <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={ memberStatus }
+                        label="Status"
+                        onChange={ handleChangeStatus }
+                        >
+                            <MenuItem value="">
+                                <em>--Select--</em>
+                            </MenuItem>
+                            <MenuItem value="member">Member</MenuItem>
+                            <MenuItem value="suspended">Suspended</MenuItem>
+                            <MenuItem value="validating">Validating</MenuItem>
+                            <MenuItem value="deleted">Deleted</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                
                     {searchable && <Paper
                         component={motion.div}
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-                        className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
+                        className="flex items-center w-full sm:max-w-256 space-x-8 px-16 border-1 rounded shadow-0"
                     >
                         <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
@@ -278,6 +326,12 @@ function Listing(props) {
                     </motion.div>}
                 </div>
             </div>
+            <Stack direction="row" spacing={1} className="my-16 justify-center">
+                <Chip label="Member" color="success" size="small" />
+                <Chip label="Suspended" size="small" color="primary" />
+                <Chip label="Validating" size="small" color="warning" />
+                <Chip label="Deleted" size="small" color="error" />
+            </Stack>
 
             {/* // body */}
             <div className="w-full flex flex-col min-h-full">
@@ -307,7 +361,6 @@ function Listing(props) {
                                     .map((n) => {
                                         const isSelected = selected.indexOf(n.id) !== -1;
                                         return (
-
                                             <TableRow
                                                 className="h-72 cursor-pointer"
                                                 hover
@@ -317,23 +370,34 @@ function Listing(props) {
                                                 key={n.id}
                                                 selected={isSelected}
                                                 onClick={(event) => handleClick(n)}
-                                            >{module === 'tickets' ? '' :
+                                            >
+                                                {/* {module === 'tickets' ? '' :
                                                 <TableCell className="w-40 md:w-64 text-center" padding="none">
                                                     {(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
                                                         checked={isSelected}
                                                         onClick={(event) => event.stopPropagation()}
                                                         onChange={(event) => handleCheck(event, n.id)}
                                                     />}
-                                                </TableCell>}
-                                                {Object.values(fields)
+                                                </TableCell>} */}
+
+                                                <TableCell className="w-40 md:w-64 text-center" padding="none">
+                                                    {
+                                                        isDeletable(n) && (
+                                                            <Checkbox
+                                                                checked={isSelected}
+                                                                onClick={(event) => event.stopPropagation()}
+                                                                onChange={(event) => handleCheck(event, n.id)}
+                                                            />
+                                                        )
+                                                    }
+                                                </TableCell>
+                                                {
+                                                    Object.values(fields)
                                                     .filter(field => field.listing === true)
                                                     .map((field, i) => {
-                                                        return <Fragment key={i}>
-                                                            <TableCell className="p-4 md:p-16" component="th" scope="row">
-                                                                {processFieldValue(n[field.field_name], field)}
-                                                            </TableCell>
-                                                        </Fragment>
-                                                    })}
+                                                        return <TableCell key={i} className="p-4 md:p-16" component="th" scope="row">{ customizedRowValue(n, field) }</TableCell>
+                                                    })
+                                                }
                                             </TableRow>
                                         );
                                     })}
