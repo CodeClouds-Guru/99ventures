@@ -32,7 +32,7 @@ class MemberReferralController extends Controller {
     let count = 0
     docs.forEach(function (record,key) {
       if(record.dataValues.Member != null && record.dataValues.Member.dataValues.avatar != ''){
-        record.dataValues.Member.dataValues.avatar = process.env.S3_BUCKET_OBJECT_URL+record.dataValues.Member.dataValues.avatar
+        record.dataValues.Member.dataValues.avatar = record.dataValues.Member.dataValues.avatar
       }
       if(record.dataValues.join_date == ''){
         record.dataValues.status = 'Pending';

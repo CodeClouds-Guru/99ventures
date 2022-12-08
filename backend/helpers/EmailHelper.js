@@ -1,6 +1,7 @@
-const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,User,CompanyPortal,sequelize } = require('../models/index')
+const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,User,CompanyPortal,EmailConfiguration,sequelize } = require('../models/index')
 const queryInterface = sequelize.getQueryInterface()
 const { Op } = require("sequelize");
+const nodemailer = require('nodemailer');
 class EmailHelper {
     
     constructor(req_data) {
@@ -71,6 +72,34 @@ class EmailHelper {
         email_body = email_body.replaceAll(value,replace_data[key])
         })
         return email_body
+    }
+    //send mail
+    async sendMail(body,to){
+        // create reusable transporter object using the default SMTP transport
+        let req = this.req_data
+        let company_portal_id = req.headers.site_id
+        let email_configurations = await EmailConfiguration.findAll({where:{'company_portal_id':company_portal_id}})
+        var transporter = nodemailer.createTransport({
+            host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
+            port: email_configurations[0].email_server_port,//465,//2525,
+            auth: {
+              user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
+              pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
+            }
+          });
+        const mailData = {
+            from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
+            to: to,   // list of receivers
+            subject: 'Sending Email using Node.js',
+            //text: 'That was easy!',
+            html: body,
+        };
+        transporter.sendMail(mailData, function (err, info) {
+            if(err)
+                console.log('err',err)
+            else
+                console.log('success====',info);
+        });
     }
 }
 module.exports = EmailHelper

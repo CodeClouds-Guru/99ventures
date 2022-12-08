@@ -20,6 +20,9 @@ class EmailTemplateController extends Controller {
   }
   //override list function
   async list(req, res) {
+    // var emailHelper = new EmailHelper(req)
+    // var send_mail = await emailHelper.sendMail('<b>hello</b>','sourabh.das@codeclouds.in');
+    // return send_mail
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     options.include = [
