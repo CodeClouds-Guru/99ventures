@@ -6,8 +6,8 @@ import {
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import SendIcon from '@mui/icons-material/Send';
 import { useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import LoadingButton from '@mui/lab/LoadingButton';
+// import { motion } from 'framer-motion';
+// import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectUser } from 'app/store/userSlice';

@@ -13,17 +13,6 @@ function ListPage() {
   return <FusePageCarded
     content={
       <>
-        {/* {module === 'members' ?
-        <Listing module='members'
-          editable={hasPermission('update')}
-          addable={hasPermission('save')}
-          deletable={hasPermission('delete')}
-        /> :
-        <List module={module}
-          editable={hasPermission('update')}
-          addable={hasPermission('save')}
-          deletable={hasPermission('delete')}
-        />} */}
         <List module={module}
           editable={hasPermission('update')}
           addable={hasPermission('save')}

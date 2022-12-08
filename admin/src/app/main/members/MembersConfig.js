@@ -5,6 +5,7 @@ import IPLogs from './IPlogs';
 import MemberTransaction from './MemberTransaction';
 import Withdraws from './Withdraws'
 import MembersList from './listing/Listing';
+import CreateMember from './CreateMember';
 
 const UserConfig = {
     settings: {
@@ -35,6 +36,11 @@ const UserConfig = {
         {
             path: 'app/members',
             element: <MembersList />,
+            auth: settingsConfig.defaultAuth
+        },
+        {
+            path: 'app/members/create',
+            element: <CreateMember />,
             auth: settingsConfig.defaultAuth
         },
         {
