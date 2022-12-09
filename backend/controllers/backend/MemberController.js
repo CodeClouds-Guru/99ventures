@@ -14,7 +14,7 @@ const {
   User,
   CompanyPortal,
   Survey,
-  SurveyProvider,
+  SurveyProvider,Company,
   sequelize,
 } = require("../../models/index");
 const db = require("../../models/index");
@@ -256,11 +256,11 @@ class MemberController extends Controller {
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
+
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
     });
     let fields = this.model.fields;
-    console.log(roles);
     if (roles == 1) {
       options.include = { model: CompanyPortal, attributes: ["name"] };
     } else {
@@ -296,7 +296,7 @@ class MemberController extends Controller {
         searchable: true,
       };
     }
-    console.log(result.rows);
+    // console.log(result.rows);
     return {
       result: { data: result.rows, pages, total: result.count },
       fields: fields,
@@ -406,6 +406,30 @@ class MemberController extends Controller {
       console.error(error);
       this.throwCustomError("Unable to get data", 500);
     }
+  }
+
+  async add(req, res) {
+    let permission = false;
+    if (req.user.permissions.includes("all-members-add")) permission = true;
+    let roles = req.user.roles.map((role) => {
+      if (role.id == 1) return role.id;
+    });
+    let companies = {};
+    if (roles == 1) {
+      companies = await Company.findAll({
+        attributes: ["id", "name"],
+        where: { status: 1 },
+        include: {
+          model: CompanyPortal,
+          attributes: ["id", "name", "domain"],
+        },
+      });
+    }
+    return {
+      status: true,
+      fields: this.model.fields,
+      companies,
+    };
   }
 }
 
