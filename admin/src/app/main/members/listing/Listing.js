@@ -57,7 +57,7 @@ function Listing() {
             page: page + 1,
             show: rowsPerPage,
             module: module,
-            where: {}
+            where
         }
         /* order is added if it's not the very first call os API listing */
         if (!firstCall) {
@@ -79,19 +79,6 @@ function Listing() {
             dispatch(showMessage({ variant: 'error', message }));
             navigate('/dashboard');
         })
-    }
-
-    const ticketsReadCount = (values) => {
-        let unread = 0;
-        let user_obj = {};
-        Object.keys(user).forEach((val, key) => {
-            user_obj[val] = user[val];
-        })
-        Object.values(values).forEach((val, key) => {
-            val.is_read === 0 ? unread++ : '';
-        });
-        user_obj.unread_tickets = unread;
-        // dispatch(setUser(user_obj));
     }
 
     useEffect(() => {
@@ -248,7 +235,25 @@ function Listing() {
                     Members
                 </Typography>
 
-                <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
+                <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
+                    <FormControl sx={{ minWidth: 120 }} size="small">
+                        <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                        <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={ memberStatus }
+                        label="Status"
+                        onChange={ handleChangeStatus }
+                        >
+                            <MenuItem value="">
+                                <em>--Select--</em>
+                            </MenuItem>
+                            <MenuItem value="member">Member</MenuItem>
+                            <MenuItem value="suspended">Suspended</MenuItem>
+                            <MenuItem value="validating">Validating</MenuItem>
+                            <MenuItem value="deleted">Deleted</MenuItem>
+                        </Select>
+                    </FormControl>
                     <Paper
                         component={motion.div}
                         initial={{ y: -20, opacity: 0 }}
@@ -286,12 +291,12 @@ function Listing() {
                     </motion.div>
                 </div>
             </div>
-            <Stack direction="row" spacing={1} className="my-16 justify-center">
+            {/* <Stack direction="row" spacing={1} className="my-16 justify-center">
                 <Chip label="Member" color="success" size="small" />
                 <Chip label="Suspended" size="small" color="primary" />
                 <Chip label="Validating" size="small" color="warning" />
                 <Chip label="Deleted" size="small" color="error" />
-            </Stack>
+            </Stack> */}
 
             {/* // body */}
             <div className="w-full flex flex-col min-h-full">

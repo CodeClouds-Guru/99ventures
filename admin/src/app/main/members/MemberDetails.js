@@ -6,10 +6,10 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import AccountNotes from './components/AccountNotes';
-import MemberTxn from './components/MemberTxn';
 import { useDispatch } from 'react-redux';
 import axios from 'axios'
 import Adjustment from './components/Adjustment';
+import SurveyDetails from './components/SurveyDetails';
 
 
 const labelStyling = {
@@ -73,6 +73,7 @@ const MemberDetails = () => {
     const [ editStatus, setEditStatus ] = useState(false);
     const [ statusNote, setStatusNote ] = useState('');
     const [ status, setStatus ] = useState('');
+    const [ surveyDetails, setSurveyDetails ] = useState([]);
 
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
@@ -114,6 +115,7 @@ const MemberDetails = () => {
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status); 
+                    setSurveyDetails(result.survey);
 
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
@@ -656,7 +658,7 @@ const MemberDetails = () => {
                             </div>
                         </div>
                         <div className='w-1/2'> 
-                            <MemberTxn />
+                            <SurveyDetails surveyData={ surveyDetails } />
                         </div>
                     </div>
                     <div className='flex flex-row'>
