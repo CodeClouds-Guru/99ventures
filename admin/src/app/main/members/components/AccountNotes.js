@@ -1,9 +1,10 @@
 import { Typography, List, ListItem, ListItemText} from '@mui/material';
 import Helper from 'src/app/helper';
+import * as React from 'react'
 
 const AccountNotes = (props) => {
     const accountNotes = props.accountNotes;
-
+ 
     const notesList = () => {
         return accountNotes.map(note => {            
             return (
@@ -29,4 +30,4 @@ const AccountNotes = (props) => {
     )
 }
 
-export default AccountNotes;
+export default React.memo(AccountNotes);

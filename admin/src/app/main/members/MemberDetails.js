@@ -612,8 +612,8 @@ const MemberDetails = () => {
                         // },
                     }}
                 >
-                    <Typography variant="h6" className="mb-16 text-xl xtext-white">Balance: { memberData.total_earnings && memberData.total_earnings.total_amount } (Total Earnings)</Typography>
-                    <Typography variant="h6" className="text-xl xtext-white">Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment }</Typography>                    
+                    <Typography variant="h6" className="mb-16 text-xl xtext-white">Balance: ${ memberData.total_earnings && memberData.total_earnings.total_amount } (Total Earnings)</Typography>
+                    <Typography variant="h6" className="text-xl xtext-white">Adjustment: ${ memberData.total_earnings && memberData.total_earnings.total_adjustment }</Typography>                    
                     <Adjustment updateMemberData={ updateMemberData }/>        
                 </Box>
 

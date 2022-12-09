@@ -1,9 +1,10 @@
+import * as React from 'react';
 import { Box, Typography, List, ListItem, ListItemText} from '@mui/material';
 import Helper from 'src/app/helper';
 
+
 const SurveyDetails = (props) => {
     const surveyData = props.surveyData;
-    console.log(surveyData)
 
     return (
         <Box
@@ -28,7 +29,7 @@ const SurveyDetails = (props) => {
                                                     <Typography variant="caption" className="text-xs italic font-bold">{ item.name }</Typography>
                                                     <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(item.completed_at)}</Typography>
                                                 </div>
-                                                <Typography variant="body2" className="text-xs">{ item.amount }</Typography>
+                                                <Typography variant="body2" className="text-xs">${ item.amount }</Typography>
                                             </>
                                         } />
                                     </ListItem>
@@ -44,4 +45,4 @@ const SurveyDetails = (props) => {
     )
 }
 
-export default SurveyDetails;
+export default React.memo(SurveyDetails);
