@@ -14,7 +14,8 @@ const {
   User,
   CompanyPortal,
   Survey,
-  SurveyProvider, Company,
+  SurveyProvider,
+  Company,
   sequelize,
 } = require("../../models/index");
 const db = require("../../models/index");
@@ -36,11 +37,13 @@ class MemberController extends Controller {
           [Op.and]: {
             company_portal_id: req.body.company_portal_id,
             username: req.body.username,
-          }
-        }
-      })
+          },
+        },
+      });
       if (existing_email_or_username > 0) {
-        const errorObj = new Error("Sorry! this username or email has already been taken");
+        const errorObj = new Error(
+          "Sorry! this username or email has already been taken"
+        );
         errorObj.statusCode = 422;
         errorObj.data = error.details.map((err) => err.message);
         throw errorObj;
@@ -52,7 +55,7 @@ class MemberController extends Controller {
         };
       }
     } catch (error) {
-      console.error('error saving member', error);
+      console.error("error saving member", error);
       this.throwCustomError("Unable to save data", 500);
     }
   }
@@ -149,16 +152,6 @@ class MemberController extends Controller {
               attributes: ["referral_code", "first_name", "last_name", "email"],
             },
           },
-          // {
-          //   model: Survey,
-
-          //   attributes: ["payout"],
-
-          //   include: {
-          //     model: SurveyProvider,
-          //     attributes: ["name", "logo", "status"],
-          //   },
-          // },
         ];
         // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
@@ -338,7 +331,7 @@ class MemberController extends Controller {
   async getTotalEarnings(member_id) {
     let result = {};
     let total_earnings = await db.sequelize.query(
-      "SELECT id, amount as total_amount FROM `member_balances` WHERE amount_type='cash' AND member_id=?",
+      "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=?",
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
@@ -351,14 +344,14 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-    result = total_earnings[0];
+    result.earnings = total_earnings;
 
-    console.log("total_adjustment", total_adjustment[0].total_adjustment);
+    console.log("total_earnings", total_earnings);
 
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -420,10 +413,13 @@ class MemberController extends Controller {
         },
       });
     }
+    let country_list = await Country.getAllCountryList();
+
     return {
       status: true,
       fields: this.model.fields,
       companies,
+      country_list,
     };
   }
 }
