@@ -25,6 +25,37 @@ class MemberController extends Controller {
     this.view = this.view.bind(this);
     this.update = this.update.bind(this);
   }
+  async save(req, res) {
+    try {
+      const existing_email_or_username = await Member.count({
+        [Op.or]: {
+          [Op.and]: {
+            company_portal_id: req.body.company_portal_id,
+            email: req.body.email,
+          },
+          [Op.and]: {
+            company_portal_id: req.body.company_portal_id,
+            username: req.body.username,
+          }
+        }
+      })
+      if (existing_email_or_username > 0) {
+        const errorObj = new Error("Sorry! this username or email has already been taken");
+        errorObj.statusCode = 422;
+        errorObj.data = error.details.map((err) => err.message);
+        throw errorObj;
+      } else {
+        await super.save(req);
+        return {
+          status: true,
+          message: "Record has been updated successfully",
+        };
+      }
+    } catch (error) {
+      console.error('error saving member', error);
+      this.throwCustomError("Unable to save data", 500);
+    }
+  }
 
   async view(req, res) {
     let company_id = req.headers.company_id;
@@ -327,7 +358,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
