@@ -14,7 +14,7 @@ const {
   User,
   CompanyPortal,
   Survey,
-  SurveyProvider,Company,
+  SurveyProvider, Company,
   sequelize,
 } = require("../../models/index");
 const db = require("../../models/index");
@@ -409,16 +409,11 @@ class MemberController extends Controller {
   }
 
   async add(req, res) {
-    let permission = false;
-    if (req.user.permissions.includes("all-members-add")) permission = true;
-    let roles = req.user.roles.map((role) => {
-      if (role.id == 1) return role.id;
-    });
-    let companies = {};
-    if (roles == 1) {
+    let roles = req.user.roles.find((role) => role.id === 1);
+    let companies = [];
+    if (roles) {
       companies = await Company.findAll({
         attributes: ["id", "name"],
-        where: { status: 1 },
         include: {
           model: CompanyPortal,
           attributes: ["id", "name", "domain"],
