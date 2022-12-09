@@ -266,6 +266,14 @@ const MemberDetails = () => {
         });
     }
 
+    const showBalance = () => {
+        if(memberData.total_earnings && memberData.total_earnings.earnings){
+            const result = memberData.total_earnings.earnings.filter(item => item.amount_type === 'cash');
+            return result.length ? result[0].total_amount : 0
+        }
+        return 0;
+    }
+
     return (
         <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
@@ -612,8 +620,12 @@ const MemberDetails = () => {
                         // },
                     }}
                 >
-                    <Typography variant="h6" className="mb-16 text-xl xtext-white">Balance: ${ memberData.total_earnings && memberData.total_earnings.total_amount } (Total Earnings)</Typography>
-                    <Typography variant="h6" className="text-xl xtext-white">Adjustment: ${ memberData.total_earnings && memberData.total_earnings.total_adjustment }</Typography>                    
+                    <Typography variant="h6" className="mb-16 text-xl xtext-white">
+                        Balance: ${ showBalance() } (Total Earnings)
+                    </Typography>
+                    <Typography variant="h6" className="text-xl xtext-white">
+                        Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$'+ memberData.total_earnings.total_adjustment : 0}
+                    </Typography>                    
                     <Adjustment updateMemberData={ updateMemberData }/>        
                 </Box>
 
