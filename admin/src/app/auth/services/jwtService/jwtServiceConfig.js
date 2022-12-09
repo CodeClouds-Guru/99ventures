@@ -49,6 +49,8 @@ const jwtServiceConfig = {
   savePages: 'pages/save',
   updatePages: 'pages/update',
   getSinglePage: 'pages/edit',
+  membersFieldsAdd: 'members/add',
+  membersSave: 'members/save',
   getSingleMember: 'members/view',
   memberUpdate: 'members/update',
   memberDelete: 'members/delete'
