@@ -20,6 +20,13 @@ const PageController = new PageControllerClass();
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
 
 router.get("/", (req, res) => {
+  const eventBus = require('../eventBus');
+  eventBus.emit('send_email', {
+    action: 'signed_up',
+    data: {
+      'email': 'sss@hh.com'
+    }
+  });
   res.json({ message: "API working" });
 });
 
