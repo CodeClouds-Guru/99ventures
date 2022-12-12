@@ -42,7 +42,6 @@ class MemberController extends Controller {
           },
         }
       });
-      console.log('existing_email_or_username', existing_email_or_username)
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
@@ -52,11 +51,17 @@ class MemberController extends Controller {
         throw errorObj;
       } else {
         req.body.membership_tier_id = 1;
-        await super.save(req);
-        return {
-          status: true,
-          message: "Record has been updated successfully",
-        };
+        let files = [];
+        files[0] = req.files.avatar;
+        const fileHelper = new FileHelper(
+          files,
+          "members/" + req.params.username,
+          req
+        );
+        const file_name = await fileHelper.upload();
+        req.body.avatar = file_name.files[0].filename;
+        const res = await super.save(req);
+        return res;
       }
     } catch (error) {
       console.error("error saving member", error);

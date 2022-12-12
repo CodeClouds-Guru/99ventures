@@ -93,7 +93,7 @@ const defaultValues = {
 
 const CreateMember = () => {
     const module = 'members';
-    // const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [companies, setCompanies] = useState([]);
@@ -101,8 +101,7 @@ const CreateMember = () => {
     const [companyPortalId, setCompanyPortalId] = useState('');
     const [avatar, setAvatar] = useState('');
     const [countryOptions, setCountryOptions] = useState([]);
-    const [dob, setDob] = useState('');
-    console.log(dob)
+    const [dob, setDob] = useState(moment().format('YYYY/MM/DD'));
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -215,23 +214,25 @@ const CreateMember = () => {
         form_data.append('zip_code', zip_code);
         form_data.append('phone_no', phone_no);
         form_data.append('country_id', country_id);
-        form_data.append('country_code', country_code);
+        const country_code = countryOptions.find(cnt => cnt.id === country_id);
+        form_data.append('country_code', country_code ? country_code.phonecode : '+1');
         form_data.append('dob', moment(dob).format('YYYY/MM/DD'));
 
         setLoading(true);
         axios.post(jwtServiceConfig.membersSave, form_data)
             .then((response) => {
-                setLoading(false);
-                if (response.data.results.status) {
+                console.log(response.data);
+                if (response.status === 200) {
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    // navigate(`/app/${module}/${id}`);
+                    navigate(`/app/members/${response.data.results.result.id}`);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
             })
             .catch((error) => {
-                setLoading(false)
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            }).finally(() => {
+                setLoading(false)
             })
     }
 
@@ -497,7 +498,7 @@ const CreateMember = () => {
                                     )}
                                 />
                                 <Controller
-                                    name="phone"
+                                    name="phone_no"
                                     control={control}
                                     render={({ field }) => (
                                         <TextField
