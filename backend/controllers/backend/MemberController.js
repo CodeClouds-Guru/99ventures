@@ -29,25 +29,29 @@ class MemberController extends Controller {
   async save(req, res) {
     try {
       const existing_email_or_username = await Member.count({
-        [Op.or]: {
-          [Op.and]: {
-            company_portal_id: req.body.company_portal_id,
-            email: req.body.email,
+        where: {
+          [Op.or]: {
+            [Op.and]: {
+              company_portal_id: req.body.company_portal_id,
+              email: req.body.email,
+            },
+            [Op.and]: {
+              company_portal_id: req.body.company_portal_id,
+              username: req.body.username,
+            },
           },
-          [Op.and]: {
-            company_portal_id: req.body.company_portal_id,
-            username: req.body.username,
-          },
-        },
+        }
       });
+      console.log('existing_email_or_username', existing_email_or_username)
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
         );
         errorObj.statusCode = 422;
-        errorObj.data = error.details.map((err) => err.message);
+        errorObj.data = ["Sorry! this username or email has already been taken"];
         throw errorObj;
       } else {
+        req.body.membership_tier_id = 1;
         await super.save(req);
         return {
           status: true,
@@ -351,7 +355,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 

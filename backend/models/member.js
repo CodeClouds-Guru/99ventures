@@ -55,13 +55,17 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
-      // status: Joi.string().optional().label("Status"),
-      // username: Joi.string().min(3).max(30).required().label("Username"),
+      status: Joi.string().optional().label("Status"),
+      username: Joi.string().min(3).max(30).required().label("Username"),
+      email: Joi.string().optional(),
+      company_portal_id: Joi.string().optional(),
+      company_id: Joi.string().optional(),
       password: Joi.string().optional(),
+      dob: Joi.string().optional(),
       phone_no: Joi.string().optional().label("Phone No"),
       country_id: Joi.optional().label("Country"),
       membership_tier_id: Joi.optional().label("Level"),
-      address_1: Joi.string().allow("").optional().label("Address 1"),
+      address_1: Joi.string().allow("").required().label("Address 1"),
       address_2: Joi.string().allow("").optional().label("Address 2"),
       address_3: Joi.string().allow("").optional().label("Address 3"),
       zip_code: Joi.string().allow("").optional().label("Zip Code"),
@@ -151,7 +155,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "members",
     }
   );
-  
+
 
   Member.fields = {
     id: {
@@ -258,7 +262,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: false,
     },
-    
+
   };
 
   sequelizePaginate.paginate(Member);
