@@ -1,23 +1,23 @@
-const { EmailAction,EmailTemplateVariable,EmailActionEmailTemplate,EmailTemplate,Company,User,CompanyPortal,EmailConfiguration,sequelize } = require('../models/index')
+const { EmailAction, EmailTemplateVariable, EmailActionEmailTemplate, EmailTemplate, Company, User, CompanyPortal, EmailConfiguration, sequelize } = require('../models/index')
 const queryInterface = sequelize.getQueryInterface()
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
 class EmailHelper {
-    
+
     constructor(req_data) {
         this.req_data = req_data
         this.parse = this.parse.bind(this)
         this.getCompanyInfo = this.getCompanyInfo.bind(this)
         this.replaceVariables = this.replaceVariables.bind(this)
-        }
+    }
     //email parsing
     async parse(payload){
         let req = this.req_data
         let user = req.user;
         let receiver_module = '';
-        let search = {'id' : '1'};
+        let search = { 'id': '1' };
         let all_details = {
-        'users': user
+            'users': user
         }
         let email_action = await EmailAction.findOne({where:{'action':payload.action},include:EmailTemplate})
         let email_template = email_action.EmailTemplates[0]
@@ -56,40 +56,40 @@ class EmailHelper {
         return email_body
     }
     //company info
-    async getCompanyInfo(req){
+    async getCompanyInfo(req) {
         let company_id = req.headers.company_id
         let company_portal_id = req.headers.site_id
 
         return CompanyPortal.findAll({
-        where:{'id':company_portal_id},
-        include:[{all:true,nested:false}]
+            where: { 'id': company_portal_id },
+            include: [{ all: true, nested: false }]
         })
     }
     //replace email variables
-    async replaceVariables(details, replace_data,email_body){
-        replace_data.forEach(function(value,key){
-        let new_value = value;
-        new_value = new_value.replace('{','');
-        new_value = new_value.replace('}','');
-        replace_data[key] = eval('details'+'.'+new_value)
-        email_body = email_body.replaceAll(value,replace_data[key])
+    async replaceVariables(details, replace_data, email_body) {
+        replace_data.forEach(function (value, key) {
+            let new_value = value;
+            new_value = new_value.replace('{', '');
+            new_value = new_value.replace('}', '');
+            replace_data[key] = eval('details' + '.' + new_value)
+            email_body = email_body.replaceAll(value, replace_data[key])
         })
         return email_body
     }
     //send mail
-    async sendMail(body,to){
+    async sendMail(body, to) {
         // create reusable transporter object using the default SMTP transport
         let req = this.req_data
         let company_portal_id = req.headers.site_id
-        let email_configurations = await EmailConfiguration.findAll({where:{'company_portal_id':company_portal_id}})
+        let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
         var transporter = nodemailer.createTransport({
             host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
             port: email_configurations[0].email_server_port,//465,//2525,
             auth: {
-              user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
-              pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
+                user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
+                pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
             }
-          });
+        });
         const mailData = {
             from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
             to: to,   // list of receivers
@@ -98,10 +98,10 @@ class EmailHelper {
             html: body,
         };
         transporter.sendMail(mailData, function (err, info) {
-            if(err)
-                console.log('err',err)
+            if (err)
+                console.log('err', err)
             else
-                console.log('success====',info);
+                console.log('success====', info);
         });
     }
 }
