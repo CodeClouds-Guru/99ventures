@@ -19,15 +19,18 @@ const PageController = new PageControllerClass();
 
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
 
-router.get("/", (req, res) => {
+router.get("/",[AuthMiddleware], (req, res) => {
   const eventBus = require('../eventBus');
-  eventBus.emit('send_email', {
-    action: 'signed_up',
+  let email_body = eventBus.emit('send_email', {
+    action: 'Invitation',
     data: {
-      'email': 'sss@hh.com'
-    }
+      'email': 'mailto:sourabh.das@codeclouds.in',
+      'company_id':1,
+      'company_portal_id':1
+    },
+    req:req
   });
-  res.json({ message: "API working" });
+  res.json({ message: "API working",email_body:email_body });
 });
 
 router.post("/signup", AuthController.signup);

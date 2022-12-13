@@ -11,7 +11,7 @@ class EmailHelper {
         this.replaceVariables = this.replaceVariables.bind(this)
         }
     //email parsing
-    async parse(){
+    async parse(payload){
         let req = this.req_data
         let user = req.user;
         let receiver_module = '';
@@ -19,38 +19,41 @@ class EmailHelper {
         let all_details = {
         'users': user
         }
-        let email_template = await EmailTemplate.findOne({where:{'id':'1'}})
+        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:EmailTemplate})
+        let email_template = email_action.EmailTemplates[0]
+        let email_body = ''
         if(email_template){
         //variables used for the template
-        let match_variables = email_template.body.match(/{(.*?)}/g);
-        if(match_variables){
-            //required model list
-            let models = await EmailTemplateVariable.findAll({where:{code:match_variables, module: { [Op.ne]: receiver_module }}, attributes:['module','code']})
-            let include_models = []
-            let  all_models = []
-            let  all_variables = {}
-            if(models){
-            include_models = models.map((model_obj)=>{
-                return {model: eval(model_obj.module)}
-            })
-            models.map((model_obj)=>{
-                all_models.push(model_obj.module)
-                let code = model_obj.code
-                all_variables[code]= ''
-                return model_obj.module
-            })
+            let match_variables = email_template.body.match(/{(.*?)}/g);
+            if(match_variables){
+                //required model list
+                let models = await EmailTemplateVariable.findAll({where:{code:match_variables, module: { [Op.ne]: receiver_module }}, attributes:['module','code']})
+                let include_models = []
+                let  all_models = []
+                let  all_variables = {}
+                if(models){
+                include_models = models.map((model_obj)=>{
+                    return {model: eval(model_obj.module)}
+                })
+                models.map((model_obj)=>{
+                    all_models.push(model_obj.module)
+                    let code = model_obj.code
+                    all_variables[code]= ''
+                    return model_obj.module
+                })
+                }
+                //get company info
+                let company_portal_details = await this.getCompanyInfo(req)
+                all_details['companies'] = company_portal_details[0].Company
+                company_portal_details[0].Company = {}
+                all_details['company_portals'] = company_portal_details[0]
+                //set user details
+                email_body = await this.replaceVariables(all_details,match_variables,email_template.body)
+            }else{
+                email_body = email_template.body
             }
-            //get company info
-            let company_portal_details = await this.getCompanyInfo(req)
-            all_details['companies'] = company_portal_details[0].Company
-            company_portal_details[0].Company = {}
-            all_details['company_portals'] = company_portal_details[0]
-            //set user details
-            let email_body = await this.replaceVariables(all_details,match_variables,email_template.body)
-            return email_body
         }
-        
-        }
+        return email_body
     }
     //company info
     async getCompanyInfo(req){
