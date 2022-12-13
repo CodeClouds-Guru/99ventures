@@ -1,6 +1,9 @@
+const EmailHelper = require("../helpers/EmailHelper")
 class EmailEventListner {
-    listen(payload) {
-        console.log(payload)
+    async listen(payload) {
+        // console.log(payload)
+         var emailHelper = new EmailHelper()
+         var email_template = await emailHelper.parse(payload)
     }
 }
 
