@@ -74,7 +74,6 @@ class MemberController extends Controller {
           },
           req:req
         });
-        console.log('evntbus',evntbus)
         return res;
       }
     } catch (error) {

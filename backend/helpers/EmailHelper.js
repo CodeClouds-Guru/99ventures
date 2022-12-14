@@ -25,7 +25,11 @@ class EmailHelper {
                 'users': user
             }
         }
-        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:EmailTemplate})
+        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:{
+            model: EmailTemplate,
+            required: true,
+            where: {company_portal_id:req.headers.site_id},
+          }})
         let email_template = email_action.EmailTemplates[0]
         let email_body = ''
         let email_subject = ''
