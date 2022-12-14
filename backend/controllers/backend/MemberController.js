@@ -52,15 +52,29 @@ class MemberController extends Controller {
       } else {
         req.body.membership_tier_id = 1;
         let files = [];
-        files[0] = req.files.avatar;
-        const fileHelper = new FileHelper(
-          files,
-          "members/" + req.params.username,
-          req
-        );
-        const file_name = await fileHelper.upload();
-        req.body.avatar = file_name.files[0].filename;
+        if(req.files){
+          files[0] = req.files.avatar;
+          const fileHelper = new FileHelper(
+            files,
+            "members/" + req.params.username,
+            req
+          );
+          const file_name = await fileHelper.upload();
+          req.body.avatar = file_name.files[0].filename;
+        }
         const res = await super.save(req);
+        //send mail
+        const eventBus = require('../../eventBus');
+        let member_details = await Member.findOne({where:{email:req.body.email}})
+        let evntbus = eventBus.emit('send_email', {
+          action: 'Invitation',
+          data: {
+            'email': req.body.email,
+            'details':{'members':member_details}
+          },
+          req:req
+        });
+        console.log('evntbus',evntbus)
         return res;
       }
     } catch (error) {
