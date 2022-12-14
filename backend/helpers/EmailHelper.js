@@ -1,4 +1,4 @@
-const { EmailAction, EmailTemplateVariable, EmailActionEmailTemplate, EmailTemplate, Company, User, CompanyPortal, EmailConfiguration, sequelize } = require('../models/index')
+const { Member,EmailAction, EmailTemplateVariable, EmailActionEmailTemplate, EmailTemplate, Company, User, CompanyPortal, EmailConfiguration, sequelize } = require('../models/index')
 const queryInterface = sequelize.getQueryInterface()
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
@@ -16,13 +16,21 @@ class EmailHelper {
         let user = req.user;
         let receiver_module = '';
         let search = { 'id': '1' };
-        let all_details = {
-            'users': user
+        let all_details ={}
+        if(payload.data.details != undefined && payload.data.details){
+            all_details = payload.data.details
+            all_details['users'] = user
+        }else{
+            all_details = {
+                'users': user
+            }
         }
         let email_action = await EmailAction.findOne({where:{'action':payload.action},include:EmailTemplate})
         let email_template = email_action.EmailTemplates[0]
         let email_body = ''
+        let email_subject = ''
         if(email_template){
+            email_subject = email_template.subject
         //variables used for the template
             let match_variables = email_template.body.match(/{(.*?)}/g);
             if(match_variables){
@@ -53,7 +61,7 @@ class EmailHelper {
                 email_body = email_template.body
             }
         }
-        return email_body
+        return {email_body:email_body,subject:email_subject}
     }
     //company info
     async getCompanyInfo(req) {
@@ -77,32 +85,34 @@ class EmailHelper {
         return email_body
     }
     //send mail
-    async sendMail(body, to) {
+    async sendMail(body, to,subject) {
         // create reusable transporter object using the default SMTP transport
         let req = this.req_data
         let company_portal_id = req.headers.site_id
         let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
-        var transporter = nodemailer.createTransport({
-            host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
-            port: email_configurations[0].email_server_port,//465,//2525,
-            auth: {
-                user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
-                pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
-            }
-        });
-        const mailData = {
-            from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
-            to: to,   // list of receivers
-            subject: 'Sending Email using Node.js',
-            //text: 'That was easy!',
-            html: body,
-        };
-        transporter.sendMail(mailData, function (err, info) {
-            if (err)
-                console.log('err', err)
-            else
-                console.log('success====', info);
-        });
+        if(email_configurations){
+            var transporter = nodemailer.createTransport({
+                host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
+                port: email_configurations[0].email_server_port,//465,//2525,
+                auth: {
+                    user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
+                    pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
+                }
+            });
+            const mailData = {
+                from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
+                to: to,   // list of receivers
+                subject: subject,
+                //text: 'That was easy!',
+                html: body,
+            };
+            transporter.sendMail(mailData, function (err, info) {
+                if (err)
+                    console.log('err', err)
+                else
+                    console.log('success====', info);
+            });
+        }
     }
 }
 module.exports = EmailHelper
