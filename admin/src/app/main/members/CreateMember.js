@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Typography, FormControl, TextField, Paper, Select, InputLabel, Tooltip, IconButton, Avatar, MenuItem } from '@mui/material';
+import { Typography, FormControl, TextField, Paper, Select, InputLabel, Tooltip, IconButton, Avatar, MenuItem, Divider } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -66,7 +66,7 @@ const schema = yup.object().shape({
     username: yup.string().required('Please enter Username'),
     status: yup.string().required('Please enter Status'),
     address_1: yup.string().required('Please enter Address 1'),
-    zip_code: yup.string().required('Please enter Zipcode'),
+    zip_code: yup.number().required('Please enter Zipcode').typeError('Please insert only number'),
     country_id: yup.string().required('Please enter Country'),
     // dob: yup.string().required('Please enter DOB'),
 });
@@ -235,7 +235,7 @@ const CreateMember = () => {
 
     return (
         <>
-            <div className="m-10">
+            <div className="mt-10 ml-10">
                 <motion.div
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1, transition: { delay: 0.3 } }}
@@ -266,305 +266,309 @@ const CreateMember = () => {
                 </motion.div>
             </div>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-
-
                 <form
                     name="loginForm"
                     noValidate
-                    className="flex flex-col justify-center w-full mt-32"
+                    className="flex flex-col justify-center w-full mt-10"
                     onSubmit={handleSubmit(onSubmit)}
                 >
-                    <Root className="user relative flex flex-col items-center justify-center p-0 mt-0 pb-14 shadow-0">
-                        <div className="flex items-center justify-center mb-24">
-                            <input
-                                accept="image/*"
-                                className="hidden"
-                                id="contained-button-file"
-                                type="file"
-                                onChange={(e) => selectedFile(e)}
-                            />
-                            <label htmlFor="contained-button-file" onMouseEnter={addOverlay} onMouseLeave={removeOverlay}>
-                                <div className="flex justify-between items-center mt-0">
-                                    {/* {uploadIcon()} */}
-                                    {removeAvatar()}
-                                </div>
-                                <IconButton onClick={openFileSelectDialog}>
-                                    <div id="avatar-div" className="items-center justify-center hidden">
-                                        <span className="image-edit">
-                                            <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
-                                                feather:camera
-                                            </FuseSvgIcon>
-                                        </span>
-                                    </div>
-                                    <Avatar
-                                        sx={{
-                                            backgroundColor: 'background.paper',
-                                            color: 'text.secondary',
-                                            height: 150,
-                                            width: 150
-                                        }}
-                                        className="avatar text-50 font-bold edit-hover"
-                                        src={!avatar ? '' : URL.createObjectURL(avatar)}
-                                        alt="Avatar"
-                                    >
-                                    </Avatar>
-                                </IconButton>
-                            </label>
-                        </div>
-                    </Root>
+
                     <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                         <div className="w-full mx-auto sm:mx-0 scripts-configuration">
-                            <div className='flex w-full justify-between'>
-                                {companies.length === 0 ? '' :
-                                    <Controller
-                                        name="company_id"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl className="w-1/2 mb-10 p-5">
-                                                <InputLabel id="demo-select-small" >Company*</InputLabel>
-                                                <Select
-                                                    {...field}
-                                                    labelId="demo-select-small"
-                                                    id="demo-select-small"
-                                                    label="Company"
-                                                    value={companyId}
-                                                    onChange={(event) => { setCompanyId(event.target.value) }}
-                                                >
-                                                    {companies.map((val) => {
-                                                        return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
-                                                    })
-                                                    }
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                }
-                                {!companyId ? '' :
-                                    <Controller
-                                        name="company_portal_id"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl className="w-1/2 mb-10 p-5">
-                                                <InputLabel className="pt-5 pl-5" id="demo-select-small">Portal*</InputLabel>
-                                                <Select
-                                                    {...field}
-                                                    labelId="demo-select-small"
-                                                    id="demo-select-small"
-                                                    label="Portal"
-                                                    value={companyPortalId}
-                                                    onChange={(event) => { setCompanyPortalId(event.target.value) }}
-                                                >
-                                                    {companies[0].CompanyPortals.map((val) => {
-                                                        return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
-                                                    })
-                                                    }
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                }
-                            </div>
-
-                            <Controller
-                                name="first_name"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="First Name"
-                                        type="text"
-                                        error={!!errors.first_name}
-                                        helperText={errors?.first_name?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="last_name"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Last Name"
-                                        type="text"
-                                        error={!!errors.last_name}
-                                        helperText={errors?.last_name?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="email"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Email"
-                                        type="email"
-                                        error={!!errors.email}
-                                        helperText={errors?.email?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="username"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Username"
-                                        type="text"
-                                        error={!!errors.username}
-                                        helperText={errors?.username?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControl className="w-1/2 mb-10 p-5">
-                                        <InputLabel className="pt-5 pl-5" id="demo-select-small">Status*</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="demo-select-small"
-                                            id="demo-select-small"
-                                            label="Status"
-                                            required
-                                        >
-                                            <MenuItem value="member">Member</MenuItem>
-                                            <MenuItem value="validating">Validating</MenuItem>
-                                            <MenuItem value="suspended">Suspended</MenuItem>
-                                            <MenuItem value="deleted">Deleted</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                )}
-                            />
-                            <Controller
-                                name="address_1"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Address 1"
-                                        type="text"
-                                        error={!!errors.address_1}
-                                        helperText={errors?.address_1?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="address_2"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Address 2"
-                                        type="text"
-                                        error={!!errors.address_2}
-                                        helperText={errors?.address_2?.message}
-                                        variant="outlined"
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="address_3"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Address 3"
-                                        type="text"
-                                        error={!!errors.address_3}
-                                        helperText={errors?.address_3?.message}
-                                        variant="outlined"
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="country_id"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControl className="w-1/2 mb-10 p-5">
-                                        <InputLabel className="pt-5 pl-5" id="demo-select-small">Country*</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="demo-select-small"
-                                            id="demo-select-small"
-                                            label="Country"
-                                            required
-                                        >
-                                            {countryOptions.map((val) => {
-                                                return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
-                                            })
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                )}
-                            />
-                            <Controller
-                                name="zip_code"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Zip"
-                                        type="text"
-                                        error={!!errors.zip_code}
-                                        helperText={errors?.zip_code?.message}
-                                        variant="outlined"
-                                        required
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="phone_no"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Phone"
-                                        type="text"
-                                        error={!!errors.phone_no}
-                                        helperText={errors?.phone_no?.message}
-                                        variant="outlined"
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="dob"
-                                control={control}
-                                render={({ field }) => (
-                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <DatePicker
-                                            className="w-1/2 mb-10 p-5"
-                                            {...field}
-                                            label="DOB"
-                                            value={dob}
-                                            onChange={(event) => setDob(moment(event).format('YYYY/MM/DD'))}
-                                            maxDate={moment().subtract(1, 'days')}
-                                            renderInput={(params) => <TextField {...params} />}
+                            <div className="flex w-full">
+                                <div className="w-1/3 justify-between pr-10 border-r-2">
+                                    <Root className="user relative flex flex-col items-center justify-center p-0 mt-0 pb-14 shadow-0">
+                                        <div className="flex items-center justify-center mb-24">
+                                            <input
+                                                accept="image/*"
+                                                className="hidden"
+                                                id="contained-button-file"
+                                                type="file"
+                                                onChange={(e) => selectedFile(e)}
+                                            />
+                                            <label htmlFor="contained-button-file" onMouseEnter={addOverlay} onMouseLeave={removeOverlay}>
+                                                <div className="flex justify-between items-center mt-0">
+                                                    {/* {uploadIcon()} */}
+                                                    {removeAvatar()}
+                                                </div>
+                                                <IconButton onClick={openFileSelectDialog}>
+                                                    <div id="avatar-div" className="items-center justify-center hidden">
+                                                        <span className="image-edit">
+                                                            <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
+                                                                feather:camera
+                                                            </FuseSvgIcon>
+                                                        </span>
+                                                    </div>
+                                                    <Avatar
+                                                        sx={{
+                                                            backgroundColor: 'background.paper',
+                                                            color: 'text.secondary',
+                                                            height: 150,
+                                                            width: 150
+                                                        }}
+                                                        className="avatar text-50 font-bold edit-hover"
+                                                        src={!avatar ? '' : URL.createObjectURL(avatar)}
+                                                        alt="Avatar"
+                                                    >
+                                                    </Avatar>
+                                                </IconButton>
+                                            </label>
+                                        </div>
+                                    </Root>
+                                    {companies.length === 0 ? '' :
+                                        <Controller
+                                            name="company_id"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <FormControl className="w-full mb-10 p-5">
+                                                    <InputLabel id="demo-select-small" >Company*</InputLabel>
+                                                    <Select
+                                                        {...field}
+                                                        labelId="demo-select-small"
+                                                        id="demo-select-small"
+                                                        label="Company"
+                                                        value={companyId}
+                                                        onChange={(event) => { setCompanyId(event.target.value) }}
+                                                    >
+                                                        {companies.map((val) => {
+                                                            return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
+                                                        })
+                                                        }
+                                                    </Select>
+                                                </FormControl>
+                                            )}
                                         />
-                                    </LocalizationProvider>
-                                )}
-                            />
+                                    }
+                                    {!companyId ? '' :
+                                        <Controller
+                                            name="company_portal_id"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <FormControl className="w-full mb-10 p-5">
+                                                    <InputLabel className="pt-5 pl-5" id="demo-select-small">Portal*</InputLabel>
+                                                    <Select
+                                                        {...field}
+                                                        labelId="demo-select-small"
+                                                        id="demo-select-small"
+                                                        label="Portal"
+                                                        value={companyPortalId}
+                                                        onChange={(event) => { setCompanyPortalId(event.target.value) }}
+                                                    >
+                                                        {companies[0].CompanyPortals.map((val) => {
+                                                            return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
+                                                        })
+                                                        }
+                                                    </Select>
+                                                </FormControl>
+                                            )}
+                                        />
+                                    }
+                                    <Controller
+                                        name="status"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl className="w-full mb-10 p-5">
+                                                <InputLabel className="pt-5 pl-5" id="demo-select-small">Status*</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    labelId="demo-select-small"
+                                                    id="demo-select-small"
+                                                    label="Status"
+                                                    required
+                                                >
+                                                    <MenuItem value="member">Member</MenuItem>
+                                                    <MenuItem value="validating">Validating</MenuItem>
+                                                    <MenuItem value="suspended">Suspended</MenuItem>
+                                                    <MenuItem value="deleted">Deleted</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    />
+                                </div>
+                                <div className="w-2/3 justify-between pl-10">
+                                    <Divider textAlign="left"><h2>Personal Details</h2></Divider>
+                                    <Controller
+                                        name="first_name"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="First Name"
+                                                type="text"
+                                                error={!!errors.first_name}
+                                                helperText={errors?.first_name?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="last_name"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Last Name"
+                                                type="text"
+                                                error={!!errors.last_name}
+                                                helperText={errors?.last_name?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="username"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Username"
+                                                type="text"
+                                                error={!!errors.username}
+                                                helperText={errors?.username?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="email"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Email"
+                                                type="email"
+                                                error={!!errors.email}
+                                                helperText={errors?.email?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="phone_no"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Phone"
+                                                type="text"
+                                                error={!!errors.phone_no}
+                                                helperText={errors?.phone_no?.message}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="dob"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                <DatePicker
+                                                    className="w-1/2 mb-10 p-5"
+                                                    {...field}
+                                                    label="DOB"
+                                                    value={dob}
+                                                    onChange={(event) => setDob(moment(event).format('YYYY/MM/DD'))}
+                                                    maxDate={moment().subtract(1, 'days')}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                />
+                                            </LocalizationProvider>
+                                        )}
+                                    />
+                                    <Divider textAlign="left"><h2>Address</h2></Divider>
+                                    <Controller
+                                        name="address_1"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Address 1"
+                                                type="text"
+                                                error={!!errors.address_1}
+                                                helperText={errors?.address_1?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="address_2"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Address 2"
+                                                type="text"
+                                                error={!!errors.address_2}
+                                                helperText={errors?.address_2?.message}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="address_3"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Address 3"
+                                                type="text"
+                                                error={!!errors.address_3}
+                                                helperText={errors?.address_3?.message}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="country_id"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl className="w-1/2 mb-10 p-5">
+                                                <InputLabel className="pt-5 pl-5" id="demo-select-small">Country*</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    labelId="demo-select-small"
+                                                    id="demo-select-small"
+                                                    label="Country"
+                                                    required
+                                                >
+                                                    {countryOptions.map((val) => {
+                                                        return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
+                                                    })
+                                                    }
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    />
+                                    <Controller
+                                        name="zip_code"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2 mb-10 p-5"
+                                                {...field}
+                                                label="Zip"
+                                                type="text"
+                                                error={!!errors.zip_code}
+                                                helperText={errors?.zip_code?.message}
+                                                variant="outlined"
+                                                required
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            </div>
                             <div className="flex justify-center">
                                 <LoadingButton
                                     variant="contained"
