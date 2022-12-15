@@ -10,6 +10,35 @@ class MemberTransactionController extends Controller {
   // override save function
   async list(req, res) {
     var options = super.getQueryOptions(req);
+    let fields = { ...this.model.fields };
+    var query_where = req.query.where ? JSON.parse(req.query.where) : null;
+    if(query_where != null && query_where.type != undefined && query_where.type == 'withdraw'){
+      fields.transaction_id.listing = false
+      fields.note.listing = false
+    }
+    // if(req.params.transaction_date_from !='' && req.params.transaction_date_to !=''){
+    //   let transaction_date_from = req.params.transaction_date_from+' 00:00'
+    //   let transaction_date_to = req.params.transaction_date_to+' 23:59'
+    //   if ("where" in options){
+    //     // && Op.and in options['where']
+       
+    //     options['where'] = {
+    //       [Op.and]: {
+    //         ...options['where'][Op.and],
+    //         created_at: {
+    //           [Op.between]: [transaction_date_from,transaction_date_to],
+    //         },
+    //       }
+    //     }
+    //   }
+    //   else{
+    //     options.where = {
+    //       created_at: {
+    //         [Op.between]: [req.params.transaction_date_from+' 00:00',req.params.transaction_date_to+"23:59"],
+    //       },
+    //     };
+    //   }
+    // }
     options.include = {
       model: Member,
       required: false,
@@ -46,7 +75,7 @@ class MemberTransactionController extends Controller {
         pages:pages,
         total:total
       },
-      fields: this.model.fields
+      fields: fields
     }
   }
 }
