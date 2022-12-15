@@ -22,6 +22,7 @@ const labelStyling = {
 } 
 
 const textFieldStyle = {
+    width: '100%',
     '& .muiltr-r11gs3-MuiInputBase-root-MuiInput-root': {
         minHeight: '30px'
     }
@@ -39,10 +40,10 @@ const iconStyle = {
 }
 
 const selectStyle = {
-    minWidth: '220px',
-    '@media screen and (max-width: 1400px)': {
-        minWidth: '100%'
-    }
+    // minWidth: '220px',
+    // '@media screen and (max-width: 1400px)': {
+    //     minWidth: '100%'
+    // }
 }
 
 const listItemTextStyle = {
@@ -334,7 +335,7 @@ const MemberDetails = () => {
                                     width: '10rem',
                                     height: '10rem',
                                 },
-                                '@media screen and (max-width: 1024px)': {
+                                '@media screen and (max-width: 1280px)': {
                                     width: '16rem',
                                     height: '16rem',
                                 },
@@ -480,38 +481,35 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
                                 } />
-                                <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
-                                    <>
-                                    {
-                                        editMode ? (
-                                            <>
-                                                <TextField
-                                                    id="standard-helperText"                                
-                                                    defaultValue={memberData.first_name}                               
-                                                    variant="standard"
-                                                    placeholder="First Name"
-                                                    sx={textFieldStyle}
-                                                    className="left-textbox"
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, first_name: e.target.value})
-                                                    }
-                                                />
-                                                <TextField
-                                                    id="standard-helperText"                                
-                                                    defaultValue={memberData.last_name}                                
-                                                    variant="standard"
-                                                    placeholder="Last Name"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, last_name: e.target.value})
-                                                    }
-                                                />
-                                            </>
-                                        ) : (
-                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
-                                        )
-                                    }
-                                    </>                            
+                                <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={                                    
+                                    editMode ? (
+                                        <div className='flex md:flex-col xl:flex-row w-full justify-between'>
+                                            <TextField
+                                                id="standard-helperText"                                
+                                                defaultValue={memberData.first_name}                               
+                                                variant="standard"
+                                                placeholder="First Name"
+                                                sx={textFieldStyle}
+                                                className="xl:w-1/2 md:w-2/5 lg:w-full"
+                                                onChange={
+                                                    (e)=> setMemberData({...memberData, first_name: e.target.value})
+                                                }
+                                            />
+                                            <TextField
+                                                id="standard-helperText"                                
+                                                defaultValue={memberData.last_name}                                
+                                                variant="standard"
+                                                className="xl:w-2/5 md:w-2/5 lg:w-full"
+                                                placeholder="Last Name"
+                                                sx={textFieldStyle}
+                                                onChange={
+                                                    (e)=> setMemberData({...memberData, last_name: e.target.value})
+                                                }
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
+                                    )                                                                
                                 } />
                             </ListItem>
                         </List>
@@ -584,18 +582,19 @@ const MemberDetails = () => {
                                         <div className='flex lg:flex-col xl:flex-row justify-between'>
                                             <Autocomplete
                                                 {...countryCodeProps}
-                                                className="sm:w-3/4 sm:mr-10 md:mr-0 md:w-auto"
+                                                className="sm:w-3/4 xl:w-2/4 sm:mr-10 md:mr-0 md:w-2/4 lg:w-full"
                                                 sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
                                                 id="clear-on-escape"
                                                 value={ countryData.filter(c => c.id == memberData.country_code)[0]}
                                                 clearOnEscape
                                                 onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.id}) }
                                                 renderInput={(params) => (
-                                                    <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                    <TextField {...params} variant="standard" sx={{...textFieldStyle }} />
                                                 )}
                                             />
                                             <TextField
                                                 type="tel"
+                                                className="xl:w-2/5 md:w-2/5 lg:w-full"
                                                 id="standard-helperText"
                                                 defaultValue={ memberData.phone_no }
                                                 variant="standard"
@@ -615,7 +614,7 @@ const MemberDetails = () => {
                         </List>
                     </div>
                 </div>
-                <div className='flex xl:flex-col sm:flex-row items-center justify-between'>
+                <div className='flex xl:flex-col lg:flex-col sm:flex-row items-center justify-between'>
                     <Box
                         className="lg:mb-32 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full"
                         sx={{
@@ -679,7 +678,7 @@ const MemberDetails = () => {
                         </div>
                     </div>
                     <div className='flex flex-row'>
-                        <div className='w-1/2'>
+                        <div className='w-1/2 pr-10'>
                             <Typography 
                                 variant="h6"
                                 sx={{
@@ -812,7 +811,7 @@ const MemberDetails = () => {
                                                     }
                                                     clearOnEscape
                                                     renderInput={(params) => (
-                                                        <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                        <TextField {...params} variant="standard" sx={{ width: '100%', ...textFieldStyle }} />
                                                     )}
                                                 />
                                                 
