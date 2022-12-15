@@ -33,7 +33,7 @@ class EmailHelper {
         let email_template = email_action.EmailTemplates[0]
         let email_body = ''
         let email_subject = ''
-        if(email_template){
+        if(email_template.body != undefined && email_template.body != ''){
             email_subject = email_template.subject
         //variables used for the template
             let match_variables = email_template.body.match(/{(.*?)}/g);

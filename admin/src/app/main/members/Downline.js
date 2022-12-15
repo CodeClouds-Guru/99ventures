@@ -88,7 +88,7 @@ const Downline = () => {
                                                         <TimelineConnector />
                                                     </TimelineSeparator>
                                                     <TimelineContent sx={{ py: '12px', px: 2 }}>
-                                                        <div className="bg-gray-200 p-16 rounded-md w-1/2">
+                                                        <div className="bg-gray-200 p-16 rounded-md sm:w-full md:w-full lg:w-1/2">
                                                             <div className='flex items-center mb-7'>
                                                                 {
                                                                     item.Member ? (
