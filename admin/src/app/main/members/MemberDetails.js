@@ -13,6 +13,9 @@ import SurveyDetails from './components/SurveyDetails';
 
 
 const labelStyling = {
+    '@media screen and (max-width: 1024px)': {
+        fontSize: '1.7rem'
+    },
     '@media screen and (max-width: 768px)': {
         fontSize: '1.4rem'
     }
@@ -277,46 +280,49 @@ const MemberDetails = () => {
     return (
         <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
-                <div className='flex justify-between xitems-center flex-col'>
-                    <div className='flex xjustify-between items-center flex-wrap mb-24'>
-                        <Typography 
-                            variant="h4"
-                            sx={{
-                                marginRight: '10px',
-                                '@media screen and (max-width: 768px)': {
-                                    fontSize: '1.5rem'
-                                },
-                                '@media screen and (max-width: 1400px)': {
-                                    fontSize: '2rem'
-                                }
-                            }}
-                        ><strong>{memberData.username}</strong> </Typography>
-                        <sub>
-                            {
-                                !editMode ? (
-                                    <Tooltip title="Click to edit" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(true)}>
-                                            <FuseSvgIcon sx={iconStyle} className="text-28" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                <div className='flex items-center mb-24'>
+                    <Typography 
+                        variant="h4"
+                        sx={{
+                            marginRight: '10px',                            
+                            '@media screen and (max-width: 1400px)': {
+                                fontSize: '2rem'
+                            },
+                            '@media screen and (max-width: 1400px)': {
+                                fontSize: '4rem'
+                            },
+                            '@media screen and (max-width: 768px)': {
+                                fontSize: '3rem'
+                            }
+                        }}
+                    ><strong>{memberData.username}</strong> </Typography>
+                    <sub>
+                        {
+                            !editMode ? (
+                                <Tooltip title="Click to edit" placement="top-start">
+                                    <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(true)}>
+                                        <FuseSvgIcon sx={iconStyle} className="text-28" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <>
+                                    <Tooltip title="Click to save" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=>onOpenAlertDialogHandle('save_profile') }>
+                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">feather:save</FuseSvgIcon>
                                         </IconButton>
                                     </Tooltip>
-                                ) : (
-                                    <>
-                                        <Tooltip title="Click to save" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=>onOpenAlertDialogHandle('save_profile') }>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">feather:save</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Click to cancel" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(false)}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </>
-                                )
-                            }
-                        </sub>
-                    </div>
-                    <div className='relative m-auto'>
+                                    <Tooltip title="Click to cancel" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={ ()=> setEditMode(false)}>
+                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
+                            )
+                        }
+                    </sub>
+                </div>
+                <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap mb-24 sm:justify-around'>
+                    <div className='md:w-1/3 xl:w-full sm:w-1/3 flex justify-center'>
                         <Box
                             sx={{
                                 borderWidth: 4,
@@ -328,12 +334,16 @@ const MemberDetails = () => {
                                     width: '10rem',
                                     height: '10rem',
                                 },
+                                '@media screen and (max-width: 1024px)': {
+                                    width: '16rem',
+                                    height: '16rem',
+                                },
                                 '@media screen and (max-width: 768px)': {
                                     width: '15rem',
                                     height: '15rem',
                                 }
                             }}
-                            className="shadow-md relative flex items-center justify-center rounded-full overflow-hidden"
+                            className="shadow-md relative rounded-full overflow-hidden"
                         >
                             {
                                 editMode && (
@@ -394,247 +404,242 @@ const MemberDetails = () => {
                             </Avatar>
                         </Box>
                     </div>
-                </div>
-                <List className="sm:mb-16 lg:mb-20">
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
-                        } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.id }</Typography>
-                        }/>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Status:</Typography>
-                        } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={ 
-                            <>
-                                {
-                                    editStatus ? (
+                    <div className='flex flex-col xl:w-full lg:w-full md:w-2/3 sm:w-2/3'>
+                        <List className="sm:mb-16 lg:mb-20">
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
+                                    <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.id }</Typography>
+                                }/>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Status:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={ 
+                                    <>
+                                        {
+                                            editStatus ? (
+                                                <div className='flex items-center'>
+                                                    <TextField
+                                                        sx={{ 
+                                                            ...selectStyle,
+                                                            ...textFieldStyle 
+                                                        }}
+                                                        id="standard-select-currency-native"
+                                                        select
+                                                        value={ status }             
+                                                        SelectProps={{
+                                                            native: true,
+                                                        }}
+                                                        onChange={ 
+                                                            (e)=> {
+                                                                if(e.target.value){
+                                                                    setStatus(e.target.value);
+                                                                    setDialogStatus(true);
+                                                                }
+                                                            }
+                                                        }
+                                                        variant="standard"
+                                                        >
+                                                        <option value="">--Select--</option>
+                                                        <option value="member">Member</option>
+                                                        <option value="suspended">Suspended</option>
+                                                        <option value="validating">Validating</option>
+                                                        <option value="deleted">Deleted</option>
+                                                    </TextField>
+                                                    {/* <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
+                                                        <IconButton color="primary" aria-label="Filter" component="span">
+                                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:check</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip> */}
+                                                    <Tooltip title="Cancel" placement="top-start" onClick={ handleCancelStatus }>
+                                                        <IconButton color="primary" aria-label="Filter" component="span">
+                                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:cancel</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </div>
+                                            ) : (
+                                                <div className='flex'>
+                                                    <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
+                                                    <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
+                                                        <IconButton color="primary" aria-label="Filter" component="span">
+                                                            <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </div>
+                                            )
+                                        }
+                                        
+                                    </>
+                                } />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
+                                } />
+                                <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
+                                    <>
+                                    {
+                                        editMode ? (
+                                            <>
+                                                <TextField
+                                                    id="standard-helperText"                                
+                                                    defaultValue={memberData.first_name}                               
+                                                    variant="standard"
+                                                    placeholder="First Name"
+                                                    sx={textFieldStyle}
+                                                    className="left-textbox"
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, first_name: e.target.value})
+                                                    }
+                                                />
+                                                <TextField
+                                                    id="standard-helperText"                                
+                                                    defaultValue={memberData.last_name}                                
+                                                    variant="standard"
+                                                    placeholder="Last Name"
+                                                    sx={textFieldStyle}
+                                                    onChange={
+                                                        (e)=> setMemberData({...memberData, last_name: e.target.value})
+                                                    }
+                                                />
+                                            </>
+                                        ) : (
+                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
+                                        )
+                                    }
+                                    </>                            
+                                } />
+                            </ListItem>
+                        </List>
+                        <List className="sm:mb-16 lg:mb-20">
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={                                
+                                    (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
                                         <div className='flex items-center'>
+                                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                                { memberData.MemberReferral.Member.referral_code }
+                                            </Typography>
+                                            <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
+                                                <IconButton color="primary" aria-label="Filter" component="span">
+                                                    <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                                </IconButton>
+                                            </Link>
+                                        </div>
+                                    ) : '--'                                                            
+                                }/>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Level:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
+                                    editMode ? (
+                                        <div>
                                             <TextField
-                                                sx={{ 
-                                                    ...selectStyle,
-                                                    ...textFieldStyle 
-                                                }}
+                                                sx={{ ...selectStyle, ...textFieldStyle }}
                                                 id="standard-select-currency-native"
                                                 select
-                                                value={ status }             
+                                                value={ memberData.MembershipTier ?  memberData.MembershipTier.name : ''}
                                                 SelectProps={{
                                                     native: true,
                                                 }}
-                                                onChange={ 
-                                                    (e)=> {
-                                                        if(e.target.value){
-                                                            setStatus(e.target.value);
-                                                            setDialogStatus(true);
-                                                        }
-                                                    }
-                                                }
                                                 variant="standard"
+                                                onChange={
+                                                    (e)=>setMemberData({
+                                                        ...memberData, 
+                                                        'MembershipTier': {
+                                                            name: e.target.value
+                                                        },
+                                                        'membership_tier_id': e.target.value
+                                                    })
+                                                }
                                                 >
                                                 <option value="">--Select--</option>
-                                                <option value="member">Member</option>
-                                                <option value="suspended">Suspended</option>
-                                                <option value="validating">Validating</option>
-                                                <option value="deleted">Deleted</option>
+                                                <option value="1">Level 1</option>
+                                                <option value="2">Level 2</option>
+                                                <option value="3">Level 3</option>
+                                                <option value="4">Level 4</option>
+                                                <option value="5">Level 5</option>
                                             </TextField>
-                                            {/* <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
-                                                <IconButton color="primary" aria-label="Filter" component="span">
-                                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:check</FuseSvgIcon>
-                                                </IconButton>
-                                            </Tooltip> */}
-                                            <Tooltip title="Cancel" placement="top-start" onClick={ handleCancelStatus }>
-                                                <IconButton color="primary" aria-label="Filter" component="span">
-                                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:cancel</FuseSvgIcon>
-                                                </IconButton>
-                                            </Tooltip>
                                         </div>
                                     ) : (
-                                        <div className='flex'>
-                                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
-                                            <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
-                                                <IconButton color="primary" aria-label="Filter" component="span">
-                                                    <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                                </IconButton>
-                                            </Tooltip>
-                                        </div>
+                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : '' }</Typography>
                                     )
-                                }
-                                
-                            </>
-                        } />
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
-                        } />
-                        <ListItemText sx={listItemTextStyle} className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            <>
-                            {
-                                editMode ? (
-                                    <>
-                                        <TextField
-                                            id="standard-helperText"                                
-                                            defaultValue={memberData.first_name}                               
-                                            variant="standard"
-                                            placeholder="First Name"
-                                            sx={textFieldStyle}
-                                            className="left-textbox"
-                                            onChange={
-                                                (e)=> setMemberData({...memberData, first_name: e.target.value})
+                                    
+                                }/>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Phone:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
+                                    editMode ? (
+                                        <div className='flex lg:flex-col xl:flex-row justify-between'>
+                                            <Autocomplete
+                                                {...countryCodeProps}
+                                                className="sm:w-3/4 sm:mr-10 md:mr-0 md:w-auto"
+                                                sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
+                                                id="clear-on-escape"
+                                                value={ countryData.filter(c => c.id == memberData.country_code)[0]}
+                                                clearOnEscape
+                                                onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.id}) }
+                                                renderInput={(params) => (
+                                                    <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                )}
+                                            />
+                                            <TextField
+                                                type="tel"
+                                                id="standard-helperText"
+                                                defaultValue={ memberData.phone_no }
+                                                variant="standard"
+                                                sx={textFieldStyle}
+                                                onKeyUp={ handlePhoneValidation }
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">
+                                            {
+                                                memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no 
                                             }
-                                        />
-                                        <TextField
-                                            id="standard-helperText"                                
-                                            defaultValue={memberData.last_name}                                
-                                            variant="standard"
-                                            placeholder="Last Name"
-                                            sx={textFieldStyle}
-                                            onChange={
-                                                (e)=> setMemberData({...memberData, last_name: e.target.value})
-                                            }
-                                        />
-                                    </>
-                                ) : (
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
-                                )
-                            }
-                            </>                            
-                        } />
-                    </ListItem>
-                </List>
+                                        </Typography>
+                                    )                    
+                                } />
+                            </ListItem>
+                        </List>
+                    </div>
+                </div>
+                <div className='flex xl:flex-col sm:flex-row items-center justify-between'>
+                    <Box
+                        className="lg:mb-32 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full"
+                        sx={{
+                            height: 'auto',                        
+                            p: 3
+                        }}
+                    >
+                        <Typography variant="h6" className="mb-16 text-xl">
+                            Balance: ${ showBalance() } (Total Earnings)
+                        </Typography>
+                        <Typography variant="h6" className="text-xl">
+                            Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$'+ memberData.total_earnings.total_adjustment : 0}
+                        </Typography>                    
+                        <Adjustment updateMemberData={ updateMemberData }/>        
+                    </Box>
 
-                <List className="sm:mb-16 lg:mb-20">
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
-                        } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={                                
-                            (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
-                                <div className='flex items-center'>
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                        { memberData.MemberReferral.Member.referral_code }
-                                    </Typography>
-                                    <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
-                                        <IconButton color="primary" aria-label="Filter" component="span">
-                                            <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:external-link</FuseSvgIcon>
-                                        </IconButton>
-                                    </Link>
-                                </div>
-                            ) : '--'                                                            
-                        }/>
-                    </ListItem>                    
-                    
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Level:</Typography>
-                        } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            editMode ? (
-                                <div >
-                                    <TextField
-                                        sx={{ ...selectStyle, ...textFieldStyle }}
-                                        id="standard-select-currency-native"
-                                        select
-                                        value={ memberData.MembershipTier ?  memberData.MembershipTier.name : ''}
-                                        SelectProps={{
-                                            native: true,
-                                        }}
-                                        variant="standard"
-                                        onChange={
-                                            (e)=>setMemberData({
-                                                ...memberData, 
-                                                'MembershipTier': {
-                                                    name: e.target.value
-                                                },
-                                                'membership_tier_id': e.target.value
-                                            })
-                                        }
-                                        >
-                                        <option value="">--Select--</option>
-                                        <option value="1">Level 1</option>
-                                        <option value="2">Level 2</option>
-                                        <option value="3">Level 3</option>
-                                        <option value="4">Level 4</option>
-                                        <option value="5">Level 5</option>
-                                    </TextField>
-                                </div>
-                            ) : (
-                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : '' }</Typography>
-                            )
-                            
-                        }/>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                            <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Phone:</Typography>
-                        } />
-                        <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                            editMode ? (
-                                <div 
-                                    className='flex lg:flex-col xl:flex-row justify-between'
-                                >
-                                    <Autocomplete
-                                        {...countryCodeProps}
-                                        className="xmr-10"
-                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
-                                        id="clear-on-escape"
-                                        value={ countryData.filter(c => c.id == memberData.country_code)[0]}
-                                        clearOnEscape
-                                        onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.id}) }
-                                        renderInput={(params) => (
-                                            <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
-                                        )}
-                                    />
-                                    <TextField
-                                        type="tel"
-                                        id="standard-helperText"
-                                        defaultValue={ memberData.phone_no }
-                                        variant="standard"
-                                        sx={textFieldStyle}
-                                        onKeyUp={ handlePhoneValidation }
-                                    />
-                                </div>
-                            ) : (
-                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                    {
-                                        memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no 
-                                    }
-                                </Typography>
-                            )                    
-                        } />
-                    </ListItem>
-                </List>
-
-                <Box
-                    className="mb-32 bg-gray-300"
-                    sx={{
-                        width: '100%',
-                        height: 'auto',                        
-                        p: 3
-                        // '&:hover': {
-                        //     backgroundColor: 'primary.main',
-                        //     opacity: [0.9, 0.8, 0.7],
-                        // },
-                    }}
-                >
-                    <Typography variant="h6" className="mb-16 text-xl xtext-white">
-                        Balance: ${ showBalance() } (Total Earnings)
-                    </Typography>
-                    <Typography variant="h6" className="text-xl xtext-white">
-                        Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$'+ memberData.total_earnings.total_adjustment : 0}
-                    </Typography>                    
-                    <Adjustment updateMemberData={ updateMemberData }/>        
-                </Box>
-
-                <div>
-                    <Typography variant="body1">Login as this account</Typography>
-                    <Button variant="text" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '8px 15px'}}>DELETE ACCOUNT</Button>
+                    <div className='sm:w-1/4 lg:w-full lg:text-left sm:text-center'>
+                        <Typography variant="body1">Login as this account</Typography>
+                        <Button variant="outlined" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '8px 15px'}}>DELETE ACCOUNT</Button>
+                    </div>
                 </div>
             </div>
-            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
+            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
+            <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2}} className="md:my-36 sm:my-20 xl:24 lg:hidden" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
