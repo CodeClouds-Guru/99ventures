@@ -66,15 +66,16 @@ const schema = yup.object().shape({
     username: yup.string().required('Please enter Username'),
     status: yup.string().required('Please enter Status'),
     address_1: yup.string().required('Please enter Address 1'),
+    phone_no: yup.number().required('Please enter Phone').typeError('Please insert only number'),
     zip_code: yup.number().required('Please enter Zipcode').typeError('Please insert only number'),
     country_id: yup.string().required('Please enter Country'),
     // dob: yup.string().required('Please enter DOB'),
+    gender: yup.string().required('Please enter Gender'),
 });
 
 const defaultValues = {
     // company_id: '',
     // company_portal_id: '',
-    // avatar: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -87,6 +88,7 @@ const defaultValues = {
     phone_no: '',
     country_id: '',
     // dob: '',
+    gender: '',
 };
 
 const CreateMember = () => {
@@ -100,7 +102,7 @@ const CreateMember = () => {
     const [companyPortalId, setCompanyPortalId] = useState('');
     const [avatar, setAvatar] = useState('');
     const [countryOptions, setCountryOptions] = useState([]);
-    const [dob, setDob] = useState(moment().subtract(1, 'days'));
+    const [dob, setDob] = useState(moment().subtract(18, 'years'));
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -112,7 +114,6 @@ const CreateMember = () => {
     useEffect(() => {
         setValue('company_id', '', { shouldDirty: true, shouldValidate: false });
         setValue('company_portal_id', '', { shouldDirty: true, shouldValidate: false });
-        // setValue('avatar', '', { shouldDirty: true, shouldValidate: false });
         setValue('first_name', '', { shouldDirty: true, shouldValidate: false });
         setValue('last_name', '', { shouldDirty: true, shouldValidate: false });
         setValue('email', '', { shouldDirty: true, shouldValidate: false });
@@ -124,8 +125,7 @@ const CreateMember = () => {
         setValue('zip_code', '', { shouldDirty: true, shouldValidate: false });
         setValue('phone_no', '', { shouldDirty: true, shouldValidate: false });
         setValue('country_id', '', { shouldDirty: true, shouldValidate: false });
-        // setValue('dob', '', { shouldDirty: true, shouldValidate: false });
-
+        setValue('gender', '', { shouldDirty: true, shouldValidate: false });
     }, [setValue]);
 
     useEffect(() => {
@@ -354,7 +354,7 @@ const CreateMember = () => {
                                                         value={companyPortalId}
                                                         onChange={(event) => { setCompanyPortalId(event.target.value) }}
                                                     >
-                                                        {companies[0].CompanyPortals.map((val) => {
+                                                        {companies.find(item => item.id == companyId).CompanyPortals.map((val) => {
                                                             return <MenuItem key={val.id} value={val.id}>{val.name}</MenuItem>
                                                         })
                                                         }
@@ -386,7 +386,7 @@ const CreateMember = () => {
                                     />
                                 </div>
                                 <div className="w-2/3 justify-between pl-10">
-                                    <Divider textAlign="left"><h2>Personal Details</h2></Divider>
+                                    <Divider textAlign="left"><h3>Personal Details</h3></Divider>
                                     <Controller
                                         name="first_name"
                                         control={control}
@@ -463,6 +463,7 @@ const CreateMember = () => {
                                                 error={!!errors.phone_no}
                                                 helperText={errors?.phone_no?.message}
                                                 variant="outlined"
+                                                required
                                             />
                                         )}
                                     />
@@ -474,16 +475,36 @@ const CreateMember = () => {
                                                 <DatePicker
                                                     className="w-1/2 mb-10 p-5"
                                                     {...field}
-                                                    label="DOB"
+                                                    label="DOB*"
                                                     value={dob}
-                                                    onChange={(event) => setDob(moment(event).format('YYYY/MM/DD'))}
-                                                    maxDate={moment().subtract(1, 'days')}
+                                                    onChange={(event) => setDob(moment(event).format('YYYY-MM-DD'))}
+                                                    maxDate={moment().subtract(18, 'years')}
                                                     renderInput={(params) => <TextField {...params} />}
                                                 />
                                             </LocalizationProvider>
                                         )}
                                     />
-                                    <Divider textAlign="left"><h2>Address</h2></Divider>
+                                    <Controller
+                                        name="gender"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl className="w-1/2 mb-10 p-5">
+                                                <InputLabel className="pt-5 pl-5" id="demo-select-small">Gender*</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    labelId="demo-select-small"
+                                                    id="demo-select-small"
+                                                    label="Gender"
+                                                    required
+                                                >
+                                                    <MenuItem value="male">Male</MenuItem>
+                                                    <MenuItem value="female">Female</MenuItem>
+                                                    <MenuItem value="Other">Other</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    />
+                                    <Divider textAlign="left"><h3>Address</h3></Divider>
                                     <Controller
                                         name="address_1"
                                         control={control}
