@@ -40,19 +40,21 @@ class MemberController extends Controller {
               username: req.body.username,
             },
           },
-        }
+        },
       });
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
         );
         errorObj.statusCode = 422;
-        errorObj.data = ["Sorry! this username or email has already been taken"];
+        errorObj.data = [
+          "Sorry! this username or email has already been taken",
+        ];
         throw errorObj;
       } else {
         req.body.membership_tier_id = 1;
         let files = [];
-        if(req.files){
+        if (req.files) {
           files[0] = req.files.avatar;
           const fileHelper = new FileHelper(
             files,
@@ -64,17 +66,19 @@ class MemberController extends Controller {
         }
         const res = await super.save(req);
         //send mail
-        const eventBus = require('../../eventBus');
-        let member_details = await Member.findOne({where:{email:req.body.email}})
-        let evntbus = eventBus.emit('send_email', {
-          action: 'Invitation',
-          data: {
-            'email': req.body.email,
-            'details':{'members':member_details}
-          },
-          req:req
+        const eventBus = require("../../eventBus");
+        let member_details = await Member.findOne({
+          where: { email: req.body.email },
         });
-        console.log('evntbus',evntbus)
+        let evntbus = eventBus.emit("send_email", {
+          action: "Invitation",
+          data: {
+            email: req.body.email,
+            details: { members: member_details },
+          },
+          req: req,
+        });
+        console.log("evntbus", evntbus);
         return res;
       }
     } catch (error) {
@@ -228,11 +232,14 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-    console.log("request_data", request_data);
+    // console.log("request_data", request_data);
     try {
       let result = false;
       if (req.body.type == "basic_details") {
         delete req.body.type;
+        let member = await this.model.findOne({ where: { id: req.params.id } });
+        req.body.username = member.username;
+        console.log("request_data", req);
         const { error, value } = this.model.validate(req);
         if (error) {
           console.log(error);
@@ -241,7 +248,7 @@ class MemberController extends Controller {
           errorObj.data = error.details.map((err) => err.message);
           throw errorObj;
         }
-        result = this.updateBasicDetails(req, res);
+        result = this.updateBasicDetails(req, member);
       } else if (req.body.type == "member_status") {
         result = await this.model.changeStatus(req);
         delete req.body.type;
@@ -319,12 +326,12 @@ class MemberController extends Controller {
     };
   }
   //update member details and avatar
-  async updateBasicDetails(req, res) {
+  async updateBasicDetails(req, member) {
     let request_data = req.body;
     try {
       request_data.updated_by = req.user.id;
       if (req.files) {
-        let member = await this.model.findOne({ where: { id: req.params.id } });
+        // let member = await this.model.findOne({ where: { id: req.params.id } });
         let pre_avatar = member.avatar;
         let files = [];
         files[0] = req.files.avatar;
@@ -374,7 +381,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
