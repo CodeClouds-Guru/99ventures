@@ -25,11 +25,15 @@ class EmailHelper {
                 'users': user
             }
         }
-        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:EmailTemplate})
+        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:{
+            model: EmailTemplate,
+            required: true,
+            where: {company_portal_id:req.headers.site_id},
+          }})
         let email_template = email_action.EmailTemplates[0]
         let email_body = ''
         let email_subject = ''
-        if(email_template){
+        if(email_template.body != undefined && email_template.body != ''){
             email_subject = email_template.subject
         //variables used for the template
             let match_variables = email_template.body.match(/{(.*?)}/g);

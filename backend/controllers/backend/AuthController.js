@@ -265,7 +265,7 @@ class AuthController {
       return;
     }
     //user details
-    const user = await User.findOne({ where: { email: value.email } });
+    const user = await User.findOne({where: { email: value.email }});
     if (!user) {
       res.status(401).json({
         status: false,
@@ -273,10 +273,23 @@ class AuthController {
       });
       return;
     }
+    const companies = await user.getCompanies({ include: ["CompanyPortals"] });
+    req.headers.site_id = companies[0].CompanyPortals[0].id
     let reset_obj = { id: user.id, email: user.email };
     reset_obj = JSON.stringify(reset_obj);
     let base64data = Buffer.from(reset_obj, "utf8");
     let base64String = base64data.toString("base64");
+    //send mail
+    const eventBus = require('../../eventBus');
+    let evntbus = eventBus.emit('send_email', {
+      action: 'Forgot Password',
+      data: {
+        'email': value.email,
+        'details':{'reset_password_link':process.env.CLIENT_ORIGIN + "/reset-password?hash=" + base64String}
+      },
+      req:req
+    });
+
     res.status(200).json({
       status: true,
       reset_link:

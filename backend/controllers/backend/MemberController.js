@@ -71,7 +71,7 @@ class MemberController extends Controller {
           where: { email: req.body.email },
         });
         let evntbus = eventBus.emit("send_email", {
-          action: "Invitation",
+          action: "Welcome",
           data: {
             email: req.body.email,
             details: { members: member_details },
