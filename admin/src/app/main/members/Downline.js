@@ -14,7 +14,7 @@ const Downline = () => {
         <FusePageCarded
             className="sm:px-20"
             header={
-                <PageHeader module={module} button="memberreferrals" />
+                <PageHeader module={module} button="downline" />
             }
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
