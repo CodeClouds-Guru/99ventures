@@ -32,6 +32,7 @@ module.exports = {
       },
       amount: {
         type: Sequelize.DECIMAL(10, 2),
+        defaultValue:0.00
       },
       created_by: {
         type: Sequelize.BIGINT
