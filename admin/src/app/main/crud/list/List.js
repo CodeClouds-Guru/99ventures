@@ -277,7 +277,6 @@ function List(props) {
 	}
 
 	const dateRangeSelected = (val) => {
-		console.log(val)
 		setDatepickerStatus(!datepickerStatus)
 		setDateRange({
 			startDate: moment(val.startDate),
