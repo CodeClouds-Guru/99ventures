@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, Tooltip, IconButton } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, Tooltip, IconButton, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +29,7 @@ function List(props) {
   const editable = props.editable ?? true;
   const addable = props.addable ?? true;
   const deletable = props.deletable ?? true;
-  const where = props.where ?? {};
+  // const where = props.where ?? {};
   const showModuleHeading = props.moduleHeading ?? '';
   const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
@@ -49,6 +49,9 @@ function List(props) {
   });
   const [moduleDeleted, setModuleDeleted] = useState(false);
   const [firstCall, setFirstCall] = useState(true);
+  const [filterStatus, setFilterStatus] = useState('');
+  const [where, setWhere] = useState(props.where);
+
   const resetModulesListConfig = () => {
     setSearchText('');
     setOrder({
@@ -106,7 +109,7 @@ function List(props) {
 
   useEffect(() => {
     fetchModules();
-  }, [searchText, page, rowsPerPage, order]);
+  }, [searchText, page, rowsPerPage, order, where]);
 
   useEffect(() => {
     resetModulesListConfig();
@@ -282,6 +285,38 @@ function List(props) {
         </Typography> : <></>}
 
         <div className="flex flex-1 items-center justify-end space-x-8 w-full sm:w-auto">
+          {
+            (module === 'member-transactions' && location.pathname.includes('history')) && (
+              <FormControl sx={{ minWidth: 120 }} size="small">
+                <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={ filterStatus }
+                label="Status"
+                className="rounded-full"
+                sx={{ lineHeight: '17px'}}
+                onChange={ 
+                  (e)=> {
+                    setFilterStatus(e.target.value);
+                    if(e.target.value){
+                      setWhere({...where, type: e.target.value});
+                    } else {
+                      setWhere(props.where);
+                    }
+                  }
+                }
+                >
+                  <MenuItem value="">
+                      <em>--Select--</em>
+                  </MenuItem>
+                  <MenuItem value="credited">Credited</MenuItem>
+                  <MenuItem value="withdraw">Withdraw</MenuItem>
+                </Select>
+              </FormControl>
+            )
+          }            
+
           {searchable && <Paper
             component={motion.div}
             initial={{ y: -20, opacity: 0 }}

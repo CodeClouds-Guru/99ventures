@@ -467,7 +467,7 @@ const MemberDetails = () => {
                                                     <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ showStatus(memberData.status) }</Typography>
                                                     <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
                                                         <IconButton color="primary" aria-label="Filter" component="span">
-                                                            <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                            <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:pencil</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip>
                                                 </div>
@@ -516,7 +516,7 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold">Email:</Typography>
                                 } />
-                                <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
                                         <a href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</a>
                                     </Typography>
@@ -526,7 +526,7 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
                                 } />
-                                <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
                                     <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
                                         { memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '' }
                                     </Typography>
@@ -542,11 +542,11 @@ const MemberDetails = () => {
                                     (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
                                         <div className='flex items-center'>
                                             <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                                { memberData.MemberReferral.Member.referral_code }
+                                                { memberData.MemberReferral.Member.first_name } { memberData.MemberReferral.Member.last_name } ({ memberData.MemberReferral.ip })
                                             </Typography>
                                             <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b'}}>
                                                 <IconButton color="primary" aria-label="Filter" component="span">
-                                                    <FuseSvgIcon className="text-48" size={18} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                                    <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:external-link</FuseSvgIcon>
                                                 </IconButton>
                                             </Link>
                                         </div>
@@ -636,7 +636,7 @@ const MemberDetails = () => {
                 </div>
                 <div className='flex xl:flex-col lg:flex-col sm:flex-row items-center justify-between'>
                     <Box
-                        className="lg:mb-10 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full"
+                        className="lg:mb-10 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full my-10"
                         sx={{
                             height: 'auto',                        
                             p: 1.8
@@ -835,187 +835,12 @@ const MemberDetails = () => {
                                 </List>
                             </div>
                         </div>
-                        <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-20 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
-
+                        <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-20 sm:my-20 sm:mx-10 lg:mx-16 xl:24" />
                         <div className='w-1/2'> 
                             <SurveyDetails surveyData={ surveyDetails } />
                         </div>
                     </div>
-                    {/*<div className='flex flex-row'>
-                        <div className='w-1/2 pr-10'>
-                            <Typography 
-                                variant="body1"
-                                className="font-bold"
-                                sx={{
-                                    '@media screen and (max-width: 768px)': {
-                                        fontSize: '1.5rem',
-                                        fontWeight: '600'
-                                    },
-                                    '@media screen and (max-width: 1400px)': {
-                                        fontSize: '1.8rem',
-                                        fontWeight: '600'
-                                    }
-                                }}
-                            >Address</Typography>
-                            <List>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                        <Typography variant="subtitle">Address Line 1:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <TextField
-                                                    type="text"
-                                                    id="standard-helperText" 
-                                                    defaultValue={ memberData.address_1 }                              
-                                                    variant="standard"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, address_1: e.target.value })
-                                                    }
-                                                />
-                                            ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_1 }</Typography>
-                                            )
-                                        }
-                                        </>
-                                    } />
-                                </ListItem>                                
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                        <Typography variant="subtitle">Address Line 2:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <TextField
-                                                    type="tel"
-                                                    id="standard-helperText"                                
-                                                    defaultValue={ memberData.address_2 }                              
-                                                    variant="standard"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, address_2: e.target.value })
-                                                    }
-                                                />
-                                            ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_2 }</Typography>
-                                            )
-                                        }
-                                        </>
-                                    } />
-                                </ListItem>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                        <Typography variant="subtitle">Address Line 3:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <TextField
-                                                    type="tel"
-                                                    id="standard-helperText"                                
-                                                    defaultValue={ memberData.address_3 }                              
-                                                    variant="standard"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, address_3: e.target.value })
-                                                    }
-                                                />
-                                            ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_3 }</Typography>
-                                            )
-                                        }
-                                        </>
-                                    } />
-                                </ListItem>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                        <Typography variant="subtitle">ZIP Code:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <TextField
-                                                    type="tel"
-                                                    id="standard-helperText"                                
-                                                    defaultValue={ memberData.zip_code }                              
-                                                    variant="standard"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, zip_code: e.target.value })
-                                                    }
-                                                />
-                                            ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
-                                            )
-                                        }
-                                        </>
-                                    } />
-                                </ListItem>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                        <Typography variant="subtitle">Country:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                        <>
-                                        {
-                                            editMode ? (
-                                                <Autocomplete
-                                                    {...countryProps}
-                                                    value={ countryData.filter(c => c.id == memberData.country_id)[0]}
-                                                    sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
-                                                    id="clear-on-escape"
-                                                    onChange={
-                                                        (e, newValue)=>setMemberData({...memberData, country_id: newValue.id})
-                                                    }
-                                                    clearOnEscape
-                                                    renderInput={(params) => (
-                                                        <TextField {...params} variant="standard" sx={{ width: '100%', ...textFieldStyle }} />
-                                                    )}
-                                                />
-                                                
-                                            ) : (
-                                                <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                                    {memberData.country_id && countryData.filter(c => c.id == memberData.country_id)[0].name}
-                                                </Typography>
-                                            )
-                                        }
-                                        </>
-                                    } />
-                                </ListItem> 
-                            </List>
-                        </div>
-                         <div className='w-1/2'>
-                            <List>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                                        <Typography variant="subtitle" className="font-semibold">Email:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                            <a href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</a>
-                                        </Typography>
-                                    } />
-                                </ListItem>
-                                <ListItem disablePadding>
-                                    <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
-                                        <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
-                                    } />
-                                    <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
-                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                            { memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '' }
-                                        </Typography>
-                                    } />
-                                </ListItem>                            
-                            </List>
-                        </div> 
-                    </div>*/}
+                    
                     <Divider sx={{ borderWidth: 2}} className="my-10"/>
                     <Box component="div" className="w-full flex flex-col">
                         <Typography variant="body1" className="font-bold">Account Notes Section</Typography>
