@@ -23,9 +23,7 @@ class MemberReferralController extends Controller {
       // },
     }
     const { docs, pages, total } = await this.model.paginate(options);
-    // return docs
-    // let response = await super.list(req)
-    // let ref_list = { ...response.result.data };
+    
     let ref_list = []
     let temp_list = []
     let date_group = ''
@@ -41,26 +39,27 @@ class MemberReferralController extends Controller {
       }else{
         record.dataValues.status = 'Accepted';
       }
-      if(date_group != moment(record.dataValues.created_at).format('YYYY-MM')){
-        if(date_group != ''){
-          ref_list[count]['data'] = temp_list
-          count++
-          temp_list = []
-        }
-        date_group = moment(record.dataValues.created_at).format('YYYY-MM')
-        ref_list[count] = {
-          date_group : moment(record.dataValues.created_at).format('MMMM YYYY'),
-          data:[]
-        }
-      }
-      temp_list.push(record.dataValues)
-      if(key == total - 1){
-        ref_list[count]['data'] = temp_list
-      }
+      //this section is for grouping by month
+      // if(date_group != moment(record.dataValues.created_at).format('YYYY-MM')){
+      //   if(date_group != ''){
+      //     ref_list[count]['data'] = temp_list
+      //     count++
+      //     temp_list = []
+      //   }
+      //   date_group = moment(record.dataValues.created_at).format('YYYY-MM')
+      //   ref_list[count] = {
+      //     date_group : moment(record.dataValues.created_at).format('MMMM YYYY'),
+      //     data:[]
+      //   }
+      // }
+      // temp_list.push(record.dataValues)
+      // if(key == total - 1){
+      //   ref_list[count]['data'] = temp_list
+      // }
     })
     return {
       result:{
-        data:ref_list,
+        data:docs,
         pages:pages,
         total:total
       },
