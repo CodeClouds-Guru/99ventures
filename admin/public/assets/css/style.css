@@ -13,3 +13,7 @@ textarea.custom-code-editor{
     color: #ffeeba; 
 }
 textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
+.filter-daterange-picker{ top: 235px;}
+@media screen and (max-width: 768px) {
+    .filter-daterange-picker{ top: 260px; right: 10px;}
+}
