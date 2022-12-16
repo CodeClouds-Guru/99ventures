@@ -38,7 +38,7 @@ function PageHeader(props) {
     const activeBtn = props.button;
 
     return (            
-        <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-32 ">
+        <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-12 ">
             <div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0  sm:mb-16 mb-0 mr-auto">
                 <motion.div
                 initial={{ x: 20, opacity: 0 }}

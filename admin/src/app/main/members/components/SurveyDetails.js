@@ -8,17 +8,11 @@ const SurveyDetails = (props) => {
 
     return (
         <Box
-            className="text-left p-5"
-            sx={{
-                width: '100%',
-                height: '240px',
-                border: '2px solid #eee'
-            }}
-            >
-            <Typography variant="body1" className="font-bold py-5">Previous 5 Completions</Typography>
+            className="text-left p-5 w-full h-full">
+            <Typography variant="body1" className="font-bold mb-5">Previous 5 Completions</Typography>
             {
                 surveyData.length ? (
-                    <List sx={{ height: 200, p:0 }} className="overflow-auto">
+                    <List sx={{ height: 270, p:0 }} className="overflow-auto">
                         {
                             surveyData.map((item, indx) => {
                                 return (
