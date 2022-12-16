@@ -10,18 +10,17 @@ class MemberTransactionController extends Controller {
   // override save function
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    let fields = { ...this.model.fields };
+    var fields = Object.assign({}, this.model.fields);
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
-    if(query_where != null && query_where.type != undefined && query_where.type == 'withdraw'){
-      fields.transaction_id.listing = false
-      fields.note.listing = false
-    }
+
+    fields.transaction_id.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
+    fields.note.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
     // if(req.params.transaction_date_from !='' && req.params.transaction_date_to !=''){
     //   let transaction_date_from = req.params.transaction_date_from+' 00:00'
     //   let transaction_date_to = req.params.transaction_date_to+' 23:59'
     //   if ("where" in options){
     //     // && Op.and in options['where']
-       
+
     //     options['where'] = {
     //       [Op.and]: {
     //         ...options['where'][Op.and],
@@ -42,16 +41,16 @@ class MemberTransactionController extends Controller {
     options.include = {
       model: Member,
       required: false,
-      attributes: ["id", "first_name", "last_name", "email","avatar"],
+      attributes: ["id", "first_name", "last_name", "email", "avatar"],
     }
     const { docs, pages, total } = await this.model.paginate(options);
-    
+
     let transaction_list = []
-    docs.forEach(function (record,key) {
-      if(record.dataValues.Member != null && record.dataValues.Member.dataValues.avatar != ''){
-        record.dataValues.Member.dataValues.avatar = process.env.S3_BUCKET_OBJECT_URL+record.dataValues.Member.dataValues.avatar
+    docs.forEach(function (record, key) {
+      if (record.dataValues.Member != null && record.dataValues.Member.dataValues.avatar != '') {
+        record.dataValues.Member.dataValues.avatar = process.env.S3_BUCKET_OBJECT_URL + record.dataValues.Member.dataValues.avatar
       }
-      switch(record.dataValues.status) {
+      switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing'
           break;
@@ -70,12 +69,12 @@ class MemberTransactionController extends Controller {
       transaction_list.push(record.dataValues)
     })
     return {
-      result:{
-        data:transaction_list,
-        pages:pages,
-        total:total
+      result: {
+        data: transaction_list,
+        pages: pages,
+        total: total
       },
-      fields: fields
+      fields
     }
   }
 }

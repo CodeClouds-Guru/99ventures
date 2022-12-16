@@ -1,4 +1,4 @@
-import { Box, TextField, Dialog, Divider, DialogTitle, DialogActions, DialogContent, Button, TextareaAutosize } from '@mui/material';
+import { Box, TextField, Dialog, Divider, DialogTitle, DialogActions, DialogContent, Button, TextareaAutosize, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState } from 'react';
@@ -40,8 +40,8 @@ const Adjustment = (props) => {
     }
 
     return (
-        <div className='flex items-center mt-20'>
-            <Button variant="contained" color="primary" onClick={()=>setDialogStatus(true)}>Adjustment</Button>            
+        <div className='flex items-center'>
+            <Button variant="contained" color="primary" size="small" onClick={()=>setDialogStatus(true)}>Adjustment</Button>            
             {
                 dialogStatus && (
                     <Dialog open={ dialogStatus } onClose={()=>setDialogStatus(false)} fullWidth={ true }>
@@ -52,21 +52,26 @@ const Adjustment = (props) => {
                                 <Button variant="contained" color="primary" size="small" sx={btnStyle} onClick={()=>setAdjustmentAmount(adjustmentAmount => adjustmentAmount - 1)}>
                                     -
                                 </Button>
-                                <TextField type="number" value={ adjustmentAmount } id="outlined-basic" label="Amount" variant="outlined" sx={{  margin: '0 10px'}} onChange={(e)=> setAdjustmentAmount(e.target.value)} />
+                                
+                                <FormControl fullWidth sx={{ m: 1 }}>
+                                    <InputLabel htmlFor="outlined-adornment-amount">Amount</InputLabel>
+                                    <OutlinedInput
+                                        id="outlined-adornment-amount"
+                                        startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                                        label="Amount"
+                                        type="number"
+                                        value={ adjustmentAmount }
+                                        onChange={(e)=> setAdjustmentAmount(e.target.value)}
+                                    />
+                                </FormControl>
+                                
+                                {/* <TextField type="number" value={ adjustmentAmount } id="outlined-basic" label="Amount" variant="outlined" sx={{  margin: '0 10px'}} onChange={(e)=> setAdjustmentAmount(e.target.value)} /> */}
                                 <Button variant="contained" color="primary" size="small" sx={btnStyle} onClick={()=>setAdjustmentAmount(adjustmentAmount => adjustmentAmount + 1)}>
                                     +
                                 </Button>
                             </div>           
                             <TextField className="w-full" id="outlined-basic" label="Add Note" variant="outlined" onChange={ (e)=>setNote(e.target.value) }/>      
-                            {/* <TextareaAutosize
-                                maxRows={8}
-                                aria-label="maximum height"
-                                placeholder="Add note"
-                                defaultValue={ note }
-                                style={{ width: '100%', height: '20px', padding: '10px' }}
-                                className="border"
-                                onChange={ (e)=>setNote(e.target.value) }
-                            /> */}
+                            
                         </DialogContent>
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={ handleCancelStatus }>Cancel</Button>

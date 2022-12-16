@@ -24,7 +24,7 @@ const AccountNotes = (props) => {
     }
 
     return (
-        <List sx={{ height: 300 }} className="mt-5 p-0 notes-list overflow-auto">
+        <List sx={{ height: 250 }} className="mt-5 p-0 notes-list overflow-auto">
             { notesList() }
         </List>
     )

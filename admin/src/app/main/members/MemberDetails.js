@@ -22,6 +22,7 @@ const labelStyling = {
 } 
 
 const textFieldStyle = {
+    width: '100%',
     '& .muiltr-r11gs3-MuiInputBase-root-MuiInput-root': {
         minHeight: '30px'
     }
@@ -39,10 +40,10 @@ const iconStyle = {
 }
 
 const selectStyle = {
-    minWidth: '220px',
-    '@media screen and (max-width: 1400px)': {
-        minWidth: '100%'
-    }
+    // minWidth: '220px',
+    // '@media screen and (max-width: 1400px)': {
+    //     minWidth: '100%'
+    // }
 }
 
 const listItemTextStyle = {
@@ -278,11 +279,11 @@ const MemberDetails = () => {
     }
 
     return (
-        <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex sm:flex-col lg:flex-row" >
+        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
-                <div className='flex items-center mb-24'>
+                <div className='flex items-center mb-10'>
                     <Typography 
-                        variant="h4"
+                        variant="h5"
                         sx={{
                             marginRight: '10px',                            
                             '@media screen and (max-width: 1400px)': {
@@ -321,20 +322,20 @@ const MemberDetails = () => {
                         }
                     </sub>
                 </div>
-                <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap mb-24 sm:justify-around'>
+                <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap xmb-10 sm:justify-around'>
                     <div className='md:w-1/3 xl:w-full sm:w-1/3 flex justify-center'>
                         <Box
                             sx={{
                                 borderWidth: 4,
                                 borderStyle: 'solid',
                                 borderColor: 'background.paper',
-                                width: '14rem',
-                                height: '14rem',  
+                                width: '10rem',
+                                height: '10rem',  
                                 '@media screen and (max-width: 1400px)': {
                                     width: '10rem',
                                     height: '10rem',
                                 },
-                                '@media screen and (max-width: 1024px)': {
+                                '@media screen and (max-width: 1280px)': {
                                     width: '16rem',
                                     height: '16rem',
                                 },
@@ -405,7 +406,7 @@ const MemberDetails = () => {
                         </Box>
                     </div>
                     <div className='flex flex-col xl:w-full lg:w-full md:w-2/3 sm:w-2/3'>
-                        <List className="sm:mb-16 lg:mb-20">
+                        <List className="">
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
@@ -480,42 +481,59 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
                                 } />
-                                <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={
-                                    <>
-                                    {
-                                        editMode ? (
-                                            <>
-                                                <TextField
-                                                    id="standard-helperText"                                
-                                                    defaultValue={memberData.first_name}                               
-                                                    variant="standard"
-                                                    placeholder="First Name"
-                                                    sx={textFieldStyle}
-                                                    className="left-textbox"
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, first_name: e.target.value})
-                                                    }
-                                                />
-                                                <TextField
-                                                    id="standard-helperText"                                
-                                                    defaultValue={memberData.last_name}                                
-                                                    variant="standard"
-                                                    placeholder="Last Name"
-                                                    sx={textFieldStyle}
-                                                    onChange={
-                                                        (e)=> setMemberData({...memberData, last_name: e.target.value})
-                                                    }
-                                                />
-                                            </>
-                                        ) : (
-                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
-                                        )
-                                    }
-                                    </>                            
+                                <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-4/5" primary={                                    
+                                    editMode ? (
+                                        <div className='flex md:flex-col xl:flex-row w-full justify-between'>
+                                            <TextField
+                                                id="standard-helperText"                                
+                                                defaultValue={memberData.first_name}                               
+                                                variant="standard"
+                                                placeholder="First Name"
+                                                sx={textFieldStyle}
+                                                className="xl:w-1/2 md:w-2/5 lg:w-full"
+                                                onChange={
+                                                    (e)=> setMemberData({...memberData, first_name: e.target.value})
+                                                }
+                                            />
+                                            <TextField
+                                                id="standard-helperText"                                
+                                                defaultValue={memberData.last_name}                                
+                                                variant="standard"
+                                                className="xl:w-2/5 md:w-2/5 lg:w-full"
+                                                placeholder="Last Name"
+                                                sx={textFieldStyle}
+                                                onChange={
+                                                    (e)=> setMemberData({...memberData, last_name: e.target.value})
+                                                }
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{ memberData.first_name +' '+ memberData.last_name }</Typography>
+                                    )                                                                
+                                } />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold">Email:</Typography>
+                                } />
+                                <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                        <a href={`mailto:${ memberData.email }`} style={{ textDecoration: 'none', color: '#1e293b'}}>{ memberData.email }</a>
+                                    </Typography>
+                                } />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
+                                    <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
+                                } />
+                                <ListItemText className="sm:w-2/3 lg:w-2/3 xl:w-4/5" primary={
+                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                        { memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '' }
+                                    </Typography>
                                 } />
                             </ListItem>
                         </List>
-                        <List className="sm:mb-16 lg:mb-20">
+                        <List className="">
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-1/5" primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
@@ -584,18 +602,19 @@ const MemberDetails = () => {
                                         <div className='flex lg:flex-col xl:flex-row justify-between'>
                                             <Autocomplete
                                                 {...countryCodeProps}
-                                                className="sm:w-3/4 sm:mr-10 md:mr-0 md:w-auto"
+                                                className="sm:w-3/4 xl:w-2/4 sm:mr-10 md:mr-0 md:w-2/4 lg:w-full"
                                                 sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}, '& .MuiFormControl-fullWidth': {'@media screen and (max-width: 1400px)': {width:'100%'}}}}
                                                 id="clear-on-escape"
                                                 value={ countryData.filter(c => c.id == memberData.country_code)[0]}
                                                 clearOnEscape
                                                 onChange={ (e, newValue)=> setMemberData({...memberData, country_code: newValue.id}) }
                                                 renderInput={(params) => (
-                                                    <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                    <TextField {...params} variant="standard" sx={{...textFieldStyle }} />
                                                 )}
                                             />
                                             <TextField
                                                 type="tel"
+                                                className="xl:w-2/5 md:w-2/5 lg:w-full"
                                                 id="standard-helperText"
                                                 defaultValue={ memberData.phone_no }
                                                 variant="standard"
@@ -615,73 +634,218 @@ const MemberDetails = () => {
                         </List>
                     </div>
                 </div>
-                <div className='flex xl:flex-col sm:flex-row items-center justify-between'>
+                <div className='flex xl:flex-col lg:flex-col sm:flex-row items-center justify-between'>
                     <Box
-                        className="lg:mb-32 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full"
+                        className="lg:mb-10 sm:mb-0 bg-gray-300 sm:w-2/3 lg:w-full"
                         sx={{
                             height: 'auto',                        
-                            p: 3
+                            p: 1.8
                         }}
                     >
-                        <Typography variant="h6" className="mb-16 text-xl">
+                        <Typography variant="body1" className="mb-10 font-medium">
                             Balance: ${ showBalance() } (Total Earnings)
                         </Typography>
-                        <Typography variant="h6" className="text-xl">
+                        <Typography variant="body1" className="mb-10 font-medium">
                             Adjustment: { memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$'+ memberData.total_earnings.total_adjustment : 0}
                         </Typography>                    
                         <Adjustment updateMemberData={ updateMemberData }/>        
                     </Box>
 
                     <div className='sm:w-1/4 lg:w-full lg:text-left sm:text-center'>
-                        <Typography variant="body1">Login as this account</Typography>
-                        <Button variant="outlined" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '8px 15px'}}>DELETE ACCOUNT</Button>
+                        <Typography variant="body1" className="mb-5">Login as this account</Typography>
+                        <Button variant="outlined" size="small" color="error" onClick={ ()=>onOpenAlertDialogHandle('delete') } sx={{padding: '4px 15px'}}>DELETE ACCOUNT</Button>
                     </div>
                 </div>
             </div>
-            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-36 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
+            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-20 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
             <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2}} className="md:my-36 sm:my-20 xl:24 lg:hidden" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <div className='flex flex-col'>
                     <div className='flex flex-row'>
                         <div className='w-1/2'> 
-                            <div className='mb-92'>
+                            <div className='mb-16'>
                                 <Typography 
-                                    variant="h6"
-                                    sx={{
-                                        '@media screen and (max-width: 768px)': {
-                                            fontSize: '1.5rem',
-                                            fontWeight: '600'
-                                        },
-                                        '@media screen and (max-width: 1400px)': {
-                                            fontSize: '1.8rem',
-                                            fontWeight: '600'
-                                        }
-                                    }}
+                                    className="font-bold"
+                                    variant="body1"                                    
                                 >Additional Information</Typography>
                                 <List>
                                     <ListItem disablePadding>
-                                        <ListItemText className="w-2/5" primary={
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                             <Typography variant="subtitle">Geo Location:</Typography>
                                         } />
-                                        <ListItemText className="w-3/5" primary={ memberData.IpLogs && memberData.IpLogs.length && memberData.IpLogs[0].geo_location } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={ 
+                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'
+                                        } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="w-2/5" primary={
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
                                             <Typography variant="subtitle">IP:</Typography>
                                         } />
-                                        <ListItemText className="w-3/5" primary={ memberData.IpLogs && memberData.IpLogs.length && memberData.IpLogs[0].ip } />
-                                    </ListItem>                            
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={ 
+                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'
+                                        } />
+                                    </ListItem>     
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">Browser:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={ 
+                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'
+                                        } />
+                                    </ListItem>                         
+                                </List>
+                            </div>
+                            <div className=''>
+                                <Typography 
+                                    variant="body1"
+                                    className="font-bold"                                    
+                                >Address</Typography>
+                                <List>
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">Address Line 1:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                            <>
+                                            {
+                                                editMode ? (
+                                                    <TextField
+                                                        type="text"
+                                                        id="standard-helperText" 
+                                                        defaultValue={ memberData.address_1 }                              
+                                                        variant="standard"
+                                                        sx={textFieldStyle}
+                                                        onChange={
+                                                            (e)=> setMemberData({...memberData, address_1: e.target.value })
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_1 }</Typography>
+                                                )
+                                            }
+                                            </>
+                                        } />
+                                    </ListItem>                                
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">Address Line 2:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                            <>
+                                            {
+                                                editMode ? (
+                                                    <TextField
+                                                        type="tel"
+                                                        id="standard-helperText"                                
+                                                        defaultValue={ memberData.address_2 }                              
+                                                        variant="standard"
+                                                        sx={textFieldStyle}
+                                                        onChange={
+                                                            (e)=> setMemberData({...memberData, address_2: e.target.value })
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_2 }</Typography>
+                                                )
+                                            }
+                                            </>
+                                        } />
+                                    </ListItem>
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">Address Line 3:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                            <>
+                                            {
+                                                editMode ? (
+                                                    <TextField
+                                                        type="tel"
+                                                        id="standard-helperText"                                
+                                                        defaultValue={ memberData.address_3 }                              
+                                                        variant="standard"
+                                                        sx={textFieldStyle}
+                                                        onChange={
+                                                            (e)=> setMemberData({...memberData, address_3: e.target.value })
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.address_3 }</Typography>
+                                                )
+                                            }
+                                            </>
+                                        } />
+                                    </ListItem>
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">ZIP Code:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                            <>
+                                            {
+                                                editMode ? (
+                                                    <TextField
+                                                        type="tel"
+                                                        id="standard-helperText"                                
+                                                        defaultValue={ memberData.zip_code }                              
+                                                        variant="standard"
+                                                        sx={textFieldStyle}
+                                                        onChange={
+                                                            (e)=> setMemberData({...memberData, zip_code: e.target.value })
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{ memberData.zip_code }</Typography>
+                                                )
+                                            }
+                                            </>
+                                        } />
+                                    </ListItem>
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
+                                            <Typography variant="subtitle">Country:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                            <>
+                                            {
+                                                editMode ? (
+                                                    <Autocomplete
+                                                        {...countryProps}
+                                                        value={ countryData.filter(c => c.id == memberData.country_id)[0]}
+                                                        sx={{ '& .MuiAutocomplete-inputRoot': {minHeight: '30px'}}}
+                                                        id="clear-on-escape"
+                                                        onChange={
+                                                            (e, newValue)=>setMemberData({...memberData, country_id: newValue.id})
+                                                        }
+                                                        clearOnEscape
+                                                        renderInput={(params) => (
+                                                            <TextField {...params} variant="standard" sx={{ width: '100%', ...textFieldStyle }} />
+                                                        )}
+                                                    />
+                                                    
+                                                ) : (
+                                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                                        {memberData.country_id && countryData.filter(c => c.id == memberData.country_id)[0].name}
+                                                    </Typography>
+                                                )
+                                            }
+                                            </>
+                                        } />
+                                    </ListItem> 
                                 </List>
                             </div>
                         </div>
+                        <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3}} className="md:my-20 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
+
                         <div className='w-1/2'> 
                             <SurveyDetails surveyData={ surveyDetails } />
                         </div>
                     </div>
-                    <div className='flex flex-row'>
-                        <div className='w-1/2'>
+                    {/*<div className='flex flex-row'>
+                        <div className='w-1/2 pr-10'>
                             <Typography 
-                                variant="h6"
+                                variant="body1"
+                                className="font-bold"
                                 sx={{
                                     '@media screen and (max-width: 768px)': {
                                         fontSize: '1.5rem',
@@ -812,7 +976,7 @@ const MemberDetails = () => {
                                                     }
                                                     clearOnEscape
                                                     renderInput={(params) => (
-                                                        <TextField {...params} variant="standard" sx={{ width: 220, ...textFieldStyle }} />
+                                                        <TextField {...params} variant="standard" sx={{ width: '100%', ...textFieldStyle }} />
                                                     )}
                                                 />
                                                 
@@ -827,7 +991,7 @@ const MemberDetails = () => {
                                 </ListItem> 
                             </List>
                         </div>
-                        <div className='w-1/2'>
+                         <div className='w-1/2'>
                             <List>
                                 <ListItem disablePadding>
                                     <ListItemText className="sm:w-1/3 lg:w-1/3 xl:w-1/5" primary={
@@ -850,11 +1014,11 @@ const MemberDetails = () => {
                                     } />
                                 </ListItem>                            
                             </List>
-                        </div>
-                    </div>
-                    <Divider sx={{ borderWidth: 2}}/>
-                    <Box component="div" sx={{ p: 2 }} className="w-full flex flex-col px-0">
-                        <Typography variant="h6" >Account Notes Section</Typography>
+                        </div> 
+                    </div>*/}
+                    <Divider sx={{ borderWidth: 2}} className="my-10"/>
+                    <Box component="div" className="w-full flex flex-col">
+                        <Typography variant="body1" className="font-bold">Account Notes Section</Typography>
                         {
                             (accountNotes.length != 0) ? (
                                 <AccountNotes accountNotes={ accountNotes } />
