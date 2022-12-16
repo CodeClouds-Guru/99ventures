@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'referral_id',
       type: 'text',
       placeholder: 'Referral Id',
-      listing: true,
+      listing: false,
       show_in_form: false,
       sort: true,
       required: true,
