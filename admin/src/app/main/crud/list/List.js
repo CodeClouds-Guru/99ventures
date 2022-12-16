@@ -49,7 +49,7 @@ function List(props) {
   });
   const [moduleDeleted, setModuleDeleted] = useState(false);
   const [firstCall, setFirstCall] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('');
+  const [txnType, setTxnType] = useState('');
   const [where, setWhere] = useState(props.where);
 
   const resetModulesListConfig = () => {
@@ -288,17 +288,17 @@ function List(props) {
           {
             (module === 'member-transactions' && location.pathname.includes('history')) && (
               <FormControl sx={{ minWidth: 120 }} size="small">
-                <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                <InputLabel id="demo-simple-select-label">Type</InputLabel>
                 <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={ filterStatus }
-                label="Status"
+                value={ txnType }
+                label="Type"
                 className="rounded-full"
                 sx={{ lineHeight: '17px'}}
                 onChange={ 
                   (e)=> {
-                    setFilterStatus(e.target.value);
+                    setTxnType(e.target.value);
                     if(e.target.value){
                       setWhere({...where, type: e.target.value});
                     } else {
