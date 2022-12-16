@@ -395,11 +395,18 @@ class MemberController extends Controller {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
       let admin_note = req.body.admin_note || "";
-      let total_earnings = await this.getTotalEarnings(member_id);
+      // let total_earnings = await this.getTotalEarnings(member_id);
+      let total_earnings = await db.sequelize.query(
+        "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
+        {
+          replacements: [member_id],
+          type: QueryTypes.SELECT,
+        }
+      );
       console.log("total_earnings", total_earnings);
 
       let modified_total_earnings =
-        parseFloat(total_earnings.total_amount) + parseFloat(admin_amount);
+        parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
       let transaction_data = {
         type: "credited",
         amount: parseFloat(admin_amount),
@@ -417,7 +424,7 @@ class MemberController extends Controller {
       let balance = await MemberBalance.update(
         { amount: modified_total_earnings },
         {
-          where: { id: total_earnings.id },
+          where: { id: total_earnings[0].id },
         }
       );
       if (transaction && balance) {
