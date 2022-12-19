@@ -14,7 +14,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
 
-function Listing() {
+function Listing(props) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector(selectUser);
@@ -239,11 +239,11 @@ function Listing() {
                     <FormControl sx={{ minWidth: 120 }} size="small">
                         <InputLabel id="demo-simple-select-label">Status</InputLabel>
                         <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={ memberStatus }
-                        label="Status"
-                        onChange={ handleChangeStatus }
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={memberStatus}
+                            label="Status"
+                            onChange={handleChangeStatus}
                         >
                             <MenuItem value="">
                                 <em>--Select--</em>
@@ -309,7 +309,7 @@ function Listing() {
                             onRequestSort={handleRequestSort}
                             rowCount={data.length}
                             onMenuItemClick={handleDeselect}
-                            // {...props}
+                            {...props}
                             fields={fields}
                         />
                         {data.length === 0 ? <TableBody>
