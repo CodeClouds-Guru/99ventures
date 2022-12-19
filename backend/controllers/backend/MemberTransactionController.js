@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const {
   Member
 } = require("../../models/index");
+const moment = require("moment");
 class MemberTransactionController extends Controller {
   constructor() {
     super("MemberTransaction");
@@ -17,10 +18,10 @@ class MemberTransactionController extends Controller {
     var new_option = {};
     var and_query = {
       created_at: {
-        [Op.between]: query_where.created_at,
+        [Op.between]: query_where.created_at ?? [moment().subtract(30, 'days').toISOString(), moment().toISOString()],
       },
     };
-    
+
     if (Object.keys(query_where).length > 0) {
       new_option[Op.and] = {
         ...option_where,
@@ -33,6 +34,7 @@ class MemberTransactionController extends Controller {
       required: false,
       attributes: ["id", "first_name", "last_name", "email", "avatar"],
     }
+    console.log(options);
     const { docs, pages, total } = await this.model.paginate(options);
 
     let transaction_list = []
@@ -58,7 +60,7 @@ class MemberTransactionController extends Controller {
       }
       transaction_list.push(record.dataValues)
     })
-    
+
     fields.transaction_id.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
     fields.note.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
     return {
