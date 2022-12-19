@@ -38,8 +38,9 @@ class EmailHelper {
         if (email_template.body != undefined && email_template.body != '') {
             email_subject = email_template.subject
             //variables used for the template
-            let match_variables = email_template.body.match(/{(.*?)}/g);
-            if (match_variables) {
+            let match_variables = email_template.body.match(/\${(.*?)}/g);
+            let match_variables_subject = email_template.subject.match(/\${(.*?)}/g);
+            if (match_variables || match_variables_subject) {
                 //required model list
                 let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
                 let include_models = []
@@ -63,6 +64,7 @@ class EmailHelper {
                 all_details['company_portals'] = company_portal_details[0]
                 //set user details
                 email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
+                email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
             } else {
                 email_body = email_template.body
             }
@@ -81,10 +83,9 @@ class EmailHelper {
     }
     //replace email variables
     async replaceVariables(details, replace_data, email_body) {
-        console.log('details', details)
         replace_data.forEach(function (value, key) {
             let new_value = value;
-            new_value = new_value.replace('{', '');
+            new_value = new_value.replace('${', '');
             new_value = new_value.replace('}', '');
             replace_data[key] = eval('details' + '.' + new_value)
             email_body = email_body.replaceAll(value, replace_data[key])
