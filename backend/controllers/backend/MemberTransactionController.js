@@ -10,34 +10,24 @@ class MemberTransactionController extends Controller {
   // override save function
   async list(req, res) {
     var options = super.getQueryOptions(req);
+    let company_portal_id = req.headers.site_id;
     var fields = Object.assign({}, this.model.fields);
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
-
-    fields.transaction_id.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
-    fields.note.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
-    // if(req.params.transaction_date_from !='' && req.params.transaction_date_to !=''){
-    //   let transaction_date_from = req.params.transaction_date_from+' 00:00'
-    //   let transaction_date_to = req.params.transaction_date_to+' 23:59'
-    //   if ("where" in options){
-    //     // && Op.and in options['where']
-
-    //     options['where'] = {
-    //       [Op.and]: {
-    //         ...options['where'][Op.and],
-    //         created_at: {
-    //           [Op.between]: [transaction_date_from,transaction_date_to],
-    //         },
-    //       }
-    //     }
-    //   }
-    //   else{
-    //     options.where = {
-    //       created_at: {
-    //         [Op.between]: [req.params.transaction_date_from+' 00:00',req.params.transaction_date_to+"23:59"],
-    //       },
-    //     };
-    //   }
-    // }
+    var option_where = options.where || {};
+    var new_option = {};
+    var and_query = {
+      created_at: {
+        [Op.between]: query_where.created_at,
+      },
+    };
+    
+    if (Object.keys(query_where).length > 0) {
+      new_option[Op.and] = {
+        ...option_where,
+        ...and_query,
+      };
+    }
+    options.where = new_option;
     options.include = {
       model: Member,
       required: false,
@@ -68,6 +58,9 @@ class MemberTransactionController extends Controller {
       }
       transaction_list.push(record.dataValues)
     })
+    
+    fields.transaction_id.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
+    fields.note.listing = !(query_where && 'type' in query_where && query_where.type === 'withdraw')
     return {
       result: {
         data: transaction_list,
