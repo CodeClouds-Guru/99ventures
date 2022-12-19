@@ -29,13 +29,21 @@ const textFieldStyle = {
 }
 
 const iconStyle = {
-    '@media screen and (max-width: 1400px)': {
-        width: '17px',
-        height: '17px',
-        minWidth: '17px',
-        minHeight: '17px',
-        fontSize: '17px',
-        lineHeight: 17
+    '@media screen and (min-width: 1281px)': {
+        width: '15px',
+        height: '15px',
+        minWidth: '15px',
+        minHeight: '15px',
+        fontSize: '15px',
+        lineHeight: 15
+    },
+    '@media screen and (max-width: 1280px)': {
+        width: '25px',
+        height: '25px',
+        minWidth: '25px',
+        minHeight: '25px',
+        fontSize: '25px',
+        lineHeight: 25
     }
 }
 
@@ -331,9 +339,9 @@ const MemberDetails = () => {
                                 borderColor: 'background.paper',
                                 width: '10rem',
                                 height: '10rem',  
-                                '@media screen and (max-width: 1400px)': {
-                                    width: '10rem',
-                                    height: '10rem',
+                                '@media screen and (max-width: 1300px)': {
+                                    width: '8rem',
+                                    height: '8rem',
                                 },
                                 '@media screen and (max-width: 1280px)': {
                                     width: '16rem',
