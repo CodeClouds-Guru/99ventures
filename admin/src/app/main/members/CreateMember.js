@@ -196,7 +196,7 @@ const CreateMember = () => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
             })
     }
-    const onSubmit = ({ first_name, last_name, email, username, status, address_1, address_2, address_3, zip_code, phone_no, country_id }) => {
+    const onSubmit = ({ first_name, last_name, email, username, status, address_1, address_2, address_3, zip_code, phone_no, country_id, gender }) => {
         let form_data = new FormData();
         form_data.append('company_id', companyId);
         form_data.append('company_portal_id', companyPortalId);
@@ -205,6 +205,7 @@ const CreateMember = () => {
         form_data.append('last_name', last_name);
         form_data.append('email', email);
         form_data.append('username', username);
+        form_data.append('gender', gender);
         form_data.append('status', status);
         form_data.append('address_1', address_1);
         form_data.append('address_2', address_2);
