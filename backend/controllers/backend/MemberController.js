@@ -311,28 +311,47 @@ class MemberController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
-    if (roles == 1) {
+    
       for (let i = 0; i < result.rows.length; i++) {
-        result.rows[i].setDataValue(
-          "company_portal_id",
-          result.rows[i].CompanyPortal.name
-        );
+        //get first ip
+        let ip_log = await IpLog.findOne({where:{member_id:result.rows[i].id},
+                                                  order: [["id", "ASC"]],})
+        if (roles == 1) {                                          
+          result.rows[i].setDataValue(
+            "company_portal_id",
+            result.rows[i].CompanyPortal.name
+          );
+          fields.company_portal_id.listing = true
+        }else{
+          fields.company_portal_id.listing = false
+        }
+        if(ip_log){
+          result.rows[i].setDataValue(
+            "ip",
+            ip_log.ip
+          );
+        }else{
+          result.rows[i].setDataValue(
+            "ip",
+            ''
+          );
+        }
       }
-      this.model.extra_fields = ["company_portal_id"];
-      fields.company_portal_id = {
-        field_name: "company_portal_id",
-        db_name: "company_portal_id",
-        type: "text",
-        placeholder: "Company Portal",
-        listing: true,
-        show_in_form: false,
-        sort: true,
-        required: false,
-        value: "",
-        width: "50",
-        searchable: true,
-      };
-    }
+      
+      // fields.company_portal_id = {
+      //   field_name: "company_portal_id",
+      //   db_name: "company_portal_id",
+      //   type: "text",
+      //   placeholder: "Company Portal",
+      //   listing: true,
+      //   show_in_form: false,
+      //   sort: true,
+      //   required: false,
+      //   value: "",
+      //   width: "50",
+      //   searchable: true,
+      // };
+    
     // console.log(result.rows);
     return {
       result: { data: result.rows, pages, total: result.count },
