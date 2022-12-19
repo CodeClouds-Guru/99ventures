@@ -70,8 +70,8 @@ class MemberController extends Controller {
         let member_details = await Member.findOne({
           where: { email: req.body.email },
         });
-        await MemberBalance.bulkCreate(
-          [{
+        await MemberBalance.bulkCreate([
+          {
             member_id: member_details.id,
             amount: 0.0,
             amount_type: "cash",
@@ -82,8 +82,8 @@ class MemberController extends Controller {
             amount: 0.0,
             amount_type: "point",
             created_by: req.user.id,
-          }]
-        );
+          },
+        ]);
         let evntbus = eventBus.emit("send_email", {
           action: "Welcome",
           data: {
@@ -127,6 +127,7 @@ class MemberController extends Controller {
           "country_id",
           "referral_code",
           "member_referral_id",
+          "gender",
         ];
 
         options.where = { id: member_id };
@@ -395,7 +396,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
