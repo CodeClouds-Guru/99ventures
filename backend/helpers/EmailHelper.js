@@ -33,46 +33,51 @@ class EmailHelper {
                     where: { company_portal_id: req.headers.site_id },
                 }
             })
-            let email_template = email_action.EmailTemplates[0]
-            let email_body = ''
-            let email_subject = ''
-            if (email_template.body != undefined && email_template.body != '') {
-                email_subject = email_template.subject
-                //variables used for the template
-                let match_variables = email_template.body.match(/\${(.*?)}/g);
-                let match_variables_subject = email_template.subject.match(/\${(.*?)}/g);
-                if (match_variables || match_variables_subject) {
-                    //required model list
-                    let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
-                    let include_models = []
-                    let all_models = []
-                    let all_variables = {}
-                    if (models) {
-                        include_models = models.map((model_obj) => {
-                            return { model: eval(model_obj.module) }
-                        })
-                        models.map((model_obj) => {
-                            all_models.push(model_obj.module)
-                            let code = model_obj.code
-                            all_variables[code] = ''
-                            return model_obj.module
-                        })
+            if(email_action && email_action.EmailTemplates){
+                let email_template = email_action.EmailTemplates[0]
+                let email_body = ''
+                let email_subject = ''
+                if (email_template.body != undefined && email_template.body != '') {
+                    email_subject = email_template.subject
+                    //variables used for the template
+                    let match_variables = email_template.body.match(/\${(.*?)}/g);
+                    let match_variables_subject = email_template.subject.match(/\${(.*?)}/g);
+                    if (match_variables || match_variables_subject) {
+                        //required model list
+                        let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
+                        let include_models = []
+                        let all_models = []
+                        let all_variables = {}
+                        if (models) {
+                            include_models = models.map((model_obj) => {
+                                return { model: eval(model_obj.module) }
+                            })
+                            models.map((model_obj) => {
+                                all_models.push(model_obj.module)
+                                let code = model_obj.code
+                                all_variables[code] = ''
+                                return model_obj.module
+                            })
+                        }
+                        //get company info
+                        let company_portal_details = await this.getCompanyInfo(req)
+                        all_details['companies'] = company_portal_details[0].Company
+                        company_portal_details[0].Company = {}
+                        all_details['company_portals'] = company_portal_details[0]
+                        //set user details
+                        email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
+                        email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
+                    } else {
+                        email_body = email_template.body
                     }
-                    //get company info
-                    let company_portal_details = await this.getCompanyInfo(req)
-                    all_details['companies'] = company_portal_details[0].Company
-                    company_portal_details[0].Company = {}
-                    all_details['company_portals'] = company_portal_details[0]
-                    //set user details
-                    email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
-                    email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
-                } else {
-                    email_body = email_template.body
                 }
+                return { status:true,email_body: email_body, subject: email_subject }
+            }else{
+                return {status:false}
             }
-            return { email_body: email_body, subject: email_subject }
         }catch (error) {
             console.error("error sending email", error);
+            return {status:false}
           }
     }
     //company info
