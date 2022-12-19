@@ -18,6 +18,7 @@ module.exports = {
       },
       amount: {
         type: Sequelize.DECIMAL(10, 2),
+        defaultValue:0.00
       },
       amount_type: {
         type: Sequelize.ENUM('cash', 'point'),

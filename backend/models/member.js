@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       first_name: Joi.string().required().label("First Name"),
       last_name: Joi.string().required().label("Last Name"),
+      gender: Joi.string().required().label("Gender"),
       status: Joi.string().optional().label("Status"),
       username: Joi.string().min(3).max(30).required().label("Username"),
       email: Joi.string().optional(),
@@ -143,6 +144,7 @@ module.exports = (sequelize, DataTypes) => {
           else this.setDataValue("country_id", value);
         },
       },
+      gender: DataTypes.ENUM("male", "female", "other"),
     },
     {
       sequelize,
@@ -215,6 +217,19 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "email",
       type: "text",
       placeholder: "Email",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    gender: {
+      field_name: "gender",
+      db_name: "gender",
+      type: "text",
+      placeholder: "Gender",
       listing: true,
       show_in_form: true,
       sort: true,

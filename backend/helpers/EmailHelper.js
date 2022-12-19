@@ -1,4 +1,4 @@
-const { Member,EmailAction, EmailTemplateVariable, EmailActionEmailTemplate, EmailTemplate, Company, User, CompanyPortal, EmailConfiguration, sequelize } = require('../models/index')
+const { Member, EmailAction, EmailTemplateVariable, EmailActionEmailTemplate, EmailTemplate, Company, User, CompanyPortal, EmailConfiguration, sequelize } = require('../models/index')
 const queryInterface = sequelize.getQueryInterface()
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
@@ -11,48 +11,50 @@ class EmailHelper {
         this.replaceVariables = this.replaceVariables.bind(this)
     }
     //email parsing
-    async parse(payload){
+    async parse(payload) {
         let req = this.req_data
         let user = req.user;
         let receiver_module = '';
         let search = { 'id': '1' };
-        let all_details ={}
-        if(payload.data.details != undefined && payload.data.details){
+        let all_details = {}
+        if (payload.data.details != undefined && payload.data.details) {
             all_details = payload.data.details
             all_details['users'] = user
-        }else{
+        } else {
             all_details = {
                 'users': user
             }
         }
-        let email_action = await EmailAction.findOne({where:{'action':payload.action},include:{
-            model: EmailTemplate,
-            required: true,
-            where: {company_portal_id:req.headers.site_id},
-          }})
+        let email_action = await EmailAction.findOne({
+            where: { 'action': payload.action }, include: {
+                model: EmailTemplate,
+                required: true,
+                where: { company_portal_id: req.headers.site_id },
+            }
+        })
         let email_template = email_action.EmailTemplates[0]
         let email_body = ''
         let email_subject = ''
-        if(email_template.body != undefined && email_template.body != ''){
+        if (email_template.body != undefined && email_template.body != '') {
             email_subject = email_template.subject
-        //variables used for the template
+            //variables used for the template
             let match_variables = email_template.body.match(/{(.*?)}/g);
-            if(match_variables){
+            if (match_variables) {
                 //required model list
-                let models = await EmailTemplateVariable.findAll({where:{code:match_variables, module: { [Op.ne]: receiver_module }}, attributes:['module','code']})
+                let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
                 let include_models = []
-                let  all_models = []
-                let  all_variables = {}
-                if(models){
-                include_models = models.map((model_obj)=>{
-                    return {model: eval(model_obj.module)}
-                })
-                models.map((model_obj)=>{
-                    all_models.push(model_obj.module)
-                    let code = model_obj.code
-                    all_variables[code]= ''
-                    return model_obj.module
-                })
+                let all_models = []
+                let all_variables = {}
+                if (models) {
+                    include_models = models.map((model_obj) => {
+                        return { model: eval(model_obj.module) }
+                    })
+                    models.map((model_obj) => {
+                        all_models.push(model_obj.module)
+                        let code = model_obj.code
+                        all_variables[code] = ''
+                        return model_obj.module
+                    })
                 }
                 //get company info
                 let company_portal_details = await this.getCompanyInfo(req)
@@ -60,12 +62,12 @@ class EmailHelper {
                 company_portal_details[0].Company = {}
                 all_details['company_portals'] = company_portal_details[0]
                 //set user details
-                email_body = await this.replaceVariables(all_details,match_variables,email_template.body)
-            }else{
+                email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
+            } else {
                 email_body = email_template.body
             }
         }
-        return {email_body:email_body,subject:email_subject}
+        return { email_body: email_body, subject: email_subject }
     }
     //company info
     async getCompanyInfo(req) {
@@ -79,6 +81,7 @@ class EmailHelper {
     }
     //replace email variables
     async replaceVariables(details, replace_data, email_body) {
+        console.log('details', details)
         replace_data.forEach(function (value, key) {
             let new_value = value;
             new_value = new_value.replace('{', '');
@@ -89,12 +92,12 @@ class EmailHelper {
         return email_body
     }
     //send mail
-    async sendMail(body, to,subject) {
+    async sendMail(body, to, subject) {
         // create reusable transporter object using the default SMTP transport
         let req = this.req_data
         let company_portal_id = req.headers.site_id
         let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
-        if(email_configurations){
+        if (email_configurations) {
             var transporter = nodemailer.createTransport({
                 host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
                 port: email_configurations[0].email_server_port,//465,//2525,
