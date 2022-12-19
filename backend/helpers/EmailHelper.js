@@ -17,59 +17,63 @@ class EmailHelper {
         let receiver_module = '';
         let search = { 'id': '1' };
         let all_details = {}
-        if (payload.data.details != undefined && payload.data.details) {
-            all_details = payload.data.details
-            all_details['users'] = user
-        } else {
-            all_details = {
-                'users': user
-            }
-        }
-        let email_action = await EmailAction.findOne({
-            where: { 'action': payload.action }, include: {
-                model: EmailTemplate,
-                required: true,
-                where: { company_portal_id: req.headers.site_id },
-            }
-        })
-        let email_template = email_action.EmailTemplates[0]
-        let email_body = ''
-        let email_subject = ''
-        if (email_template.body != undefined && email_template.body != '') {
-            email_subject = email_template.subject
-            //variables used for the template
-            let match_variables = email_template.body.match(/\${(.*?)}/g);
-            let match_variables_subject = email_template.subject.match(/\${(.*?)}/g);
-            if (match_variables || match_variables_subject) {
-                //required model list
-                let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
-                let include_models = []
-                let all_models = []
-                let all_variables = {}
-                if (models) {
-                    include_models = models.map((model_obj) => {
-                        return { model: eval(model_obj.module) }
-                    })
-                    models.map((model_obj) => {
-                        all_models.push(model_obj.module)
-                        let code = model_obj.code
-                        all_variables[code] = ''
-                        return model_obj.module
-                    })
-                }
-                //get company info
-                let company_portal_details = await this.getCompanyInfo(req)
-                all_details['companies'] = company_portal_details[0].Company
-                company_portal_details[0].Company = {}
-                all_details['company_portals'] = company_portal_details[0]
-                //set user details
-                email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
-                email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
+        try {
+            if (payload.data.details != undefined && payload.data.details) {
+                all_details = payload.data.details
+                all_details['users'] = user
             } else {
-                email_body = email_template.body
+                all_details = {
+                    'users': user
+                }
             }
-        }
-        return { email_body: email_body, subject: email_subject }
+            let email_action = await EmailAction.findOne({
+                where: { 'action': payload.action }, include: {
+                    model: EmailTemplate,
+                    required: true,
+                    where: { company_portal_id: req.headers.site_id },
+                }
+            })
+            let email_template = email_action.EmailTemplates[0]
+            let email_body = ''
+            let email_subject = ''
+            if (email_template.body != undefined && email_template.body != '') {
+                email_subject = email_template.subject
+                //variables used for the template
+                let match_variables = email_template.body.match(/\${(.*?)}/g);
+                let match_variables_subject = email_template.subject.match(/\${(.*?)}/g);
+                if (match_variables || match_variables_subject) {
+                    //required model list
+                    let models = await EmailTemplateVariable.findAll({ where: { code: match_variables, module: { [Op.ne]: receiver_module } }, attributes: ['module', 'code'] })
+                    let include_models = []
+                    let all_models = []
+                    let all_variables = {}
+                    if (models) {
+                        include_models = models.map((model_obj) => {
+                            return { model: eval(model_obj.module) }
+                        })
+                        models.map((model_obj) => {
+                            all_models.push(model_obj.module)
+                            let code = model_obj.code
+                            all_variables[code] = ''
+                            return model_obj.module
+                        })
+                    }
+                    //get company info
+                    let company_portal_details = await this.getCompanyInfo(req)
+                    all_details['companies'] = company_portal_details[0].Company
+                    company_portal_details[0].Company = {}
+                    all_details['company_portals'] = company_portal_details[0]
+                    //set user details
+                    email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
+                    email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
+                } else {
+                    email_body = email_template.body
+                }
+            }
+            return { email_body: email_body, subject: email_subject }
+        }catch (error) {
+            console.error("error sending email", error);
+          }
     }
     //company info
     async getCompanyInfo(req) {
@@ -95,32 +99,36 @@ class EmailHelper {
     //send mail
     async sendMail(body, to, subject) {
         // create reusable transporter object using the default SMTP transport
-        let req = this.req_data
-        let company_portal_id = req.headers.site_id
-        let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
-        if (email_configurations) {
-            var transporter = nodemailer.createTransport({
-                host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
-                port: email_configurations[0].email_server_port,//465,//2525,
-                auth: {
-                    user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
-                    pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
-                }
-            });
-            const mailData = {
-                from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
-                to: to,   // list of receivers
-                subject: subject,
-                //text: 'That was easy!',
-                html: body,
-            };
-            transporter.sendMail(mailData, function (err, info) {
-                if (err)
-                    console.log('err', err)
-                else
-                    console.log('success====', info);
-            });
-        }
+        try{
+            let req = this.req_data
+            let company_portal_id = req.headers.site_id
+            let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
+            if (email_configurations) {
+                var transporter = nodemailer.createTransport({
+                    host: email_configurations[0].email_server_host,//"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
+                    port: email_configurations[0].email_server_port,//465,//2525,
+                    auth: {
+                        user: email_configurations[0].email_username,//"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
+                        pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
+                    }
+                });
+                const mailData = {
+                    from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
+                    to: to,   // list of receivers
+                    subject: subject,
+                    //text: 'That was easy!',
+                    html: body,
+                };
+                transporter.sendMail(mailData, function (err, info) {
+                    if (err)
+                        console.log('err', err)
+                    else
+                        console.log('success====', info);
+                });
+            }
+        }catch (error) {
+            console.error("error sending email", error);
+          }
     }
 }
 module.exports = EmailHelper
