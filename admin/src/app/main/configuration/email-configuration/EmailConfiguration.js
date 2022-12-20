@@ -78,7 +78,7 @@ function EmailConfiguration(props) {
     const getEmailConfiguration = () => {
         axios.get(jwtServiceConfig.getEmailConguration)
             .then((response) => {
-                if (response.data.results.status) {
+                if (response.data.results.status && response.data.results.data) {
                     setValue('fromName', response.data.results.data.from_name, { shouldDirty: false, shouldValidate: true });
                     setValue('fromEmail', response.data.results.data.from_email, { shouldDirty: false, shouldValidate: true });
                     setValue('emailUsername', response.data.results.data.email_username, { shouldDirty: false, shouldValidate: true });
@@ -87,9 +87,10 @@ function EmailConfiguration(props) {
                     setValue('password', response.data.results.data.password, { shouldDirty: false, shouldValidate: true });
                     setSslRequired(response.data.results.data.ssl_required === 1);
                     setSiteNameVisible(response.data.results.data.site_name_visible === 1);
-                } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
-                }
+                } 
+                // else {
+                //     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                // }
             })
             .catch((error) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
