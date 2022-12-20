@@ -235,7 +235,6 @@ const CreateUpdate = (props) => {
 
     useEffect(() => {
         if (Object.keys(editor).length && Object.keys(selectComponentData).length && moduleId !== 'create' && !isNaN(moduleId)) {
-            console.log(selectComponentData.html)
             setAllData(allData => ({
                 ...allData,
                 name: selectComponentData.name,
@@ -256,11 +255,7 @@ const CreateUpdate = (props) => {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
             const htmlData = editor.getHtml().match(reg)[1];
-            generatedHTML +=
-                `<section>
-                    ${css}
-                    ${htmlData}            
-                </section>`;
+            generatedHTML += `${css}\n${htmlData}`;
         }
         return generatedHTML;
     }
@@ -302,19 +297,29 @@ const CreateUpdate = (props) => {
         }
     }
 
+    const addCommentWrapper = (components, componentName) => {
+        return [
+            {tagName: 'NULL', type: 'comment', content: ` Start ${componentName} comment `},
+            ...components,
+            {tagName: 'NULL', type: 'comment', content: ` End ${componentName} comment `}
+        ]
+    }
+
     const handleFormSubmit = () => {
         if (!Object.keys(errors).length) {
             const editorJsonBody = editor.getProjectData();
             const componentName = allData.name.trim();
-            
+                       
             // to add the comment in html 
             const components = editorJsonBody.pages[0].frames[0].component.components;
-            const finalComponents = [
-                {tagName: 'NULL', type: 'comment', content: ` Start ${componentName} comment `},
-                ...components,
-                {tagName: 'NULL', type: 'comment', content: ` End ${componentName} comment `}
-            ]
-            editorJsonBody.pages[0].frames[0].component.components = finalComponents;
+            if(moduleId === 'create'){
+                editorJsonBody.pages[0].frames[0].component.components = addCommentWrapper(components, componentName);
+            } else {
+                // If the comment has been removed by the user manually or not, we filter all the comment tags here,
+                // because comment tags will be added again at the top and end of the content.
+                const filterComponents = components.filter(cmp => cmp.type !== 'comment');
+                editorJsonBody.pages[0].frames[0].component.components = addCommentWrapper(filterComponents, componentName);
+            }
             //--------
 
             const params = {
