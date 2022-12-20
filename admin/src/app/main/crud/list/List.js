@@ -58,6 +58,7 @@ function List(props) {
 		endDate: '',
 	});
 
+
 	const resetModulesListConfig = () => {
 		setSearchText('');
 		setOrder({
@@ -282,13 +283,19 @@ function List(props) {
 			startDate: moment(val.startDate),
 			endDate: moment(val.endDate)
 		});
+		const param = {
+            created_at: [moment(val.startDate), moment(val.endDate)]
+        }
+		setWhere({...where, ...param});
 	}
 
 	const handleClearDateRange = () => {
 		setDateRange({
-			startDate: '',
-			endDate: ''
-		})
+			startDate: null,
+			endDate: null
+		});
+		delete where.created_at;
+		setWhere({...where});
 	}
 
 	return (
@@ -312,12 +319,16 @@ function List(props) {
 					{
 						(module === 'member-transactions' && location.pathname.includes('history')) && (
 							<>
-								<DateRangePicker
-									wrapperClassName="filter-daterange-picker"
-									open={datepickerStatus}
-									toggle={() => setDatepickerStatus(!datepickerStatus)}
-									onChange={dateRangeSelected}
-								/>
+								{
+									datepickerStatus && (
+										<DateRangePicker
+											wrapperClassName="filter-daterange-picker"
+											open={datepickerStatus}
+											toggle={() => setDatepickerStatus(!datepickerStatus)}
+											onChange={dateRangeSelected}
+										/>
+									)
+								}
 								<Paper
 									component={motion.div}
 									initial={{ y: -20, opacity: 0 }}
@@ -340,7 +351,7 @@ function List(props) {
 											: ''
 										}
 									/>
-									{ (dateRange && dateRange.startDate) && <FuseSvgIcon className="text-48" size={24} color="action" onClick={ handleClearDateRange }>material-outline:close</FuseSvgIcon> }
+									{ (dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={ handleClearDateRange }>material-outline:close</FuseSvgIcon> }
 								</Paper> 
 								<FormControl sx={{ minWidth: 120 }} size="small">
 									<InputLabel id="demo-simple-select-label">Type</InputLabel>
