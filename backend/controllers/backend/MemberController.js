@@ -30,18 +30,15 @@ class MemberController extends Controller {
     try {
       const existing_email_or_username = await Member.count({
         where: {
+          company_portal_id: req.body.company_portal_id,
           [Op.or]: {
-            [Op.and]: {
-              company_portal_id: req.body.company_portal_id,
-              email: req.body.email,
-            },
-            [Op.and]: {
-              company_portal_id: req.body.company_portal_id,
-              username: req.body.username,
-            },
+            email: req.body.email,
+            username: req.body.username,
           },
         },
+        // logging: console.log,
       });
+      console.log('ppppp',existing_email_or_username)
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
