@@ -119,7 +119,7 @@ function Listing(props) {
     function handleSelectAllClick(event) {
         if (event.target.checked) {
             setSelected(data.map((n) => {
-                n.id
+                return n.id
             }));
             return;
         }
