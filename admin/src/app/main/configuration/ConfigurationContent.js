@@ -15,7 +15,7 @@ import { usePermission } from '@fuse/hooks';
 function TabPanel(props) {
     const { children, value, panel, index, panelIndx, ...other } = props;
     return (
-        (!panel) ? (
+        (!panel && index < 2) ? (
             <div
                 role="tabpanel"
                 id={`simple-tabpanel-${index}`}
@@ -96,6 +96,21 @@ function ConfigurationContent() {
     const [value, setValue] = useState(0);
     const [selectedTab, setSelectedTab] = useState('');
     
+    const tabPanel = () => {
+        let initialIndx = 0;
+        return tabs.map((tab, indx) => {
+            const { hasPermission } = usePermission(tab.module);
+            const Component = tab.component;
+            if(hasPermission('view')) {
+                return(
+                    <TabPanel value={ value } panel={ selectedTab } panelIndx={ `simple-tab-${indx}`} index={ ++initialIndx } key={ indx }>                            
+                        <Component permission={ hasPermission } />
+                    </TabPanel>
+                )
+            }
+        })
+    }
+
     const handleChange = (event, newValue) => {
         setValue(newValue);
         setSelectedTab(event.target.id);
@@ -121,17 +136,7 @@ function ConfigurationContent() {
                 </Tabs>
             </Box>
             {
-                tabs.map((tab, indx) => {
-                    const { hasPermission } = usePermission(tab.module);
-                    const Component = tab.component;
-                    if(hasPermission('view')) {
-                        return(
-                            <TabPanel value={ value } panel={ selectedTab } panelIndx={ `simple-tab-${indx}`} index={ indx } key={ indx }>                            
-                                <Component permission={ hasPermission } />
-                            </TabPanel>
-                        )
-                    }
-                })
+                tabPanel()
             }
         </Box>
     );
