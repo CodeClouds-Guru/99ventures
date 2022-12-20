@@ -282,13 +282,20 @@ function List(props) {
 			startDate: moment(val.startDate),
 			endDate: moment(val.endDate)
 		});
+		const param = {
+            created_at: [moment(val.startDate), moment(val.endDate)]
+        }
+		setWhere({...where, ...param});
 	}
 
 	const handleClearDateRange = () => {
 		setDateRange({
 			startDate: '',
 			endDate: ''
-		})
+		});
+		// const index = where.findIndex(el => el === 'created_at') ;
+		console.log(where)
+		setWhere({...props.where});
 	}
 
 	return (
