@@ -257,6 +257,9 @@ const CreateUpdate = (props) => {
             const htmlData = editor.getHtml().match(reg)[1];
             generatedHTML += `${css}\n${htmlData}`;
         }
+        if((moduleId !== 'create' && !isNaN(moduleId))){
+            generatedHTML = generatedHTML.replace(/<\!--.*?-->/g, "");   // To remove HTML Comment tag
+        }
         return generatedHTML;
     }
 
