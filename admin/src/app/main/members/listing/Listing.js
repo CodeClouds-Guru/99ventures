@@ -1,6 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Box, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,6 +13,11 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { column, match } from 'stylis';
+import { object } from 'prop-types';
 
 function Listing(props) {
     const dispatch = useDispatch();
@@ -37,8 +42,11 @@ function Listing(props) {
     });
     const [moduleDeleted, setModuleDeleted] = useState(false);
     const [firstCall, setFirstCall] = useState(true);
-    const [memberStatus, setMemberStatus] = useState('');
+    const [memberStatus, setMemberStatus] = useState([]);
     const [where, setWhere] = useState({});
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    // const [filterRow, setFilterRow] = useState(1);
+    const [filters, setFilters] = useState([{ column: '', match: '', search: '' }]);
 
     const resetModulesListConfig = () => {
         setSearchText('');
@@ -220,7 +228,30 @@ function Listing(props) {
             setWhere({});
         }
     }
-
+    const removeFilterRow = (key) => {
+        setFilters(filters.splice(key))
+    }
+    const addFilterRow = () => {
+        setFilters(filters.concat({ column: '', match: '', search: '' }))
+    }
+    const cancelFilter = () => {
+        setOpenAlertDialog(false);
+        setFilters([{ column: '', match: '', search: '' }]);
+        setMemberStatus([]);
+    }
+    // console.log(typeof filters, filters)
+    const handleChangeFilter = (event, key, field) => {
+        // console.log(event.target.value, key, field);
+        setFilters(
+            filters.map((val, index) => {
+                return field === 'column' ? Object.assign(val, { 'column': event.target.value })
+                    : field === 'match' ? Object.assign(val, { 'match': event.target.value })
+                        : field === 'search' ? Object.assign(val, { 'search': event.target.value })
+                            : val
+            })
+        )
+    }
+    const handleApplyFilters = () => { }
     return (
         <div>
             {/* // header */}
@@ -236,7 +267,115 @@ function Listing(props) {
                 </Typography>
 
                 <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
-                    <FormControl sx={{ minWidth: 120 }} size="small">
+                    <Button variant="outlined" startIcon={<FilterAltIcon />} onClick={() => setOpenAlertDialog(true)}>
+                        Search
+                    </Button>
+                    <Dialog
+                        open={openAlertDialog}
+                        onClose={() => { setOpenAlertDialog(false) }}
+                        disableEscapeKeyDown
+                        aria-labelledby="scroll-dialog-title"
+                        aria-describedby="scroll-dialog-description"
+                        sx={{ width: '100%' }}
+                    >
+                        <DialogTitle id="scroll-dialog-title">Filter</DialogTitle>
+                        <DialogContent>
+                            {Object.values(filters).map((val, key) => {
+                                return (
+                                    <div key={key} className="flex w-full justify-between mb-10">
+                                        <FormControl className="w-4/12" size="large">
+                                            <InputLabel id="demo-simple-select-label">Column</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={val.column}
+                                                label="Column"
+                                                onChange={(event) => handleChangeFilter(event, key, 'column')}
+                                            >
+                                                <MenuItem value="billing_street_address">Billing Street Address</MenuItem>
+                                                <MenuItem value="browser">Browser</MenuItem>
+                                                <MenuItem value="email">Email</MenuItem>
+                                                <MenuItem value="geo_isp">Geo ISP</MenuItem>
+                                                <MenuItem value="geo_location">Geo Locaion</MenuItem>
+                                                <MenuItem value="id">ID</MenuItem>
+                                                <MenuItem value="ip_address">IP Address</MenuItem>
+                                                <MenuItem value="ip_log">IP Log</MenuItem>
+                                                <MenuItem value="payment_email">Payment Email</MenuItem>
+                                                <MenuItem value="refferar">Refferar</MenuItem>
+                                                <MenuItem value="phone">Phone</MenuItem>
+                                                <MenuItem value="username">Username</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl className="w-3/12 px-5" size="large">
+                                            <InputLabel id="demo-simple-select-label">Match</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={val.match}
+                                                label="Match"
+                                                onChange={(event) => handleChangeFilter(event, key, 'match')}
+                                            >
+                                                <MenuItem value="like">LIKE</MenuItem>
+                                                <MenuItem value="exact">EXACT</MenuItem>
+                                                <MenuItem value="not_exact">NOT EXACT</MenuItem>
+                                                <MenuItem value="starts_with">STARTS WITH</MenuItem>
+                                                <MenuItem value=">">&#62;</MenuItem>
+                                                <MenuItem value=">=">&#62;=</MenuItem>
+                                                <MenuItem value="<">&#60;</MenuItem>
+                                                <MenuItem value="<=">&#60;=</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl className="w-4/12" size="large">
+                                            <TextField
+                                                type="text"
+                                                label="Search"
+                                                value={val.search}
+                                                variant="outlined"
+                                                onChange={(event) => handleChangeFilter(event, key, 'search')}
+                                            />
+                                        </FormControl>
+                                        <div className="w-1/12 pl-5">
+                                            {filters.length > 1 && key !== 0
+                                                ?
+                                                <Tooltip title="Remove row" placement="right">
+                                                    <DeleteIcon className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
+                                                </Tooltip>
+                                                : ''
+                                            }
+                                        </div>
+                                    </div>
+                                )
+                            })
+                            }
+                            <Tooltip title="Add row" placement="right">
+                                <AddIcon className="cursor-pointer" variant="contained" color="secondary" onClick={addFilterRow} />
+                            </Tooltip>
+                            <FormControl className="w-full" size="large">
+                                <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={memberStatus}
+                                    label="Status"
+                                    onChange={handleChangeStatus}
+                                    multiple
+                                >
+                                    <MenuItem value="">
+                                        <em>--Select--</em>
+                                    </MenuItem>
+                                    <MenuItem value="member">Member</MenuItem>
+                                    <MenuItem value="suspended">Suspended</MenuItem>
+                                    <MenuItem value="validating">Validating</MenuItem>
+                                    <MenuItem value="deleted">Deleted</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button variant="outlined" color="error" onClick={cancelFilter}>Cancel</Button>
+                            <Button variant="contained" color="primary" onClick={handleApplyFilters}>Apply Filters</Button>
+                        </DialogActions>
+                    </Dialog>
+                    {/* <FormControl sx={{ minWidth: 120 }} size="small">
                         <InputLabel id="demo-simple-select-label">Status</InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
@@ -253,8 +392,8 @@ function Listing(props) {
                             <MenuItem value="validating">Validating</MenuItem>
                             <MenuItem value="deleted">Deleted</MenuItem>
                         </Select>
-                    </FormControl>
-                    <Paper
+                    </FormControl> */}
+                    {/* <Paper
                         component={motion.div}
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
@@ -273,7 +412,7 @@ function Listing(props) {
                             }}
                             onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
                         />
-                    </Paper>
+                    </Paper> */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
