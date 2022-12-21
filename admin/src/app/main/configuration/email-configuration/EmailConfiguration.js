@@ -87,7 +87,10 @@ function EmailConfiguration(props) {
                     setValue('password', response.data.results.data.password, { shouldDirty: false, shouldValidate: true });
                     setSslRequired(response.data.results.data.ssl_required === 1);
                     setSiteNameVisible(response.data.results.data.site_name_visible === 1);
-                } 
+                    'sslRequired' in dirtyFields ? delete dirtyFields.sslRequired : '';
+                    'siteNameVisible' in dirtyFields ? delete dirtyFields.siteNameVisible : '';
+
+                }
                 // else {
                 //     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 // }
@@ -97,7 +100,7 @@ function EmailConfiguration(props) {
             })
     }
 
-    const onSubmit = ({ fromName, fromEmail, emailUsername, emailServerHost, port, sslRequired, siteNameVisible, password }) => {
+    const onSubmit = ({ fromName, fromEmail, emailUsername, emailServerHost, port, password }) => {
         let data = {
             "from_name": fromName,
             "from_email": fromEmail,
@@ -123,9 +126,11 @@ function EmailConfiguration(props) {
             })
     }
     const selectSslRequired = (event) => {
+        dirtyFields.sslRequired = true
         setSslRequired(event.target.checked)
     }
     const selectSiteNameVisible = (event) => {
+        dirtyFields.siteNameVisible = true;
         setSiteNameVisible(event.target.checked)
     }
     return (
