@@ -13,8 +13,8 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import { column, match } from 'stylis';
 import { object } from 'prop-types';
@@ -222,11 +222,11 @@ function Listing(props) {
 
     const handleChangeStatus = (e) => {
         setMemberStatus(e.target.value);
-        if (e.target.value) {
-            setWhere({ status: e.target.value });
-        } else {
-            setWhere({});
-        }
+        // if (e.target.value) {
+        //     setWhere({ status: e.target.value });
+        // } else {
+        //     setWhere({});
+        // }
     }
     const removeFilterRow = (key) => {
         filters.splice(key, 1);
@@ -240,13 +240,17 @@ function Listing(props) {
         setFilters([{ column: '', match: '', search: '' }]);
         setMemberStatus([]);
     }
-    // console.log(typeof filters, filters)
     const handleChangeFilter = (event, key, field) => {
         filters[key][field] = event.target.value;
-        console.log(filters);
         setFilters([...filters])
     }
-    const handleApplyFilters = () => { }
+    const handleApplyFilters = () => {
+        setWhere({
+            filters: filters,
+            status: memberStatus
+        });
+        setOpenAlertDialog(false);
+    }
     return (
         <div>
             {/* // header */}
@@ -262,7 +266,7 @@ function Listing(props) {
                 </Typography>
 
                 <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
-                    <Button variant="outlined" startIcon={<FilterAltIcon />} onClick={() => setOpenAlertDialog(true)}>
+                    <Button variant="outlined" startIcon={<SearchIcon />} onClick={() => setOpenAlertDialog(true)}>
                         Search
                     </Button>
                     <Dialog
@@ -271,13 +275,14 @@ function Listing(props) {
                         disableEscapeKeyDown
                         aria-labelledby="scroll-dialog-title"
                         aria-describedby="scroll-dialog-description"
-                        sx={{ width: '100%' }}
+                        fullWidth
+                        maxWidth="md"
                     >
                         <DialogTitle id="scroll-dialog-title">Filter</DialogTitle>
                         <DialogContent>
                             {Object.values(filters).map((val, key) => {
                                 return (
-                                    <div key={key} className="flex w-full justify-between mb-10">
+                                    <div key={key} className="flex w-full justify-between my-10">
                                         <FormControl className="w-4/12" size="large">
                                             <InputLabel id="demo-simple-select-label">Column</InputLabel>
                                             <Select
@@ -296,7 +301,7 @@ function Listing(props) {
                                                 <MenuItem value="ip_address">IP Address</MenuItem>
                                                 <MenuItem value="ip_log">IP Log</MenuItem>
                                                 <MenuItem value="payment_email">Payment Email</MenuItem>
-                                                <MenuItem value="refferar">Refferar</MenuItem>
+                                                <MenuItem value="referrer">Referrer</MenuItem>
                                                 <MenuItem value="phone">Phone</MenuItem>
                                                 <MenuItem value="username">Username</MenuItem>
                                             </Select>
@@ -332,8 +337,8 @@ function Listing(props) {
                                         <div className="w-1/12 pl-5">
                                             {filters.length > 1 && key !== 0
                                                 ?
-                                                <Tooltip title="Remove row" placement="right">
-                                                    <DeleteIcon className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
+                                                <Tooltip title="Clear conditions" placement="right">
+                                                    <ClearIcon className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
                                                 </Tooltip>
                                                 : ''
                                             }
@@ -342,10 +347,10 @@ function Listing(props) {
                                 )
                             })
                             }
-                            <Tooltip title="Add row" placement="right">
+                            <Tooltip title="Add conditions" placement="right">
                                 <AddIcon className="cursor-pointer" variant="contained" color="secondary" onClick={addFilterRow} />
                             </Tooltip>
-                            <FormControl className="w-full" size="large">
+                            <FormControl className="w-full mt-16" size="large">
                                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
@@ -355,9 +360,6 @@ function Listing(props) {
                                     onChange={handleChangeStatus}
                                     multiple
                                 >
-                                    <MenuItem value="">
-                                        <em>--Select--</em>
-                                    </MenuItem>
                                     <MenuItem value="member">Member</MenuItem>
                                     <MenuItem value="suspended">Suspended</MenuItem>
                                     <MenuItem value="validating">Validating</MenuItem>
@@ -365,7 +367,7 @@ function Listing(props) {
                                 </Select>
                             </FormControl>
                         </DialogContent>
-                        <DialogActions>
+                        <DialogActions className="mx-16">
                             <Button variant="outlined" color="error" onClick={cancelFilter}>Cancel</Button>
                             <Button variant="contained" color="primary" onClick={handleApplyFilters}>Apply Filters</Button>
                         </DialogActions>
