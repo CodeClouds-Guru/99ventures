@@ -98,6 +98,11 @@ module.exports = {
           code: "${email_confirmation_link}",
           module: "",
         },
+        {
+          name: "Logo",
+          code: "${logo}",
+          module: "",
+        },
       ],
       {}
     );
