@@ -229,7 +229,8 @@ function Listing(props) {
         }
     }
     const removeFilterRow = (key) => {
-        setFilters(filters.splice(key))
+        filters.splice(key, 1);
+        setFilters([...filters]);
     }
     const addFilterRow = () => {
         setFilters(filters.concat({ column: '', match: '', search: '' }))
@@ -241,15 +242,9 @@ function Listing(props) {
     }
     // console.log(typeof filters, filters)
     const handleChangeFilter = (event, key, field) => {
-        // console.log(event.target.value, key, field);
-        setFilters(
-            filters.map((val, index) => {
-                return field === 'column' ? Object.assign(val, { 'column': event.target.value })
-                    : field === 'match' ? Object.assign(val, { 'match': event.target.value })
-                        : field === 'search' ? Object.assign(val, { 'search': event.target.value })
-                            : val
-            })
-        )
+        filters[key][field] = event.target.value;
+        console.log(filters);
+        setFilters([...filters])
     }
     const handleApplyFilters = () => { }
     return (
