@@ -164,7 +164,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: "username",
       db_name: "username",
       type: "text",
-      placeholder: "User Name",
+      placeholder: "Username",
       listing: true,
       show_in_form: true,
       sort: true,
