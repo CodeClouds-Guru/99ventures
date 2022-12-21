@@ -315,14 +315,15 @@ function Listing(props) {
                                                 label="Match"
                                                 onChange={(event) => handleChangeFilter(event, key, 'match')}
                                             >
-                                                <MenuItem value="like">LIKE</MenuItem>
-                                                <MenuItem value="exact">EXACT</MenuItem>
-                                                <MenuItem value="not_exact">NOT EXACT</MenuItem>
-                                                <MenuItem value="starts_with">STARTS WITH</MenuItem>
-                                                <MenuItem value=">">&#62;</MenuItem>
-                                                <MenuItem value=">=">&#62;=</MenuItem>
-                                                <MenuItem value="<">&#60;</MenuItem>
-                                                <MenuItem value="<=">&#60;=</MenuItem>
+                                                <MenuItem value="substring">LIKE</MenuItem>
+                                                <MenuItem value="eq">EXACT</MenuItem>
+                                                <MenuItem value="ne">NOT EXACT</MenuItem>
+                                                <MenuItem value="startsWith">STARTS WITH</MenuItem>
+                                                <MenuItem value="endsWith">ENDS WITH</MenuItem>
+                                                <MenuItem value="gt">&#62;</MenuItem>
+                                                <MenuItem value="gte">&#62;=</MenuItem>
+                                                <MenuItem value="lt">&#60;</MenuItem>
+                                                <MenuItem value="lte">&#60;=</MenuItem>
                                             </Select>
                                         </FormControl>
                                         <FormControl className="w-4/12" size="large">
