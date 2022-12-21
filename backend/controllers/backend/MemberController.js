@@ -38,7 +38,7 @@ class MemberController extends Controller {
         },
         // logging: console.log,
       });
-      console.log('ppppp',existing_email_or_username)
+      console.log("ppppp", existing_email_or_username);
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
@@ -309,47 +309,42 @@ class MemberController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
-    
-      for (let i = 0; i < result.rows.length; i++) {
-        //get first ip
-        let ip_log = await IpLog.findOne({where:{member_id:result.rows[i].id},
-                                                  order: [["id", "ASC"]],})
-        if (roles == 1) {                                          
-          result.rows[i].setDataValue(
-            "company_portal_id",
-            result.rows[i].CompanyPortal.name
-          );
-          fields.company_portal_id.listing = true
-        }else{
-          fields.company_portal_id.listing = false
-        }
-        if(ip_log){
-          result.rows[i].setDataValue(
-            "ip",
-            ip_log.ip
-          );
-        }else{
-          result.rows[i].setDataValue(
-            "ip",
-            ''
-          );
-        }
+    for (let i = 0; i < result.rows.length; i++) {
+      //get first ip
+      let ip_log = await IpLog.findOne({
+        where: { member_id: result.rows[i].id },
+        order: [["id", "ASC"]],
+      });
+      if (roles == 1) {
+        result.rows[i].setDataValue(
+          "company_portal_id",
+          result.rows[i].CompanyPortal.name
+        );
+        fields.company_portal_id.listing = true;
+      } else {
+        fields.company_portal_id.listing = false;
       }
-      
-      // fields.company_portal_id = {
-      //   field_name: "company_portal_id",
-      //   db_name: "company_portal_id",
-      //   type: "text",
-      //   placeholder: "Company Portal",
-      //   listing: true,
-      //   show_in_form: false,
-      //   sort: true,
-      //   required: false,
-      //   value: "",
-      //   width: "50",
-      //   searchable: true,
-      // };
-    
+      if (ip_log) {
+        result.rows[i].setDataValue("ip", ip_log.ip);
+      } else {
+        result.rows[i].setDataValue("ip", "");
+      }
+    }
+
+    // fields.company_portal_id = {
+    //   field_name: "company_portal_id",
+    //   db_name: "company_portal_id",
+    //   type: "text",
+    //   placeholder: "Company Portal",
+    //   listing: true,
+    //   show_in_form: false,
+    //   sort: true,
+    //   required: false,
+    //   value: "",
+    //   width: "50",
+    //   searchable: true,
+    // };
+
     // console.log(result.rows);
     return {
       result: { data: result.rows, pages, total: result.count },
@@ -399,7 +394,7 @@ class MemberController extends Controller {
       }
     );
     let total_adjustment = await db.sequelize.query(
-      "SELECT SUM(amount) as total_adjustment FROM `member_transactions` WHERE type='credited' AND amount_action='admin_adjustment' AND member_id=?",
+      "SELECT SUM(amount) as total_adjustment FROM `member_transactions` WHERE  amount_action='admin_adjustment' AND member_id=?",
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
@@ -439,7 +434,7 @@ class MemberController extends Controller {
       let modified_total_earnings =
         parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
       let transaction_data = {
-        type: "credited",
+        type: parseFloat(admin_amount) > 0 ? "credited" : "withdraw",
         amount: parseFloat(admin_amount),
         status: 2,
         note: admin_note,
