@@ -14,7 +14,21 @@ import { arrayMoveImmutable } from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { getLayout, setRevisionData } from 'app/store/layout'
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
+const iconPositionStyle = {
+    position: 'absolute',
+    right: '-8px',
+    top: '-12px',
+    width: '35px',
+    height: '35px',
+    background: '#eee',
+    borderRadius: '50%'
+}
 
 const CreateEditForm = (props) => {
     const navigate = useNavigate();
@@ -29,15 +43,18 @@ const CreateEditForm = (props) => {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [records, setRecords] = useState({});
     const [changeStatus, setChangeStatus] = useState({ name_changed: false, header_changed: false, body_changed: false });
+    const [popupStatus, setPopupStatus] = useState(false);
+    const [editor, setEditor] = useState('');
+    const [msg, setMsg] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [fullScreen, setFullScreen] = useState(false);
+
     const [layoutCode, setLayoutCode] = useState({
         header: {
             value: ''
         },
         body: {
-            value: [{
-                name: 'Content',
-                code: '{{content}}'
-            }]
+            value: '<body>\n{{content}}\n</body>'
         }
     });
 
@@ -78,16 +95,21 @@ const CreateEditForm = (props) => {
 
     const handleSelectComponent = (e) => {
         const selectedValue = e.target.value;
-        if (selectedValue) {
-            const componentCode = components.filter(el => el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, { name: selectedValue, code: '{{' + componentCode[0].code + '}}' }].map((item) => [item["name"], item])).values()];
-            setLayoutCode({
-                ...layoutCode,
-                body: {
-                    value: uniqueObjArray
-                }
-            });
+        let htmlData = '';
+        if(editor.includes('<body>') || editor.includes('</body>')) {
+            let content = editor;
+            if(editor.includes('<body>')){
+                content = content.replace('<body>', '')
+            }
+            if(editor.includes('</body>')){
+                content = content.replace('</body>', '')
+            }
+            htmlData = `<body>${content}{{${selectedValue}}}\n</body>`
+        } else {
+            htmlData = `<body>\n${editor}\n{{${selectedValue}}}\n</body>`
         }
+
+        setEditor(htmlData);
     }
 
     const handleDelete = (element) => {
@@ -117,6 +139,8 @@ const CreateEditForm = (props) => {
          */
         if ((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
             setOpenAlertDialog(true);
+            setMsg('Do you want to update the changes?');
+            setAlertType('save_layout');
         } else {
             handleLayoutSubmit();
         }
@@ -124,6 +148,11 @@ const CreateEditForm = (props) => {
     }
 
     const handleLayoutSubmit = () => {
+        if(!layoutCode.body.value.includes('{{content}}')){
+            dispatch(showMessage({ variant: 'error', message: 'Sorry! Unable to save the data. {{content}} is missing.' }));
+            return;
+        }
+
         const htmlCode = '<html>\n' +
             '<head>\n' +
             '<title>${page_title}</title>\n' +
@@ -136,8 +165,7 @@ const CreateEditForm = (props) => {
             '\n\n<!-- Additional Script Start-->\n'+
             '${additional_header_script}\n'+
             '<!-- Additional Script End -->\n'+
-            '</head>\n' +
-            '<body>\n' + layoutCode.body.value.map(el => el.code).join('\n') + '\n</body>\n' +
+            '</head>\n' + layoutCode.body.value + '\n' +
             '</html>';
 
         const params = {
@@ -177,6 +205,8 @@ const CreateEditForm = (props) => {
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        setMsg('');
+        setAlertType('');
     }
 
     /**
@@ -186,7 +216,10 @@ const CreateEditForm = (props) => {
      * ChangeCount value set to 0.
      */
     const onConfirmAlertDialogHandle = () => {
-        handleLayoutSubmit();
+        if(alertType === 'save_layout')
+            handleLayoutSubmit();
+        else if(alertType === 'save_body')
+            saveEditorValue();
     }
 
     const handleSetLayoutName = (e) => {
@@ -234,6 +267,46 @@ const CreateEditForm = (props) => {
 
     }, [layoutCode.body, records]);
 
+    const handleOpenDialog = () =>{
+        setPopupStatus(true);
+        setEditor(layoutCode.body.value);
+    }
+
+    const handleClose =() => {
+        setPopupStatus(false);
+    }
+
+    const handleConfirmSave = () => {
+        setMsg('Do you want to save the changes?');
+        setAlertType('save_body');
+        setOpenAlertDialog(true);
+    }
+
+    const saveEditorValue = () => {
+        let content = editor;
+        
+        if(content){
+            if(editor.includes('<body>') || editor.includes('</body>')){
+                if(editor.includes('<body>')){
+                    content = editor.replace('<body>', '').trim();
+                }
+                if(editor.includes('</body>')){
+                    content = content.replace('</body>', '').trim();
+                }
+            }
+            content = `<body>\n${content}\n</body>`;
+        } else {
+            content = '<body>\n{{content}}\n</body>';
+        }
+        setLayoutCode({
+            ...layoutCode,
+            body: {
+                value: content
+            }
+        });
+        setPopupStatus(false);
+        onCloseAlertDialogHandle();
+    }
 
     return (
         <Box className="p-32" >
@@ -287,53 +360,27 @@ const CreateEditForm = (props) => {
                             <Typography variant="subtitle1">Body</Typography>
                         </legend>
                         <div className='p-32'>
-                            <FormControl sx={{ m: 1, minWidth: 350 }} size="small">
-                                <InputLabel id="select-component-label">Select Component</InputLabel>
-                                <Select
-                                    name="components"
-                                    labelId="select-component-label"
-                                    id="select-component"
-                                    label="Select Component"
-                                    onChange={handleSelectComponent}
-                                    defaultValue=""
-                                >
-                                    <MenuItem value="">Select</MenuItem>
-                                    {
-                                        components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{el.name}</MenuItem>)
-                                    }
-
-                                </Select>
-                            </FormControl>
-                            <List
-                                sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}
-                            >
-                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                    {
-                                        layoutCode.body.value.map((el, indx) => {
-                                            return (
-                                                <Draggable key={indx}>
-                                                    <ListItem>
-                                                        <ListItemIcon className="drag-handle">
-                                                            <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
-                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
-                                                            </IconButton>
-                                                        </ListItemIcon>
-                                                        <ListItemText id="switch-list-label-wifi" primary={el.name} />
-                                                        {
-                                                            el.name !== 'Content' && (
-                                                                <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
-                                                                    <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
-                                                                </IconButton>
-                                                            )
-                                                        }
-                                                    </ListItem>
-                                                    <Divider variant="inset" component="li" className="ml-12" />
-                                                </Draggable>
-                                            )
-                                        })
-                                    }
-                                </Container>
-                            </List>
+                            <div className='relative'> 
+                                <Tooltip title="Edit" placement="top-start">
+                                    <IconButton 
+                                        style={iconPositionStyle}
+                                        color="primary" aria-label="Edit" component="span" onClick={handleOpenDialog}>
+                                        <FuseSvgIcon className="text-48" size={18} color="action">material-outline:edit</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                                    
+                                <pre>
+                                    <code>
+                                        <TextareaAutosize
+                                            maxRows={8}
+                                            aria-label="maximum height"
+                                            value={layoutCode.body.value}
+                                            className="custom-code-editor"
+                                            disabled
+                                        />
+                                    </code>
+                                </pre>
+                            </div>
                         </div>
                     </fieldset>
                 </fieldset>
@@ -385,11 +432,79 @@ const CreateEditForm = (props) => {
                 </motion.div>
             </form>
             <AlertDialog
-                content="Do you want to update the changes?"
+                content={ msg }
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={onCloseAlertDialogHandle}
             />
+            <Dialog maxWidth="md" fullScreen={ fullScreen } fullWidth={true} open={popupStatus} onClose={handleClose}>
+                <DialogTitle>Edit Layout</DialogTitle>
+                <Divider/>
+                <DialogContent>                    
+                    <div className='w-full'>
+                        <FormControl className="mb-10" sx={{minWidth: 350 }} size="small">
+                            <InputLabel id="select-component-label">Select Component</InputLabel>
+                            <Select
+                                name="components"
+                                labelId="select-component-label"
+                                id="select-component"
+                                label="Select Component"
+                                onChange={handleSelectComponent}
+                                defaultValue=""
+                            >
+                                <MenuItem value="">Select</MenuItem>
+                                {
+                                    components.map(el => <MenuItem key={el.code} value={el.code} data-name={el.name}>{el.name}</MenuItem>)
+                                }
+
+                            </Select>
+                        </FormControl>
+                        <div className='relative'>                            
+                            {
+                                fullScreen ? (
+                                    <Tooltip title="Exit Fullscreen" placement="top-start">
+                                        <IconButton 
+                                            style={iconPositionStyle}
+                                            color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(false)}>
+                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen_exit</FuseSvgIcon>
+                                        </IconButton>
+                                    </Tooltip>
+                                ) : (
+                                    <Tooltip title="Fullscreen View" placement="top-start">
+                                        <IconButton 
+                                            style={iconPositionStyle}
+                                            color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(true)}>
+                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen</FuseSvgIcon>
+                                        </IconButton>
+                                    </Tooltip>
+                                )
+                            }
+                            <pre>
+                                <code>
+                                    <TextareaAutosize
+                                        maxRows={10}
+                                        aria-label="maximum height"
+                                        placeholder="#Add your HTML content here"
+                                        value={ editor }
+                                        className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
+                                        onChange={ (e)=> setEditor(e.target.value)}
+                                    />
+                                </code>
+                            </pre>
+                            <small>Note: Do not remove <strong>{'{{content}}'}</strong>.</small>
+                        </div>
+                    </div>
+                </DialogContent>
+                <DialogActions className="justify-between px-24">
+                    <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+                    <Button 
+                        color="primary"
+                        variant="contained"
+                        onClick={ handleConfirmSave }
+                        disabled={ editor.trim() === '' ? true : false}
+                    >Save</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     )
 }
