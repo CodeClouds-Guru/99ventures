@@ -291,7 +291,38 @@ class MemberController extends Controller {
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
-
+    // req.query.where = JSON.stringify({
+    //   filters: [
+    //     { column: "username", match: "substring", search: "Debosmita" },
+    //     // { column: "email", match: "substring", search: "codeclouds" },
+    //   ],
+    //   // status: ["validating", "suspended"],
+    // });
+    console.log(req.query);
+    // let search_options = {};
+    var query_where = JSON.parse(req.query.where);
+    var temp = {};
+    var status_filter = {};
+    console.log(req.query);
+    if (query_where) {
+      if (query_where.filters) {
+        temp = query_where.filters.map((filter) => {
+          return {
+            [filter.column]: {
+              [Op[filter.match]]: filter.search,
+            },
+          };
+        });
+      }
+    }
+    console.log("======================search_options", temp);
+    options.where = {
+      ...(temp && { [Op.and]: temp }),
+      ...(query_where.status &&
+        query_where.status.length > 0 && {
+          status: { [Op.in]: query_where.status },
+        }),
+    };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
     });
@@ -299,13 +330,20 @@ class MemberController extends Controller {
     if (roles == 1) {
       options.include = { model: CompanyPortal, attributes: ["name"] };
     } else {
-      options.where = { company_portal_id: site_id };
+      options.where = {
+        ...options.where,
+        company_portal_id: site_id,
+      };
     }
+
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
+
+    console.log("======================options", options.where);
+
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
@@ -330,20 +368,6 @@ class MemberController extends Controller {
         result.rows[i].setDataValue("ip", "");
       }
     }
-
-    // fields.company_portal_id = {
-    //   field_name: "company_portal_id",
-    //   db_name: "company_portal_id",
-    //   type: "text",
-    //   placeholder: "Company Portal",
-    //   listing: true,
-    //   show_in_form: false,
-    //   sort: true,
-    //   required: false,
-    //   value: "",
-    //   width: "50",
-    //   searchable: true,
-    // };
 
     // console.log(result.rows);
     return {
