@@ -319,7 +319,7 @@ class MemberController extends Controller {
       if (role.id == 1) return role.id;
     });
     let fields = this.model.fields;
-    options.include = [{ model: IpLog, attributes: ["ip"],order: [["id", "ASC"]],limit:1 }]
+    options.include = [{ model: IpLog, attributes: ["ip"],order: [["id", "DESC"]],limit:1 }]
     if (roles == 1) {
       options.include.push({ model: CompanyPortal, attributes: ["name"]});
     } else {
