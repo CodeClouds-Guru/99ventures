@@ -61,7 +61,7 @@ const BodyPart = (props) => {
                             maxRows={8}
                             aria-label="maximum height"
                             value={props.body}
-                            className={ props.fullScreen ? 'custom-code-editor-fullscreen' : 'custom-code-editor-md' }
+                            className={ props.fullScreen ? 'custom-code-editor-view-fullscreen' : 'custom-code-editor-md' }
                             disabled
                         />
                     </code>

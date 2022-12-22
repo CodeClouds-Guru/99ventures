@@ -3,7 +3,7 @@ import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Icon
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,7 +26,19 @@ const iconPositionStyle = {
     borderRadius: '50%'
 }
 
+const removeBodyTag = (string) => {
+    if(string.includes('<body>')){
+        string = string.replace('<body>', '').trim()
+    }
+    if(string.includes('</body>')){
+        string = string.replace('</body>', '').trim()
+    }
+
+    return string;
+}
+
 const CreateEditForm = (props) => {
+    const editorRef = useRef();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
@@ -92,19 +104,25 @@ const CreateEditForm = (props) => {
     const handleSelectComponent = (e) => {
         const selectedValue = e.target.value;
         let htmlData = '';
-        if(editor.includes('<body>') || editor.includes('</body>')) {
-            let content = editor;
-            if(editor.includes('<body>')){
-                content = content.replace('<body>', '')
-            }
-            if(editor.includes('</body>')){
-                content = content.replace('</body>', '')
-            }
-            htmlData = `<body>${content}{{${selectedValue}}}\n</body>`
-        } else {
-            htmlData = `<body>\n${editor}\n{{${selectedValue}}}\n</body>`
+        let newContent = editor;
+        if(editor === '') {
+            newContent = `<body>\n{{content}}\n</body>`
         }
 
+        if(editorRef.current.selectionStart !== 0 && editorRef.current.selectionStart === editorRef.current.selectionEnd) {
+            newContent = editor.substring(0, editorRef.current.selectionStart) +'{{'+ selectedValue +'}}'+ editor.substring(editorRef.current.selectionEnd, editor.length);
+            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+                newContent = removeBodyTag(newContent);
+            }
+            htmlData = `<body>\n${newContent}\n</body>`
+        } else {
+            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+                newContent = removeBodyTag(newContent);
+                htmlData = `<body>\n{{${selectedValue}}}${newContent}\n</body>`
+            } else
+                htmlData = `<body>\n{{${selectedValue}}}${editor}\n</body>`
+        }
+        
         setEditor(htmlData);
     }
 
@@ -283,15 +301,9 @@ const CreateEditForm = (props) => {
 
     const saveEditorValue = () => {
         let content = editor;
-        
         if(content){
             if(editor.includes('<body>') || editor.includes('</body>')){
-                if(editor.includes('<body>')){
-                    content = editor.replace('<body>', '').trim();
-                }
-                if(editor.includes('</body>')){
-                    content = content.replace('</body>', '').trim();
-                }
+                content = removeBodyTag(editor);
             }
             content = `<body>\n${content}\n</body>`;
         } else {
@@ -358,6 +370,7 @@ const CreateEditForm = (props) => {
                     <pre>
                         <code>
                             <TextareaAutosize
+                                ref={ editorRef }
                                 maxRows={10}
                                 aria-label="maximum height"
                                 placeholder="#Add your HTML content here"
@@ -488,6 +501,7 @@ const CreateEditForm = (props) => {
             }
 
             <DialogBox 
+                title={dialogFor === 'edit_mode' ? 'Edit Code' : 'View Code'}
                 fullScreen={fullScreen} 
                 popupStatus={popupStatus} 
                 handleClose={handleClose} 
