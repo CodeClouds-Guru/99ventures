@@ -45,9 +45,33 @@ function Listing(props) {
     const [memberStatus, setMemberStatus] = useState([]);
     const [where, setWhere] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    // const [filterRow, setFilterRow] = useState(1);
-    const [filters, setFilters] = useState([{ column: '', match: '', search: '' }]);
-
+    const [filterActive, setFilterActive] = useState(false);
+    const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
+    const column_object = {
+        'address_1': 'Billing Street Address',
+        'browser': 'Browser',
+        'email': 'Email',
+        'isp': 'ISP',
+        'geo_location': 'Geo Location',
+        'id': 'ID',
+        'ip_address': 'IP Address',
+        'ip_log': 'IP Log',
+        'payment_email': 'Payment Email',
+        'referrer': 'Referrer',
+        'phone': 'Phone',
+        'username': 'Username',
+    }
+    const match_object = {
+        'substring': 'LIKE',
+        'eq': 'EXACT',
+        'ne': 'NOT EXACT',
+        'startsWith': 'STARTS WITH',
+        'endsWith': 'ENDS WITH',
+        'gt': '>',
+        'gte': '>=',
+        'lt': '<',
+        'lte': '<=',
+    }
     const resetModulesListConfig = () => {
         setSearchText('');
         setOrder({
@@ -233,10 +257,11 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const addFilterRow = () => {
-        setFilters(filters.concat({ column: '', match: '', search: '' }))
+        setFilters(filters.concat({ column: 'address_1', match: 'substring', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
+        setFilterActive(false);
         setFilters([{ column: '', match: '', search: '' }]);
         setMemberStatus([]);
     }
@@ -249,6 +274,7 @@ function Listing(props) {
             filters: filters,
             status: memberStatus
         });
+        setFilterActive(true);
         setOpenAlertDialog(false);
     }
     return (
@@ -292,11 +318,11 @@ function Listing(props) {
                                                 label="Column"
                                                 onChange={(event) => handleChangeFilter(event, key, 'column')}
                                             >
-                                                <MenuItem value="billing_street_address">Billing Street Address</MenuItem>
+                                                <MenuItem value="address_1">Billing Street Address</MenuItem>
                                                 <MenuItem value="browser">Browser</MenuItem>
                                                 <MenuItem value="email">Email</MenuItem>
-                                                <MenuItem value="geo_isp">Geo ISP</MenuItem>
-                                                <MenuItem value="geo_location">Geo Locaion</MenuItem>
+                                                <MenuItem value="isp">ISP</MenuItem>
+                                                <MenuItem value="geo_location">Geo Location</MenuItem>
                                                 <MenuItem value="id">ID</MenuItem>
                                                 <MenuItem value="ip_address">IP Address</MenuItem>
                                                 <MenuItem value="ip_log">IP Log</MenuItem>
@@ -339,7 +365,7 @@ function Listing(props) {
                                             {filters.length > 1 && key !== 0
                                                 ?
                                                 <Tooltip title="Clear conditions" placement="right">
-                                                    <ClearIcon className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
+                                                    <ClearIcon sx={{ float: 'right' }} className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
                                                 </Tooltip>
                                                 : ''
                                             }
@@ -349,7 +375,8 @@ function Listing(props) {
                             })
                             }
                             <Tooltip title="Add conditions" placement="right">
-                                <AddIcon className="cursor-pointer" variant="contained" color="secondary" onClick={addFilterRow} />
+                                <Button className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />} onClick={addFilterRow}>
+                                </Button>
                             </Tooltip>
                             <FormControl className="w-full mt-16" size="large">
                                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
@@ -373,44 +400,6 @@ function Listing(props) {
                             <Button variant="contained" color="primary" onClick={handleApplyFilters}>Apply Filters</Button>
                         </DialogActions>
                     </Dialog>
-                    {/* <FormControl sx={{ minWidth: 120 }} size="small">
-                        <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={memberStatus}
-                            label="Status"
-                            onChange={handleChangeStatus}
-                        >
-                            <MenuItem value="">
-                                <em>--Select--</em>
-                            </MenuItem>
-                            <MenuItem value="member">Member</MenuItem>
-                            <MenuItem value="suspended">Suspended</MenuItem>
-                            <MenuItem value="validating">Validating</MenuItem>
-                            <MenuItem value="deleted">Deleted</MenuItem>
-                        </Select>
-                    </FormControl> */}
-                    {/* <Paper
-                        component={motion.div}
-                        initial={{ y: -20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-                        className="flex items-center w-full sm:max-w-256 space-x-8 px-16 border-1 rounded shadow-0"
-                    >
-                        <FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
-
-                        <Input
-                            placeholder="Search members"
-                            className="flex flex-1"
-                            disableUnderline
-                            fullWidth
-                            value={searchText}
-                            inputProps={{
-                                'aria-label': 'Search members',
-                            }}
-                            onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
-                        />
-                    </Paper> */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
@@ -428,13 +417,23 @@ function Listing(props) {
                     </motion.div>
                 </div>
             </div>
-            {/* <Stack direction="row" spacing={1} className="my-16 justify-center">
-                <Chip label="Member" color="success" size="small" />
-                <Chip label="Suspended" size="small" color="primary" />
-                <Chip label="Validating" size="small" color="warning" />
-                <Chip label="Deleted" size="small" color="error" />
-            </Stack> */}
-
+            {!filterActive ? '' :
+                <div className="flex">
+                    <Stack direction="row" sx={{ overflowX: 'auto', maxWidth: '82%' }} spacing={1} className="flex w-10/12 my-16 justify-center">
+                        {filters.map((val, key) => {
+                            return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
+                        })
+                        }
+                        <Chip className="capitalize" label={'Status IN ' + memberStatus.join(', ')} size="small" color="primary" />
+                    </Stack>
+                    <div className="w-2/12">
+                        <Tooltip title="Clear filters" placement="top">
+                            <Button sx={{ float: 'right' }} className="mt-12 mr-20" variant="outlined" size="small" color="error" onClick={cancelFilter}>
+                                X
+                            </Button>
+                        </Tooltip>
+                    </div>
+                </div>}
             {/* // body */}
             <div className="w-full flex flex-col min-h-full">
                 <FuseScrollbars className="grow overflow-x-auto">
