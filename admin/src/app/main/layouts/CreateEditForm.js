@@ -369,15 +369,15 @@ const CreateEditForm = (props) => {
                     }
                     <pre>
                         <code>
-                            <TextareaAutosize
+                            <textarea
                                 ref={ editorRef }
-                                maxRows={10}
+                                rows={10}
                                 aria-label="maximum height"
                                 placeholder="#Add your HTML content here"
                                 value={ editor }
                                 className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
                                 onChange={ (e)=> setEditor(e.target.value)}
-                            />
+                            ></textarea>
                         </code>
                     </pre>
                     <small>Note: Do not remove <strong>{'{{content}}'}</strong>.</small>
