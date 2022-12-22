@@ -54,7 +54,7 @@ function Listing(props) {
         'isp': 'ISP',
         'geo_location': 'Geo Location',
         'id': 'ID',
-        'ip_address': 'IP Address',
+        '$ip_logs.ip$': 'IP Address',
         'ip_log': 'IP Log',
         'payment_email': 'Payment Email',
         'referrer': 'Referrer',
@@ -262,8 +262,9 @@ function Listing(props) {
     const cancelFilter = () => {
         setOpenAlertDialog(false);
         setFilterActive(false);
-        setFilters([{ column: '', match: '', search: '' }]);
+        setFilters([{ column: 'address_1', match: 'substring', search: '' }]);
         setMemberStatus([]);
+        setWhere({});
     }
     const handleChangeFilter = (event, key, field) => {
         filters[key][field] = event.target.value;
@@ -318,18 +319,9 @@ function Listing(props) {
                                                 label="Column"
                                                 onChange={(event) => handleChangeFilter(event, key, 'column')}
                                             >
-                                                <MenuItem value="address_1">Billing Street Address</MenuItem>
-                                                <MenuItem value="browser">Browser</MenuItem>
-                                                <MenuItem value="email">Email</MenuItem>
-                                                <MenuItem value="isp">ISP</MenuItem>
-                                                <MenuItem value="geo_location">Geo Location</MenuItem>
-                                                <MenuItem value="id">ID</MenuItem>
-                                                <MenuItem value="ip_address">IP Address</MenuItem>
-                                                <MenuItem value="ip_log">IP Log</MenuItem>
-                                                <MenuItem value="payment_email">Payment Email</MenuItem>
-                                                <MenuItem value="referrer">Referrer</MenuItem>
-                                                <MenuItem value="phone">Phone</MenuItem>
-                                                <MenuItem value="username">Username</MenuItem>
+                                                {
+                                                    Object.keys(column_object).map(key => <MenuItem value={key}>{column_object[key]}</MenuItem>)
+                                                }
                                             </Select>
                                         </FormControl>
                                         <FormControl className="w-3/12 px-5" size="large">
@@ -341,15 +333,9 @@ function Listing(props) {
                                                 label="Match"
                                                 onChange={(event) => handleChangeFilter(event, key, 'match')}
                                             >
-                                                <MenuItem value="substring">LIKE</MenuItem>
-                                                <MenuItem value="eq">EXACT</MenuItem>
-                                                <MenuItem value="ne">NOT EXACT</MenuItem>
-                                                <MenuItem value="startsWith">STARTS WITH</MenuItem>
-                                                <MenuItem value="endsWith">ENDS WITH</MenuItem>
-                                                <MenuItem value="gt">&#62;</MenuItem>
-                                                <MenuItem value="gte">&#62;=</MenuItem>
-                                                <MenuItem value="lt">&#60;</MenuItem>
-                                                <MenuItem value="lte">&#60;=</MenuItem>
+                                                {
+                                                    Object.keys(match_object).map(key => <MenuItem value={key}>{match_object[key]}</MenuItem>)
+                                                }
                                             </Select>
                                         </FormControl>
                                         <FormControl className="w-4/12" size="large">
@@ -424,7 +410,7 @@ function Listing(props) {
                             return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
                         })
                         }
-                        <Chip className="capitalize" label={'Status IN ' + memberStatus.join(', ')} size="small" color="primary" />
+                        {memberStatus.length > 0 && <Chip className="capitalize" label={'Status IN ' + memberStatus.join(', ')} size="small" color="primary" />}
                     </Stack>
                     <div className="w-2/12">
                         <Tooltip title="Clear filters" placement="top">
