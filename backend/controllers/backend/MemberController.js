@@ -315,7 +315,7 @@ class MemberController extends Controller {
         });
       }
     }
-    console.log("======================search_options", temp);
+    // console.log("======================search_options", temp);
     options.where = {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
@@ -327,8 +327,9 @@ class MemberController extends Controller {
       if (role.id == 1) return role.id;
     });
     let fields = this.model.fields;
+    options.include = [{ model: IpLog, attributes: ["ip"],order: [["id", "ASC"]],limit:1 }]
     if (roles == 1) {
-      options.include = { model: CompanyPortal, attributes: ["name"] };
+      options.include.push({ model: CompanyPortal, attributes: ["name"]});
     } else {
       options.where = {
         ...options.where,
@@ -342,17 +343,12 @@ class MemberController extends Controller {
     options.limit = limit;
     options.offset = offset;
 
-    console.log("======================options", options.where);
-
+    // console.log("======================options", options.where);
+    
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
     for (let i = 0; i < result.rows.length; i++) {
-      //get first ip
-      let ip_log = await IpLog.findOne({
-        where: { member_id: result.rows[i].id },
-        order: [["id", "ASC"]],
-      });
       if (roles == 1) {
         result.rows[i].setDataValue(
           "company_portal_id",
@@ -362,8 +358,8 @@ class MemberController extends Controller {
       } else {
         fields.company_portal_id.listing = false;
       }
-      if (ip_log) {
-        result.rows[i].setDataValue("ip", ip_log.ip);
+      if (result.rows[i].IpLogs) {
+        result.rows[i].setDataValue("ip", result.rows[i].IpLogs[0].ip);
       } else {
         result.rows[i].setDataValue("ip", "");
       }
