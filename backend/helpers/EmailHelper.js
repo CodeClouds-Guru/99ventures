@@ -17,6 +17,8 @@ class EmailHelper {
         let receiver_module = '';
         let search = { 'id': '1' };
         let all_details = {}
+        const publicURL =
+              process.env.CLIENT_ORIGIN || "http://127.0.0.1:3000";
         try {
             if (payload.data.details != undefined && payload.data.details) {
                 all_details = payload.data.details
@@ -26,6 +28,7 @@ class EmailHelper {
                     'users': user
                 }
             }
+            all_details['logo'] = publicURL+'/assets/images/logo/logo.png'
             let email_action = await EmailAction.findOne({
                 where: { 'action': payload.action }, include: {
                     model: EmailTemplate,
@@ -67,6 +70,7 @@ class EmailHelper {
                         //set user details
                         email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
                         email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
+                        console.log('all_details======',all_details)
                     } else {
                         email_body = email_template.body
                     }
@@ -117,8 +121,11 @@ class EmailHelper {
                         pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
                     }
                 });
+                if(email_configurations[0].site_name_visible == '1'){
+                    subject = email_configurations[0].from_name+' - '+subject
+                }
                 const mailData = {
-                    from: email_configurations[0].from_email,//'info@moresurveys.com', // sender address
+                    from: email_configurations[0].from_name+'<'+email_configurations[0].from_email+'>',//'info@moresurveys.com', // sender address
                     to: to,   // list of receivers
                     subject: subject,
                     //text: 'That was easy!',

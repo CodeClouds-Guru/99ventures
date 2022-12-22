@@ -9,39 +9,48 @@ class LayoutController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-
-    let response = await super.save(req);
-    return {
-      status: true,
-      message: "Layout added.",
-      id: response.result.id,
-    };
+    let layout_html = req.body.html
+    if(layout_html.includes('{{content}}')){
+      let response = await super.save(req);
+      return {
+        status: true,
+        message: "Layout added.",
+        id: response.result.id,
+      };
+    }else{
+      this.throwCustomError("{{content}} is missing.", 401);
+    }
   }
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    let rev_layout_id = req.body.rev_layout_id || null; //5
-    let previous = await this.model.findByPk(req.params.id); //1
-    const countBackups = await this.model.count({
-      where: {
-        code: {
-          [Op.like]: previous.code + "-rev-%",
+    let layout_html = req.body.html
+    if(layout_html.includes('{{content}}')){
+      let rev_layout_id = req.body.rev_layout_id || null; //5
+      let previous = await this.model.findByPk(req.params.id); //1
+      const countBackups = await this.model.count({
+        where: {
+          code: {
+            [Op.like]: previous.code + "-rev-%",
+          },
         },
-      },
-    });
-    req.countBackups = countBackups;
-    let current = {};
-    if (rev_layout_id !== null) {
-      current = await this.model.findByPk(rev_layout_id);
-    } else {
-      current = req.body;
-    }
-    let response = await this.layoutRevisionUpdate(req, current, previous);
+      });
+      req.countBackups = countBackups;
+      let current = {};
+      if (rev_layout_id !== null) {
+        current = await this.model.findByPk(rev_layout_id);
+      } else {
+        current = req.body;
+      }
+      let response = await this.layoutRevisionUpdate(req, current, previous);
 
-    return {
-      status: true,
-      message: "Layout updated.",
-    };
+      return {
+        status: true,
+        message: "Layout updated.",
+      };
+    }else{
+      this.throwCustomError("{{content}} is missing.", 401);
+    }
   }
 
   //override add function
