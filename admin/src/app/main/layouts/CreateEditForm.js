@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
@@ -10,15 +10,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
-import { arrayMoveImmutable } from "array-move";
-import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { getLayout, setRevisionData } from 'app/store/layout'
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import BodyPart from './BodyPart';
+import DialogBox from './Dialogbox';
+
 
 const iconPositionStyle = {
     position: 'absolute',
@@ -48,7 +44,7 @@ const CreateEditForm = (props) => {
     const [msg, setMsg] = useState('');
     const [alertType, setAlertType] = useState('');
     const [fullScreen, setFullScreen] = useState(false);
-
+    const [dialogFor, setDialogFor] = useState('');
     const [layoutCode, setLayoutCode] = useState({
         header: {
             value: ''
@@ -110,16 +106,6 @@ const CreateEditForm = (props) => {
         }
 
         setEditor(htmlData);
-    }
-
-    const handleDelete = (element) => {
-        const newData = layoutCode.body.value.filter(el => el.name !== element);
-        setLayoutCode({
-            ...layoutCode,
-            body: {
-                value: newData
-            }
-        });
     }
 
     /**
@@ -194,14 +180,14 @@ const CreateEditForm = (props) => {
     /**
      * Drag & Drop components
      */
-    const onDrop = ({ removedIndex, addedIndex }) => {
+    /*const onDrop = ({ removedIndex, addedIndex }) => {
         setLayoutCode({
             ...layoutCode,
             body: {
                 value: arrayMoveImmutable(layoutCode.body.value, removedIndex, addedIndex)
             }
         });
-    };
+    };*/
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
@@ -270,10 +256,23 @@ const CreateEditForm = (props) => {
     const handleOpenDialog = () =>{
         setPopupStatus(true);
         setEditor(layoutCode.body.value);
+        setDialogFor('edit_mode')
+    }
+
+    const handleFullScreen = (mode) => {
+        if(mode === true){
+            setFullScreen(true);
+            setPopupStatus(true);
+            setDialogFor('view_mode');
+        } else {
+            handleClose();
+        }        
     }
 
     const handleClose =() => {
         setPopupStatus(false);
+        setDialogFor('');
+        setFullScreen(false);
     }
 
     const handleConfirmSave = () => {
@@ -308,8 +307,74 @@ const CreateEditForm = (props) => {
         onCloseAlertDialogHandle();
     }
 
+    const viewFullscreen = () => {
+        return (
+            <div className='p-16'>
+                <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value} />
+            </div>
+        )
+    }
+
+    const editFullscreen = () => {
+        return (
+            <div className='w-full'>
+                <FormControl className="mb-10" sx={{minWidth: 350 }} size="small">
+                    <InputLabel id="select-component-label">Select Component</InputLabel>
+                    <Select
+                        name="components"
+                        labelId="select-component-label"
+                        id="select-component"
+                        label="Select Component"
+                        onChange={handleSelectComponent}
+                        defaultValue=""
+                    >
+                        <MenuItem value="">Select</MenuItem>
+                        {
+                            components.map(el => <MenuItem key={el.code} value={el.code} data-name={el.name}>{el.name}</MenuItem>)
+                        }
+
+                    </Select>
+                </FormControl>
+                <div className='relative'>                            
+                    {
+                        fullScreen ? (
+                            <Tooltip title="Exit Fullscreen" placement="top-start">
+                                <IconButton 
+                                    style={iconPositionStyle}
+                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(false)}>
+                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen_exit</FuseSvgIcon>
+                                </IconButton>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Fullscreen View" placement="top-start">
+                                <IconButton 
+                                    style={iconPositionStyle}
+                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(true)}>
+                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen</FuseSvgIcon>
+                                </IconButton>
+                            </Tooltip>
+                        )
+                    }
+                    <pre>
+                        <code>
+                            <TextareaAutosize
+                                maxRows={10}
+                                aria-label="maximum height"
+                                placeholder="#Add your HTML content here"
+                                value={ editor }
+                                className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
+                                onChange={ (e)=> setEditor(e.target.value)}
+                            />
+                        </code>
+                    </pre>
+                    <small>Note: Do not remove <strong>{'{{content}}'}</strong>.</small>
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <Box className="p-32" >
+        <Box className="p-24" >
             <form onSubmit={formSubmit}>
                 <div className='flex mb-24 justify-between'>
                     <FormControl className="w-1/2">
@@ -332,7 +397,7 @@ const CreateEditForm = (props) => {
                         )
                     }
                 </div>
-                <fieldset className='border mb-24 p-32'>
+                <fieldset className='border mb-24 p-24'>
                     <legend className='ml-24 px-10'>
                         <Typography variant="h6">Layout</Typography>
                     </legend>
@@ -340,7 +405,7 @@ const CreateEditForm = (props) => {
                         <legend className='ml-24 px-10'>
                             <Typography variant="subtitle1">Header</Typography>
                         </legend>
-                        <div className='p-32'>
+                        <div className='p-24'>
                             <pre>
                                 <code>
                                     <TextareaAutosize
@@ -359,28 +424,8 @@ const CreateEditForm = (props) => {
                         <legend className='ml-24  px-10'>
                             <Typography variant="subtitle1">Body</Typography>
                         </legend>
-                        <div className='p-32'>
-                            <div className='relative'> 
-                                <Tooltip title="Edit" placement="top-start">
-                                    <IconButton 
-                                        style={iconPositionStyle}
-                                        color="primary" aria-label="Edit" component="span" onClick={handleOpenDialog}>
-                                        <FuseSvgIcon className="text-48" size={18} color="action">material-outline:edit</FuseSvgIcon>
-                                    </IconButton>
-                                </Tooltip>
-                                    
-                                <pre>
-                                    <code>
-                                        <TextareaAutosize
-                                            maxRows={8}
-                                            aria-label="maximum height"
-                                            value={layoutCode.body.value}
-                                            className="custom-code-editor"
-                                            disabled
-                                        />
-                                    </code>
-                                </pre>
-                            </div>
+                        <div className='p-24'>
+                            <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value}/>                            
                         </div>
                     </fieldset>
                 </fieldset>
@@ -431,80 +476,40 @@ const CreateEditForm = (props) => {
 
                 </motion.div>
             </form>
-            <AlertDialog
-                content={ msg }
-                open={openAlertDialog}
-                onConfirm={onConfirmAlertDialogHandle}
-                onClose={onCloseAlertDialogHandle}
-            />
-            <Dialog maxWidth="md" fullScreen={ fullScreen } fullWidth={true} open={popupStatus} onClose={handleClose}>
-                <DialogTitle>Edit Layout</DialogTitle>
-                <Divider/>
-                <DialogContent>                    
-                    <div className='w-full'>
-                        <FormControl className="mb-10" sx={{minWidth: 350 }} size="small">
-                            <InputLabel id="select-component-label">Select Component</InputLabel>
-                            <Select
-                                name="components"
-                                labelId="select-component-label"
-                                id="select-component"
-                                label="Select Component"
-                                onChange={handleSelectComponent}
-                                defaultValue=""
-                            >
-                                <MenuItem value="">Select</MenuItem>
-                                {
-                                    components.map(el => <MenuItem key={el.code} value={el.code} data-name={el.name}>{el.name}</MenuItem>)
-                                }
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content={ msg }
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
 
-                            </Select>
-                        </FormControl>
-                        <div className='relative'>                            
-                            {
-                                fullScreen ? (
-                                    <Tooltip title="Exit Fullscreen" placement="top-start">
-                                        <IconButton 
-                                            style={iconPositionStyle}
-                                            color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(false)}>
-                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen_exit</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
-                                ) : (
-                                    <Tooltip title="Fullscreen View" placement="top-start">
-                                        <IconButton 
-                                            style={iconPositionStyle}
-                                            color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(true)}>
-                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
-                                )
-                            }
-                            <pre>
-                                <code>
-                                    <TextareaAutosize
-                                        maxRows={10}
-                                        aria-label="maximum height"
-                                        placeholder="#Add your HTML content here"
-                                        value={ editor }
-                                        className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
-                                        onChange={ (e)=> setEditor(e.target.value)}
-                                    />
-                                </code>
-                            </pre>
-                            <small>Note: Do not remove <strong>{'{{content}}'}</strong>.</small>
-                        </div>
-                    </div>
-                </DialogContent>
-                <DialogActions className="justify-between px-24">
-                    <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-                    <Button 
-                        color="primary"
-                        variant="contained"
-                        onClick={ handleConfirmSave }
-                        disabled={ editor.trim() === '' ? true : false}
-                    >Save</Button>
-                </DialogActions>
-            </Dialog>
+            <DialogBox 
+                fullScreen={fullScreen} 
+                popupStatus={popupStatus} 
+                handleClose={handleClose} 
+                content={
+                    dialogFor === 'edit_mode' ? editFullscreen() : viewFullscreen()
+                }
+                action={
+                    <>
+                        <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+                        {
+                            dialogFor === 'edit_mode' && (
+                                <Button 
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={ handleConfirmSave }
+                                    disabled={ editor.trim() === '' ? true : false}
+                                >Save</Button>
+                            )
+                        }                        
+                    </>
+                }
+            />
         </Box>
     )
 }
