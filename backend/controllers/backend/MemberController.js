@@ -36,9 +36,8 @@ class MemberController extends Controller {
             username: req.body.username,
           },
         },
-        // logging: console.log,
       });
-      console.log("ppppp", existing_email_or_username);
+
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
           "Sorry! this username or email has already been taken"
@@ -89,7 +88,7 @@ class MemberController extends Controller {
           },
           req: req,
         });
-        console.log("evntbus", evntbus);
+
         return res;
       }
     } catch (error) {
@@ -222,7 +221,7 @@ class MemberController extends Controller {
           );
           survey_list[i].Surveys = null;
         }
-        console.log("survey_list=============", survey_list);
+
         result.setDataValue("country_list", country_list);
         result.setDataValue("total_earnings", total_earnings);
         result.setDataValue("survey", survey_list);
@@ -244,17 +243,14 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
-    // console.log("request_data", request_data);
     try {
       let result = false;
       if (req.body.type == "basic_details") {
         delete req.body.type;
         let member = await this.model.findOne({ where: { id: req.params.id } });
         req.body.username = member.username;
-        console.log("request_data", req);
         const { error, value } = this.model.validate(req);
         if (error) {
-          console.log(error);
           const errorObj = new Error("Validation failed.");
           errorObj.statusCode = 422;
           errorObj.data = error.details.map((err) => err.message);
@@ -265,7 +261,6 @@ class MemberController extends Controller {
         result = await this.model.changeStatus(req);
         delete req.body.type;
       } else if (req.body.type == "admin_adjustment") {
-        console.log("req.body", req.body);
         result = await this.adminAdjustment(req);
         delete req.body.type;
       } else {
@@ -298,12 +293,10 @@ class MemberController extends Controller {
     //   ],
     //   // status: ["validating", "suspended"],
     // });
-    console.log(req.query);
     // let search_options = {};
     var query_where = JSON.parse(req.query.where);
     var temp = {};
     var status_filter = {};
-    console.log(req.query);
     if (query_where) {
       if (query_where.filters) {
         temp = query_where.filters.map((filter) => {
@@ -315,20 +308,23 @@ class MemberController extends Controller {
         });
       }
     }
-    console.log("======================search_options", temp);
+
     options.where = {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
     });
     let fields = this.model.fields;
     if (roles == 1) {
-      options.include = { model: CompanyPortal, attributes: ["name"] };
+      options.include = [
+        { model: IpLog, attributes: ["ip", "isp", "geo_location"] },
+        { model: CompanyPortal, attributes: ["name"] },
+      ];
     } else {
       options.where = {
         ...options.where,
@@ -342,7 +338,6 @@ class MemberController extends Controller {
     options.limit = limit;
     options.offset = offset;
 
-    console.log("======================options", options.where);
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
@@ -369,7 +364,6 @@ class MemberController extends Controller {
       }
     }
 
-    // console.log(result.rows);
     return {
       result: { data: result.rows, pages, total: result.count },
       fields: fields,
@@ -426,12 +420,11 @@ class MemberController extends Controller {
     );
     result.earnings = total_earnings;
 
-    console.log("total_earnings", total_earnings);
 
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -439,7 +432,6 @@ class MemberController extends Controller {
   }
   //get transaction details
   async adminAdjustment(req) {
-    console.log("req", req);
 
     try {
       let member_id = req.params.id;
@@ -453,7 +445,6 @@ class MemberController extends Controller {
           type: QueryTypes.SELECT,
         }
       );
-      console.log("total_earnings", total_earnings);
 
       let modified_total_earnings =
         parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
@@ -467,7 +458,7 @@ class MemberController extends Controller {
         amount_action: "admin_adjustment",
         completed_at: new Date(),
       };
-      console.log("transaction_data", transaction_data);
+
       let transaction = await MemberTransaction.create(transaction_data, {
         silent: true,
       });
