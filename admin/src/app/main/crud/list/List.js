@@ -224,8 +224,8 @@ function List(props) {
 	}
 
 	const processFieldValue = (value, fieldConfig) => {
-		if (value && (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'activity_date')) {
-		  value = moment(value).format('DD-MMM-YYYY')
+		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'activity_date')) {
+			value = moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
 	}
@@ -283,19 +283,20 @@ function List(props) {
 			startDate: moment(val.startDate),
 			endDate: moment(val.endDate)
 		});
-		const param = {
-            created_at: [moment(val.startDate), moment(val.endDate)]
-        }
-		setWhere({...where, ...param});
+		const param = module === 'member-transactions' ? {
+			completed_at: [moment(val.startDate), moment(val.endDate)]
+		} : {
+			created_at: [moment(val.startDate), moment(val.endDate)]
+		}
+		setWhere({ ...where, ...param });
 	}
-
 	const handleClearDateRange = () => {
 		setDateRange({
 			startDate: null,
 			endDate: null
 		});
-		delete where.created_at;
-		setWhere({...where});
+		module === 'member-transactions' ? delete where.completed_at : delete where.created_at;
+		setWhere({ ...where });
 	}
 
 	return (
@@ -312,10 +313,10 @@ function List(props) {
 							className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 						>
 							{module.split('-').join(' ')}
-						</Typography> 
+						</Typography>
 					)
 				}
-				<div className="flex items-center justify-end space-x-8 w-full ml-auto">					
+				<div className="flex items-center justify-end space-x-8 w-full ml-auto">
 					{
 						(module === 'member-transactions' && location.pathname.includes('history')) && (
 							<>
@@ -334,8 +335,8 @@ function List(props) {
 									initial={{ y: -20, opacity: 0 }}
 									animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
 									className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
-									sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%'}}}
-								>						
+									sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+								>
 									<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
 									<Input
 										label="Select a date range"
@@ -346,13 +347,13 @@ function List(props) {
 										size="small"
 										onClick={() => setDatepickerStatus(!datepickerStatus)}
 										value={
-											dateRange && dateRange.startDate 
-											? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
-											: ''
+											dateRange && dateRange.startDate
+												? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
+												: ''
 										}
 									/>
-									{ (dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={ handleClearDateRange }>material-outline:close</FuseSvgIcon> }
-								</Paper> 
+									{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
+								</Paper>
 								<FormControl sx={{ minWidth: 120 }} size="small">
 									<InputLabel id="demo-simple-select-label">Type</InputLabel>
 									<Select
@@ -383,13 +384,13 @@ function List(props) {
 							</>
 						)
 					}
-					
+
 					{searchable && <Paper
 						component={motion.div}
 						initial={{ y: -20, opacity: 0 }}
 						animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
 						className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
-						>
+					>
 						<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
 						<Input
