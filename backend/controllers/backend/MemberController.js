@@ -321,10 +321,7 @@ class MemberController extends Controller {
     let fields = this.model.fields;
     options.include = [{ model: IpLog, attributes: ["ip"],order: [["id", "ASC"]],limit:1 }]
     if (roles == 1) {
-      options.include = [
-        { model: IpLog, attributes: ["ip", "isp", "geo_location"] },
-        { model: CompanyPortal, attributes: ["name"] },
-      ];
+      options.include.push({ model: CompanyPortal, attributes: ["name"]});
     } else {
       options.where = {
         ...options.where,
