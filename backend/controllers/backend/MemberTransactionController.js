@@ -17,8 +17,8 @@ class MemberTransactionController extends Controller {
     var option_where = options.where || {};
     var new_option = {};
     var and_query = {
-      created_at: {
-        [Op.between]: query_where.created_at ?? [moment().subtract(30, 'days').toISOString(), moment().toISOString()],
+      completed_at: {
+        [Op.between]: query_where.completed_at ?? [moment().subtract(30, 'days').toISOString(), moment().toISOString()],
       },
     };
 
