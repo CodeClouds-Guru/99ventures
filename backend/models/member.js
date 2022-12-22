@@ -125,7 +125,6 @@ module.exports = (sequelize, DataTypes) => {
           return rawValue;
         },
         set(value) {
-          console.log("avatar", value);
           if (value == "" || value == null) this.setDataValue("avatar", null);
           else this.setDataValue("avatar", value);
         },
@@ -138,7 +137,6 @@ module.exports = (sequelize, DataTypes) => {
       country_id: {
         type: DataTypes.INTEGER,
         set(value) {
-          console.log("country_id", value);
           if (value == "" || value == null)
             this.setDataValue("country_id", null);
           else this.setDataValue("country_id", value);
@@ -158,7 +156,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  Member.extra_fields = ["company_portal_id","ip"];
+  Member.extra_fields = ["company_portal_id", "ip"];
   Member.fields = {
     username: {
       field_name: "username",
@@ -199,7 +197,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: true,
     },
-    ip:{
+    ip: {
       field_name: "ip",
       db_name: "ip",
       type: "text",
@@ -251,7 +249,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: true,
     },
-    company_portal_id : {
+    company_portal_id: {
       field_name: "company_portal_id",
       db_name: "company_portal_id",
       type: "text",
@@ -276,7 +274,7 @@ module.exports = (sequelize, DataTypes) => {
       value: "",
       width: "50",
       searchable: false,
-    },  
+    },
     phone_no: {
       field_name: "phone_no",
       db_name: "phone_no",
