@@ -12,8 +12,15 @@ textarea.custom-code-editor{
     background-color: #000; 
     color: #ffeeba; 
 }
+textarea.custom-code-editor-md{
+    height: 300px !important; 
+    width: 100%; 
+    padding: 15px; 
+    background-color: #000; 
+    color: #ffeeba; 
+}
 textarea.custom-code-editor-fullscreen{
-    height: 600px !important; 
+    height: 70vh !important; 
     width: 100%; 
     padding: 15px; 
     background-color: #000; 

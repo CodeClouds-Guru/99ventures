@@ -10,7 +10,7 @@ const CreateEdit = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const [ sidebar, setSidebar ] = useState(false);
     const module = 'Layouts';
-    const { moduleId } = useParams;
+    const { moduleId } = useParams();
 
     const toggleSidebar = (val) => setSidebar(val)
 
