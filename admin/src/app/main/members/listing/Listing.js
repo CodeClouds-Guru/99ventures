@@ -46,13 +46,13 @@ function Listing(props) {
     const [where, setWhere] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [filterActive, setFilterActive] = useState(false);
-    const [filters, setFilters] = useState([{ column: '', match: '', search: '' }]);
+    const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
     const column_object = {
-        'billing_street_address': 'Billing Street Address',
+        'address_1': 'Billing Street Address',
         'browser': 'Browser',
         'email': 'Email',
-        'geo_isp': 'Geo ISP',
-        'geo_location': 'Geo Locaion',
+        'isp': 'ISP',
+        'geo_location': 'Geo Location',
         'id': 'ID',
         'ip_address': 'IP Address',
         'ip_log': 'IP Log',
@@ -257,7 +257,7 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const addFilterRow = () => {
-        setFilters(filters.concat({ column: '', match: '', search: '' }))
+        setFilters(filters.concat({ column: 'address_1', match: 'substring', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
@@ -318,11 +318,11 @@ function Listing(props) {
                                                 label="Column"
                                                 onChange={(event) => handleChangeFilter(event, key, 'column')}
                                             >
-                                                <MenuItem value="billing_street_address">Billing Street Address</MenuItem>
+                                                <MenuItem value="address_1">Billing Street Address</MenuItem>
                                                 <MenuItem value="browser">Browser</MenuItem>
                                                 <MenuItem value="email">Email</MenuItem>
-                                                <MenuItem value="geo_isp">Geo ISP</MenuItem>
-                                                <MenuItem value="geo_location">Geo Locaion</MenuItem>
+                                                <MenuItem value="isp">ISP</MenuItem>
+                                                <MenuItem value="geo_location">Geo Location</MenuItem>
                                                 <MenuItem value="id">ID</MenuItem>
                                                 <MenuItem value="ip_address">IP Address</MenuItem>
                                                 <MenuItem value="ip_log">IP Log</MenuItem>
@@ -365,7 +365,7 @@ function Listing(props) {
                                             {filters.length > 1 && key !== 0
                                                 ?
                                                 <Tooltip title="Clear conditions" placement="right">
-                                                    <ClearIcon className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
+                                                    <ClearIcon sx={{ float: 'right' }} className="cursor-pointer" variant="contained" color="error" onClick={() => removeFilterRow(key)} />
                                                 </Tooltip>
                                                 : ''
                                             }
@@ -375,7 +375,8 @@ function Listing(props) {
                             })
                             }
                             <Tooltip title="Add conditions" placement="right">
-                                <AddIcon className="cursor-pointer" variant="contained" color="secondary" onClick={addFilterRow} />
+                                <Button className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />} onClick={addFilterRow}>
+                                </Button>
                             </Tooltip>
                             <FormControl className="w-full mt-16" size="large">
                                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
@@ -419,15 +420,15 @@ function Listing(props) {
             {!filterActive ? '' :
                 <div className="flex">
                     <Stack direction="row" sx={{ overflowX: 'auto', maxWidth: '82%' }} spacing={1} className="flex w-10/12 my-16 justify-center">
-                        {filters.map((val) => {
-                            return <Chip label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
+                        {filters.map((val, key) => {
+                            return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
                         })
                         }
                         <Chip className="capitalize" label={'Status IN ' + memberStatus.join(', ')} size="small" color="primary" />
                     </Stack>
                     <div className="w-2/12">
                         <Tooltip title="Clear filters" placement="top">
-                            <Button sx={{ float: 'right' }} className="mt-16 mr-20" variant="outlined" size="small" color="error" onClick={cancelFilter}>
+                            <Button sx={{ float: 'right' }} className="mt-12 mr-20" variant="outlined" size="small" color="error" onClick={cancelFilter}>
                                 X
                             </Button>
                         </Tooltip>
