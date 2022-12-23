@@ -90,9 +90,9 @@ const MemberDetails = () => {
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
         if(type === 'delete')
-            msg = 'Do you want to delete your account?';
+            msg = 'Do you want to delete this account?';
         else if(type === 'save_profile')
-            msg = 'Do you want to save changes?';
+            msg = 'Do you want to save the changes?';
         else if(type === 'adjustment')
             msg = 'Do you want to adjust the amount?'
 

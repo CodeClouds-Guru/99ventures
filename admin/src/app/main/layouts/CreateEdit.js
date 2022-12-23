@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 const CreateEdit = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const [ sidebar, setSidebar ] = useState(false);
-    const module = 'Layouts';
+    const module = 'layouts';
     const { moduleId } = useParams();
 
     const toggleSidebar = (val) => setSidebar(val)
