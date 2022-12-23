@@ -58,7 +58,7 @@ function Listing(props) {
         '$IpLogs.ip$': 'IP Log',
         'payment_email': 'Payment Email',
         'referrer': 'Referrer',
-        'phone': 'Phone',
+        'phone_no': 'Phone',
         'username': 'Username',
     }
     const match_object = {

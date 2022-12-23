@@ -321,9 +321,7 @@ class MemberController extends Controller {
       {
         model: IpLog,
         attributes: ['ip', 'isp', 'geo_location', 'browser'],
-        // order: [['id', 'DESC']],
-        // limit: 1,
-        // as: 'IpLogs',
+        order: [['id', 'DESC']],
       },
     ]
     if (roles == 1) {
@@ -334,12 +332,13 @@ class MemberController extends Controller {
         company_portal_id: site_id,
       }
     }
-    console.dir(options.include)
+
     let page = req.query.page || 1
     let limit = parseInt(req.query.show) || 10 // per page record
     let offset = (page - 1) * limit
     options.limit = limit
     options.offset = offset
+    options.subQuery = false
 
     let result = await this.model.findAndCountAll(options)
     let pages = Math.ceil(result.count / limit)
