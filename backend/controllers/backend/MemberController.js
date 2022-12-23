@@ -323,6 +323,10 @@ class MemberController extends Controller {
         attributes: ['ip', 'isp', 'geo_location', 'browser'],
         order: [['id', 'DESC']],
       },
+      {
+        model: MemberReferral,
+        attributes: ['referral_email'],
+      },
     ]
     if (roles == 1) {
       options.include.push({ model: CompanyPortal, attributes: ['name'] })
