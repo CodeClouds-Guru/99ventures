@@ -49,15 +49,15 @@ function Listing(props) {
     const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
     const column_object = {
         'address_1': 'Billing Street Address',
-        'browser': 'Browser',
+        '$IpLogs.browser$': 'Browser',
         'email': 'Email',
-        'isp': 'ISP',
-        'geo_location': 'Geo Location',
+        '$IpLogs.isp$': 'ISP',
+        '$IpLogs.geo_location$': 'Geo Location',
         'id': 'ID',
         '$IpLogs.ip$': 'IP Address',
         '$IpLogs.ip$': 'IP Log',
-        'payment_email': 'Payment Email',
-        'referrer': 'Referrer',
+        'email': 'Payment Email',       //this need to change to payment_email
+        '$MemberReferral.referral_email$': 'Referrer',
         'phone_no': 'Phone',
         'username': 'Username',
     }
@@ -381,7 +381,7 @@ function Listing(props) {
                                 </Select>
                             </FormControl>
                         </DialogContent>
-                        <DialogActions className="mx-16">
+                        <DialogActions className="mx-16 mb-16">
                             <Button variant="outlined" color="error" onClick={cancelFilter}>Cancel</Button>
                             <Button variant="contained" color="primary" onClick={handleApplyFilters}>Apply Filters</Button>
                         </DialogActions>
