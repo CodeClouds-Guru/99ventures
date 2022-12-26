@@ -38,6 +38,15 @@ const navigationConfig = [
     end: true,
   },
   {
+    id: 'campaigns',
+    title: 'Campaigns',
+    translate: 'Campaigns',
+    type: 'item',
+    icon: 'material-outline:campaign',
+    url: 'app/campaigns',
+    end: true,
+  },
+  {
     id: 'administration',
     title: 'Administration',
     translate: 'Administration',
@@ -52,7 +61,7 @@ const navigationConfig = [
         icon: 'heroicons-outline:user-circle',
         url: 'app/users',
         end: true,
-      },      
+      },
       {
         id: 'roles',
         title: 'Roles',
