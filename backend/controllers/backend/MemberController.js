@@ -357,7 +357,7 @@ class MemberController extends Controller {
       } else {
         fields.company_portal_id.listing = false
       }
-      if (result.rows[i].IpLogs) {
+      if (result.rows[i].IpLogs != undefined && result.rows[i].IpLogs.length) {
         result.rows[i].setDataValue('ip', result.rows[i].IpLogs[0].ip)
       } else {
         result.rows[i].setDataValue('ip', '')
