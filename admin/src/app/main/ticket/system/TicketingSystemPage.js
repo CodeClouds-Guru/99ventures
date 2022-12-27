@@ -20,6 +20,8 @@ import ImagePreview from '../../filemanager/ImagePreview';
 import { setUser } from "app/store/userSlice";
 import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
 import parse from 'html-react-parser';
+import { EditorState, convertFromHTML, ContentState } from 'draft-js';
+
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -92,9 +94,7 @@ function TicketingSystemPage(props) {
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
         setChatField(event.target.value);
-        // WYSIWYGEditor.onEditorStateChange(event.target.value)
-        // console.log(event.target.value)
-        wysiwygEditorRef.current.innerHTML = event.target.value
+        setEditorValue(event.target.value)
     };
     // console.log(chatField)
     const handleMemberStatus = (event) => {
@@ -148,6 +148,7 @@ function TicketingSystemPage(props) {
         setInputFiles({});
         setChatField('');
         setQuickResponse('');
+        setEditorValue('');
     }
     const handleOpenPreview = (file) => {
         dispatch(setlightBoxStatus({ isOpen: true, src: file }));
@@ -198,6 +199,11 @@ function TicketingSystemPage(props) {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
             })
     }
+
+    const setEditorValue = (value) => {
+        wysiwygEditorRef.current.props.onEditorStateChange( EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))) )
+    }
+
 
     return (
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-0">
