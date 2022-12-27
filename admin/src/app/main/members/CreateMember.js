@@ -67,7 +67,7 @@ const schema = yup.object().shape({
     status: yup.string().required('Please enter Status'),
     address_1: yup.string().required('Please enter Address 1'),
     phone_no: yup.number().required('Please enter Phone').typeError('Please insert only number'),
-    zip_code: yup.string().required('Please enter Zipcode'),
+    zip_code: yup.string().required('Please enter ZIP Code'),
     country_id: yup.string().required('Please enter Country'),
     // dob: yup.string().required('Please enter DOB'),
     gender: yup.string().required('Please enter Gender'),
