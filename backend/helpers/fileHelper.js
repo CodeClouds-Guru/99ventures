@@ -2,6 +2,8 @@ const AWS = require('aws-sdk')
 const assert = require('assert')
 var fs = require('fs')
 const ArchieverClass = require("../helpers/Archiever");
+const mime = require('mime-types')
+
 class FileHelper {
   constructor(files, model, req, new_filename) {
     this.company_id = ''
@@ -44,6 +46,9 @@ class FileHelper {
       file_name = file_name.replaceAll(' ','-')
       file_name = file_name.replaceAll(/[^a-zA-Z0-9 ]/g,'')
       var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
+      let mime_type = mime.lookup(
+        new_filename
+      );
       try {
         let s3 = await this.s3Connect()
         const imagePath = file.tempFilePath
@@ -56,7 +61,8 @@ class FileHelper {
           Key: path.concat(new_filename),
           Body: blob,
           ACL: this.private,
-          Metadata: metadata
+          Metadata: metadata,
+          ContentType:mime_type
         }).promise()
         this.response.status = true
         this.response.files[key] = {
