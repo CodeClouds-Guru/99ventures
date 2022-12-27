@@ -67,7 +67,7 @@ const schema = yup.object().shape({
     status: yup.string().required('Please enter Status'),
     address_1: yup.string().required('Please enter Address 1'),
     phone_no: yup.number().required('Please enter Phone').typeError('Please insert only number'),
-    zip_code: yup.number().required('Please enter Zipcode').typeError('Please insert only number'),
+    zip_code: yup.string().required('Please enter Zipcode'),
     country_id: yup.string().required('Please enter Country'),
     // dob: yup.string().required('Please enter DOB'),
     gender: yup.string().required('Please enter Gender'),
@@ -108,7 +108,6 @@ const CreateMember = () => {
         defaultValues,
         resolver: yupResolver(schema),
     });
-
     const { isValid, dirtyFields, errors } = formState;
 
     useEffect(() => {
@@ -136,6 +135,12 @@ const CreateMember = () => {
         document.getElementById('contained-button-file').click();
     }
     const selectedFile = (event) => {
+        const file = event.target.files[0];
+        const fileSizeInMB = Math.round(file.size/1000/1000); //MiB
+        if(fileSizeInMB > 2) {
+            dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB' }));
+            return;
+        }
         event.target.files.length > 0 ? setAvatar(event.target.files[0]) : setAvatar('')
     }
     const makeAvatarBlank = () => {
@@ -600,6 +605,7 @@ const CreateMember = () => {
                                     disabled={_.isEmpty(dirtyFields) || !isValid}
                                     type="submit"
                                     size="large"
+                                    loading={loading}
                                 >
                                     Save
                                 </LoadingButton>

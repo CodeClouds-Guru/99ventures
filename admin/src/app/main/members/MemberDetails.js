@@ -224,7 +224,12 @@ const MemberDetails = () => {
 
     async function readFileAsync(e) {
         const response = await new Promise((resolve, reject) => {
-            const file = e.target.files[0];       
+            const file = e.target.files[0];    
+            const fileSizeInMB = Math.round(file.size/1000/1000); //MiB
+            if(fileSizeInMB > 2) {
+                dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB' }));
+                return;
+            }
             setAvatarFile(file);     
             if (!file) {
                 return;
