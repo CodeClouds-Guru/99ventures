@@ -66,6 +66,8 @@ const listItemTextStyle = {
     }
 }
 
+const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/svg+xml"];
+
 const MemberDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -226,8 +228,13 @@ const MemberDetails = () => {
         const response = await new Promise((resolve, reject) => {
             const file = e.target.files[0];    
             const fileSizeInMB = Math.round(file.size/1000/1000); //MiB
+            
             if(fileSizeInMB > 2) {
-                dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB' }));
+                dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB!' }));
+                return;
+            }
+            if(!acceptAvatarMimeTypes.includes(file.type)) {
+                dispatch(showMessage({ variant: 'error', message: 'Invalid image type!' }));
                 return;
             }
             setAvatarFile(file);     

@@ -91,6 +91,8 @@ const defaultValues = {
     gender: '',
 };
 
+const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/svg+xml"];
+
 const CreateMember = () => {
     const module = 'members';
     const [loading, setLoading] = useState(false);
@@ -139,6 +141,10 @@ const CreateMember = () => {
         const fileSizeInMB = Math.round(file.size/1000/1000); //MiB
         if(fileSizeInMB > 2) {
             dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB' }));
+            return;
+        }
+        if(!acceptAvatarMimeTypes.includes(file.type)) {
+            dispatch(showMessage({ variant: 'error', message: 'Invalid image type!' }));
             return;
         }
         event.target.files.length > 0 ? setAvatar(event.target.files[0]) : setAvatar('')
