@@ -14,6 +14,7 @@ const navigationConfig = [
     type: 'item',
     icon: 'heroicons-outline:cog',
     url: 'configuration',
+    depends_on: ['generalconfigurations', 'emailconfigurations', 'ipconfigurations', 'metatagconfigurations', 'paymentconfigurations', 'downtime']
   },
   {
     id: 'tickets',
@@ -26,6 +27,24 @@ const navigationConfig = [
       title: 0,
       classes: 'px-8 bg-pink-600 text-white rounded-full',
     },
+  },
+  {
+    id: 'members',
+    title: 'Members',
+    translate: 'Members',
+    type: 'item',
+    icon: 'heroicons-outline:user-group',
+    url: 'app/members',
+    end: true,
+  },
+  {
+    id: 'campaigns',
+    title: 'Campaigns',
+    translate: 'Campaigns',
+    type: 'item',
+    icon: 'material-outline:campaign',
+    url: 'app/campaigns',
+    end: true,
   },
   {
     id: 'administration',

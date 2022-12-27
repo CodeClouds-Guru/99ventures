@@ -285,8 +285,7 @@ const CreateUpdate = () => {
                 attributes: {
                     class: 'fa fa-square'
                 },
-                content:
-                    val.html
+                content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
             });
         })
     }
@@ -368,7 +367,7 @@ const CreateUpdate = () => {
                         status: record.status,
                         name: record.name,
                         slug: record.slug,
-                        permalink: !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
+                        permalink: record.permalink === '/' ? domain : !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,

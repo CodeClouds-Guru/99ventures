@@ -22,16 +22,26 @@ const Root = styled('div')({
 
 const WYSIWYGEditor = forwardRef((props, ref) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const mutateOnChange = (val) => {
+    let str = draftToHtml(val)
+    if (!str || /^<p>(&nbsp;)*<\/p>$/.test(str.trim())) {
+      return props.onChange('');
+    }
+    return props.onChange(str);
+  };
+  const mutatedProps = {
+    ...props,
+    onChange: mutateOnChange
+  }
 
   function onEditorStateChange(_editorState) {
     setEditorState(_editorState);
-
     return props.onChange(draftToHtml(convertToRaw(_editorState.getCurrentContent())));
   }
 
   return (
     <Root className={clsx('rounded-4 border-1 overflow-hidden w-full', props.className)} ref={ref}>
-      <Editor ref={ref} {...props} editorState={editorState} onEditorStateChange={onEditorStateChange} />
+      <Editor ref={ref} {...mutatedProps} editorState={editorState} onEditorStateChange={onEditorStateChange} />
     </Root>
   );
 });

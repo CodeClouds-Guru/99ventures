@@ -1,22 +1,44 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, IconButton, Typography, TextareaAutosize, Tooltip } from '@mui/material';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { usePermission } from '@fuse/hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useParams, useNavigate } from 'react-router-dom';
-import { arrayMoveImmutable } from "array-move";
-import { Container, Draggable } from "react-smooth-dnd";
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { getLayout, setRevisionData } from 'app/store/layout'
+import BodyPart from './BodyPart';
+import DialogBox from './Dialogbox';
 
+
+const iconPositionStyle = {
+    position: 'absolute',
+    right: '-8px',
+    top: '-12px',
+    width: '35px',
+    height: '35px',
+    background: '#eee',
+    borderRadius: '50%'
+}
+
+const removeBodyTag = (string) => {
+    if(string.includes('<body>')){
+        string = string.replace('<body>', '').trim()
+    }
+    if(string.includes('</body>')){
+        string = string.replace('</body>', '').trim()
+    }
+
+    return string;
+}
 
 const CreateEditForm = (props) => {
+    const editorRef = useRef();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
@@ -29,15 +51,18 @@ const CreateEditForm = (props) => {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [records, setRecords] = useState({});
     const [changeStatus, setChangeStatus] = useState({ name_changed: false, header_changed: false, body_changed: false });
+    const [popupStatus, setPopupStatus] = useState(false);
+    const [editor, setEditor] = useState('');
+    const [msg, setMsg] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [fullScreen, setFullScreen] = useState(false);
+    const [dialogFor, setDialogFor] = useState('');
     const [layoutCode, setLayoutCode] = useState({
         header: {
             value: ''
         },
         body: {
-            value: [{
-                name: 'Content',
-                code: '{{content}}'
-            }]
+            value: '<body>\n{{content}}\n</body>'
         }
     });
 
@@ -78,26 +103,27 @@ const CreateEditForm = (props) => {
 
     const handleSelectComponent = (e) => {
         const selectedValue = e.target.value;
-        if (selectedValue) {
-            const componentCode = components.filter(el => el.name === selectedValue);
-            const uniqueObjArray = [...new Map([...layoutCode.body.value, { name: selectedValue, code: '{{' + componentCode[0].code + '}}' }].map((item) => [item["name"], item])).values()];
-            setLayoutCode({
-                ...layoutCode,
-                body: {
-                    value: uniqueObjArray
-                }
-            });
+        let htmlData = '';
+        let newContent = editor;
+        if(editor === '') {
+            newContent = `<body>\n{{content}}\n</body>`
         }
-    }
 
-    const handleDelete = (element) => {
-        const newData = layoutCode.body.value.filter(el => el.name !== element);
-        setLayoutCode({
-            ...layoutCode,
-            body: {
-                value: newData
+        if(editorRef.current.selectionStart !== 0 && editorRef.current.selectionStart === editorRef.current.selectionEnd) {
+            newContent = editor.substring(0, editorRef.current.selectionStart) +'{{'+ selectedValue +'}}'+ editor.substring(editorRef.current.selectionEnd, editor.length);
+            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+                newContent = removeBodyTag(newContent);
             }
-        });
+            htmlData = `<body>\n${newContent}\n</body>`
+        } else {
+            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+                newContent = removeBodyTag(newContent);
+                htmlData = `<body>\n{{${selectedValue}}}${newContent}\n</body>`
+            } else
+                htmlData = `<body>\n{{${selectedValue}}}${editor}\n</body>`
+        }
+        
+        setEditor(htmlData);
     }
 
     /**
@@ -117,6 +143,8 @@ const CreateEditForm = (props) => {
          */
         if ((changeStatus.header_changed === true || changeStatus.body_changed === true) && (moduleId !== 'create' && !isNaN(moduleId))) {
             setOpenAlertDialog(true);
+            setMsg('Do you want to update the changes?');
+            setAlertType('save_layout');
         } else {
             handleLayoutSubmit();
         }
@@ -124,6 +152,11 @@ const CreateEditForm = (props) => {
     }
 
     const handleLayoutSubmit = () => {
+        if(!layoutCode.body.value.includes('{{content}}')){
+            dispatch(showMessage({ variant: 'error', message: 'Sorry! Unable to save the data. {{content}} is missing.' }));
+            return;
+        }
+
         const htmlCode = '<html>\n' +
             '<head>\n' +
             '<title>${page_title}</title>\n' +
@@ -136,8 +169,7 @@ const CreateEditForm = (props) => {
             '\n\n<!-- Additional Script Start-->\n'+
             '${additional_header_script}\n'+
             '<!-- Additional Script End -->\n'+
-            '</head>\n' +
-            '<body>\n' + layoutCode.body.value.map(el => el.code).join('\n') + '\n</body>\n' +
+            '</head>\n' + layoutCode.body.value + '\n' +
             '</html>';
 
         const params = {
@@ -166,17 +198,19 @@ const CreateEditForm = (props) => {
     /**
      * Drag & Drop components
      */
-    const onDrop = ({ removedIndex, addedIndex }) => {
+    /*const onDrop = ({ removedIndex, addedIndex }) => {
         setLayoutCode({
             ...layoutCode,
             body: {
                 value: arrayMoveImmutable(layoutCode.body.value, removedIndex, addedIndex)
             }
         });
-    };
+    };*/
 
     const onCloseAlertDialogHandle = () => {
         setOpenAlertDialog(false);
+        setMsg('');
+        setAlertType('');
     }
 
     /**
@@ -186,7 +220,10 @@ const CreateEditForm = (props) => {
      * ChangeCount value set to 0.
      */
     const onConfirmAlertDialogHandle = () => {
-        handleLayoutSubmit();
+        if(alertType === 'save_layout')
+            handleLayoutSubmit();
+        else if(alertType === 'save_body')
+            saveEditorValue();
     }
 
     const handleSetLayoutName = (e) => {
@@ -234,9 +271,123 @@ const CreateEditForm = (props) => {
 
     }, [layoutCode.body, records]);
 
+    const handleOpenDialog = () =>{
+        setPopupStatus(true);
+        setEditor(layoutCode.body.value);
+        setDialogFor('edit_mode')
+    }
+
+    const handleFullScreen = (mode) => {
+        if(mode === true){
+            setFullScreen(true);
+            setPopupStatus(true);
+            setDialogFor('view_mode');
+        } else {
+            handleClose();
+        }        
+    }
+
+    const handleClose =() => {
+        setPopupStatus(false);
+        setDialogFor('');
+        setFullScreen(false);
+    }
+
+    const handleConfirmSave = () => {
+        setMsg('Do you want to save the changes?');
+        setAlertType('save_body');
+        setOpenAlertDialog(true);
+    }
+
+    const saveEditorValue = () => {
+        let content = editor;
+        if(content){
+            if(editor.includes('<body>') || editor.includes('</body>')){
+                content = removeBodyTag(editor);
+            }
+            content = `<body>\n${content}\n</body>`;
+        } else {
+            content = '<body>\n{{content}}\n</body>';
+        }
+        setLayoutCode({
+            ...layoutCode,
+            body: {
+                value: content
+            }
+        });
+        setPopupStatus(false);
+        onCloseAlertDialogHandle();
+    }
+
+    const viewFullscreen = () => {
+        return (
+            <div className='p-16'>
+                <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value} />
+            </div>
+        )
+    }
+
+    const editFullscreen = () => {
+        return (
+            <div className='w-full'>
+                <FormControl className="mb-10" sx={{minWidth: 350 }} size="small">
+                    <InputLabel id="select-component-label">Select Component</InputLabel>
+                    <Select
+                        name="components"
+                        labelId="select-component-label"
+                        id="select-component"
+                        label="Select Component"
+                        onChange={handleSelectComponent}
+                        defaultValue=""
+                    >
+                        <MenuItem value="">Select</MenuItem>
+                        {
+                            components.map(el => <MenuItem key={el.code} value={el.code} data-name={el.name}>{el.name}</MenuItem>)
+                        }
+
+                    </Select>
+                </FormControl>
+                <div className='relative'>                            
+                    {
+                        fullScreen ? (
+                            <Tooltip title="Exit Fullscreen" placement="top-start">
+                                <IconButton 
+                                    style={iconPositionStyle}
+                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(false)}>
+                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen_exit</FuseSvgIcon>
+                                </IconButton>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Fullscreen View" placement="top-start">
+                                <IconButton 
+                                    style={iconPositionStyle}
+                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(true)}>
+                                    <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen</FuseSvgIcon>
+                                </IconButton>
+                            </Tooltip>
+                        )
+                    }
+                    <pre>
+                        <code>
+                            <textarea
+                                ref={ editorRef }
+                                rows={10}
+                                aria-label="maximum height"
+                                placeholder="#Add your HTML content here"
+                                value={ editor }
+                                className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
+                                onChange={ (e)=> setEditor(e.target.value)}
+                            ></textarea>
+                        </code>
+                    </pre>
+                    <small>Note: Do not remove <strong>{'{{content}}'}</strong>.</small>
+                </div>
+            </div>
+        )
+    }
 
     return (
-        <Box className="p-32" >
+        <Box className="p-24" >
             <form onSubmit={formSubmit}>
                 <div className='flex mb-24 justify-between'>
                     <FormControl className="w-1/2">
@@ -259,7 +410,7 @@ const CreateEditForm = (props) => {
                         )
                     }
                 </div>
-                <fieldset className='border mb-24 p-32'>
+                <fieldset className='border mb-24 p-24'>
                     <legend className='ml-24 px-10'>
                         <Typography variant="h6">Layout</Typography>
                     </legend>
@@ -267,7 +418,7 @@ const CreateEditForm = (props) => {
                         <legend className='ml-24 px-10'>
                             <Typography variant="subtitle1">Header</Typography>
                         </legend>
-                        <div className='p-32'>
+                        <div className='p-24'>
                             <pre>
                                 <code>
                                     <TextareaAutosize
@@ -286,54 +437,8 @@ const CreateEditForm = (props) => {
                         <legend className='ml-24  px-10'>
                             <Typography variant="subtitle1">Body</Typography>
                         </legend>
-                        <div className='p-32'>
-                            <FormControl sx={{ m: 1, minWidth: 350 }} size="small">
-                                <InputLabel id="select-component-label">Select Component</InputLabel>
-                                <Select
-                                    name="components"
-                                    labelId="select-component-label"
-                                    id="select-component"
-                                    label="Select Component"
-                                    onChange={handleSelectComponent}
-                                    defaultValue=""
-                                >
-                                    <MenuItem value="">Select</MenuItem>
-                                    {
-                                        components.map(el => <MenuItem key={el.code} value={el.name} data-name={el.name}>{el.name}</MenuItem>)
-                                    }
-
-                                </Select>
-                            </FormControl>
-                            <List
-                                sx={{ width: '100%', maxWidth: 500, bgcolor: 'background.paper' }}
-                            >
-                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                    {
-                                        layoutCode.body.value.map((el, indx) => {
-                                            return (
-                                                <Draggable key={indx}>
-                                                    <ListItem>
-                                                        <ListItemIcon className="drag-handle">
-                                                            <IconButton size="small" className="cursor-move" color="primary" aria-label="List" component="label">
-                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:swap_vert</FuseSvgIcon>
-                                                            </IconButton>
-                                                        </ListItemIcon>
-                                                        <ListItemText id="switch-list-label-wifi" primary={el.name} />
-                                                        {
-                                                            el.name !== 'Content' && (
-                                                                <IconButton size="small" color="primary" aria-label="List" component="label" onClick={() => handleDelete(el.name)}>
-                                                                    <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:trash</FuseSvgIcon>
-                                                                </IconButton>
-                                                            )
-                                                        }
-                                                    </ListItem>
-                                                    <Divider variant="inset" component="li" className="ml-12" />
-                                                </Draggable>
-                                            )
-                                        })
-                                    }
-                                </Container>
-                            </List>
+                        <div className='p-24'>
+                            <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value}/>                            
                         </div>
                     </fieldset>
                 </fieldset>
@@ -384,11 +489,40 @@ const CreateEditForm = (props) => {
 
                 </motion.div>
             </form>
-            <AlertDialog
-                content="Do you want to update the changes?"
-                open={openAlertDialog}
-                onConfirm={onConfirmAlertDialogHandle}
-                onClose={onCloseAlertDialogHandle}
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content={ msg }
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
+
+            <DialogBox 
+                title={dialogFor === 'edit_mode' ? 'Edit Code' : 'View Code'}
+                fullScreen={fullScreen} 
+                popupStatus={popupStatus} 
+                handleClose={handleClose} 
+                content={
+                    dialogFor === 'edit_mode' ? editFullscreen() : viewFullscreen()
+                }
+                action={
+                    <>
+                        <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+                        {
+                            dialogFor === 'edit_mode' && (
+                                <Button 
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={ handleConfirmSave }
+                                    disabled={ editor.trim() === '' ? true : false}
+                                >Save</Button>
+                            )
+                        }                        
+                    </>
+                }
             />
         </Box>
     )

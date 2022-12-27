@@ -39,7 +39,7 @@ function MetatagConfiguration(props) {
             keywords: '',
             description: ''
         },
-        resolver: yupResolver(schema),
+        // resolver: yupResolver(schema),
     });
 
     useEffect(() => {
@@ -67,6 +67,11 @@ function MetatagConfiguration(props) {
      * Metatags data post
      */
     const onSubmit = (data) => {
+        if(data.keywords === '' && data.description === '' && data.header_script === ''){
+            dispatch(showMessage({ variant: 'error', message: 'Please enter the value!' }));
+            return;
+        }
+
         const params = [{
             content: data.keywords,
             tag_name: 'Keywords'
@@ -79,6 +84,7 @@ function MetatagConfiguration(props) {
             .then((response) => {
                 if (response.data.results.status) {
                     setLoading(false);
+                    setValue('header_script', data.header_script);
                     setValue('keywords', data.keywords)
                     setValue('description', data.description)
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
@@ -140,8 +146,7 @@ function MetatagConfiguration(props) {
                                         {...field}
                                         label="Keywords"
                                         id="fullWidth"
-                                        className="mb-24"
-                                        required
+                                        className="mb-24"                                        
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -158,8 +163,7 @@ function MetatagConfiguration(props) {
                                         {...field}
                                         label="Description"
                                         id="fullWidth"
-                                        className="mb-24"
-                                        required
+                                        className="mb-24"                                        
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -180,7 +184,6 @@ function MetatagConfiguration(props) {
                                             type="submit"
                                             size="large"
                                             loading={loading}
-                                            disabled={!Object.keys(dirtyFields).length || !isValid}
                                         >
                                             Save
                                         </LoadingButton>

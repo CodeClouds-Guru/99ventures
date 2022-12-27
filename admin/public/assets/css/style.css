@@ -12,4 +12,29 @@ textarea.custom-code-editor{
     background-color: #000; 
     color: #ffeeba; 
 }
+textarea.custom-code-editor-md{
+    height: 300px !important; 
+    width: 100%; 
+    padding: 15px; 
+    background-color: #000; 
+    color: #ffeeba; 
+}
+textarea.custom-code-editor-fullscreen{
+    height: 70vh !important; 
+    width: 100%; 
+    padding: 15px; 
+    background-color: #000; 
+    color: #ffeeba; 
+}
+textarea.custom-code-editor-view-fullscreen{
+    height: 77vh !important; 
+    width: 100%; 
+    padding: 15px; 
+    background-color: #000; 
+    color: #ffeeba; 
+}
 textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
+.filter-daterange-picker{ top: 235px;}
+@media screen and (max-width: 768px) {
+    .filter-daterange-picker{ top: 260px; right: 10px;}
+}

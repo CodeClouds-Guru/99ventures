@@ -6,8 +6,8 @@ import {
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import SendIcon from '@mui/icons-material/Send';
 import { useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import LoadingButton from '@mui/lab/LoadingButton';
+// import { motion } from 'framer-motion';
+// import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectUser } from 'app/store/userSlice';
@@ -18,11 +18,14 @@ import Helper from 'src/app/helper';
 import { setlightBoxStatus } from 'app/store/filemanager';
 import ImagePreview from '../../filemanager/ImagePreview';
 import { setUser } from "app/store/userSlice";
+import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
+import parse from 'html-react-parser';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
     const theme = useTheme();
     const inputFileRef = useRef(null);
+    const wysiwygEditorRef = useRef();
     const user = useSelector(selectUser);
     const [inputFiles, setInputFiles] = useState([]);
     const [ticketStatus, setTicketStatus] = useState('');
@@ -53,13 +56,19 @@ function TicketingSystemPage(props) {
         if (files && Object.keys(files).length <= 4) {
             var allowed_files = [];
             Object.values(files).map((val, key) => {
-                var parts = val.name.split(".");
-                const file_type = parts[parts.length - 1];
-                ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
-                    ? allowed_files.push(val) : dispatch(showMessage({
-                        variant: 'error', message
-                            : `File type ${file_type} is not allowed for ${val.name}`
-                    }));
+                if (val.size <= 2048000) {
+                    var parts = val.name.split(".");
+                    const file_type = parts[parts.length - 1];
+                    ['jpg', 'jpeg', 'png', 'gif', 'JPG', 'JPEG', 'PNG', 'GIF'].includes(file_type)
+                        ? allowed_files.push(val) : dispatch(showMessage({
+                            variant: 'error', message
+                                : `File type ${file_type} is not allowed for ${val.name}`
+                        }));
+                } else {
+                    dispatch(showMessage({
+                        variant: 'error', message: `File size allowed upto 2MB`
+                    }))
+                }
             })
             // setInputFiles(allowed_files);
             setInputFiles(allowed_files.map(file => Object.assign(file, {
@@ -77,11 +86,17 @@ function TicketingSystemPage(props) {
             id: props.ticketId,
             type: 'ticket_status'
         });
+        let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (event.target.value !== 'open' ? stateUser.unread_tickets - 1 : stateUser.unread_tickets + 1) }
+        dispatch(setUser(updatedNotReadonlyUser))
     };
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
         setChatField(event.target.value);
+        // WYSIWYGEditor.onEditorStateChange(event.target.value)
+        // console.log(event.target.value)
+        wysiwygEditorRef.current.innerHTML = event.target.value
     };
+    // console.log(chatField)
     const handleMemberStatus = (event) => {
         setTempMemberStatus(event.target.value);
         setOpenAlertDialog(true);
@@ -90,7 +105,8 @@ function TicketingSystemPage(props) {
         setMemberNote(event.target.value);
     }
     const handleChatField = (event) => {
-        setChatField(event.target.value);
+        // console.log(event)
+        setChatField(event);
     }
     const cancelAndResetNote = () => {
         setTempMemberStatus('');
@@ -120,7 +136,9 @@ function TicketingSystemPage(props) {
         data_set.append('user_id', user.id);
         // data_set.append('member_id', memberId);
         data_set.append('type', 'ticket_chat');
-        chatField.trim() ? data_set.append('value', chatField) : '';
+        chatField ? data_set.append('value', chatField) : '';
+        // `Thanks,
+        //     ${user.alias_name} - More Surveys Support Team`
         if (Object.keys(inputFiles).length > 0) {
             for (const key of Object.keys(inputFiles)) {
                 data_set.append('attachments', inputFiles[key])
@@ -132,7 +150,6 @@ function TicketingSystemPage(props) {
         setQuickResponse('');
     }
     const handleOpenPreview = (file) => {
-        console.log(file);
         dispatch(setlightBoxStatus({ isOpen: true, src: file }));
     }
     const getTicketDetails = () => {
@@ -153,11 +170,15 @@ function TicketingSystemPage(props) {
                             id: props.ticketId,
                             type: 'is_read'
                         })
-                        if (stateUser.unread_tickets > 0) {
-                            let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (stateUser.unread_tickets - 1) }
-                            dispatch(setUser(updatedNotReadonlyUser))
-                        }
+                        //     if (stateUser.unread_tickets > 0) {
+                        //         let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (stateUser.unread_tickets - 1) }
+                        //         dispatch(setUser(updatedNotReadonlyUser))
+                        //     }
                     }
+                    setTimeout(() => {
+                        let main_chat = document.getElementById('main_chat');
+                        main_chat.scrollTop = main_chat.scrollHeight;
+                    }, 500)
                 }
             }).catch(err => {
                 console.error(err)
@@ -177,6 +198,7 @@ function TicketingSystemPage(props) {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
             })
     }
+
     return (
         <div className="flex flex-row flex-1 w-full items-center justify-between space-y-0 p-0">
             <div className="flex flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 w-full h-full">
@@ -221,7 +243,7 @@ function TicketingSystemPage(props) {
                             </DialogActions>
                         </div>
                     </Dialog>
-                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+                    <div className="md:flex w-full h-full mx-auto sm:mx-0" style={{ height: '82rem', overflow: 'auto' }}>
                         <div className="h-full w-full md:w-8/12 border-2 rounded-l-2xl mb-10 md:mb-0">
                             <div className="flex flex-row justify-center sm:justify-between p-0 m-0">
                                 <div className="flex flex-col justify-center sm:justify-start p-0 m-16">
@@ -257,7 +279,7 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 280px)', }}>
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '30rem', }} id="main_chat">
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
@@ -269,12 +291,12 @@ function TicketingSystemPage(props) {
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
                                                 <div>
-                                                    <p>
-                                                        {val.message}
-                                                    </p>
+
+                                                    {parse(val.message)}
+
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
-                                                    <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4} /*cols={val.TicketAttachments.length == 1 ? 1 : (val.TicketAttachments.length > 1 ? 2 : 1)} rowHeight={212}*/>
+                                                    <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4}>
                                                         {val.TicketAttachments.map((item, key) => (
                                                             <ImageListItem key={key} style={{ paddingLeft: '2px', paddingRight: '2px', justifyContent: 'flex-end', flexDirection: 'inherit' }}>
                                                                 <div style={{ height: '120px', overflow: 'hidden', width: '100%', marginBottom: '4px' }}>
@@ -322,20 +344,26 @@ function TicketingSystemPage(props) {
                                         }
                                     </Select>
                                 </FormControl>
-                                <TextareaAutosize className="w-full border-1"
+                                {/* <TextareaAutosize className="w-full border-1"
                                     aria-label="empty textarea"
                                     placeholder=""
                                     minRows={4}
                                     sx={{ background: '#dcdcdc' }}
                                     value={chatField}
                                     onChange={handleChatField}
+                                /> */}
+                                <WYSIWYGEditor
+                                    className="w-full h-auto border-1"
+                                    onChange={handleChatField}
+                                    value={chatField}
+                                    ref={wysiwygEditorRef}
                                 />
                                 <div className="flex flex-row justify-between h-auto w-full px-10">
                                     <div className="flex flex-col justify-start" style={{ marginLeft: '-1rem', width: '70%' }}>
                                         <b className="m-0 p-0">
                                             Files({Object.keys(inputFiles).length})
                                         </b>
-                                        <Stack direction="row" spacing={1} sx={{ overflowY: 'scroll', overflowX: 'hidden', height: '6.1rem' }}>
+                                        <Stack direction="row" spacing={1} sx={{ overflowY: 'scroll', overflowX: 'hidden', height: '6rem' }}>
                                             <ul className="ml-10" style={{ listStyleType: 'disc' }}>
                                                 {
                                                     Object.values(inputFiles).map((val, key) => {
@@ -357,12 +385,12 @@ function TicketingSystemPage(props) {
                                                 multiple
                                                 accept="image/jpg, image/jpeg, image/png, image/gif, image/JPG, image/JPEG, image/PNG, image/GIF"
                                             />
-                                            <Tooltip title="Attach upto 4 files" placement="left">
+                                            <Tooltip title="Attach upto 4 files (Max Filesize 2MB each)" placement="left">
                                                 <IconButton aria-label="fingerprint" color="secondary" onClick={onAttachmentButtonClick}>
                                                     <FuseSvgIcon className="text-48" size={20} color="secondary">feather:paperclip</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
-                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.trim().length === 0} >
+                                            <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.length === 0} >
                                                 Send
                                             </Button>
                                         </Stack>
@@ -376,14 +404,14 @@ function TicketingSystemPage(props) {
                                     <b>Member details</b>
                                 </Typography>
                                 <div className="flex">
-                                    <Typography component={'h4'} className="pr-5">
-                                        <b>Total Earnings: $</b>
+                                    <Typography component={'h4'} className="pr-10">
+                                        <b>Total Earnings: ${memberDetails.total_earnings}</b>
                                     </Typography>
-                                    {memberDetails.total_earnings}
+
                                 </div>
                             </div>
                             <div className="sm:flex flex-row justify-between p-0 m-0 pb-10">
-                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
+                                <div className="flex flex-col w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
@@ -395,7 +423,7 @@ function TicketingSystemPage(props) {
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
-                                                <b>Full name:</b>
+                                                <b>Name:</b>
                                             </Typography>
                                             {memberDetails.first_name + ' ' + memberDetails.last_name}
                                         </div>
@@ -409,9 +437,9 @@ function TicketingSystemPage(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col w-full sm:w-1/2 justify-center sm:justify-end">
+                                <div className="flex flex-col w-1/2 justify-center sm:justify-end">
                                     <div className="flex justify-center sm:justify-end">
-                                        <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
+                                        <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
                                             <InputLabel id="demo-select-small">Status</InputLabel>
                                             <Select
                                                 labelId="demo-select-small"
@@ -420,32 +448,24 @@ function TicketingSystemPage(props) {
                                                 label="Status"
                                                 onChange={handleMemberStatus}
                                             >
-                                                <MenuItem value="verified">Verified</MenuItem>
+                                                <MenuItem value="member">Member</MenuItem>
                                                 <MenuItem value="validating">Validating</MenuItem>
                                                 <MenuItem value="suspended">Suspended</MenuItem>
                                                 <MenuItem value="deleted">Deleted</MenuItem>
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    {/* <div className="flex flex-row justify-center sm:justify-end pr-20">
-                                        <div className="flex">
-                                            <Typography component={'h4'} className="pr-5">
-                                                <b>Total Earnings:</b>
-                                            </Typography>
-                                            {memberDetails.total_earnings} USD
-                                        </div>
-                                    </div> */}
                                 </div>
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: 'calc(100% - 325px)' }}>
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '40rem' }}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: 'calc(100% - 25px)' }} className="px-4">
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
