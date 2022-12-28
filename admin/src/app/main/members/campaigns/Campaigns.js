@@ -19,7 +19,7 @@ function Campaigns(props) {
     return (
         <Root
             content={
-                <div className="p-24" style={{ width: '100%' }}>
+                <div className="" style={{ width: '100%' }}>
                     <CampaignsContent />
                 </div>
             }
