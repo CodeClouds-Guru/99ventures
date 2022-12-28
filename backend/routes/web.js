@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const PageParser = require('../helpers/PageParser')
 router.get('/:slug?', async (req, res) => {
-  console.log(req.params.slug || '/');
+  console.log('slug', req.params.slug || '/');
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
     var page_content = await pagePerser.preview();

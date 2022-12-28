@@ -204,7 +204,7 @@ module.exports = (sequelize, DataTypes) => {
       placeholder: "IP",
       listing: true,
       show_in_form: false,
-      sort: true,
+      sort: false,
       required: false,
       value: "",
       width: "50",
