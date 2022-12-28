@@ -118,10 +118,17 @@ class TicketController extends Controller {
       and_query.status = query_where.status;
     }
     if (Object.keys(query_where).length > 0) {
-      new_option[Op.and] = {
-        ...option_where,
-        ...and_query,
-      };
+      if (Op.and in option_where) {
+        new_option[Op.and] = {
+          ...option_where[Op.and],
+          ...and_query,
+        }
+      } else {
+        new_option[Op.and] = {
+          ...option_where,
+          ...and_query,
+        };
+      }
     }
     options.where = new_option;
     options.include = [
@@ -161,8 +168,7 @@ class TicketController extends Controller {
         ];
         options.where = { [Op.and]: { id: ticket_id } };
         options.order = [
-          // [Ticket, "created_at", "DESC"],
-          // [Member, "created_at", "DESC"],
+          [TicketConversation, "created_at", "DESC"],
           [Member, MemberNote, "created_at", "DESC"],
         ];
         options.include = [

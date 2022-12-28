@@ -225,7 +225,8 @@ function List(props) {
 
 	const processFieldValue = (value, fieldConfig) => {
 		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'activity_date')) {
-			value = moment(value).format('DD-MMM-YYYY')
+			// value = moment(value).format('DD-MMM-YYYY')
+			value =  Helper.parseTimeStamp(value)
 		}
 		return value;
 	}
@@ -252,9 +253,9 @@ function List(props) {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
 			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "error"} />
-		} else if (module === 'member-transactions' && field.field_name === 'completed_at') {
+		} /*else if (module === 'member-transactions' && field.field_name === 'completed_at') {
 			return Helper.parseTimeStamp(processFieldValue(n[field.field_name], field))
-		} else if (module === 'member-transactions' && field.field_name === 'note') {
+		}*/ else if (module === 'member-transactions' && field.field_name === 'note') {
 			return processFieldValue(n[field.field_name], field) ? (
 				<Tooltip title={processFieldValue(n[field.field_name], field)} placement="top-start" arrow>
 					<FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:chat-alt</FuseSvgIcon>
