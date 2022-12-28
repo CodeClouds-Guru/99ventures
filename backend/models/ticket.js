@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: true,
     },
-    username: {
+    "$Member.username$": {
       field_name: "username",
       db_name: "username",
       type: "text",
@@ -113,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: "",
       width: "50",
-      searchable: false,
+      searchable: true,
     },
     subject: {
       field_name: "subject",
