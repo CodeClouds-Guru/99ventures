@@ -2,6 +2,7 @@ import { React, lazy } from 'react';
 import settingsConfig from 'app/configs/settingsConfig';
 import Campaigns from './Campaigns';
 import CampaignsCreateUpdate from './create-update/CreateUpdate';
+import UsersTracking from './UsersTracking';
 
 const CampaignsConfig = {
   settings: {
@@ -35,6 +36,11 @@ const CampaignsConfig = {
       path: 'app/campaigns/create',
       element: <CampaignsCreateUpdate />,
       auth: settingsConfig.defaultAuth
+    },
+    {
+      path: 'app/campaigns/users-tracking',
+      element: <UsersTracking />,
+      // auth: settingsConfig.defaultAuth
     },
   ],
 };
