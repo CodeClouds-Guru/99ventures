@@ -16,7 +16,7 @@ class CampaignController extends Controller {
                                             attributes: ["id", "first_name", "last_name", "email"],}
                                         });
     let fields = this.model.fields;
-    return { result: model, fields };
+    return { status: true,result: model, fields };
   }
 }
 
