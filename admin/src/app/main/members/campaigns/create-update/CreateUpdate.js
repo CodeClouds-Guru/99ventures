@@ -1,22 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Typography, FormControl, TextField, Paper, Select, InputLabel, Tooltip, IconButton, Avatar, MenuItem, Divider, TextareaAutosize, OutlinedInput, InputAdornment, FormHelperText } from '@mui/material';
+import { Typography, FormControl, TextField, Paper, Select, InputLabel, MenuItem, Divider, InputAdornment, FormHelperText, FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import ClearIcon from '@mui/icons-material/Clear';
-import UploadIcon from '@mui/icons-material/Upload';
-import { styled } from '@mui/material/styles';
-import moment from 'moment';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { motion } from 'framer-motion';
 import { useTheme } from '@mui/material/styles';
+import Helper from 'src/app/helper';
 
 const schema = yup.object().shape({
     name: yup.string().required('Please enter Name'),
@@ -28,10 +25,7 @@ const schema = yup.object().shape({
     payout_amount: yup.number().required('Please enter Payout Amount').typeError('Please insert only number'),
     track_id: yup.string().required('Please enter Track ID'),
     trigger_postback: yup.string().required('Please enter Trigger Postback'),
-    postback_url: yup.string().matches(
-        /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-        'Enter correct URL!'
-    ).required('Please enter Postback URL'),
+    postback_url: yup.string().required('Please enter Postback URL'),
     condition_type: yup.string().required('Please enter Condition Type'),
     condition_currency: yup.string().required('Please enter Condition Currency'),
     condition_amount: yup.number().required('Please enter Condition Amount').typeError('Please insert only number'),
@@ -48,19 +42,18 @@ const defaultValues = {
     condition_type: '',
     condition_currency: '',
     condition_amount: '',
+    status: '',
 };
 
 const CreateUpdate = () => {
     const module = 'campaigns';
+    const moduleId = useParams().moduleId || 'create';
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const theme = useTheme();
-    const [companies, setCompanies] = useState([]);
-    const [companyId, setCompanyId] = useState('');
-    const [companyPortalId, setCompanyPortalId] = useState('');
-    const [avatar, setAvatar] = useState('');
-    const [countryOptions, setCountryOptions] = useState([]);
+    const [status, setStatus] = useState(true)
+
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -80,6 +73,8 @@ const CreateUpdate = () => {
         setValue('condition_type', '', { shouldDirty: true, shouldValidate: false });
         setValue('condition_currency', '', { shouldDirty: true, shouldValidate: false });
         setValue('condition_amount', '', { shouldDirty: true, shouldValidate: false });
+        setValue('status', '', { shouldDirty: true, shouldValidate: false });
+        moduleId === 'create' ? '' : getSingleCampaign();
     }, [setValue]);
 
     const handleDefaultValues = (event, field_name) => {
@@ -89,9 +84,70 @@ const CreateUpdate = () => {
             :
             setValue(field_name, event.target.value, { shouldDirty: true, shouldValidate: false });
     }
-    const onSubmit = () => {
-        console.log(defaultValues)
+    const handleStatus = (event) => {
+        dirtyFields.status = true
+        setStatus(event.target.checked)
+    }
+    const clickToCopy = (text) => {
+        Helper.copyTextToClipboard(text).then(res => {
+            dispatch(showMessage({ variant: 'success', message: 'Copied' }));
+        }).catch((error) => {
+            dispatch(showMessage({ variant: 'error', message: error }))
+        })
+    }
+    const getSingleCampaign = () => {
+        axios.get(jwtServiceConfig.getSingleCampaign + `/${moduleId}`)
+            .then((response) => {
+                if (response.data.results.status && response.data.results.result) {
+                    setValue('name', response.data.results.result.name, { shouldDirty: false, shouldValidate: true });
+                    setValue('description', response.data.results.result.description, { shouldDirty: false, shouldValidate: true });
+                    setValue('affiliate_network', response.data.results.result.affiliate_network, { shouldDirty: false, shouldValidate: true });
+                    setValue('payout_amount', response.data.results.result.payout_amount, { shouldDirty: false, shouldValidate: true });
+                    setValue('trigger_postback', response.data.results.result.trigger_postback, { shouldDirty: false, shouldValidate: true });
+                    setValue('track_id', response.data.results.result.track_id, { shouldDirty: false, shouldValidate: true });
+                    setValue('postback_url', response.data.results.result.postback_url, { shouldDirty: false, shouldValidate: true });
+                    setValue('condition_type', response.data.results.result.condition_type, { shouldDirty: false, shouldValidate: true });
+                    setValue('condition_currency', response.data.results.result.condition_currency, { shouldDirty: false, shouldValidate: true });
+                    setValue('condition_amount', response.data.results.result.condition_amount, { shouldDirty: false, shouldValidate: true });
+                    setStatus(response.data.results.result.status === 'active');
+                    'status' in dirtyFields ? delete dirtyFields.status : '';
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
+    const onSubmit = ({ name, description, affiliate_network, payout_amount, trigger_postback, track_id, postback_url, condition_type, condition_currency, condition_amount }) => {
+        setLoading(true);
+        let form_data = {
+            name: name,
+            description: description,
+            affiliate_network: affiliate_network,
+            payout_amount: payout_amount,
+            trigger_postback: trigger_postback,
+            track_id: track_id,
+            postback_url: postback_url,
+            condition_type: condition_type,
+            condition_currency: condition_currency,
+            condition_amount: condition_amount,
+            status: status ? 'active' : 'inactive'
+        };
 
+        axios.post(moduleId === 'create' ? jwtServiceConfig.campaignsSave : jwtServiceConfig.campaignUpdate + `/${moduleId}`, form_data)
+            .then((response) => {
+                if (response.status === 200) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    navigate(`/app/campaigns`);
+                    // navigate(`/app/campaigns/${response.data.results.result.id}`);
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            }).finally(() => {
+                setLoading(false)
+            })
     }
 
     return (
@@ -271,7 +327,11 @@ const CreateUpdate = () => {
                                             required
                                         // onChange={(event) => handleDefaultValues(event, 'postback_url')}
                                         />
-                                        <FormHelperText variant="standard">%trackId%=&%payout%=&%status%=</FormHelperText>
+                                        <Tooltip title="Click to copy" placement="right">
+                                            <FormHelperText color="primary" onClick={() => clickToCopy('%trackId%=&%payout%=&%status%=')} className="cursor-pointer w-1/3" variant="standard">
+                                                <b>%trackId%=&%payout%=&%status%=</b>
+                                            </FormHelperText>
+                                        </Tooltip>
                                     </FormControl>
                                 )}
                             />
@@ -340,6 +400,27 @@ const CreateUpdate = () => {
                                     />
                                 )}
                             />
+                            {moduleId !== 'create' && <Controller
+                                name="status"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormControl className="w-1/2 mb-10 p-15">
+                                        <FormGroup aria-label="position" row>
+                                            <FormControlLabel
+                                                {...field}
+                                                value="top"
+                                                control={<Switch
+                                                    className="mb-24"
+                                                    checked={status}
+                                                    onChange={handleStatus}
+                                                />}
+                                                label="Status"
+                                                labelPlacement="top"
+                                            />
+                                        </FormGroup>
+                                    </FormControl>
+                                )}
+                            />}
                         </div>
                         <div className="flex justify-center">
                             <LoadingButton
