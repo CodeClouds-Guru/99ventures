@@ -13,16 +13,28 @@ class CampaignController extends Controller {
     // return send_mail
     const options = this.getQueryOptions(req);
     let company_portal_id = req.headers.site_id;
-
-    // options.attributes = Object.keys(this.model.fields).concat([
-    //   [
-    //     // Note the wrapping parentheses in the call below!
-    //     sequelize.literal(
-    //       `(SELECT COUNT(*) as users, COUNT(if(is_condition_met=1,1,null)) as leads, COUNT(if(is_reversed=1,1,null)) as reversals FROM campaign_member WHERE campaign_member.campaign_id = Campaign.id)`
-    //     ),
-    //     'laughReactionsCount'
-    //   ],
-    // ]);
+    var query_str =
+      "FROM campaign_member WHERE campaign_member.campaign_id = Campaign.id";
+      
+    options.attributes = Object.keys(this.model.fields).concat([
+      [sequelize.literal(`(SELECT COUNT(*)` + query_str + `)`), "users"],
+      [
+        sequelize.literal(
+          `(SELECT COUNT(if(campaign_member.is_condition_met=1,1,null)) ` +
+            query_str +
+            `)`
+        ),
+        "leads",
+      ],
+      [
+        sequelize.literal(
+          `(SELECT COUNT(if(campaign_member.is_reversed=1,1,null)) ` +
+            query_str +
+            `)`
+        ),
+        "reversals",
+      ],
+    ]);
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;
