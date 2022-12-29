@@ -38,10 +38,15 @@ const CampaignsConfig = {
       auth: settingsConfig.defaultAuth
     },
     {
+      path: 'app/campaigns/:moduleId',
+      element: <CampaignsCreateUpdate />,
+      auth: settingsConfig.defaultAuth
+    },
+    {
       path: 'app/campaigns/users-tracking',
       element: <UsersTracking />,
-      // auth: settingsConfig.defaultAuth
-    },
+      auth: settingsConfig.defaultAuth
+    }
   ],
 };
 
