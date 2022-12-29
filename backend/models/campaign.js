@@ -11,6 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Campaign.belongsToMany(models.Member, {
+        through: 'campaign_member',
+        foreignKey: 'campaign_id',
+        otherKey: 'member_id',
+        timestamps: false,
+      })
     }
   }
   Campaign.init(
