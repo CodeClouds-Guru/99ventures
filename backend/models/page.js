@@ -145,8 +145,8 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
     page_json: {
-      field_name: 'layout_json',
-      db_name: 'layout_json',
+      field_name: 'page_json',
+      db_name: 'page_json',
       type: 'text',
       placeholder: 'JSON',
       listing: false,

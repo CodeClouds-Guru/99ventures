@@ -36,6 +36,11 @@ const CampaignsConfig = {
       element: <CampaignsCreateUpdate />,
       auth: settingsConfig.defaultAuth
     },
+    {
+      path: 'app/campaigns/:moduleId',
+      element: <CampaignsCreateUpdate />,
+      auth: settingsConfig.defaultAuth
+    },
   ],
 };
 

@@ -224,9 +224,10 @@ function List(props) {
 	}
 
 	const processFieldValue = (value, fieldConfig) => {
-		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'activity_date')) {
-			// value = moment(value).format('DD-MMM-YYYY')
-			value =  Helper.parseTimeStamp(value)
+		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
+			value = Helper.parseTimeStamp(value)
+		} else if (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at') {
+			value = moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
 	}
@@ -273,6 +274,8 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+		} else if (module === 'campaigns' && field.field_name === 'status') {
+			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 		} else {
 			return processFieldValue(n[field.field_name], field)
 		}
