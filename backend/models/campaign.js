@@ -43,7 +43,23 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "campaigns",
     }
   );
-
+ //validation function
+ Campaign.validate = function (req) {
+  const schema = Joi.object({
+    name: Joi.string().required().label('Name'),
+    description: Joi.string().required().label('Description'),
+    affiliate_network: Joi.string().required().label('Affiliate Network'),
+    payout_amount: Joi.required().label('Payout Amount'),
+    trigger_postback: Joi.required().label('Trigger Postback'),
+    postback_url: Joi.string().required().label('Postback URL'),
+    track_id: Joi.string().required().label('track_id'),
+    condition_type: Joi.required().label('Condition Type'),
+    condition_currency: Joi.required().label('Condition Currency'),
+    condition_amount: Joi.required().label('Condition Amount'),
+    status: Joi.required().label('Status')
+  })
+  return schema.validate(req.body)
+}
   Campaign.fields = {
     id: {
       field_name: "id",
