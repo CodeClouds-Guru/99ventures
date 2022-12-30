@@ -16,7 +16,11 @@ class CampaignController extends Controller {
     var query_str =
       "FROM campaign_member WHERE campaign_member.campaign_id = Campaign.id";
       
-    options.attributes = Object.keys(this.model.fields).concat([
+    var fields = Object.keys(this.model.fields).filter(
+      (x) => !this.model.extra_fields.includes(x)
+    );
+    console.log(fields)
+    options.attributes = fields.concat([
       [sequelize.literal(`(SELECT COUNT(*)` + query_str + `)`), "users"],
       [
         sequelize.literal(
