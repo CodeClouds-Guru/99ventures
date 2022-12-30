@@ -2,7 +2,7 @@ import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import MainHeader from 'app/shared-components/MainHeader';
 import CampaignDetails from "./CampaignDetails";
-import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel, Stack, Chip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState } from 'react';
 import List from "../../crud/list/List";
@@ -44,6 +44,12 @@ const UsersTracking = () => {
                             </div>
                         </div>
                     </div>
+                    <Stack direction="row" spacing={1} className="py-10 justify-center">
+                        <Chip label="Condition Met (Postback Triggered)" size="small" color="success" />
+                        <Chip label="Condition Met (Postback Not Triggered)" size="small" color="warning" />
+                        <Chip label="Condition Met (Reversed)" size="small" color="primary" />
+                        <Chip label="Condition Not Met" size="small" color="error" />
+                    </Stack>
                 </>
             }
             content={

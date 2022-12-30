@@ -306,126 +306,131 @@ function List(props) {
 	return (
 		<div>
 			{/* // header */}
-			<div className='w-full flex py-32 px-24 md:px-32'>
-				{
-					showModuleHeading === '' && (
-						<Typography
-							component={motion.span}
-							initial={{ x: -20 }}
-							animate={{ x: 0, transition: { delay: 0.2 } }}
-							delay={300}
-							className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
-						>
-							{module.split('-').join(' ')}
-						</Typography>
-					)
-				}
-				<div className="flex items-center justify-end space-x-8 w-full ml-auto">
-					{
-						(module === 'member-transactions' && location.pathname.includes('history')) && (
-							<>
-								{
-									datepickerStatus && (
-										<DateRangePicker
-											wrapperClassName="filter-daterange-picker"
-											open={datepickerStatus}
-											toggle={() => setDatepickerStatus(!datepickerStatus)}
-											onChange={dateRangeSelected}
-										/>
-									)
-								}
-								<Paper
-									component={motion.div}
-									initial={{ y: -20, opacity: 0 }}
-									animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-									className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
-									sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+			{
+				(showModuleHeading === '' || searchable && addable) && (
+					<div className='w-full flex py-32 px-24 md:px-32'>
+						{
+							showModuleHeading === '' && (
+								<Typography
+									component={motion.span}
+									initial={{ x: -20 }}
+									animate={{ x: 0, transition: { delay: 0.2 } }}
+									delay={300}
+									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
-									<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
-									<Input
-										label="Select a date range"
-										className="datepicker--input"
-										placeholder="Select daterange"
-										disabled
-										disableUnderline
-										size="small"
-										onClick={() => setDatepickerStatus(!datepickerStatus)}
-										value={
-											dateRange && dateRange.startDate
-												? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
-												: ''
+									{module.split('-').join(' ')}
+								</Typography>
+							)
+						}
+						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
+							{
+								(module === 'member-transactions' && location.pathname.includes('history')) && (
+									<>
+										{
+											datepickerStatus && (
+												<DateRangePicker
+													wrapperClassName="filter-daterange-picker"
+													open={datepickerStatus}
+													toggle={() => setDatepickerStatus(!datepickerStatus)}
+													onChange={dateRangeSelected}
+												/>
+											)
 										}
-									/>
-									{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
-								</Paper>
-								<FormControl sx={{ minWidth: 120 }} size="small">
-									<InputLabel id="demo-simple-select-label">Type</InputLabel>
-									<Select
-										labelId="demo-simple-select-label"
-										id="demo-simple-select"
-										value={txnType}
-										label="Type"
-										className="rounded-full"
-										sx={{ lineHeight: '17px' }}
-										onChange={
-											(e) => {
-												setTxnType(e.target.value);
-												if (e.target.value) {
-													setWhere({ ...where, type: e.target.value });
-												} else {
-													setWhere(props.where);
+										<Paper
+											component={motion.div}
+											initial={{ y: -20, opacity: 0 }}
+											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
+											className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
+											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+										>
+											<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
+											<Input
+												label="Select a date range"
+												className="datepicker--input"
+												placeholder="Select daterange"
+												disabled
+												disableUnderline
+												size="small"
+												onClick={() => setDatepickerStatus(!datepickerStatus)}
+												value={
+													dateRange && dateRange.startDate
+														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
+														: ''
 												}
-											}
-										}
-									>
-										<MenuItem value="">
-											<em>--Select--</em>
-										</MenuItem>
-										<MenuItem value="credited">Credited</MenuItem>
-										<MenuItem value="withdraw">Withdraw</MenuItem>
-									</Select>
-								</FormControl>
-							</>
-						)
-					}
+											/>
+											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
+										</Paper>
+										<FormControl sx={{ minWidth: 120 }} size="small">
+											<InputLabel id="demo-simple-select-label">Type</InputLabel>
+											<Select
+												labelId="demo-simple-select-label"
+												id="demo-simple-select"
+												value={txnType}
+												label="Type"
+												className="rounded-full"
+												sx={{ lineHeight: '17px' }}
+												onChange={
+													(e) => {
+														setTxnType(e.target.value);
+														if (e.target.value) {
+															setWhere({ ...where, type: e.target.value });
+														} else {
+															setWhere(props.where);
+														}
+													}
+												}
+											>
+												<MenuItem value="">
+													<em>--Select--</em>
+												</MenuItem>
+												<MenuItem value="credited">Credited</MenuItem>
+												<MenuItem value="withdraw">Withdraw</MenuItem>
+											</Select>
+										</FormControl>
+									</>
+								)
+							}
 
-					{searchable && <Paper
-						component={motion.div}
-						initial={{ y: -20, opacity: 0 }}
-						animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-						className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
-					>
-						<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
+							{searchable && <Paper
+								component={motion.div}
+								initial={{ y: -20, opacity: 0 }}
+								animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
+								className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
+							>
+								<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
-						<Input
-							placeholder={`Search ${module.split('-').join(' ')}`}
-							className="flex flex-1"
-							disableUnderline
-							fullWidth
-							value={searchText}
-							inputProps={{
-								'aria-label': `Search ${module}`,
-							}}
-							onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
-						/>
-					</Paper>}
-					{addable && <motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-					>
-						<Button
-							className=""
-							component={Link}
-							to={customAddURL}
-							variant="contained"
-							color="secondary"
-							startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
-						>
-							Add
-						</Button>
-					</motion.div>}
-				</div>
-			</div>
+								<Input
+									placeholder={`Search ${module.split('-').join(' ')}`}
+									className="flex flex-1"
+									disableUnderline
+									fullWidth
+									value={searchText}
+									inputProps={{
+										'aria-label': `Search ${module}`,
+									}}
+									onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
+								/>
+							</Paper>}
+							{addable && <motion.div
+								initial={{ opacity: 0, x: 20 }}
+								animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+							>
+								<Button
+									className=""
+									component={Link}
+									to={customAddURL}
+									variant="contained"
+									color="secondary"
+									startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
+								>
+									Add
+								</Button>
+							</motion.div>}
+						</div>
+					</div>
+				)
+			}
+			
 
 			{/* // body */}
 			<div className="w-full flex flex-col min-h-full">
