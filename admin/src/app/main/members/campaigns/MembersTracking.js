@@ -16,7 +16,7 @@ const UsersTracking = () => {
             sx={{ '& .FusePageCarded-header': {flexDirection: 'column'} }}
             header={
                 <>
-                    <MainHeader module="Users Tracking" />
+                    <MainHeader module="Reports" />
                     <div className='flex mb-16 w-full justify-between items-center'>
                         <CampaignDetails  />
                         <div className="flex">
@@ -26,7 +26,7 @@ const UsersTracking = () => {
                                     labelId="demo-select-small"
                                     id="demo-select-small"
                                     value={20}
-                                    label="Age"
+                                    label="Filter"
                                 >
                                     <MenuItem value={10}>All</MenuItem>
                                     <MenuItem value={20}>Condition Met (Postback Triggered)</MenuItem>
