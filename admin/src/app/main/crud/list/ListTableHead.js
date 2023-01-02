@@ -152,30 +152,3 @@ function ListTableHead(props) {
 }
 
 export default ListTableHead;
-
-// {module === 'campaigns' &&
-//                 <TableCell
-//                   sx={{
-//                     backgroundColor: (theme) =>
-//                       theme.palette.mode === 'light'
-//                         ? lighten(theme.palette.background.default, 0.4)
-//                         : lighten(theme.palette.background.default, 0.02),
-//                   }}
-//                   className="p-4 md:p-16"
-//                   key="action"
-//                   align="left"
-//                   padding="normal"
-//                 >
-//                   <Tooltip
-//                     title="Action"
-//                     placement={row.align === 'right' ? 'bottom-end' : 'bottom-start'}
-//                     enterDelay={300}
-//                   >
-//                     <TableSortLabel
-//                       className="font-semibold"
-//                     >
-//                       Action
-//                     </TableSortLabel>
-//                   </Tooltip>
-//                 </TableCell>
-//               }

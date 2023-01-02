@@ -86,7 +86,7 @@ function List(props) {
 
 		axios.get(`/${module}`, { params }).then(res => {
 			let fields_var = res.data.results.fields;
-			fields_var.actions = {
+			module === 'campaigns' ? fields_var.actions = {
 				db_name: "actions",
 				field_name: "actions",
 				listing: true,
@@ -98,7 +98,7 @@ function List(props) {
 				type: "text",
 				value: "",
 				width: "50"
-			}
+			} : '';
 			setFields(fields_var);
 			setModules(res.data.results.result.data);
 			setTotalRecords(res.data.results.result.total)
