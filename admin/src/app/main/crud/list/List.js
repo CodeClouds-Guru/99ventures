@@ -184,8 +184,13 @@ function List(props) {
 		}
 	}
 
-	function handleClick(item) {
-		editable ? handelNavigate(item) : '';
+	function handleClick(item, e) {
+		console.log(e.target.classList, e.target.classList.contains('listingExtraMenu'))
+		if (editable && !e.target.classList.contains('listingExtraMenu')) {
+			handelNavigate(item)
+		} else {
+			return false;
+		}
 	}
 
 	function handelNavigate(item) {
@@ -302,13 +307,16 @@ function List(props) {
 				return (
 					<>
 						<IconButton
-							sx={{ zIndex: 999999 }}
 							aria-owns={actionsMenu ? 'actionsMenu' : null}
 							aria-haspopup="true"
 							onClick={openActionsMenu}
 							size="large"
+							className="listingExtraMenu"
+							sx={{ zIndex: 999 }}
 						>
-							<FuseSvgIcon>material-outline:settings</FuseSvgIcon>
+							<FuseSvgIcon
+								className="listingExtraMenu"
+							>material-outline:settings</FuseSvgIcon>
 						</IconButton>
 						<Menu
 							id="actionsMenu"
@@ -526,7 +534,7 @@ function List(props) {
 												tabIndex={-1}
 												key={n.id}
 												selected={isSelected}
-												onClick={(event) => handleClick(n)}
+												onClick={(event) => handleClick(n, event)}
 											>{module === 'tickets' ? '' :
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
