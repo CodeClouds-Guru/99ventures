@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -57,7 +57,7 @@ function List(props) {
 		startDate: '',
 		endDate: '',
 	});
-
+	const [actionsMenu, setActionsMenu] = useState(null);
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
@@ -85,7 +85,21 @@ function List(props) {
 		}
 
 		axios.get(`/${module}`, { params }).then(res => {
-			setFields(res.data.results.fields);
+			let fields_var = res.data.results.fields;
+			fields_var.actions = {
+				db_name: "actions",
+				field_name: "actions",
+				listing: true,
+				placeholder: "Actions",
+				required: false,
+				searchable: false,
+				show_in_form: false,
+				sort: false,
+				type: "text",
+				value: "",
+				width: "50"
+			}
+			setFields(fields_var);
 			setModules(res.data.results.result.data);
 			setTotalRecords(res.data.results.result.total)
 			setLoading(false);
@@ -222,7 +236,13 @@ function List(props) {
 		setRowsPerPage(event.target.value);
 		setFirstCall(true);
 	}
+	function openActionsMenu(event) {
+		setActionsMenu(event.currentTarget);
+	}
 
+	function closeActionsMenu() {
+		setActionsMenu(null);
+	}
 	const processFieldValue = (value, fieldConfig) => {
 		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
 			value = Helper.parseTimeStamp(value)
@@ -274,8 +294,45 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'campaigns' && field.field_name === 'status') {
-			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+		} else if (module === 'campaigns') {
+			if (field.field_name === 'status') {
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+			}
+			if (field.field_name === 'actions') {
+				return (
+					<>
+						<IconButton
+							sx={{ zIndex: 999999 }}
+							aria-owns={actionsMenu ? 'actionsMenu' : null}
+							aria-haspopup="true"
+							onClick={openActionsMenu}
+							size="large"
+						>
+							<FuseSvgIcon>material-outline:settings</FuseSvgIcon>
+						</IconButton>
+						<Menu
+							id="actionsMenu"
+							anchorEl={actionsMenu}
+							open={Boolean(actionsMenu)}
+							onClose={closeActionsMenu}
+						>
+							<MenuList>
+								<MenuItem
+									onClick={(event) => {
+										event.stopPropagation();
+										navigate(`/app/campaigns/${n.id}/report`)
+									}}
+								>
+									<ListItemIcon className="min-w-40">
+										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+									</ListItemIcon>
+									<ListItemText primary="Report" />
+								</MenuItem>
+							</MenuList>
+						</Menu></>
+				)
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else {
 			return processFieldValue(n[field.field_name], field)
 		}
@@ -430,7 +487,7 @@ function List(props) {
 					</div>
 				)
 			}
-			
+
 
 			{/* // body */}
 			<div className="w-full flex flex-col min-h-full">
