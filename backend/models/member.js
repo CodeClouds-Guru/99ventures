@@ -48,7 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'member_id',
         otherKey: 'survey_id',
-      })
+      });
+      Member.hasMany(models.CampaignMember, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.validate = function (req) {
