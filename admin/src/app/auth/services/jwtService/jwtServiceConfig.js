@@ -53,7 +53,10 @@ const jwtServiceConfig = {
   membersSave: 'members/save',
   getSingleMember: 'members/view',
   memberUpdate: 'members/update',
-  memberDelete: 'members/delete'
+  memberDelete: 'members/delete',
+  campaignsSave: 'campaigns/save',
+  getSingleCampaign: 'campaigns/view',
+  campaignUpdate: 'campaigns/update',
 };
 
 export default jwtServiceConfig;

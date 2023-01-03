@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const sequelizePaginate = require("sequelize-paginate");
-const Joi = require('joi')
+const Joi = require("joi");
 module.exports = (sequelize, DataTypes) => {
   class Campaign extends Model {
     /**
@@ -12,11 +12,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Campaign.belongsToMany(models.Member, {
-        through: 'campaign_member',
-        foreignKey: 'campaign_id',
-        otherKey: 'member_id',
+        through: "campaign_member",
+        foreignKey: "campaign_id",
+        otherKey: "member_id",
         timestamps: false,
-      })
+      });
     }
   }
   Campaign.init(
@@ -50,23 +50,25 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "campaigns",
     }
   );
- //validation function
- Campaign.validate = function (req) {
-  const schema = Joi.object({
-    name: Joi.string().required().label('Name'),
-    description: Joi.string().required().label('Description'),
-    affiliate_network: Joi.string().required().label('Affiliate Network'),
-    payout_amount: Joi.required().label('Payout Amount'),
-    trigger_postback: Joi.required().label('Trigger Postback'),
-    postback_url: Joi.string().required().label('Postback URL'),
-    track_id: Joi.string().required().label('track_id'),
-    condition_type: Joi.required().label('Condition Type'),
-    condition_currency: Joi.required().label('Condition Currency'),
-    condition_amount: Joi.required().label('Condition Amount'),
-    status: Joi.required().label('Status')
-  })
-  return schema.validate(req.body)
-}
+  //validation function
+  Campaign.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required().label("Name"),
+      description: Joi.string().required().label("Description"),
+      affiliate_network: Joi.string().required().label("Affiliate Network"),
+      payout_amount: Joi.required().label("Payout Amount"),
+      trigger_postback: Joi.required().label("Trigger Postback"),
+      postback_url: Joi.string().required().label("Postback URL"),
+      track_id: Joi.string().required().label("track_id"),
+      condition_type: Joi.required().label("Condition Type"),
+      condition_currency: Joi.required().label("Condition Currency"),
+      condition_amount: Joi.required().label("Condition Amount"),
+      status: Joi.required().label("Status"),
+    });
+    return schema.validate(req.body);
+  };
+  Campaign.extra_fields = ["users", "leads", "reversals"];
+
   Campaign.fields = {
     id: {
       field_name: "id",
@@ -229,6 +231,45 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "created_at",
       type: "text",
       placeholder: "Created At",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    users: {
+      field_name: "users",
+      db_name: "users",
+      type: "text",
+      placeholder: "Users",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    leads: {
+      field_name: "leads",
+      db_name: "leads",
+      type: "text",
+      placeholder: "Leads",
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    reversals: {
+      field_name: "reversals",
+      db_name: "reversals",
+      type: "text",
+      placeholder: "Reversals",
       listing: true,
       show_in_form: false,
       sort: true,
