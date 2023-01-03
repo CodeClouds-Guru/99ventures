@@ -11,18 +11,35 @@ class CampaignController extends Controller {
   }
 
   async list(req, res) {
-    // var emailHelper = new EmailHelper(req)
-    // var send_mail = await emailHelper.sendMail('<b>hello</b>','sourabh.das@codeclouds.in');
-    // return send_mail
     const options = this.getQueryOptions(req);
     let company_portal_id = req.headers.site_id;
+
+    // var query_where = JSON.parse(req.query.where);
+    // var temp = {};
+    // var status_filter = {};
+    // if (query_where) {
+    //   if (query_where.filters) {
+    //     temp = query_where.filters.map((filter) => {
+    //       return {
+    //         [filter.column]: {
+    //           [Op[filter.match]]: filter.search,
+    //         },
+    //       };
+    //     });
+    //   }
+    // }
+    // options.where = {
+    //   ...options.where,
+    //   company_portal_id: company_portal_id,
+    //   ...(temp && { [Op.and]: temp }),
+    // };
     var query_str =
       "FROM campaign_member WHERE campaign_member.campaign_id = Campaign.id";
-      
+
     var fields = Object.keys(this.model.fields).filter(
       (x) => !this.model.extra_fields.includes(x)
     );
-    console.log(fields)
+    console.log(fields);
     options.attributes = fields.concat([
       [sequelize.literal(`(SELECT COUNT(*)` + query_str + `)`), "users"],
       [

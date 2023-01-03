@@ -7,21 +7,23 @@
  * Description: Similar to asset() helper in laravel
  * @param {String} part_url
  */
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
-const fs = require('fs')
+require("dotenv").config();
+
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const fs = require("fs");
 // const axios = require('axios')
 
-exports.asset = (part_url = '') => {
-  base_asset_url = process.env.URI
-  if (base_asset_url.slice(-1) !== '/') {
-    base_asset_url += '/'
+exports.asset = (part_url = "") => {
+  base_asset_url = process.env.URI;
+  if (base_asset_url.slice(-1) !== "/") {
+    base_asset_url += "/";
   }
-  if (part_url[0] === '/') {
-    part_url = part_url.substr(1)
+  if (part_url[0] === "/") {
+    part_url = part_url.substr(1);
   }
-  return base_asset_url + part_url
-}
+  return base_asset_url + part_url;
+};
 
 /**
  * Description: Similar to asset() helper in laravel
@@ -32,15 +34,15 @@ exports.asset = (part_url = '') => {
 exports.search = (key, value, arrayOfObjects) => {
   for (var i = 0; i < arrayOfObjects.length; i++) {
     if (arrayOfObjects[i][key] === value) {
-      return arrayOfObjects[i]
+      return arrayOfObjects[i];
     }
   }
-  return null
-}
+  return null;
+};
 
 exports.generateToken = (params) => {
-  return jwt.sign(params, process.env.APP_SECRET, { expiresIn: 100000 })
-}
+  return jwt.sign(params, process.env.APP_SECRET, { expiresIn: 100000 });
+};
 
 // exports.downloadImageFromLink = (url, image_path) =>
 //   axios({
@@ -57,40 +59,59 @@ exports.generateToken = (params) => {
 //   )
 
 exports.stringToSlug = (str) => {
-  str = str.replace(/^\s+|\s+$/g, '') // trim
-  str = str.toLowerCase()
+  str = str.replace(/^\s+|\s+$/g, ""); // trim
+  str = str.toLowerCase();
 
   // remove accents, swap ñ for n, etc
-  var from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:;'
-  var to = 'aaaaeeeeiiiioooouuuunc------'
+  var from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;";
+  var to = "aaaaeeeeiiiioooouuuunc------";
   for (var i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
+    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
   }
 
   str = str
-    .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-    .replace(/\s+/g, '-') // collapse whitespace and replace by -
-    .replace(/-+/g, '-') // collapse dashes
+    .replace(/[^a-z0-9 -]/g, "") // remove invalid chars
+    .replace(/\s+/g, "-") // collapse whitespace and replace by -
+    .replace(/-+/g, "-"); // collapse dashes
 
-  return str
-}
+  return str;
+};
 exports.cartesian = (...a) =>
-  a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())))
+  a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())));
 
 exports.replaceAllWithReplacements = (str, replacements) => {
   var replacedString = str;
-  const find = Object.keys(replacements)
-  const replace = Object.values(replacements)
+  const find = Object.keys(replacements);
+  const replace = Object.values(replacements);
   for (var i = 0; i < find.length; i++) {
     replacedString = replacedString.replaceAll(find[i], replace[i]);
   }
   return replacedString;
-}
+};
 
 exports.createCommentSignature = (code) => {
   // return {
   //   'start': `<!-- ${code} starts -->`,
   //   'end': `<!-- ${code} ends -->`
   // }
-  return { 'start': '', 'end': '' }
-}
+  return { start: "", end: "" };
+};
+
+exports.cryptoEncryption = (str) => {
+  var pass = process.env.CRYPTO_KEY || "99_VENTURES";
+  const mystr = crypto
+    .createHash("sha256", pass)
+    .update(str,'binary')
+    .digest("hex");
+  console.log(mystr);
+  return mystr;
+};
+
+exports.cryptoDecryption = (str) => {
+  var pass = process.env.CRYPTO_KEY || "99_VENTURES";
+  var mykey = crypto.createDecipher("aes-128-cbc", pass);
+  var mystr = mykey.update(str, "hex", "utf8");
+  mystr += mykey.final("utf8");
+  console.log(mystr);
+  return mystr;
+};

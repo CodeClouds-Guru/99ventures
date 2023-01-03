@@ -250,7 +250,7 @@ module.exports = (sequelize, DataTypes) => {
       required: false,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     leads: {
       field_name: "leads",
@@ -263,7 +263,7 @@ module.exports = (sequelize, DataTypes) => {
       required: false,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
     reversals: {
       field_name: "reversals",
@@ -276,7 +276,7 @@ module.exports = (sequelize, DataTypes) => {
       required: false,
       value: "",
       width: "50",
-      searchable: true,
+      searchable: false,
     },
   };
   sequelizePaginate.paginate(Campaign);
