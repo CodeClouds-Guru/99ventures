@@ -19,18 +19,18 @@ const PageController = new PageControllerClass();
 
 const DynamicRouteController = require("../controllers/backend/DynamicRouteController");
 
-router.get("/",[AuthMiddleware], (req, res) => {
-  const eventBus = require('../eventBus');
-  let email_body = eventBus.emit('send_email', {
-    action: 'Invitation',
+router.get("/", [AuthMiddleware], (req, res) => {
+  const eventBus = require("../eventBus");
+  let email_body = eventBus.emit("send_email", {
+    action: "Invitation",
     data: {
-      'email': 'mailto:sourabh.das@codeclouds.in',
-      'company_id':1,
-      'company_portal_id':1
+      email: "mailto:sourabh.das@codeclouds.in",
+      company_id: 1,
+      company_portal_id: 1,
     },
-    req:req
+    req: req,
   });
-  res.json({ message: "API working",email_body:email_body });
+  res.json({ message: "API working", email_body: email_body });
 });
 
 router.post("/signup", AuthController.signup);
@@ -54,7 +54,22 @@ router.post("/check-auth", [AuthMiddleware], AuthController.checkAuth);
 
 //change ticket read status
 // router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
-router.post("/file-manager/download", [AuthMiddleware], FileManagerController.download);
+
+//testing of axios api call
+router.get("/campaign-callback", [AuthMiddleware], (req, res) => {
+  const axios = require("../helpers/CampaignCallbackHelper");
+
+  let axios_class = new axios();
+  let axios_callback = axios_class.makeRequest();
+  console.log('axios_callback',axios_callback);
+  res.json(axios_callback);
+});
+
+router.post(
+  "/file-manager/download",
+  [AuthMiddleware],
+  FileManagerController.download
+);
 router.get("/pages/preview/:id?", [AuthMiddleware], PageController.preview);
 router.all(
   "/:module/:action?/:id?",
