@@ -64,9 +64,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    console.log(
-      util.inspect(options, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+    // );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
