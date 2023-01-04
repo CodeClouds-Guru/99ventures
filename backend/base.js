@@ -36,13 +36,14 @@ function setup(app) {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
     cors({
-      origin: function (origin, callback) {
-        if (whitelists.indexOf(origin) !== -1) {
-          callback(null, true)
-        } else {
-          callback(new Error('Not allowed by CORS'))
-        }
-      },
+      // origin: function (origin, callback) {
+      //   if (whitelists.indexOf(origin) !== -1) {
+      //     callback(null, true)
+      //   } else {
+      //     callback(new Error('Not allowed by CORS'))
+      //   }
+      // },
+      origin: true,
       optionsSuccessStatus: 200,
     })
   )

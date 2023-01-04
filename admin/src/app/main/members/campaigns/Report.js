@@ -7,8 +7,9 @@ import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel, St
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'
-import List from "../../crud/list/List";
-import axios from 'axios'
+// import List from "../../crud/list/List";
+import axios from 'axios';
+import ReportList from './ReportList';
 
 const UsersTracking = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
@@ -16,17 +17,19 @@ const UsersTracking = () => {
     const [ listData, setListData] = useState([]);
     const { campaignId } = useParams(); 
     
-    // useEffect(()=>{
-    //     getDetails();
-    // }, []);
+    useEffect(()=>{
+        getDetails();
+    }, []);
 
     const getDetails = () => {
         axios.post(jwtServiceConfig.getSingleCampaign + '/' + campaignId + '?report=1')
         .then(res => {
-            if (res.data.results) {
-                const result = res.data.results;
-                setCampaignDetails(result.result);
-            }
+            console.log(res)
+            // if (res.data.results) {
+            //     const result = res.data.results;
+            //     setListData(result)
+            //     // setCampaignDetails(result.result);
+            // }
         })
         .catch(errors => {
             dispatch(showMessage({ variant: 'error', message: errors.message}));
@@ -86,6 +89,7 @@ const UsersTracking = () => {
             }
             content={
                 <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 " >
+                    {/* <ReportList result={listData}/> */}
                     {/* <List
                         module="campaigns"
                         moduleHeading={false}
