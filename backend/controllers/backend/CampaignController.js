@@ -253,7 +253,7 @@ class CampaignController extends Controller {
       return { status: true, result: model, fields };
     }
   }
-  //
+  //generate query 
   async getQueryOptions(req, fields_custom) {
     let page = req.query.page || 1;
     let show = parseInt(req.query.show) || 10; // per page record
