@@ -123,15 +123,6 @@ class CampaignController extends Controller {
       '&track=' +
       model.track_id;
     // console.log("========", home_page_url, "========", registration_page_url);
-
-    let campaign_link = {
-      home_page_url,
-      registration_page_url,
-      referral_link,
-      ref_home_page_url,
-      ref_registration_page_url,
-    };
-    model.setDataValue('campaign_link', campaign_link);
     console.log('============', model);
     let fields = {};
     if (report == '1') {
@@ -301,14 +292,20 @@ class CampaignController extends Controller {
           });
         }
       });
-      model = report_details;
-
       return {
         status: true,
-        result: { data: model, pages, total },
+        result: { data: report_details,campaign_details:model, pages, total },
         fields: fields,
       };
     } else {
+      let campaign_link = {
+        home_page_url,
+        registration_page_url,
+        referral_link,
+        ref_home_page_url,
+        ref_registration_page_url,
+      };
+      model.setDataValue('campaign_link', campaign_link);
       fields = this.model.fields;
       return { status: true, result: model, fields };
     }
