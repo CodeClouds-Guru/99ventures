@@ -91,39 +91,45 @@ class CampaignController extends Controller {
         attributes: ['domain'],
       },
     });
-
-    console.log('======================model', model);
-
     //view url section
-    let home_page_url =
-      model.CompanyPortal.domain +
-      '/?cid=' +
-      req.params.id +
-      '&track=' +
-      model.track_id;
-    let registration_page_url =
-      model.CompanyPortal.domain +
-      '/?members/register.php?cid=' +
-      req.params.id +
-      '&track=' +
-      model.track_id;
+    let campaign_link = {};
+    if (model.CompanyPortal && model.CompanyPortal.domain) {
+      let home_page_url =
+        model.CompanyPortal.domain +
+        '/?cid=' +
+        req.params.id +
+        '&track=' +
+        model.track_id;
+      let registration_page_url =
+        model.CompanyPortal.domain +
+        '/?members/register.php?cid=' +
+        req.params.id +
+        '&track=' +
+        model.track_id;
 
-    let referral_link =
-      "Replace 'scripteed' within the below campaign links with the username of the member you would like to use.";
-    let ref_home_page_url =
-      model.CompanyPortal.domain +
-      '/?ref=scripteed&cid=' +
-      req.params.id +
-      '&track=' +
-      model.track_id;
-    let ref_registration_page_url =
-      model.CompanyPortal.domain +
-      '/?members/register.php?/?ref=scripteed&cid=' +
-      req.params.id +
-      '&track=' +
-      model.track_id;
-    // console.log("========", home_page_url, "========", registration_page_url);
-    console.log('============', model);
+      let referral_link =
+        "Replace 'scripteed' within the below campaign links with the username of the member you would like to use.";
+      let ref_home_page_url =
+        model.CompanyPortal.domain +
+        '/?ref=scripteed&cid=' +
+        req.params.id +
+        '&track=' +
+        model.track_id;
+      let ref_registration_page_url =
+        model.CompanyPortal.domain +
+        '/?members/register.php?/?ref=scripteed&cid=' +
+        req.params.id +
+        '&track=' +
+        model.track_id;
+      // console.log("========", home_page_url, "========", registration_page_url);
+      campaign_link = {
+        home_page_url,
+        registration_page_url,
+        referral_link,
+        ref_home_page_url,
+        ref_registration_page_url,
+      };
+    }
     let fields = {};
     if (report == '1') {
       fields = {
@@ -278,39 +284,32 @@ class CampaignController extends Controller {
         if (record.dataValues.Member != null) {
           record.dataValues.Member.dataValues.avatar =
             record.dataValues.Member.dataValues.avatar;
-            report_details.push({
-              id: record.dataValues.id,
-              name: model.dataValues.name,
-              member_id: record.dataValues.member_id,
-              username: record.dataValues.Member.dataValues.username,
-              created_at: record.dataValues.Member.dataValues.created_at,
-              status: record.dataValues.Member.dataValues.status,
-              payout_amount: model.dataValues.payout_amount,
-              payout_point: model.dataValues.payout_amount,
-              combained: model.dataValues.payout_amount,
-              track_id: record.dataValues.track_id,
+          report_details.push({
+            id: record.dataValues.id,
+            name: model.dataValues.name,
+            member_id: record.dataValues.member_id,
+            username: record.dataValues.Member.dataValues.username,
+            created_at: record.dataValues.Member.dataValues.created_at,
+            status: record.dataValues.Member.dataValues.status,
+            payout_amount: model.dataValues.payout_amount,
+            payout_point: model.dataValues.payout_amount,
+            combained: model.dataValues.payout_amount,
+            track_id: record.dataValues.track_id,
           });
         }
       });
       return {
         status: true,
-        result: { data: report_details,campaign_details:model, pages, total },
+        result: { data: report_details, campaign_details: model, pages, total },
         fields: fields,
       };
     } else {
-      let campaign_link = {
-        home_page_url,
-        registration_page_url,
-        referral_link,
-        ref_home_page_url,
-        ref_registration_page_url,
-      };
       model.setDataValue('campaign_link', campaign_link);
       fields = this.model.fields;
       return { status: true, result: model, fields };
     }
   }
-  //generate query 
+  //generate query
   async getQueryOptions(req, fields_custom) {
     let page = req.query.page || 1;
     let show = parseInt(req.query.show) || 10; // per page record
