@@ -245,8 +245,8 @@ class CampaignController extends Controller {
       model = report;
       return {
         status: true,
-        result: { data: docs, pages, total },
-        fields: this.model.fields,
+        result: { data: model, pages, total },
+        fields: fields,
       };
     }else{
       fields = this.model.fields;
