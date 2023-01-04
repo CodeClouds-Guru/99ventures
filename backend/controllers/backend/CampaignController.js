@@ -5,13 +5,14 @@ const {
   CampaignMember,
   sequelize,
 } = require("../../models/index");
+const util = require('util');
 class CampaignController extends Controller {
   constructor() {
     super("Campaign");
   }
 
   async list(req, res) {
-    const options = this.getQueryOptions(req);
+    let options = await this.getQueryOptions(req);
     let company_portal_id = req.headers.site_id;
 
     // var query_where = JSON.parse(req.query.where);
@@ -39,7 +40,6 @@ class CampaignController extends Controller {
     var fields = Object.keys(this.model.fields).filter(
       (x) => !this.model.extra_fields.includes(x)
     );
-    console.log(fields);
     options.attributes = fields.concat([
       [sequelize.literal(`(SELECT COUNT(*)` + query_str + `)`), "users"],
       [
@@ -64,9 +64,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    // console.log(
-    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
-    // );
+    console.log(
+      util.inspect(options, { showHidden: false, depth: null, colors: true })
+    );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -82,9 +82,9 @@ class CampaignController extends Controller {
     if (member_id) {
       where['member_id'] = { member_id: member_id }
     }
-    let model = await this.model.findOne({where:{id:req.params.id}});
+    let model = await this.model.findOne({ where: { id: req.params.id } });
     let fields = {}
-    if(report == '1'){
+    if (report == '1') {
       fields = {
         id: {
           field_name: "id",
@@ -217,28 +217,28 @@ class CampaignController extends Controller {
           searchable: true,
         }
       }
-      var options = await this.getQueryOptions(req,fields)
-      options.include = { 
+      var options = await this.getQueryOptions(req, fields)
+      options.include = {
         model: Member,
         // required: false,
-        attributes: ["id", "first_name", "last_name", "email","username","created_at","status"],
+        attributes: ["id", "first_name", "last_name", "email", "username", "created_at", "status"],
       }
-      const { docs, pages, total } = await CampaignMember.paginate(options);  
+      const { docs, pages, total } = await CampaignMember.paginate(options);
       let report = []
-      docs.forEach(function (record,key) {
-        if(record.dataValues.Member != null){
+      docs.forEach(function (record, key) {
+        if (record.dataValues.Member != null) {
           record.dataValues.Member.dataValues.avatar = record.dataValues.Member.dataValues.avatar
           report.push({
-            id:record.dataValues.id,
-            name:model.dataValues.name,
-            member_id:record.dataValues.member_id,
-            username:record.dataValues.Member.dataValues.username,
-            created_at:record.dataValues.Member.dataValues.created_at,
-            status:record.dataValues.Member.dataValues.status,
-            payout_amount:model.dataValues.payout_amount,
-            payout_point:model.dataValues.payout_amount,
-            combained:model.dataValues.payout_amount,
-            track_id:record.dataValues.track_id,
+            id: record.dataValues.id,
+            name: model.dataValues.name,
+            member_id: record.dataValues.member_id,
+            username: record.dataValues.Member.dataValues.username,
+            created_at: record.dataValues.Member.dataValues.created_at,
+            status: record.dataValues.Member.dataValues.status,
+            payout_amount: model.dataValues.payout_amount,
+            payout_point: model.dataValues.payout_amount,
+            combained: model.dataValues.payout_amount,
+            track_id: record.dataValues.track_id,
           })
         }
       })
@@ -248,13 +248,13 @@ class CampaignController extends Controller {
         result: { data: model, pages, total },
         fields: fields,
       };
-    }else{
+    } else {
       fields = this.model.fields;
       return { status: true, result: model, fields };
     }
   }
   //
-  async getQueryOptions(req,fields_custom){
+  async getQueryOptions(req, fields_custom) {
     let page = req.query.page || 1;
     let show = parseInt(req.query.show) || 10; // per page record
     var search = req.query.search || "";
