@@ -243,10 +243,15 @@ class CampaignController extends Controller {
         }
       })
       model = report;
+      return {
+        status: true,
+        result: { data: docs, pages, total },
+        fields: this.model.fields,
+      };
     }else{
       fields = this.model.fields;
+      return { status: true, result: model, fields };
     }
-    return { status: true, result: model, fields };
   }
   //
   async getQueryOptions(req,fields_custom){
