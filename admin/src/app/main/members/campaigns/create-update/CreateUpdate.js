@@ -402,27 +402,54 @@ const CreateUpdate = () => {
                                     />
                                 )}
                             />
-                            {moduleId !== 'create' && <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControl className="w-1/2 mb-10 p-15">
-                                        <FormGroup aria-label="position" row>
-                                            <FormControlLabel
-                                                {...field}
-                                                value="top"
-                                                control={<Switch
-                                                    className="mb-24"
-                                                    checked={status}
-                                                    onChange={handleStatus}
-                                                />}
-                                                label="Status"
-                                                labelPlacement="top"
-                                            />
-                                        </FormGroup>
-                                    </FormControl>
-                                )}
-                            />}
+                            {moduleId !== 'create' &&
+                                <>
+                                    <Controller
+                                        name="status"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl className="w-1/2 mb-10 p-15">
+                                                <FormGroup aria-label="position" row>
+                                                    <FormControlLabel
+                                                        {...field}
+                                                        value="top"
+                                                        control={<Switch
+                                                            className="mb-24"
+                                                            checked={status}
+                                                            onChange={handleStatus}
+                                                        />}
+                                                        label="Status"
+                                                        labelPlacement="top"
+                                                    />
+                                                </FormGroup>
+                                            </FormControl>
+                                        )}
+                                    />
+                                    <Divider className="pb-10" textAlign="left"><h3>Campaign Link</h3></Divider>
+                                    <div className="w-full border-3">
+                                        <div className="flex w-full justify-center m-10">
+                                            <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
+                                            <div className="w-10/12 ml-5"> home 1</div>
+                                        </div>
+                                        <div className="flex w-full justify-center m-10">
+                                            <div className="flex w-2/12 mr-5"> <b> Registration Page :</b></div>
+                                            <div className="w-10/12 ml-5"> reg 1</div>
+                                        </div>
+                                        <div className="flex w-full justify-center m-10 pt-5">
+                                            <div className="flex w-2/12 mr-5"> <h3> <b> Referral Link -</b></h3></div>
+                                            <div className="w-10/12 ml-5"> <h3> Replace "shiftcode" within the below campaign with the username of the member you would like to use</h3></div>
+                                        </div>
+                                        <div className="flex w-full justify-center m-10">
+                                            <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
+                                            <div className="w-10/12 ml-5"> home 2</div>
+                                        </div>
+                                        <div className="flex w-full justify-center m-10">
+                                            <div className="flex w-2/12  mr-5"> <b> Registration Page :</b></div>
+                                            <div className="w-10/12 ml-5"> reg 2</div>
+                                        </div>
+                                    </div>
+                                </>
+                            }
                         </div>
                         <div className="flex justify-center">
                             <LoadingButton
