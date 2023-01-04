@@ -40,6 +40,19 @@ module.exports = (sequelize, DataTypes) => {
   );
  //validation function
   CampaignMember.fields = {
+    id: {
+      field_name: "id",
+      db_name: "id",
+      type: "text",
+      placeholder: "Id",
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
     member_id: {
       field_name: "member_id",
       db_name: "member_id",

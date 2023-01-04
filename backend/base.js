@@ -21,6 +21,7 @@ function init() {
  * @param {Express} app
  */
 function setup(app) {
+  const whitelists = ['http://admin.moresurveys.com']
   app.use(
     fileUpload({
       useTempFiles: true,
@@ -33,10 +34,15 @@ function setup(app) {
 
   app.use(bodyParser.json({ limit: "5mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
-
   app.use(
     cors({
-      origin: true,
+      origin: function (origin, callback) {
+        if (whitelists.indexOf(origin) !== -1) {
+          callback(null, true)
+        } else {
+          callback(new Error('Not allowed by CORS'))
+        }
+      },
       optionsSuccessStatus: 200,
     })
   )
@@ -80,7 +86,7 @@ module.exports = function () {
   const app = init()
   setup(app)
   // connectDB(app)
-  
+
   chainMiddlewares(app);
   chainRoutes(app);
   initializeHandlebars(app);
