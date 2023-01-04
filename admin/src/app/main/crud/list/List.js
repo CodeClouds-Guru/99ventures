@@ -315,6 +315,7 @@ function List(props) {
 							sx={{ zIndex: 999 }}
 						>
 							<FuseSvgIcon
+								sx={{ pointerEvents: 'none' }}
 								className="listingExtraMenu"
 							>material-outline:settings</FuseSvgIcon>
 						</IconButton>
