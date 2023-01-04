@@ -55,7 +55,7 @@ class MemberController extends Controller {
           files[0] = req.files.avatar;
           const fileHelper = new FileHelper(
             files,
-            "members/" + req.params.username,
+            "members",
             req
           );
           const file_name = await fileHelper.upload();
@@ -401,7 +401,7 @@ class MemberController extends Controller {
         files[0] = req.files.avatar;
         const fileHelper = new FileHelper(
           files,
-          "members/" + req.params.id,
+          "members",
           req
         );
         const file_name = await fileHelper.upload();
