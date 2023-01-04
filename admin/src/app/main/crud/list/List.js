@@ -185,11 +185,11 @@ function List(props) {
 	}
 
 	function handleClick(item, e) {
-		console.log(e.target.classList, e.target.classList.contains('listingExtraMenu'))
-		if (editable && !e.target.classList.contains('listingExtraMenu')) {
+		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root'))) {
 			handelNavigate(item)
 		} else {
-			return false;
+			e.stopPropagation();
+			// return false;
 		}
 	}
 

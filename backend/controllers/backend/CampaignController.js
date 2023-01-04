@@ -45,16 +45,16 @@ class CampaignController extends Controller {
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_condition_met=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         "leads",
       ],
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_reversed=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         "reversals",
       ],
@@ -75,12 +75,12 @@ class CampaignController extends Controller {
     };
   }
   //view campaign
-  async view(req, res){
+  async view(req, res) {
     let member_id = req.body.member_id
     let report = req.body.report
-    let where = {campaign_id:req.params.id}
-    if(member_id){
-      where['member_id'] = {member_id:member_id}
+    let where = { campaign_id: req.params.id }
+    if (member_id) {
+      where['member_id'] = { member_id: member_id }
     }
     let model = await this.model.findOne({where:{id:req.params.id}});
     let fields = {}

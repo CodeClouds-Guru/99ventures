@@ -27,7 +27,7 @@ const schema = yup.object().shape({
     trigger_postback: yup.string().required('Please enter Trigger Postback'),
     postback_url: yup.string().required('Please enter Postback URL'),
     condition_type: yup.string().required('Please enter Condition Type'),
-    condition_currency: yup.string().required('Please enter Condition Currency'),
+    // condition_currency: yup.string().required('Please enter Condition Currency'),
     condition_amount: yup.number().required('Please enter Condition Amount').typeError('Please insert only number'),
 });
 
@@ -40,7 +40,7 @@ const defaultValues = {
     track_id: '',
     postback_url: '',
     condition_type: '',
-    condition_currency: '',
+    // condition_currency: '',
     condition_amount: '',
     status: '',
 };
@@ -71,7 +71,7 @@ const CreateUpdate = () => {
         setValue('postback_url', '', { shouldDirty: true, shouldValidate: false });
         // setValue('postback_url', `${defaultValues['affiliate_network']}/?%trackId%=${defaultValues['track_id']}&%payout%=${defaultValues['payout_amount']}&%status%=`, { shouldDirty: true, shouldValidate: false });
         setValue('condition_type', '', { shouldDirty: true, shouldValidate: false });
-        setValue('condition_currency', '', { shouldDirty: true, shouldValidate: false });
+        // setValue('condition_currency', '', { shouldDirty: true, shouldValidate: false });
         setValue('condition_amount', '', { shouldDirty: true, shouldValidate: false });
         setValue('status', '', { shouldDirty: true, shouldValidate: false });
         moduleId === 'create' ? '' : getSingleCampaign();
@@ -107,7 +107,7 @@ const CreateUpdate = () => {
                     setValue('track_id', response.data.results.result.track_id, { shouldDirty: false, shouldValidate: true });
                     setValue('postback_url', response.data.results.result.postback_url, { shouldDirty: false, shouldValidate: true });
                     setValue('condition_type', response.data.results.result.condition_type, { shouldDirty: false, shouldValidate: true });
-                    setValue('condition_currency', response.data.results.result.condition_currency, { shouldDirty: false, shouldValidate: true });
+                    // setValue('condition_currency', response.data.results.result.condition_currency, { shouldDirty: false, shouldValidate: true });
                     setValue('condition_amount', response.data.results.result.condition_amount, { shouldDirty: false, shouldValidate: true });
                     setStatus(response.data.results.result.status === 'active');
                     'status' in dirtyFields ? delete dirtyFields.status : '';
@@ -117,7 +117,9 @@ const CreateUpdate = () => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-    const onSubmit = ({ name, description, affiliate_network, payout_amount, trigger_postback, track_id, postback_url, condition_type, condition_currency, condition_amount }) => {
+    const onSubmit = ({ name, description, affiliate_network, payout_amount, trigger_postback, track_id, postback_url, condition_type,
+        // condition_currency,
+        condition_amount }) => {
         setLoading(true);
         let form_data = {
             name: name,
@@ -128,7 +130,7 @@ const CreateUpdate = () => {
             track_id: track_id,
             postback_url: postback_url,
             condition_type: condition_type,
-            condition_currency: condition_currency,
+            condition_currency: 'cash',
             condition_amount: condition_amount,
             status: status ? 'active' : 'inactive'
         };
@@ -360,7 +362,7 @@ const CreateUpdate = () => {
                                     </FormControl>
                                 )}
                             />
-                            <Controller
+                            {/* <Controller
                                 name="condition_currency"
                                 control={control}
                                 render={({ field }) => (
@@ -382,7 +384,7 @@ const CreateUpdate = () => {
                                         </Select>
                                     </FormControl>
                                 )}
-                            />
+                            /> */}
                             <Controller
                                 name="condition_amount"
                                 control={control}
