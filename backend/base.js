@@ -21,7 +21,7 @@ function init() {
  * @param {Express} app
  */
 function setup(app) {
-  const whitelists = ['http://admin.moresurveys.com', 'http://localhost:3000']
+  const whitelists = ['http://admin.moresurveys.com', 'http://moresurveys.com', 'http://localhost:3000']
   app.use(
     fileUpload({
       useTempFiles: true,
@@ -37,7 +37,7 @@ function setup(app) {
   app.use(
     cors({
       origin: function (origin, callback) {
-        if (whitelists.indexOf(origin) !== -1) {
+        if (whitelists.indexOf(origin) !== -1 || !origin) {
           callback(null, true)
         } else {
           callback(new Error('Not allowed by CORS'))
