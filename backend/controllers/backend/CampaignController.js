@@ -282,26 +282,26 @@ class CampaignController extends Controller {
         ],
       };
       const { docs, pages, total } = await CampaignMember.paginate(options);
-      let report = [];
+      let report_details = [];
       docs.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
           record.dataValues.Member.dataValues.avatar =
             record.dataValues.Member.dataValues.avatar;
-          report.push({
-            id: record.dataValues.id,
-            name: model.dataValues.name,
-            member_id: record.dataValues.member_id,
-            username: record.dataValues.Member.dataValues.username,
-            created_at: record.dataValues.Member.dataValues.created_at,
-            status: record.dataValues.Member.dataValues.status,
-            payout_amount: model.dataValues.payout_amount,
-            payout_point: model.dataValues.payout_amount,
-            combained: model.dataValues.payout_amount,
-            track_id: record.dataValues.track_id,
+            report_details.push({
+              id: record.dataValues.id,
+              name: model.dataValues.name,
+              member_id: record.dataValues.member_id,
+              username: record.dataValues.Member.dataValues.username,
+              created_at: record.dataValues.Member.dataValues.created_at,
+              status: record.dataValues.Member.dataValues.status,
+              payout_amount: model.dataValues.payout_amount,
+              payout_point: model.dataValues.payout_amount,
+              combained: model.dataValues.payout_amount,
+              track_id: record.dataValues.track_id,
           });
         }
       });
-      model = report;
+      model = report_details;
 
       return {
         status: true,
