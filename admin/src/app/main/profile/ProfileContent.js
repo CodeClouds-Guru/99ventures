@@ -13,6 +13,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import UploadIcon from '@mui/icons-material/Upload';
 import Account from './account/Account';
 import Password from './password/Password';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const Root = styled('div')(({ theme }) => ({
     '& .username, & .email': {
@@ -90,6 +91,7 @@ function ProfileContent() {
     const user = useSelector(selectUser);
     const [tabValue, setTabValue] = useState(0);
     const [avatar, setAvatar] = useState('');
+    const [loading, setLoading] = useState(false);
     const handleChangeTab = (event, newValue) => {
         setTabValue(newValue);
     };
@@ -148,11 +150,13 @@ function ProfileContent() {
         element.classList.add('hidden');
     }
     const uploadAvatar = () => {
+        setLoading(true);
         let form_data = new FormData();
         form_data.append('type', 'change_avatar');
         form_data.append('avatar', avatar);
         axios.post(jwtServiceConfig.updateProfile, form_data)
             .then((response) => {
+                setLoading(false);
                 if (response.data.status) {
                     jwtService.getProfile().then(user => dispatch(setUser(user)));
                     makeAvatarBlank();
@@ -180,9 +184,12 @@ function ProfileContent() {
                         <IconButton onClick={openFileSelectDialog}>
                             <div id="avatar-div" className="items-center justify-center hidden">
                                 <span className="image-edit">
-                                    <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
+                                    {!loading ? <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
                                         feather:camera
+                                    </FuseSvgIcon> : <FuseSvgIcon className="text-48 cursor-pointer" size={140} color="primary">
+                                        feather:loader
                                     </FuseSvgIcon>
+                                    }
                                 </span>
                             </div>
                             <Avatar
@@ -199,10 +206,10 @@ function ProfileContent() {
                                 {user.first_name + ' ' + user.last_name}
                             </Avatar>
                         </IconButton>
-                        <div className="flex justify-center items-center mt-4">
+                        {!loading && <div className="flex justify-center items-center mt-4">
                             {uploadIcon()}
                             {removeAvatar()}
-                        </div>
+                        </div>}
                     </label>
                 </div>
                 <Typography className="username text-14 whitespace-nowrap font-medium">

@@ -53,6 +53,7 @@ const CreateUpdate = () => {
     const dispatch = useDispatch();
     const theme = useTheme();
     const [status, setStatus] = useState(true)
+    const [singleCampaignData, setSingleCampaignData] = useState({})
 
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
@@ -99,6 +100,7 @@ const CreateUpdate = () => {
         axios.get(jwtServiceConfig.getSingleCampaign + `/${moduleId}`)
             .then((response) => {
                 if (response.data.results.status && response.data.results.result) {
+                    setSingleCampaignData(response.data.results.result)
                     setValue('name', response.data.results.result.name, { shouldDirty: false, shouldValidate: true });
                     setValue('description', response.data.results.result.description, { shouldDirty: false, shouldValidate: true });
                     setValue('affiliate_network', response.data.results.result.affiliate_network, { shouldDirty: false, shouldValidate: true });
@@ -425,29 +427,32 @@ const CreateUpdate = () => {
                                             </FormControl>
                                         )}
                                     />
-                                    <Divider className="pb-10" textAlign="left"><h3>Campaign Link</h3></Divider>
-                                    <div className="w-full border-3">
-                                        <div className="flex w-full justify-center m-10">
-                                            <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
-                                            <div className="w-10/12 ml-5"> home 1</div>
-                                        </div>
-                                        <div className="flex w-full justify-center m-10">
-                                            <div className="flex w-2/12 mr-5"> <b> Registration Page :</b></div>
-                                            <div className="w-10/12 ml-5"> reg 1</div>
-                                        </div>
-                                        <div className="flex w-full justify-center m-10 pt-5">
-                                            <div className="flex w-2/12 mr-5"> <h3> <b> Referral Link -</b></h3></div>
-                                            <div className="w-10/12 ml-5"> <h3> Replace "shiftcode" within the below campaign with the username of the member you would like to use</h3></div>
-                                        </div>
-                                        <div className="flex w-full justify-center m-10">
-                                            <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
-                                            <div className="w-10/12 ml-5"> home 2</div>
-                                        </div>
-                                        <div className="flex w-full justify-center m-10">
-                                            <div className="flex w-2/12  mr-5"> <b> Registration Page :</b></div>
-                                            <div className="w-10/12 ml-5"> reg 2</div>
-                                        </div>
-                                    </div>
+                                    {Object.keys(singleCampaignData).length > 0 &&
+                                        <>
+                                            <Divider className="pb-10" textAlign="left"><h3>Campaign Link</h3></Divider>
+                                            <div className="w-full border-3">
+                                                <div className="flex w-full justify-center m-10">
+                                                    <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
+                                                    <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.home_page_url}</div>
+                                                </div>
+                                                <div className="flex w-full justify-center m-10">
+                                                    <div className="flex w-2/12 mr-5"> <b> Registration Page :</b></div>
+                                                    <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.registration_page_url}</div>
+                                                </div>
+                                                <div className="flex w-full justify-center m-10 pt-5">
+                                                    <div className="flex w-2/12 mr-5"> <h3> <b> Referral Link -</b></h3></div>
+                                                    <div className="w-10/12 ml-5"> <h3> {singleCampaignData.campaign_link.referral_link}</h3></div>
+                                                </div>
+                                                <div className="flex w-full justify-center m-10">
+                                                    <div className="flex w-2/12 mr-5"> <b> Home Page :</b></div>
+                                                    <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.ref_home_page_url}</div>
+                                                </div>
+                                                <div className="flex w-full justify-center m-10">
+                                                    <div className="flex w-2/12  mr-5"> <b> Registration Page :</b></div>
+                                                    <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.ref_registration_page_url}</div>
+                                                </div>
+                                            </div>
+                                        </>}
                                 </>
                             }
                         </div>
