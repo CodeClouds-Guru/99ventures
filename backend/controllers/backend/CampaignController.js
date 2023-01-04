@@ -77,8 +77,8 @@ class CampaignController extends Controller {
   }
   //view campaign
   async view(req, res) {
-    let member_id = req.body.member_id;
-    let report = req.body.report;
+    let member_id = req.query.member_id;
+    let report = req.query.report;
     let where = { campaign_id: req.params.id };
     if (member_id) {
       where['member_id'] = { member_id: member_id };
@@ -131,7 +131,7 @@ class CampaignController extends Controller {
       };
     }
     let fields = {};
-    if (report == '1') {
+    if (parseInt(report) == 1) {
       fields = {
         id: {
           field_name: 'id',
