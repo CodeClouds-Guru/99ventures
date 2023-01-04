@@ -39,6 +39,19 @@ router.get('/preview/:slug?', async (req, res) => {
   }
   res.render('page', { page_content });
 });
+
+router.get('/test-crypt', async (req, res) => {
+  const Crypt = require("../helpers/Crypt");
+  const obj = {
+    email: 'sourabh@mailinator.com',
+    id: 1,
+    company_portal_id: 1,
+    company_id: 1
+  }
+  let cryptic = new Crypt(JSON.stringify(obj));
+  let str = cryptic.encrypt();
+  res.send(str);
+});
 module.exports = {
   prefix: '/',
   router,
