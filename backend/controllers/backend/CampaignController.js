@@ -91,9 +91,6 @@ class CampaignController extends Controller {
         attributes: ['domain'],
       },
     });
-
-    console.log('======================model', model);
-
     //view url section
     let campaign_link = {};
     if (model.CompanyPortal && model.CompanyPortal.domain) {
@@ -133,9 +130,6 @@ class CampaignController extends Controller {
         ref_registration_page_url,
       };
     }
-
-    model.setDataValue('campaign_link', campaign_link);
-    console.log('============', model);
     let fields = {};
     if (report == '1') {
       fields = {
@@ -310,13 +304,6 @@ class CampaignController extends Controller {
         fields: fields,
       };
     } else {
-      let campaign_link = {
-        home_page_url,
-        registration_page_url,
-        referral_link,
-        ref_home_page_url,
-        ref_registration_page_url,
-      };
       model.setDataValue('campaign_link', campaign_link);
       fields = this.model.fields;
       return { status: true, result: model, fields };
