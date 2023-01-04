@@ -21,7 +21,7 @@ function init() {
  * @param {Express} app
  */
 function setup(app) {
-  const whitelists = ['http://admin.moresurveys.com']
+  const whitelists = ['http://admin.moresurveys.com', 'http://localhost:3000']
   app.use(
     fileUpload({
       useTempFiles: true,
