@@ -63,7 +63,7 @@ class MemberController extends Controller {
         }
 
         const res = await super.save(req);
-
+        // console.log("---------------res", res.result.id);
         //send mail
         const eventBus = require("../../eventBus");
         let member_details = await Member.findOne({
@@ -93,18 +93,11 @@ class MemberController extends Controller {
         });
 
         //Referral code
-        let referral_obj = {
-          id: member_details.id,
-          email: member_details.email,
-          company_portal_id: member_details.company_portal_id,
-          company_id: member_details.company_id,
-        };
-        let referral_code = cryptoEncryption(referral_obj.toString());
 
         let model = await this.model.update(
-          { referral_code: referral_code },
+          { referral_code: res.result.id + "0" + new Date().getTime() },
           {
-            where: { id: member_details.id },
+            where: { id: res.result.id },
           }
         );
         return res;

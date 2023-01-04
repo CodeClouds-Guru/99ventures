@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: "member_id",
         timestamps: false,
       });
+      Campaign.belongsTo(models.CompanyPortal, {
+        foreignKey: "company_portal_id",
+      });
     }
   }
   Campaign.init(
@@ -38,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
+      company_portal_id: DataTypes.BIGINT,
     },
     {
       sequelize,

@@ -97,21 +97,22 @@ exports.createCommentSignature = (code) => {
   return { start: "", end: "" };
 };
 
-exports.cryptoEncryption = (str) => {
-  var pass = process.env.CRYPTO_KEY || "99_VENTURES";
-  const mystr = crypto
-    .createHash("sha256", pass)
-    .update(str,'binary')
-    .digest("hex");
-  console.log(mystr);
-  return mystr;
-};
+// exports.cryptoEncryption = (str) => {
+//   var pass = process.env.CRYPTO_KEY || "99_VENTURES";
+//   const mystr = crypto
+//     .createHash("sha256", pass)
+//     .update(str,'binary')
+//     .digest("hex");
+//   console.log(crypto.getCipherInfo());
 
-exports.cryptoDecryption = (str) => {
-  var pass = process.env.CRYPTO_KEY || "99_VENTURES";
-  var mykey = crypto.createDecipher("aes-128-cbc", pass);
-  var mystr = mykey.update(str, "hex", "utf8");
-  mystr += mykey.final("utf8");
-  console.log(mystr);
-  return mystr;
-};
+//   return mystr;
+// };
+
+// exports.cryptoDecryption = (str) => {
+//   var pass = process.env.CRYPTO_KEY || "99_VENTURES";
+//   var mykey = crypto.createDecipher("aes-128-cbc", pass);
+//   var mystr = mykey.update(str, "hex", "utf8");
+//   mystr += mykey.final("utf8");
+//   console.log(mystr);
+//   return mystr;
+// };
