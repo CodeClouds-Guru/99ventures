@@ -142,7 +142,9 @@ class FileHelper {
     };
 
     listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key: Key });
+      if(Key != '' && Key !='/'){
+        deleteParams.Delete.Objects.push({ Key: Key });
+      }
     });
     await s3.deleteObjects(deleteParams).promise();
     return true
