@@ -132,6 +132,9 @@ class CampaignController extends Controller {
     }
     let fields = {};
     if (parseInt(report) == 1) {
+      //filter parameters
+      var is_condition_met =req.query.is_condition_met;//0 = not met, 1 = postback triggered, 2 = postback not triggered, 3 = condition met (reversed)
+
       fields = {
         id: {
           field_name: 'id',
@@ -265,6 +268,13 @@ class CampaignController extends Controller {
         },
       };
       var options = await this.getQueryOptions(req, fields);
+      options.attributes =[
+        "id",
+        "member_id",
+        "campaign_id",
+        "track_id",
+        [sequelize.literal('CASE WHEN `is_condition_met` = 0 THEN 0 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 1 THEN 1 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 0 THEN 2 WHEN `is_condition_met` = 1 AND `is_reversed` = 1 THEN 3 ELSE 0 END'), 'campaign_status'],
+      ]
       options.include = {
         model: Member,
         // required: false,
@@ -295,6 +305,7 @@ class CampaignController extends Controller {
             payout_point: model.dataValues.payout_amount,
             combained: model.dataValues.payout_amount,
             track_id: record.dataValues.track_id,
+            campaign_status: record.dataValues.campaign_status,
           });
         }
       });
