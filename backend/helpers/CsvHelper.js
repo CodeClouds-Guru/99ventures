@@ -1,5 +1,5 @@
 const csv = require('csv');
-const { appendFileSync } = require('fs');
+const fs = require('fs');
 
 class CsvHelper {
   constructor() {}
@@ -25,38 +25,22 @@ class CsvHelper {
         });
       }
     });
-    console.log('===============report_details', report_details);
+    console.log(
+      '===============report_details',
+      this.generateCsv(report_details)
+    );
   }
   generateCsv(report) {
-    try {
-      appendFileSync('./contacts.csv', JSON.stringify(report));
-    } catch (err) {
-      console.error(err);
-    }
-    let csv_result = csv
-      .generate({
-        delimiter: '|',
-        length: 20,
-      })
-      .pipe(
-        csv.parse({
-          delimiter: '|',
-        })
-      )
-      .pipe(
-        csv.transform((record) => {
-          return record.map((value) => {
-            return value.toUpperCase();
-          });
-        })
-      )
-      .pipe(
-        csv.stringify({
-          quoted: true,
-        })
-      )
-      .pipe(process.stdout);
-    // return csv_result;
+    const stringifier = csv.stringify({
+      header: true,
+      columns: ['user_id', 'username', 'user_status', 'cash_earned'],
+    });
+    const writableStream = fs.createWriteStream('panda.csv');
+    report.forEach((row) => {
+      stringifier.write(row);
+    });
+    stringifier.pipe(writableStream);
+    console.log('Finished writing data');
   }
 }
 
