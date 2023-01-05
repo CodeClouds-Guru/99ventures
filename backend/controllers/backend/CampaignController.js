@@ -4,9 +4,11 @@ const {
   Member,
   CampaignMember,
   CompanyPortal,
+  IpLog,
   sequelize,
 } = require('../../models/index');
 const util = require('util');
+const csv = require('../../helpers/CsvHelper');
 class CampaignController extends Controller {
   constructor() {
     super('Campaign');
@@ -65,9 +67,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    console.log(
-      util.inspect(options, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+    // );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -80,6 +82,7 @@ class CampaignController extends Controller {
     let member_id = req.query.member_id;
     let report = req.query.report;
     let where = { campaign_id: req.params.id };
+    let export_csv = req.query.export_csv || 1;
     if (member_id) {
       where['member_id'] = { member_id: member_id };
     }
@@ -305,6 +308,7 @@ class CampaignController extends Controller {
           'status',
         ],
       };
+      console.log('==============', options);
       const { docs, pages, total } = await CampaignMember.paginate(options);
       let report_details = [];
       docs.forEach(function (record, key) {
@@ -326,6 +330,26 @@ class CampaignController extends Controller {
           });
         }
       });
+
+      if (export_csv) {
+        delete options.page;
+        delete options.paginate;
+        options.where = { campaign_id: req.params.id };
+        options.include.include = {
+          model: IpLog,
+          attributes: ['ip', 'created_at'],
+          limit: 1,
+          order: [['created_at', 'DESC']],
+        };
+        console.log('==============', options.include);
+        let report_data = await CampaignMember.findAll(options);
+        console.log('report_data', report_data);
+        let csv_class = new csv();
+        csv_class.generateDataForCsv(report_data, model);
+      }
+
+      // console.log('==============', options);
+
       return {
         status: true,
         result: { data: report_details, campaign_details: model, pages, total },
