@@ -17,9 +17,9 @@ const UsersTracking = () => {
     const [ listData, setListData ] = useState({});
     const [ filter, setFilter ] = useState('all');
     const { campaignId } = useParams(); 
-    const [order, setOrder] = useState({});
-    const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [ order, setOrder ] = useState({});
+    const [ page, setPage ] = useState(0);
+	const [ rowsPerPage, setRowsPerPage ] = useState(10);
 
     useEffect(()=>{
         getDetails();

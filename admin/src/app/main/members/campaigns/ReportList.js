@@ -12,7 +12,6 @@ function ReportList(props) {
 	const [modules, setModules] = useState([]);
 	const [fields, setFields] = useState({});
 	const [totalRecords, setTotalRecords] = useState(0);
-
 	const [loading, setLoading] = useState(true);
 	const [selected, setSelected] = useState([]);
 	const [data, setData] = useState(modules);
@@ -29,39 +28,6 @@ function ReportList(props) {
 		}
     }
 
-	/*const fetchModules1 = () => {
-		let params = {
-			search: searchText,
-			page: page + 1,
-			show: rowsPerPage,
-			module,
-			where
-		}
-		/* order is added if it's not the very first call os API listing 
-		if (!firstCall) {
-			params.sort = order.id
-			params.sort_order = order.direction
-		}
-
-		axios.get(`/${module}`, { params }).then(res => {
-			let fields_var = res.data.results.fields;
-			
-			setFields(fields_var);
-			setModules(res.data.results.result.data);
-			setTotalRecords(res.data.results.result.total)
-			setLoading(false);
-			setFirstCall(false);
-		}).catch(error => {
-			let message = 'Something went wrong!'
-			if (error && error.response.data && error.response.data.errors) {
-				message = error.response.data.errors
-			}
-			dispatch(showMessage({ variant: 'error', message }));
-			navigate('/dashboard');
-		})
-	}*/
-
-
 	useEffect(() => {
 		fetchModules();
 	}, [props.result]);
@@ -69,15 +35,6 @@ function ReportList(props) {
 	useEffect(() => {
 		setData(modules);
 	}, [modules]);
-
-	// function handleChangePage(event, value) {
-	// 	setPage(value);
-	// }
-
-	// function handleChangeRowsPerPage(event) {
-	// 	setPage(0);
-	// 	setRowsPerPage(event.target.value);
-	// }
 
 	if (loading) {
 		return (
