@@ -49,11 +49,14 @@ class FileHelper {
       let mime_type = mime.lookup(
         new_filename
       );
+      if(!mime_type)
+      {
+        mime_type = "image/jpeg";
+      }
       try {
         let s3 = await this.s3Connect()
         const imagePath = file.tempFilePath
         const blob = fs.readFileSync(imagePath)
-
         // const uploadedImage = await s3.upload({
         // if(this.private_file == '1'){}
         const uploadedImage = await s3.putObject({
@@ -70,6 +73,7 @@ class FileHelper {
         }
       } catch (e) {
         this.response.trace = e
+        console.log(e)
       }
     }
     return this.response
