@@ -7,29 +7,45 @@ import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel, St
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'
-// import List from "../../crud/list/List";
 import axios from 'axios';
 import ReportList from './ReportList';
 
+
 const UsersTracking = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const [ campaignDetails, setCampaignDetails] = useState({});
-    const [ listData, setListData] = useState([]);
+    const [ campaignDetails, setCampaignDetails ] = useState({});
+    const [ listData, setListData ] = useState({});
+    const [ filter, setFilter ] = useState('all');
     const { campaignId } = useParams(); 
-    
+    const [order, setOrder] = useState({});
+    const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(10);
+
     useEffect(()=>{
         getDetails();
-    }, []);
+    }, [filter, order, page, rowsPerPage]);
 
     const getDetails = () => {
-        axios.post(jwtServiceConfig.getSingleCampaign + '/' + campaignId + '?report=1')
+        const params = {
+            report: 1,
+            page: page + 1,
+			show: rowsPerPage,
+        }
+        if('all' !== filter) {
+            params.campaign_status = filter
+        }
+        if(order.id && order.direction) {
+            params.sort = order.id
+			params.sort_order = order.direction
+        }
+
+        axios.get(jwtServiceConfig.getSingleCampaign + '/' + campaignId, { params })
         .then(res => {
-            console.log(res)
-            // if (res.data.results) {
-            //     const result = res.data.results;
-            //     setListData(result)
-            //     // setCampaignDetails(result.result);
-            // }
+            if (res.data.results) {
+                const result = res.data.results;
+                setListData(result);
+                setCampaignDetails(result.result.campaign_details);
+            }
         })
         .catch(errors => {
             dispatch(showMessage({ variant: 'error', message: errors.message}));
@@ -37,8 +53,29 @@ const UsersTracking = () => {
     }
     
     const handleFilter = (e) => {
-        console.log(e.target.value)
+        setFilter(e.target.value);
     }
+
+    const handleRequestSort = (property) => {
+		const id = property;
+		let direction = 'desc';
+		if (order.id === property && order.direction === 'desc') {
+			direction = 'asc';
+		}
+		setOrder({
+			direction,
+			id,
+		});
+	}
+
+    const handleChangePage = (event, value) => {
+		setPage(value);
+	}
+
+	const handleChangeRowsPerPage = (event) => {
+		setPage(0);
+		setRowsPerPage(event.target.value);
+	}
 
     const hanldeExport = () => {
 
@@ -54,20 +91,20 @@ const UsersTracking = () => {
                     <div className='flex mb-16 w-full justify-between items-center'>
                         <CampaignDetails campaign={ campaignDetails } />
                         <div className="flex">
-                            <FormControl sx={{ minWidth: 120 }} size="small" className="mr-5">
+                            <FormControl sx={{ minWidth: 300 }} size="small" className="mr-5">
                                 <InputLabel id="demo-select-small">Filter</InputLabel>
                                 <Select
                                     labelId="demo-select-small"
                                     id="demo-select-small"
-                                    value={20}
+                                    value={ filter }
                                     label="Filter"
                                     onChange={ handleFilter }
                                 >
-                                    <MenuItem value={10}>All</MenuItem>
-                                    <MenuItem value={20}>Condition Met (Postback Triggered)</MenuItem>
-                                    <MenuItem value={30}>Condition Met (Postback Not Triggered)</MenuItem>
-                                    <MenuItem value={30}>Condition Met (Reversed)</MenuItem>
-                                    <MenuItem value={30}>Condition Not Met</MenuItem>
+                                    <MenuItem value='all'>All</MenuItem>
+                                    <MenuItem value={1}>Condition Met (Postback Triggered)</MenuItem>
+                                    <MenuItem value={2}>Condition Met (Postback Not Triggered)</MenuItem>
+                                    <MenuItem value={3}>Condition Met (Reversed)</MenuItem>
+                                    <MenuItem value={0}>Condition Not Met</MenuItem>
                                 </Select>
                             </FormControl>
                             <div>
@@ -89,13 +126,15 @@ const UsersTracking = () => {
             }
             content={
                 <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 " >
-                    {/* <ReportList result={listData}/> */}
-                    {/* <List
-                        module="campaigns"
-                        moduleHeading={false}
-                        searchable={false}
-                        addable={false}
-                    /> */}
+                    <ReportList 
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        order={order} 
+                        result={listData} 
+                        handleRequestSort={handleRequestSort}
+                        handleChangePage={handleChangePage}
+                        handleChangeRowsPerPage={handleChangeRowsPerPage}
+                    />
                 </Box>
             }
             rightSidebarOpen={ false }
