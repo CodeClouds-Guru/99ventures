@@ -133,8 +133,24 @@ class CampaignController extends Controller {
     let fields = {};
     if (parseInt(report) == 1) {
       //filter parameters
-      var is_condition_met =req.query.is_condition_met;//0 = not met, 1 = postback triggered, 2 = postback not triggered, 3 = condition met (reversed)
-
+      var campaign_status = req.query.campaign_status;//0 = not met, 1 = postback triggered, 2 = postback not triggered, 3 = condition met (reversed)
+      var custom_where = req.query.where ? JSON.parse(req.query.where) : {};
+      if(campaign_status != ''){
+        if(parseInt(campaign_status) == 0){
+          custom_where['is_condition_met'] = 0;
+        }
+        else if(parseInt(campaign_status) == 3){
+          custom_where['is_condition_met'] = 1;
+          custom_where['is_reversed'] = 1;
+        }else if(parseInt(campaign_status) == 1){
+          custom_where['is_condition_met'] = 1;
+          custom_where['is_postback_triggered'] = 1;
+        }else if(parseInt(campaign_status) == 2){
+          custom_where['is_condition_met'] = 1;
+          custom_where['is_postback_triggered'] = 0;
+        }
+        req.query.where = JSON.stringify(custom_where)
+      }
       fields = {
         id: {
           field_name: 'id',
@@ -267,13 +283,14 @@ class CampaignController extends Controller {
           searchable: true,
         },
       };
+      // return req.query
       var options = await this.getQueryOptions(req, fields);
       options.attributes =[
         "id",
         "member_id",
         "campaign_id",
         "track_id",
-        [sequelize.literal('CASE WHEN `is_condition_met` = 0 THEN 0 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 1 THEN 1 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 0 THEN 2 WHEN `is_condition_met` = 1 AND `is_reversed` = 1 THEN 3 ELSE 0 END'), 'campaign_status'],
+        [sequelize.literal('CASE WHEN `is_condition_met` = 0 THEN 0 WHEN `is_condition_met` = 1 AND `is_reversed` = 1 THEN 3 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 1 THEN 1 WHEN `is_condition_met` = 1 AND `is_postback_triggered` = 0 THEN 2 ELSE 0 END'), 'campaign_status'],
       ]
       options.include = {
         model: Member,
