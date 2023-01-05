@@ -48,16 +48,16 @@ class CampaignController extends Controller {
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_condition_met=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'leads',
       ],
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_reversed=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'reversals',
       ],
@@ -138,17 +138,17 @@ class CampaignController extends Controller {
       //filter parameters
       var campaign_status = req.query.campaign_status;//0 = not met, 1 = postback triggered, 2 = postback not triggered, 3 = condition met (reversed)
       var custom_where = req.query.where ? JSON.parse(req.query.where) : {};
-      if(campaign_status != ''){
-        if(parseInt(campaign_status) == 0){
+      if (campaign_status != '') {
+        if (parseInt(campaign_status) == 0) {
           custom_where['is_condition_met'] = 0;
         }
-        else if(parseInt(campaign_status) == 3){
+        else if (parseInt(campaign_status) == 3) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_reversed'] = 1;
-        }else if(parseInt(campaign_status) == 1){
+        } else if (parseInt(campaign_status) == 1) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_postback_triggered'] = 1;
-        }else if(parseInt(campaign_status) == 2){
+        } else if (parseInt(campaign_status) == 2) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_postback_triggered'] = 0;
         }
@@ -288,7 +288,7 @@ class CampaignController extends Controller {
       };
       // return req.query
       var options = await this.getQueryOptions(req, fields);
-      options.attributes =[
+      options.attributes = [
         "id",
         "member_id",
         "campaign_id",
@@ -345,7 +345,14 @@ class CampaignController extends Controller {
         let report_data = await CampaignMember.findAll(options);
         console.log('report_data', report_data);
         let csv_class = new csv();
-        csv_class.generateDataForCsv(report_data, model);
+        const csv_response_filename = csv_class.generateDataForCsv(report_data, model);
+        return {
+          downloadable_file: {
+            contentType: 'text/csv',
+            fileName: csv_response_filename,
+            toBeDeletedAfterDownload: true
+          }
+        }
       }
 
       // console.log('==============', options);

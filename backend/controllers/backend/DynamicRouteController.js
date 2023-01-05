@@ -1,4 +1,6 @@
 const pluralize = require('pluralize')
+const fileSystem = require('fs'),
+  path = require('path');
 const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
@@ -27,7 +29,23 @@ class DynamicRouteController {
         `new controllers.${moduleInSingular}Controller`
       )
       var response = await controller_obj[action](req, res)
-      res.json({ results: response })
+      if ('downloadable_file' in response && response.downloadable_file && 'fileName' in response.downloadable_file) {
+        const toBeDeletedAfterDownload = response.downloadable_file.toBeDeletedAfterDownload;
+        const filepath = path.join(response.downloadable_file.fileName)
+        var stat = fileSystem.statSync(filepath);
+        res.writeHead(200, {
+          'Content-Type': response.downloadable_file.contentType || 'text/csv',
+          'Content-Length': stat.size,
+          "Content-Disposition": "attachment; filename=" + response.downloadable_file.fileName
+        });
+        fileSystem.createReadStream(filepath).pipe(res);
+        // if (toBeDeletedAfterDownload) {
+        //   fileSystem.unlink(filepath)
+        // }
+        return;
+      } else {
+        res.json({ results: response })
+      }
     } catch (error) {
       console.error(error)
       let statusCode = error.statusCode || 500

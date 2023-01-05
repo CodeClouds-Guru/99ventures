@@ -2,7 +2,7 @@ const csv = require('csv');
 const fs = require('fs');
 
 class CsvHelper {
-  constructor() {}
+  constructor() { }
 
   generateDataForCsv(data, model) {
     let report_details = [];
@@ -25,22 +25,21 @@ class CsvHelper {
         });
       }
     });
-    console.log(
-      '===============report_details',
-      this.generateCsv(report_details)
-    );
+    return this.generateCsv(report_details);
   }
   generateCsv(report) {
     const stringifier = csv.stringify({
       header: true,
       columns: ['user_id', 'username', 'user_status', 'cash_earned'],
     });
-    const writableStream = fs.createWriteStream('panda.csv');
+    const filename = `report-${new Date().getTime()}.csv`
+    const writableStream = fs.createWriteStream(filename);
     report.forEach((row) => {
       stringifier.write(row);
     });
     stringifier.pipe(writableStream);
     console.log('Finished writing data');
+    return filename;
   }
 }
 
