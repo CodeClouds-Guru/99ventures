@@ -155,4 +155,4 @@ function ReportList(props) {
 	);
 }
 
-export default withRouter(ReportList);
+export default ReportList;
