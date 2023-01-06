@@ -61,7 +61,7 @@ router.get("/campaign-callback", [AuthMiddleware], (req, res) => {
 
   let axios_class = new axios();
   let axios_callback = axios_class.makeRequest();
-  console.log('axios_callback',axios_callback);
+  console.log('axios_callback', axios_callback);
   res.json(axios_callback);
 });
 
@@ -73,7 +73,7 @@ router.post(
 router.get("/pages/preview/:id?", [AuthMiddleware], PageController.preview);
 router.all(
   "/:module/:action?/:id?",
-  [AuthMiddleware, checkPermissionMiddleware],
+  // [AuthMiddleware, checkPermissionMiddleware],
   DynamicRouteController.handle
 );
 

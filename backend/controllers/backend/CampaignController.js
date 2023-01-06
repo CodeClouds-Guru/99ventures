@@ -4,9 +4,11 @@ const {
   Member,
   CampaignMember,
   CompanyPortal,
+  IpLog,
   sequelize,
 } = require('../../models/index');
 const util = require('util');
+const csv = require('../../helpers/CsvHelper');
 class CampaignController extends Controller {
   constructor() {
     super('Campaign');
@@ -46,16 +48,16 @@ class CampaignController extends Controller {
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_condition_met=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'leads',
       ],
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_reversed=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'reversals',
       ],
@@ -65,9 +67,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    console.log(
-      util.inspect(options, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+    // );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -80,6 +82,7 @@ class CampaignController extends Controller {
     let member_id = req.query.member_id;
     let report = req.query.report;
     let where = { campaign_id: req.params.id };
+    let export_csv = req.query.export_csv || 1;
     if (member_id) {
       where['member_id'] = { member_id: member_id };
     }
@@ -135,17 +138,17 @@ class CampaignController extends Controller {
       //filter parameters
       var campaign_status = req.query.campaign_status;//0 = not met, 1 = postback triggered, 2 = postback not triggered, 3 = condition met (reversed)
       var custom_where = req.query.where ? JSON.parse(req.query.where) : {};
-      if(campaign_status != ''){
-        if(parseInt(campaign_status) == 0){
+      if (campaign_status != '') {
+        if (parseInt(campaign_status) == 0) {
           custom_where['is_condition_met'] = 0;
         }
-        else if(parseInt(campaign_status) == 3){
+        else if (parseInt(campaign_status) == 3) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_reversed'] = 1;
-        }else if(parseInt(campaign_status) == 1){
+        } else if (parseInt(campaign_status) == 1) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_postback_triggered'] = 1;
-        }else if(parseInt(campaign_status) == 2){
+        } else if (parseInt(campaign_status) == 2) {
           custom_where['is_condition_met'] = 1;
           custom_where['is_postback_triggered'] = 0;
         }
@@ -285,7 +288,7 @@ class CampaignController extends Controller {
       };
       // return req.query
       var options = await this.getQueryOptions(req, fields);
-      options.attributes =[
+      options.attributes = [
         "id",
         "member_id",
         "campaign_id",
@@ -305,6 +308,7 @@ class CampaignController extends Controller {
           'status',
         ],
       };
+      console.log('==============', options);
       const { docs, pages, total } = await CampaignMember.paginate(options);
       let report_details = [];
       docs.forEach(function (record, key) {
@@ -326,6 +330,33 @@ class CampaignController extends Controller {
           });
         }
       });
+
+      if (export_csv) {
+        delete options.page;
+        delete options.paginate;
+        options.where = { campaign_id: req.params.id };
+        options.include.include = {
+          model: IpLog,
+          attributes: ['ip', 'created_at'],
+          limit: 1,
+          order: [['created_at', 'DESC']],
+        };
+        console.log('==============', options.include);
+        let report_data = await CampaignMember.findAll(options);
+        console.log('report_data', report_data);
+        let csv_class = new csv();
+        const csv_response_filename = csv_class.generateDataForCsv(report_data, model);
+        return {
+          downloadable_file: {
+            contentType: 'text/csv',
+            fileName: csv_response_filename,
+            toBeDeletedAfterDownload: true
+          }
+        }
+      }
+
+      // console.log('==============', options);
+
       return {
         status: true,
         result: { data: report_details, campaign_details: model, pages, total },
