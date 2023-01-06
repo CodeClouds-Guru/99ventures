@@ -73,7 +73,7 @@ router.post(
 router.get("/pages/preview/:id?", [AuthMiddleware], PageController.preview);
 router.all(
   "/:module/:action?/:id?",
-  // [AuthMiddleware, checkPermissionMiddleware],
+  [AuthMiddleware, checkPermissionMiddleware],
   DynamicRouteController.handle
 );
 

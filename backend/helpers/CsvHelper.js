@@ -1,10 +1,11 @@
-const csv = require('csv');
+const csvWriter = require('csv-writer');
 const fs = require('fs');
+const path = require('path');
 
 class CsvHelper {
   constructor() { }
 
-  generateDataForCsv(data, model) {
+  async generateDataForCsv(data, model) {
     let report_details = [];
     data.forEach(function (record, key) {
       if (record.dataValues.Member != null) {
@@ -25,20 +26,20 @@ class CsvHelper {
         });
       }
     });
-    return this.generateCsv(report_details);
+    return await this.generateCsv(report_details);
   }
-  generateCsv(report) {
-    const stringifier = csv.stringify({
-      header: true,
-      columns: ['user_id', 'username', 'user_status', 'cash_earned'],
-    });
+  async generateCsv(report) {
     const filename = `report-${new Date().getTime()}.csv`
-    const writableStream = fs.createWriteStream(filename);
-    report.forEach((row) => {
-      stringifier.write(row);
+    const csv = csvWriter.createObjectCsvWriter({
+      path: path.join(appRoot, filename),
+      header: [
+        { id: 'user_id', title: 'ID' },
+        { id: 'username', title: 'Username' },
+        { id: 'user_status', title: 'Status' },
+        { id: 'cash_earned', title: 'Cash Earned' },
+      ]
     });
-    stringifier.pipe(writableStream);
-    console.log('Finished writing data');
+    await csv.writeRecords(report)
     return filename;
   }
 }
