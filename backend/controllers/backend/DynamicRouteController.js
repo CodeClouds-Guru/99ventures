@@ -31,17 +31,21 @@ class DynamicRouteController {
       var response = await controller_obj[action](req, res)
       if ('downloadable_file' in response && response.downloadable_file && 'fileName' in response.downloadable_file) {
         const toBeDeletedAfterDownload = response.downloadable_file.toBeDeletedAfterDownload;
-        const filepath = path.join(response.downloadable_file.fileName)
+        const filepath = path.join(appRoot, '/', response.downloadable_file.fileName)
+        console.log(filepath)
         var stat = fileSystem.statSync(filepath);
         res.writeHead(200, {
           'Content-Type': response.downloadable_file.contentType || 'text/csv',
           'Content-Length': stat.size,
           "Content-Disposition": "attachment; filename=" + response.downloadable_file.fileName
         });
-        fileSystem.createReadStream(filepath).pipe(res);
-        // if (toBeDeletedAfterDownload) {
-        //   fileSystem.unlink(filepath)
-        // }
+        const file = fileSystem.createReadStream(filepath);
+        if (toBeDeletedAfterDownload) {
+          file.on('end', function () {
+            fileSystem.unlink(filepath)
+          });
+        }
+        file.pipe(res);
         return;
       } else {
         res.json({ results: response })

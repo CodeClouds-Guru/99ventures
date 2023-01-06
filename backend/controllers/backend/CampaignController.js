@@ -9,6 +9,7 @@ const {
 } = require('../../models/index');
 const util = require('util');
 const csv = require('../../helpers/CsvHelper');
+const fs = require('fs');
 class CampaignController extends Controller {
   constructor() {
     super('Campaign');
@@ -341,11 +342,11 @@ class CampaignController extends Controller {
           limit: 1,
           order: [['created_at', 'DESC']],
         };
-        console.log('==============', options.include);
         let report_data = await CampaignMember.findAll(options);
-        console.log('report_data', report_data);
         let csv_class = new csv();
-        const csv_response_filename = csv_class.generateDataForCsv(report_data, model);
+        const csv_response_filename = await csv_class.generateDataForCsv(report_data, model);
+        console.log('fs.existsSync(path)', fs.existsSync(csv_response_filename))
+
         return {
           downloadable_file: {
             contentType: 'text/csv',
