@@ -5,13 +5,16 @@ import CampaignDetails from "./CampaignDetails";
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel, Stack, Chip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom'
 import axios from 'axios';
 import ReportList from './ReportList';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 
 
 const UsersTracking = () => {
+    const dispatch = useDispatch();
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const [ campaignDetails, setCampaignDetails ] = useState({});
     const [ listData, setListData ] = useState({});
@@ -28,9 +31,9 @@ const UsersTracking = () => {
     const getDetails = () => {
         const params = {
             report: 1,
-            page: page + 1,
-			show: rowsPerPage,
-        }
+            page: page+1,
+            show: rowsPerPage
+        };
         if('all' !== filter) {
             params.campaign_status = filter
         }
@@ -38,18 +41,7 @@ const UsersTracking = () => {
             params.sort = order.id
 			params.sort_order = order.direction
         }
-
-        axios.get(jwtServiceConfig.getSingleCampaign + '/' + campaignId, { params })
-        .then(res => {
-            if (res.data.results) {
-                const result = res.data.results;
-                setListData(result);
-                setCampaignDetails(result.result.campaign_details);
-            }
-        })
-        .catch(errors => {
-            dispatch(showMessage({ variant: 'error', message: errors.message}));
-        })
+        sendRequest(params, '');
     }
     
     const handleFilter = (e) => {
@@ -78,7 +70,40 @@ const UsersTracking = () => {
 	}
 
     const hanldeExport = () => {
+        const params = {
+            export_csv: 1,
+            report:1
+        }
+        if('all' !== filter) {
+            params.campaign_status = filter
+        }
+        sendRequest(params, 'csv_download');
+    }
 
+    const sendRequest = (params, mode) => {
+        axios.get(jwtServiceConfig.getSingleCampaign + '/' + campaignId, { params })
+        .then(res => {
+            if(mode == 'csv_download') {
+                downloadCSV(res.data)
+            }
+            else if(res.data.results) {
+                const result = res.data.results;
+                setListData(result);
+                setCampaignDetails(result.result.campaign_details);
+            }   
+        })
+        .catch(errors => {
+            dispatch(showMessage({ variant: 'error', message: errors.message}));
+        })
+    }
+
+    const downloadCSV = (data) => {
+        const a = document.createElement('a');
+        a.href = `data:text/csv;charset=utf-8,${escape(data)}`;
+        a.download = 'campaign_report_' + Date.now();
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     return (
