@@ -251,7 +251,7 @@ class CampaignController extends Controller {
           db_name: 'payout_amount',
           type: 'text',
           placeholder: 'Points',
-          listing: true,
+          listing: false,
           show_in_form: true,
           sort: true,
           required: false,
@@ -272,12 +272,25 @@ class CampaignController extends Controller {
           width: '50',
           searchable: true,
         },
+        ip: {
+          field_name: 'ip',
+          db_name: 'ip',
+          type: 'text',
+          placeholder: 'IP',
+          listing: true,
+          show_in_form: true,
+          sort: false,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: false,
+        },
         track_id: {
           field_name: 'track_id',
           db_name: 'track_id',
           type: 'text',
           placeholder: 'Tracking ID',
-          listing: false,
+          listing: true,
           show_in_form: true,
           sort: true,
           required: true,
@@ -312,14 +325,27 @@ class CampaignController extends Controller {
           'created_at',
           'status',
         ],
+        include:{
+          model: IpLog,
+          attributes: [
+            "ip",
+          ],
+          limit: 1,
+          order: [["created_at", "DESC"]],
+        }
       };
-      console.log('==============', options);
+      
       const { docs, pages, total } = await CampaignMember.paginate(options);
+      
       let report_details = [];
       docs.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
           record.dataValues.Member.dataValues.avatar =
             record.dataValues.Member.dataValues.avatar;
+          var member_ip = ''
+          if(record.dataValues.Member.dataValues.IpLogs.length){
+            member_ip = record.dataValues.Member.dataValues.IpLogs[0].ip
+          }
           report_details.push({
             id: record.dataValues.id,
             name: model.dataValues.name,
@@ -332,6 +358,7 @@ class CampaignController extends Controller {
             combained: model.dataValues.payout_amount,
             track_id: record.dataValues.track_id,
             campaign_status: record.dataValues.campaign_status,
+            ip: member_ip
           });
         }
       });
