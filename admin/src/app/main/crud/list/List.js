@@ -36,6 +36,7 @@ function List(props) {
 
 	const [modules, setModules] = useState([]);
 	const [searchText, setSearchText] = useState('');
+	const [searchKeywords, setSearchKeywords] = useState('');
 	const [fields, setFields] = useState({});
 	const [totalRecords, setTotalRecords] = useState(0);
 
@@ -61,6 +62,7 @@ function List(props) {
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
+		setSearchKeywords('');
 		setOrder({
 			direction: 'desc',
 			id: 'id',
@@ -147,6 +149,15 @@ function List(props) {
 		}
 	}, [moduleDeleted]);
 
+	const debounceFn = useCallback(_.debounce((val)=>{
+		setSearchText(val);
+	}, 1000), []);
+
+	const handleSearchtext = (ev) => {		
+		setFirstCall(true); 
+		setSearchKeywords(ev.target.value);
+		debounceFn(ev.target.value);
+	}
 
 
 	function handleRequestSort(event, property) {
@@ -470,11 +481,11 @@ function List(props) {
 									className="flex flex-1"
 									disableUnderline
 									fullWidth
-									value={searchText}
+									value={searchKeywords}
 									inputProps={{
 										'aria-label': `Search ${module}`,
 									}}
-									onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
+									onChange={handleSearchtext}
 								/>
 							</Paper>}
 							{addable && <motion.div
