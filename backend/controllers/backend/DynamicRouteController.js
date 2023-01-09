@@ -42,7 +42,7 @@ class DynamicRouteController {
         const file = fileSystem.createReadStream(filepath);
         if (toBeDeletedAfterDownload) {
           file.on('end', function () {
-            fileSystem.unlink(filepath)
+            fileSystem.unlink(filepath, function () { });
           });
         }
         file.pipe(res);
