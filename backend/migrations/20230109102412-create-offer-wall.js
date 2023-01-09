@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      company_portal_id:{
+        type: Sequelize.BIGINT
+      },
       premium_configuration: {
         type: Sequelize.ENUM('Custom', 'Automatic'),
         defaultValue:'Custom'
@@ -94,6 +97,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('OfferWalls');
+    await queryInterface.dropTable('offer_walls');
   }
 };
