@@ -2,7 +2,6 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
 import { Table, TableBody, TableCell, TablePagination, TableRow, Typography, Chip } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
-import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
 import ListTableHead from '../../crud/list/ListTableHead';
 import Helper from 'src/app/helper';

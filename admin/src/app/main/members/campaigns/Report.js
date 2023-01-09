@@ -6,7 +6,7 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.
 import { Box, Tooltip, IconButton, MenuItem, Select, FormControl, InputLabel, Stack, Chip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import ReportList from './ReportList';
 import { useDispatch } from 'react-redux';
@@ -14,6 +14,7 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 
 
 const UsersTracking = () => {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const [ campaignDetails, setCampaignDetails ] = useState({});
@@ -94,6 +95,7 @@ const UsersTracking = () => {
         })
         .catch(errors => {
             dispatch(showMessage({ variant: 'error', message: errors.message}));
+            navigate('/app/campaigns')
         })
     }
 
@@ -132,13 +134,17 @@ const UsersTracking = () => {
                                     <MenuItem value={0}>Condition Not Met</MenuItem>
                                 </Select>
                             </FormControl>
-                            <div>
-                                <Tooltip title="Export to CSV">
-                                    <IconButton color="primary" aria-label="Export to CSV" component="label" onClick={ hanldeExport }>
-                                        <FuseSvgIcon className="text-48" size={28} color="action">feather:download</FuseSvgIcon>
-                                    </IconButton>
-                                </Tooltip>
-                            </div>
+                            {
+                                (listData.result && listData.result.data.length) ? (
+                                    <div>
+                                        <Tooltip title="Export to CSV">
+                                            <IconButton color="primary" aria-label="Export to CSV" component="label" onClick={ hanldeExport }>
+                                                <FuseSvgIcon className="text-48" size={28} color="action">feather:download</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
+                                ) : ''
+                            }
                         </div>
                     </div>
                     <Stack direction="row" spacing={1} className="flex-wrap py-10 justify-center">
