@@ -151,7 +151,7 @@ const UsersTracking = () => {
                         <Chip label="Condition Met (Postback Triggered)" size="small" color="success" />
                         <Chip label="Condition Met (Postback Not Triggered)" size="small" color="warning" />
                         <Chip label="Condition Met (Reversed)" size="small" color="primary" />
-                        <Chip label="Condition Not Met" size="small" color="error" className="sm:mt-10" />
+                        <Chip label="Condition Not Met" size="small" color="error" sx={{ '@media(max-width: 900px)': {marginTop: '5px !important'}}} />
                     </Stack>
                 </div>
             }

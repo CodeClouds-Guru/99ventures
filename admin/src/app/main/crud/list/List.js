@@ -134,10 +134,19 @@ function List(props) {
 		fetchModules();
 	}, [searchText, page, rowsPerPage, order, where]);
 
-	useEffect(() => {
-		resetModulesListConfig();
-		setFirstCall(true);
+	/**
+	 * Unmounted the sate value
+	 */
+	useEffect(() => {		
+		return ()=> {
+			resetModulesListConfig();
+		}
 	}, [module]);
+
+	// useEffect(() => {
+	// 	resetModulesListConfig();
+	// 	setFirstCall(true);
+	// }, [module]);
 
 	useEffect(() => {
 		setData(modules);
@@ -384,7 +393,7 @@ function List(props) {
 		<div>
 			{/* // header */}
 			{
-				(showModuleHeading === '' || searchable && addable) && (
+				(showModuleHeading === '' || searchable || addable) && (
 					<div className='w-full flex py-32 px-24 md:px-32'>
 						{
 							showModuleHeading === '' && (
