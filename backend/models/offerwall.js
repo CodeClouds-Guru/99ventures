@@ -1,9 +1,7 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-const sequelizePaginate = require("sequelize-paginate");
-const Joi = require("joi");
+const { Model } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
 module.exports = (sequelize, DataTypes) => {
   class OfferWall extends Model {
     /**
@@ -13,46 +11,56 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      OfferWall.belongsTo(models.Campaign, {
+        foreignKey: 'campaign_id',
+      });
+      OfferWall.belongsTo(models.CompanyPortal, {
+        foreignKey: 'company_portal_id',
+      });
     }
   }
-  OfferWall.init({
-    company_portal_id: DataTypes.BIGINT,
-    campaign_id: DataTypes.BIGINT,
-    premium_configuration: DataTypes.ENUM("Custom", "Premium"),
-    name: DataTypes.STRING,
-    sub_id_prefix: DataTypes.STRING,
-    log_postback_erros: DataTypes.INTEGER,
-    secure_sub_ids: DataTypes.INTEGER,
-    status: DataTypes.ENUM('Enabled', 'Disabled'),
-    mode: DataTypes.ENUM('Reward Tool', 'PostBack'),
-    allow_from_any_ip: DataTypes.INTEGER,
-    campaign_id_variable: DataTypes.STRING,
-    campaign_name_variable: DataTypes.STRING,
-    sub_id_variable: DataTypes.STRING,
-    reverse_variable: DataTypes.STRING,
-    reverse_value: DataTypes.STRING,
-    response_ok: DataTypes.STRING,
-    response_fail: DataTypes.STRING,
-    currency_variable: DataTypes.STRING,
-    currency_options: DataTypes.ENUM('Cash', 'Points'),
-    currency_percent: DataTypes.STRING,
-    currency_max: DataTypes.STRING,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: "TIMESTAMP",
-    updated_at: "TIMESTAMP",
-    deleted_at: "TIMESTAMP",
-  }, {
-    sequelize,
-    modelName: 'OfferWall',
-    timestamps: true,
-    paranoid: true,
-    createdAt: "created_at", // alias createdAt as created_date
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    tableName: "offer_walls",
-  });
+  OfferWall.init(
+    {
+      company_portal_id: DataTypes.BIGINT,
+      campaign_id: DataTypes.BIGINT,
+      premium_configuration: DataTypes.ENUM('Custom', 'Premium'),
+      name: DataTypes.STRING,
+      sub_id_prefix: DataTypes.STRING,
+      log_postback_erros: DataTypes.INTEGER,
+      secure_sub_ids: DataTypes.INTEGER,
+      status: DataTypes.ENUM('Enabled', 'Disabled'),
+      mode: DataTypes.ENUM('Reward Tool', 'PostBack'),
+      allow_from_any_ip: DataTypes.INTEGER,
+      campaign_id_variable: DataTypes.STRING,
+      campaign_name_variable: DataTypes.STRING,
+      sub_id_variable: DataTypes.STRING,
+      reverse_variable: DataTypes.STRING,
+      reverse_value: DataTypes.STRING,
+      response_ok: DataTypes.STRING,
+      response_fail: DataTypes.STRING,
+      currency_variable: DataTypes.STRING,
+      currency_options: DataTypes.ENUM('Cash', 'Points'),
+      currency_percent: DataTypes.STRING,
+      currency_max: DataTypes.STRING,
+      created_by: DataTypes.BIGINT,
+      updated_by: DataTypes.BIGINT,
+      deleted_by: DataTypes.BIGINT,
+      created_at: 'TIMESTAMP',
+      updated_at: 'TIMESTAMP',
+      deleted_at: 'TIMESTAMP',
+    },
+    {
+      sequelize,
+      modelName: 'OfferWall',
+      timestamps: true,
+      paranoid: true,
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'offer_walls',
+    }
+  );
+  OfferWall.extra_fields = ['name'];
   OfferWall.fields = {
     id: {
       field_name: 'id',
@@ -365,12 +373,27 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
-    }
-  }
+    },
+    '$Campaign.name$': {
+      field_name: 'name',
+      db_name: 'name',
+      type: 'text',
+      placeholder: 'Campaign',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+  };
   OfferWall.validate = function (req) {
     const schema = Joi.object({
       campaign_id: Joi.required().label('campaign_id'),
-      premium_configuration: Joi.string().required().label('premium_configuration'),
+      premium_configuration: Joi.string()
+        .required()
+        .label('premium_configuration'),
       name: Joi.string().required().label('name'),
       sub_id_prefix: Joi.required().label('sub_id_prefix'),
       log_postback_erros: Joi.string().required().label('log_postback_erros'),
@@ -387,9 +410,9 @@ module.exports = (sequelize, DataTypes) => {
       currency_percent: Joi.required().label('currency_percent'),
       currency_variable: Joi.required().label('currency_variable'),
       currency_max: Joi.required().label('currency_max'),
-    })
-    return schema.validate(req.body)
-  }
-  sequelizePaginate.paginate(OfferWall)
+    });
+    return schema.validate(req.body);
+  };
+  sequelizePaginate.paginate(OfferWall);
   return OfferWall;
 };
