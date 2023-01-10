@@ -16,7 +16,7 @@ module.exports = {
         type: Sequelize.BIGINT
       },
       premium_configuration: {
-        type: Sequelize.ENUM('Custom', 'Automatic'),
+        type: Sequelize.ENUM('Custom', 'Premium'),
         defaultValue:'Custom'
       },
       name: {
