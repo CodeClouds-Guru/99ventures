@@ -31,6 +31,9 @@ services:
       - PORT=4000
     networks:
       - 99Bridge
+    volumes:
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
 
   admin:
     depends_on:
@@ -54,7 +57,7 @@ services:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
-      
+
   certbot:
     image: certbot/certbot:latest
     volumes:
