@@ -4,6 +4,7 @@ import Campaigns from './Campaigns';
 import CampaignsCreateUpdate from './create-update/CreateUpdate';
 import Report from './Report';
 import OfferwallsCreateUpdate from './offerwalls/CreateUpdate';
+import Offerwalls from './offerwalls/Index';
 
 const CampaignsConfig = {
   settings: {
@@ -46,6 +47,11 @@ const CampaignsConfig = {
     {
       path: 'app/campaigns/:campaignId/report',
       element: <Report />,
+      auth: settingsConfig.defaultAuth
+    },
+    {
+      path: 'app/campaigns/:moduleId/offerwalls',
+      element: <Offerwalls />,
       auth: settingsConfig.defaultAuth
     },
     {
