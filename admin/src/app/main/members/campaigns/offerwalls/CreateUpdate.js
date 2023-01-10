@@ -15,6 +15,43 @@ import { motion } from 'framer-motion';
 import { useTheme } from '@mui/material/styles';
 import Helper from 'src/app/helper';
 
+
+const schema = yup.object().shape({
+    premium_configuration: yup.string().required('Please enter Premium Configuration'),
+    name: yup.string().required('Please enter Name'),
+    sub_id_prefix: yup.string().required('Please enter Sub ID Prefix'),
+    status: yup.string().required('Please enter Status'),
+    mode: yup.string().required('Please enter Mode'),
+    campaign_id_variable: yup.string().required('Please enter Campaign ID Variable'),
+    campaign_name_variable: yup.string().required('Please enter Campaign Name Variable'),
+    sub_id_variable: yup.string().required('Please enter Sub ID Variable'),
+    reverse_variable_1: yup.string().required('Please enter Reverse Variable 1'),
+    reverse_variable_2: yup.string().required('Please enter Reverse Variable 2'),
+    currency_variable: yup.string().required('Please enter Currency Variable'),
+    percent: yup.string().required('Please enter Percent'),
+    max: yup.string().required('Please enter Max'),
+});
+
+const defaultValues = {
+    premium_configuration: '',
+    name: '',
+    sub_id_prefix: '',
+    postback_error_checkbox: false,
+    secure_sub_ids: '',
+    status: '',
+    mode: '',
+    ips: [],
+    allow_from_any: false,
+    campaign_id_variable: '',
+    campaign_name_variable: '',
+    sub_id_variable: '',
+    reverse_variable_1: '',
+    reverse_variable_2: '',
+    currency_variable: '',
+    percent: 100,
+    max: 0,
+};
+
 const CreateUpdate = () => {
 
     return (
