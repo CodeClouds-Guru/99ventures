@@ -184,19 +184,6 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    mode: {
-      field_name: 'mode',
-      db_name: 'mode',
-      type: 'text',
-      placeholder: 'Mode',
-      listing: false,
-      show_in_form: false,
-      sort: true,
-      required: false,
-      value: '',
-      width: '50',
-      searchable: false,
-    },
     allow_from_any_ip: {
       field_name: 'allow_from_any_ip',
       db_name: 'allow_from_any_ip',
@@ -380,5 +367,29 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     }
   }
+  OfferWall.validate = function (req) {
+    const schema = Joi.object({
+      campaign_id: Joi.required().label('campaign_id'),
+      premium_configuration: Joi.string().required().label('premium_configuration'),
+      name: Joi.string().required().label('name'),
+      sub_id_prefix: Joi.required().label('sub_id_prefix'),
+      log_postback_erros: Joi.string().required().label('log_postback_erros'),
+      secure_sub_ids: Joi.required().label('secure_sub_ids'),
+      status: Joi.string().required().label('status'),
+      mode: Joi.required().label('mode'),
+      allow_from_any_ip: Joi.required().label('allow_from_any_ip'),
+      ips: Joi.optional().allow('').label('ips'),
+      campaign_id_variable: Joi.required().label('campaign_id_variable'),
+      sub_id_variable: Joi.required().label('sub_id_variable'),
+      reverse_variable: Joi.required().label('reverse_variable'),
+      reverse_value: Joi.required().label('reverse_value'),
+      currency_options: Joi.required().label('currency_options'),
+      currency_percent: Joi.required().label('currency_percent'),
+      currency_variable: Joi.required().label('currency_variable'),
+      currency_max: Joi.required().label('currency_max'),
+    })
+    return schema.validate(req.body)
+  }
+  sequelizePaginate.paginate(OfferWall)
   return OfferWall;
 };
