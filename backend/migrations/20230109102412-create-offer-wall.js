@@ -12,6 +12,9 @@ module.exports = {
       company_portal_id:{
         type: Sequelize.BIGINT
       },
+      campaign_id:{
+        type: Sequelize.BIGINT
+      },
       premium_configuration: {
         type: Sequelize.ENUM('Custom', 'Automatic'),
         defaultValue:'Custom'

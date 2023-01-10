@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   OfferWall.init({
     company_portal_id: DataTypes.BIGINT,
+    campaign_id: DataTypes.BIGINT,
     premium_configuration: DataTypes.ENUM("Custom", "Automatic"),
     name: DataTypes.STRING,
     sub_id_prefix: DataTypes.STRING,
