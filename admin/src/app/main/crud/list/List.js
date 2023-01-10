@@ -31,7 +31,7 @@ function List(props) {
 	const addable = props.addable ?? true;
 	const deletable = props.deletable ?? true;
 	// const where = props.where ?? {};
-	const showModuleHeading = props.moduleHeading ?? '';
+	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
 
 	const [modules, setModules] = useState([]);
@@ -357,6 +357,17 @@ function List(props) {
 									</ListItemIcon>
 									<ListItemText primary="Report" />
 								</MenuItem>
+								<MenuItem
+									onClick={(event) => {
+										event.stopPropagation();
+										navigate(`/app/campaigns/${n.id}/offerwalls`)
+									}}
+								>
+									<ListItemIcon className="min-w-40">
+										<FuseSvgIcon>material-outline:attach_money</FuseSvgIcon>
+									</ListItemIcon>
+									<ListItemText primary="Offerwalls" />
+								</MenuItem>
 							</MenuList>
 						</Menu></>
 				)
@@ -392,11 +403,12 @@ function List(props) {
 	return (
 		<div>
 			{/* // header */}
+			
 			{
-				(showModuleHeading === '' || searchable || addable) && (
+				(showModuleHeading || searchable || addable) && (
 					<div className='w-full flex py-32 px-24 md:px-32'>
 						{
-							showModuleHeading === '' && (
+							showModuleHeading && (
 								<Typography
 									component={motion.span}
 									initial={{ x: -20 }}

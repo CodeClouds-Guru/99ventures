@@ -62,6 +62,15 @@ const navigationConfig = [
         url: 'app/campaigns',
         end: true,
       },
+      {
+        id: 'offerwalls',
+        title: 'Offerwalls',
+        translate: 'Offerwalls',
+        type: 'item',
+        icon: 'material-outline:attach_money',
+        url: 'app/offerwalls',
+        end: true,
+      },
     ],
   },
 
