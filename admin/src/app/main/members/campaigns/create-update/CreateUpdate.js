@@ -54,6 +54,11 @@ const CreateUpdate = () => {
     const theme = useTheme();
     const [status, setStatus] = useState(true)
     const [singleCampaignData, setSingleCampaignData] = useState({})
+    const [campaignObject, setCampaignObject] = useState({
+        affiliate_network: '',
+        payout_amount: '',
+        track_id: '',
+    });
 
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
@@ -70,7 +75,7 @@ const CreateUpdate = () => {
         setValue('trigger_postback', '', { shouldDirty: true, shouldValidate: false });
         setValue('track_id', '', { shouldDirty: true, shouldValidate: false });
         setValue('postback_url', '', { shouldDirty: true, shouldValidate: false });
-        // setValue('postback_url', `${defaultValues['affiliate_network']}/?%trackId%=${defaultValues['track_id']}&%payout%=${defaultValues['payout_amount']}&%status%=`, { shouldDirty: true, shouldValidate: false });
+        // setValue('postback_url', `${campaignObject.affiliate_network}/?%trackId%=${campaignObject.track_id}&%payout%=${campaignObject.payout_amount}&%status%=`, { shouldDirty: true, shouldValidate: false });
         setValue('condition_type', '', { shouldDirty: true, shouldValidate: false });
         // setValue('condition_currency', '', { shouldDirty: true, shouldValidate: false });
         setValue('condition_amount', '', { shouldDirty: true, shouldValidate: false });
@@ -78,12 +83,15 @@ const CreateUpdate = () => {
         moduleId === 'create' ? '' : getSingleCampaign();
     }, [setValue]);
 
-    const handleDefaultValues = (event, field_name) => {
-        // console.log(event.target.value, field_name)
-        field_name === 'postback_url' ?
-            setValue(field_name, `${defaultValues['affiliate_network']}/?%trackId%=${defaultValues['track_id']}&%payout%=${defaultValues['payout_amount']}&%status%=`, { shouldDirty: false, shouldValidate: false })
-            :
-            setValue(field_name, event.target.value, { shouldDirty: true, shouldValidate: false });
+    useEffect(() => {
+        setValue('postback_url', `${campaignObject.affiliate_network}/?%trackId%=${campaignObject.track_id}&%payout%=${campaignObject.payout_amount}&%status%=`, { shouldDirty: true, shouldValidate: false });
+    }, [campaignObject])
+
+    const handleDefaultValues = (value, field_name) => {
+        setCampaignObject({
+            ...campaignObject,
+            [field_name]: value,
+        })
     }
     const handleStatus = (event) => {
         dirtyFields.status = true
@@ -200,19 +208,22 @@ const CreateUpdate = () => {
                             <Controller
                                 name="name"
                                 control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Name"
-                                        type="text"
-                                        error={!!errors.name}
-                                        helperText={errors?.name?.message}
-                                        variant="outlined"
-                                        required
-                                    // onChange={(event) => handleDefaultValues(event, 'name')}
-
-                                    />
+                                render={({ field: { value, onChange, ...field } }) => (
+                                    <>
+                                        <TextField
+                                            className="w-1/2 mb-10 p-5"
+                                            {...field}
+                                            label="Name"
+                                            type="text"
+                                            error={!!errors.name}
+                                            helperText={errors?.name?.message}
+                                            variant="outlined"
+                                            required
+                                            onChange={({ target: { value } }) => {
+                                                onChange(value)
+                                            }}
+                                        />
+                                    </>
                                 )}
                             />
                             <Controller
@@ -238,24 +249,29 @@ const CreateUpdate = () => {
                             <Controller
                                 name="affiliate_network"
                                 control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        className="w-1/2 mb-10 p-5"
-                                        {...field}
-                                        label="Affiliate Network"
-                                        type="text"
-                                        error={!!errors.affiliate_network}
-                                        helperText={errors?.affiliate_network?.message}
-                                        variant="outlined"
-                                        required
-                                    // onChange={(event) => handleDefaultValues(event, 'affiliate_network')}
-                                    />
+                                render={({ field: { value, onChange, ...field } }) => (
+                                    <>
+                                        <TextField
+                                            className="w-1/2 mb-10 p-5"
+                                            {...field}
+                                            label="Affiliate Network"
+                                            type="text"
+                                            error={!!errors.affiliate_network}
+                                            helperText={errors?.affiliate_network?.message}
+                                            variant="outlined"
+                                            required
+                                            onChange={({ target: { value } }) => {
+                                                handleDefaultValues(value, 'affiliate_network')
+                                                onChange(value)
+                                            }}
+                                        />
+                                    </>
                                 )}
                             />
                             <Controller
                                 name="payout_amount"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field: { value, onChange, ...field } }) => (
                                     <TextField
                                         {...field}
                                         InputProps={{
@@ -272,7 +288,10 @@ const CreateUpdate = () => {
                                         helperText={errors?.payout_amount?.message}
                                         variant="outlined"
                                         required
-                                    // onChange={(event) => handleDefaultValues(event, 'payout_amount')}
+                                        onChange={({ target: { value } }) => {
+                                            handleDefaultValues(value, 'payout_amount')
+                                            onChange(value)
+                                        }}
                                     />
                                 )}
                             />
@@ -301,7 +320,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="track_id"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field: { value, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -311,7 +330,10 @@ const CreateUpdate = () => {
                                         helperText={errors?.track_id?.message}
                                         variant="outlined"
                                         required
-                                    // onChange={(event) => handleDefaultValues(event, 'track_id')}
+                                        onChange={({ target: { value } }) => {
+                                            handleDefaultValues(value, 'track_id')
+                                            onChange(value)
+                                        }}
                                     />
                                 )}
                             />
