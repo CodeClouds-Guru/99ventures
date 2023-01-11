@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'offer_walls',
     }
   );
-  OfferWall.extra_fields = ['name'];
+  OfferWall.extra_fields = ['Campaign.name'];
   OfferWall.fields = {
     id: {
       field_name: 'id',

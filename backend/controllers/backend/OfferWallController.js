@@ -70,11 +70,13 @@ class OfferWallController extends Controller {
       let result = await this.model.findAndCountAll(options);
 
       for (let i = 0; i < result.rows.length; i++) {
-        result.rows[i].setDataValue(
-          'campaign_name',
-          result.rows[i].Campaign.name
-        );
-        delete result.rows[i].Campaign.name;
+        if (result.rows[i].Campaign) {
+          result.rows[i].setDataValue(
+            'campaign_name',
+            result.rows[i].Campaign.name
+          );
+          delete result.rows[i].Campaign.name;
+        }
       }
       let pages = Math.ceil(result.count / limit);
       return {
