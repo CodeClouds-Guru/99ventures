@@ -29,7 +29,7 @@ class DynamicRouteController {
         `new controllers.${moduleInSingular}Controller`
       );
       var response = await controller_obj[action](req, res);
-      console.log(response);
+      // console.log(response);
       if (
         response &&
         'downloadable_file' in response &&
