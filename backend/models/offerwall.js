@@ -375,7 +375,7 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
     '$Campaign.name$': {
-      field_name: 'name',
+      field_name: 'campaign_name',
       db_name: 'name',
       type: 'text',
       placeholder: 'Campaign',
