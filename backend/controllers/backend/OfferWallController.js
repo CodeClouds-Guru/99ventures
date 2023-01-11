@@ -15,7 +15,7 @@ class OfferWallController extends Controller {
       const site_id = req.header('site_id') || 1;
       let report = req.query.report || 0;
       var options = super.getQueryOptions(req);
-      const campaign_id = parseInt(req.query.id) || null;
+      const campaign_id = parseInt(req.query.campaign_id) || null;
       options['where'] = {
         [Op.and]: {
           ...options['where'],
