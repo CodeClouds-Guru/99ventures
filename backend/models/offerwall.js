@@ -125,7 +125,7 @@ module.exports = (sequelize, DataTypes) => {
       required: false,
       value: '',
       width: '50',
-      searchable: false,
+      searchable: true,
     },
     sub_id_prefix: {
       field_name: 'sub_id_prefix',
