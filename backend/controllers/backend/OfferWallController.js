@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { OfferWall } = require('../../models/index');
+const { OfferWall,OfferWallIp } = require('../../models/index');
 const util = require('util');
 class OfferWallController extends Controller {
   constructor() {
