@@ -31,15 +31,51 @@ class OfferWallController extends Controller {
         );
       });
     }
-    //delete previous record
-    // await OfferWallIp.destroy({ where: { id: modelIds } });
+    
     return {
       status: true,
       message: 'Record has been created successfully',
       result: model,
     };
   }
+  //update
+  async update(req,res){
+    let id = req.params.id;
+    let request_data = req.body;
+    let company_portal_id = req.headers.site_id;
+    let ips = request_data.ips;
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      const errorObj = new Error("Validation failed.");
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
+    }
+    try {
+      request_data.updated_by = req.user.id;
+      request_data.company_portal_id = company_portal_id;
+      delete request_data.ips;
+      let model = await this.model.update(request_data, { where: { id } });
 
+      //delete previous record
+      await OfferWallIp.destroy({ where: { offer_wall_id: id } });
+      if (ips != '') {
+        ips = ips.split(',');
+        ips.forEach(async (ip) => {
+          model.deleted_by = req.user.id;
+          await OfferWallIp.create(
+            { ip: ip, offer_wall_id: model.id, status: '1' },
+            { silent: true }
+          );
+        });
+      }
+      return {
+        message: "Record has been updated successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
   //override list function
   async list(req, res) {
     try {
