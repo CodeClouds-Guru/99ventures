@@ -25,6 +25,7 @@ function List(props) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const user = useSelector(selectUser);
+
 	const { module } = props;
 	const searchable = props.searchable ?? true;
 	const editable = props.editable ?? true;
@@ -33,6 +34,7 @@ function List(props) {
 	// const where = props.where ?? {};
 	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
+	const queryParams = props.params ?? {};
 
 	const [modules, setModules] = useState([]);
 	const [searchText, setSearchText] = useState('');
@@ -78,7 +80,8 @@ function List(props) {
 			page: page + 1,
 			show: rowsPerPage,
 			module,
-			where
+			where,
+			...queryParams
 		}
 		/* order is added if it's not the very first call os API listing */
 		if (!firstCall) {
@@ -132,7 +135,7 @@ function List(props) {
 
 	useEffect(() => {
 		fetchModules();
-	}, [searchText, page, rowsPerPage, order, where]);
+	}, [searchText, page, rowsPerPage, order, where, props.params]);
 
 	/**
 	 * Unmounted the sate value
@@ -327,12 +330,13 @@ function List(props) {
 				return (
 					<>
 						<IconButton
-							aria-owns={actionsMenu ? 'actionsMenu' : null}
+							aria-owns={actionsMenu ? `actionsMenu_${ n.id}` : null}
 							aria-haspopup="true"
 							onClick={openActionsMenu}
 							size="large"
 							className="listingExtraMenu"
 							sx={{ zIndex: 999 }}
+							id={ `actionsMenu_${ n.id}` }
 						>
 							<FuseSvgIcon
 								sx={{ pointerEvents: 'none' }}
@@ -340,9 +344,9 @@ function List(props) {
 							>material-outline:settings</FuseSvgIcon>
 						</IconButton>
 						<Menu
-							id="actionsMenu"
+							id={`actionsMenu_${ n.id}`}
 							anchorEl={actionsMenu}
-							open={Boolean(actionsMenu)}
+							open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${ n.id}`)}
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
@@ -369,7 +373,8 @@ function List(props) {
 									<ListItemText primary="Offerwalls" />
 								</MenuItem>
 							</MenuList>
-						</Menu></>
+						</Menu>
+					</>
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
