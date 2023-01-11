@@ -128,7 +128,13 @@ class OfferWallController extends Controller {
 
   //override delete function
   async delete(req, res) {
+    // console.log(req);
+    let modelIds = req.body.modelIds ?? [];
     let response = await super.delete(req);
+
+    await OfferWallIp.destroy({
+      where: { offer_wall_id: modelIds },
+    });
     return {
       status: true,
       message: 'Offer deleted.',
