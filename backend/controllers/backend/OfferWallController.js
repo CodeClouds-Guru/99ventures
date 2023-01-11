@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { OfferWall,OfferWallIp } = require('../../models/index');
+const { OfferWall, OfferWallIp, Campaign } = require('../../models/index');
 const util = require('util');
 class OfferWallController extends Controller {
   constructor() {
@@ -10,22 +10,25 @@ class OfferWallController extends Controller {
   async save(req, res) {
     let request_data = req.body;
     let company_portal_id = req.headers.site_id;
-    let ips = request_data.ips
+    let ips = request_data.ips;
     const { error, value } = this.model.validate(req);
     if (error) {
-      const errorObj = new Error("Validation failed.");
+      const errorObj = new Error('Validation failed.');
       errorObj.statusCode = 422;
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
     }
-    request_data.company_portal_id = company_portal_id
-    delete request_data.ips
+    request_data.company_portal_id = company_portal_id;
+    delete request_data.ips;
     let model = await this.model.create(request_data, { silent: true });
-    if(ips != ''){
-      ips = ips.split(",");
+    if (ips != '') {
+      ips = ips.split(',');
       ips.forEach(async (ip) => {
         model.deleted_by = req.user.id;
-        await OfferWallIp.create({ip:ip,offer_wall_id:model.id,status:'1'}, { silent: true });
+        await OfferWallIp.create(
+          { ip: ip, offer_wall_id: model.id, status: '1' },
+          { silent: true }
+        );
       });
     }
     //delete previous record
@@ -37,7 +40,7 @@ class OfferWallController extends Controller {
     };
   }
 
-  //list
+  //override list function
   async list(req, res) {
     try {
       const site_id = req.header('site_id') || 1;
@@ -60,8 +63,19 @@ class OfferWallController extends Controller {
       let offset = (page - 1) * limit;
       options.limit = limit;
       options.offset = offset;
-
+      options.include = {
+        model: Campaign,
+        attributes: ['name'],
+      };
       let result = await this.model.findAndCountAll(options);
+
+      for (let i = 0; i < result.rows.length; i++) {
+        result.rows[i].setDataValue(
+          'campaign_name',
+          result.rows[i].Campaign.name
+        );
+        delete result.rows[i].Campaign.name;
+      }
       let pages = Math.ceil(result.count / limit);
       return {
         status: true,
@@ -72,6 +86,15 @@ class OfferWallController extends Controller {
       console.error(err);
       this.throwCustomError('Unable to get data', 500);
     }
+  }
+
+  //override delete function
+  async delete(req, res) {
+    let response = await super.delete(req);
+    return {
+      status: true,
+      message: 'Offer deleted.',
+    };
   }
 }
 module.exports = OfferWallController;
