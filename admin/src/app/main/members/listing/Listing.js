@@ -320,7 +320,7 @@ function Listing(props) {
                                                 onChange={(event) => handleChangeFilter(event, key, 'column')}
                                             >
                                                 {
-                                                    Object.keys(column_object).map(key => <MenuItem value={key}>{column_object[key]}</MenuItem>)
+                                                    Object.keys(column_object).map(key => <MenuItem key={key} value={key}>{column_object[key]}</MenuItem>)
                                                 }
                                             </Select>
                                         </FormControl>
@@ -334,7 +334,7 @@ function Listing(props) {
                                                 onChange={(event) => handleChangeFilter(event, key, 'match')}
                                             >
                                                 {
-                                                    Object.keys(match_object).map(key => <MenuItem value={key}>{match_object[key]}</MenuItem>)
+                                                    Object.keys(match_object).map(key => <MenuItem key={key} value={key}>{match_object[key]}</MenuItem>)
                                                 }
                                             </Select>
                                         </FormControl>
