@@ -25,7 +25,7 @@ module.exports = {
       sub_id_prefix: {
         type: Sequelize.STRING,
       },
-      log_postback_erros: {
+      log_postback_errors: {
         type: Sequelize.INTEGER,
         defaultValue:'0'
       },
