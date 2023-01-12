@@ -306,6 +306,11 @@ const MemberDetails = () => {
         return 0;
     }
 
+    const getCountryName = (country_id) => {
+        const result = countryData.filter(c => c.id == country_id);
+        return result.length ? result[0].name : ''
+    }
+
     return (
         <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row" >
             <div className="lg:w-1/3 xl:w-2/5">
@@ -722,7 +727,7 @@ const MemberDetails = () => {
                         <Typography variant="body1" className="mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
                         </Typography>
-                        <Adjustment updateMemberData={updateMemberData} />
+                        <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
                     </Box>
 
                     <div className='sm:w-1/4 lg:w-full lg:text-left sm:text-center'>
@@ -899,7 +904,7 @@ const MemberDetails = () => {
 
                                                     ) : (
                                                         <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                                            {memberData.country_id && countryData.filter(c => c.id == memberData.country_id)[0].name}
+                                                            { memberData.country_id && getCountryName(memberData.country_id) }
                                                         </Typography>
                                                     )
                                                 }
