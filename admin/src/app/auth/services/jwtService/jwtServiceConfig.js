@@ -57,6 +57,9 @@ const jwtServiceConfig = {
   campaignsSave: 'campaigns/save',
   getSingleCampaign: 'campaigns/view',
   campaignUpdate: 'campaigns/update',
+  offerwallsSave: 'offerwalls/save',
+  getSingleOfferwall: 'offerwalls/view',
+  offerwallUpdate: 'offerwalls/update',
 };
 
 export default jwtServiceConfig;
