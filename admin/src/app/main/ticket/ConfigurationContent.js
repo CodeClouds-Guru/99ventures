@@ -104,7 +104,7 @@ function ConfigurationContent() {
                                         label="Select a date range"
                                         variant="outlined"
                                         disabled
-                                        defaultValue={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
+                                        value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
                                     />
                                 </div>
                         }
@@ -126,7 +126,7 @@ function ConfigurationContent() {
             {/* {JSON.stringify(whereClause)} */}
             <List
                 module="tickets"
-                moduleHeading='N/A'
+                moduleHeading={ true }
                 where={whereClause}
                 key={listKey}
                 addable={false}
