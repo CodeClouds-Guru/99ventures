@@ -1,6 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const PageParser = require('../helpers/PageParser')
+const Lucid = require("../helpers/Lucid");
+
+router.get('/test-lucid', async (req, res) => {
+  const lucidObj = new Lucid();
+  const data = await lucidObj.suppliers();
+  res.json(data);
+});
+
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
