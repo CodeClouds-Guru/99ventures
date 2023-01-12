@@ -46,7 +46,11 @@ function Listing(props) {
     const [where, setWhere] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [filterActive, setFilterActive] = useState(false);
-    const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
+    const [filters, setFilters] = useState([{ column: '', match: '', search: '' }]);
+    // const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
+    const [applyBtnSts, setApplyBtnSts] = useState(true);
+    const [addBtnSts, setAddBtnSts] = useState(true);
+
     const column_object = {
         'address_1': 'Billing Street Address',
         '$IpLogs.browser$': 'Browser',
@@ -132,7 +136,18 @@ function Listing(props) {
         }
     }, [moduleDeleted]);
 
-
+    useEffect(()=>{
+        const filterResult = filters.some(el => el.column === '' || el.match === '');
+        if(!filterResult)
+            setAddBtnSts(false);
+        else 
+            setAddBtnSts(true);
+        
+        if(memberStatus.length || !filterResult)
+            setApplyBtnSts(false);
+        else
+            setApplyBtnSts(true);
+    }, [filters, memberStatus]);
 
     function handleRequestSort(event, property) {
         const id = property;
@@ -257,27 +272,31 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const addFilterRow = () => {
-        setFilters(filters.concat({ column: 'address_1', match: 'substring', search: '' }))
+        setFilters(filters.concat({ column: '', match: '', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
         setFilterActive(false);
-        setFilters([{ column: 'address_1', match: 'substring', search: '' }]);
+        setFilters([{ column: '', match: '', search: '' }]);
         setMemberStatus([]);
         setWhere({});
     }
     const handleChangeFilter = (event, key, field) => {
         filters[key][field] = event.target.value;
-        setFilters([...filters])
+        setFilters([...filters]);
     }
     const handleApplyFilters = () => {
-        setWhere({
-            filters: filters,
-            status: memberStatus
-        });
+        const where = {status: memberStatus};
+        const filterResult = filters.some(el => el.column === '' || el.match === '');
+        if(!filterResult){
+            where.filters = filters
+        }
+        setWhere(where);
         setFilterActive(true);
         setOpenAlertDialog(false);
     }
+
+
     return (
         <div>
             {/* // header */}
@@ -320,7 +339,10 @@ function Listing(props) {
                                                 onChange={(event) => handleChangeFilter(event, key, 'column')}
                                             >
                                                 {
-                                                    Object.keys(column_object).map(key => <MenuItem key={key} value={key}>{column_object[key]}</MenuItem>)
+                                                    Object.keys(column_object).map(key => (
+                                                            <MenuItem disabled={ filters.some(el=> el.column === key) } key={key} value={key}>{column_object[key]}</MenuItem>
+                                                        )
+                                                    )
                                                 }
                                             </Select>
                                         </FormControl>
@@ -360,10 +382,17 @@ function Listing(props) {
                                 )
                             })
                             }
-                            <Tooltip title="Add conditions" placement="right">
-                                <Button className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />} onClick={addFilterRow}>
-                                </Button>
-                            </Tooltip>
+                            {
+                                !addBtnSts ? (
+                                    <Tooltip title="Add conditions" placement="right">
+                                        <Button className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />} onClick={addFilterRow}>
+                                        </Button>
+                                    </Tooltip>
+                                ) : (
+                                    <Button disabled={ addBtnSts } className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />}></Button>
+                                )
+                            }
+                            
                             <FormControl className="w-full mt-16" size="large">
                                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
                                 <Select
@@ -383,7 +412,7 @@ function Listing(props) {
                         </DialogContent>
                         <DialogActions className="mx-16 mb-16">
                             <Button variant="outlined" color="error" onClick={cancelFilter}>Cancel</Button>
-                            <Button variant="contained" color="primary" onClick={handleApplyFilters}>Apply Filters</Button>
+                            <Button variant="contained" color="primary" disabled={ applyBtnSts } onClick={handleApplyFilters}>Apply Filters</Button>
                         </DialogActions>
                     </Dialog>
                     <motion.div
@@ -406,7 +435,7 @@ function Listing(props) {
             {!filterActive ? '' :
                 <div className="flex">
                     <Stack direction="row" sx={{ overflowX: 'auto', maxWidth: '82%' }} spacing={1} className="flex w-10/12 my-16 justify-center">
-                        {filters.map((val, key) => {
+                        {filters.filter(el => el.column !== '' && el.match !== '').map((val, key) => {
                             return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
                         })
                         }
