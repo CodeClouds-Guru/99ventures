@@ -2,6 +2,8 @@ import { Box, TextField, Dialog, Divider, DialogTitle, DialogActions, DialogCont
 import AlertDialog from 'app/shared-components/AlertDialog';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useState } from 'react';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { useDispatch } from 'react-redux';
 
 const btnStyle = {
     borderRadius: '5px',
@@ -9,17 +11,23 @@ const btnStyle = {
 }
 
 const Adjustment = (props) => {
+    const dispatch = useDispatch();
     const [ dialogStatus, setDialogStatus ] = useState(false);
     const [ note, setNote ] = useState('');
     const [ adjustmentAmount, setAdjustmentAmount ] = useState(1);
     const [ openAlertDialog, setOpenAlertDialog ] = useState(false);
+
+    const totalBalance = () => {
+        const result = props.totalEarnings.earnings && props.totalEarnings.earnings.filter(er=> er.amount_type === 'cash');
+        return result.length ? result[0].total_amount : 0
+    }
 
     const handleChangeStatus = () => {
         const params = {
             admin_amount: adjustmentAmount,
             admin_note: note,
             type: 'admin_adjustment'
-        }
+        }        
         props.updateMemberData(params, "adjustment");
         handleCancelStatus();
         onCloseAlertDialogHandle();
@@ -37,6 +45,36 @@ const Adjustment = (props) => {
   
     const onConfirmAlertDialogHandle = () => {
         handleChangeStatus()
+    }
+
+    const handleAdjustment = () => {
+        if(adjustmentAmount == 0 || adjustmentAmount == -0){
+            dispatch(showMessage({ variant: 'error', message: 'Invalid amount!' }));
+            return;
+        }
+        var flag = false;
+        if(adjustmentAmount < 0){   // At the time of withdraw
+            const balance = totalBalance();
+            if(balance < 1 || (balance - Math.abs(adjustmentAmount) < 0)) {
+                dispatch(showMessage({ variant: 'error', message: 'Insufficient balance!' }));
+            } else {
+                flag = true;
+            }
+        } else {
+            flag = true;
+        }
+
+        if(flag){
+            if(note.length >= 5)
+                setOpenAlertDialog(true);
+            else 
+                dispatch(showMessage({ variant: 'error', message: 'Please add more words in note!' }));
+        }
+    }
+
+    const handleSetNote = (e)=> {
+        const noteVal = e.target.value.trim();
+        setNote(noteVal);
     }
 
     return (
@@ -70,13 +108,13 @@ const Adjustment = (props) => {
                                     +
                                 </Button>
                             </div>           
-                            <TextField className="w-full" id="outlined-basic" label="Add Note" variant="outlined" onChange={ (e)=>setNote(e.target.value) }/>      
+                            <TextField className="w-full" id="outlined-basic" label="Add Note" variant="outlined" onChange={ handleSetNote }/>      
                             
                         </DialogContent>
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={ handleCancelStatus }>Cancel</Button>
                             {/* <Button variant="outlined" color="primary" onClick={ handleChangeStatus }>Skip & Save</Button> */}
-                            <Button color="primary" variant="contained" onClick={ ()=>setOpenAlertDialog(true) } disabled={ note ? false : true }>Save</Button>
+                            <Button color="primary" variant="contained" onClick={ handleAdjustment } disabled={ note ? false : true }>Save</Button>
                         </DialogActions>
                     </Dialog>
                 )

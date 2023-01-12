@@ -727,7 +727,7 @@ const MemberDetails = () => {
                         <Typography variant="body1" className="mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
                         </Typography>
-                        <Adjustment updateMemberData={updateMemberData} />
+                        <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
                     </Box>
 
                     <div className='sm:w-1/4 lg:w-full lg:text-left sm:text-center'>
