@@ -26,7 +26,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       log_postback_errors: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.TINYINT,
         defaultValue:'0'
       },
       secure_sub_ids: {
@@ -42,7 +42,7 @@ module.exports = {
         defaultValue:'Reward Tool'
       },
       allow_from_any_ip:{
-        type: Sequelize.INTEGER,
+        type: Sequelize.TINYINT,
         defaultValue:'0'
       },
       campaign_id_variable: {

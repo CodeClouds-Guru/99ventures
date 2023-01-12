@@ -21,8 +21,8 @@ class OfferWallController extends Controller {
     request_data.company_portal_id = company_portal_id;
     delete request_data.ips;
     let model = await this.model.create(request_data, { silent: true });
-    if (ips != '') {
-      ips = ips.split(',');
+    if (ips.length > 0) {
+      // ips = ips.split(',');
       ips.forEach(async (ip) => {
         model.deleted_by = req.user.id;
         await OfferWallIp.create(
@@ -59,8 +59,8 @@ class OfferWallController extends Controller {
 
       //delete previous record
       await OfferWallIp.destroy({ where: { offer_wall_id: id } });
-      if (ips != '') {
-        ips = ips.split(',');
+      if (ips.length > 0) {
+        // ips = ips.split(',');
         ips.forEach(async (ip) => {
           model.deleted_by = req.user.id;
           await OfferWallIp.create(
