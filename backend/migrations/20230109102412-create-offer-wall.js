@@ -25,7 +25,7 @@ module.exports = {
       sub_id_prefix: {
         type: Sequelize.STRING,
       },
-      log_postback_erros: {
+      log_postback_errors: {
         type: Sequelize.INTEGER,
         defaultValue:'0'
       },
@@ -34,8 +34,8 @@ module.exports = {
         defaultValue:'0'
       },
       status: {
-        type: Sequelize.ENUM('Enabled', 'Disabled'),
-        defaultValue:'Enabled'
+        type: Sequelize.TINYINT,
+        defaultValue:0
       },
       mode: {
         type: Sequelize.ENUM('Reward Tool', 'PostBack'),
