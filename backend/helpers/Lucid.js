@@ -23,12 +23,16 @@ class Lucid {
             headers: { 'Authorization': '1E1E0F7F-77B6-4732-9ED3-9D2953A7BF3F' }
         });
         this.suppliers = this.suppliers.bind(this);
+        this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
         return new Proxy(this, handler);
     }
-    async suppliers() {
-        // throw new Error('Custom Error');
-        const response = await this.instance.get('Core/v1/Suppliers/AllWithAccount');
+    async fetchAndReturnData(partUrl) {
+        const response = await this.instance.get(partUrl);
         return response.data;
+    }
+    async suppliers() {
+        const data = await this.fetchAndReturnData('Core/v1/Suppliers/AllWithAccount');
+        return data;
     }
 }
 
