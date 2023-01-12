@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       sub_id_prefix: DataTypes.STRING,
       log_postback_errors: DataTypes.INTEGER,
       secure_sub_ids: DataTypes.INTEGER,
-      status: DataTypes.ENUM('Enabled', 'Disabled'),
+      status: DataTypes.TINYINT,
       mode: DataTypes.ENUM('Reward Tool', 'PostBack'),
       allow_from_any_ip: DataTypes.INTEGER,
       campaign_id_variable: DataTypes.STRING,

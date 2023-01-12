@@ -34,8 +34,8 @@ module.exports = {
         defaultValue:'0'
       },
       status: {
-        type: Sequelize.ENUM('Enabled', 'Disabled'),
-        defaultValue:'Enabled'
+        type: Sequelize.TINYINT,
+        defaultValue:0
       },
       mode: {
         type: Sequelize.ENUM('Reward Tool', 'PostBack'),
