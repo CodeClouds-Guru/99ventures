@@ -68,6 +68,7 @@ module.exports = (sequelize, DataTypes) => {
       condition_currency: Joi.required().label("Condition Currency"),
       condition_amount: Joi.required().label("Condition Amount"),
       status: Joi.required().label("Status"),
+      company_portal_id: Joi.optional().label("Company Portal ID"),
     });
     return schema.validate(req.body);
   };

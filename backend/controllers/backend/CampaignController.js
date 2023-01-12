@@ -460,7 +460,7 @@ class CampaignController extends Controller {
   //override save
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    await super.save(req);
+    let model = await super.save(req);
     return {
       status: true,
       message: 'Record has been created successfully',
