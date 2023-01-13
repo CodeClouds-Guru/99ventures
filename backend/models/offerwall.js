@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       OfferWall.hasMany(models.OfferWallIp, {
         foreignKey: "offer_wall_id",
       });
+      OfferWall.belongsToMany(models.Member, {
+        through: "member_offer_wall",
+        foreignKey: "offer_wall_id",
+        otherKey: "member_id",
+        timestamps: false,
+      });
     }
   }
   OfferWall.init(

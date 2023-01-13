@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { OfferWall, OfferWallIp, Campaign } = require('../../models/index');
+const { OfferWall, OfferWallIp, Campaign,Member } = require('../../models/index');
 const util = require('util');
 class OfferWallController extends Controller {
   constructor() {
@@ -128,16 +128,24 @@ class OfferWallController extends Controller {
   }
   //view offer wall
   async view(req,res){
+    let report = req.query.report;
+    let options = [{
+      model: Campaign,
+      attributes: ['name'],
+    },
+    {
+      model: OfferWallIp,
+      attributes: ['ip'],
+    }]
+    
+    let fields = this.model.fields;
+    if(report == '1'){
+      //offer wall report details
+      options.push({model: Member,attributes: ['id','first_name','last_name','email','username','created_at','status']});
+    }
     let model = await this.model.findOne({
       where: { id: req.params.id },
-      include: [{
-                  model: Campaign,
-                  attributes: ['name'],
-                },
-                {
-                  model: OfferWallIp,
-                  attributes: ['ip'],
-                }]
+      include: options
     });
     model.dataValues.ips = []
     if (model.dataValues.OfferWallIps) {
@@ -150,7 +158,6 @@ class OfferWallController extends Controller {
     if (model.dataValues.Campaign != null) {
       model.dataValues.campaign_name = model.dataValues.Campaign.name
     }
-    let fields = this.model.fields;
     return { status: true, result: model, fields };
   }
   //override delete function
@@ -166,6 +173,10 @@ class OfferWallController extends Controller {
       status: true,
       message: 'Offer deleted.',
     };
+  }
+  //get report details 
+  async getReport(req){
+
   }
 }
 module.exports = OfferWallController;
