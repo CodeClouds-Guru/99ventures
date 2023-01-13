@@ -5,15 +5,15 @@ const handler = {
     return !(prop in target)
       ? target[prop]
       : function (...args) {
-          try {
-            return target[prop].apply(this, args);
-          } catch (e) {
-            return {
-              status: false,
-              error: e.message,
-            };
-          }
-        };
+        try {
+          return target[prop].apply(this, args);
+        } catch (e) {
+          return {
+            status: false,
+            error: e.message,
+          };
+        }
+      };
   },
 };
 class Lucid {
@@ -49,9 +49,9 @@ class Lucid {
 
     let languages = [];
     data.AllCountryLanguages.map((val) => {
-      let lang = val.Name.split(' - ')[1].toLowerCase();
+      let lang = val.Name.split(' - ')[1].toLowerCase().trim();
       country.map((el) => {
-        if (el.name.toLowerCase() == lang) {
+        if (el.name.toLowerCase() === lang) {
           languages.push({
             id: el.id,
             name: el.name,
@@ -62,13 +62,18 @@ class Lucid {
         }
       });
     });
-    // console.log(languages);
-    const insertNewData = await Country.bulkCreate(languages, {
-      updateOnDuplicate: ['id'],
-      ignoreDuplicates: true,
-    });
-
-    return insertNewData;
+    var resp = [];
+    try {
+      await Country.sync({ force: true });
+      resp = await Country.bulkCreate(languages, {
+        updateOnDuplicate: ['id'],
+        // ignoreDuplicates: true,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      return resp;
+    }
   }
 }
 
