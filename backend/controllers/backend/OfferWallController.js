@@ -99,10 +99,10 @@ class OfferWallController extends Controller {
       let offset = (page - 1) * limit;
       options.limit = limit;
       options.offset = offset;
-      options.include = {
-        model: Campaign,
-        attributes: ['name'],
-      };
+      options.include = [{
+                    model: Campaign,
+                    attributes: ['name'],
+                  }];
       let result = await this.model.findAndCountAll(options);
 
       for (let i = 0; i < result.rows.length; i++) {
@@ -125,7 +125,22 @@ class OfferWallController extends Controller {
       this.throwCustomError('Unable to get data', 500);
     }
   }
-
+  //view offer wall
+  async view(req,res){
+    let model = await this.model.findOne({
+      where: { id: req.params.id },
+      include: [{
+                  model: Campaign,
+                  attributes: ['name'],
+                },
+                {
+                  model: OfferWallIp,
+                  attributes: ['name'],
+                }]
+    });
+    fields = this.model.fields;
+    return { status: true, result: model, fields };
+  }
   //override delete function
   async delete(req, res) {
     // console.log(req);
