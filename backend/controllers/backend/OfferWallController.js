@@ -138,9 +138,9 @@ class OfferWallController extends Controller {
                   attributes: ['ip'],
                 }]
     });
-    model.dataValues.ips = ['6']
+    model.dataValues.ips = []
     if (model.dataValues.OfferWallIps) {
-      model.dataValues.ips = ['7']
+      model.dataValues.ips = []
       let offer_wall_ips = model.dataValues.OfferWallIps;
       offer_wall_ips.forEach(function (ip, key) {
         model.dataValues.ips.push(ip.ip)
