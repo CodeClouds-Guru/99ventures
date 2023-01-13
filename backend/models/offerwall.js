@@ -403,7 +403,7 @@ module.exports = (sequelize, DataTypes) => {
       secure_sub_ids: Joi.label('secure_sub_ids'),
       status: Joi.required().label('status'),
       mode: Joi.required().label('mode'),
-      allow_from_any_ip: Joi.label('allow_from_any_ip'),
+      allow_from_any_ip: Joi.required().label('allow_from_any_ip'),
       ips: Joi.optional().allow('').label('ips'),
       campaign_id_variable: Joi.required().label('campaign_id_variable'),
       campaign_name_variable: Joi.required().label('campaign_name_variable'),
