@@ -245,7 +245,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="affiliate_network"
                                 control={control}
-                                render={({ field: { value, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <>
                                         <TextField
                                             className="w-1/2 mb-10 p-5"
@@ -267,7 +267,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="payout_amount"
                                 control={control}
-                                render={({ field: { value, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <TextField
                                         {...field}
                                         InputProps={{
@@ -316,7 +316,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="track_id"
                                 control={control}
-                                render={({ field: { value, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
