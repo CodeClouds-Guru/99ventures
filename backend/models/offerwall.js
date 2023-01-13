@@ -400,7 +400,7 @@ module.exports = (sequelize, DataTypes) => {
       name: Joi.string().required().label('name'),
       sub_id_prefix: Joi.required().label('sub_id_prefix'),
       log_postback_errors: Joi.required().label('log_postback_errors'),
-      secure_sub_ids: Joi.label('secure_sub_ids'),
+      secure_sub_ids: Joi.required().label('secure_sub_ids'),
       status: Joi.required().label('status'),
       mode: Joi.required().label('mode'),
       allow_from_any_ip: Joi.required().label('allow_from_any_ip'),
