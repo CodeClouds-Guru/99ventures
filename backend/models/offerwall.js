@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_variable: DataTypes.STRING,
       currency_options: DataTypes.ENUM('Cash', 'Points'),
       currency_percent: DataTypes.STRING,
+      postback_url: DataTypes.STRING,
       currency_max: DataTypes.STRING,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,

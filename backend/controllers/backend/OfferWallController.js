@@ -19,6 +19,7 @@ class OfferWallController extends Controller {
       throw errorObj;
     }
     request_data.company_portal_id = company_portal_id;
+    request_data.postback_url = process.env.CLIENT_ORIGIN
     delete request_data.ips;
     let model = await this.model.create(request_data, { silent: true });
     if (ips.length > 0) {
@@ -64,7 +65,7 @@ class OfferWallController extends Controller {
         ips.forEach(async (ip) => {
           model.deleted_by = req.user.id;
           await OfferWallIp.create(
-            { ip: ip, offer_wall_id: model.id, status: '1' },
+            { ip: ip, offer_wall_id: id, status: '1' },
             { silent: true }
           );
         });
