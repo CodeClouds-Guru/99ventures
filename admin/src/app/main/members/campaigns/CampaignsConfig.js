@@ -55,7 +55,7 @@ const CampaignsConfig = {
       auth: settingsConfig.defaultAuth
     },
     {
-      path: 'app/campaigns/:moduleId/offerwalls/create',
+      path: 'app/campaigns/:campaignId/offerwalls/create',
       element: <OfferwallsCreateUpdate />,
       auth: settingsConfig.defaultAuth
     }
