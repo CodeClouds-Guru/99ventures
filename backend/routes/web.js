@@ -6,7 +6,7 @@ const Lucid = require('../helpers/Lucid');
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
   // const data = await lucidObj.suppliers();
-  const definitions_data = await lucidObj.definitions();
+  const definitions_data = await lucidObj.allocatedSurveys();
   res.json(definitions_data);
 });
 

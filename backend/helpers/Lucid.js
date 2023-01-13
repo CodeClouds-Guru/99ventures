@@ -38,6 +38,11 @@ class Lucid {
     return data;
   }
 
+  async allocatedSurveys() {
+    const data = await this.fetchAndReturnData('/Supply/v1/Surveys/SupplierAllocations/All/6373');
+    return data;
+  }
+
   //get all definition - update country table to insert language details
   async definitions() {
     const data = await this.fetchAndReturnData(
