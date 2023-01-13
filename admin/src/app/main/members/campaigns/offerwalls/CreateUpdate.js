@@ -419,7 +419,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="campaign_id_variable"
                                 control={control}
-                                render={({ field: { value1, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -429,9 +429,9 @@ const CreateUpdate = () => {
                                         helperText={errors?.campaign_id_variable?.message}
                                         variant="outlined"
                                         required
-                                        onChange={({ target: { value2 } }) => {
-                                            handleUrlObject(value1, 'campaignIdVariable')
-                                            onChange(value2)
+                                        onChange={({ target: { value } }) => {
+                                            handleUrlObject(value, 'campaignIdVariable')
+                                            onChange(value)
                                         }}
                                     />
                                 )}
@@ -439,7 +439,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="campaign_name_variable"
                                 control={control}
-                                render={({ field: { value1, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -449,9 +449,9 @@ const CreateUpdate = () => {
                                         helperText={errors?.campaign_name_variable?.message}
                                         variant="outlined"
                                         required
-                                        onChange={({ target: { value2 } }) => {
-                                            handleUrlObject(value1, 'campaignNameVariable')
-                                            onChange(value2)
+                                        onChange={({ target: { value } }) => {
+                                            handleUrlObject(value, 'campaignNameVariable')
+                                            onChange(value)
                                         }}
                                     />
                                 )}
@@ -459,7 +459,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="sub_id_variable"
                                 control={control}
-                                render={({ field: { value1, onChange, ...field } }) => (
+                                render={({ field: { defaultValue, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -469,9 +469,9 @@ const CreateUpdate = () => {
                                         helperText={errors?.sub_id_variable?.message}
                                         variant="outlined"
                                         required
-                                        onChange={({ target: { value2 } }) => {
-                                            handleUrlObject(value1, 'subIdVariable')
-                                            onChange(value2)
+                                        onChange={({ target: { value } }) => {
+                                            handleUrlObject(value, 'subIdVariable')
+                                            onChange(value)
                                         }}
                                     />
                                 )}
@@ -595,12 +595,12 @@ const CreateUpdate = () => {
                             {moduleId !== 'create' &&
                                 <>
                                     <div className="flex  justify-center">
-                                        PostBack URL: {singleOfferwallData.postback_url}
+                                        <b> PostBack URL:</b> {singleOfferwallData.postback_url}
                                     </div>
                                     <div className="flex  justify-center">
-                                        PostBack URL Example: {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
+                                        <b> PostBack URL Example:</b> {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
                                     </div>
-                                    <div className="flex justify-center">
+                                    <div className="flex justify-center" variant="error">
                                         <b>{'The above URL just an example. The {sub}, {offerid} and {offername} would need to be replaced with the networls tracking variables.'}</b>
                                     </div>
                                 </>

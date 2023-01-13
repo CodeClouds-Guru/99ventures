@@ -88,9 +88,11 @@ const CreateUpdate = () => {
     }, [campaignObject])
 
     const handleDefaultValues = (value, field_name) => {
-        setCampaignObject({
-            ...campaignObject,
-            [field_name]: value,
+        setCampaignObject((campaignObject) => {
+            return {
+                ...campaignObject,
+                [field_name]: value,
+            }
         })
     }
     const handleStatus = (event) => {
@@ -112,9 +114,12 @@ const CreateUpdate = () => {
                     setValue('name', response.data.results.result.name, { shouldDirty: false, shouldValidate: true });
                     setValue('description', response.data.results.result.description, { shouldDirty: false, shouldValidate: true });
                     setValue('affiliate_network', response.data.results.result.affiliate_network, { shouldDirty: false, shouldValidate: true });
+                    handleDefaultValues(response.data.results.result.affiliate_network, 'affiliate_network')
                     setValue('payout_amount', response.data.results.result.payout_amount, { shouldDirty: false, shouldValidate: true });
+                    handleDefaultValues(response.data.results.result.payout_amount, 'payout_amount')
                     setValue('trigger_postback', response.data.results.result.trigger_postback, { shouldDirty: false, shouldValidate: true });
                     setValue('track_id', response.data.results.result.track_id, { shouldDirty: false, shouldValidate: true });
+                    handleDefaultValues(response.data.results.result.track_id, 'track_id')
                     setValue('postback_url', response.data.results.result.postback_url, { shouldDirty: false, shouldValidate: true });
                     setValue('condition_type', response.data.results.result.condition_type, { shouldDirty: false, shouldValidate: true });
                     // setValue('condition_currency', response.data.results.result.condition_currency, { shouldDirty: false, shouldValidate: true });
@@ -305,7 +310,6 @@ const CreateUpdate = () => {
                                             error={!!errors.trigger_postback}
                                             // helperText={errors?.trigger_postback?.message}
                                             required
-                                        // onChange={(event) => handleDefaultValues(event, 'trigger_postback')}
                                         >
                                             <MenuItem value="automatic">Automatic</MenuItem>
                                             <MenuItem value="manual">Manual</MenuItem>
@@ -347,6 +351,16 @@ const CreateUpdate = () => {
                                             helperText={errors?.postback_url?.message}
                                             variant="outlined"
                                             required
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <Tooltip title="Click to copy" placement="right">
+                                                            <FuseSvgIcon
+                                                                onClick={() => clickToCopy(`${campaignObject.affiliate_network}%trackId%=${campaignObject.track_id}&%payout%=${campaignObject.payout_amount}&%status%=`)} className="cursor-pointer text-48" size={24} color="action">heroicons-solid:clipboard-copy</FuseSvgIcon>
+                                                        </Tooltip>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
                                         />
                                         <Tooltip title="Click to copy" placement="right">
                                             <FormHelperText color="primary" onClick={() => clickToCopy('%trackId%=&%payout%=&%status%=')} className="cursor-pointer w-1/3" variant="standard">
@@ -416,7 +430,6 @@ const CreateUpdate = () => {
                                         helperText={errors?.condition_amount?.message}
                                         variant="outlined"
                                         required
-                                    // onChange={(event) => handleDefaultValues(event, 'condition_amount')}
                                     />
                                 )}
                             />
