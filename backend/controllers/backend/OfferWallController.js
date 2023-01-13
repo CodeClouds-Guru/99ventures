@@ -135,10 +135,10 @@ class OfferWallController extends Controller {
                 },
                 {
                   model: OfferWallIp,
-                  attributes: ['name'],
+                  attributes: ['ip'],
                 }]
     });
-    fields = this.model.fields;
+    let fields = this.model.fields;
     return { status: true, result: model, fields };
   }
   //override delete function
