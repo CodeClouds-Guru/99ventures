@@ -53,18 +53,23 @@ const defaultValues = {
 
 const CreateUpdate = () => {
     const module = 'offerwalls';
-    const campaignId = useParams().campaignId;
+    const campaignId = useParams().campaignId ? useParams().campaignId : '';
     const moduleId = useParams().moduleId || 'create';
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const theme = useTheme();
+    const [singleOfferwallData, setSingleOfferwallData] = useState({});
     const [logPostbackErrors, setLogPostbackErrors] = useState(false);
     const [secureSubIDs, setSecureSubIDs] = useState(false);
     const [status, setStatus] = useState(true);
     const [IPs, setIPs] = useState([]);
     const [allowFromAnyIP, setAllowFromAnyIP] = useState(false);
-
+    const [urlObject, setUrlObject] = useState({
+        subIdVariable: '',
+        campaignIdVariable: '',
+        campaignNameVariable: '',
+    });
     const { control, formState, handleSubmit, setError, setValue } = useForm({
         mode: 'onChange',
         defaultValues,
@@ -73,6 +78,11 @@ const CreateUpdate = () => {
 
     const { isValid, dirtyFields, errors } = formState;
     useEffect(() => {
+        'logPostbackErrors' in dirtyFields ? delete dirtyFields.logPostbackErrors : '';
+        'secureSubIDs' in dirtyFields ? delete dirtyFields.secureSubIDs : '';
+        'status' in dirtyFields ? delete dirtyFields.status : '';
+        'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
+        'allowFromAnyIP' in dirtyFields ? delete dirtyFields.allowFromAnyIP : '';
         setValue('premium_configuration', '', { shouldDirty: true, shouldValidate: false });
         setValue('name', '', { shouldDirty: true, shouldValidate: false });
         setValue('sub_id_prefix', '', { shouldDirty: true, shouldValidate: false });
@@ -93,30 +103,34 @@ const CreateUpdate = () => {
         axios.get(jwtServiceConfig.getSingleOfferwall + `/${moduleId}`)
             .then((response) => {
                 if (response.data.results.status && response.data.results.result) {
-                    // setSingleCampaignData(response.data.results.result)
+                    setSingleOfferwallData(response.data.results.result)
                     setValue('premium_configuration', response.data.results.result.premium_configuration, { shouldDirty: true, shouldValidate: false });
                     setValue('name', response.data.results.result.name, { shouldDirty: true, shouldValidate: false });
                     setValue('sub_id_prefix', response.data.results.result.sub_id_prefix, { shouldDirty: true, shouldValidate: false });
-                    setLogPostbackErrors(logPostbackErrors === 1)
+                    setLogPostbackErrors(response.data.results.result.log_postback_errors === 1);
                     'logPostbackErrors' in dirtyFields ? delete dirtyFields.logPostbackErrors : '';
-                    setSecureSubIDs(secureSubIDs === 1);
+                    setSecureSubIDs(response.data.results.result.secure_sub_ids === 1);
                     'secureSubIDs' in dirtyFields ? delete dirtyFields.secureSubIDs : '';
-                    setStatus(status === 1);
+                    setStatus(response.data.results.result.status === 1);
                     'status' in dirtyFields ? delete dirtyFields.status : '';
                     setValue('mode', response.data.results.result.mode, { shouldDirty: true, shouldValidate: false });
-                    setIPs(IPs);
-                    setAllowFromAnyIP(allowFromAnyIP === 1);
+                    setIPs(response.data.results.result.ips);
+                    'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
+                    setAllowFromAnyIP(response.data.results.result.allow_from_any_ip === 1);
                     'allowFromAnyIP' in dirtyFields ? delete dirtyFields.allowFromAnyIP : '';
                     setValue('campaign_id_variable', response.data.results.result.campaign_id_variable, { shouldDirty: true, shouldValidate: false });
+                    handleUrlObject(response.data.results.result.campaign_id_variable, 'campaignIdVariable');
                     setValue('campaign_name_variable', response.data.results.result.campaign_name_variable, { shouldDirty: true, shouldValidate: false });
+                    handleUrlObject(response.data.results.result.campaign_name_variable, 'campaignNameVariable');
                     setValue('sub_id_variable', response.data.results.result.sub_id_variable, { shouldDirty: true, shouldValidate: false });
+                    handleUrlObject(response.data.results.result.sub_id_variable, 'subIdVariable');
                     setValue('reverse_variable', response.data.results.result.reverse_variable, { shouldDirty: true, shouldValidate: false });
-                    setValue('reverse_variable_value', response.data.results.result.reverse_variable_value, { shouldDirty: true, shouldValidate: false });
+                    setValue('reverse_variable_value', response.data.results.result.reverse_value, { shouldDirty: true, shouldValidate: false });
                     setValue('response_ok', response.data.results.result.response_ok, { shouldDirty: true, shouldValidate: false });
                     setValue('response_fail', response.data.results.result.response_fail, { shouldDirty: true, shouldValidate: false });
                     setValue('currency_variable', response.data.results.result.currency_variable, { shouldDirty: true, shouldValidate: false });
-                    setValue('percent', response.data.results.result.percent, { shouldDirty: true, shouldValidate: false });
-                    setValue('max', response.data.results.result.max, { shouldDirty: true, shouldValidate: false });
+                    setValue('percent', response.data.results.result.currency_percent, { shouldDirty: true, shouldValidate: false });
+                    setValue('max', response.data.results.result.currency_max, { shouldDirty: true, shouldValidate: false });
                 }
             })
             .catch((error) => {
@@ -124,23 +138,44 @@ const CreateUpdate = () => {
             })
     }
     const handlePostbackErrorCheckbox = (event) => {
+        dirtyFields.logPostbackErrors = true;
         setLogPostbackErrors(event.target.checked);
     }
     const handleSecureSubIDs = (event) => {
+        dirtyFields.secureSubIDs = true;
         setSecureSubIDs(event.target.checked);
     }
     const handleStatus = (event) => {
+        dirtyFields.status = true;
         setStatus(event.target.checked);
     }
     const handleIPs = (val) => {
+        dirtyFields.IPs = true;
         setIPs(val);
     }
     const handleAllowFromAny = (event) => {
         setIPs([])
         'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
+        dirtyFields.allowFromAnyIP = true;
         setAllowFromAnyIP(event.target.checked);
     }
+    const handleUrlObject = (value, field_name) => {
+        setUrlObject((urlObject) => {
+            return {
+                ...urlObject,
+                [field_name]: value,
+            }
+        })
+    }
     const onSubmit = ({ premium_configuration, name, sub_id_prefix, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent, max }) => {
+        if (allowFromAnyIP && IPs.length > 0) {
+            dispatch(showMessage({ variant: 'error', message: 'IPs field should be blank' }));
+            return false
+        }
+        if (!allowFromAnyIP && IPs.length === 0) {
+            dispatch(showMessage({ variant: 'error', message: 'Please input IPs' }));
+            return false
+        }
         setLoading(true);
         axios.post(moduleId === 'create' ? jwtServiceConfig.offerwallsSave : jwtServiceConfig.offerwallUpdate + `/${moduleId}`, {
             campaign_id: campaignId,
@@ -191,7 +226,7 @@ const CreateUpdate = () => {
                         className="flex items-center sm:mb-12"
                         component={Link}
                         role="button"
-                        to={`/app/${module}`}
+                        to={campaignId ? `/app/campaigns/${campaignId}/${module}` : `/app/${module}`}
                         color="inherit"
                     >
                         <FuseSvgIcon size={20}>
@@ -208,7 +243,7 @@ const CreateUpdate = () => {
                     animate={{ x: 0, transition: { delay: 0.3 } }}
                 >
                     <Typography className="text-16 sm:text-20 truncate font-semibold">
-                        Add New
+                        {moduleId === 'create' ? 'Add New' : 'Edit'}
                     </Typography>
                 </motion.div>
             </div>
@@ -237,8 +272,8 @@ const CreateUpdate = () => {
                                             error={!!errors.premium_configuration}
                                             required
                                         >
-                                            <MenuItem value="custom">Custom</MenuItem>
-                                            <MenuItem value="premium">Premium</MenuItem>
+                                            <MenuItem value="Custom">Custom</MenuItem>
+                                            <MenuItem value="Premium">Premium</MenuItem>
                                         </Select>
                                     </FormControl>
                                 )}
@@ -342,8 +377,8 @@ const CreateUpdate = () => {
                                             error={!!errors.mode}
                                             required
                                         >
-                                            <MenuItem value="reward_tool">Reward Tool</MenuItem>
-                                            <MenuItem value="postback">Postback</MenuItem>
+                                            <MenuItem value="Reward Tool">Reward Tool</MenuItem>
+                                            <MenuItem value="PostBack">PostBack</MenuItem>
                                         </Select>
                                     </FormControl>
                                 )}
@@ -354,7 +389,7 @@ const CreateUpdate = () => {
                                 render={() => (
                                     <FormControl className="w-1/2 mb-10 p-5">
                                         <AddMore
-                                            permission={true}
+                                            permission={!allowFromAnyIP}
                                             required={!allowFromAnyIP}
                                             data={IPs}
                                             placeholder="IPs"
@@ -384,7 +419,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="campaign_id_variable"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field: { value1, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -394,13 +429,17 @@ const CreateUpdate = () => {
                                         helperText={errors?.campaign_id_variable?.message}
                                         variant="outlined"
                                         required
+                                        onChange={({ target: { value2 } }) => {
+                                            handleUrlObject(value1, 'campaignIdVariable')
+                                            onChange(value2)
+                                        }}
                                     />
                                 )}
                             />
                             <Controller
                                 name="campaign_name_variable"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field: { value1, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -410,13 +449,17 @@ const CreateUpdate = () => {
                                         helperText={errors?.campaign_name_variable?.message}
                                         variant="outlined"
                                         required
+                                        onChange={({ target: { value2 } }) => {
+                                            handleUrlObject(value1, 'campaignNameVariable')
+                                            onChange(value2)
+                                        }}
                                     />
                                 )}
                             />
                             <Controller
                                 name="sub_id_variable"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field: { value1, onChange, ...field } }) => (
                                     <TextField
                                         className="w-1/2 mb-10 p-5"
                                         {...field}
@@ -426,6 +469,10 @@ const CreateUpdate = () => {
                                         helperText={errors?.sub_id_variable?.message}
                                         variant="outlined"
                                         required
+                                        onChange={({ target: { value2 } }) => {
+                                            handleUrlObject(value1, 'subIdVariable')
+                                            onChange(value2)
+                                        }}
                                     />
                                 )}
                             />
@@ -545,6 +592,19 @@ const CreateUpdate = () => {
                                     />
                                 )}
                             />
+                            {moduleId !== 'create' &&
+                                <>
+                                    <div className="flex  justify-center">
+                                        PostBack URL: {singleOfferwallData.postback_url}
+                                    </div>
+                                    <div className="flex  justify-center">
+                                        PostBack URL Example: {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <b>{'The above URL just an example. The {sub}, {offerid} and {offername} would need to be replaced with the networls tracking variables.'}</b>
+                                    </div>
+                                </>
+                            }
                         </div>
                         <div className="flex justify-center">
                             <LoadingButton

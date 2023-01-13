@@ -150,7 +150,6 @@ const CreateUpdate = () => {
                 if (response.status === 200) {
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
                     navigate(`/app/campaigns`);
-                    // navigate(`/app/campaigns/${response.data.results.result.id}`);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -190,7 +189,7 @@ const CreateUpdate = () => {
                     animate={{ x: 0, transition: { delay: 0.3 } }}
                 >
                     <Typography className="text-16 sm:text-20 truncate font-semibold">
-                        Add New
+                        {moduleId === 'create' ? 'Add New' : 'Edit'}
                     </Typography>
                 </motion.div>
             </div>
@@ -208,7 +207,7 @@ const CreateUpdate = () => {
                             <Controller
                                 name="name"
                                 control={control}
-                                render={({ field: { value, onChange, ...field } }) => (
+                                render={({ field }) => (
                                     <>
                                         <TextField
                                             className="w-1/2 mb-10 p-5"
@@ -219,9 +218,6 @@ const CreateUpdate = () => {
                                             helperText={errors?.name?.message}
                                             variant="outlined"
                                             required
-                                            onChange={({ target: { value } }) => {
-                                                onChange(value)
-                                            }}
                                         />
                                     </>
                                 )}
@@ -351,7 +347,6 @@ const CreateUpdate = () => {
                                             helperText={errors?.postback_url?.message}
                                             variant="outlined"
                                             required
-                                        // onChange={(event) => handleDefaultValues(event, 'postback_url')}
                                         />
                                         <Tooltip title="Click to copy" placement="right">
                                             <FormHelperText color="primary" onClick={() => clickToCopy('%trackId%=&%payout%=&%status%=')} className="cursor-pointer w-1/3" variant="standard">
@@ -376,7 +371,6 @@ const CreateUpdate = () => {
                                             error={!!errors.condition_type}
                                             // helperText={errors?.condition_type?.message}
                                             required
-                                        // onChange={(event) => handleDefaultValues(event, 'condition_type')}
                                         >
                                             <MenuItem value="registration">Registration</MenuItem>
                                             <MenuItem value="earn_at_least">Earn at Least</MenuItem>
