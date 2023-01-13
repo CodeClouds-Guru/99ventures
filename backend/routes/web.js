@@ -1,12 +1,13 @@
-const express = require('express')
-const router = express.Router()
-const PageParser = require('../helpers/PageParser')
-const Lucid = require("../helpers/Lucid");
+const express = require('express');
+const router = express.Router();
+const PageParser = require('../helpers/PageParser');
+const Lucid = require('../helpers/Lucid');
 
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
-  const data = await lucidObj.suppliers();
-  res.json(data);
+  // const data = await lucidObj.suppliers();
+  const definitions_data = await lucidObj.definitions();
+  res.json(definitions_data);
 });
 
 router.get('/:slug?', async (req, res) => {
@@ -20,7 +21,7 @@ router.get('/:slug?', async (req, res) => {
         return;
       default:
         res.redirect('/500');
-        console.error(e)
+        console.error(e);
         return;
     }
     page_content = await pagePerser.preview();
@@ -31,4 +32,4 @@ router.get('/:slug?', async (req, res) => {
 module.exports = {
   prefix: '/',
   router,
-}
+};
