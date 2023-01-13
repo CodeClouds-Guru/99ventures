@@ -138,6 +138,17 @@ class OfferWallController extends Controller {
                   attributes: ['ip'],
                 }]
     });
+    model.dataValues.ips = ['6']
+    if (model.dataValues.OfferWallIps) {
+      model.dataValues.ips = ['7']
+      let offer_wall_ips = model.dataValues.OfferWallIps;
+      offer_wall_ips.forEach(function (ip, key) {
+        model.dataValues.ips.push(ip.ip)
+      })
+    }
+    if (model.dataValues.Campaign != null) {
+      model.dataValues.campaign_name = model.dataValues.Campaign.name
+    }
     let fields = this.model.fields;
     return { status: true, result: model, fields };
   }
