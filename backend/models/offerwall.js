@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       OfferWall.belongsTo(models.CompanyPortal, {
         foreignKey: 'company_portal_id',
       });
+      OfferWall.hasMany(models.OfferWallIp, {
+        foreignKey: "offer_wall_id",
+      });
     }
   }
   OfferWall.init(
@@ -396,11 +399,11 @@ module.exports = (sequelize, DataTypes) => {
         .label('premium_configuration'),
       name: Joi.string().required().label('name'),
       sub_id_prefix: Joi.required().label('sub_id_prefix'),
-      log_postback_errors: Joi.string().required().label('log_postback_errors'),
-      secure_sub_ids: Joi.required().label('secure_sub_ids'),
-      status: Joi.string().required().label('status'),
+      log_postback_errors: Joi.required().label('log_postback_errors'),
+      secure_sub_ids: Joi.label('secure_sub_ids'),
+      status: Joi.required().label('status'),
       mode: Joi.required().label('mode'),
-      allow_from_any_ip: Joi.required().label('allow_from_any_ip'),
+      allow_from_any_ip: Joi.label('allow_from_any_ip'),
       ips: Joi.optional().allow('').label('ips'),
       campaign_id_variable: Joi.required().label('campaign_id_variable'),
       campaign_name_variable: Joi.required().label('campaign_name_variable'),
