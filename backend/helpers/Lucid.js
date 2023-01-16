@@ -5,15 +5,15 @@ const handler = {
     return !(prop in target)
       ? target[prop]
       : function (...args) {
-        try {
-          return target[prop].apply(this, args);
-        } catch (e) {
-          return {
-            status: false,
-            error: e.message,
-          };
-        }
-      };
+          try {
+            return target[prop].apply(this, args);
+          } catch (e) {
+            return {
+              status: false,
+              error: e.message,
+            };
+          }
+        };
   },
 };
 class Lucid {
@@ -39,7 +39,9 @@ class Lucid {
   }
 
   async allocatedSurveys() {
-    const data = await this.fetchAndReturnData('/Supply/v1/Surveys/SupplierAllocations/All/6373');
+    const data = await this.fetchAndReturnData(
+      '/Supply/v1/Surveys/SupplierAllocations/All/6373'
+    );
     return data;
   }
 
@@ -79,6 +81,14 @@ class Lucid {
     } finally {
       return resp;
     }
+  }
+
+  //get standard questions
+  async standard_questions(language_id) {
+    const data = await this.fetchAndReturnData(
+      '/Lookup/v1/QuestionLibrary/AllQuestions/language_id'
+    );
+    return data;
   }
 }
 
