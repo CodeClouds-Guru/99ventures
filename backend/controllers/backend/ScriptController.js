@@ -18,9 +18,9 @@ class ScriptController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    
-    options.where= {...options.where, ...{[Op.and]: { company_portal_id: company_portal_id }}};
-    
+
+    options.where = { ...options.where, ...{ [Op.and]: { company_portal_id: company_portal_id, type: 'custom' } } };
+
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -60,7 +60,7 @@ class ScriptController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     try {
       let prev_data = await this.model.findOne({ where: { id: id } });
-     
+
       if (prev_data) {
         const script_name = req.body.name || "";
         // req.body.script_json = JSON.parse(req.body.script_json) || {};

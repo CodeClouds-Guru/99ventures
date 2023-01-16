@@ -6,6 +6,13 @@ const {
   CompanyPortalAdditionalHeader,
 } = require("../models");
 const { QueryTypes, Op } = require("sequelize");
+
+const defaultAddOns = [
+  {
+    type: 'script',
+    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/jquery-v1.js'
+  }
+];
 class PageParser {
   constructor(slug) {
     this.slug = slug;
@@ -14,6 +21,7 @@ class PageParser {
     this.getPageNLayout = this.getPageNLayout.bind(this);
     this.generateHtml = this.generateHtml.bind(this);
     this.convertComponentToHtml = this.convertComponentToHtml.bind(this);
+    this.addDefaultAddOns = this.addDefaultAddOns.bind(this);
   }
 
   async getPageNLayout() {
@@ -62,6 +70,7 @@ class PageParser {
       ? layout_descriptions.tag_content
       : "";
 
+    const default_scripted_codes = this.addDefaultAddOns();
     layout_html = layout_html.replaceAll("{{content}}", content);
     layout_html = layout_html.replaceAll("${additional_header_script}", additional_headers);
     layout_html = await this.convertComponentToHtml(layout_html);
@@ -87,6 +96,23 @@ class PageParser {
       });
     }
     return layout_html;
+  }
+
+  addDefaultAddOns() {
+    var str = '';
+    defaultAddOns.forEach(item => {
+      switch (item.type) {
+        case 'script':
+          str += `<script src="${item.src}"></script>`
+          break;
+        case 'css':
+          str += `<link rel="stylesheet" href="${item.src}">`
+          break;
+        default:
+          break;
+      }
+    });
+    return str;
   }
 }
 module.exports = PageParser;
