@@ -2,7 +2,7 @@ import { React, lazy } from 'react';
 import settingsConfig from 'app/configs/settingsConfig';
 import Campaigns from './Campaigns';
 import CampaignsCreateUpdate from './create-update/CreateUpdate';
-import Report from './Report';
+import Index from './report/Index';
 import OfferwallsCreateUpdate from './offerwalls/CreateUpdate';
 import Offerwalls from './offerwalls/Index';
 
@@ -46,7 +46,7 @@ const CampaignsConfig = {
     },
     {
       path: 'app/campaigns/:campaignId/report',
-      element: <Report />,
+      element: <Index />,
       auth: settingsConfig.defaultAuth
     },
     {
