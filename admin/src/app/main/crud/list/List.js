@@ -433,12 +433,14 @@ function List(props) {
 									<>
 										{
 											datepickerStatus && (
-												<DateRangePicker
-													wrapperClassName="filter-daterange-picker"
-													open={datepickerStatus}
-													toggle={() => setDatepickerStatus(!datepickerStatus)}
-													onChange={dateRangeSelected}
-												/>
+												<div className="date-range-wrapper member-txn-list">
+													<DateRangePicker
+														wrapperClassName="filter-daterange-picker"
+														open={datepickerStatus}
+														toggle={() => setDatepickerStatus(!datepickerStatus)}
+														onChange={dateRangeSelected}
+													/>
+												</div>
 											)
 										}
 										<Paper

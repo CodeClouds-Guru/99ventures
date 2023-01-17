@@ -3,7 +3,7 @@ import _ from '@lodash';
 import { Table, TableBody, TableCell, TablePagination, TableRow, Typography, Chip } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 import FuseLoading from '@fuse/core/FuseLoading';
-import ListTableHead from '../../crud/list/ListTableHead';
+import ListTableHead from '../../../crud/list/ListTableHead';
 import Helper from 'src/app/helper';
 
 
@@ -58,19 +58,18 @@ function ReportList(props) {
 	}
 
 	const rowIndicator = (campaign_status) => {
-		if(campaign_status === 0)
+		if(campaign_status === 0)	// Condition Not Met
 			return <Chip label="" color="error" />
-		else if(campaign_status === 1)
+		else if(campaign_status === 1)	// Condition Met (Postback Triggered)
 			return <Chip label="" color="success" />
-		else if(campaign_status === 2)
+		else if(campaign_status === 2)	// Condition Met (Postback Not Triggered)
 			return <Chip label="" color="warning" />
-		else if(campaign_status === 3)
+		else if(campaign_status === 3)	// Condition Met (Reversed)
 			return <Chip label="" color="primary" />		 
 	}
 
 	return (
 		<div>
-			{/* // body */}
 			<div className="w-full flex flex-col min-h-full">
 				<FuseScrollbars className="grow overflow-x-auto">
 					<Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
