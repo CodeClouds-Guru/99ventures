@@ -34,7 +34,11 @@ textarea.custom-code-editor-view-fullscreen{
     color: #ffeeba; 
 }
 textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
-.filter-daterange-picker{ top: 235px;}
+/* .filter-daterange-picker{ top: 235px;}
+.date-range-wrapper .filter-daterange-picker{top: -46px; }
+*/
+.date-range-wrapper > div{right: 23px; top: 172px;}
+.member-txn-list.date-range-wrapper > div{right: 67px; top: 112px;}
 @media screen and (max-width: 768px) {
-    .filter-daterange-picker{ top: 260px; right: 10px;}
-}
+    .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
+} 
