@@ -595,13 +595,15 @@ const CreateUpdate = () => {
                             {moduleId !== 'create' &&
                                 <>
                                     <div className="flex  justify-center">
-                                        <b> PostBack URL:</b> {singleOfferwallData.postback_url}
+                                        <b className="pr-10"> PostBack URL :</b> {singleOfferwallData.postback_url}
                                     </div>
                                     <div className="flex  justify-center">
-                                        <b> PostBack URL Example:</b> {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
+                                        <b className="pr-10"> PostBack URL Example :</b> {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
                                     </div>
                                     <div className="flex justify-center" variant="error">
-                                        <b>{'The above URL just an example. The {sub}, {offerid} and {offername} would need to be replaced with the networls tracking variables.'}</b>
+                                        <Typography variant={'body1'} color="error">
+                                            <b> {'The above URL just an example. The {sub}, {offerid} and {offername} would need to be replaced with the networls tracking variables.'}</b>
+                                        </Typography>
                                     </div>
                                 </>
                             }

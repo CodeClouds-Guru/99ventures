@@ -5,7 +5,7 @@ const path = require("path");
 const fileUpload = require("express-fileupload");
 const db = require("./config/database");
 const { engine } = require('express-handlebars');
-
+const session = require('express-session');
 
 /**
  * This functions initialize an express app
@@ -82,6 +82,21 @@ function chainRoutes(app) {
     })
 }
 
+/**
+ * This function will setup the session store for the application
+ * @param {Express} app 
+ */
+function initializeSession(app) {
+  const oneDay = 1000 * 60 * 60 * 24;
+  app.use(session({
+    name: `Scripted`,
+    secret: process.env.NODE_APP_SECRET,
+    saveUninitialized: true,
+    cookie: { maxAge: oneDay },
+    resave: false
+  }));
+}
+
 module.exports = function () {
   const app = init()
   setup(app)
@@ -90,6 +105,7 @@ module.exports = function () {
   chainMiddlewares(app);
   chainRoutes(app);
   initializeHandlebars(app);
+  initializeSession(app);
 
   //General exception handler
   app.use((err, req, res, next) => {

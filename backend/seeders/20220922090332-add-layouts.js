@@ -16,7 +16,7 @@ module.exports = {
             '{"body": {"value": "<body>{{content}}</body>"},"header": {"value": ""}}',
           created_by: "1",
           created_at: new Date(),
-          html: '<html><head><title>${page_title}</title><meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}"><meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">${page_meta_code}<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>{{content}}</body></html>',
+          html: '<html><head><title>${page_title}</title><meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}"><meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">${page_meta_code}${default_scripted_codes}<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>{{content}}</body></html>',
         },
         {
           id: "2",
@@ -27,7 +27,7 @@ module.exports = {
             '{"body": {"value": "<body>{{content}}</body>"},"header": {"value": ""}}',
           created_by: "1",
           created_at: new Date(),
-          html: '<html><head><title>${page_title}</title><meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}"><meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">${page_meta_code}<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>{{content}}</body></html>',
+          html: '<html><head><title>${page_title}</title><meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}"><meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">${page_meta_code}${default_scripted_codes}<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>{{content}}</body></html>',
         },
       ],
       {}

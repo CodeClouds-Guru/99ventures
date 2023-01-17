@@ -27,10 +27,10 @@ const iconPositionStyle = {
 }
 
 const removeBodyTag = (string) => {
-    if(string.includes('<body>')){
+    if (string.includes('<body>')) {
         string = string.replace('<body>', '').trim()
     }
-    if(string.includes('</body>')){
+    if (string.includes('</body>')) {
         string = string.replace('</body>', '').trim()
     }
 
@@ -105,24 +105,24 @@ const CreateEditForm = (props) => {
         const selectedValue = e.target.value;
         let htmlData = '';
         let newContent = editor;
-        if(editor === '') {
+        if (editor === '') {
             newContent = `<body>\n{{content}}\n</body>`
         }
 
-        if(editorRef.current.selectionStart !== 0 && editorRef.current.selectionStart === editorRef.current.selectionEnd) {
-            newContent = editor.substring(0, editorRef.current.selectionStart) +'{{'+ selectedValue +'}}'+ editor.substring(editorRef.current.selectionEnd, editor.length);
-            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+        if (editorRef.current.selectionStart !== 0 && editorRef.current.selectionStart === editorRef.current.selectionEnd) {
+            newContent = editor.substring(0, editorRef.current.selectionStart) + '{{' + selectedValue + '}}' + editor.substring(editorRef.current.selectionEnd, editor.length);
+            if (newContent.includes('<body>') || newContent.includes('</body>')) {
                 newContent = removeBodyTag(newContent);
             }
             htmlData = `<body>\n${newContent}\n</body>`
         } else {
-            if(newContent.includes('<body>') || newContent.includes('</body>')) {
+            if (newContent.includes('<body>') || newContent.includes('</body>')) {
                 newContent = removeBodyTag(newContent);
                 htmlData = `<body>\n{{${selectedValue}}}${newContent}\n</body>`
             } else
                 htmlData = `<body>\n{{${selectedValue}}}${editor}\n</body>`
         }
-        
+
         setEditor(htmlData);
     }
 
@@ -152,7 +152,7 @@ const CreateEditForm = (props) => {
     }
 
     const handleLayoutSubmit = () => {
-        if(!layoutCode.body.value.includes('{{content}}')){
+        if (!layoutCode.body.value.includes('{{content}}')) {
             dispatch(showMessage({ variant: 'error', message: 'Sorry! Unable to save the data. {{content}} is missing.' }));
             return;
         }
@@ -166,9 +166,10 @@ const CreateEditForm = (props) => {
             '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n' +
             '${page_meta_code}\n\n' +
             layoutCode.header.value +
-            '\n\n<!-- Additional Script Start-->\n'+
-            '${additional_header_script}\n'+
-            '<!-- Additional Script End -->\n'+
+            '\n\n<!-- Additional Script Start-->\n' +
+            '${additional_header_script}\n' +
+            '${default_scripted_codes}\n' +
+            '<!-- Additional Script End -->\n' +
             '</head>\n' + layoutCode.body.value + '\n' +
             '</html>';
 
@@ -220,9 +221,9 @@ const CreateEditForm = (props) => {
      * ChangeCount value set to 0.
      */
     const onConfirmAlertDialogHandle = () => {
-        if(alertType === 'save_layout')
+        if (alertType === 'save_layout')
             handleLayoutSubmit();
-        else if(alertType === 'save_body')
+        else if (alertType === 'save_body')
             saveEditorValue();
     }
 
@@ -271,23 +272,23 @@ const CreateEditForm = (props) => {
 
     }, [layoutCode.body, records]);
 
-    const handleOpenDialog = () =>{
+    const handleOpenDialog = () => {
         setPopupStatus(true);
         setEditor(layoutCode.body.value);
         setDialogFor('edit_mode')
     }
 
     const handleFullScreen = (mode) => {
-        if(mode === true){
+        if (mode === true) {
             setFullScreen(true);
             setPopupStatus(true);
             setDialogFor('view_mode');
         } else {
             handleClose();
-        }        
+        }
     }
 
-    const handleClose =() => {
+    const handleClose = () => {
         setPopupStatus(false);
         setDialogFor('');
         setFullScreen(false);
@@ -301,8 +302,8 @@ const CreateEditForm = (props) => {
 
     const saveEditorValue = () => {
         let content = editor;
-        if(content){
-            if(editor.includes('<body>') || editor.includes('</body>')){
+        if (content) {
+            if (editor.includes('<body>') || editor.includes('</body>')) {
                 content = removeBodyTag(editor);
             }
             content = `<body>\n${content}\n</body>`;
@@ -330,7 +331,7 @@ const CreateEditForm = (props) => {
     const editFullscreen = () => {
         return (
             <div className='w-full'>
-                <FormControl className="mb-10" sx={{minWidth: 350 }} size="small">
+                <FormControl className="mb-10" sx={{ minWidth: 350 }} size="small">
                     <InputLabel id="select-component-label">Select Component</InputLabel>
                     <Select
                         name="components"
@@ -347,21 +348,21 @@ const CreateEditForm = (props) => {
 
                     </Select>
                 </FormControl>
-                <div className='relative'>                            
+                <div className='relative'>
                     {
                         fullScreen ? (
                             <Tooltip title="Exit Fullscreen" placement="top-start">
-                                <IconButton 
+                                <IconButton
                                     style={iconPositionStyle}
-                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(false)}>
+                                    color="primary" aria-label="Edit" component="span" onClick={() => setFullScreen(false)}>
                                     <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen_exit</FuseSvgIcon>
                                 </IconButton>
                             </Tooltip>
                         ) : (
                             <Tooltip title="Fullscreen View" placement="top-start">
-                                <IconButton 
+                                <IconButton
                                     style={iconPositionStyle}
-                                    color="primary" aria-label="Edit" component="span" onClick={()=>setFullScreen(true)}>
+                                    color="primary" aria-label="Edit" component="span" onClick={() => setFullScreen(true)}>
                                     <FuseSvgIcon className="text-48" size={18} color="action">material-outline:fullscreen</FuseSvgIcon>
                                 </IconButton>
                             </Tooltip>
@@ -370,13 +371,13 @@ const CreateEditForm = (props) => {
                     <pre>
                         <code>
                             <textarea
-                                ref={ editorRef }
+                                ref={editorRef}
                                 rows={10}
                                 aria-label="maximum height"
                                 placeholder="#Add your HTML content here"
-                                value={ editor }
-                                className={ fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen' }
-                                onChange={ (e)=> setEditor(e.target.value)}
+                                value={editor}
+                                className={fullScreen === false ? 'custom-code-editor' : 'custom-code-editor-fullscreen'}
+                                onChange={(e) => setEditor(e.target.value)}
                             ></textarea>
                         </code>
                     </pre>
@@ -438,7 +439,7 @@ const CreateEditForm = (props) => {
                             <Typography variant="subtitle1">Body</Typography>
                         </legend>
                         <div className='p-24'>
-                            <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value}/>                            
+                            <BodyPart fullScreen={fullScreen} handleOpenDialog={handleOpenDialog} handleFullScreen={handleFullScreen} body={layoutCode.body.value} />
                         </div>
                     </fieldset>
                 </fieldset>
@@ -492,7 +493,7 @@ const CreateEditForm = (props) => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content={ msg }
+                        content={msg}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
@@ -500,11 +501,11 @@ const CreateEditForm = (props) => {
                 )
             }
 
-            <DialogBox 
+            <DialogBox
                 title={dialogFor === 'edit_mode' ? 'Edit Code' : 'View Code'}
-                fullScreen={fullScreen} 
-                popupStatus={popupStatus} 
-                handleClose={handleClose} 
+                fullScreen={fullScreen}
+                popupStatus={popupStatus}
+                handleClose={handleClose}
                 content={
                     dialogFor === 'edit_mode' ? editFullscreen() : viewFullscreen()
                 }
@@ -513,14 +514,14 @@ const CreateEditForm = (props) => {
                         <Button variant="outlined" onClick={handleClose}>Cancel</Button>
                         {
                             dialogFor === 'edit_mode' && (
-                                <Button 
+                                <Button
                                     color="primary"
                                     variant="contained"
-                                    onClick={ handleConfirmSave }
-                                    disabled={ editor.trim() === '' ? true : false}
+                                    onClick={handleConfirmSave}
+                                    disabled={editor.trim() === '' ? true : false}
                                 >Save</Button>
                             )
-                        }                        
+                        }
                     </>
                 }
             />
