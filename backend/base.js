@@ -6,6 +6,7 @@ const fileUpload = require("express-fileupload");
 const db = require("./config/database");
 const { engine } = require('express-handlebars');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 /**
  * This functions initialize an express app
@@ -30,7 +31,7 @@ function setup(app) {
   )
 
   app.use(express.static(path.join(__dirname, '/public')))
-
+  app.use(cookieParser())
 
   app.use(bodyParser.json({ limit: "5mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
