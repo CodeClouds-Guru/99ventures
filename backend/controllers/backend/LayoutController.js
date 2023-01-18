@@ -162,7 +162,7 @@ class LayoutController extends Controller {
         html: current.html,
         layout_json: current.layout_json,
         updated_by: req.user.id,
-        created_at: new Date(),
+        // created_at: new Date(),
       };
 
       let model_update = this.model.update(update_data, {
