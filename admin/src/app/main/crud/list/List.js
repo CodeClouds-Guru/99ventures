@@ -276,7 +276,7 @@ function List(props) {
 	const processFieldValue = (value, fieldConfig) => {
 		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
 			value = Helper.parseTimeStamp(value)
-		} else if (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at') {
+		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at') && value) {
 			value = moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
