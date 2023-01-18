@@ -84,7 +84,7 @@ class LayoutController extends Controller {
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
-        attributes: ['id', 'name', 'created_at'],
+        attributes: ['id', 'name', 'created_at', 'updated_at'],
         where: {
           code: {
             [Op.like]: model.code + '-rev-%',
