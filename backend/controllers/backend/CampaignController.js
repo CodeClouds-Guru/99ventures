@@ -16,28 +16,9 @@ class CampaignController extends Controller {
   }
 
   async list(req, res) {
-    let options = await this.getQueryOptions(req);
+    let options = super.getQueryOptions(req);
     let company_portal_id = req.headers.site_id;
 
-    // var query_where = JSON.parse(req.query.where);
-    // var temp = {};
-    // var status_filter = {};
-    // if (query_where) {
-    //   if (query_where.filters) {
-    //     temp = query_where.filters.map((filter) => {
-    //       return {
-    //         [filter.column]: {
-    //           [Op[filter.match]]: filter.search,
-    //         },
-    //       };
-    //     });
-    //   }
-    // }
-    // options.where = {
-    //   ...options.where,
-    //   company_portal_id: company_portal_id,
-    //   ...(temp && { [Op.and]: temp }),
-    // };
     var query_str =
       'FROM campaign_member WHERE campaign_member.campaign_id = Campaign.id';
 
@@ -68,9 +49,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    // console.log(
-    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
-    // );
+    console.log(
+      util.inspect(options, { showHidden: false, depth: null, colors: true })
+    );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -325,26 +306,24 @@ class CampaignController extends Controller {
           'created_at',
           'status',
         ],
-        include:{
+        include: {
           model: IpLog,
-          attributes: [
-            "ip",
-          ],
+          attributes: ['ip'],
           limit: 1,
-          order: [["created_at", "DESC"]],
-        }
+          order: [['created_at', 'DESC']],
+        },
       };
-      
+
       const { docs, pages, total } = await CampaignMember.paginate(options);
-      
+
       let report_details = [];
       docs.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
           record.dataValues.Member.dataValues.avatar =
             record.dataValues.Member.dataValues.avatar;
-          var member_ip = ''
-          if(record.dataValues.Member.dataValues.IpLogs.length){
-            member_ip = record.dataValues.Member.dataValues.IpLogs[0].ip
+          var member_ip = '';
+          if (record.dataValues.Member.dataValues.IpLogs.length) {
+            member_ip = record.dataValues.Member.dataValues.IpLogs[0].ip;
           }
           report_details.push({
             id: record.dataValues.id,
@@ -358,7 +337,7 @@ class CampaignController extends Controller {
             combained: model.dataValues.payout_amount,
             track_id: record.dataValues.track_id,
             campaign_status: record.dataValues.campaign_status,
-            ip: member_ip
+            ip: member_ip,
           });
         }
       });
@@ -419,6 +398,8 @@ class CampaignController extends Controller {
       .filter((attr) => extra_fields.indexOf(attr.db_name) == -1)
       .map((attr) => attr.db_name);
 
+    console.log('==============attributes', attributes);
+
     let searchable_fields = [];
     for (const key in fields) {
       if ('searchable' in fields[key] && fields[key].searchable) {
@@ -442,13 +423,15 @@ class CampaignController extends Controller {
       };
     }
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
-    for(let where_field in query_where){
-      if(where_field in fields){
-        if(where_field=='created_at' && Array.isArray(query_where[where_field])){
-          
+    for (let where_field in query_where) {
+      if (where_field in fields) {
+        if (
+          where_field == 'created_at' &&
+          Array.isArray(query_where[where_field])
+        ) {
         }
-      }else{
-        delete query_where[where_field]
+      } else {
+        delete query_where[where_field];
       }
     }
     if ('where' in options && query_where) {
