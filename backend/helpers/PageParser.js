@@ -80,10 +80,8 @@ class PageParser {
 
   async convertComponentToHtml(layout_html) {
     var regex_match = layout_html.match(/{{\s*[\w\-*.]+\s*}}/g);
-    console.log(layout_html, regex_match)
     if (regex_match) {
       var components = regex_match.map((x) => x.match(/[\w\-*.]+/)[0]);
-      console.log('components', components);
       let matched_components = await Component.findAll({
         where: {
           code: {

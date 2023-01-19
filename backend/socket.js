@@ -1,11 +1,12 @@
 module.exports = (app) => {
-    var server = require('http').createServer(app);
+    var server = require('http').Server(app);
     var io = require('socket.io')(server);
-    io.on('connection', function (socket) {
-        socket.on('shoutbox', function (data) {
-            console.log(data);
+
+    io.on('connection', (socket) => {
+        console.log('connected');
+        socket.on('disconnect', function () {
+            console.log('A user disconnected');
         });
-        socket.emit('shoutbox', { bp: 'high' })
     });
     return app;
 }
