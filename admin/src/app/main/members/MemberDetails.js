@@ -572,13 +572,19 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Code:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
-                                        {memberData.referral_code}
+                                    <div className="flex items-center">
+                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                            {memberData.referral_code}
+                                        </Typography>
                                         <Tooltip title="Click to copy" placement="right">
-                                            <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => clickToCopy(memberData.referral_code)}>heroicons-solid:clipboard-copy</FuseSvgIcon>
+                                            <IconButton color="primary" aria-label="Filter" component="span">
+                                                <FuseSvgIcon className="text-48 cursor-pointer" size={16} color="action" onClick={() => clickToCopy(memberData.referral_code)}>material-outline:content_copy</FuseSvgIcon>
+                                            </IconButton>
                                         </Tooltip>
-                                    </Typography>
+                                    </div>
                                 } />
+                            </ListItem>
+                            <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                                 } />
