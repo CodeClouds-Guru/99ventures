@@ -45,7 +45,7 @@ const UsersTracking = () => {
         setFilter(e.target.value);
     }
 
-    const handleRequestSort = (property) => {
+    const handleRequestSort = (e, property) => {
 		const id = property;
 		let direction = 'desc';
 		if (order.id === property && order.direction === 'desc') {
@@ -90,8 +90,9 @@ const UsersTracking = () => {
             }   
         })
         .catch(errors => {
+            console.log(errors)
             dispatch(showMessage({ variant: 'error', message: errors.message}));
-            navigate('/app/campaigns')
+            // navigate('/app/campaigns')
         })
     }
 
