@@ -37,7 +37,7 @@ function setup(app) {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
     cors({
-      origin: false,
+      origin: '*',
       // function (origin, callback) {
       //   if (whitelists.indexOf(origin) !== -1 || !origin) {
       //     callback(null, true)
