@@ -37,13 +37,14 @@ function setup(app) {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
     cors({
-      origin: function (origin, callback) {
-        if (whitelists.indexOf(origin) !== -1 || !origin) {
-          callback(null, true)
-        } else {
-          callback(new Error('Not allowed by CORS'))
-        }
-      },
+      origin: false,
+      // function (origin, callback) {
+      //   if (whitelists.indexOf(origin) !== -1 || !origin) {
+      //     callback(null, true)
+      //   } else {
+      //     callback(new Error('Not allowed by CORS'))
+      //   }
+      // },
       optionsSuccessStatus: 200,
     })
   )
@@ -108,15 +109,6 @@ module.exports = function () {
   initializeHandlebars(app);
   initializeSession(app);
 
-  var server = require('http').Server(app);
-  var io = require('socket.io')(server);
-
-  io.on('connection', (socket) => {
-    console.log('connected');
-    socket.on('disconnect', function () {
-      console.log('A user disconnected');
-    });
-  });
 
   //General exception handler
   app.use((err, req, res, next) => {
