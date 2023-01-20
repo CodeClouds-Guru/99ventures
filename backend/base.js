@@ -108,6 +108,16 @@ module.exports = function () {
   initializeHandlebars(app);
   initializeSession(app);
 
+  var server = require('http').Server(app);
+  var io = require('socket.io')(server);
+
+  io.on('connection', (socket) => {
+    console.log('connected');
+    socket.on('disconnect', function () {
+      console.log('A user disconnected');
+    });
+  });
+
   //General exception handler
   app.use((err, req, res, next) => {
     console.error(err.stack)
