@@ -46,7 +46,7 @@ function Listing(props) {
     const [where, setWhere] = useState({});
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [filterActive, setFilterActive] = useState(false);
-    const [filters, setFilters] = useState([{ column: '', match: '', search: '' }]);
+    const [filters, setFilters] = useState([{ column: 'username', match: 'substring', search: '' }]);
     // const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
     const [applyBtnSts, setApplyBtnSts] = useState(true);
     const [addBtnSts, setAddBtnSts] = useState(true);
@@ -136,14 +136,14 @@ function Listing(props) {
         }
     }, [moduleDeleted]);
 
-    useEffect(()=>{
+    useEffect(() => {
         const filterResult = filters.some(el => el.column === '' || el.match === '');
-        if(!filterResult)
+        if (!filterResult)
             setAddBtnSts(false);
-        else 
+        else
             setAddBtnSts(true);
-        
-        if(memberStatus.length || !filterResult)
+
+        if (memberStatus.length || !filterResult)
             setApplyBtnSts(false);
         else
             setApplyBtnSts(true);
@@ -272,12 +272,12 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const addFilterRow = () => {
-        setFilters(filters.concat({ column: '', match: '', search: '' }))
+        setFilters(filters.concat({ column: 'username', match: 'substring', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
         setFilterActive(false);
-        setFilters([{ column: '', match: '', search: '' }]);
+        setFilters([{ column: 'username', match: 'substring', search: '' }]);
         setMemberStatus([]);
         setWhere({});
     }
@@ -286,9 +286,9 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const handleApplyFilters = () => {
-        const where = {status: memberStatus};
+        const where = { status: memberStatus };
         const filterResult = filters.some(el => el.column === '' || el.match === '');
-        if(!filterResult){
+        if (!filterResult) {
             where.filters = filters
         }
         setWhere(where);
@@ -340,8 +340,8 @@ function Listing(props) {
                                             >
                                                 {
                                                     Object.keys(column_object).map(key => (
-                                                            <MenuItem disabled={ filters.some(el=> el.column === key) } key={key} value={key}>{column_object[key]}</MenuItem>
-                                                        )
+                                                        <MenuItem disabled={filters.some(el => el.column === key)} key={key} value={key}>{column_object[key]}</MenuItem>
+                                                    )
                                                     )
                                                 }
                                             </Select>
@@ -389,10 +389,10 @@ function Listing(props) {
                                         </Button>
                                     </Tooltip>
                                 ) : (
-                                    <Button disabled={ addBtnSts } className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />}></Button>
+                                    <Button disabled={addBtnSts} className="pr-5" variant="outlined" sx={{ float: 'right' }} color="secondary" startIcon={<AddIcon />}></Button>
                                 )
                             }
-                            
+
                             <FormControl className="w-full mt-16" size="large">
                                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
                                 <Select
@@ -412,7 +412,7 @@ function Listing(props) {
                         </DialogContent>
                         <DialogActions className="mx-16 mb-16">
                             <Button variant="outlined" color="error" onClick={cancelFilter}>Cancel</Button>
-                            <Button variant="contained" color="primary" disabled={ applyBtnSts } onClick={handleApplyFilters}>Apply Filters</Button>
+                            <Button variant="contained" color="primary" disabled={applyBtnSts} onClick={handleApplyFilters}>Apply Filters</Button>
                         </DialogActions>
                     </Dialog>
                     <motion.div
