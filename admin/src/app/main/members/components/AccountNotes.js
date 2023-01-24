@@ -2,6 +2,13 @@ import { Typography, List, ListItem, ListItemText} from '@mui/material';
 import Helper from 'src/app/helper';
 import * as React from 'react'
 
+const listStyle = {
+    height: '340px',
+    '@media screen and (max-width: 1400px)': {
+        height: '250px'
+    },
+}
+
 const AccountNotes = (props) => {
     const accountNotes = props.accountNotes;
  
@@ -24,7 +31,7 @@ const AccountNotes = (props) => {
     }
 
     return (
-        <List sx={{ height: 250 }} className="mt-5 p-0 notes-list overflow-auto">
+        <List sx={listStyle} className="mt-5 p-0 notes-list overflow-auto">
             { notesList() }
         </List>
     )

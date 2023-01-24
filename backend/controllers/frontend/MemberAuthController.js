@@ -50,9 +50,11 @@ class MemberAuthController {
     }
     //profile
     async profile(req,res){
+      global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
+        
         res.status(200).json({
             status: false,
-            data: req.session,
+            data: 'data',
         });
         return;
     }
