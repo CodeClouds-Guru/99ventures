@@ -1,4 +1,5 @@
-import { Box, Avatar, IconButton, Tooltip } from '@mui/material';
+import { Box, Avatar, Tooltip } from '@mui/material';
+import * as React from 'react'
 import { useRef, useState, useEffect } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import LightboxModal from 'app/shared-components/LightboxModal';
@@ -8,6 +9,8 @@ const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/sv
 const MemberAvatar = (props) => {
     const avatarRef = useRef();
     const [ previewStatus, setPreviewStatus ] = useState(false);
+    const [ memberAvatarURL, setMemberAvatarURL ] = useState('');
+
     async function readFileAsync(e) {
         const response = await new Promise((resolve, reject) => {
             const file = e.target.files[0];
@@ -36,11 +39,17 @@ const MemberAvatar = (props) => {
         props.handleSetAvatar(response);
     }
 
+    /**
+     * setMemberAvatarURL storing current avatar url. 
+     * When user click on edit and select file but cancel the edit then the initial avatar url will take from memberAvatarURL state variable
+     */
     useEffect(()=>{
+        setMemberAvatarURL(props.avatar)
         if(!props.editMode) {
-            props.handleSetAvatar(props.memberData.avatar);
+            props.handleSetAvatar(memberAvatarURL);
         }
-    }, [props.editMode])
+    }, [props.editMode]);
+
 
     return (
         <Box

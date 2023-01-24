@@ -1,6 +1,6 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
-import { useState, useEffect, useRef } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText, TextareaAutosize, Tooltip } from '@mui/material';
+import { useState, useEffect, } from 'react';
+import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -115,13 +115,10 @@ const chipStyle = {
     },
 }
 
-const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/svg+xml"];
-
 const MemberDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const avatarRef = useRef();
     const { moduleId } = useParams();
     const [editMode, setEditMode] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
@@ -191,7 +188,7 @@ const MemberDetails = () => {
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
-
+                    
                     setMemberData({ ...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl });
                 }
             })
