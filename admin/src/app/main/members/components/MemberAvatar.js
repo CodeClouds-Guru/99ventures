@@ -50,6 +50,10 @@ const MemberAvatar = (props) => {
                 borderColor: 'background.paper',
                 width: '8rem',
                 height: '8rem',
+                '@media screen and (max-width: 1600px)': {
+                    width: '6rem',
+                    height: '6rem',
+                },
                 '@media screen and (max-width: 1400px)': {
                     width: '5rem',
                     height: '5rem',
