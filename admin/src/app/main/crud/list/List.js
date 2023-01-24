@@ -140,8 +140,8 @@ function List(props) {
 	/**
 	 * Unmounted the sate value
 	 */
-	useEffect(() => {		
-		return ()=> {
+	useEffect(() => {
+		return () => {
 			resetModulesListConfig();
 		}
 	}, [module]);
@@ -161,12 +161,12 @@ function List(props) {
 		}
 	}, [moduleDeleted]);
 
-	const debounceFn = useCallback(_.debounce((val)=>{
+	const debounceFn = useCallback(_.debounce((val) => {
 		setSearchText(val);
 	}, 1000), []);
 
-	const handleSearchtext = (ev) => {		
-		setFirstCall(true); 
+	const handleSearchtext = (ev) => {
+		setFirstCall(true);
 		setSearchKeywords(ev.target.value);
 		debounceFn(ev.target.value);
 	}
@@ -220,7 +220,7 @@ function List(props) {
 		if (module === 'users' && item.id == user.id) {
 			dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
 			return '';
-		} else if(module === 'offer-walls' || module === 'offerwalls'){
+		} else if (module === 'offer-walls' || module === 'offerwalls') {
 			props.navigate(`/app/campaigns/${item.campaign_id}/offerwalls/${item.id}`);
 		} else {
 			props.navigate(`/app/${module}/${item.id}`);
@@ -303,7 +303,7 @@ function List(props) {
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
-			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "error"} />
+			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "withdraw" ? "error" : "warning"} />
 		} /*else if (module === 'member-transactions' && field.field_name === 'completed_at') {
 			return Helper.parseTimeStamp(processFieldValue(n[field.field_name], field))
 		}*/ else if (module === 'member-transactions' && field.field_name === 'note') {
@@ -332,13 +332,13 @@ function List(props) {
 				return (
 					<>
 						<IconButton
-							aria-owns={actionsMenu ? `actionsMenu_${ n.id}` : null}
+							aria-owns={actionsMenu ? `actionsMenu_${n.id}` : null}
 							aria-haspopup="true"
 							onClick={openActionsMenu}
 							size="large"
 							className="listingExtraMenu"
 							sx={{ zIndex: 999 }}
-							id={ `actionsMenu_${ n.id}` }
+							id={`actionsMenu_${n.id}`}
 						>
 							<FuseSvgIcon
 								sx={{ pointerEvents: 'none' }}
@@ -346,9 +346,9 @@ function List(props) {
 							>material-outline:settings</FuseSvgIcon>
 						</IconButton>
 						<Menu
-							id={`actionsMenu_${ n.id}`}
+							id={`actionsMenu_${n.id}`}
 							anchorEl={actionsMenu}
-							open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${ n.id}`)}
+							open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${n.id}`)}
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
@@ -410,7 +410,7 @@ function List(props) {
 	return (
 		<div>
 			{/* // header */}
-			
+
 			{
 				(showModuleHeading || searchable || addable) && (
 					<div className='w-full flex py-32 px-24 md:px-32'>
@@ -492,6 +492,7 @@ function List(props) {
 												</MenuItem>
 												<MenuItem value="credited">Credited</MenuItem>
 												<MenuItem value="withdraw">Withdraw</MenuItem>
+												<MenuItem value="reversal">Reversal</MenuItem>
 											</Select>
 										</FormControl>
 									</>
