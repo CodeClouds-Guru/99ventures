@@ -1,6 +1,6 @@
 import { Box, Avatar, Tooltip } from '@mui/material';
 import * as React from 'react'
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import LightboxModal from 'app/shared-components/LightboxModal';
 
@@ -9,7 +9,6 @@ const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/sv
 const MemberAvatar = (props) => {
     const avatarRef = useRef();
     const [ previewStatus, setPreviewStatus ] = useState(false);
-    const [ memberAvatarURL, setMemberAvatarURL ] = useState('');
 
     async function readFileAsync(e) {
         const response = await new Promise((resolve, reject) => {
