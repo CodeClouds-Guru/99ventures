@@ -43,6 +43,7 @@ const CreateUpdate = (props) => {
     useEffect(() => {
         dispatch(setRevisionData([]));
         const editor = grapesjs.init({
+            allowScripts: 1,
             container: '#gjs',
             fromElement: false,
             protectedCss: '',   // disabled default CSS
@@ -166,7 +167,17 @@ const CreateUpdate = (props) => {
                 htmlViewer.refresh()
                 cssViewer.refresh()
             }
-        })
+        });
+
+        // To enable JS in the editor
+        cmdm.add('allowScripts', {
+            run: function(editor) {
+              editor.getConfig().allowScripts = 1;
+            },
+            stop: function(editor) {
+              editor.getConfig().allowScripts = 0;
+            },
+        });
 
         // Removed default read-only code editor btn from toolbar
         pnm.removeButton("options", 'export-template');

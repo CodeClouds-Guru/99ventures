@@ -17,4 +17,7 @@ io.sockets.on('connection', (socket) => {
     socket.on('disconnect', function () {
         console.log('A user disconnected');
     });
+    socket.on('shoutbox_client', function(data){
+        socket.emit("shoutbox", { name: 'Tez', place: 'USA', message: data.message });
+    })
 });

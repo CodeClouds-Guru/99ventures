@@ -1,8 +1,7 @@
-
-import Lightbox from 'react-image-lightbox';
-import 'react-image-lightbox/style.css';
 import { setlightBoxStatus } from '../../store/filemanager'
 import { useDispatch, useSelector } from 'react-redux';
+import LightboxModal from 'app/shared-components/LightboxModal';
+
 
 const ImagePreview = () => {
     const dispatch = useDispatch();
@@ -10,9 +9,9 @@ const ImagePreview = () => {
     const previewLink = useSelector(state=> state.filemanager.lightBox.src);
 
     return isOpen && previewLink && (
-        <Lightbox
-            mainSrc={previewLink}
-            onCloseRequest={() => dispatch(setlightBoxStatus({isOpen: false, src: ''})) }
+        <LightboxModal 
+            previewLink={ previewLink }
+            handleLightboxClose={()=> dispatch(setlightBoxStatus({isOpen: false, src: ''})) }
         />
     )
 }

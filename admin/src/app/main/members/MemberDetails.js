@@ -1,6 +1,6 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
-import { useState, useEffect, useRef } from 'react';
-import { Box, Avatar, Stack, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemIcon, ListItemText, TextareaAutosize, Tooltip } from '@mui/material';
+import { useState, useEffect, } from 'react';
+import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -11,8 +11,12 @@ import axios from 'axios'
 import Adjustment from './components/Adjustment';
 import SurveyDetails from './components/SurveyDetails';
 import Helper from 'src/app/helper';
+import MemberAvatar from './components/MemberAvatar';
 
 const labelStyling = {
+    '@media screen and (max-width: 1400px)': {
+        fontSize: '1.2rem'
+    },
     '@media screen and (max-width: 1024px)': {
         fontSize: '1.7rem'
     },
@@ -24,12 +28,29 @@ const labelStyling = {
 const textFieldStyle = {
     width: '100%',
     '& .muiltr-r11gs3-MuiInputBase-root-MuiInput-root': {
-        minHeight: '30px'
+        minHeight: '30px',
+        '& .MuiInputBase-input': {
+            ...labelStyling
+        }
     }
 }
 
 const iconStyle = {
-    '@media screen and (min-width: 1281px)': {
+    width: '20px',
+    height: '20px',
+    minWidth: '20px',
+    minHeight: '20px',
+    fontSize: '20px',
+    lineHeight: 20,
+    '@media screen and (max-width: 1600px)': {
+        width: '18px',
+        height: '18px',
+        minWidth: '18px',
+        minHeight: '18px',
+        fontSize: '18px',
+        lineHeight: 18
+    },
+    '@media screen and (max-width: 1400px)': {
         width: '15px',
         height: '15px',
         minWidth: '15px',
@@ -37,14 +58,34 @@ const iconStyle = {
         fontSize: '15px',
         lineHeight: 15
     },
-    '@media screen and (max-width: 1280px)': {
-        width: '25px',
-        height: '25px',
-        minWidth: '25px',
-        minHeight: '25px',
-        fontSize: '25px',
-        lineHeight: 25
+    '@media screen and (max-width: 1279px)': {
+        width: '20px',
+        height: '20px',
+        minWidth: '20px',
+        minHeight: '20px',
+        fontSize: '20px',
+        lineHeight: 20
     }
+}
+
+const autoCompleteStyle = { 
+    '& .MuiAutocomplete-inputRoot': { 
+        minHeight: '30px',
+        '& .MuiInputBase-input': {
+            ...labelStyling
+        }
+    }, 
+    '& .MuiFormControl-fullWidth': { 
+        '@media screen and (max-width: 1400px)': { 
+            width: '100%' 
+        } 
+    } 
+}
+
+const iconLabel = {
+    '@media screen and (max-width: 1400px)': {
+        padding: '3px'
+    },
 }
 
 const selectStyle = {
@@ -55,6 +96,7 @@ const selectStyle = {
 }
 
 const listItemTextStyle = {
+    // margin: '2px 0',
     '& .MuiListItemText-primary': {
         display: 'flex',
         justifyContent: 'space-between'
@@ -66,13 +108,17 @@ const listItemTextStyle = {
     }
 }
 
-const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/svg+xml"];
+const chipStyle = {
+    '@media screen and (max-width: 1400px)': {
+        fontSize: '1.2rem',
+        height: '25px',
+    },
+}
 
 const MemberDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const avatarRef = useRef();
     const { moduleId } = useParams();
     const [editMode, setEditMode] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
@@ -142,7 +188,7 @@ const MemberDetails = () => {
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
-
+                    
                     setMemberData({ ...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl });
                 }
             })
@@ -223,41 +269,21 @@ const MemberDetails = () => {
 
     const showStatus = (status) => {
         if (status === 'member')
-            return <Chip component="span" label={status} className="capitalize" color="success" />
+            return <Chip component="span" label={status} className="capitalize" color="success" sx={chipStyle} />
         else if (status === 'suspended')
-            return <Chip component="span" label={status} className="capitalize" color="primary" />
+            return <Chip component="span" label={status} className="capitalize" color="primary" sx={chipStyle} />
         else if (status === 'validating')
-            return <Chip component="span" label={status} className="capitalize" color="warning" />
+            return <Chip component="span" label={status} className="capitalize" color="warning" sx={chipStyle} />
         else if (status === 'deleted')
-            return <Chip component="span" label={status} className="capitalize" color="error" />
+            return <Chip component="span" label={status} className="capitalize" color="error" sx={chipStyle} />
     }
 
-    async function readFileAsync(e) {
-        const response = await new Promise((resolve, reject) => {
-            const file = e.target.files[0];
-            const fileSizeInMB = Math.round(file.size / 1000 / 1000); //MiB
-
-            if (fileSizeInMB > 2) {
-                dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB!' }));
-                return;
-            }
-            if (!acceptAvatarMimeTypes.includes(file.type)) {
-                dispatch(showMessage({ variant: 'error', message: 'Invalid image type!' }));
-                return;
-            }
-            setAvatarFile(file);
-            if (!file) {
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => {
-                resolve(`data:${file.type};base64,${btoa(reader.result)}`);
-            };
-            reader.onerror = reject;
-            reader.readAsBinaryString(file);
-        });
-
+    const handleSetAvatar = (response) => {
         setAvatar(response);
+    }
+
+    const handleSetAvatarFile = (response) => {
+        setAvatarFile(response);
     }
 
     /**
@@ -311,148 +337,94 @@ const MemberDetails = () => {
         return result.length ? result[0].name : ''
     }
 
+    const handleCancelEdit = () => {
+        setEditMode(false);
+        /**
+         * setAvatar setting initial avatar value. 
+         * we set this because user may have edit the avatar after clicking the edit button.
+         */
+        setAvatar(memberData.avatar);
+    }
+
     return (
-        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row" >
+        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full" >
             <div className="lg:w-1/3 xl:w-2/5">
-                <div className='flex items-center mb-10'>
-                    <Typography
-                        variant="h5"
-                        sx={{
-                            marginRight: '10px',
-                            '@media screen and (max-width: 1400px)': {
-                                fontSize: '3rem'
-                            },
-                            '@media screen and (max-width: 1300px)': {
-                                fontSize: '2.4rem'
-                            },
-                            '@media screen and (max-width: 768px)': {
-                                fontSize: '3rem'
-                            }
-                        }}
-                    ><strong>{memberData.username}</strong> </Typography>
-                    <sub>
-                        {
-                            !editMode ? (
-                                <Tooltip title="Click to edit" placement="top-start">
-                                    <IconButton color="primary" aria-label="Filter" component="span" onClick={() => setEditMode(true)}>
-                                        <FuseSvgIcon sx={iconStyle} className="text-28" size={20} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
-                                    </IconButton>
-                                </Tooltip>
-                            ) : (
-                                <>
-                                    <Tooltip title="Click to save" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={() => onOpenAlertDialogHandle('save_profile')}>
-                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">feather:save</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Click to cancel" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="span" onClick={() => setEditMode(false)}>
-                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={20} color="action">material-outline:cancel</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
-                                </>
-                            )
-                        }
-                    </sub>
-                </div>
-                <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap xmb-10 sm:justify-around'>
-                    <div className='md:w-1/3 xl:w-full sm:w-1/3 flex justify-center'>
-                        <Box
+                <div className='flex items-start justify-between'>
+                    <div className='flex items-center justify-between'>
+                        <Typography
+                            variant="h5"
                             sx={{
-                                borderWidth: 4,
-                                borderStyle: 'solid',
-                                borderColor: 'background.paper',
-                                width: '10rem',
-                                height: '10rem',
-                                '@media screen and (max-width: 1300px)': {
-                                    width: '8rem',
-                                    height: '8rem',
-                                },
-                                '@media screen and (max-width: 1280px)': {
-                                    width: '16rem',
-                                    height: '16rem',
+                                marginRight: '10px',
+                                '@media screen and (max-width: 1400px)': {
+                                    fontSize: '2rem'
                                 },
                                 '@media screen and (max-width: 768px)': {
-                                    width: '15rem',
-                                    height: '15rem',
+                                    fontSize: '3rem'
                                 }
                             }}
-                            className="shadow-md relative rounded-full overflow-hidden"
-                        >
+                        ><strong>{memberData.username}</strong> </Typography>
+                        <sub>
                             {
-                                editMode && (
+                                !editMode ? (
+                                    <Tooltip title="Click to edit" placement="top-start">
+                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
+                                            <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                                        </IconButton>
+                                    </Tooltip>
+                                ) : (
                                     <>
-                                        <div className="absolute inset-0 bg-black bg-opacity-50 z-10" />
-                                        <div className="absolute inset-0 flex items-center justify-center z-20">
-                                            <div>
-                                                <label htmlFor="button-avatar" className="flex p-8 cursor-pointer">
-                                                    <input
-                                                        ref={avatarRef}
-                                                        accept="image/*"
-                                                        className="hidden"
-                                                        id="button-avatar"
-                                                        type="file"
-                                                        onChange={(e) => {
-                                                            readFileAsync(e);
-                                                        }}
-                                                    />
-                                                    <Tooltip title="Upload" placement="bottom-start">
-                                                        <FuseSvgIcon sx={iconStyle} className="text-white">heroicons-outline:camera</FuseSvgIcon>
-                                                    </Tooltip>
-                                                </label>
-                                            </div>
-                                            <div>
-                                                <Tooltip title="Reset" placement="bottom-start">
-                                                    <IconButton
-                                                        onClick={() => {
-                                                            setAvatar(memberData.avatar);
-                                                            avatarRef.current.value = ''; // To remove the value from input file
-                                                        }}
-                                                    >
-                                                        <FuseSvgIcon sx={iconStyle} className="text-white text-48" size={24} color="action">feather:rotate-ccw</FuseSvgIcon>
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </div>
-                                        </div>
+                                        <Tooltip title="Click to save" placement="top-start">
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => onOpenAlertDialogHandle('save_profile')}>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">feather:save</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Click to cancel" placement="top-start">
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={handleCancelEdit}>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
                                     </>
                                 )
                             }
-                            <Avatar
-                                sx={{
-                                    backgroundColor: 'background.default',
-                                    color: 'text.secondary',
-                                    '@media screen and (max-width: 768px)': {
-                                        width: 60,
-                                        height: 60,
-                                    },
-                                    '@media screen and (max-width: 1400px)': {
-                                        width: 120,
-                                        height: 120,
-                                    }
-                                }}
-                                className="object-cover w-full h-full text-20 font-bold"
-                                src={avatar}
-                                alt={`${memberData.first_name} ${memberData.last_name}`}
-                            >
-                                {avatar}
-                            </Avatar>
-                        </Box>
+                        </sub>
                     </div>
+                    <div className='lg:flex justify-center sm:hidden'>
+                        <MemberAvatar 
+                            avatar={avatar} 
+                            editMode={editMode} 
+                            handleSetAvatar={handleSetAvatar} 
+                            handleSetAvatarFile={handleSetAvatarFile} 
+                            memberData={memberData} 
+                            iconStyle={iconStyle}
+                        />
+                    </div>
+                </div>
+                <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap xmb-10 sm:justify-around'>
+                    <div className='md:w-1/3 xl:w-full sm:w-1/3 flex justify-center lg:hidden'>
+                        <MemberAvatar 
+                            avatar={avatar} 
+                            editMode={editMode} 
+                            handleSetAvatar={handleSetAvatar} 
+                            handleSetAvatarFile={handleSetAvatarFile} 
+                            memberData={memberData} 
+                            iconStyle={iconStyle}
+                        />
+                    </div>  
                     <div className='flex flex-col xl:w-full lg:w-full md:w-2/3 sm:w-2/3'>
                         <List className="">
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
-                                    <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{memberData.id}</Typography>
+                                <ListItemText className="sm:w-3/4 md:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-base xl:text-base">{memberData.id}</Typography>
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Status:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     <>
                                         {
                                             editStatus ? (
@@ -489,18 +461,18 @@ const MemberDetails = () => {
                                                             <FuseSvgIcon className="text-48" size={18} color="action">material-outline:check</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip> */}
-                                                    <Tooltip title="Cancel" placement="top-start" onClick={handleCancelStatus}>
-                                                        <IconButton color="primary" aria-label="Filter" component="span">
-                                                            <FuseSvgIcon className="text-48" size={18} color="action">material-outline:cancel</FuseSvgIcon>
+                                                    <Tooltip title="Cancel" placement="top-start" >
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={handleCancelStatus}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip>
                                                 </div>
                                             ) : (
                                                 <div className='flex'>
-                                                    <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{showStatus(memberData.status)}</Typography>
-                                                    <Tooltip title="Change Status" placement="top-start" onClick={() => setEditStatus(true)}>
-                                                        <IconButton color="primary" aria-label="Filter" component="span">
-                                                            <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                    {showStatus(memberData.status)}
+                                                    <Tooltip title="Change Status" placement="top-start">
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel}  onClick={() => setEditStatus(true)}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip>
                                                 </div>
@@ -511,7 +483,7 @@ const MemberDetails = () => {
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Name:</Typography>
                                 } />
                                 <ListItemText sx={listItemTextStyle} className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
@@ -541,57 +513,55 @@ const MemberDetails = () => {
                                             />
                                         </div>
                                     ) : (
-                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{memberData.first_name + ' ' + memberData.last_name}</Typography>
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.first_name + ' ' + memberData.last_name}</Typography>
                                     )
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
-                                    <Typography variant="subtitle" className="font-semibold">Email:</Typography>
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Email:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                    <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                         <a href={`mailto:${memberData.email}`} style={{ textDecoration: 'none', color: '#1e293b' }}>{memberData.email}</a>
                                     </Typography>
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
-                                    <Typography variant="subtitle" className="font-semibold">Payment Emails:</Typography>
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Payment Emails:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
-                                    <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
                                         {memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '--'}
                                     </Typography>
                                 } />
-                            </ListItem>
-                        </List>
-                        <List className="">
+                            </ListItem>                        
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Code:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     <div className="flex items-center">
-                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                             {memberData.referral_code}
                                         </Typography>
                                         <Tooltip title="Click to copy" placement="right">
-                                            <IconButton color="primary" aria-label="Filter" component="span">
-                                                <FuseSvgIcon className="text-48 cursor-pointer" size={16} color="action" onClick={() => clickToCopy(memberData.referral_code)}>material-outline:content_copy</FuseSvgIcon>
+                                            <IconButton color="primary" aria-label="Filter" sx={iconLabel}  component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_code)}>
+                                                <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-outline:content_copy</FuseSvgIcon>
                                             </IconButton>
                                         </Tooltip>
                                     </div>
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
                                         <div className='flex items-center'>
-                                            <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
                                                 {memberData.MemberReferral.Member.first_name} {memberData.MemberReferral.Member.last_name} ({memberData.MemberReferral.ip})
                                             </Typography>
                                             <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
@@ -604,12 +574,12 @@ const MemberDetails = () => {
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Level:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     editMode ? (
-                                        <div>
+                                        <div className="xl:w-1/2 sm:w-full">
                                             <TextField
                                                 sx={{ ...selectStyle, ...textFieldStyle }}
                                                 id="standard-select-currency-native"
@@ -638,22 +608,22 @@ const MemberDetails = () => {
                                             </TextField>
                                         </div>
                                     ) : (
-                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">{memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : ''}</Typography>
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : ''}</Typography>
                                     )
 
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Phone:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     editMode ? (
-                                        <div className='flex lg:flex-col xl:flex-row justify-between'>
+                                        <div className='flex lg:flex-col xl:flex-row justify-between w-full'>
                                             <Autocomplete
                                                 {...countryCodeProps}
                                                 className="sm:w-3/4 xl:w-2/4 sm:mr-10 md:mr-0 md:w-2/4 lg:w-full"
-                                                sx={{ '& .MuiAutocomplete-inputRoot': { minHeight: '30px' }, '& .MuiFormControl-fullWidth': { '@media screen and (max-width: 1400px)': { width: '100%' } } }}
+                                                sx={autoCompleteStyle}
                                                 id="clear-on-escape"
                                                 value={countryData.filter(c => c.id == memberData.country_code)[0]}
                                                 clearOnEscape
@@ -673,7 +643,7 @@ const MemberDetails = () => {
                                             />
                                         </div>
                                     ) : (
-                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-base xl:text-base">
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                             {
                                                 memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no
                                             }
@@ -682,12 +652,12 @@ const MemberDetails = () => {
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
-                                <ListItemText className="sm:w-1/5 lg:w-1/3 xl:w-3/12" primary={
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Gender:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     editMode ? (
-                                        <div>
+                                        <div className="xl:w-1/2 sm:w-full">
                                             <TextField
                                                 sx={{ ...selectStyle, ...textFieldStyle }}
                                                 id="standard-select-currency-native"
@@ -710,7 +680,7 @@ const MemberDetails = () => {
                                             </TextField>
                                         </div>
                                     ) : (
-                                        <Typography variant="body1" className="capitalize sm:text-sm md:text-lg lg:text-base xl:text-base">
+                                        <Typography variant="body1" className="capitalize sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                             {memberData.gender}
                                         </Typography>
                                     )
@@ -727,10 +697,10 @@ const MemberDetails = () => {
                             p: 1.8
                         }}
                     >
-                        <Typography variant="body1" className="mb-10 font-medium">
+                        <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Balance: ${showBalance()} (Total Earnings)
                         </Typography>
-                        <Typography variant="body1" className="mb-10 font-medium">
+                        <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
                         </Typography>
                         <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
@@ -742,7 +712,7 @@ const MemberDetails = () => {
                     </div>
                 </div>
             </div>
-            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className="md:my-20 sm:my-20 sm:mx-10 lg:mx-16 xl:24 sm:hidden lg:flex" />
+            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className=" sm:mx-10 lg:mx-10 xl:24 sm:hidden lg:flex" />
             <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2 }} className="md:my-36 sm:my-20 xl:24 lg:hidden" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <div className='flex flex-col'>
@@ -755,27 +725,27 @@ const MemberDetails = () => {
                                 >Additional Information</Typography>
                                 <List>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Geo Location:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Geo Location:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'
-                                        } />
-                                    </ListItem>
-                                    <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">IP:</Typography>
-                                        } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'}</Typography>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Browser:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>IP:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
-                                            (memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'}</Typography>
+                                        } />
+                                    </ListItem>
+                                    <ListItem disablePadding>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Browser:</Typography>
+                                        } />
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'}</Typography>
                                         } />
                                     </ListItem>
                                 </List>
@@ -787,10 +757,10 @@ const MemberDetails = () => {
                                 >Address</Typography>
                                 <List>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Address Line 1:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Address Line 1:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -805,17 +775,17 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{memberData.address_1}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.address_1}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Address Line 2:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Address Line 2:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -830,17 +800,17 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{memberData.address_2}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.address_2}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Address Line 3:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Address Line 3:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -855,17 +825,17 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{memberData.address_3}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm  md:text-lg lg:text-sm xl:text-base">{memberData.address_3}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">ZIP Code:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>ZIP Code:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -880,24 +850,25 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">{memberData.zip_code}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.zip_code}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" primary={
-                                            <Typography variant="subtitle">Country:</Typography>
+                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="subtitle" sx={labelStyling}>Country:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" primary={
+                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
                                                         <Autocomplete
+                                                            className="w-full"
                                                             {...countryProps}
                                                             value={countryData.filter(c => c.id == memberData.country_id)[0]}
-                                                            sx={{ '& .MuiAutocomplete-inputRoot': { minHeight: '30px' } }}
+                                                            sx={autoCompleteStyle}
                                                             id="clear-on-escape"
                                                             onChange={
                                                                 (e, newValue) => setMemberData({ ...memberData, country_id: newValue.id })
@@ -909,7 +880,7 @@ const MemberDetails = () => {
                                                         />
 
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm lg:text-base xl:text-base">
+                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">
                                                             { memberData.country_id && getCountryName(memberData.country_id) }
                                                         </Typography>
                                                     )
