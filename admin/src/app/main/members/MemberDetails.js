@@ -96,7 +96,7 @@ const selectStyle = {
 }
 
 const listItemTextStyle = {
-    margin: '2px 0',
+    // margin: '2px 0',
     '& .MuiListItemText-primary': {
         display: 'flex',
         justifyContent: 'space-between'
@@ -369,7 +369,7 @@ const MemberDetails = () => {
     }
 
     return (
-        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row" >
+        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full" >
             <div className="lg:w-1/3 xl:w-2/5">
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center justify-between'>
