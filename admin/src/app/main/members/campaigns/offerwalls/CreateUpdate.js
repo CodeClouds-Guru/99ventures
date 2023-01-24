@@ -104,33 +104,33 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results.status && response.data.results.result) {
                     setSingleOfferwallData(response.data.results.result)
-                    setValue('premium_configuration', response.data.results.result.premium_configuration, { shouldDirty: true, shouldValidate: false });
-                    setValue('name', response.data.results.result.name, { shouldDirty: true, shouldValidate: false });
-                    setValue('sub_id_prefix', response.data.results.result.sub_id_prefix, { shouldDirty: true, shouldValidate: false });
+                    setValue('premium_configuration', response.data.results.result.premium_configuration, { shouldDirty: false, shouldValidate: true });
+                    setValue('name', response.data.results.result.name, { shouldDirty: false, shouldValidate: true });
+                    setValue('sub_id_prefix', response.data.results.result.sub_id_prefix, { shouldDirty: false, shouldValidate: true });
                     setLogPostbackErrors(response.data.results.result.log_postback_errors === 1);
                     'logPostbackErrors' in dirtyFields ? delete dirtyFields.logPostbackErrors : '';
                     setSecureSubIDs(response.data.results.result.secure_sub_ids === 1);
                     'secureSubIDs' in dirtyFields ? delete dirtyFields.secureSubIDs : '';
                     setStatus(response.data.results.result.status === 1);
                     'status' in dirtyFields ? delete dirtyFields.status : '';
-                    setValue('mode', response.data.results.result.mode, { shouldDirty: true, shouldValidate: false });
+                    setValue('mode', response.data.results.result.mode, { shouldDirty: false, shouldValidate: true });
                     setIPs(response.data.results.result.ips);
                     'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
                     setAllowFromAnyIP(response.data.results.result.allow_from_any_ip === 1);
                     'allowFromAnyIP' in dirtyFields ? delete dirtyFields.allowFromAnyIP : '';
-                    setValue('campaign_id_variable', response.data.results.result.campaign_id_variable, { shouldDirty: true, shouldValidate: false });
+                    setValue('campaign_id_variable', response.data.results.result.campaign_id_variable, { shouldDirty: false, shouldValidate: true });
                     handleUrlObject(response.data.results.result.campaign_id_variable, 'campaignIdVariable');
-                    setValue('campaign_name_variable', response.data.results.result.campaign_name_variable, { shouldDirty: true, shouldValidate: false });
+                    setValue('campaign_name_variable', response.data.results.result.campaign_name_variable, { shouldDirty: false, shouldValidate: true });
                     handleUrlObject(response.data.results.result.campaign_name_variable, 'campaignNameVariable');
-                    setValue('sub_id_variable', response.data.results.result.sub_id_variable, { shouldDirty: true, shouldValidate: false });
+                    setValue('sub_id_variable', response.data.results.result.sub_id_variable, { shouldDirty: false, shouldValidate: true });
                     handleUrlObject(response.data.results.result.sub_id_variable, 'subIdVariable');
-                    setValue('reverse_variable', response.data.results.result.reverse_variable, { shouldDirty: true, shouldValidate: false });
-                    setValue('reverse_variable_value', response.data.results.result.reverse_value, { shouldDirty: true, shouldValidate: false });
-                    setValue('response_ok', response.data.results.result.response_ok, { shouldDirty: true, shouldValidate: false });
-                    setValue('response_fail', response.data.results.result.response_fail, { shouldDirty: true, shouldValidate: false });
-                    setValue('currency_variable', response.data.results.result.currency_variable, { shouldDirty: true, shouldValidate: false });
-                    setValue('percent', response.data.results.result.currency_percent, { shouldDirty: true, shouldValidate: false });
-                    setValue('max', response.data.results.result.currency_max, { shouldDirty: true, shouldValidate: false });
+                    setValue('reverse_variable', response.data.results.result.reverse_variable, { shouldDirty: false, shouldValidate: true });
+                    setValue('reverse_variable_value', response.data.results.result.reverse_value, { shouldDirty: false, shouldValidate: true });
+                    setValue('response_ok', response.data.results.result.response_ok, { shouldDirty: false, shouldValidate: true });
+                    setValue('response_fail', response.data.results.result.response_fail, { shouldDirty: false, shouldValidate: true });
+                    setValue('currency_variable', response.data.results.result.currency_variable, { shouldDirty: false, shouldValidate: true });
+                    setValue('percent', response.data.results.result.currency_percent, { shouldDirty: false, shouldValidate: true });
+                    setValue('max', response.data.results.result.currency_max, { shouldDirty: false, shouldValidate: true });
                 }
             })
             .catch((error) => {
@@ -150,9 +150,12 @@ const CreateUpdate = () => {
         setStatus(event.target.checked);
     }
     const handleIPs = (val) => {
+        // console.log(55)
         dirtyFields.IPs = true;
         setIPs(val);
     }
+    // console.log('outside', dirtyFields)
+
     const handleAllowFromAny = (event) => {
         setIPs([])
         'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
