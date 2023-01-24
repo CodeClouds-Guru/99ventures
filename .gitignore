@@ -9,3 +9,4 @@ frontend/node_modules
 admin/src/.DS_Store
 admin/public/.DS_Store
 *.code-workspace
+logs
