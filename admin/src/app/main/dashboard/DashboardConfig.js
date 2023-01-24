@@ -6,7 +6,23 @@ const Dashboard = lazy(() => import('./Dashboard'));
 const DashboardConfig = {
     settings: {
         layout: {
-            config: {},
+            config: {
+                navbar: {
+                    display: true,
+                },
+                toolbar: {
+                    display: true,
+                },
+                footer: {
+                    display: false,
+                },
+                leftSidePanel: {
+                    display: true,
+                },
+                rightSidePanel: {
+                    display: false,
+                },
+            },
         },
     },
     routes: [

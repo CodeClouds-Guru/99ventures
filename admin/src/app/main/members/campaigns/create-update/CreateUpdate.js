@@ -387,6 +387,7 @@ const CreateUpdate = () => {
                                             required
                                         >
                                             <MenuItem value="registration">Registration</MenuItem>
+                                            <MenuItem value="email_verified">Email Verified</MenuItem>
                                             <MenuItem value="earn_at_least">Earn at Least</MenuItem>
                                             <MenuItem value="withdrawn_at_least">Withdrawn at Least</MenuItem>
                                             <MenuItem value="withdrawn_count">Withdrawn Count</MenuItem>
@@ -468,7 +469,7 @@ const CreateUpdate = () => {
                                                     <div className="flex w-2/12 mr-5"> <b> Registration Page :</b></div>
                                                     <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.registration_page_url}</div>
                                                 </div>
-                                                <div className="flex w-full justify-center m-10 pt-5">
+                                                {/* <div className="flex w-full justify-center m-10 pt-5">
                                                     <div className="flex w-2/12 mr-5"> <h3> <b> Referral Link -</b></h3></div>
                                                     <div className="w-10/12 ml-5"> <h3> {singleCampaignData.campaign_link.referral_link}</h3></div>
                                                 </div>
@@ -479,7 +480,7 @@ const CreateUpdate = () => {
                                                 <div className="flex w-full justify-center m-10">
                                                     <div className="flex w-2/12  mr-5"> <b> Registration Page :</b></div>
                                                     <div className="w-10/12 ml-5"> {singleCampaignData.campaign_link.ref_registration_page_url}</div>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </>}
                                 </>

@@ -9,19 +9,35 @@ import CreateEdit from './create-edit/CreateEdit';
 const CRUDConfig = {
   settings: {
     layout: {
-      config: {},
+      config: {
+        navbar: {
+          display: true,
+        },
+        toolbar: {
+          display: true,
+        },
+        footer: {
+          display: false,
+        },
+        leftSidePanel: {
+          display: true,
+        },
+        rightSidePanel: {
+          display: false,
+        },
+      },
     },
   },
   routes: [
     {
-        path: 'app/:module/:moduleId',
-        element: <CreateEdit />,
+      path: 'app/:module/:moduleId',
+      element: <CreateEdit />,
     },
     {
       path: 'app/:module',
       element: <List />,
     },
-    
+
   ],
 };
 
