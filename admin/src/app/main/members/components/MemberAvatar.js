@@ -114,7 +114,8 @@ const MemberAvatar = (props) => {
                     '@media screen and (max-width: 1400px)': {
                         width: 120,
                         height: 120,
-                    }
+                    },
+                    cursor: 'pointer'
                 }}
                 className="object-cover w-full h-full text-20 font-bold"
                 src={props.avatar}
