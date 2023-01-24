@@ -150,16 +150,13 @@ const CreateUpdate = () => {
         setStatus(event.target.checked);
     }
     const handleIPs = (val) => {
-        // console.log(55)
         dirtyFields.IPs = true;
-        setIPs(val);
+        setIPs(() =>
+            [...val]);
     }
-    // console.log('outside', dirtyFields)
-
     const handleAllowFromAny = (event) => {
         setIPs([])
-        'IPs' in dirtyFields ? delete dirtyFields.IPs : '';
-        dirtyFields.allowFromAnyIP = true;
+        event.target.checked ? dirtyFields.allowFromAnyIP = true : '';
         setAllowFromAnyIP(event.target.checked);
     }
     const handleUrlObject = (value, field_name) => {
@@ -256,7 +253,6 @@ const CreateUpdate = () => {
                 className="flex flex-col justify-center w-full mt-10"
                 onSubmit={handleSubmit(onSubmit)}
             >
-
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
                         <div className="w-full justify-between">
