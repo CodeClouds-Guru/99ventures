@@ -13,7 +13,7 @@ const ConfigurationConfig = {
           display: true,
         },
         footer: {
-          display: true,
+          display: false,
         },
         leftSidePanel: {
           display: true,
