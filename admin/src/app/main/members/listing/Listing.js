@@ -272,7 +272,8 @@ function Listing(props) {
         setFilters([...filters]);
     }
     const addFilterRow = () => {
-        setFilters(filters.concat({ column: 'username', match: 'substring', search: '' }))
+        // All the values will be blank while adding new row.
+        setFilters(filters.concat({ column: '', match: '', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
@@ -436,7 +437,7 @@ function Listing(props) {
                 <div className="flex">
                     <Stack direction="row" sx={{ overflowX: 'auto', maxWidth: '82%' }} spacing={1} className="flex w-10/12 my-16 justify-center">
                         {filters.filter(el => el.column !== '' && el.match !== '').map((val, key) => {
-                            return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + val.search} size="small" color="primary" />
+                            return <Chip key={key} label={column_object[val.column] + ' ' + match_object[val.match] + ' ' + (val.search ? val.search : "''")} size="small" color="primary" />
                         })
                         }
                         {memberStatus.length > 0 && <Chip className="capitalize" label={'Status IN ' + memberStatus.join(', ')} size="small" color="primary" />}
