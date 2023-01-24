@@ -119,6 +119,14 @@ class FileManagerController {
       let download_zip = await this.download(req, res)
     } else {
       let file_path = req.body.file_path
+      if(file_path == ''){
+        //create file-manager folder
+        const fileHelperFolder = new FileHelper('', 'file-manager', req)
+        let file_list = await fileHelperFolder.getList();
+        if (file_list.KeyCount == 0) {
+          await fileHelperFolder.createFolder()
+        }
+      }
       if (file_path != '') {
         file_path = 'file-manager' + '/' + file_path
       } else {
