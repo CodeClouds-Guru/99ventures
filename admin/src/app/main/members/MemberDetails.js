@@ -337,6 +337,15 @@ const MemberDetails = () => {
         return result.length ? result[0].name : ''
     }
 
+    const handleCancelEdit = () => {
+        setEditMode(false);
+        /**
+         * setAvatar setting initial avatar value. 
+         * we set this because user may have edit the avatar after clicking the edit button.
+         */
+        setAvatar(memberData.avatar);
+    }
+
     return (
         <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full" >
             <div className="lg:w-1/3 xl:w-2/5">
@@ -370,7 +379,7 @@ const MemberDetails = () => {
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title="Click to cancel" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(false)}>
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={handleCancelEdit}>
                                                 <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
                                             </IconButton>
                                         </Tooltip>

@@ -39,18 +39,6 @@ const MemberAvatar = (props) => {
         props.handleSetAvatar(response);
     }
 
-    /**
-     * setMemberAvatarURL storing current avatar url. 
-     * When user click on edit and select file but cancel the edit then the initial avatar url will take from memberAvatarURL state variable
-     */
-    useEffect(()=>{
-        setMemberAvatarURL(props.avatar)
-        if(!props.editMode) {
-            props.handleSetAvatar(memberAvatarURL);
-        }
-    }, [props.editMode]);
-
-
     return (
         <Box
             sx={{
