@@ -12,6 +12,7 @@ import Adjustment from './components/Adjustment';
 import SurveyDetails from './components/SurveyDetails';
 import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
+import CustomerLoader from '../../shared-components/customLoader/Index'
 
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
@@ -134,6 +135,7 @@ const MemberDetails = () => {
     const [statusNote, setStatusNote] = useState('');
     const [status, setStatus] = useState('');
     const [surveyDetails, setSurveyDetails] = useState([]);
+    const [loader, setLoader] = useState(true);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -177,6 +179,7 @@ const MemberDetails = () => {
     const getMemberData = (updateAvatar = true) => {
         axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
+                setLoader(false);
                 if (res.data.results.data) {
                     const result = res.data.results.data;
                     const avatarUrl = (result.avatar) ? result.avatar : `https://ui-avatars.com/api/?name=${result.first_name}+${result.last_name}`;
@@ -346,6 +349,11 @@ const MemberDetails = () => {
         setAvatar(memberData.avatar);
     }
 
+    if(loader){
+        return (
+            <CustomerLoader />
+        )
+    }
     return (
         <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full" >
             <div className="lg:w-1/3 xl:w-2/5">
