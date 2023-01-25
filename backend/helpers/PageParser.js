@@ -10,11 +10,11 @@ const { QueryTypes, Op } = require('sequelize');
 const defaultAddOns = [
   {
     type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/jquery-v1.js',
+    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Scripted-essentials/jquery-v1.js',
   },
   {
     type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/socket.io.js',
+    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Scripted-essentials/socket.js',
   },
 ];
 class PageParser {
