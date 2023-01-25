@@ -3,7 +3,10 @@ import Helper from 'src/app/helper';
 import * as React from 'react'
 
 const listStyle = {
-    height: '340px',
+    height: '350px',
+    '@media screen and (max-width: 1600px)': {
+        height: '280px'
+    },
     '@media screen and (max-width: 1400px)': {
         height: '250px'
     },
@@ -22,7 +25,7 @@ const AccountNotes = (props) => {
                                 <Typography variant="caption" className="text-xs italic font-bold">{note.User.alias_name} - More Surveys Support Team</Typography>
                                 <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>
                             </div>
-                            <Typography variant="body2">{note.note}</Typography>
+                            <Typography variant="body2" className="md:text-lg lg:text-sm xl:text-base">{note.note}</Typography>
                         </>
                     }/>
                 </ListItem>

@@ -44,8 +44,8 @@ const MemberAvatar = (props) => {
                 borderWidth: 4,
                 borderStyle: 'solid',
                 borderColor: 'background.paper',
-                width: '8rem',
-                height: '8rem',
+                width: '7rem',
+                height: '7rem',
                 '@media screen and (max-width: 1600px)': {
                     width: '6rem',
                     height: '6rem',

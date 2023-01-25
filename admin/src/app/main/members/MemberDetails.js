@@ -96,7 +96,7 @@ const selectStyle = {
 }
 
 const listItemTextStyle = {
-    // margin: '2px 0',
+    margin: '2px 0',
     '& .MuiListItemText-primary': {
         display: 'flex',
         justifyContent: 'space-between'
@@ -716,7 +716,7 @@ const MemberDetails = () => {
                     </div>
                 </div>
             </div>
-            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className=" sm:mx-10 lg:mx-10 xl:24 sm:hidden lg:flex" />
+            <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className="my-10 sm:mx-10 lg:mx-10 xl:24 sm:hidden lg:flex" />
             <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2 }} className="md:my-36 sm:my-20 xl:24 lg:hidden" />
             <div className="lg:w-2/3 xl:w-3/5">
                 <div className='flex flex-col'>
@@ -905,7 +905,7 @@ const MemberDetails = () => {
                         </div>
                     </div>
 
-                    <Divider sx={{ borderWidth: 2 }} className="my-10" />
+                    <Divider sx={{ borderWidth: 2 }} className="my-5" />
                     <Box component="div" className="w-full flex flex-col">
                         <Typography variant="body1" className="font-bold">Account Notes Section</Typography>
                         {
