@@ -251,7 +251,7 @@ const CreateUpdate = () => {
                 name="OfferwallCreateUpdateForm"
                 noValidate
                 className="flex flex-col justify-center w-full mt-10"
-                onKeyPress={(e) => { e.key === 'Enter' && e.preventDefault(); }}
+                onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}
                 onSubmit={handleSubmit(onSubmit)}
             >
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
