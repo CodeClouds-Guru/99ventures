@@ -18,8 +18,8 @@ const labelStyling = {
     '@media screen and (max-width: 1400px)': {
         fontSize: '1.2rem'
     },
-    '@media screen and (max-width: 1024px)': {
-        fontSize: '1.7rem'
+    '@media screen and (max-width: 1199px)': {
+        fontSize: '1.6rem'
     },
     '@media screen and (max-width: 768px)': {
         fontSize: '1.4rem'
@@ -737,27 +737,27 @@ const MemberDetails = () => {
                                 >Additional Information</Typography>
                                 <List>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Geo Location:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'}</Typography>
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'}</Typography>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>IP:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'}</Typography>
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'}</Typography>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Browser:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                            <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'}</Typography>
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'}</Typography>
                                         } />
                                     </ListItem>
                                 </List>
@@ -769,10 +769,10 @@ const MemberDetails = () => {
                                 >Address</Typography>
                                 <List>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Address Line 1:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -787,17 +787,17 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.address_1}</Typography>
+                                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.address_1}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Address Line 2:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -812,7 +812,7 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">
+                                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                                             {memberData.address_2 ? memberData.address_2 : '--'}
                                                         </Typography>
                                                     )
@@ -821,10 +821,10 @@ const MemberDetails = () => {
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Address Line 3:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -839,7 +839,7 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm  md:text-lg lg:text-sm xl:text-base">
+                                                        <Typography variant="body1" className="sm:text-lg  md:text-lg lg:text-sm xl:text-base">
                                                             {memberData.address_3 ? memberData.address_3 : '--'}
                                                         </Typography>
                                                     )
@@ -848,10 +848,10 @@ const MemberDetails = () => {
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>ZIP Code:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -866,17 +866,17 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.zip_code}</Typography>
+                                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.zip_code}</Typography>
                                                     )
                                                 }
                                             </>
                                         } />
                                     </ListItem>
                                     <ListItem disablePadding>
-                                        <ListItemText className="sm:w-1/3 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
                                             <Typography variant="subtitle" sx={labelStyling}>Country:</Typography>
                                         } />
-                                        <ListItemText className="sm:w-2/3 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
+                                        <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
@@ -896,7 +896,7 @@ const MemberDetails = () => {
                                                         />
 
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">
+                                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                                             { memberData.country_id && getCountryName(memberData.country_id) }
                                                         </Typography>
                                                     )
