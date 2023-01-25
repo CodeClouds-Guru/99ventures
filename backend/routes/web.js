@@ -14,7 +14,10 @@ router.get('/test-lucid', async (req, res) => {
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
-    var page_content = await pagePerser.preview();
+    const { Member } = require('../models/index');
+    let member = await Member.findByPk(1);
+    req.session = { member };
+    var page_content = await pagePerser.preview(req);
   } catch (e) {
     switch (e.statusCode) {
       case 404:
