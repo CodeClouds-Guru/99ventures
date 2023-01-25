@@ -4,21 +4,22 @@ const {
   Page,
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
-} = require("../models");
-const { QueryTypes, Op } = require("sequelize");
+} = require('../models');
+const { QueryTypes, Op } = require('sequelize');
 
 const defaultAddOns = [
   {
     type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/jquery-v1.js'
+    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/jquery-v1.js',
   },
   {
     type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/socket.io.js'
-  }
+    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Resources/socket.io.js',
+  },
 ];
 class PageParser {
   constructor(slug) {
+    this.sessionUser = null;
     this.slug = slug;
     this.page = null;
     this.preview = this.preview.bind(this);
@@ -31,16 +32,19 @@ class PageParser {
   async getPageNLayout() {
     this.page = await Page.findOne({
       where: { slug: this.slug },
-      include: "Layout",
+      include: 'Layout',
     });
     if (!this.page || !this.page.Layout) {
-      const errorObj = new Error("Sorry! Page not found");
+      const errorObj = new Error('Sorry! Page not found');
       errorObj.statusCode = 404;
       throw errorObj;
     }
   }
 
-  async preview() {
+  async preview(req) {
+    if ('member' in req.session) {
+      this.sessionUser = req.session.member;
+    }
     const page_content = await this.generateHtml();
     return page_content;
   }
@@ -52,33 +56,42 @@ class PageParser {
     let content = this.page.html;
     const page_keywords = this.page.keywords;
     const page_descriptions = this.page.descriptions;
-    const page_meta_code = this.page.meta_code || "";
+    const page_meta_code = this.page.meta_code || '';
     let layout_keywords = await CompanyPortalMetaTag.findOne({
       where: {
-        tag_name: "Keywords",
+        tag_name: 'Keywords',
         company_portal_id: this.page.company_portal_id,
       },
     });
     let layout_descriptions = await CompanyPortalMetaTag.findOne({
       where: {
-        tag_name: "Description",
+        tag_name: 'Description',
         company_portal_id: this.page.company_portal_id,
       },
     });
     let additional_headers = await CompanyPortalAdditionalHeader.findOne({
       where: { company_portal_id: this.page.company_portal_id },
     });
-    layout_keywords = layout_keywords ? layout_keywords.tag_content : "";
-    additional_headers = additional_headers ? additional_headers.tag_content : "";
+    layout_keywords = layout_keywords ? layout_keywords.tag_content : '';
+    additional_headers = additional_headers
+      ? additional_headers.tag_content
+      : '';
     layout_descriptions = layout_descriptions
       ? layout_descriptions.tag_content
-      : "";
+      : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
-    layout_html = layout_html.replaceAll("{{content}}", content);
-    layout_html = layout_html.replaceAll("${additional_header_script}", additional_headers);
+    layout_html = layout_html.replaceAll('{{content}}', content);
+    layout_html = layout_html.replaceAll(
+      '${additional_header_script}',
+      additional_headers
+    );
     layout_html = await this.convertComponentToHtml(layout_html);
-    layout_html = eval("`" + layout_html + "`");
+
+    const user = this.getSessionUser();
+
+    layout_html = eval('`' + layout_html + '`');
+
     return layout_html;
   }
 
@@ -102,19 +115,23 @@ class PageParser {
 
   addDefaultAddOns() {
     var str = '';
-    defaultAddOns.forEach(item => {
+    defaultAddOns.forEach((item) => {
       switch (item.type) {
         case 'script':
-          str += `<script src="${item.src}"></script>`
+          str += `<script src="${item.src}"></script>`;
           break;
         case 'css':
-          str += `<link rel="stylesheet" href="${item.src}">`
+          str += `<link rel="stylesheet" href="${item.src}">`;
           break;
         default:
           break;
       }
     });
     return str;
+  }
+
+  getSessionUser() {
+    return this.sessionUser;
   }
 }
 module.exports = PageParser;
