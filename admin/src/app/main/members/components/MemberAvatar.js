@@ -74,7 +74,7 @@ const MemberAvatar = (props) => {
                                 <label htmlFor="button-avatar" className="flex p-8 cursor-pointer">
                                     <input
                                         ref={avatarRef}
-                                        accept="image/*"
+                                        accept="image/png, image/gif, image/jpeg"
                                         className="hidden"
                                         id="button-avatar"
                                         type="file"
