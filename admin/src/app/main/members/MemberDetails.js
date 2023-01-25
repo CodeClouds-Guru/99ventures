@@ -544,13 +544,17 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     <div className="flex items-center">
                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                            {memberData.referral_code}
+                                            {memberData.referral_code ?? '--'}
                                         </Typography>
-                                        <Tooltip title="Click to copy" placement="right">
-                                            <IconButton color="primary" aria-label="Filter" sx={iconLabel}  component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_code)}>
-                                                <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-outline:content_copy</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
+                                        {
+                                            (memberData.referral_code) && (
+                                                <Tooltip title="Click to copy" placement="right">
+                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel}  component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_code)}>
+                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-outline:content_copy</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )
+                                        }                                        
                                     </div>
                                 } />
                             </ListItem>
@@ -800,7 +804,9 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">{memberData.address_2}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm md:text-lg lg:text-sm xl:text-base">
+                                                            {memberData.address_2 ? memberData.address_2 : '--'}
+                                                        </Typography>
                                                     )
                                                 }
                                             </>
@@ -825,7 +831,9 @@ const MemberDetails = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        <Typography variant="body1" className="sm:text-sm  md:text-lg lg:text-sm xl:text-base">{memberData.address_3}</Typography>
+                                                        <Typography variant="body1" className="sm:text-sm  md:text-lg lg:text-sm xl:text-base">
+                                                            {memberData.address_3 ? memberData.address_3 : '--'}
+                                                        </Typography>
                                                     )
                                                 }
                                             </>

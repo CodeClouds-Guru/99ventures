@@ -122,7 +122,7 @@ const MemberAvatar = (props) => {
                 alt={`${props.memberData.first_name} ${props.memberData.last_name}`}
                 onClick={()=>setPreviewStatus(true)}
             >
-                {props.avatar}
+                {props.memberData.first_name}
             </Avatar>
             {
                 previewStatus && (
