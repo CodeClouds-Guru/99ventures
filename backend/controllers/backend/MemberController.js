@@ -1,5 +1,5 @@
-const Controller = require("./Controller");
-const { QueryTypes, Op } = require("sequelize");
+const Controller = require('./Controller');
+const { QueryTypes, Op } = require('sequelize');
 const {
   MembershipTier,
   IpLog,
@@ -17,13 +17,14 @@ const {
   SurveyProvider,
   Company,
   sequelize,
-} = require("../../models/index");
-const db = require("../../models/index");
-const FileHelper = require("../../helpers/fileHelper");
-const { cryptoEncryption, cryptoDecryption } = require("../../helpers/global");
+} = require('../../models/index');
+const db = require('../../models/index');
+const FileHelper = require('../../helpers/fileHelper');
+const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
+const membertransaction = require('../../models/membertransaction');
 class MemberController extends Controller {
   constructor() {
-    super("Member");
+    super('Member');
     this.view = this.view.bind(this);
     this.update = this.update.bind(this);
   }
@@ -41,11 +42,11 @@ class MemberController extends Controller {
 
       if (existing_email_or_username > 0) {
         const errorObj = new Error(
-          "Sorry! this username or email has already been taken"
+          'Sorry! this username or email has already been taken'
         );
         errorObj.statusCode = 422;
         errorObj.data = [
-          "Sorry! this username or email has already been taken",
+          'Sorry! this username or email has already been taken',
         ];
         throw errorObj;
       } else {
@@ -53,11 +54,7 @@ class MemberController extends Controller {
         let files = [];
         if (req.files) {
           files[0] = req.files.avatar;
-          const fileHelper = new FileHelper(
-            files,
-            "members",
-            req
-          );
+          const fileHelper = new FileHelper(files, 'members', req);
           const file_name = await fileHelper.upload();
           req.body.avatar = file_name.files[0].filename;
         }
@@ -65,7 +62,7 @@ class MemberController extends Controller {
         const res = await super.save(req);
         // console.log("---------------res", res.result.id);
         //send mail
-        const eventBus = require("../../eventBus");
+        const eventBus = require('../../eventBus');
         let member_details = await Member.findOne({
           where: { email: req.body.email },
         });
@@ -73,18 +70,18 @@ class MemberController extends Controller {
           {
             member_id: member_details.id,
             amount: 0.0,
-            amount_type: "cash",
+            amount_type: 'cash',
             created_by: req.user.id,
           },
           {
             member_id: member_details.id,
             amount: 0.0,
-            amount_type: "point",
+            amount_type: 'point',
             created_by: req.user.id,
           },
         ]);
-        let evntbus = eventBus.emit("send_email", {
-          action: "Welcome",
+        let evntbus = eventBus.emit('send_email', {
+          action: 'Welcome',
           data: {
             email: req.body.email,
             details: { members: member_details },
@@ -95,7 +92,7 @@ class MemberController extends Controller {
         //Referral code
 
         let model = await this.model.update(
-          { referral_code: res.result.id + "0" + new Date().getTime() },
+          { referral_code: res.result.id + '0' + new Date().getTime() },
           {
             where: { id: res.result.id },
           }
@@ -103,8 +100,8 @@ class MemberController extends Controller {
         return res;
       }
     } catch (error) {
-      console.error("error saving member", error);
-      this.throwCustomError("Unable to save data", 500);
+      console.error('error saving member', error);
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 
@@ -117,88 +114,88 @@ class MemberController extends Controller {
       try {
         let options = {};
         options.attributes = [
-          "id",
-          "first_name",
-          "last_name",
-          "email",
-          "country_code",
-          "username",
-          "status",
-          "zip_code",
-          "phone_no",
-          "avatar",
-          "address_1",
-          "address_2",
-          "address_3",
-          "last_active_on",
-          "country_id",
-          "referral_code",
-          "member_referral_id",
-          "gender",
+          'id',
+          'first_name',
+          'last_name',
+          'email',
+          'country_code',
+          'username',
+          'status',
+          'zip_code',
+          'phone_no',
+          'avatar',
+          'address_1',
+          'address_2',
+          'address_3',
+          'last_active_on',
+          'country_id',
+          'referral_code',
+          'member_referral_id',
+          'gender',
         ];
 
         options.where = { id: member_id };
         options.include = [
           {
             model: MembershipTier,
-            attributes: ["name"],
+            attributes: ['name'],
           },
           {
             model: Country,
-            attributes: [["nicename", "name"]],
+            attributes: [['nicename', 'name']],
           },
           {
             model: IpLog,
             attributes: [
-              "geo_location",
-              "ip",
-              "isp",
-              "browser",
-              "browser_language",
+              'geo_location',
+              'ip',
+              'isp',
+              'browser',
+              'browser_language',
             ],
             limit: 1,
-            order: [["created_at", "DESC"]],
+            order: [['created_at', 'DESC']],
           },
           {
             model: MemberNote,
             attributes: [
-              "user_id",
-              "member_id",
-              "previous_status",
-              "current_status",
-              "note",
-              "created_at",
-              "id",
+              'user_id',
+              'member_id',
+              'previous_status',
+              'current_status',
+              'note',
+              'created_at',
+              'id',
             ],
             limit: 20,
-            order: [["created_at", "DESC"]],
+            order: [['created_at', 'DESC']],
             include: {
               model: User,
-              attributes: ["first_name", "last_name", "alias_name"],
+              attributes: ['first_name', 'last_name', 'alias_name'],
             },
           },
           {
             model: MemberTransaction,
-            attributes: ["member_payment_information_id"],
+            attributes: ['member_payment_information_id'],
             limit: 1,
             where: {
               member_id: member_id,
               status: 2,
-              type: "credited",
+              type: 'credited',
             },
-            order: [["created_at", "DESC"]],
+            order: [['created_at', 'DESC']],
             include: {
               model: MemberPaymentInformation,
-              attributes: ["name", "value"],
+              attributes: ['name', 'value'],
             },
           },
 
           {
             model: MemberReferral,
-            attributes: ["referral_email", "ip", "member_id"],
+            attributes: ['referral_email', 'ip', 'member_id'],
             include: {
               model: Member,
-              attributes: ["referral_code", "first_name", "last_name", "email"],
+              attributes: ['referral_code', 'first_name', 'last_name', 'email'],
             },
           },
         ];
@@ -210,32 +207,32 @@ class MemberController extends Controller {
         let total_earnings = await this.getTotalEarnings(member_id);
 
         let survey_list = await MemberTransaction.findAll({
-          attributes: ["amount", "completed_at"],
+          attributes: ['amount', 'completed_at'],
           limit: 5,
-          order: [["completed_at", "DESC"]],
+          order: [['completed_at', 'DESC']],
           where: {
-            type: "credited",
+            type: 'credited',
             status: 2,
-            amount_action: "survey",
+            amount_action: 'survey',
             member_id: member_id,
           },
           include: {
             model: Survey,
-            attributes: ["id"],
-            include: { model: SurveyProvider, attributes: ["name"] },
+            attributes: ['id'],
+            include: { model: SurveyProvider, attributes: ['name'] },
           },
         });
         for (let i = 0; i < survey_list.length; i++) {
           survey_list[i].setDataValue(
-            "name",
+            'name',
             survey_list[i].Surveys[0].SurveyProvider.name
           );
           survey_list[i].Surveys = null;
         }
 
-        result.setDataValue("country_list", country_list);
-        result.setDataValue("total_earnings", total_earnings);
-        result.setDataValue("survey", survey_list);
+        result.setDataValue('country_list', country_list);
+        result.setDataValue('total_earnings', total_earnings);
+        result.setDataValue('survey', survey_list);
 
         return {
           status: true,
@@ -243,11 +240,11 @@ class MemberController extends Controller {
         };
       } catch (error) {
         console.error(error);
-        this.throwCustomError("Unable to get data", 500);
+        this.throwCustomError('Unable to get data', 500);
       }
     } else {
       console.error(error);
-      this.throwCustomError("Unable to get data", 500);
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 
@@ -256,39 +253,39 @@ class MemberController extends Controller {
     let request_data = req.body;
     try {
       let result = false;
-      if (req.body.type == "basic_details") {
+      if (req.body.type == 'basic_details') {
         delete req.body.type;
         let member = await this.model.findOne({ where: { id: req.params.id } });
         req.body.username = member.username;
         const { error, value } = this.model.validate(req);
         if (error) {
-          const errorObj = new Error("Validation failed.");
+          const errorObj = new Error('Validation failed.');
           errorObj.statusCode = 422;
           errorObj.data = error.details.map((err) => err.message);
           throw errorObj;
         }
         result = this.updateBasicDetails(req, member);
-      } else if (req.body.type == "member_status") {
+      } else if (req.body.type == 'member_status') {
         result = await this.model.changeStatus(req);
         delete req.body.type;
-      } else if (req.body.type == "admin_adjustment") {
+      } else if (req.body.type == 'admin_adjustment') {
         result = await this.adminAdjustment(req);
         delete req.body.type;
       } else {
         console.error(error);
-        this.throwCustomError("Type is required", 401);
+        this.throwCustomError('Type is required', 401);
       }
       if (result) {
         return {
           status: true,
-          message: "Record has been updated successfully",
+          message: 'Record has been updated successfully',
         };
       } else {
-        this.throwCustomError("Unable to save data", 500);
+        this.throwCustomError('Unable to save data', 500);
       }
     } catch (error) {
       console.error(error);
-      this.throwCustomError("Unable to save data", 500);
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 
@@ -333,16 +330,16 @@ class MemberController extends Controller {
     options.include = [
       {
         model: IpLog,
-        attributes: ["ip", "isp", "geo_location", "browser"],
-        order: [["id", "DESC"]],
+        attributes: ['ip', 'isp', 'geo_location', 'browser'],
+        order: [['id', 'DESC']],
       },
       {
         model: MemberReferral,
-        attributes: ["referral_email"],
+        attributes: ['referral_email'],
       },
     ];
     if (roles == 1) {
-      options.include.push({ model: CompanyPortal, attributes: ["name"] });
+      options.include.push({ model: CompanyPortal, attributes: ['name'] });
     } else {
       options.where = {
         ...options.where,
@@ -363,7 +360,7 @@ class MemberController extends Controller {
     for (let i = 0; i < result.rows.length; i++) {
       if (roles == 1) {
         result.rows[i].setDataValue(
-          "company_portal_id",
+          'company_portal_id',
           result.rows[i].CompanyPortal.name
         );
         fields.company_portal_id.listing = true;
@@ -371,9 +368,9 @@ class MemberController extends Controller {
         fields.company_portal_id.listing = false;
       }
       if (result.rows[i].IpLogs != undefined && result.rows[i].IpLogs.length) {
-        result.rows[i].setDataValue("ip", result.rows[i].IpLogs[0].ip);
+        result.rows[i].setDataValue('ip', result.rows[i].IpLogs[0].ip);
       } else {
-        result.rows[i].setDataValue("ip", "");
+        result.rows[i].setDataValue('ip', '');
       }
     }
 
@@ -392,15 +389,11 @@ class MemberController extends Controller {
         let pre_avatar = member.avatar;
         let files = [];
         files[0] = req.files.avatar;
-        const fileHelper = new FileHelper(
-          files,
-          "members",
-          req
-        );
+        const fileHelper = new FileHelper(files, 'members', req);
         const file_name = await fileHelper.upload();
         request_data.avatar = file_name.files[0].filename;
 
-        if (pre_avatar != "") {
+        if (pre_avatar != '') {
           let file_delete = await fileHelper.deleteFile(pre_avatar);
         }
       } else request_data.avatar = null;
@@ -410,7 +403,7 @@ class MemberController extends Controller {
       return true;
     } catch (error) {
       console.error(error);
-      this.throwCustomError("Unable to get data", 500);
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 
@@ -418,7 +411,7 @@ class MemberController extends Controller {
   async getTotalEarnings(member_id) {
     let result = {};
     let total_earnings = await db.sequelize.query(
-      "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=?",
+      'SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=?',
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
@@ -447,46 +440,55 @@ class MemberController extends Controller {
     try {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
-      let admin_note = req.body.admin_note || "";
+      let admin_note = req.body.admin_note || '';
       // let total_earnings = await this.getTotalEarnings(member_id);
-      let total_earnings = await db.sequelize.query(
-        "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
-        {
-          replacements: [member_id],
-          type: QueryTypes.SELECT,
-        }
-      );
 
-      let modified_total_earnings =
-        parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
-      let transaction_data = {
-        type: parseFloat(admin_amount) > 0 ? "credited" : "withdraw",
-        amount: parseFloat(admin_amount),
-        status: 2,
+      let result = await MemberTransaction.updateMemberTransactionAndBalance({
+        member_id,
+        amount: admin_amount,
         note: admin_note,
+        type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
+        amount_action: 'admin_adjustment',
         created_by: req.user.id,
-        member_id: member_id,
-        amount_action: "admin_adjustment",
-        completed_at: new Date(),
-      };
-
-      let transaction = await MemberTransaction.create(transaction_data, {
-        silent: true,
       });
-      let balance = await MemberBalance.update(
-        { amount: modified_total_earnings },
-        {
-          where: { id: total_earnings[0].id },
-        }
-      );
-      if (transaction && balance) {
+      // let total_earnings = await db.sequelize.query(
+      //   "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
+      //   {
+      //     replacements: [member_id],
+      //     type: QueryTypes.SELECT,
+      //   }
+      // );
+
+      // let modified_total_earnings =
+      //   parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
+      // let transaction_data = {
+      //   type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
+      //   amount: parseFloat(admin_amount),
+      //   status: 2,
+      //   note: admin_note,
+      //   created_by: req.user.id,
+      //   member_id: member_id,
+      //   amount_action: 'admin_adjustment',
+      //   completed_at: new Date(),
+      // };
+
+      // let transaction = await MemberTransaction.create(transaction_data, {
+      //   silent: true,
+      // });
+      // let balance = await MemberBalance.update(
+      //   { amount: modified_total_earnings },
+      //   {
+      //     where: { id: total_earnings[0].id },
+      //   }
+      // );
+      if (result) {
         return true;
       } else {
         return false;
       }
     } catch (error) {
       console.error(error);
-      this.throwCustomError("Unable to get data", 500);
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 
@@ -495,10 +497,10 @@ class MemberController extends Controller {
     let companies = [];
     if (roles) {
       companies = await Company.findAll({
-        attributes: ["id", "name"],
+        attributes: ['id', 'name'],
         include: {
           model: CompanyPortal,
-          attributes: ["id", "name", "domain"],
+          attributes: ['id', 'name', 'domain'],
         },
       });
     }

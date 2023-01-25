@@ -1,6 +1,12 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { OfferWall, OfferWallIp, Campaign,Member } = require('../../models/index');
+const {
+  OfferWall,
+  OfferWallIp,
+  Campaign,
+  Member,
+  CompanyPortal,
+} = require('../../models/index');
 const util = require('util');
 class OfferWallController extends Controller {
   constructor() {
@@ -19,7 +25,13 @@ class OfferWallController extends Controller {
       throw errorObj;
     }
     request_data.company_portal_id = company_portal_id;
-    request_data.postback_url = process.env.CLIENT_ORIGIN
+
+    let company_portal_domain = await CompanyPortal.findOne({
+      attributes: ['domain'],
+      where: { id: company_portal_id },
+    });
+
+    request_data.postback_url = company_portal_domain.domain;
     delete request_data.ips;
     let model = await this.model.create(request_data, { silent: true });
     if (ips.length > 0) {
@@ -32,7 +44,7 @@ class OfferWallController extends Controller {
         );
       });
     }
-    
+
     return {
       status: true,
       message: 'Record has been created successfully',
@@ -40,14 +52,14 @@ class OfferWallController extends Controller {
     };
   }
   //update
-  async update(req,res){
+  async update(req, res) {
     let id = req.params.id;
     let request_data = req.body;
     let company_portal_id = req.headers.site_id;
     let ips = request_data.ips;
     const { error, value } = this.model.validate(req);
     if (error) {
-      const errorObj = new Error("Validation failed.");
+      const errorObj = new Error('Validation failed.');
       errorObj.statusCode = 422;
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
@@ -71,7 +83,7 @@ class OfferWallController extends Controller {
         });
       }
       return {
-        message: "Record has been updated successfully",
+        message: 'Record has been updated successfully',
       };
     } catch (error) {
       throw error;
@@ -100,10 +112,12 @@ class OfferWallController extends Controller {
       let offset = (page - 1) * limit;
       options.limit = limit;
       options.offset = offset;
-      options.include = [{
-                    model: Campaign,
-                    attributes: ['name'],
-                  }];
+      options.include = [
+        {
+          model: Campaign,
+          attributes: ['name'],
+        },
+      ];
       let result = await this.model.findAndCountAll(options);
 
       for (let i = 0; i < result.rows.length; i++) {
@@ -127,36 +141,49 @@ class OfferWallController extends Controller {
     }
   }
   //view offer wall
-  async view(req,res){
+  async view(req, res) {
     let report = req.query.report;
-    let options = [{
-      model: Campaign,
-      attributes: ['name'],
-    },
-    {
-      model: OfferWallIp,
-      attributes: ['ip'],
-    }]
-    
+    let options = [
+      {
+        model: Campaign,
+        attributes: ['name'],
+      },
+      {
+        model: OfferWallIp,
+        attributes: ['ip'],
+      },
+    ];
+
     let fields = this.model.fields;
-    if(report == '1'){
+    if (report == '1') {
       //offer wall report details
-      options.push({model: Member,attributes: ['id','first_name','last_name','email','username','created_at','status']});
+      options.push({
+        model: Member,
+        attributes: [
+          'id',
+          'first_name',
+          'last_name',
+          'email',
+          'username',
+          'created_at',
+          'status',
+        ],
+      });
     }
     let model = await this.model.findOne({
       where: { id: req.params.id },
-      include: options
+      include: options,
     });
-    model.dataValues.ips = []
+    model.dataValues.ips = [];
     if (model.dataValues.OfferWallIps) {
-      model.dataValues.ips = []
+      model.dataValues.ips = [];
       let offer_wall_ips = model.dataValues.OfferWallIps;
       offer_wall_ips.forEach(function (ip, key) {
-        model.dataValues.ips.push(ip.ip)
-      })
+        model.dataValues.ips.push(ip.ip);
+      });
     }
     if (model.dataValues.Campaign != null) {
-      model.dataValues.campaign_name = model.dataValues.Campaign.name
+      model.dataValues.campaign_name = model.dataValues.Campaign.name;
     }
     return { status: true, result: model, fields };
   }
@@ -174,9 +201,7 @@ class OfferWallController extends Controller {
       message: 'Offer deleted.',
     };
   }
-  //get report details 
-  async getReport(req){
-
-  }
+  //get report details
+  async getReport(req) {}
 }
 module.exports = OfferWallController;
