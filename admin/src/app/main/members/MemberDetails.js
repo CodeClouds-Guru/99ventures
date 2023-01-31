@@ -69,18 +69,18 @@ const iconStyle = {
     }
 }
 
-const autoCompleteStyle = { 
-    '& .MuiAutocomplete-inputRoot': { 
+const autoCompleteStyle = {
+    '& .MuiAutocomplete-inputRoot': {
         minHeight: '30px',
         '& .MuiInputBase-input': {
             ...labelStyling
         }
-    }, 
-    '& .MuiFormControl-fullWidth': { 
-        '@media screen and (max-width: 1400px)': { 
-            width: '100%' 
-        } 
-    } 
+    },
+    '& .MuiFormControl-fullWidth': {
+        '@media screen and (max-width: 1400px)': {
+            width: '100%'
+        }
+    }
 }
 
 const iconLabel = {
@@ -191,7 +191,7 @@ const MemberDetails = () => {
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
-                    
+
                     setMemberData({ ...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl });
                 }
             })
@@ -349,7 +349,7 @@ const MemberDetails = () => {
         setAvatar(memberData.avatar);
     }
 
-    if(loader){
+    if (loader) {
         return (
             <CustomerLoader />
         )
@@ -397,27 +397,27 @@ const MemberDetails = () => {
                         </sub>
                     </div>
                     <div className='lg:flex justify-center sm:hidden'>
-                        <MemberAvatar 
-                            avatar={avatar} 
-                            editMode={editMode} 
-                            handleSetAvatar={handleSetAvatar} 
-                            handleSetAvatarFile={handleSetAvatarFile} 
-                            memberData={memberData} 
+                        <MemberAvatar
+                            avatar={avatar}
+                            editMode={editMode}
+                            handleSetAvatar={handleSetAvatar}
+                            handleSetAvatarFile={handleSetAvatarFile}
+                            memberData={memberData}
                             iconStyle={iconStyle}
                         />
                     </div>
                 </div>
                 <div className='flex items-center xl:flex-col md:flex-row lg:flex-col sm:flex-row md:flex-wrap xmb-10 sm:justify-around'>
                     <div className='md:w-1/3 xl:w-full sm:w-1/3 flex justify-center lg:hidden'>
-                        <MemberAvatar 
-                            avatar={avatar} 
-                            editMode={editMode} 
-                            handleSetAvatar={handleSetAvatar} 
-                            handleSetAvatarFile={handleSetAvatarFile} 
-                            memberData={memberData} 
+                        <MemberAvatar
+                            avatar={avatar}
+                            editMode={editMode}
+                            handleSetAvatar={handleSetAvatar}
+                            handleSetAvatarFile={handleSetAvatarFile}
+                            memberData={memberData}
                             iconStyle={iconStyle}
                         />
-                    </div>  
+                    </div>
                     <div className='flex flex-col xl:w-full lg:w-full md:w-2/3 sm:w-2/3'>
                         <List className="">
                             <ListItem disablePadding>
@@ -479,7 +479,7 @@ const MemberDetails = () => {
                                                 <div className='flex'>
                                                     {showStatus(memberData.status)}
                                                     <Tooltip title="Change Status" placement="top-start">
-                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel}  onClick={() => setEditStatus(true)}>
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditStatus(true)}>
                                                             <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip>
@@ -544,7 +544,7 @@ const MemberDetails = () => {
                                         {memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '--'}
                                     </Typography>
                                 } />
-                            </ListItem>                        
+                            </ListItem>
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Code:</Typography>
@@ -557,12 +557,12 @@ const MemberDetails = () => {
                                         {
                                             (memberData.referral_code) && (
                                                 <Tooltip title="Click to copy" placement="right">
-                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel}  component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_code)}>
-                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-outline:content_copy</FuseSvgIcon>
+                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_code)}>
+                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
                                                     </IconButton>
                                                 </Tooltip>
                                             )
-                                        }                                        
+                                        }
                                     </div>
                                 } />
                             </ListItem>
@@ -897,7 +897,7 @@ const MemberDetails = () => {
 
                                                     ) : (
                                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                                            { memberData.country_id && getCountryName(memberData.country_id) }
+                                                            {memberData.country_id && getCountryName(memberData.country_id)}
                                                         </Typography>
                                                     )
                                                 }
