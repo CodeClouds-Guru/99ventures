@@ -356,7 +356,7 @@ const CreateUpdate = () => {
                                                     <InputAdornment position="end">
                                                         <Tooltip title="Click to copy" placement="right">
                                                             <FuseSvgIcon
-                                                                onClick={() => clickToCopy(`${campaignObject.affiliate_network}%trackId%=${campaignObject.track_id}&%payout%=${campaignObject.payout_amount}&%status%=`)} className="cursor-pointer text-48" size={24} color="action">heroicons-solid:clipboard-copy</FuseSvgIcon>
+                                                                onClick={() => clickToCopy(`${campaignObject.affiliate_network}%trackId%=${campaignObject.track_id}&%payout%=${campaignObject.payout_amount}&%status%=`)} className="cursor-pointer text-48" size={24} color="action">material-solid:content_copy</FuseSvgIcon>
                                                         </Tooltip>
                                                     </InputAdornment>
                                                 ),
