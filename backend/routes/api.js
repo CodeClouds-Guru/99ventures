@@ -38,8 +38,8 @@ router.get("/", [AuthMiddleware], (req, res) => {
 
 router.post("/signup", AuthController.signup);
 router.post("/login", AuthController.login);
-router.all("/member-login", MemberAuthController.login);
-router.all("/member-profile", MemberAuthController.profile);
+router.post("/member-login", MemberAuthController.login);
+router.get("/member-profile", MemberAuthController.profile);
 router.get("/profile", [AuthMiddleware], AuthController.profile);
 router.post("/profile-update", [AuthMiddleware], AuthController.profileUpdate);
 router.post("/logout", [AuthMiddleware], AuthController.logout);
