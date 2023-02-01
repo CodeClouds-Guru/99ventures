@@ -8,6 +8,8 @@ class MemberAuthController {
     }
     //login
     async login(req,res){
+      
+        let company_portal_id = req.headers.site_id
         const schema = Joi.object({
             password: Joi.string()
                 .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
@@ -23,7 +25,7 @@ class MemberAuthController {
             });
             return;
         }
-        const member = await Member.findOne({ where: { email: value.email } });
+        const member = await Member.findOne({ where: { email: value.email,company_portal_id:company_portal_id } });
         if (!member) {
           res.status(401).json({
             status: false,
@@ -41,22 +43,34 @@ class MemberAuthController {
         }
         let session = {member_id:member.id,logged_in:true}
         req.session = session
-    
+        console.log(req.session)
+        // req.session.save(function(err) {
+        //   // session saved
+        // })
         res.status(200).json({
           status: true,
           member: member,
           member_id:member.id,
+          session:session
         });
     }
     //profile
     async profile(req,res){
-      global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
+      console.log('iioioi')
+      console.log(req.session)
+      res.status(200).json({
+        status: true,
+        session:req.session,
+        h:8
+      });
+    //   return req.session
+    //   global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
         
-        res.status(200).json({
-            status: false,
-            data: 'data',
-        });
-        return;
+    //     res.status(200).json({
+    //         status: false,
+    //         data: 'data',
+    //     });
+    //     return;
     }
 }
 module.exports = MemberAuthController;
