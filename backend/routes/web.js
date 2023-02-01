@@ -2,13 +2,16 @@ const express = require('express');
 const router = express.Router();
 const PageParser = require('../helpers/PageParser');
 const Lucid = require('../helpers/Lucid');
+const Cint = require('../helpers/Cint');
 
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
-  // const data = await lucidObj.suppliers();
   const definitions_data = await lucidObj.allocatedSurveys();
-
   res.json(definitions_data);
+});
+
+router.get('/test-cint', async (req, res) => {
+  const cintObj = new Cint();
 });
 
 router.get('/:slug?', async (req, res) => {
