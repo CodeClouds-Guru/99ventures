@@ -1,52 +1,62 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
-const { MemberTransaction, Member } = require('../models/index');
+const { MemberTransaction, Member, OfferWall } = require('../models/index');
 
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
   logger.info(JSON.stringify(req.query));
   res.send(req.query);
 });
-router.get('/adgate-postback', async (req, res) => {
-  console.log(req.query);
-  //   {
-  //     aff_sub: 'ccguruus',
-  //     offer_id: '394737',
-  //     vc_title: 'Offer to Test Postbacks',
-  //     points: '75',
-  //     status: '1',
-  //     s1: 'ccguruus',
-  //     payout: '1',
-  //     offer_name: 'Offer Wall Postback Test Offer',
-  //     event_id: 'cca682f4-4cac-4aab-b875-21a890ac975b',
-  //     event_name: 'Postback Sent',
-  //     s2: '',
-  //     s3: '',
-  //     s4: '',
-  //     s5: '',
-  //     conversion_id: '8b7dab6a7948ba1d68bcf3bf2238a229a',
-  //     session_ip: '116.206.220.16',
-  //     date: '2023-01-24',
-  //     time: '10:54:33',
-  //     random: '2133033595'
-  //   }
+router.get('/postback/:offerwall', async (req, res) => {
+  console.log(req.params.offerwall);
+  const offerwall_name = req.params.offerwall;
+  let offerwall_details = await OfferWall.findOne({
+    attributes: [
+      'campaign_id_variable',
+      'campaign_name_variable',
+      'sub_id_variable',
+    ],
+    where: { name: offerwall_name },
+  });
+
   let member = {};
-  if (req.query.s1 !== '') {
+  if (
+    offerwall_details &&
+    offerwall_details.campaign_id_variable in req.query
+  ) {
+    let username = req.query[offerwall_details.campaign_id_variable];
+
     member = await Member.findOne({
       attributes: ['id', 'username'],
-      where: { username: req.query.s1 },
+      where: {
+        username: username,
+      },
     });
+    if (member) {
+      const payout_amount =
+        offerwall_details.campaign_name_variable in req.query
+          ? parseFloat(req.query[offerwall_details.campaign_name_variable])
+          : 0;
+      const note =
+        offerwall_details.sub_id_variable in req.query
+          ? req.query[offerwall_details.sub_id_variable]
+          : '';
+      const transaction_obj = {
+        member_id: member ? member.id : null,
+        amount: payout_amount,
+        note: note,
+        type: parseFloat(req.query.payout) > 0 ? 'credited' : 'withdraw',
+        amount_action: 'survey',
+        created_by: null,
+      };
+      console.log('transaction_obj', transaction_obj);
+      let result = await MemberTransaction.updateMemberTransactionAndBalance(
+        transaction_obj
+      );
+      res.send(req.query);
+    }
   }
-  let result = await MemberTransaction.updateMemberTransactionAndBalance({
-    member_id: member ? member.id : null,
-    amount: req.query.payout || 0,
-    note: req.query.offer_name || '',
-    type: parseFloat(req.query.payout) > 0 ? 'credited' : 'withdraw',
-    amount_action: 'survey',
-    created_by: null,
-  });
-  res.send(req.query);
 });
 module.exports = {
   prefix: '/callback',

@@ -55,6 +55,7 @@ const CreateUpdate = () => {
     useEffect(() => {
         const editor = grapesjs.init({
             container: '#gjs',
+            allowScripts: 1,
             protectedCss: '',   // disabled default CSS
             height: '700px',
             width: '100%',
@@ -177,6 +178,16 @@ const CreateUpdate = () => {
                 cssViewer.refresh()
             }
         })
+
+        // To enable JS in the editor
+        cmdm.add('allowScripts', {
+            run: function(editor) {
+              editor.getConfig().allowScripts = 1;
+            },
+            stop: function(editor) {
+              editor.getConfig().allowScripts = 0;
+            },
+        });
 
         // Removed default read-only code editor btn from toolbar
         pnm.removeButton("options", 'export-template');
