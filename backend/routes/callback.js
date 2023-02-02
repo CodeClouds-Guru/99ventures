@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
-const { MemberTransaction, Member, Offerwall } = require('../models/index');
+const { MemberTransaction, Member, OfferWall } = require('../models/index');
 
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
@@ -11,7 +11,7 @@ router.get('/test-adgate', (req, res) => {
 router.get('/postback/:offerwall', async (req, res) => {
   console.log(req.params.offerwall);
   const offerwall_name = req.params.offerwall;
-  let offerwall_details = await Offerwall.findOne({
+  let offerwall_details = await OfferWall.findOne({
     attributes: [
       'campaign_id_variable',
       'campaign_name_variable',
