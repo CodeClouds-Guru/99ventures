@@ -40,6 +40,7 @@ router.post("/signup", AuthController.signup);
 router.post("/login", AuthController.login);
 router.post("/member-login", MemberAuthController.login);
 router.get("/member-profile", MemberAuthController.profile);
+router.post("/member-signup", MemberAuthController.signup);
 router.get("/profile", [AuthMiddleware], AuthController.profile);
 router.post("/profile-update", [AuthMiddleware], AuthController.profileUpdate);
 router.post("/logout", [AuthMiddleware], AuthController.logout);
