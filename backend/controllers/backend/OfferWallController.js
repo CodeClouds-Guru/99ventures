@@ -25,7 +25,16 @@ class OfferWallController extends Controller {
       throw errorObj;
     }
     request_data.company_portal_id = company_portal_id;
-
+    //unique offerwall name
+    let existing_offerwall = await OfferWall.count({
+      where: {
+        company_portal_id: company_portal_id,
+        name: req.body.name
+      },
+    });
+    if (existing_offerwall > 0) {
+      this.throwCustomError("Sorry! this name has already been taken", 409);
+    }
     let company_portal_domain = await CompanyPortal.findOne({
       attributes: ['domain'],
       where: { id: company_portal_id },
@@ -67,6 +76,17 @@ class OfferWallController extends Controller {
     try {
       request_data.updated_by = req.user.id;
       request_data.company_portal_id = company_portal_id;
+      //unique offerwall name
+      let existing_offerwall = await OfferWall.count({
+        where: {
+          company_portal_id: company_portal_id,
+          name: req.body.name,
+          id: { [Op.ne]: id }
+        },
+      });
+      if (existing_offerwall > 0) {
+        this.throwCustomError("Sorry! this name has already been taken", 409);
+      }
       delete request_data.ips;
       let model = await this.model.update(request_data, { where: { id } });
 
