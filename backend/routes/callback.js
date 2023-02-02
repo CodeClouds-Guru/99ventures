@@ -30,13 +30,13 @@ router.get('/postback/:offerwall', async (req, res) => {
     member = await Member.findOne({
       attributes: ['id', 'username'],
       where: {
-        username: req.query[offerwall_details.campaign_id_variable],
+        username: username,
       },
     });
     if (member) {
       const payout_amount =
         offerwall_details.campaign_name_variable in req.query
-          ? req.query[offerwall_details.campaign_name_variable]
+          ? parseFloat(req.query[offerwall_details.campaign_name_variable])
           : 0;
       const note =
         offerwall_details.sub_id_variable in req.query
