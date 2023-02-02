@@ -25,15 +25,15 @@ router.get('/postback/:offerwall', async (req, res) => {
     ],
     where: { name: offerwall_name },
   });
+  console.log('offerwall_details', offerwall_details);
 
-  let member = {};
   if (
     offerwall_details &&
     offerwall_details.campaign_id_variable in req.query
   ) {
     let username = req.query[offerwall_details.campaign_id_variable];
 
-    member = await Member.findOne({
+    let member = await Member.findOne({
       attributes: ['id', 'username'],
       where: {
         username: username,
@@ -47,6 +47,8 @@ router.get('/postback/:offerwall', async (req, res) => {
         attributes: ['id'],
       },
     });
+    console.log('member', member);
+
     if (member) {
       const payout_amount =
         offerwall_details.campaign_name_variable in req.query
