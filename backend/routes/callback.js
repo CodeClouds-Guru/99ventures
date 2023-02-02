@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
-const { MemberTransaction, Member, OfferWall } = require('../models/index');
+const {
+  MemberTransaction,
+  Member,
+  OfferWall,
+  CompanyPortal,
+} = require('../models/index');
 
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
@@ -16,6 +21,7 @@ router.get('/postback/:offerwall', async (req, res) => {
       'campaign_id_variable',
       'campaign_name_variable',
       'sub_id_variable',
+      'postback_url',
     ],
     where: { name: offerwall_name },
   });
@@ -31,6 +37,14 @@ router.get('/postback/:offerwall', async (req, res) => {
       attributes: ['id', 'username'],
       where: {
         username: username,
+      },
+      include: {
+        model: CompanyPortal,
+        where: {
+          domain: offerwall_details.postback_url,
+        },
+        required: true,
+        attributes: ['id'],
       },
     });
     if (member) {
