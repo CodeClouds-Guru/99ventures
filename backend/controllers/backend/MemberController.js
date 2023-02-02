@@ -225,7 +225,7 @@ class MemberController extends Controller {
         for (let i = 0; i < survey_list.length; i++) {
           if (
             survey_list[i].Surveys &&
-            survey_list[i].Surveys[0].SurveyProvider
+            'SurveyProvider' in survey_list[i].Surveys[0]
           )
             survey_list[i].setDataValue(
               'name',
