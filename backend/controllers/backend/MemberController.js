@@ -222,6 +222,7 @@ class MemberController extends Controller {
             include: { model: SurveyProvider, attributes: ['name'] },
           },
         });
+        console.log('survey_list', survey_list);
         for (let i = 0; i < survey_list.length; i++) {
           if (
             survey_list[i].Surveys &&
