@@ -223,10 +223,12 @@ class MemberController extends Controller {
           },
         });
         for (let i = 0; i < survey_list.length; i++) {
-          survey_list[i].setDataValue(
-            'name',
-            survey_list[i].Surveys[0].SurveyProvider.name
-          );
+          if (survey_list[i].Surveys)
+            survey_list[i].setDataValue(
+              'name',
+              survey_list[i].Surveys[0].SurveyProvider.name
+            );
+          else survey_list[i].setDataValue('name', null);
           survey_list[i].Surveys = null;
         }
 
