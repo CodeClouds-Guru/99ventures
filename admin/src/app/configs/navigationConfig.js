@@ -181,7 +181,16 @@ const navigationConfig = [
         end: true,
       },
     ]
-  }
+  },
+  {
+    id: 'shoutbox',
+    title: 'Shoutbox',
+    translate: 'Shoutbox',
+    type: 'item',
+    icon: 'heroicons-solid:speakerphone',
+    url: 'app/shoutbox',
+    end: true,
+  },
 ];
 
 export default navigationConfig;
