@@ -102,6 +102,12 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
   };
+  ShoutboxConfiguration.validate = function (req) {
+    const schema = Joi.object({
+      status: Joi.required(),
+    })
+    return schema.validate(req.body)
+  }
   sequelizePaginate.paginate(ShoutboxConfiguration);
   return ShoutboxConfiguration;
 };
