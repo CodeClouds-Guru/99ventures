@@ -1,10 +1,10 @@
-const Controller = require('./Controller');
+const Controller = require('../Controller');
 const {
   MemberTransaction,
   Member,
   OfferWall,
   CompanyPortal,
-} = require('../models/index');
+} = require('../../../models/index');
 
 class AdgateController extends Controller {
   constructor() {
