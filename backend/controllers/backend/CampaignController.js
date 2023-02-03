@@ -133,8 +133,9 @@ class CampaignController extends Controller {
           custom_where['is_condition_met'] = 1;
           custom_where['is_postback_triggered'] = 0;
         }
-        req.query.where = JSON.stringify(custom_where);
       }
+      custom_where['campaign_id'] = req.params.id
+      req.query.where = JSON.stringify(custom_where);
       fields = {
         id: {
           field_name: 'id',
@@ -282,6 +283,7 @@ class CampaignController extends Controller {
       };
       // return req.query
       var options = await this.getQueryOptions(req, fields);
+      console.log('options....',options.where)
       options.attributes = [
         'id',
         'member_id',
@@ -313,7 +315,7 @@ class CampaignController extends Controller {
           order: [['created_at', 'DESC']],
         },
       };
-
+      
       const { docs, pages, total } = await CampaignMember.paginate(options);
 
       let report_details = [];

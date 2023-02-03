@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const Joi = require("joi");
 const sequelizePaginate = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
@@ -102,6 +103,12 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
   };
+  ShoutboxConfiguration.validate = function (req) {
+    const schema = Joi.object({
+      status: Joi.required(),
+    })
+    return schema.validate(req.body)
+  }
   sequelizePaginate.paginate(ShoutboxConfiguration);
   return ShoutboxConfiguration;
 };
