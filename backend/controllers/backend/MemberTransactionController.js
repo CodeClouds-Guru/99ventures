@@ -25,7 +25,7 @@ class MemberTransactionController extends Controller {
     if (Object.keys(query_where).length > 0) {
       new_option[Op.and] = {
         ...option_where,
-        ...and_query,
+        ...and_query
       };
     }
     options.where = new_option;
@@ -34,7 +34,6 @@ class MemberTransactionController extends Controller {
       required: false,
       attributes: ["id", "first_name", "last_name", "email", "avatar"],
     }
-    console.log(options);
     const { docs, pages, total } = await this.model.paginate(options);
 
     let transaction_list = []

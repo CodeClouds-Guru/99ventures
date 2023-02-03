@@ -58,12 +58,6 @@ class Controller {
     }
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
 
-    for (let where_field in query_where) {
-      if (where_field in fields) {
-      } else {
-        delete query_where[where_field];
-      }
-    }
     if ("where" in options && query_where) {
       options['where'] = {
         [Op.and]: {
