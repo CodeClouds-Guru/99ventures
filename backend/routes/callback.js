@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
 
-const AdgateControllerClass = require('../controllers/backend/callback/AdgateController');
+const AdgateControllerClass = require('../controllers/callback/AdgateController');
 const AdgateController = new AdgateControllerClass();
 
 router.get('/test-adgate', (req, res) => {

@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const sequelizePaginate = require("sequelize-paginate");
+
 module.exports = (sequelize, DataTypes) => {
   class ShoutboxConfiguration extends Model {
     /**
@@ -100,5 +102,6 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
   };
+  sequelizePaginate.paginate(ShoutboxConfiguration);
   return ShoutboxConfiguration;
 };

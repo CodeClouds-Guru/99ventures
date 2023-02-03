@@ -1,14 +1,12 @@
-const Controller = require('../Controller');
 const {
   MemberTransaction,
   Member,
   OfferWall,
   CompanyPortal,
-} = require('../../../models/index');
+} = require('../../models');
 
-class AdgateController extends Controller {
+class AdgateController{
   constructor() {
-    super('');
   }
   async save(req, res) {
     console.log(req.params.offerwall);
