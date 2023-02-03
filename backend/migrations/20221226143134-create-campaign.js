@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("campaigns", {
+    await queryInterface.createTable('campaigns', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,22 +11,22 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull:false,
+        allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
       },
       affiliate_network: {
         type: Sequelize.STRING,
-        allowNull:false,
+        allowNull: false,
       },
       payout_amount: {
         type: Sequelize.FLOAT,
-        allowNull:false,
+        allowNull: false,
       },
       trigger_postback: {
         type: Sequelize.ENUM('automatic', 'manual'),
-        defaultValue:'automatic'
+        defaultValue: 'automatic',
       },
       postback_url: {
         type: Sequelize.STRING,
@@ -35,7 +35,13 @@ module.exports = {
         type: Sequelize.STRING,
       },
       condition_type: {
-        type: Sequelize.ENUM('registration', 'earn_at_least', 'withdrawn_at_least', 'withdrawrn_count'),
+        type: Sequelize.ENUM(
+          'registration',
+          'earn_at_least',
+          'withdrawn_at_least',
+          'withdrawn_count',
+          'email_verified'
+        ),
       },
       condition_currency: {
         type: Sequelize.ENUM('cash', 'point', 'combined'),
@@ -47,13 +53,13 @@ module.exports = {
         type: Sequelize.ENUM('active', 'inactive'),
       },
       created_at: {
-        type: "TIMESTAMP",
+        type: 'TIMESTAMP',
       },
       updated_at: {
-        type: "TIMESTAMP",
+        type: 'TIMESTAMP',
       },
       deleted_at: {
-        type: "TIMESTAMP",
+        type: 'TIMESTAMP',
       },
       created_by: {
         type: Sequelize.BIGINT,
@@ -67,6 +73,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("campaigns");
+    await queryInterface.dropTable('campaigns');
   },
 };

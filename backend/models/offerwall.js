@@ -18,12 +18,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'company_portal_id',
       });
       OfferWall.hasMany(models.OfferWallIp, {
-        foreignKey: "offer_wall_id",
+        foreignKey: 'offer_wall_id',
       });
       OfferWall.belongsToMany(models.Member, {
-        through: "member_offer_wall",
-        foreignKey: "offer_wall_id",
-        otherKey: "member_id",
+        through: 'member_offer_wall',
+        foreignKey: 'offer_wall_id',
+        otherKey: 'member_id',
         timestamps: false,
       });
     }
@@ -422,7 +422,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_options: Joi.required().label('currency_options'),
       currency_percent: Joi.required().label('currency_percent'),
       currency_variable: Joi.required().label('currency_variable'),
-      currency_max: Joi.required().label('currency_max'),
+      currency_max: Joi.optional().label('currency_max'),
     });
     return schema.validate(req.body);
   };
