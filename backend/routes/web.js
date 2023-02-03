@@ -4,6 +4,9 @@ const PageParser = require('../helpers/PageParser');
 const Lucid = require('../helpers/Lucid');
 const Cint = require('../helpers/Cint');
 
+const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthController");
+const MemberAuthController = new MemberAuthControllerClass();
+
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
   const definitions_data = await lucidObj.allocatedSurveys();
@@ -13,6 +16,11 @@ router.get('/test-lucid', async (req, res) => {
 router.get('/test-cint', async (req, res) => {
   const cintObj = new Cint();
 });
+
+//ROUTES FOR FRONTEND
+router.post("/member-login", MemberAuthController.login);
+router.get("/member-profile", MemberAuthController.profile);
+router.post("/member-signup", MemberAuthController.signup);
 
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');

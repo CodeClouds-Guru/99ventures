@@ -10,70 +10,61 @@ class MemberAuthController {
     async login(req,res){
         // let company_portal_id = req.headers.site_id
         let company_portal_id = 1
+        let ip = (req.connection.remoteAddress).split('::ffff:');
+        ip = ip[ip.length - 1] 
+        // res.send(ip);
+        let member_status = true
+        let member_message = "Logged in successfully!"
         const schema = Joi.object({
             password: Joi.string()
                 .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
                 .required(),
             email: Joi.string().email().required(),
-            ip: Joi.string().required(),
+            remember_me: Joi.optional(),
         });
         const { error, value } = schema.validate(req.body);
         if (error) {
-            let error_msg = error.details.map((err) => err.message);
-            res.status(401).json({
-              status: false,
-              errors: error_msg.join(","),
-            });
-            return;
+            member_status = false
+            member_message = error.details.map((err) => err.message);
         }
+        
         //check if IP is blacklisted
         const ipHelper = new IpHelper();
-        let ip_ckeck = await ipHelper.checkIp(req.body.ip,company_portal_id);
+        let ip_ckeck = await ipHelper.checkIp(ip,company_portal_id);
         if(ip_ckeck.status){
           if(ip_ckeck.blacklisted){
-            res.status(401).json({
-              status: false,
-              errors:"This IP is blacklisted"
-            });
-            return
+            member_status = false
+            member_message = "This IP is blacklisted!"
           }
           const member = await Member.findOne({ where: { email: value.email,company_portal_id:company_portal_id } });
           if (!member) {
-            res.status(401).json({
-              status: false,
-              errors: "Email is not registered",
-            });
-            return;
+            member_status = false
+            member_message = "Email is not registered!"
           }
           let isMatch = false
           if(member.password != null){
             isMatch = await bcrypt.compare(value.password, member.password);
           }
           if (!isMatch) {
-            res.status(401).json({
-              status: false,
-              errors: "Invalid Credentials",
-            });
-            return;
+            member_status = false
+            member_message = "Invalid credentials!"
           }
           let session = {member_id:member.id,logged_in:true}
           req.session = session
           console.log(req.session)
-          
-          res.status(200).json({
-            status: true,
-            member: member,
-            member_id:member.id,
-            session:session
-          });
-          return
+          //member status checking
+          if(member.status != 'member'){
+            member_status = false
+            member_message = "Your account status is <b>"+member.status+"</b>. Please contact to our admin!"
+          }
         }else{
-          res.status(401).json({
-            status: false,
-            errors:"Failed to check IP"
-          });
-          return
+          member_status = false
+          member_message = "Failed to check IP"
         }
+        if(member_status)
+          res.redirect('profile')
+        else
+          res.send(member_message);
     }
     //signup
     async signup(req,res){
