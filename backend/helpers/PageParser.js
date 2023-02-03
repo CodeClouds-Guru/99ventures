@@ -20,6 +20,7 @@ const defaultAddOns = [
 class PageParser {
   constructor(slug) {
     this.sessionUser = null;
+    this.sessionMessage = '';
     this.slug = slug;
     this.page = null;
     this.preview = this.preview.bind(this);
@@ -44,6 +45,9 @@ class PageParser {
   async preview(req) {
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
+    }
+    if('flash' in req.session && 'error' in req.session.flash){
+      this.sessionMessage = req.session.flash.error
     }
     const page_content = await this.generateHtml();
     return page_content;
@@ -89,6 +93,7 @@ class PageParser {
     layout_html = await this.convertComponentToHtml(layout_html);
 
     const user = this.getSessionUser();
+    const error_message = this.getFlashMessage();
 
     layout_html = eval('`' + layout_html + '`');
 
@@ -132,6 +137,9 @@ class PageParser {
 
   getSessionUser() {
     return this.sessionUser;
+  }
+  getFlashMessage(){
+    return this.sessionMessage;
   }
 }
 module.exports = PageParser;
