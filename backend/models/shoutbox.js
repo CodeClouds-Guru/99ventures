@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: false,
     },
-    member_id: {
+    company_portal_id: {
       field_name: "company_portal_id",
       db_name: "company_portal_id",
       type: "text",
@@ -75,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: false,
     },
-    "member_id": {
+    member_id: {
       field_name: "member_id",
       db_name: "member_id",
       type: "text",
