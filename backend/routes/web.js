@@ -18,16 +18,14 @@ router.get('/test-cint', async (req, res) => {
 });
 
 //ROUTES FOR FRONTEND
-router.post("/member-login", MemberAuthController.login);
-router.get("/member-profile", MemberAuthController.profile);
-router.post("/member-signup", MemberAuthController.signup);
+router.post("/login", MemberAuthController.login);
+router.get("/profile", MemberAuthController.profile);
+router.post("/signup", MemberAuthController.signup);
 
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
+  console.log(req.session.flash)
   try {
-    const { Member } = require('../models/index');
-    let member = await Member.findByPk(1);
-    req.session = { member };
     var page_content = await pagePerser.preview(req);
   } catch (e) {
     switch (e.statusCode) {
