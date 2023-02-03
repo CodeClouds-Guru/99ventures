@@ -26,9 +26,6 @@ router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   console.log(req.session.flash)
   try {
-    const { Member } = require('../models/index');
-    let member = await Member.findByPk(1);
-    req.session.member = member;
     var page_content = await pagePerser.preview(req);
   } catch (e) {
     switch (e.statusCode) {

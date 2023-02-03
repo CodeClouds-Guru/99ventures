@@ -12,6 +12,7 @@ class MemberAuthController {
       res.redirect('/dashboard');
     } else {
       let company_portal_id = 1
+      const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
       let ip = (req.connection.remoteAddress).split('::ffff:');
       ip = ip[ip.length - 1]
       let member_status = true
@@ -37,32 +38,32 @@ class MemberAuthController {
           member_status = false
           member_message = "This IP is blacklisted!"
         }
-        const member = await Member.findOne({ where: { email: value.email, company_portal_id: company_portal_id } });
         if (!member) {
           member_status = false
           member_message = "Email is not registered!"
-        }
-        let isMatch = false
-        if (member.password != null) {
-          isMatch = await bcrypt.compare(value.password, member.password);
-        }
-        if (!isMatch) {
-          member_status = false
-          member_message = "Invalid credentials!"
-        }
-        let session = { member_id: member.id, logged_in: true }
-        req.session = session
-        console.log(req.session)
-        //member status checking
-        if (member.status != 'member') {
-          member_status = false
-          member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
+        } else {
+          let isMatch = false
+          if (!member.password) {
+            member_status = false
+            member_message = "Please Setup your account before login"
+          } else {
+            isMatch = await bcrypt.compare(value.password, member.password);
+            if (!isMatch) {
+              member_status = false
+              member_message = "Invalid credentials!"
+            }
+            if (member.status != 'member') {
+              member_status = false
+              member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
+            }
+          }
         }
       } else {
         member_status = false
         member_message = "Failed to check IP"
       }
       if (member_status) {
+        req.session.member = member
         res.redirect('dashboard')
       }
       else {
