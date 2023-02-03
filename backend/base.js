@@ -107,12 +107,10 @@ function initializeSession(app) {
 module.exports = function () {
   const app = init();
   setup(app);
-  // connectDB(app)
-
+  initializeSession(app);
+  initializeHandlebars(app);
   chainMiddlewares(app);
   chainRoutes(app);
-  initializeHandlebars(app);
-  initializeSession(app);
 
   //General exception handler
   app.use((err, req, res, next) => {
