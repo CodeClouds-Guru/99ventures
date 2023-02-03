@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const Joi = require("joi");
 const sequelizePaginate = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
