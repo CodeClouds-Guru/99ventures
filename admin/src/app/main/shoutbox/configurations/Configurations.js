@@ -1,6 +1,6 @@
 import { styled } from '@mui/material/styles';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import ShoutboxContent from './ShoutboxContent';
+import ConfigurationsContent from './ConfigurationsContent';
 
 const Root = styled(FusePageSimple)(({ theme }) => ({
     '& .FusePageSimple-header': {
@@ -20,7 +20,7 @@ function ShoutboxConfigurations(props) {
         <Root
             content={
                 <div className="p-24" style={{ width: '100%' }}>
-                    <ShoutboxContent />
+                    <ConfigurationsContent />
                 </div>
             }
             scroll="content"

@@ -183,13 +183,28 @@ const navigationConfig = [
     ]
   },
   {
-    id: 'shoutbox',
+    id: 'shoutboxMenu',
     title: 'Shoutbox',
-    translate: 'Shoutbox',
-    type: 'item',
+    type: 'collapse',
     icon: 'heroicons-solid:speakerphone',
-    url: 'app/shoutbox',
-    end: true,
+    children: [
+      {
+        id: 'shoutbox',
+        title: 'Shoutbox List',
+        type: 'item',
+        icon: 'heroicons-outline:view-list',
+        url: 'app/shoutbox',
+        end: true,
+      },
+      {
+        id: 'shoutboxconfigurations',
+        title: 'Configurations',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/shoutbox-configurations',
+        end: true,
+      },
+    ]
   },
 ];
 

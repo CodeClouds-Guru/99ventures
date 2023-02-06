@@ -26,8 +26,9 @@ import MembersConfig from '../main/members/MembersConfig';
 import CampaignsConfig from '../main/members/campaigns/CampaignsConfig';
 import OfferwallsConfig from '../main/members/campaigns/offerwalls/OfferwallsConfig';
 import ShoutboxConfig from '../main/shoutbox/ShoutboxConfig';
+import ConfigurationsConfig from '../main/shoutbox/configurations/ConfigurationsConfig';
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
