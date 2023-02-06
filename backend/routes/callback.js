@@ -18,6 +18,12 @@ router.get('/survey/:provider', async (req, res) => {
   res.send(req.query);
 });
 
+router.get('/survey/outcome/:provider', async (req, res) => {
+  console.dir(logger);
+  logger.info(JSON.stringify(req));
+  res.send(req.query);
+});
+
 module.exports = {
   prefix: '/callback',
   router,
