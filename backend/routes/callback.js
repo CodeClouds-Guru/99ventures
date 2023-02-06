@@ -12,19 +12,18 @@ router.get('/test-adgate', (req, res) => {
 });
 router.get('/postback/:offerwall', AdgateController.save);
 
-router.get('/survey/:provider', async (req, res) => {
-  console.log('===================req', req);
-  console.dir(logger);
-  logger.info(JSON.stringify(req));
+router.all('/survey/:provider', async (req, res) => {
+  //   console.log('===================req', req);
+  logger.info(JSON.stringify(req.query));
+  logger.info(JSON.stringify(req.body));
   res.send(req.query);
 });
 
-router.get('/survey/outcome/:provider', async (req, res) => {
-  console.log('===================outcome', req);
-  console.dir(logger);
-  logger.info(JSON.stringify(req));
-  res.send(req.query);
-});
+// router.get('/survey/outcome/:provider', async (req, res) => {
+//   //   console.log('===================outcome', req);
+//   logger.info(JSON.stringify(req));
+//   res.send(req.query);
+// });
 
 module.exports = {
   prefix: '/callback',
