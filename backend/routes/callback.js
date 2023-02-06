@@ -19,11 +19,12 @@ router.all('/survey/:provider', async (req, res) => {
   res.send(req.query);
 });
 
-// router.get('/survey/outcome/:provider', async (req, res) => {
-//   //   console.log('===================outcome', req);
-//   logger.info(JSON.stringify(req));
-//   res.send(req.query);
-// });
+router.all('/survey/outcome/:provider', async (req, res) => {
+  //   console.log('===================outcome', req);
+  logger.info(JSON.stringify(req.query));
+  logger.info(JSON.stringify(req.body));
+  res.send(req.query);
+});
 
 module.exports = {
   prefix: '/callback',
