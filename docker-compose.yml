@@ -31,6 +31,8 @@ services:
       - PORT=4000
     networks:
       - 99Bridge
+    volumes:
+      - ./backend:/usr/src/backend
 
   admin:
     depends_on:
