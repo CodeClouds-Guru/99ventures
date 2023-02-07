@@ -16,7 +16,6 @@ import { useTheme } from '@mui/material/styles';
 import Helper from 'src/app/helper';
 import AddMore from 'app/shared-components/AddMore';
 
-
 const schema = yup.object().shape({
     premium_configuration: yup.string().required('Please enter Premium Configuration'),
     name: yup.string().required('Please enter Name'),
@@ -31,7 +30,7 @@ const schema = yup.object().shape({
     response_fail: yup.string().required('Please enter Response Fail'),
     currency_variable: yup.string().required('Please enter Currency Variable'),
     percent: yup.number().required('Please enter Percent').typeError('Please insert only number'),
-    max: yup.number().required('Please enter MAX').typeError('Please insert only number'),
+    // max: yup.number().required('Please enter MAX').typeError('Please insert only number'),
 });
 
 const defaultValues = {
@@ -47,8 +46,8 @@ const defaultValues = {
     response_ok: '',
     response_fail: '',
     currency_variable: '',
-    percent: '',
-    max: '',
+    percent: 100,
+    // max: '',
 };
 
 const CreateUpdate = () => {
@@ -95,8 +94,8 @@ const CreateUpdate = () => {
         setValue('response_ok', '', { shouldDirty: true, shouldValidate: false });
         setValue('response_fail', '', { shouldDirty: true, shouldValidate: false });
         setValue('currency_variable', '', { shouldDirty: true, shouldValidate: false });
-        setValue('percent', '', { shouldDirty: true, shouldValidate: false });
-        setValue('max', '', { shouldDirty: true, shouldValidate: false });
+        setValue('percent', 100, { shouldDirty: true, shouldValidate: false });
+        // setValue('max', '', { shouldDirty: true, shouldValidate: false });
         moduleId === 'create' ? '' : getSingleOfferwall();
     }, [setValue]);
     const getSingleOfferwall = () => {
@@ -130,7 +129,7 @@ const CreateUpdate = () => {
                     setValue('response_fail', response.data.results.result.response_fail, { shouldDirty: false, shouldValidate: true });
                     setValue('currency_variable', response.data.results.result.currency_variable, { shouldDirty: false, shouldValidate: true });
                     setValue('percent', response.data.results.result.currency_percent, { shouldDirty: false, shouldValidate: true });
-                    setValue('max', response.data.results.result.currency_max, { shouldDirty: false, shouldValidate: true });
+                    // setValue('max', response.data.results.result.currency_max, { shouldDirty: false, shouldValidate: true });
                 }
             })
             .catch((error) => {
@@ -167,7 +166,8 @@ const CreateUpdate = () => {
             }
         })
     }
-    const onSubmit = ({ premium_configuration, name, sub_id_prefix, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent, max }) => {
+    const onSubmit = ({ premium_configuration, name, sub_id_prefix, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent }) => {
+        // max
         if (allowFromAnyIP && IPs.length > 0) {
             dispatch(showMessage({ variant: 'error', message: 'IPs field should be blank' }));
             return false
@@ -198,7 +198,7 @@ const CreateUpdate = () => {
             currency_variable: currency_variable,
             currency_options: 'Cash',
             currency_percent: percent,
-            currency_max: max
+            // currency_max: max
         })
             .then((response) => {
                 if (response.status === 200) {
@@ -576,7 +576,7 @@ const CreateUpdate = () => {
                                     />
                                 )}
                             />
-                            <Controller
+                            {/* <Controller
                                 name="max"
                                 control={control}
                                 render={({ field }) => (
@@ -591,7 +591,7 @@ const CreateUpdate = () => {
                                         required
                                     />
                                 )}
-                            />
+                            /> */}
                             {moduleId !== 'create' &&
                                 <>
                                     <div className="flex  justify-center">
