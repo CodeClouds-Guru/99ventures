@@ -33,6 +33,7 @@ services:
       - 99Bridge
     volumes:
       - ./backend:/usr/src/backend
+      - /usr/src/backend/node_modules
 
   admin:
     depends_on:
