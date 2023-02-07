@@ -5,6 +5,8 @@ function ShoutboxContent() {
     return (
         <List
             module="shoutbox"
+            addable={false}
+            editable={false}
             where={{ company_portal_id: JwtService.getCompanySiteId().site_id }}
         />
     );

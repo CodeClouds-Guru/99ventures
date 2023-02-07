@@ -47,7 +47,7 @@ const navigationConfig = [
     children: [
       {
         id: 'members',
-        title: 'Member List',
+        title: 'Members',
         type: 'item',
         icon: 'heroicons-outline:view-list',
         url: 'app/members',

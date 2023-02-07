@@ -32,6 +32,9 @@ const schema = yup.object().shape({
     home_page_id: yup
         .string()
         .required('Please choose a Home Page'),
+    redirect_page_id: yup
+        .string()
+        .required('Please choose a Redirect Page'),
     default_template_id: yup
         .string()
         .required('Please select a default layout'),
@@ -58,6 +61,7 @@ function GeneralConfiguration(props) {
 
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
+        redirect_page_id: 0,
         default_template_id: 0,
         default_captcha_option_id: 0
     });
@@ -75,9 +79,23 @@ function GeneralConfiguration(props) {
     });
 
     const selectHomePage = (event) => {
+        if (event.target.value === defaultValues.redirect_page_id) {
+            dispatch(showMessage({ variant: 'error', message: 'Selected page should be different' }));
+            return false;
+        }
         setDefaultValues({
             ...defaultValues,
             home_page_id: event.target.value,
+        });
+    }
+    const selectRedirectPage = (event) => {
+        if (event.target.value === defaultValues.home_page_id) {
+            dispatch(showMessage({ variant: 'error', message: 'Selected page should be different' }));
+            return false;
+        }
+        setDefaultValues({
+            ...defaultValues,
+            redirect_page_id: event.target.value,
         });
     }
     const selectLayoutOption = (event) => {
@@ -95,7 +113,7 @@ function GeneralConfiguration(props) {
 
 
     const onDrop = ({ removedIndex, addedIndex }) => {
-        console.log({ removedIndex, addedIndex });
+        // console.log({ removedIndex, addedIndex });
         setGeneralReplies(items => arrayMoveImmutable(items, removedIndex, addedIndex));
     };
 
@@ -110,12 +128,13 @@ function GeneralConfiguration(props) {
         axios.get(jwtServiceConfig.getGeneralConfiguration).then((response) => {
             if (response.data.results.status) {
                 setCaptchaOptions([...response.data.results.data.captcha_options, { id: 0, name: 'Select Captcha Option' }])
-                setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Home Page' }])
+                setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Page' }])
                 setLayoutOptions([...response.data.results.data.layout_options, { id: 0, name: 'Select default layout' }])
                 setGeneralReplies([...response.data.results.data.general_replies])
                 setDefaultValues({
                     ...defaultValues,
                     home_page_id: response.data.results.data.home_page_id,
+                    redirect_page_id: response.data.results.data.redirect_page_id,
                     default_template_id: response.data.results.data.default_template_id,
                     default_captcha_option_id: response.data.results.data.default_captcha_option_id
                 })
@@ -195,6 +214,7 @@ function GeneralConfiguration(props) {
         });
         const params = {
             selected_page_id: defaultValues.home_page_id,
+            redirect_page_id: defaultValues.redirect_page_id,
             selected_template_id: defaultValues.default_template_id,
             selected_captcha_id: defaultValues.default_captcha_option_id,
             auto_response_new_data: responses
@@ -333,6 +353,28 @@ function GeneralConfiguration(props) {
                                             value={defaultValues.home_page_id}
                                             label="Homepage"
                                             onChange={selectHomePage}
+                                            required
+                                            disabled={!permission}
+                                        >
+                                            {getFormattedOptions(pageOptions)}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            />
+                            <Controller
+                                name="redirect_page_id"
+                                control={generalFormControl}
+                                render={({ field }) => (
+                                    <FormControl fullWidth>
+                                        <InputLabel id="redirect_page">Redirect Page</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="redirect_page"
+                                            className="mb-24"
+                                            id="demo-simple-select"
+                                            value={defaultValues.redirect_page_id}
+                                            label="Redirect Page"
+                                            onChange={selectRedirectPage}
                                             required
                                             disabled={!permission}
                                         >
