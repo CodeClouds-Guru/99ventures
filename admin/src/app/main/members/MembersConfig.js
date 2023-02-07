@@ -3,8 +3,8 @@ import Downline from './Downline';
 import Index from './Index';
 import IPLogs from './IPlogs';
 import MemberTransaction from './MemberTransaction';
-import Withdraws from './Withdraws'
-import MembersList from './listing/Listing';
+import Withdraws from './Withdraws';
+import MembersContent from './MembersContent';
 import CreateMember from './CreateMember';
 
 const UserConfig = {
@@ -35,7 +35,7 @@ const UserConfig = {
     routes: [
         {
             path: 'app/members',
-            element: <MembersList />,
+            element: <MembersContent />,
             auth: settingsConfig.defaultAuth
         },
         {
