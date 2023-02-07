@@ -142,15 +142,14 @@ class GeneralConfigurationController {
           { after_signin: 0 },
           { where: { company_portal_id: site_id, after_signin: 1 } }
         );
-        if (prevRedirectPageUpdate) {
-          let currRedirectPageUpdate = await Page.update(
-            { after_signin: 1 },
-            { where: { company_portal_id: site_id, id: selectedRedirectPageId } }
-          );
-          if(currRedirectPageUpdate){
-            flag = true
-          }
+        let currRedirectPageUpdate = await Page.update(
+          { after_signin: 1 },
+          { where: { company_portal_id: site_id, id: selectedRedirectPageId } }
+        );
+        if(currRedirectPageUpdate){
+          flag = true
         }
+        
       }
 
       /** Code for Captcha option changed **/
