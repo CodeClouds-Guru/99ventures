@@ -143,10 +143,13 @@ class GeneralConfigurationController {
           { where: { company_portal_id: site_id, after_signin: 1 } }
         );
         if (prevRedirectPageUpdate) {
-          await Page.update(
+          let currRedirectPageUpdate = await Page.update(
             { after_signin: 1 },
             { where: { company_portal_id: site_id, id: selectedRedirectPageId } }
           );
+          if(currRedirectPageUpdate){
+            flag = true
+          }
         }
       }
 
