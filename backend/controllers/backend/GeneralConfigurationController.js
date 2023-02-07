@@ -149,7 +149,6 @@ class GeneralConfigurationController {
         if(currRedirectPageUpdate){
           flag = true
         }
-        
       }
 
       /** Code for Captcha option changed **/

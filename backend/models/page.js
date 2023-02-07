@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     permalink: DataTypes.STRING,
     is_homepage: DataTypes.TINYINT,
+    after_signin: DataTypes.TINYINT,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
     page_json: DataTypes.JSON,
