@@ -283,7 +283,6 @@ class CampaignController extends Controller {
       };
       // return req.query
       var options = await this.getQueryOptions(req, fields);
-      console.log('options....',options.where)
       options.attributes = [
         'id',
         'member_id',

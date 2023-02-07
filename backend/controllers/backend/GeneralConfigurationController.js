@@ -28,12 +28,13 @@ class GeneralConfigurationController {
     const site_id = req.header("site_id") || 1;
 
     let home_page_id = 0;
+    let redirect_page_id = 0;
     let default_template_id = 0;
     let default_captcha_option_id = 0;
     try {
       const page_options = await Page.findAll({
-        attributes: ["id", "name", "is_homepage"],
-        where: { company_portal_id: site_id },
+        attributes: ["id", "name", "is_homepage","after_signin"],
+        where: { company_portal_id: site_id,status:"published" },
       });
       const layout_options = await Layout.findAll({
         attributes: ["id", "name"],
@@ -61,8 +62,11 @@ class GeneralConfigurationController {
       const home_page = page_options.find(
         (page) => page.dataValues.is_homepage === 1
       );
+      const redirect_page = page_options.find(
+        (page) => page.dataValues.after_signin === 1
+      );
       home_page_id = home_page ? home_page.id : 0;
-
+      redirect_page_id = redirect_page ? redirect_page.id : 0
       const selected_captcha = await db.sequelize.query(
         "SELECT * FROM captcha_option_company_portal WHERE company_portal_id = ?",
         {
@@ -83,6 +87,7 @@ class GeneralConfigurationController {
           captcha_options,
           general_replies,
           home_page_id,
+          redirect_page_id,
           default_template_id,
           default_captcha_option_id,
         },
@@ -98,6 +103,7 @@ class GeneralConfigurationController {
 
     try {
       const selectedHomePageId = req.body.selected_page_id || "";
+      const selectedRedirectPageId = req.body.redirect_page_id || "";
       const selectedPageTemplate = req.body.selected_template_id || 0;
       const selectedCaptchaId = req.body.selected_captcha_id || "";
 
@@ -128,6 +134,19 @@ class GeneralConfigurationController {
           if (currHomePageUpdate) {
             flag = true;
           }
+        }
+      }
+      /** Code for default redirect changed **/
+      if (selectedRedirectPageId !== "") {
+        const prevRedirectPageUpdate = await Page.update(
+          { after_signin: 0 },
+          { where: { company_portal_id: site_id, after_signin: 1 } }
+        );
+        if (prevRedirectPageUpdate) {
+          await Page.update(
+            { after_signin: 1 },
+            { where: { company_portal_id: site_id, id: selectedRedirectPageId } }
+          );
         }
       }
 

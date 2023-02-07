@@ -1,7 +1,8 @@
 const Joi = require("joi");
-const { Member, MemberBalance } = require("../../models/index");
+const { Member, MemberBalance, IpLog, MemberReferral } = require("../../models/index");
 const bcrypt = require("bcryptjs");
 const IpHelper = require("../../helpers/IpHelper");
+const geoip = require('geoip-lite');
 class MemberAuthController {
   constructor() {
     // super('Member');
@@ -10,11 +11,13 @@ class MemberAuthController {
   async login(req, res) {
     if (req.session.member) {
       res.redirect('/dashboard');
+      return
     } else {
       let company_portal_id = 1
       const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
-      let ip = (req.connection.remoteAddress).split('::ffff:');
+      let ip = (req.ip).split('::ffff:');
       ip = ip[ip.length - 1]
+      
       let member_status = true
       let member_message = "Logged in successfully!"
       const schema = Joi.object({
@@ -51,6 +54,19 @@ class MemberAuthController {
             if (!isMatch) {
               member_status = false
               member_message = "Invalid credentials!"
+            }else{
+              var geo = geoip.lookup('122.163.102.160');
+              let ip_logs = {
+                member_id: member.id,
+                geo_location: geo.region,
+                ip:ip,
+                browser:req.headers["user-agent"],
+                browser_language: req.headers["accept-language"],
+                latitude: geo.range[0],
+                longitude: geo.range[1]
+              }
+              //ip logs
+              await IpLog.create(ip_logs)
             }
             if (member.status != 'member') {
               member_status = false
@@ -62,6 +78,13 @@ class MemberAuthController {
         member_status = false
         member_message = "Failed to check IP"
       }
+      //remember me
+      if(req.body.remember_me){
+        //res.cookie('remember_me', true);
+      }else{
+        //res.cookie('remember_me', false);
+      }
+      //store ip logs
       if (member_status) {
         req.session.member = member
         res.redirect('dashboard')
@@ -78,22 +101,33 @@ class MemberAuthController {
     try {
       let company_portal_id = req.headers.site_id
       const schema = Joi.object({
-        first_name: Joi.string().required(),
-        last_name: Joi.string().required(),
-        username: Joi.string().alphanum().min(3).max(30).required(),
-        password: Joi.string()
-          .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-          .required(),
-        phone_no: Joi.string().required(),
-        email: Joi.string().email().required(),
+                  first_name: Joi.string().required().label("First Name"),
+                  last_name: Joi.string().required().label("Last Name"),
+                  gender: Joi.string().required().label("Gender"),
+                  status: Joi.string().optional().label("Status"),
+                  username: Joi.string().min(3).max(30).required().label("Username"),
+                  email: Joi.string().optional(),
+                  company_portal_id: Joi.string().optional(),
+                  company_id: Joi.string().optional(),
+                  password: Joi.string().optional(),
+                  dob: Joi.string().optional(),
+                  phone_no: Joi.string().optional().label("Phone No"),
+                  country_id: Joi.optional().label("Country"),
+                  address_1: Joi.string().allow("").required().label("Address 1"),
+                  address_2: Joi.string().allow("").optional().label("Address 2"),
+                  address_3: Joi.string().allow("").optional().label("Address 3"),
+                  zip_code: Joi.string().allow("").optional().label("Zip Code"),
+                  avatar: Joi.optional().label("Avatar"),
+                  country_code: Joi.optional().label("Country Code"),
+                  state: Joi.optional().label("State"),
+                  referral_code: Joi.optional().allow('').label("Referral Code"),
       });
       const { error, value } = schema.validate(req.body);
+      let member_status = true
+      let member_message = "Signed in successfully!"
       if (error) {
-        let error_msg = error.details.map((err) => err.message);
-        res.status(401).json({
-          status: false,
-          errors: error_msg.join(","),
-        });
+        member_status = false
+        member_message = error.details.map((err) => err.message);
       }
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(value.password, salt);
@@ -108,11 +142,8 @@ class MemberAuthController {
       });
 
       if (existing_email_or_username > 0) {
-        res.status(500).json({
-          status: false,
-          message: "Sorry! this username or email has already been taken"
-        });
-        return
+          member_status = false
+          member_message = "Sorry! this username or email has already been taken"
       } else {
         req.body.membership_tier_id = 1;
         let files = [];
@@ -127,7 +158,6 @@ class MemberAuthController {
           ...req.body,
           password,
         });
-        // console.log("---------------res", res.result.id);
         //send mail
         const eventBus = require('../../eventBus');
         let member_details = await Member.findOne({
@@ -157,18 +187,44 @@ class MemberAuthController {
         });
 
         //Referral code
-
-        let model = await Member.update(
-          { referral_code: res.result.id + '0' + new Date().getTime() },
-          {
-            where: { id: res.result.id },
+        let referrer = ''
+        if(req.body.referral_code != ''){
+          referrer = await Member.findOne({where:{referral_code:req.body.referral_code}})
+          if(referrer){
+            referrer = referrer.id
+            //update member referral info
+            let ip = (req.ip).split('::ffff:');
+            ip = ip[ip.length - 1]
+            var geo = geoip.lookup('122.163.102.160');
+            
+            let referral_details = await MemberReferral.findOne({where:{referral_id:referrer,referral_email:req.body.email}, order: [['id', 'DESC']],})
+            if(referral_details){
+              await MemberReferral.update(
+                { geo_location: geo.region,ip:ip,member_id: referrer, join_date: new Date()},
+                {
+                  where: { id: referral_details.id },
+                }
+              );
+            }
+            else{
+                    await MemberReferral.create({
+                                          member_id: referrer,
+                                          referral_id: member_details.id,
+                                          referral_email:req.body.email,
+                                          geo_location: geo.region,
+                                          ip:ip,
+                                          join_date: new Date()
+                                      })
+              }
           }
-        );
-        res.status(200).json({
-          status: true,
-          message: "Registered Successfully."
-        });
-        return
+          let model = await Member.update(
+            { referral_code: res.result.id + '0' + new Date().getTime(),member_referral_id:referrer },
+            {
+              where: { id: res.result.id },
+            }
+          );
+          //signed up with referral code
+        }
       }
 
     } catch (error) {
@@ -182,11 +238,11 @@ class MemberAuthController {
   }
   //profile
   async profile(req, res) {
-    console.log('iioioi')
-    console.log(req.session)
+    console.log(req.cookies.remember_me)
+    console.log(req.cookies.name)
     res.status(200).json({
       status: true,
-      session: req.session,
+      session: req.session.flash.error,
       h: 8
     });
     //   return req.session
