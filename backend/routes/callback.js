@@ -13,16 +13,21 @@ router.get('/test-adgate', (req, res) => {
 router.get('/postback/:offerwall', AdgateController.save);
 
 router.all('/survey/:provider', async (req, res) => {
+  const logger1 = require('../helpers/Logger')(req.params.provider);
   //   console.log('===================req', req);
-  logger.info(JSON.stringify(req.query));
-  logger.info(JSON.stringify(req.body));
+  logger1.info(JSON.stringify(req.query));
+  logger1.info(JSON.stringify(req.body));
   res.send(req.query);
 });
 
 router.all('/survey/outcome/:provider', async (req, res) => {
   //   console.log('===================outcome', req);
-  logger.info(JSON.stringify(req.query));
-  logger.info(JSON.stringify(req.body));
+  const logger1 = require('../helpers/Logger')(
+    `outcome-${req.params.provider}.log`
+  );
+
+  logger1.info(JSON.stringify(req.query));
+  logger1.info(JSON.stringify(req.body));
   res.send(req.query);
 });
 
