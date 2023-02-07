@@ -9,11 +9,17 @@ class MemberAuthController {
   }
   //login
   async login(req, res) {
+    let company_portal_id = 1
+    let redirect_page = await Page.findOne({where:{company_portal_id:company_portal_id,after_signin:1}})
+    if(redirect_page)
+      redirect_page = '/'+redirect_page.slug
+    else
+      redirect_page = '/'
     if (req.session.member) {
-      res.redirect('/dashboard');
+      res.redirect(redirect_page);
       return
     } else {
-      let company_portal_id = 1
+      
       const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
       let ip = (req.ip).split('::ffff:');
       ip = ip[ip.length - 1]
@@ -84,10 +90,9 @@ class MemberAuthController {
       }else{
         //res.cookie('remember_me', false);
       }
-      //store ip logs
       if (member_status) {
         req.session.member = member
-        res.redirect('dashboard')
+        res.redirect(redirect_page)
       }
       else {
         req.session.flash = { error: member_message }
@@ -124,7 +129,7 @@ class MemberAuthController {
       });
       const { error, value } = schema.validate(req.body);
       let member_status = true
-      let member_message = "Signed in successfully!"
+      let member_message = "Registered successfully!"
       if (error) {
         member_status = false
         member_message = error.details.map((err) => err.message);
@@ -225,15 +230,27 @@ class MemberAuthController {
           );
           //signed up with referral code
         }
+        //registration bonus
+        let registration_bonus = await Setting.findOne({where:{settings_key:'registration_bonus'}})
+        await MemberTransaction.create({
+          type:'credited',
+          amount: registration_bonus.settings_value,
+          status:2,
+          member_id:member_details.id,
+          amount_action:'admin_adjustment',
+          balance: registration_bonus.settings_value
+        })
       }
-
+      if (member_status) {
+        req.session.flash = { message: member_message }
+      }
+      else {
+        req.session.flash = { error: member_message }
+      }
+      res.redirect('back')
     } catch (error) {
-      console.error('error saving member', error);
-      res.status(500).json({
-        status: false,
-        message: "Unable to save data"
-      });
-      return
+      req.session.flash = { error: "Unable to save data"}
+      res.redirect('back')
     }
   }
   //profile
