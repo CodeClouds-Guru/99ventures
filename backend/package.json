@@ -11,6 +11,7 @@
   "author": "Sourabh Das (sourabh.das@codeclouds.in)",
   "license": "ISC",
   "dependencies": {
+    "@maxmind/geoip2-node": "^3.5.0",
     "archiver": "^5.3.1",
     "aws-sdk": "^2.1204.0",
     "axios": "^1.2.2",
