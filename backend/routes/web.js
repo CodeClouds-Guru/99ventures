@@ -13,8 +13,53 @@ router.get('/test-lucid', async (req, res) => {
   res.json(definitions_data);
 });
 
-router.get('/test-cint', async (req, res) => {
-  const cintObj = new Cint();
+router.get('/cint/entry-link', async (req, res) => {
+  try{
+    const queryString = new URLSearchParams(req.query).toString();
+    const cintObj = new Cint();
+    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user'; 
+    const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
+    
+    const surveys = result.surveys;
+    var tbodyData = '';
+    if(surveys.length){
+      for(let survey of surveys) {
+        tbodyData +=`<tr>
+            <td>
+              <a href="${survey.entry_link}" target="_blank">${survey.name}</a>
+              <table style="width:100%">
+                  <tbody>
+                    <tr>
+                        <td style="">Conversion Rate <b>${survey.conversion_rate}</b>%</td>
+                        <td style="">Avg Time <b>5 minutes</b></td>
+                        <td style="">Remaining Completes: <b>${survey.remaining_completes}</b></td>
+                    </tr>
+                  </tbody>
+              </table>
+            </td>
+        </tr>`
+      }
+    } else {
+      tbodyData +=`<tr><td>No records found!</td></tr>`
+    }
+    const htmlData = `<table style="width:100%">
+          <tbody>
+            ${tbodyData}
+          </tbody>
+        </table>`
+    res.send(htmlData)
+  }
+  catch(error) {
+    console.error(error);
+    throw error;
+  }
+});
+
+router.get('/test-maxmind', async (req, res) => {
+  const WebServiceClient = require('@maxmind/geoip2-node').WebServiceClient;
+  const client = new WebServiceClient('823389', 'cmcQTMegLo00y705');
+  // const resp = await client.country(req.ip);
+  res.send((req.ip).split('::ffff:'));
 });
 
 //ROUTES FOR FRONTEND

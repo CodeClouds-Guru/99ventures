@@ -1,7 +1,9 @@
-"use strict";
-const { Model } = require("sequelize");
-const sequelizePaginate = require("sequelize-paginate");
-const Joi = require("joi");
+'use strict';
+const { Model } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
+
+const moment = require('moment');
 // const {MemberNote} = require("../models/index");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
@@ -13,35 +15,35 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Member.hasMany(models.MemberNote, {
-        foreignKey: "member_id",
+        foreignKey: 'member_id',
       });
       Member.hasMany(models.IpLog, {
-        foreignKey: "member_id",
+        foreignKey: 'member_id',
       });
       Member.belongsTo(models.MembershipTier, {
-        foreignKey: "membership_tier_id",
+        foreignKey: 'membership_tier_id',
       });
       Member.belongsTo(models.Country, {
-        foreignKey: "country_id",
+        foreignKey: 'country_id',
       });
       Member.hasMany(models.MemberTransaction, {
-        foreignKey: "member_id",
+        foreignKey: 'member_id',
       });
       Member.hasMany(models.MemberPaymentInformation, {
-        foreignKey: "member_id",
+        foreignKey: 'member_id',
       });
       Member.belongsTo(models.MemberReferral, {
-        foreignKey: "member_referral_id",
+        foreignKey: 'member_referral_id',
       });
       Member.hasMany(models.MemberBalance, {
-        foreignKey: "member_id",
-        as: "member_amounts",
+        foreignKey: 'member_id',
+        as: 'member_amounts',
       });
       Member.hasMany(models.MemberReferral, {
-        foreignKey: "referral_id",
+        foreignKey: 'referral_id',
       });
       Member.belongsTo(models.CompanyPortal, {
-        foreignKey: "company_portal_id",
+        foreignKey: 'company_portal_id',
       });
       Member.belongsToMany(models.Survey, {
         through: 'member_surveys',
@@ -50,31 +52,31 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'survey_id',
       });
       Member.hasMany(models.CampaignMember, {
-        foreignKey: "member_id",
+        foreignKey: 'member_id',
       });
     }
   }
   Member.validate = function (req) {
     const schema = Joi.object({
-      first_name: Joi.string().required().label("First Name"),
-      last_name: Joi.string().required().label("Last Name"),
-      gender: Joi.string().required().label("Gender"),
-      status: Joi.string().optional().label("Status"),
-      username: Joi.string().min(3).max(30).required().label("Username"),
+      first_name: Joi.string().required().label('First Name'),
+      last_name: Joi.string().required().label('Last Name'),
+      gender: Joi.string().required().label('Gender'),
+      status: Joi.string().optional().label('Status'),
+      username: Joi.string().min(3).max(30).required().label('Username'),
       email: Joi.string().optional(),
       company_portal_id: Joi.string().optional(),
       company_id: Joi.string().optional(),
       password: Joi.string().optional(),
       dob: Joi.string().optional(),
-      phone_no: Joi.string().optional().label("Phone No"),
-      country_id: Joi.optional().label("Country"),
-      membership_tier_id: Joi.optional().label("Level"),
-      address_1: Joi.string().allow("").required().label("Address 1"),
-      address_2: Joi.string().allow("").optional().label("Address 2"),
-      address_3: Joi.string().allow("").optional().label("Address 3"),
-      zip_code: Joi.string().allow("").optional().label("Zip Code"),
-      avatar: Joi.optional().label("Avatar"),
-      country_code: Joi.optional().label("Country Code"),
+      phone_no: Joi.string().optional().label('Phone No'),
+      country_id: Joi.optional().label('Country'),
+      membership_tier_id: Joi.optional().label('Level'),
+      address_1: Joi.string().allow('').required().label('Address 1'),
+      address_2: Joi.string().allow('').optional().label('Address 2'),
+      address_3: Joi.string().allow('').optional().label('Address 3'),
+      zip_code: Joi.string().allow('').optional().label('Zip Code'),
+      avatar: Joi.optional().label('Avatar'),
+      country_code: Joi.optional().label('Country Code'),
     });
     return schema.validate(req.body);
   };
@@ -90,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: {
           args: true,
-          msg: "Username already in use!",
+          msg: 'Username already in use!',
         },
       },
       email: DataTypes.STRING,
@@ -99,28 +101,34 @@ module.exports = (sequelize, DataTypes) => {
       country_code: {
         type: DataTypes.INTEGER,
         set(value) {
-          if (value == "" || value == null)
-            this.setDataValue("country_code", null);
-          else this.setDataValue("country_code", value);
+          if (value == '' || value == null)
+            this.setDataValue('country_code', null);
+          else this.setDataValue('country_code', value);
         },
       },
-      dob: DataTypes.DATE,
+      dob: {
+        type: DataTypes.DATE,
+        get() {
+          if (this.getDataValue('dob'))
+            return moment(this.getDataValue('dob')).format('YYYY-MM-DD');
+        },
+      },
       member_referral_id: DataTypes.INTEGER,
       password: DataTypes.STRING,
-      last_active_on: "TIMESTAMP",
+      last_active_on: 'TIMESTAMP',
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
-      created_at: "TIMESTAMP",
-      updated_at: "TIMESTAMP",
-      deleted_at: "TIMESTAMP",
+      created_at: 'TIMESTAMP',
+      updated_at: 'TIMESTAMP',
+      deleted_at: 'TIMESTAMP',
       avatar: {
         type: DataTypes.STRING,
         get() {
-          let rawValue = this.getDataValue("avatar") || null;
-          if (rawValue == null || rawValue == "") {
+          let rawValue = this.getDataValue('avatar') || null;
+          if (rawValue == null || rawValue == '') {
             const publicURL =
-              process.env.CLIENT_API_PUBLIC_URL || "http://127.0.0.1:4000";
+              process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
             rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
           } else {
             rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
@@ -128,8 +136,8 @@ module.exports = (sequelize, DataTypes) => {
           return rawValue;
         },
         set(value) {
-          if (value == "" || value == null) this.setDataValue("avatar", null);
-          else this.setDataValue("avatar", value);
+          if (value == '' || value == null) this.setDataValue('avatar', null);
+          else this.setDataValue('avatar', value);
         },
       },
       referral_code: DataTypes.STRING,
@@ -140,168 +148,168 @@ module.exports = (sequelize, DataTypes) => {
       country_id: {
         type: DataTypes.INTEGER,
         set(value) {
-          if (value == "" || value == null)
-            this.setDataValue("country_id", null);
-          else this.setDataValue("country_id", value);
+          if (value == '' || value == null)
+            this.setDataValue('country_id', null);
+          else this.setDataValue('country_id', value);
         },
       },
-      gender: DataTypes.ENUM("male", "female", "other"),
+      gender: DataTypes.ENUM('male', 'female', 'other'),
     },
     {
       sequelize,
-      modelName: "Member",
+      modelName: 'Member',
       timestamps: true,
       paranoid: true,
-      createdAt: "created_at", // alias createdAt as created_date
-      updatedAt: "updated_at",
-      deletedAt: "deleted_at",
-      tableName: "members",
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'members',
     }
   );
 
-  Member.extra_fields = ["company_portal_id", "ip"];
+  Member.extra_fields = ['company_portal_id', 'ip'];
   Member.fields = {
     username: {
-      field_name: "username",
-      db_name: "username",
-      type: "text",
-      placeholder: "Username",
+      field_name: 'username',
+      db_name: 'username',
+      type: 'text',
+      placeholder: 'Username',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     id: {
-      field_name: "id",
-      db_name: "id",
-      type: "text",
-      placeholder: "Id",
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
       listing: true,
       show_in_form: false,
       sort: true,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     status: {
-      field_name: "status",
-      db_name: "status",
-      type: "text",
-      placeholder: "Status",
+      field_name: 'status',
+      db_name: 'status',
+      type: 'text',
+      placeholder: 'Status',
       listing: true,
       show_in_form: false,
       sort: false,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     ip: {
-      field_name: "ip",
-      db_name: "ip",
-      type: "text",
-      placeholder: "IP",
+      field_name: 'ip',
+      db_name: 'ip',
+      type: 'text',
+      placeholder: 'IP',
       listing: true,
       show_in_form: false,
       sort: false,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     first_name: {
-      field_name: "first_name",
-      db_name: "first_name",
-      type: "text",
-      placeholder: "First Name",
+      field_name: 'first_name',
+      db_name: 'first_name',
+      type: 'text',
+      placeholder: 'First Name',
       listing: false,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     last_name: {
-      field_name: "last_name",
-      db_name: "last_name",
-      type: "text",
-      placeholder: "Last Name",
+      field_name: 'last_name',
+      db_name: 'last_name',
+      type: 'text',
+      placeholder: 'Last Name',
       listing: false,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     email: {
-      field_name: "email",
-      db_name: "email",
-      type: "text",
-      placeholder: "Email",
+      field_name: 'email',
+      db_name: 'email',
+      type: 'text',
+      placeholder: 'Email',
       listing: true,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     company_portal_id: {
-      field_name: "company_portal_id",
-      db_name: "company_portal_id",
-      type: "text",
-      placeholder: "Company Portal",
+      field_name: 'company_portal_id',
+      db_name: 'company_portal_id',
+      type: 'text',
+      placeholder: 'Company Portal',
       listing: true,
       show_in_form: false,
       sort: true,
       required: false,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: true,
     },
     gender: {
-      field_name: "gender",
-      db_name: "gender",
-      type: "text",
-      placeholder: "Gender",
+      field_name: 'gender',
+      db_name: 'gender',
+      type: 'text',
+      placeholder: 'Gender',
       listing: false,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     phone_no: {
-      field_name: "phone_no",
-      db_name: "phone_no",
-      type: "text",
-      placeholder: "Phone No",
+      field_name: 'phone_no',
+      db_name: 'phone_no',
+      type: 'text',
+      placeholder: 'Phone No',
       listing: false,
       show_in_form: true,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
     created_at: {
-      field_name: "created_at",
-      db_name: "created_at",
-      type: "text",
-      placeholder: "Created at",
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created at',
       listing: true,
       show_in_form: false,
       sort: true,
       required: true,
-      value: "",
-      width: "50",
+      value: '',
+      width: '50',
       searchable: false,
     },
   };
@@ -309,15 +317,15 @@ module.exports = (sequelize, DataTypes) => {
   sequelizePaginate.paginate(Member);
 
   Member.changeStatus = async (req) => {
-    const { MemberNote } = require("../models/index");
+    const { MemberNote } = require('../models/index');
 
-    const value = req.body.value || "";
-    const field_name = req.body.field_name || "";
+    const value = req.body.value || '';
+    const field_name = req.body.field_name || '';
     const id = req.params.id || null;
     const notes = req.body.member_notes || null;
     try {
       let member = await Member.findOne({
-        attributes: ["status"],
+        attributes: ['status'],
         where: { id: id },
       });
       console.log(req);
@@ -338,7 +346,7 @@ module.exports = (sequelize, DataTypes) => {
           current_status: value,
           note: notes,
         };
-        console.log("MemberNote===========", MemberNote);
+        console.log('MemberNote===========', MemberNote);
         await MemberNote.create(data);
       }
       return result[0];

@@ -20,7 +20,9 @@ module.exports = function (filename = "all-logs.log") {
                 maxsize: 5242880,
                 maxFiles: 5,
             }),
-            new transports.Console(),
+            new transports.Console({
+                silent: true,
+            }),
         ],
     });
     return logger;
