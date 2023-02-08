@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { Member, MemberBalance, IpLog, MemberReferral } = require("../../models/index");
+const { Member, MemberBalance, IpLog, MemberReferral, Page, Setting} = require("../../models/index");
 const bcrypt = require("bcryptjs");
 const IpHelper = require("../../helpers/IpHelper");
 const geoip = require('geoip-lite');
