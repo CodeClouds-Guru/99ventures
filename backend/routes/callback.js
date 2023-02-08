@@ -31,6 +31,17 @@ router.all('/survey/outcome/:provider', async (req, res) => {
   res.send(req.query);
 });
 
+router.all('/survey/other/:provider/:status', async (req, res) => {
+  //   console.log('===================outcome', req);
+  const logger1 = require('../helpers/Logger')(
+    `${req.params.status}-${req.params.provider}.log`
+  );
+
+  logger1.info(JSON.stringify(req.query));
+  logger1.info(JSON.stringify(req.body));
+  res.send(req.query);
+});
+
 module.exports = {
   prefix: '/callback',
   router,
