@@ -112,7 +112,7 @@ module.exports = function () {
   initializeHandlebars(app);
   chainMiddlewares(app);
   chainRoutes(app);
-
+  app.enable('trust proxy')
   //General exception handler
   app.use((err, req, res, next) => {
     console.error(err.stack);
