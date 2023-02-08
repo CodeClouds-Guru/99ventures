@@ -25,8 +25,10 @@ class Cint {
         Authorization: process.env.CINT_API_KEY,
         Accept: 'application/json, text/plain, */*',
         'Content-Type': 'application/json',
+        'X-YourSurveys-Api-Key': 'd762032ae3ed45ae3fe81188156076fe'
       },
     });
+    this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
     return new Proxy(this, handler);
   }
   async fetchAndReturnData(partUrl) {
