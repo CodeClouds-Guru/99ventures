@@ -14,39 +14,45 @@ router.get('/test-lucid', async (req, res) => {
 });
 
 router.get('/cint/entry-link', async (req, res) => {
-  const queryString = new URLSearchParams(req.query).toString();
-  const cintObj = new Cint();
-  const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user'; 
-  const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
-  
-  const surveys = result.surveys;
-  var tbodyData = '';
-  if(surveys.length){
-    for(let survey of surveys) {
-      tbodyData +=`<tr>
-          <td>
-            <a href="${survey.entry_link}" target="_blank">${survey.name}</a>
-            <table style="width:100%">
-                <tbody>
-                  <tr>
-                      <td style="">Conversion Rate <b>${survey.conversion_rate}</b>%</td>
-                      <td style="">Avg Time <b>5 minutes</b></td>
-                      <td style="">Remaining Completes: <b>${survey.remaining_completes}</b></td>
-                  </tr>
-                </tbody>
-            </table>
-          </td>
-      </tr>`
+  try{
+    const queryString = new URLSearchParams(req.query).toString();
+    const cintObj = new Cint();
+    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user'; 
+    const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
+    
+    const surveys = result.surveys;
+    var tbodyData = '';
+    if(surveys.length){
+      for(let survey of surveys) {
+        tbodyData +=`<tr>
+            <td>
+              <a href="${survey.entry_link}" target="_blank">${survey.name}</a>
+              <table style="width:100%">
+                  <tbody>
+                    <tr>
+                        <td style="">Conversion Rate <b>${survey.conversion_rate}</b>%</td>
+                        <td style="">Avg Time <b>5 minutes</b></td>
+                        <td style="">Remaining Completes: <b>${survey.remaining_completes}</b></td>
+                    </tr>
+                  </tbody>
+              </table>
+            </td>
+        </tr>`
+      }
+    } else {
+      tbodyData +=`<tr><td>No records found!</td></tr>`
     }
-  } else {
-    tbodyData +=`<tr><td>No records found!</td></tr>`
+    const htmlData = `<table style="width:100%">
+          <tbody>
+            ${tbodyData}
+          </tbody>
+        </table>`
+    res.send(htmlData)
   }
-  const htmlData = `<table style="width:100%">
-        <tbody>
-          ${tbodyData}
-        </tbody>
-      </table>`
-  res.send(htmlData)
+  catch(error) {
+    console.error(error);
+    throw error;
+  }
 
 });
 
