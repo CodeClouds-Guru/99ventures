@@ -16,14 +16,14 @@ router.get('/test-lucid', async (req, res) => {
 router.get('/cint/entry-link', async (req, res) => {
   const queryString = new URLSearchParams(req.query).toString();
   const cintObj = new Cint();
-  const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user'; 
+  const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
   const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
-  
+
   const surveys = result.surveys;
   var tbodyData = '';
-  if(surveys.length){
-    for(let survey of surveys) {
-      tbodyData +=`<tr>
+  if (surveys.length) {
+    for (let survey of surveys) {
+      tbodyData += `<tr>
           <td>
             <a href="${survey.entry_link}" target="_blank">${survey.name}</a>
             <table style="width:100%">
@@ -39,7 +39,7 @@ router.get('/cint/entry-link', async (req, res) => {
       </tr>`
     }
   } else {
-    tbodyData +=`<tr><td>No records found!</td></tr>`
+    tbodyData += `<tr><td>No records found!</td></tr>`
   }
   const htmlData = `<table style="width:100%">
         <tbody>
@@ -47,7 +47,13 @@ router.get('/cint/entry-link', async (req, res) => {
         </tbody>
       </table>`
   res.send(htmlData)
+});
 
+router.get('/test-maxmind', async (req, res) => {
+  const WebServiceClient = require('@maxmind/geoip2-node').WebServiceClient;
+  const client = new WebServiceClient('823389', 'cmcQTMegLo00y705');
+  // const resp = await client.country(req.ip);
+  res.send((req.ip).split('::ffff:'));
 });
 
 //ROUTES FOR FRONTEND
