@@ -16,7 +16,7 @@ const handler = {
         };
   },
 };
-class LuciSupply {
+class LucidSupply {
   constructor() {
     this.instance = axios.create({
       baseURL: 'https://api.samplicio.us',
@@ -234,4 +234,4 @@ class LuciSupply {
   /******* End - Supply Apis ******/
 }
 
-module.exports = LuciSupply;
+module.exports = LucidSupply;
