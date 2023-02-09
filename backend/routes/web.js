@@ -24,9 +24,11 @@ router.get('/cint/entry-link', async (req, res) => {
     var tbodyData = '';
     if(surveys.length){
       for(let survey of surveys) {
+        const entryLink = survey.entry_link;
+        const rebuildEntryLink = entryLink.replace('SUBID', req.query.ssi);
         tbodyData +=`<tr>
             <td>
-              <a href="${survey.entry_link}" target="_blank">${survey.name}</a>
+              <a href="${rebuildEntryLink}" target="_blank">${survey.name}</a>
               <table style="width:100%">
                   <tbody>
                     <tr>
