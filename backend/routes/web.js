@@ -59,7 +59,7 @@ router.get('/test-maxmind', async (req, res) => {
   const WebServiceClient = require('@maxmind/geoip2-node').WebServiceClient;
   const client = new WebServiceClient('823389', 'cmcQTMegLo00y705');
   // const resp = await client.country(req.ip);
-  res.send((req.ip).split('::ffff:'));
+  res.send(req.ip.replace("::ffff:", ""));
 });
 
 //ROUTES FOR FRONTEND
