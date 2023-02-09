@@ -13,8 +13,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Shoutbox.belongsTo(models.Member, {
+        foreignKey: "member_id",
+      });
     }
   }
+  Shoutbox.extra_fields = ['member_name'];
   Shoutbox.init({
     company_id: DataTypes.BIGINT,
     company_portal_id: DataTypes.BIGINT,
@@ -82,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: "member_id",
       type: "text",
       placeholder: "Member ID",
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,
@@ -90,12 +94,25 @@ module.exports = (sequelize, DataTypes) => {
       width: "50",
       searchable: true,
     },
+    member_name: {
+      field_name: "member_name",
+      db_name: "member_name",
+      type: "text",
+      placeholder: "Member Name",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: "",
+      width: "50",
+      searchable: false,
+    },
     survey_provider_id: {
       field_name: "survey_provider_id",
       db_name: "survey_provider_id",
       type: "text",
       placeholder: "Survey Provider ID",
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,
