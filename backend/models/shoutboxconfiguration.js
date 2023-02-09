@@ -134,6 +134,7 @@ module.exports = (sequelize, DataTypes) => {
   ShoutboxConfiguration.validate = function (req) {
     const schema = Joi.object({
       status: Joi.required(),
+      verbose: Joi.string().required(),
     })
     return schema.validate(req.body)
   }
