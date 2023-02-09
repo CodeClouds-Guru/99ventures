@@ -1,7 +1,7 @@
 import './Style.css';
 
 const Index = () => {
-    return (<div class="lds-ring">
+    return (<div className="lds-ring">
         <div></div>
         <div></div>
         <div></div>
