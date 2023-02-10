@@ -2,7 +2,7 @@ import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl, ListItemSecondaryAction, ListItemIcon } from '@mui/material';
+import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl, ListItemSecondaryAction, ListItemIcon, Tooltip } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
@@ -343,47 +343,50 @@ function GeneralConfiguration(props) {
                                 name="home_page_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <FormControl fullWidth>
-                                        <InputLabel id="home_page">Homepage</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="home_page"
-                                            className="mb-24"
-                                            id="demo-simple-select"
-                                            value={defaultValues.home_page_id}
-                                            label="Homepage"
-                                            onChange={selectHomePage}
-                                            required
-                                            disabled={!permission}
-                                        >
-                                            {getFormattedOptions(pageOptions)}
-                                        </Select>
-                                    </FormControl>
+                                    <Tooltip title="Please select 'Published' page only" placement="top">
+                                        <FormControl fullWidth>
+                                            <InputLabel id="home_page">Homepage</InputLabel>
+                                            <Select
+                                                {...field}
+                                                labelId="home_page"
+                                                className="mb-24"
+                                                id="demo-simple-select"
+                                                value={defaultValues.home_page_id}
+                                                label="Homepage"
+                                                onChange={selectHomePage}
+                                                required
+                                                disabled={!permission}
+                                            >
+                                                {getFormattedOptions(pageOptions)}
+                                            </Select>
+                                        </FormControl>
+                                    </Tooltip>
                                 )}
                             />
                             <Controller
                                 name="redirect_page_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <FormControl fullWidth>
-                                        <InputLabel id="redirect_page">Redirect Page</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="redirect_page"
-                                            className="mb-24"
-                                            id="demo-simple-select"
-                                            value={defaultValues.redirect_page_id}
-                                            label="Redirect Page"
-                                            onChange={selectRedirectPage}
-                                            required
-                                            disabled={!permission}
-                                        >
-                                            {getFormattedOptions(pageOptions)}
-                                        </Select>
-                                    </FormControl>
+                                    <Tooltip title="Please select 'Published' page only" placement="top">
+                                        <FormControl fullWidth>
+                                            <InputLabel id="redirect_page">Redirect Page</InputLabel>
+                                            <Select
+                                                {...field}
+                                                labelId="redirect_page"
+                                                className="mb-24"
+                                                id="demo-simple-select"
+                                                value={defaultValues.redirect_page_id}
+                                                label="Redirect Page"
+                                                onChange={selectRedirectPage}
+                                                required
+                                                disabled={!permission}
+                                            >
+                                                {getFormattedOptions(pageOptions)}
+                                            </Select>
+                                        </FormControl>
+                                    </Tooltip>
                                 )}
                             />
-
                             <Controller
                                 name="default_template_id"
                                 control={generalFormControl}

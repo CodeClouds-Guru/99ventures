@@ -1,5 +1,5 @@
 // import List from "../crud/list/List";
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch } from '@mui/material';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch, TextField, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import jwtServiceConfig from "src/app/auth/services/jwtService/jwtServiceConfig";
 import { useState, useEffect } from 'react';
@@ -11,6 +11,8 @@ function ConfigurationsContent() {
     const module = "shoutbox-configurations";
     const dispatch = useDispatch();
     const [responseData, setResponseData] = useState({});
+    const [singleRow, setSingleRow] = useState({ verbose: '', status: 0 });
+
     useEffect(() => {
         getShoutboxCongurations();
     }, [module]);
@@ -25,10 +27,25 @@ function ConfigurationsContent() {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
-    const updateStatus = (event, id) => {
-        axios.post(jwtServiceConfig.shoutboxConfigurationUpdate + `/${id}`, {
-            status: event.target.checked ? 1 : 0
-        })
+    const handleData = (event) => {
+        setResponseData(prevState => {
+            const newState = prevState.map(obj => {
+                if (event.target.name === `verbose-${obj.id}`) {
+                    return { ...obj, verbose: event.target.value };
+                } else if (event.target.name === `status-${obj.id}`) {
+                    return { ...obj, status: event.target.checked ? 1 : 0 }
+                }
+                return obj;
+            });
+            return newState;
+        });
+    }
+    const updateData = (target_id) => {
+        const params = {};
+        responseData.map((row, index) => {
+            row.id === target_id ? Object.assign(params, { verbose: row.verbose, status: row.status }) : '';
+        });
+        axios.post(jwtServiceConfig.shoutboxConfigurationUpdate + `/${target_id}`, params)
             .then((response) => {
                 if (response.status === 200) {
                     getShoutboxCongurations();
@@ -56,7 +73,9 @@ function ConfigurationsContent() {
                     <TableHead>
                         <TableRow>
                             <TableCell>Event</TableCell>
-                            <TableCell align="right">Status</TableCell>
+                            <TableCell align="center">Verbose</TableCell>
+                            <TableCell align="center">Status</TableCell>
+                            <TableCell align="center">Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -67,12 +86,37 @@ function ConfigurationsContent() {
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
                                     <TableCell>{row.event_name}</TableCell>
-                                    <TableCell align="right">
+                                    <TableCell align="center">
+                                        <TextField
+                                            value={row.verbose || ''}
+                                            className="w-full mb-10 p-5 capitalize"
+                                            label="Verbose"
+                                            type="text"
+                                            variant="outlined"
+                                            name={`verbose-${row.id}`}
+                                            onChange={(event) => handleData(event)}
+                                        />
+                                    </TableCell>
+                                    <TableCell align="center">
                                         <Switch
                                             className="mb-24"
                                             checked={!!row.status}
-                                            onChange={(event) => updateStatus(event, row.id)}
+                                            name={`status-${row.id}`}
+                                            onChange={(event) => handleData(event)}
                                         />
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Button
+                                            className="whitespace-nowrap mx-4 w-full mb-24"
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                updateData(row.id)
+                                            }}
+                                        >
+                                            Save
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             )
