@@ -14,19 +14,19 @@ router.get('/test-lucid', async (req, res) => {
 });
 
 router.get('/cint/entry-link', async (req, res) => {
-  try{
+  try {
     const queryString = new URLSearchParams(req.query).toString();
     const cintObj = new Cint();
-    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user'; 
+    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
-    
+
     const surveys = result.surveys;
     var tbodyData = '';
-    if(surveys.length){
-      for(let survey of surveys) {
+    if (surveys.length) {
+      for (let survey of surveys) {
         const entryLink = survey.entry_link;
         const rebuildEntryLink = entryLink.replace('SUBID', req.query.ssi);
-        tbodyData +=`<tr>
+        tbodyData += `<tr>
             <td>
               <a href="${rebuildEntryLink}" target="_blank">${survey.name}</a>
               <table style="width:100%">
@@ -42,7 +42,7 @@ router.get('/cint/entry-link', async (req, res) => {
         </tr>`
       }
     } else {
-      tbodyData +=`<tr><td>No records found!</td></tr>`
+      tbodyData += `<tr><td>No records found!</td></tr>`
     }
     const htmlData = `<table style="width:100%">
           <tbody>
@@ -51,7 +51,7 @@ router.get('/cint/entry-link', async (req, res) => {
         </table>`
     res.send(htmlData)
   }
-  catch(error) {
+  catch (error) {
     console.error(error);
     throw error;
   }
