@@ -1,11 +1,12 @@
 // import List from "../crud/list/List";
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch, TextField, Button } from '@mui/material';
+import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch, TextField, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import jwtServiceConfig from "src/app/auth/services/jwtService/jwtServiceConfig";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 function ConfigurationsContent() {
     const module = "shoutbox-configurations";
@@ -69,62 +70,63 @@ function ConfigurationsContent() {
                 </Typography>
             </motion.div>
             <TableContainer component={Paper} className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
-                {Object.keys(responseData).length > 0 && <Table aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Event</TableCell>
-                            <TableCell align="center">Verbose</TableCell>
-                            <TableCell align="center">Status</TableCell>
-                            <TableCell align="center">Action</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {responseData.map((row) => {
-                            return (
-                                <TableRow
-                                    key={row.id}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                    <TableCell>{row.event_name}</TableCell>
-                                    <TableCell align="center">
-                                        <TextField
-                                            value={row.verbose || ''}
-                                            className="w-full mb-10 p-5 capitalize"
-                                            label="Verbose"
-                                            type="text"
-                                            variant="outlined"
-                                            name={`verbose-${row.id}`}
-                                            onChange={(event) => handleData(event)}
-                                        />
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Switch
-                                            className="mb-24"
-                                            checked={!!row.status}
-                                            name={`status-${row.id}`}
-                                            onChange={(event) => handleData(event)}
-                                        />
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Button
-                                            className="whitespace-nowrap mx-4 w-full mb-24"
-                                            variant="contained"
-                                            color="secondary"
-                                            onClick={(event) => {
-                                                event.preventDefault();
-                                                updateData(row.id)
-                                            }}
-                                        >
-                                            Save
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
-                    </TableBody>
-                </Table>}
+                {Object.keys(responseData).length > 0 &&
+                    <Table stickyHeader aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Event</TableCell>
+                                <TableCell align="center">Verbose</TableCell>
+                                <TableCell align="center">Status</TableCell>
+                                <TableCell align="center">Action</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {responseData.map((row) => {
+                                return (
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell className="border-b-2 ">{row.event_name}</TableCell >
+                                        <TableCell align="center" className="border-b-2 ">
+                                            <TextField
+                                                value={row.verbose || ''}
+                                                className="w-full mb-10 p-5 capitalize"
+                                                label="Verbose"
+                                                type="text"
+                                                variant="outlined"
+                                                name={`verbose-${row.id}`}
+                                                onChange={(event) => handleData(event)}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center" className="border-b-2 ">
+                                            <Switch
+                                                className="mb-24"
+                                                checked={!!row.status}
+                                                name={`status-${row.id}`}
+                                                onChange={(event) => handleData(event)}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center" className="border-b-2">
+                                            <IconButton
+                                                className="whitespace-nowrap mx-4 w-full mb-24"
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    updateData(row.id)
+                                                }}
+                                            >
+                                                <FuseSvgIcon className="text-48" size={32} color="secondary">material-solid:save</FuseSvgIcon>
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
+                        </TableBody>
+                    </Table>}
             </TableContainer>
-        </div>
+        </div >
     );
 }
 export default ConfigurationsContent;
