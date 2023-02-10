@@ -208,7 +208,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'tor',
       db_name: 'tor',
       type: 'text',
-      placeholder: 'tor',
+      placeholder: 'Tor',
       listing: true,
       show_in_form: true,
       sort: true,
