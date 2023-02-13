@@ -1,26 +1,22 @@
 const axios = require('axios');
 class IpQualityScore {
     constructor() {
-        this.baseUrl = 'https://ipqualityscore.com/api/json/ip/';
+        this.baseUrl = 'https://ipqualityscore.com/api/json/';
         this.privetKey = process.env.IP_QUALITY_SCORE_PRIVATE_KEY
         this.instance = axios.create({
             baseURL: this.baseUrl,
         });
+        this.getFromServer = this.getFromServer.bind(this);
+        this.getIpReport = this.getIpReport.bind(this);
     }
-    async getIpReport(ip) {
+    async getFromServer(url, params = null) {
         let resp = {
             status: false,
             report: null,
             error: '',
         }
         try {
-            const response = await this.instance.get(`${this.privetKey}/${ip}`, {
-                params: {
-                    strictness: 0,
-                    allow_public_access_points: true,
-                    lighter_penalties: true,
-                }
-            });
+            const response = await this.instance.get(url, { params });
             resp.status = true;
             resp.report = response.data;
         } catch (e) {
@@ -28,6 +24,18 @@ class IpQualityScore {
         } finally {
             return resp;
         }
+    }
+    async getIpReport(ip) {
+        const response = await this.getFromServer(`ip/${this.privetKey}/${ip}`, {
+            strictness: 0,
+            allow_public_access_points: true,
+            lighter_penalties: true,
+        });
+        return response;
+    }
+    async getEmailReport(email) {
+        const response = await this.getFromServer(`email/${this.privetKey}/${email}`);
+        return response;
     }
 }
 module.exports = IpQualityScore
