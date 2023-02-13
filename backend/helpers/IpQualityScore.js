@@ -37,5 +37,12 @@ class IpQualityScore {
         const response = await this.getFromServer(`email/${this.privetKey}/${email}`);
         return response;
     }
+    async getPhoneNumberReport(ph) {
+        const response = await this.getFromServer(`phone/${this.privetKey}/${ph}`, {
+            country: ['IN', 'US', 'UK'],
+            strictness: 1
+        });
+        return response;
+    }
 }
 module.exports = IpQualityScore
