@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Survey extends Model {
+  class SurveyQuestion extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,34 +11,28 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Survey.belongsTo(models.SurveyProvider, {
-        foreignKey: 'survey_provider_id',
-      })
-      Survey.belongsToMany(models.MemberTransaction, {
-        through: 'member_surveys',
-        timestamps: false,
-        foreignKey: 'survey_id',
-        otherKey: 'member_transaction_id',
-      })
     }
   }
-  Survey.init({
-    survey_provider_id: DataTypes.BIGINT,
-    loi: DataTypes.FLOAT,
-    cpi: DataTypes.FLOAT,
+  SurveyQuestion.init({
+    question_text: DataTypes.STRING,
     name: DataTypes.STRING,
+    survey_provider_id: DataTypes.BIGINT,
+    survey_provider_question_id: DataTypes.BIGINT,
+    created_by: DataTypes.BIGINT,
+    updated_by: DataTypes.BIGINT,
+    deleted_by: DataTypes.BIGINT,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'Survey',
-    tableName: 'surveys',
+    modelName: 'SurveyQuestion',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
+    tableName: 'survey_questions',
   });
-  return Survey;
+  return SurveyQuestion;
 };
