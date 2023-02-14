@@ -4,7 +4,6 @@ import List from './list/List'
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { usePermission } from '@fuse/hooks';
-import Listing from '../members/listing/Listing';
 
 function ListPage() {
   const { module } = useParams();

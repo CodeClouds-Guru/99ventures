@@ -234,7 +234,7 @@ const CreateUpdate = () => {
                                 ? 'heroicons-outline:arrow-sm-left'
                                 : 'heroicons-outline:arrow-sm-right'}
                         </FuseSvgIcon>
-                        <span className="flex mx-4 font-medium capitalize">Campaigns</span>
+                        <span className="flex mx-4 font-medium capitalize">Offerwalls</span>
                     </Typography>
                 </motion.div>
                 <motion.div
