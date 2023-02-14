@@ -58,10 +58,11 @@ router.get('/cint/entry-link', async (req, res) => {
 });
 
 router.get('/test-maxmind', async (req, res) => {
-  const WebServiceClient = require('@maxmind/geoip2-node').WebServiceClient;
-  const client = new WebServiceClient('823389', 'cmcQTMegLo00y705');
-  // const resp = await client.country(req.ip);
-  res.send(req.ip.replace("::ffff:", ""));
+  const IpQualityScoreClass = require('../helpers/IpQualityScore');
+  const obj = new IpQualityScoreClass();
+  // const resp = await obj.getEmailReport('email goes here');
+  // const resp = await obj.getPhoneNumberReport('phone_number_goes here');
+  res.json(resp);
 });
 
 //ROUTES FOR FRONTEND
