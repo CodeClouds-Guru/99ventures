@@ -17,13 +17,7 @@ router.get('/test-adgate', (req, res) => {
 });
 router.get('/postback/:offerwall', OfferwallPostbackController.save);
 
-router.all('/survey/:provider', async (req, res) => {
-  const logger1 = require('../helpers/Logger')(req.params.provider + '.log');
-  //   console.log('===================req', req);
-  logger1.info(JSON.stringify(req.query));
-  logger1.info(JSON.stringify(req.body));
-  res.send(req.query);
-});
+router.all('/survey/:provider', SurveycallbackController.syncSurvey);
 
 // router.all('/survey/outcome/:provider', async (req, res) => {
 //   //   console.log('===================outcome', req);

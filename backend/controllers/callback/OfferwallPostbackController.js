@@ -63,7 +63,7 @@ class OfferwallPostbackController {
               type: parseFloat(payout_amount) > 0 ? 'credited' : 'withdraw',
               amount_action: 'survey',
               created_by: null,
-              payload: req.query,
+              payload: JSON.stringify(req.query),
             };
             //console.log('transaction_obj', transaction_obj);
             let result =
