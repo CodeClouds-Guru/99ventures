@@ -19,6 +19,16 @@ router.get('/postback/:offerwall', OfferwallPostbackController.save);
 
 router.all('/survey/:provider', SurveycallbackController.syncSurvey);
 
+// for adscend PB test
+router.all('/postback-test/:offerwall', async (req, res) => {
+  const logger1 = require('../helpers/Logger')('adscend.log');
+  logger1.info(req.method)
+  logger1.info(JSON.stringify(req.query));
+  logger1.info(JSON.stringify(req.body));
+  res.send(req.query);
+});
+
+
 // router.all('/survey/outcome/:provider', async (req, res) => {
 //   //   console.log('===================outcome', req);
 //   const logger1 = require('../helpers/Logger')(
