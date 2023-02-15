@@ -252,7 +252,7 @@ class MemberController extends Controller {
   }
 
   async update(req, res) {
-    let id = req.params.id;
+    let id = req.params.id || null;
     let request_data = req.body;
     try {
       let result = false;

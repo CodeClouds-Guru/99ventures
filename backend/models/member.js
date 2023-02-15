@@ -318,17 +318,19 @@ module.exports = (sequelize, DataTypes) => {
 
   Member.changeStatus = async (req) => {
     const { MemberNote } = require('../models/index');
-
+    
     const value = req.body.value || '';
     const field_name = req.body.field_name || '';
     const id = req.params.id || null;
     const notes = req.body.member_notes || null;
+    if(id == '' && req.body.member_id && Array.isArray(req.body.member_id)){
+      id = req.body.member_id
+    }
     try {
-      let member = await Member.findOne({
-        attributes: ['status'],
+      let member = await Member.findAll({
+        attributes: ['status','id'],
         where: { id: id },
       });
-      console.log(req);
       let result = await Member.update(
         {
           [field_name]: value,
@@ -339,15 +341,20 @@ module.exports = (sequelize, DataTypes) => {
         }
       );
       if (notes !== null) {
-        let data = {
-          user_id: req.user.id,
-          member_id: id,
-          previous_status: member.status,
-          current_status: value,
-          note: notes,
-        };
-        console.log('MemberNote===========', MemberNote);
-        await MemberNote.create(data);
+        
+        if(member){
+          let data = []
+          member.forEach(element => {
+            data.push({
+              user_id: req.user.id,
+              member_id: element.dataValues.id,
+              previous_status: element.dataValues.status,
+              current_status: value,
+              note: notes,
+            })
+          });
+          await MemberNote.bulkCreate(data);
+        }
       }
       return result[0];
     } catch (error) {
