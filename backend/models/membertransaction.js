@@ -232,6 +232,7 @@ module.exports = (sequelize, DataTypes) => {
       completed_at: new Date(),
       transaction_id: data.transaction_id || null,
       balance: modified_total_earnings,
+      payload: data.payload || null,
     };
     console.log(transaction_data);
     let transaction = await MemberTransaction.create(transaction_data, {

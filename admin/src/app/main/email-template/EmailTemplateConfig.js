@@ -1,5 +1,6 @@
 import settingsConfig from 'app/configs/settingsConfig';
 import CreateUpdateForm from './create-update/CreateUpdateForm';
+import EmailTemplateContent from './EmailTemplateContent';
 
 const EmailTemplateConfig = {
     settings: {
@@ -27,6 +28,11 @@ const EmailTemplateConfig = {
         },
     },
     routes: [
+        {
+            path: 'app/email-templates',
+            element: <EmailTemplateContent />,
+            auth: settingsConfig.defaultAuth
+        },
         {
             path: 'app/email-templates/:id',
             element: <CreateUpdateForm />,

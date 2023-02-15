@@ -423,7 +423,7 @@ function List(props) {
 									delay={300}
 									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
-									{module.split('-').join(' ')}
+									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
 								</Typography>
 							)
 						}
@@ -508,7 +508,7 @@ function List(props) {
 								<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
 								<Input
-									placeholder={`Search ${module.split('-').join(' ')}`}
+									placeholder={`Search ${module !== 'offer-walls' ? module.split('-').join(' ') : 'offerwalls'}`}
 									className="flex flex-1"
 									disableUnderline
 									fullWidth

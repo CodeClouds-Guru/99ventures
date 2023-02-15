@@ -8,32 +8,18 @@ import { useEffect } from 'react';
 
 const Index = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-    const module = 'Offerwalls';
+    const module = 'offer-walls';
     const { moduleId } = useParams();
- 
+
     return (
-        <FusePageCarded
-            className="min-h-0"
-            sx={{ '& .FusePageCarded-header': {flexDirection: 'column'} }}
-            header={
-                <MainHeader module={module} backUrl={ (moduleId && !isNaN(moduleId)) ? '/app/campaigns' : '' } />
-            }
-            content={
-                <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 " >
-                    <List
-                        params={ (moduleId && !isNaN(moduleId)) ? {report: 1, campaign_id: moduleId} : {}}
-                        module="offer-walls"
-                        moduleHeading={ false }
-                        customAddURL={`/app/campaigns/${moduleId}/offerwalls/create`}
-                        where=""
-                        addable={ (moduleId && !isNaN(moduleId)) ? true : false }
-                        editable={ true }
-                        deletable={ (moduleId && !isNaN(moduleId)) ? true : false }
-                    />
-                </Box>
-            }
-            rightSidebarOpen={ false }
-            scroll={isMobile ? 'normal' : 'content'}
+        <List
+            params={(moduleId && !isNaN(moduleId)) ? { report: 1, campaign_id: moduleId } : {}}
+            module={module}
+            customAddURL={`/app/campaigns/${moduleId}/offerwalls/create`}
+            where=""
+            addable={(moduleId && !isNaN(moduleId)) ? true : false}
+            editable={true}
+            deletable={(moduleId && !isNaN(moduleId)) ? true : false}
         />
     )
 }

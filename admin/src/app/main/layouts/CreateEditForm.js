@@ -165,11 +165,11 @@ const CreateEditForm = (props) => {
             '<meta name="description" content="${page_descriptions ? page_descriptions : layout_descriptions}">\n' +
             '<meta name="keywords" content="${page_keywords ? page_keywords : layout_keywords}">\n' +
             '${page_meta_code}\n\n' +
-            layoutCode.header.value +
             '\n\n<!-- Additional Script Start-->\n' +
             '${additional_header_script}\n' +
             '${default_scripted_codes}\n' +
             '<!-- Additional Script End -->\n' +
+            layoutCode.header.value +
             '</head>\n' + layoutCode.body.value + '\n' +
             '</html>';
 

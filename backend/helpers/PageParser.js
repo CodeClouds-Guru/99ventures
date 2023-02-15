@@ -46,7 +46,7 @@ class PageParser {
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
     }
-    if('flash' in req.session && 'error' in req.session.flash){
+    if ('flash' in req.session && 'error' in req.session.flash) {
       this.sessionMessage = req.session.flash.error
     }
     const page_content = await this.generateHtml();
@@ -138,7 +138,7 @@ class PageParser {
   getSessionUser() {
     return this.sessionUser;
   }
-  getFlashMessage(){
+  getFlashMessage() {
     return this.sessionMessage;
   }
 }

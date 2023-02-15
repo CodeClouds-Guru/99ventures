@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Typography, Paper, Button, Accordion, AccordionDetails, AccordionSummary, FormGroup, FormControlLabel, Checkbox, List, ListItem, Divider} from '@mui/material';
+import { Typography, Paper, Button, Accordion, AccordionDetails, AccordionSummary, FormGroup, FormControlLabel, Checkbox, List, ListItem, Divider } from '@mui/material';
 import axios from "axios";
 import { motion } from 'framer-motion';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -111,7 +111,7 @@ function PermissionSettings(props) {
                 setOpenAlertDialog(false);
             })
     }
-    
+
     return (
         <div className="p-16 permission--section">
             <AlertDialog
@@ -130,7 +130,7 @@ function PermissionSettings(props) {
                                     <Accordion expanded={expanded === 'panel1'} key={`accordion-${childModule}-${childKey}`}>
                                         <AccordionSummary
                                             aria-controls="panel1bh-content"
-                                            className="uncategorized--accordian"                                       
+                                            className="uncategorized--accordian"
                                         >
                                             <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pl-5 font-semibold" variant="body1">
                                                 {childModule.name}
@@ -169,7 +169,7 @@ function PermissionSettings(props) {
                                         <Typography component={'div'} sx={{ width: '33%', flexShrink: 0 }} className="pl-5 font-semibold" variant="body1">
                                             {module}
                                         </Typography>
-                                        <Typography component={'div'}                                            
+                                        <Typography component={'div'}
                                             className="">
                                             <FormGroup row={true}>
                                                 <FormControlLabel onClick={(e) => e.stopPropagation()} control={
@@ -196,8 +196,9 @@ function PermissionSettings(props) {
                                             modules[module].map((childModule, childKey) => {
                                                 return (
                                                     <Typography key={`accordion-${childModule}-${childKey}`} component={'div'} row={true} className="flex justify-between px-24 py-5">
-                                                        <Typography variant="body1">{childModule.name}</Typography>
-                                                        
+                                                        <Typography variant="body1">    {childModule.name === 'Offer Walls' ? 'Offerwalls' : childModule.name}
+                                                        </Typography>
+
                                                         <FormGroup row={true} className="">
                                                             <FormControlLabel control={
                                                                 <Checkbox onClick={handleChildCheckbox('view', childModule)} id={`view-${childModule.slug}-${childKey}`}
