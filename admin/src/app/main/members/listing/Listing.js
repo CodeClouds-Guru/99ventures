@@ -319,7 +319,7 @@ function Listing(props) {
     return (
         <div>
             {/* // header */}
-            <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between py-32 px-24 md:px-32">
+            <div className="flex flex-col sm:flex-row flex-1 w-full space-y-8 sm:space-y-0 items-center justify-between pb-32 px-24 md:px-32">
                 <Typography
                     component={motion.span}
                     initial={{ x: -20 }}
