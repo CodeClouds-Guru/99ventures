@@ -8,6 +8,15 @@ const {
 class OfferwallPostbackController {
   constructor() {}
   async save(req, res) {
+    //---- To Generate Log
+    const logger1 = require('../helpers/Logger')(
+      `outcome-${req.params.offerwall}.log`
+    );
+    logger1.info(req.method)
+    logger1.info(JSON.stringify(req.query));
+    logger1.info(JSON.stringify(req.body));
+    //----
+
     console.log(req.params.offerwall);
     if (req.query.status == '1') {
       try {
