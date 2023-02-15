@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     survey_provider_id: DataTypes.BIGINT,
     survey_provider_question_id: DataTypes.BIGINT,
+    question_type: DataTypes.STRING,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

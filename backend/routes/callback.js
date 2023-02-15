@@ -5,6 +5,9 @@ const logger = require('../helpers/Logger')();
 const AdgateControllerClass = require('../controllers/callback/AdgateController');
 const AdgateController = new AdgateControllerClass();
 
+const SurveyQuestionsControllerClass = require('../controllers/callback/SurveyQuestionsController');
+const SurveyQuestionsController = new SurveyQuestionsControllerClass();
+
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
   logger.info(JSON.stringify(req.query));
@@ -41,7 +44,8 @@ router.all('/survey/other/:provider/:status', async (req, res) => {
   logger1.info(JSON.stringify(req.body));
   res.send(req.query);
 });
-
+//survey question
+router.get('/survey-questions/', SurveyQuestionsController.save);
 module.exports = {
   prefix: '/callback',
   router,
