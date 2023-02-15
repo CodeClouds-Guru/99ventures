@@ -16,6 +16,7 @@ const {
           });
           await SurveyQuestion.bulkCreate(question_list)
         }
+        
         res.json({status: true,message:"Updated"})
         return
     }
