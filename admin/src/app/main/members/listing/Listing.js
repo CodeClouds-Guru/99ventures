@@ -183,7 +183,25 @@ function Listing(props) {
             console.log(error);
         }
     }
-
+    async function handleMultirowStatus(selectedIds, memberStatus, statusNote) {
+        try {
+            await axios.post(`${module}/update`, {
+                value: memberStatus,
+                field_name: "status",
+                member_id: selectedIds,
+                type: "member_status",
+                member_notes: statusNote.trim()
+            }).then(res => {
+                if (res.data.results.message) {
+                    setSelected([]);
+                    fetchModules();
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
     function handleClick(item) {
         handelNavigate(item);
     }
@@ -461,6 +479,7 @@ function Listing(props) {
                             onRequestSort={handleRequestSort}
                             rowCount={data.length}
                             onMenuItemClick={handleDeselect}
+                            onChangeMultirowStatus={handleMultirowStatus}
                             {...props}
                             fields={fields}
                         />
