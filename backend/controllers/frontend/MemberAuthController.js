@@ -10,9 +10,9 @@ class MemberAuthController {
   //login
   async login(req, res) {
     let company_portal_id = 1
-    let redirect_page = await Page.findOne({where:{company_portal_id:company_portal_id,after_signin:1}})
-    if(redirect_page)
-      redirect_page = '/'+redirect_page.slug
+    let redirect_page = await Page.findOne({ where: { company_portal_id: company_portal_id, after_signin: 1 } })
+    if (redirect_page)
+      redirect_page = '/' + redirect_page.slug
     else
       redirect_page = '/'
     if (req.session.member) {
@@ -22,10 +22,9 @@ class MemberAuthController {
 
       const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
       let ip = req.ip;
-      if(Array.isArray(ip))
-      {
+      if (Array.isArray(ip)) {
         ip = ip[0]
-      }else{
+      } else {
         ip = ip.replace("::ffff:", "");
       }
 
@@ -52,6 +51,10 @@ class MemberAuthController {
           member_status = false
           member_message = "This IP is blacklisted!"
         }
+        // if (ip_ckeck.vpn) {
+        //   member_status = false
+        //   member_message = "Please disconnect from VPN to access this site"
+        // }
         if (!member) {
           member_status = false
           member_message = "Email is not registered!"
@@ -65,17 +68,17 @@ class MemberAuthController {
             if (!isMatch) {
               member_status = false
               member_message = "Invalid credentials!"
-            }else{
+            } else {
               const reportObj = new IpQualityScoreClass();
               const geo = await reportObj.getIpReport(ip);
               let ip_logs = {
                 member_id: member.id,
-                ip:ip,
-                browser:req.headers["user-agent"],
+                ip: ip,
+                browser: req.headers["user-agent"],
                 browser_language: req.headers["accept-language"]
               }
-              if(geo.status){
-                ip_logs['geo_location'] = geo.report.country_code+','+geo.report.region+','+geo.report.city;
+              if (geo.status) {
+                ip_logs['geo_location'] = geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city;
                 ip_logs['isp'] = geo.report.ISP;
                 ip_logs['fraud_score'] = geo.report.fraud_score;
                 ip_logs['vpn'] = geo.report.vpn;
@@ -99,9 +102,9 @@ class MemberAuthController {
         member_message = "Failed to check IP"
       }
       //remember me
-      if(req.body.remember_me){
+      if (req.body.remember_me) {
         //res.cookie('remember_me', true);
-      }else{
+      } else {
         //res.cookie('remember_me', false);
       }
       if (member_status) {
@@ -120,26 +123,26 @@ class MemberAuthController {
     try {
       let company_portal_id = req.headers.site_id
       const schema = Joi.object({
-                  first_name: Joi.string().required().label("First Name"),
-                  last_name: Joi.string().required().label("Last Name"),
-                  gender: Joi.string().required().label("Gender"),
-                  status: Joi.string().optional().label("Status"),
-                  username: Joi.string().min(3).max(30).required().label("Username"),
-                  email: Joi.string().optional(),
-                  company_portal_id: Joi.string().optional(),
-                  company_id: Joi.string().optional(),
-                  password: Joi.string().optional(),
-                  dob: Joi.string().optional(),
-                  phone_no: Joi.string().optional().label("Phone No"),
-                  country_id: Joi.optional().label("Country"),
-                  address_1: Joi.string().allow("").required().label("Address 1"),
-                  address_2: Joi.string().allow("").optional().label("Address 2"),
-                  address_3: Joi.string().allow("").optional().label("Address 3"),
-                  zip_code: Joi.string().allow("").optional().label("Zip Code"),
-                  avatar: Joi.optional().label("Avatar"),
-                  country_code: Joi.optional().label("Country Code"),
-                  state: Joi.optional().label("State"),
-                  referral_code: Joi.optional().allow('').label("Referral Code"),
+        first_name: Joi.string().required().label("First Name"),
+        last_name: Joi.string().required().label("Last Name"),
+        gender: Joi.string().required().label("Gender"),
+        status: Joi.string().optional().label("Status"),
+        username: Joi.string().min(3).max(30).required().label("Username"),
+        email: Joi.string().optional(),
+        company_portal_id: Joi.string().optional(),
+        company_id: Joi.string().optional(),
+        password: Joi.string().optional(),
+        dob: Joi.string().optional(),
+        phone_no: Joi.string().optional().label("Phone No"),
+        country_id: Joi.optional().label("Country"),
+        address_1: Joi.string().allow("").required().label("Address 1"),
+        address_2: Joi.string().allow("").optional().label("Address 2"),
+        address_3: Joi.string().allow("").optional().label("Address 3"),
+        zip_code: Joi.string().allow("").optional().label("Zip Code"),
+        avatar: Joi.optional().label("Avatar"),
+        country_code: Joi.optional().label("Country Code"),
+        state: Joi.optional().label("State"),
+        referral_code: Joi.optional().allow('').label("Referral Code"),
       });
       const { error, value } = schema.validate(req.body);
       let member_status = true
@@ -161,8 +164,8 @@ class MemberAuthController {
       });
 
       if (existing_email_or_username > 0) {
-          member_status = false
-          member_message = "Sorry! this username or email has already been taken"
+        member_status = false
+        member_message = "Sorry! this username or email has already been taken"
       } else {
         req.body.membership_tier_id = 1;
         let files = [];
@@ -207,37 +210,37 @@ class MemberAuthController {
 
         //Referral code
         let referrer = ''
-        if(req.body.referral_code != ''){
-          referrer = await Member.findOne({where:{referral_code:req.body.referral_code}})
-          if(referrer){
+        if (req.body.referral_code != '') {
+          referrer = await Member.findOne({ where: { referral_code: req.body.referral_code } })
+          if (referrer) {
             referrer = referrer.id
             //update member referral info
             let ip = (req.ip).split('::ffff:');
             ip = ip[ip.length - 1]
             var geo = geoip.lookup('122.163.102.160');
 
-            let referral_details = await MemberReferral.findOne({where:{referral_id:referrer,referral_email:req.body.email}, order: [['id', 'DESC']],})
-            if(referral_details){
+            let referral_details = await MemberReferral.findOne({ where: { referral_id: referrer, referral_email: req.body.email }, order: [['id', 'DESC']], })
+            if (referral_details) {
               await MemberReferral.update(
-                { geo_location: geo.region,ip:ip,member_id: referrer, join_date: new Date()},
+                { geo_location: geo.region, ip: ip, member_id: referrer, join_date: new Date() },
                 {
                   where: { id: referral_details.id },
                 }
               );
             }
-            else{
-                    await MemberReferral.create({
-                                          member_id: referrer,
-                                          referral_id: member_details.id,
-                                          referral_email:req.body.email,
-                                          geo_location: geo.region,
-                                          ip:ip,
-                                          join_date: new Date()
-                                      })
-              }
+            else {
+              await MemberReferral.create({
+                member_id: referrer,
+                referral_id: member_details.id,
+                referral_email: req.body.email,
+                geo_location: geo.region,
+                ip: ip,
+                join_date: new Date()
+              })
+            }
           }
           let model = await Member.update(
-            { referral_code: res.result.id + '0' + new Date().getTime(),member_referral_id:referrer },
+            { referral_code: res.result.id + '0' + new Date().getTime(), member_referral_id: referrer },
             {
               where: { id: res.result.id },
             }
@@ -245,13 +248,13 @@ class MemberAuthController {
           //signed up with referral code
         }
         //registration bonus
-        let registration_bonus = await Setting.findOne({where:{settings_key:'registration_bonus'}})
+        let registration_bonus = await Setting.findOne({ where: { settings_key: 'registration_bonus' } })
         await MemberTransaction.create({
-          type:'credited',
+          type: 'credited',
           amount: registration_bonus.settings_value,
-          status:2,
-          member_id:member_details.id,
-          amount_action:'admin_adjustment',
+          status: 2,
+          member_id: member_details.id,
+          amount_action: 'admin_adjustment',
           balance: registration_bonus.settings_value
         })
       }
@@ -263,7 +266,7 @@ class MemberAuthController {
       }
       res.redirect('back')
     } catch (error) {
-      req.session.flash = { error: "Unable to save data"}
+      req.session.flash = { error: "Unable to save data" }
       res.redirect('back')
     }
   }
