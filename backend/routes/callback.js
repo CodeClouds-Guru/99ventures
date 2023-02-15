@@ -21,7 +21,7 @@ router.all('/survey/:provider', SurveycallbackController.syncSurvey);
 
 // for adscend PB test
 router.all('/postback-test/:offerwall', async (req, res) => {
-  const logger1 = require('../helpers/Logger')('adscend.log');
+  const logger1 = require('../helpers/Logger')('allofferwallpb.log');
   logger1.info(req.method)
   logger1.info(JSON.stringify(req.query));
   logger1.info(JSON.stringify(req.body));
