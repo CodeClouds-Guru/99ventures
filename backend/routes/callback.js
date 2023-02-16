@@ -52,6 +52,10 @@ router.all('/survey/other/:provider/:status', async (req, res) => {
 });
 //survey question
 router.get('/survey-questions/', SurveyQuestionsController.save);
+router.get(
+  '/survey-answer-precodes/',
+  SurveyQuestionsController.saveAnswerPrecodes
+);
 module.exports = {
   prefix: '/callback',
   router,

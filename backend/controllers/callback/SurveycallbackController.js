@@ -3,6 +3,8 @@ const {
   Member,
   SurveyProvider,
   Survey,
+  SurveyQuestion,
+  SurveyQualification,
 } = require('../../models');
 
 class SurveycallbackController {
@@ -60,19 +62,37 @@ class SurveycallbackController {
         attributes: ['id'],
         where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
       });
-      let survey_sync = [];
-      survey.forEach(function (record, key) {
-        survey_sync.push({
-          survey_provider_id: survey_provider.id,
-          loi: record.length_of_interview,
-          cpi: record.cpi,
-          name: record.survey_name,
-          survey_number: record.survey_id,
-        });
+      let survey_questions = await SurveyQuestion.findAll({
+        attributes: ['survey_provider_question_id'],
       });
-      let model = await Survey.bulkCreate(survey_sync, {
-        updateOnDuplicate: ['survey_number'],
-        ignoreDuplicates: true,
+      survey.map(async (record) => {
+        let model = await Survey.create(
+          {
+            survey_provider_id: survey_provider.id,
+            loi: record.length_of_interview,
+            cpi: record.cpi,
+            name: record.survey_name,
+            survey_number: record.survey_id,
+          },
+          { silent: true }
+        );
+        if (record.survey_qualifications.length > 0) {
+          record.survey_qualifications.map(async (record1) => {
+            let obj = survey_questions.find(
+              (val) => val.survey_provider_question_id === record1.question_id
+            );
+            if (obj) {
+              let model1 = await SurveyQualification.create(
+                {
+                  survey_id: model.id,
+                  survey_question_id: obj.id,
+                  logical_operator: record1.logical_operator,
+                },
+                { silent: true }
+              );
+            }
+          });
+        }
       });
     }
   }
