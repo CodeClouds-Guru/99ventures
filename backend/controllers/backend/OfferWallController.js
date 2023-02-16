@@ -114,6 +114,7 @@ class OfferWallController extends Controller {
     try {
       const site_id = req.header('site_id') || 1;
       let report = req.query.report || 0;
+      req.query.sort = req.query.sort === 'campaign_name' ? 'Campaign.name' : req.query.sort;
       var options = super.getQueryOptions(req);
       const campaign_id = parseInt(req.query.campaign_id) || null;
       options['where'] = {
@@ -222,6 +223,6 @@ class OfferWallController extends Controller {
     };
   }
   //get report details
-  async getReport(req) {}
+  async getReport(req) { }
 }
 module.exports = OfferWallController;
