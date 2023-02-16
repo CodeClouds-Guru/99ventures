@@ -1,5 +1,5 @@
 'use strict';
-const { Model } = require('sequelize');
+const { Model, Op } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
 const Joi = require('joi');
 
@@ -318,43 +318,47 @@ module.exports = (sequelize, DataTypes) => {
 
   Member.changeStatus = async (req) => {
     const { MemberNote } = require('../models/index');
-    
+
     const value = req.body.value || '';
     const field_name = req.body.field_name || '';
     const id = req.params.id || null;
     const notes = req.body.member_notes || null;
-    if(id == '' && req.body.member_id && Array.isArray(req.body.member_id)){
-      id = req.body.member_id
-    }
+    const member_ids = id ? [id] : Array.isArray(req.body.member_id) ? req.body.member_id : [req.body.member_id];
     try {
-      let member = await Member.findAll({
-        attributes: ['status','id'],
-        where: { id: id },
+      let members = await Member.findAll({
+        attributes: ['status', 'id'],
+        where: {
+          id: {
+            [Op.in]: member_ids
+          }
+        },
       });
       let result = await Member.update(
         {
           [field_name]: value,
         },
         {
-          where: { id: id },
+          where: {
+            id: {
+              [Op.in]: member_ids
+            }
+          },
           return: true,
         }
       );
-      if (notes !== null) {
-        
-        if(member){
-          let data = []
-          member.forEach(element => {
-            data.push({
-              user_id: req.user.id,
-              member_id: element.dataValues.id,
-              previous_status: element.dataValues.status,
-              current_status: value,
-              note: notes,
-            })
-          });
+      if (notes) {
+        let data = []
+        members.forEach(element => {
+          data.push({
+            user_id: req.user.id,
+            member_id: element.dataValues.id,
+            previous_status: element.dataValues.status,
+            current_status: value,
+            note: notes,
+          })
+        });
+        if (data.length > 0)
           await MemberNote.bulkCreate(data);
-        }
       }
       return result[0];
     } catch (error) {
