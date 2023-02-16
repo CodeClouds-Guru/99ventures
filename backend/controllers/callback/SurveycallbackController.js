@@ -53,7 +53,9 @@ class SurveycallbackController {
   }
 
   async syncSurvey(req, res) {
-    const logger1 = require('../helpers/Logger')(req.params.provider + '.log');
+    const logger1 = require('../../helpers/Logger')(
+      req.params.provider + '.log'
+    );
     //   console.log('===================req', req);
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
