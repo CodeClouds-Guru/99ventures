@@ -5,7 +5,9 @@ const {
   Survey,
   SurveyQuestion,
   SurveyQualification,
+  SurveyAnswerPrecodes,
 } = require('../../models');
+const db = require('../../models/index');
 
 class SurveycallbackController {
   constructor() {}
@@ -89,6 +91,22 @@ class SurveycallbackController {
                   logical_operator: record1.logical_operator,
                 },
                 { silent: true }
+              );
+              record1.precodes.map(async (precode) => {
+                let answer_precode = await SurveyAnswerPrecodes.create(
+                  {
+                    option: precode,
+                    lucid_precode: record1.question_id,
+                  },
+                  { silent: true }
+                );
+              });
+              await db.sequelize.query(
+                'INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES (?, ?)',
+                {
+                  type: MySQL.sequelize.QueryTypes.INSERT,
+                  replacements: [model1.id, answer_precode.id],
+                }
               );
             }
           });
