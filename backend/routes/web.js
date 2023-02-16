@@ -6,12 +6,16 @@ const Cint = require('../helpers/Cint');
 
 const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthController");
 const MemberAuthController = new MemberAuthControllerClass();
+const PureSpectrumControllerClass = require("../controllers/callback/PureSpectrumController");
+const PureSpectrumController = new PureSpectrumControllerClass();
 
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
   const definitions_data = await lucidObj.allocatedSurveys();
   res.json(definitions_data);
 });
+
+router.get('/survey-create', PureSpectrumController.save);
 
 router.get('/cint/entry-link', async (req, res) => {
   try {

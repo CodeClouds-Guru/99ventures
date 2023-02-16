@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     loi: DataTypes.FLOAT,
     cpi: DataTypes.FLOAT,
     name: DataTypes.STRING,
+    survey_number: DataTypes.STRING,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',
     deleted_at: 'TIMESTAMP'
