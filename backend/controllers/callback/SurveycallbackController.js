@@ -8,6 +8,7 @@ const {
   SurveyAnswerPrecodes,
 } = require('../../models');
 const db = require('../../models/index');
+const { QueryTypes } = require('sequelize');
 
 class SurveycallbackController {
   constructor() {}
@@ -57,6 +58,8 @@ class SurveycallbackController {
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
     let survey = req.body;
+    // let survey = require('./test.json');
+    // console.log(survey, survey.length);
 
     if (survey.length > 0) {
       const provider = req.params.provider;
@@ -100,14 +103,14 @@ class SurveycallbackController {
                   },
                   { silent: true }
                 );
+                await db.sequelize.query(
+                  'INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES (?, ?)',
+                  {
+                    type: QueryTypes.INSERT,
+                    replacements: [model1.id, answer_precode.id],
+                  }
+                );
               });
-              await db.sequelize.query(
-                'INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES (?, ?)',
-                {
-                  type: MySQL.sequelize.QueryTypes.INSERT,
-                  replacements: [model1.id, answer_precode.id],
-                }
-              );
             }
           });
         }
