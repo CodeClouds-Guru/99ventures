@@ -150,8 +150,8 @@ function GeneralConfiguration(props) {
                 })
                 !response.data.results.data.google_captcha_configuration ? '' : setDefaultValues({
                     ...defaultValues,
-                    site_key: response.data.results.data.site_key,
-                    site_token: response.data.results.data.site_token,
+                    site_key: response.data.results.data.google_captcha_configuration.site_key,
+                    site_token: response.data.results.data.google_captcha_configuration.site_token,
                 })
             } else {
                 console.log('Error');
