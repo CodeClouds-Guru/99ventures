@@ -16,6 +16,8 @@ router.get('/test-lucid', async (req, res) => {
 });
 
 router.get('/survey-create', PureSpectrumController.save);
+router.get('/survey-question', PureSpectrumController.saveSurveyQuestions);
+router.get('/survey-qualification', PureSpectrumController.saveSurveyQualification);
 
 router.get('/cint/entry-link', async (req, res) => {
   try {
