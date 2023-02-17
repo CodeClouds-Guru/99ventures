@@ -2,7 +2,7 @@
 const { Model } = require('sequelize')
 const sequelizePaginate = require('sequelize-paginate')
 const Joi = require('joi')
-const {Layout} = require('../models/index')
+const { Layout } = require('../models/index')
 module.exports = (sequelize, DataTypes) => {
   class CompanyPortal extends Model {
     /**
@@ -12,14 +12,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      CompanyPortal.belongsToMany(models.CaptchaOption, {
-        through: 'captcha_option_company_portal',
-        timestamps: false,
-        foreignKey: 'company_portal_id',
-        otherKey: 'captcha_option_id',
-      })
       CompanyPortal.belongsTo(models.Company, {
         foreignKey: 'company_id',
+      })
+      CompanyPortal.hasOne(models.GoogleCaptchaConfiguration, {
+        foreignKey: 'company_portal_id'
       })
     }
   }
@@ -52,6 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       created_at: DataTypes.TIME,
       updated_at: DataTypes.TIME,
       deleted_at: DataTypes.TIME,
+      is_google_captcha_used: DataTypes.TINYINT
     },
     {
       sequelize,
