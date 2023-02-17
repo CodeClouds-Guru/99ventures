@@ -2,6 +2,7 @@
 const { Model, Op } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
 const Joi = require('joi');
+const { MemberBalance } = require("../models");
 
 const moment = require('moment');
 // const {MemberNote} = require("../models/index");
@@ -164,6 +165,32 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
       tableName: 'members',
+      hooks: {
+        afterCreate: async (member, options) => {
+          //member balance
+          await sequelize.models.MemberBalance.bulkCreate([
+            {
+              member_id: member.id,
+              amount: 0.0,
+              amount_type: 'cash',
+              created_by: '0',
+            },
+            {
+              member_id: member.id,
+              amount: 0.0,
+              amount_type: 'point',
+              created_by: '0',
+            },
+          ]);
+          //member referral code
+          await sequelize.models.Member.update(
+              { referral_code: member.id + '0' + new Date().getTime() },
+              {
+                where: { id: member.id },
+              }
+            );
+        },
+      },
     }
   );
 

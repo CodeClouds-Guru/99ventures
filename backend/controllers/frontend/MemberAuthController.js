@@ -69,27 +69,7 @@ class MemberAuthController {
               member_status = false
               member_message = "Invalid credentials!"
             } else {
-              const reportObj = new IpQualityScoreClass();
-              const geo = await reportObj.getIpReport(ip);
-              let ip_logs = {
-                member_id: member.id,
-                ip: ip,
-                browser: req.headers["user-agent"],
-                browser_language: req.headers["accept-language"]
-              }
-              if (geo.status) {
-                ip_logs['geo_location'] = geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city;
-                ip_logs['isp'] = geo.report.ISP;
-                ip_logs['fraud_score'] = geo.report.fraud_score;
-                ip_logs['vpn'] = geo.report.vpn;
-                ip_logs['proxy'] = geo.report.proxy;
-                ip_logs['tor'] = geo.report.tor;
-                ip_logs['bot_status'] = geo.report.bot_status;
-                ip_logs['latitude'] = geo.report.latitude;
-                ip_logs['longitude'] = geo.report.longitude;
-              }
-              //ip logs
-              await IpLog.create(ip_logs)
+              await this.geoTrack(req,ip,member)
             }
             if (member.status != 'member') {
               member_status = false
@@ -122,6 +102,12 @@ class MemberAuthController {
   async signup(req, res) {
     try {
       let company_portal_id = req.headers.site_id
+      let ip = req.ip;
+      if (Array.isArray(ip)) {
+        ip = ip[0]
+      } else {
+        ip = ip.replace("::ffff:", "");
+      }
       const schema = Joi.object({
         first_name: Joi.string().required().label("First Name"),
         last_name: Joi.string().required().label("Last Name"),
@@ -151,124 +137,152 @@ class MemberAuthController {
         member_status = false
         member_message = error.details.map((err) => err.message);
       }
-      const salt = await bcrypt.genSalt(10);
-      const password = await bcrypt.hash(value.password, salt);
-      const existing_email_or_username = await Member.count({
-        where: {
-          company_portal_id: company_portal_id,
-          [Op.or]: {
-            email: req.body.email,
-            username: req.body.username,
+      //check if IP is blacklisted
+      const ipHelper = new IpHelper();
+      let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
+      if (ip_ckeck.status) {
+        const salt = await bcrypt.genSalt(10);
+        const password = await bcrypt.hash(value.password, salt);
+        const existing_email_or_username = await Member.count({
+          where: {
+            company_portal_id: company_portal_id,
+            [Op.or]: {
+              email: req.body.email,
+              username: req.body.username,
+            },
           },
-        },
-      });
-
-      if (existing_email_or_username > 0) {
-        member_status = false
-        member_message = "Sorry! this username or email has already been taken"
-      } else {
-        req.body.membership_tier_id = 1;
-        let files = [];
-        if (req.files) {
-          files[0] = req.files.avatar;
-          const fileHelper = new FileHelper(files, 'members', req);
-          const file_name = await fileHelper.upload();
-          req.body.avatar = file_name.files[0].filename;
-        }
-
-        await Member.create({
-          ...req.body,
-          password,
-        });
-        //send mail
-        const eventBus = require('../../eventBus');
-        let member_details = await Member.findOne({
-          where: { email: req.body.email },
-        });
-        await MemberBalance.bulkCreate([
-          {
-            member_id: member_details.id,
-            amount: 0.0,
-            amount_type: 'cash',
-            created_by: '0',
-          },
-          {
-            member_id: member_details.id,
-            amount: 0.0,
-            amount_type: 'point',
-            created_by: '0',
-          },
-        ]);
-        let evntbus = eventBus.emit('send_email', {
-          action: 'Welcome',
-          data: {
-            email: req.body.email,
-            details: { members: member_details },
-          },
-          req: req,
         });
 
-        //Referral code
-        let referrer = ''
-        if (req.body.referral_code != '') {
-          referrer = await Member.findOne({ where: { referral_code: req.body.referral_code } })
-          if (referrer) {
-            referrer = referrer.id
-            //update member referral info
-            let ip = (req.ip).split('::ffff:');
-            ip = ip[ip.length - 1]
-            var geo = geoip.lookup('122.163.102.160');
-
-            let referral_details = await MemberReferral.findOne({ where: { referral_id: referrer, referral_email: req.body.email }, order: [['id', 'DESC']], })
-            if (referral_details) {
-              await MemberReferral.update(
-                { geo_location: geo.region, ip: ip, member_id: referrer, join_date: new Date() },
-                {
-                  where: { id: referral_details.id },
-                }
-              );
-            }
-            else {
-              await MemberReferral.create({
-                member_id: referrer,
-                referral_id: member_details.id,
-                referral_email: req.body.email,
-                geo_location: geo.region,
-                ip: ip,
-                join_date: new Date()
-              })
-            }
+        if (existing_email_or_username > 0) {
+          member_status = false
+          member_message = "Sorry! this username or email has already been taken"
+        } else {
+          req.body.membership_tier_id = 1;
+          let files = [];
+          if (req.files) {
+            files[0] = req.files.avatar;
+            const fileHelper = new FileHelper(files, 'members', req);
+            const file_name = await fileHelper.upload();
+            req.body.avatar = file_name.files[0].filename;
           }
-          let model = await Member.update(
-            { referral_code: res.result.id + '0' + new Date().getTime(), member_referral_id: referrer },
-            {
-              where: { id: res.result.id },
-            }
-          );
-          //signed up with referral code
+
+          const res = await Member.create({
+            ...req.body,
+            password,
+          });
+          //send mail
+          const eventBus = require('../../eventBus');
+          let member_details = await Member.findOne({
+            where: { email: req.body.email },
+          });
+          
+          let evntbus = eventBus.emit('send_email', {
+            action: 'Welcome',
+            data: {
+              email: req.body.email,
+              details: { members: member_details },
+            },
+            req: req,
+          });
+
+          //Referral code
+          let referrer = ''
+          if (req.body.referral_code != '') {
+            await this.referralDetails(req,res)
+            //signed up with referral code
+          }
+          //registration bonus
+          await this.saveRegistrationBonus(member_details);
         }
-        //registration bonus
-        let registration_bonus = await Setting.findOne({ where: { settings_key: 'registration_bonus' } })
-        await MemberTransaction.create({
-          type: 'credited',
-          amount: registration_bonus.settings_value,
-          status: 2,
-          member_id: member_details.id,
-          amount_action: 'admin_adjustment',
-          balance: registration_bonus.settings_value
-        })
-      }
-      if (member_status) {
-        req.session.flash = { message: member_message }
-      }
-      else {
-        req.session.flash = { error: member_message }
+        if (member_status) {
+          req.session.flash = { message: member_message }
+        }
+        else {
+          req.session.flash = { error: member_message }
+        }
       }
       res.redirect('back')
     } catch (error) {
       req.session.flash = { error: "Unable to save data" }
       res.redirect('back')
     }
+  }
+
+  //referral 
+  async referralDetails(req,res){
+    if (req.body.referral_code != '') {
+      referrer = await Member.findOne({ where: { referral_code: req.body.referral_code } })
+      if (referrer) {
+        referrer = referrer.id
+        //update member referral info
+        let ip = (req.ip).split('::ffff:');
+        ip = ip[ip.length - 1]
+        var geo = geoip.lookup('122.163.102.160');
+
+        let referral_details = await MemberReferral.findOne({ where: { referral_id: referrer, referral_email: req.body.email }, order: [['id', 'DESC']], })
+        if (referral_details) {
+          await MemberReferral.update(
+            { geo_location: geo.region, ip: ip, member_id: referrer, join_date: new Date() },
+            {
+              where: { id: referral_details.id },
+            }
+          );
+        }
+        else {
+          await MemberReferral.create({
+            member_id: referrer,
+            referral_id: member_details.id,
+            referral_email: req.body.email,
+            geo_location: geo.region,
+            ip: ip,
+            join_date: new Date()
+          })
+        }
+      }
+      let model = await Member.update(
+        { referral_code: res.result.id + '0' + new Date().getTime(), member_referral_id: referrer },
+        {
+          where: { id: res.result.id },
+        }
+      );
+      //signed up with referral code
+    }
+  }
+  //registration bonus
+  async saveRegistrationBonus(member_details){
+    let registration_bonus = await Setting.findOne({ where: { settings_key: 'registration_bonus' } })
+    await MemberTransaction.create({
+      type: 'credited',
+      amount: registration_bonus.settings_value,
+      status: 2,
+      member_id: member_details.id,
+      amount_action: 'admin_adjustment',
+      balance: registration_bonus.settings_value
+    })
+  }
+  //geo track
+  async geoTrack(req,ip,member){
+    const reportObj = new IpQualityScoreClass();
+              const geo = await reportObj.getIpReport(ip);
+              let ip_logs = {
+                member_id: member.id,
+                ip: ip,
+                browser: req.headers["user-agent"],
+                browser_language: req.headers["accept-language"]
+              }
+              if (geo.status) {
+                ip_logs['geo_location'] = geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city;
+                ip_logs['isp'] = geo.report.ISP;
+                ip_logs['fraud_score'] = geo.report.fraud_score;
+                ip_logs['vpn'] = geo.report.vpn;
+                ip_logs['proxy'] = geo.report.proxy;
+                ip_logs['tor'] = geo.report.tor;
+                ip_logs['bot_status'] = geo.report.bot_status;
+                ip_logs['latitude'] = geo.report.latitude;
+                ip_logs['longitude'] = geo.report.longitude;
+              }
+              //ip logs
+              await IpLog.create(ip_logs)
   }
   //profile
   async profile(req, res) {
