@@ -203,7 +203,7 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.status === 200) {
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    navigate(`/app/campaigns/${campaignId}/offerwalls`);
+                    navigate(`/app/offer-walls`);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -226,7 +226,7 @@ const CreateUpdate = () => {
                         className="flex items-center sm:mb-12"
                         component={Link}
                         role="button"
-                        to={campaignId ? `/app/campaigns/${campaignId}/${module}` : `/app/${module}`}
+                        to={`/app/${module}`}
                         color="inherit"
                     >
                         <FuseSvgIcon size={20}>

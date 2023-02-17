@@ -3,8 +3,6 @@ import settingsConfig from 'app/configs/settingsConfig';
 import Campaigns from './Campaigns';
 import CampaignsCreateUpdate from './create-update/CreateUpdate';
 import Index from './report/Index';
-import OfferwallsCreateUpdate from './offerwalls/CreateUpdate';
-import Offerwalls from './offerwalls/Index';
 
 const CampaignsConfig = {
   settings: {
@@ -49,21 +47,6 @@ const CampaignsConfig = {
       element: <Index />,
       auth: settingsConfig.defaultAuth
     },
-    {
-      path: 'app/campaigns/:moduleId/offerwalls',
-      element: <Offerwalls />,
-      auth: settingsConfig.defaultAuth
-    },
-    {
-      path: 'app/campaigns/:campaignId/offerwalls/create',
-      element: <OfferwallsCreateUpdate />,
-      auth: settingsConfig.defaultAuth
-    },
-    {
-      path: 'app/campaigns/:campaignId/offerwalls/:moduleId',
-      element: <OfferwallsCreateUpdate />,
-      auth: settingsConfig.defaultAuth
-    }
   ],
 };
 

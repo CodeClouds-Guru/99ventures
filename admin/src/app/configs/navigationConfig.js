@@ -68,7 +68,7 @@ const navigationConfig = [
         translate: 'Offerwalls',
         type: 'item',
         icon: 'material-outline:attach_money',
-        url: 'app/offerwalls',
+        url: 'app/offer-walls',
         end: true,
       },
     ],

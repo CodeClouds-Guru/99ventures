@@ -1,6 +1,7 @@
 import { React, lazy } from 'react';
 import settingsConfig from 'app/configs/settingsConfig';
 import Index from './Index'
+import OfferwallsCreateUpdate from './CreateUpdate';
 
 const OfferwallsConfig = {
   settings: {
@@ -26,11 +27,20 @@ const OfferwallsConfig = {
   },
   routes: [
     {
-      path: 'app/offerwalls',
+      path: 'app/offer-walls',
       element: <Index />,
       auth: settingsConfig.defaultAuth
     },
-
+    {
+      path: 'app/offer-walls/create',
+      element: <OfferwallsCreateUpdate />,
+      auth: settingsConfig.defaultAuth
+    },
+    {
+      path: 'app/offer-walls/:moduleId',
+      element: <OfferwallsCreateUpdate />,
+      auth: settingsConfig.defaultAuth
+    }
   ],
 };
 

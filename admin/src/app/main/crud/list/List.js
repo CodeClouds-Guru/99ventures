@@ -220,8 +220,6 @@ function List(props) {
 		if (module === 'users' && item.id == user.id) {
 			dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
 			return '';
-		} else if (module === 'offer-walls' || module === 'offerwalls') {
-			props.navigate(`/app/campaigns/${item.campaign_id}/offerwalls/${item.id}`);
 		} else {
 			props.navigate(`/app/${module}/${item.id}`);
 		}
@@ -363,7 +361,7 @@ function List(props) {
 									</ListItemIcon>
 									<ListItemText primary="Report" />
 								</MenuItem>
-								<MenuItem
+								{/* <MenuItem
 									onClick={(event) => {
 										event.stopPropagation();
 										navigate(`/app/campaigns/${n.id}/offerwalls`)
@@ -373,7 +371,7 @@ function List(props) {
 										<FuseSvgIcon>material-outline:attach_money</FuseSvgIcon>
 									</ListItemIcon>
 									<ListItemText primary="Offerwalls" />
-								</MenuItem>
+								</MenuItem> */}
 							</MenuList>
 						</Menu>
 					</>
