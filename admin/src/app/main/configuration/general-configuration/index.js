@@ -141,17 +141,21 @@ function GeneralConfiguration(props) {
                 setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Page' }])
                 setLayoutOptions([...response.data.results.data.layout_options, { id: 0, name: 'Select default layout' }])
                 setGeneralReplies([...response.data.results.data.general_replies])
-                setDefaultValues({
-                    ...defaultValues,
-                    home_page_id: response.data.results.data.home_page_id,
-                    redirect_page_id: response.data.results.data.redirect_page_id,
-                    default_template_id: response.data.results.data.default_template_id,
-                    google_captcha_status: response.data.results.data.is_google_captcha_used === 1,
+                setDefaultValues((defaultValues) => {
+                    return {
+                        ...defaultValues,
+                        home_page_id: response.data.results.data.home_page_id,
+                        redirect_page_id: response.data.results.data.redirect_page_id,
+                        default_template_id: response.data.results.data.default_template_id,
+                        google_captcha_status: response.data.results.data.is_google_captcha_used === 1,
+                    }
                 })
-                !response.data.results.data.google_captcha_configuration ? '' : setDefaultValues({
-                    ...defaultValues,
-                    site_key: response.data.results.data.google_captcha_configuration.site_key,
-                    site_token: response.data.results.data.google_captcha_configuration.site_token,
+                response.data.results.data.google_captcha_configuration === 0 ? '' : setDefaultValues((defaultValues) => {
+                    return {
+                        ...defaultValues,
+                        site_key: response.data.results.data.google_captcha_configuration.site_key,
+                        site_token: response.data.results.data.google_captcha_configuration.site_token,
+                    }
                 })
             } else {
                 console.log('Error');
