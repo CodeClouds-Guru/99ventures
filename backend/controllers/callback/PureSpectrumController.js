@@ -126,8 +126,9 @@ class PureSpectrumController {
                     ignoreDuplicates: true
                 });
                 res.json({ status: true, message: 'Updated' });
-            } 
-            res.json({ status: true, message: 'No record to update!' });
+            } else {
+                res.json({ status: true, message: 'No record to update!' });
+            }
             return;
         }
         catch (error) {
