@@ -162,23 +162,30 @@ class GeneralConfigurationController {
       }
 
       /** Google Captcha Configuration */
-      await CompanyPortal.update({ is_google_captcha_used: req.body.is_google_captcha_used }, { where: { company_portal_id: site_id } })
+      await CompanyPortal.update({ is_google_captcha_used: req.body.is_google_captcha_used }, { where: { id: site_id } })
       if (req.body.is_google_captcha_used) {
-        await GoogleCaptchaConfiguration.upsert({
+        await GoogleCaptchaConfiguration.destroy({ where: { company_portal_id: site_id, } });
+        await GoogleCaptchaConfiguration.create({
+          company_portal_id: site_id,
           site_key: req.body.site_key,
           site_token: req.body.site_token
         }, { company_portal_id: site_id, });
       }
 
-      if (flag) {
-        return {
-          status: true,
-          message: "Data saved",
-        };
-      } else {
-        this.throwCustomError("Unable to save data", 500);
-      }
+      // if (flag) {
+      //   return {
+      //     status: true,
+      //     message: "Data saved",
+      //   };
+      // } else {
+      //   this.throwCustomError("Unable to save data", 500);
+      // }
+      return {
+        status: true,
+        message: "Data saved",
+      };
     } catch (err) {
+      console.error(err);
       this.throwCustomError("Unable to save data", 500);
     }
   }
