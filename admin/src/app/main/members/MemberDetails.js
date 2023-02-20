@@ -136,6 +136,7 @@ const MemberDetails = () => {
     const [status, setStatus] = useState('');
     const [surveyDetails, setSurveyDetails] = useState([]);
     const [loader, setLoader] = useState(true);
+    const [statuslessNote, setStatuslessNote] = useState(false);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -292,18 +293,20 @@ const MemberDetails = () => {
     /**
      * Change member's status
      */
-    const handleChangeStatus = () => {
+    const handleChangeStatus = (type) => {
+        setStatuslessNote(false);
         const params = {
             value: status,
             field_name: "status",
             member_id: memberData.id,
             type: "member_status",
-            member_notes: statusNote ? statusNote : null
+            member_notes: type === 'save' ? statusNote : ''
         }
         updateMemberData(params, "member_status");
     }
 
     const handleCancelStatus = () => {
+        setStatuslessNote(false);
         setEditStatus(false);
         setDialogStatus(false);
         setStatus(memberData.status);
@@ -915,7 +918,11 @@ const MemberDetails = () => {
 
                     <Divider sx={{ borderWidth: 2 }} className="my-5" />
                     <Box component="div" className="w-full flex flex-col">
-                        <Typography variant="body1" className="font-bold">Account Notes Section</Typography>
+                        <Typography variant="body1" className="font-bold flex">Account Notes Section
+                            <Tooltip title="Add Note" placement="right">
+                                <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => { setStatuslessNote(true); setDialogStatus(true) }} >heroicons-solid:plus</FuseSvgIcon>
+                            </Tooltip>
+                        </Typography>
                         {
                             (accountNotes.length != 0) ? (
                                 <AccountNotes accountNotes={accountNotes} />
@@ -938,7 +945,7 @@ const MemberDetails = () => {
             }
             {
                 dialogStatus && (
-                    <Dialog open={dialogStatus} onClose={() => setDialogStatus(false)} fullWidth={true}>
+                    <Dialog open={dialogStatus} onClose={() => { setStatuslessNote(false); setDialogStatus(false) }} fullWidth={true}>
                         <DialogTitle>Add Note</DialogTitle>
                         <DialogContent className="p-32 mt-10">
                             <TextareaAutosize
@@ -953,8 +960,8 @@ const MemberDetails = () => {
                         </DialogContent>
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={handleCancelStatus}>Cancel</Button>
-                            <Button variant="outlined" color="primary" onClick={handleChangeStatus}>Skip</Button>
-                            <Button color="primary" variant="contained" onClick={handleChangeStatus} disabled={statusNote ? false : true}>Save</Button>
+                            {!statuslessNote && <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); handleChangeStatus('skip') }}>Skip</Button>}
+                            <Button color="primary" variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</Button>
                         </DialogActions>
                     </Dialog>
                 )
