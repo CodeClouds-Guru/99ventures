@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   CountryConfiguration.init({
     company_portal_id: DataTypes.BIGINT,
-    ip: DataTypes.STRING,
+    iso: DataTypes.STRING,
     status: DataTypes.TINYINT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
