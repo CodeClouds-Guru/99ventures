@@ -66,20 +66,7 @@ class MemberController extends Controller {
         let member_details = await Member.findOne({
           where: { email: req.body.email },
         });
-        await MemberBalance.bulkCreate([
-          {
-            member_id: member_details.id,
-            amount: 0.0,
-            amount_type: 'cash',
-            created_by: req.user.id,
-          },
-          {
-            member_id: member_details.id,
-            amount: 0.0,
-            amount_type: 'point',
-            created_by: req.user.id,
-          },
-        ]);
+        
         let evntbus = eventBus.emit('send_email', {
           action: 'Welcome',
           data: {
@@ -89,14 +76,7 @@ class MemberController extends Controller {
           req: req,
         });
 
-        //Referral code
-
-        let model = await this.model.update(
-          { referral_code: res.result.id + '0' + new Date().getTime() },
-          {
-            where: { id: res.result.id },
-          }
-        );
+        
         return res;
       }
     } catch (error) {
