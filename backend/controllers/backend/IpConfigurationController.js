@@ -49,7 +49,8 @@ class IpConfigurationController extends Controller {
 
     return {
       status: true,
-      data:{ip_list,isp_list,country_list,all_country_list}
+      data:{ip_list,isp_list,country_list},
+      all_country_list:all_country_list
     }
   }
   //override save function
