@@ -57,6 +57,7 @@ class IpConfigurationController extends Controller {
   async save(req, res) {
     let company_portal_id = req.headers.site_id
     let ips = req.body.ips
+    let isps = req.body.isps
     let countries = req.body.countries
 
     //remove previous ip records
