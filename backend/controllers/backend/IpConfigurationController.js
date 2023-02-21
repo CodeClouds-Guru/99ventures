@@ -46,7 +46,7 @@ class IpConfigurationController extends Controller {
   async save(req, res) {
     let company_portal_id = req.headers.site_id
     let ips = req.body.ips
-    let isps = req.body.isps
+    let countries = req.body.countries
 
     //remove previous ip records
     await IpConfiguration.destroy({
@@ -86,6 +86,27 @@ class IpConfigurationController extends Controller {
       //bulck create isp list
       await IspConfiguration.bulkCreate(isps)
     }
+
+    //remove previous countries records
+    await CountryConfiguration.destroy({
+      where: { company_portal_id: company_portal_id, status: 0 },
+    })
+
+    //store countries list
+    if (countries) {
+      countries = countries.map((country) => {
+        return {
+          iso: country,
+          company_portal_id: company_portal_id,
+          status: 0,
+          created_by: req.user.id,
+        }
+      })
+
+      //bulck create country list
+      await CountryConfiguration.bulkCreate(countries)
+    }
+
     return {
       status: true,
       message: 'Record Updated',
