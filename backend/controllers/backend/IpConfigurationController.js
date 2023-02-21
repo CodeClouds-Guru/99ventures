@@ -3,7 +3,7 @@ const {
   IpConfiguration,
   IspConfiguration,
   CompanyPortal,
-  Country
+  CountryConfiguration
 } = require('../../models/index')
 
 class IpConfigurationController extends Controller {
@@ -30,12 +30,9 @@ class IpConfigurationController extends Controller {
     })
 
     //country list
-    let country_list = await Country.findAll()
+    let country_list = await CountryConfiguration.findAll({ status: 0, company_portal_id: company_portal_id })
     country_list = country_list.map((country) => {
-      return {
-        name: country.name,
-        value: country.iso,
-      }
+      return country.iso
     })
 
     return {
