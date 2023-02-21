@@ -1,4 +1,4 @@
-import { Button, Paper, Card, CardContent, CardHeader } from '@mui/material';
+import { Button, Paper, Card, CardContent, CardHeader, Autocomplete, TextField } from '@mui/material';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -10,6 +10,10 @@ import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig
 function IpConfiguration(props) {
     let [ips, setIps] = useState([]);
     let [isps, setIsps] = useState([]);
+    let [countryOptions, setCountryOptions] = useState([]);
+    let [countryIsos, setCountryIsos] = useState([]);
+    let [countryValues, setCountryValues] = useState([]);
+
     const dispatch = useDispatch();
     const [permission, setPermission] = useState(false);
 
@@ -19,12 +23,15 @@ function IpConfiguration(props) {
             (props.permission('save') || props.permission('update'))
         );
     }, [props.permission])
-
+    useEffect(() => {
+        selectedCountries();
+    }, [countryIsos])
     const submit = (e) => {
         e.preventDefault();
         axios.post(jwtServiceConfig.saveIpConfiguration, {
             ips,
             isps,
+            countries: countryIsos
         }).then(res => {
             const variant = res.data.results.status ? 'success' : 'error';
             dispatch(showMessage({ variant, message: res.data.results.message }))
@@ -41,12 +48,31 @@ function IpConfiguration(props) {
     const onIspChangeFromChild = (val) => {
         setIsps(val);
     }
-
+    const handleCountries = (newValue) => {
+        let iso = [];
+        newValue.map((obj) => {
+            iso.push(obj.value)
+        })
+        setCountryIsos(iso)
+    }
+    const selectedCountries = () => {
+        let country_values = [];
+        countryOptions.map((c, index1) => {
+            countryIsos.map(ci => {
+                if (c.value === ci) {
+                    country_values.push(countryOptions[index1])
+                }
+            })
+        })
+        setCountryValues(country_values)
+    }
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
             if (res.data.results.status) {
                 setIps(res.data.results.data.ip_list)
                 setIsps(res.data.results.data.isp_list)
+                setCountryOptions(res.data.results.all_country_list)
+                setCountryIsos(res.data.results.data.country_list)
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.errors }))
             }
@@ -74,7 +100,7 @@ function IpConfiguration(props) {
                             </CardContent>
                         </Card>
 
-                        <Card variant="outlined">
+                        <Card variant="outlined" className="mb-20">
                             <CardHeader title="Denied ISP List" />
                             <CardContent>
                                 <AddMore
@@ -83,6 +109,28 @@ function IpConfiguration(props) {
                                     placeholder="Enter ISP"
                                     onChange={onIspChangeFromChild}
                                     validationRegex="([^\s])"
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card variant="outlined">
+                            <CardHeader title="Denied Country List" />
+                            <CardContent>
+                                <Autocomplete
+                                    multiple
+                                    id="tags-outlined"
+                                    options={countryOptions}
+                                    getOptionLabel={(option) => option.name}
+                                    onChange={(event, newValue) => handleCountries(newValue)}
+                                    value={countryValues}
+                                    filterSelectedOptions
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Denies Countrie(s)"
+                                            placeholder="Select Countrie(s)"
+                                        />
+                                    )}
                                 />
                             </CardContent>
                         </Card>
