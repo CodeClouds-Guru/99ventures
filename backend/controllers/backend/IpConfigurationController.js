@@ -3,7 +3,8 @@ const {
   IpConfiguration,
   IspConfiguration,
   CompanyPortal,
-  CountryConfiguration
+  CountryConfiguration,
+  Country,
 } = require('../../models/index')
 
 class IpConfigurationController extends Controller {
@@ -37,9 +38,18 @@ class IpConfigurationController extends Controller {
       return country.iso
     })
 
+    //all country list
+    let all_country_list = await Country.findAll()
+    all_country_list = all_country_list.map((country) => {
+      return {
+        name:country.name,
+        value:country.iso
+      }
+    })
+
     return {
       status: true,
-      data:{ip_list,isp_list,country_list}
+      data:{ip_list,isp_list,country_list,all_country_list}
     }
   }
   //override save function
