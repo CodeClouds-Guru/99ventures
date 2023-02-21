@@ -14,6 +14,7 @@ class IpConfigurationController extends Controller {
   //overide list function
   async list(req, res) {
     let company_portal_id = req.headers.site_id
+    
     //ip list
     let ip_list = await this.model.findAll({
       where: { status: 0, company_portal_id: company_portal_id },
@@ -21,6 +22,7 @@ class IpConfigurationController extends Controller {
     ip_list = ip_list.map((ip_result) => {
       return ip_result.ip
     })
+
     //isp list
     let isp_list = await IspConfiguration.findAll({
       where: { status: 0, company_portal_id: company_portal_id },
