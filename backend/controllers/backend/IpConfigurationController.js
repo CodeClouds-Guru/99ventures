@@ -3,6 +3,7 @@ const {
   IpConfiguration,
   IspConfiguration,
   CompanyPortal,
+  Country
 } = require('../../models/index')
 
 class IpConfigurationController extends Controller {
@@ -13,21 +14,33 @@ class IpConfigurationController extends Controller {
   //overide list function
   async list(req, res) {
     let company_portal_id = req.headers.site_id
+    //ip list
     let ip_list = await this.model.findAll({
       where: { status: 0, company_portal_id: company_portal_id },
     })
     ip_list = ip_list.map((ip_result) => {
       return ip_result.ip
     })
+    //isp list
     let isp_list = await IspConfiguration.findAll({
       where: { status: 0, company_portal_id: company_portal_id },
     })
     isp_list = isp_list.map((isp_result) => {
       return isp_result.isp
     })
+
+    //country list
+    let country_list = await Country.findAll()
+    country_list = country_list.map((country) => {
+      return {
+        name: country.name,
+        value: country.iso,
+      }
+    })
+
     return {
       status: true,
-      data:{ip_list,isp_list}
+      data:{ip_list,isp_list,country_list}
     }
   }
   //override save function
