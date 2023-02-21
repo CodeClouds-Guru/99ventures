@@ -156,7 +156,8 @@ class PureSpectrumController {
                         cpi: survey.cpi,
                         name: survey.survey_name,
                         survey_number: survey.survey_id,
-                       // status: PureSpectrumController.surveyStatus[survey.survey_status],
+                        status: PureSpectrumController.surveyStatus[survey.survey_status],
+                        original_json: survey,
                         created_at: new Date()
                     });
                 }
@@ -165,7 +166,6 @@ class PureSpectrumController {
                     updateOnDuplicate: ['survey_number'],
                     ignoreDuplicates: true,
                 });
-                // res.json({ status: true, message: 'Updated' });
                 return result;
             }
             return;
