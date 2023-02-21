@@ -9,6 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
+      SurveyAnswerPrecodes.belongsToMany(models.SurveyQualification, {
+        through: 'survey_answer_precode_survey_qualifications',
+        timestamps: false,
+        foreignKey: 'survey_answer_precode_id',
+        otherKey: 'survey_qualification_id',
+      })
     }
   }
   SurveyAnswerPrecodes.init(
