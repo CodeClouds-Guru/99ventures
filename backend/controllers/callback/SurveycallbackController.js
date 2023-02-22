@@ -117,7 +117,7 @@ class SurveycallbackController {
                //remove qualifications
               await SurveyQualification.destroy({ where: { id: qualification_ids } });
               await db.sequelize.query(
-                "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN "+qualification_ids, { type: sequelize.QueryTypes.DELETE}
+                "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN "+qualification_ids, { type: QueryTypes.DELETE}
               );
             }
           }
@@ -144,11 +144,13 @@ class SurveycallbackController {
       let obj = survey_questions.find(
         (val) => val.survey_provider_question_id === record1.question_id
       );
+      console.log('iiiyiy')
+      console.log(obj)
       if (obj) {
           let model1 = await SurveyQualification.create(
             {
               survey_id: model.id,
-              survey_question_id: obj.id,
+              survey_question_id: record1.question_id,
               logical_operator: record1.logical_operator,
             },
             { silent: true }

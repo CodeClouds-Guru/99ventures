@@ -8,6 +8,8 @@ const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthCon
 const MemberAuthController = new MemberAuthControllerClass();
 const PureSpectrumControllerClass = require("../controllers/callback/PureSpectrumController");
 const PureSpectrumController = new PureSpectrumControllerClass();
+const SurveyControllerClass = require("../controllers/frontend/SurveyController");
+const SurveyController = new SurveyControllerClass();
 
 router.get('/test-lucid', async (req, res) => {
   const lucidObj = new Lucid();
@@ -75,6 +77,7 @@ router.get('/test-maxmind', async (req, res) => {
 router.post("/login", MemberAuthController.login);
 router.get("/profile", MemberAuthController.profile);
 router.post("/signup", MemberAuthController.signup);
+router.get("/survey", SurveyController.getSurvey);
 
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
