@@ -5,98 +5,91 @@ const IpHelper = require("../../helpers/IpHelper");
 const IpQualityScoreClass = require("../../helpers/IpQualityScore");
 class MemberAuthController {
   constructor() {
-    // super('Member');
+    this.geoTrack = this.geoTrack.bind(this);
+    this.login = this.login.bind(this);
+    this.signup = this.signup.bind(this);
+    this.referralDetails = this.referralDetails.bind(this);
+    this.saveRegistrationBonus = this.saveRegistrationBonus.bind(this);
   }
   //login
   async login(req, res) {
     let company_portal_id = 1
     let redirect_page = await Page.findOne({ where: { company_portal_id: company_portal_id, after_signin: 1 } })
-    if (redirect_page)
-      redirect_page = '/' + redirect_page.slug
-    else
-      redirect_page = '/'
+    redirect_page = '/' + redirect_page ? redirect_page.slug : ''
     if (req.session.member) {
       res.redirect(redirect_page);
       return
+    }
+    const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
+    let ip = req.ip;
+    if (Array.isArray(ip)) {
+      ip = ip[0]
     } else {
-
-      const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
-      let ip = req.ip;
-      if (Array.isArray(ip)) {
-        ip = ip[0]
-      } else {
-        ip = ip.replace("::ffff:", "");
-      }
-
-      let member_status = true
-      let member_message = "Logged in successfully!"
-      const schema = Joi.object({
-        password: Joi.string()
-          .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-          .required(),
-        email: Joi.string().email().required(),
-        remember_me: Joi.optional(),
-      });
-      const { error, value } = schema.validate(req.body);
-      if (error) {
-        member_status = false
-        member_message = error.details.map((err) => err.message);
-      }
-
-      //check if IP is blacklisted
-      const ipHelper = new IpHelper();
-      let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
-      if (ip_ckeck.status) {
-        if (ip_ckeck.blacklisted) {
-          member_status = false
-          member_message = "This IP is blacklisted!"
-        }
-        // if (ip_ckeck.vpn) {
-        //   member_status = false
-        //   member_message = "Please disconnect from VPN to access this site"
-        // }
-        if (!member) {
-          member_status = false
-          member_message = "Email is not registered!"
-        } else {
-          let isMatch = false
-          if (!member.password) {
-            member_status = false
-            member_message = "Please Setup your account before login"
-          } else {
-            isMatch = await bcrypt.compare(value.password, member.password);
-            if (!isMatch) {
-              member_status = false
-              member_message = "Invalid credentials!"
-            } else {
-              await this.geoTrack(req,ip,member)
-            }
-            if (member.status != 'member') {
-              member_status = false
-              member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
-            }
-          }
-        }
-      } else {
-        member_status = false
-        member_message = "Failed to check IP"
-      }
-      //remember me
-      if (req.body.remember_me) {
-        //res.cookie('remember_me', true);
-      } else {
-        //res.cookie('remember_me', false);
-      }
-      if (member_status) {
-        req.session.member = member
-        res.redirect(redirect_page)
-      }
-      else {
-        req.session.flash = { error: member_message }
-        res.redirect('back')
-      }
+      ip = ip.replace("::ffff:", "");
     }
 
+    let member_status = true
+    let member_message = "Logged in successfully!"
+    const schema = Joi.object({
+      password: Joi.string()
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .required(),
+      email: Joi.string().email().required(),
+      remember_me: Joi.optional(),
+    });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      member_status = false
+      member_message = error.details.map((err) => err.message);
+    }
+
+    //check if IP is blacklisted
+    const ipHelper = new IpHelper();
+    let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
+    if (ip_ckeck.status) {
+      if (ip_ckeck.blacklisted) {
+        member_status = false
+        member_message = "This IP is blacklisted!"
+      }
+      // if (ip_ckeck.vpn) {
+      //   member_status = false
+      //   member_message = "Please disconnect from VPN to access this site"
+      // }
+      if (!member) {
+        member_status = false
+        member_message = "Email is not registered!"
+      } else {
+        let isMatch = false
+        if (!member.password) {
+          console.dir(member)
+          member_status = false
+          member_message = "Please Setup your account before login"
+        } else {
+          isMatch = await bcrypt.compare(value.password, member.password);
+          if (!isMatch) {
+            member_status = false
+            member_message = "Invalid credentials!"
+          } else {
+            await this.geoTrack(req, ip, member)
+          }
+          if (member.status != 'member') {
+            member_status = false
+            member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
+          }
+        }
+      }
+    } else {
+      member_status = false
+      member_message = "Failed to check IP"
+    }
+    if (member_status) {
+      req.session.member = member
+      res.redirect(redirect_page)
+    }
+    else {
+      req.session.flash = { error: member_message }
+      res.redirect('back')
+    }
   }
   //signup
   async signup(req, res) {
@@ -175,7 +168,7 @@ class MemberAuthController {
           let member_details = await Member.findOne({
             where: { email: req.body.email },
           });
-          
+
           let evntbus = eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
@@ -188,7 +181,7 @@ class MemberAuthController {
           //Referral code
           let referrer = ''
           if (req.body.referral_code != '') {
-            await this.referralDetails(req,res)
+            await this.referralDetails(req, res)
             //signed up with referral code
           }
           //registration bonus
@@ -209,7 +202,7 @@ class MemberAuthController {
   }
 
   //referral 
-  async referralDetails(req,res){
+  async referralDetails(req, res) {
     if (req.body.referral_code != '') {
       referrer = await Member.findOne({ where: { referral_code: req.body.referral_code } })
       if (referrer) {
@@ -249,7 +242,7 @@ class MemberAuthController {
     }
   }
   //registration bonus
-  async saveRegistrationBonus(member_details){
+  async saveRegistrationBonus(member_details) {
     let registration_bonus = await Setting.findOne({ where: { settings_key: 'registration_bonus' } })
     await MemberTransaction.create({
       type: 'credited',
@@ -261,46 +254,29 @@ class MemberAuthController {
     })
   }
   //geo track
-  async geoTrack(req,ip,member){
+  async geoTrack(req, ip, member) {
     const reportObj = new IpQualityScoreClass();
-              const geo = await reportObj.getIpReport(ip);
-              let ip_logs = {
-                member_id: member.id,
-                ip: ip,
-                browser: req.headers["user-agent"],
-                browser_language: req.headers["accept-language"]
-              }
-              if (geo.status) {
-                ip_logs['geo_location'] = geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city;
-                ip_logs['isp'] = geo.report.ISP;
-                ip_logs['fraud_score'] = geo.report.fraud_score;
-                ip_logs['vpn'] = geo.report.vpn;
-                ip_logs['proxy'] = geo.report.proxy;
-                ip_logs['tor'] = geo.report.tor;
-                ip_logs['bot_status'] = geo.report.bot_status;
-                ip_logs['latitude'] = geo.report.latitude;
-                ip_logs['longitude'] = geo.report.longitude;
-              }
-              //ip logs
-              await IpLog.create(ip_logs)
+    const geo = await reportObj.getIpReport(ip);
+    let ip_logs = {
+      member_id: member.id,
+      ip: ip,
+      browser: req.headers["user-agent"],
+      browser_language: req.headers["accept-language"]
+    }
+    if (geo.status) {
+      ip_logs['geo_location'] = geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city;
+      ip_logs['isp'] = geo.report.ISP;
+      ip_logs['fraud_score'] = geo.report.fraud_score;
+      ip_logs['vpn'] = geo.report.vpn;
+      ip_logs['proxy'] = geo.report.proxy;
+      ip_logs['tor'] = geo.report.tor;
+      ip_logs['bot_status'] = geo.report.bot_status;
+      ip_logs['latitude'] = geo.report.latitude;
+      ip_logs['longitude'] = geo.report.longitude;
+    }
+    //ip logs
+    await IpLog.create(ip_logs)
   }
-  //profile
-  async profile(req, res) {
-    console.log(req.cookies.remember_me)
-    console.log(req.cookies.name)
-    res.status(200).json({
-      status: true,
-      session: req.session.flash.error,
-      h: 8
-    });
-    //   return req.session
-    //   global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
 
-    //     res.status(200).json({
-    //         status: false,
-    //         data: 'data',
-    //     });
-    //     return;
-  }
 }
 module.exports = MemberAuthController;
