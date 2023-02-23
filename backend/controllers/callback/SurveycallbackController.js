@@ -17,7 +17,7 @@ class SurveycallbackController {
   }
 
   async save(req, res) {
-    const logger1 = require('../helpers/Logger')(
+    const logger1 = require('../../helpers/Logger')(
       `outcome-${req.params.provider}.log`
     );
     // console.log('===================req', req);
