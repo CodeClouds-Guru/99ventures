@@ -8,6 +8,8 @@ const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthCon
 const MemberAuthController = new MemberAuthControllerClass();
 const PureSpectrumControllerClass = require("../controllers/callback/PureSpectrumController");
 const PureSpectrumController = new PureSpectrumControllerClass();
+const SurveyControllerClass = require("../controllers/frontend/SurveyController");
+const SurveyController = new SurveyControllerClass();
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
 // router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
@@ -60,6 +62,7 @@ router.get('/cint/entry-link', async (req, res) => {
 //ROUTES FOR FRONTEND
 router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
+router.get("/survey", SurveyController.getSurvey);
 
 router.get('/:slug?', async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');

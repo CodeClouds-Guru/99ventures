@@ -115,9 +115,9 @@ class SurveycallbackController {
            
             if(qualification_ids.length){
                //remove qualifications
-              await SurveyQualification.destroy({ where: { id: qualification_ids } });
+              await SurveyQualification.destroy({ where: { id: qualification_ids },force:true });
               await db.sequelize.query(
-                "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN "+qualification_ids, { type: sequelize.QueryTypes.DELETE}
+                "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN "+qualification_ids, { type: QueryTypes.DELETE}
               );
             }
           }
@@ -144,11 +144,13 @@ class SurveycallbackController {
       let obj = survey_questions.find(
         (val) => val.survey_provider_question_id === record1.question_id
       );
+      console.log('iiiyiy')
+      console.log(obj)
       if (obj) {
           let model1 = await SurveyQualification.create(
             {
               survey_id: model.id,
-              survey_question_id: obj.id,
+              survey_question_id: record1.question_id,
               logical_operator: record1.logical_operator,
             },
             { silent: true }
@@ -156,15 +158,15 @@ class SurveycallbackController {
           
         record1.precodes.map(async (precode) => {
          
-          let answer_precode = await SurveyAnswerPrecodes.findOne({where:{ option: precode,lucid_precode: record1.question_id}})
+          let answer_precode = await SurveyAnswerPrecodes.findOne({where:{ lucid_precode: precode}})
                         .then(function(obj) {
                         // update
                         if(obj)
                           return
                         else{
                           return SurveyAnswerPrecodes.create({
-                                            option: precode,
-                                            lucid_precode: record1.question_id,
+                                            option: '',
+                                            lucid_precode: precode,
                                           },
                                           { silent: true }
                                         );
