@@ -1,7 +1,6 @@
 const { Survey, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes } = require('../../models');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
-const db = require('../../models/index');
-
+const { Op } = require("sequelize");
 
 class PureSpectrumController {
     static providerId = 3;
@@ -108,18 +107,30 @@ class PureSpectrumController {
                                     if(surveyQualification && surveyQualification.id) {
                                         const criteria = quota.criteria[0];
                                         if(criteria.condition_codes){
-                                            PureSpectrumController.#surveyAnswerPrecodeCheckAndCreate(
-                                                surveyQualification,
-                                                criteria.qualification_code, 
-                                                criteria.condition_codes[0]
-                                            );
+                                            const precodeData = await SurveyAnswerPrecodes.findOne({
+                                                where: {
+                                                    purespectrum_precode: criteria.qualification_code,
+                                                    option: criteria.condition_codes[0]
+                                                }
+                                            });
+                                            if(precodeData && precodeData.id) {
+                                                await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                            }
                                         }
-                                        else if(criteria.range_sets){
-                                            PureSpectrumController.#surveyAnswerPrecodeCheckAndCreate(
-                                                surveyQualification,
-                                                criteria.qualification_code, 
-                                                criteria.range_sets[0].from
-                                            );
+                                        else if(criteria.range_sets){                                            
+
+                                            const precodeData = await SurveyAnswerPrecodes.findAll({
+                                                where: {
+                                                    purespectrum_precode: criteria.qualification_code,
+                                                    option: {
+                                                        [Op.between]: [criteria.range_sets[0].from, criteria.range_sets[0].to]
+                                                    }
+                                                }
+                                            });
+                                            
+                                            if(precodeData && precodeData.length) {
+                                                await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                            }
                                         }
                                     }
                                     
@@ -176,21 +187,6 @@ class PureSpectrumController {
         }
     }
 
-    /**
-     * To save survey_answer_precode_survey_qualifications
-     */
-    static async #surveyAnswerPrecodeCheckAndCreate(surveyQualification, qualification_code, condition_codes){
-        const precodeData = await SurveyAnswerPrecodes.findOne({
-            where: {
-                purespectrum_precode: qualification_code,
-                option: condition_codes
-            }
-        });
-        if(precodeData && precodeData.id) {
-            await surveyQualification.addSurveyAnswerPrecodes(precodeData);
-        }
-        return;
-    }
 
     /*async saveSurveyQualification(req, res) {
         try{

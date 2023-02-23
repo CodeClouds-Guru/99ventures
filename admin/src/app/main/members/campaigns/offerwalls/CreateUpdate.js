@@ -178,7 +178,7 @@ const CreateUpdate = () => {
         }
         setLoading(true);
         axios.post(moduleId === 'create' ? jwtServiceConfig.offerwallsSave : jwtServiceConfig.offerwallUpdate + `/${moduleId}`, {
-            campaign_id: campaignId,
+            campaign_id: null,
             premium_configuration: premium_configuration,
             name: name,
             sub_id_prefix: sub_id_prefix,
