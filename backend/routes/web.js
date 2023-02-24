@@ -60,11 +60,24 @@ router.get('/cint/entry-link', async (req, res) => {
 });
 
 //ROUTES FOR FRONTEND
+const checkIPMiddleware = require("../middlewares/checkIPMiddleware");
 router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
 router.get("/survey", SurveyController.getSurvey);
 
-router.get('/:slug?', async (req, res) => {
+router.get('/404', async (req, res) => {
+  console.log(req)
+  var pagePerser = new PageParser('404');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+router.get('/500', async (req, res) => {
+  var pagePerser = new PageParser('500');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+
+router.get('/:slug?', [checkIPMiddleware], async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   console.log(req.session.flash)
   try {

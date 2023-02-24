@@ -46,8 +46,9 @@ class PageParser {
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
     }
-    if ('flash' in req.session && 'error' in req.session.flash) {
-      this.sessionMessage = req.session.flash.error
+    if ('flash' in req.session) {
+      this.sessionMessage = req.session.flash.error || req.session.flash.access_error
+      console.dir(this.sessionMessage)
     }
     const page_content = await this.generateHtml();
     return page_content;
