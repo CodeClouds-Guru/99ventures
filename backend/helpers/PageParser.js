@@ -28,6 +28,8 @@ class PageParser {
     this.generateHtml = this.generateHtml.bind(this);
     this.convertComponentToHtml = this.convertComponentToHtml.bind(this);
     this.addDefaultAddOns = this.addDefaultAddOns.bind(this);
+    this.getSessionUser = this.getSessionUser.bind(this);
+    this.getFlashMessage = this.getSessionUser.bind(this);
   }
 
   async getPageNLayout() {
@@ -45,6 +47,7 @@ class PageParser {
   async preview(req) {
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
+	console.log('session', this.sessionUser);
     }
     if ('flash' in req.session) {
       this.sessionMessage = req.session.flash.error || req.session.flash.access_error

@@ -39,7 +39,7 @@ function getIp(req) {
 }
 
 function getMemberOfThisSession(req) {
-    const member = null
+    var member = null
     if ('member' in req.session) {
         member = req.session.member;
     }
@@ -83,7 +83,7 @@ async function checkIfCountryChanged(req, country_code) {
             iso: country_code
         }
     });
-    return existing_country && member.country_id && existing_country.id !== member.country_id
+    return existing_country && member && member.country_id && existing_country.id !== member.country_id
 }
 
 module.exports = async function (req, res, next) {

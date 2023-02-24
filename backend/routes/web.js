@@ -66,7 +66,6 @@ router.post("/signup", MemberAuthController.signup);
 router.get("/survey", SurveyController.getSurvey);
 
 router.get('/404', async (req, res) => {
-  console.log(req)
   var pagePerser = new PageParser('404');
   var page_content = await pagePerser.preview(req);
   res.render('page', { page_content });
@@ -79,7 +78,6 @@ router.get('/500', async (req, res) => {
 
 router.get('/:slug?', [checkIPMiddleware], async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
-  console.log(req.session.flash)
   try {
     var page_content = await pagePerser.preview(req);
   } catch (e) {
