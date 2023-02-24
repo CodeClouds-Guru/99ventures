@@ -31,6 +31,7 @@ class Purespectrum {
 			},
 		});
 		this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
+		this.createData = this.createData.bind(this);
 		return new Proxy(this, handler);
 	}
 
