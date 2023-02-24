@@ -186,6 +186,9 @@ router.get('/:slug?', [checkIPMiddleware], async (req, res) => {
       case 404:
         res.redirect('/404');
         return;
+      case 401:
+        res.redirect('/');
+        return;
       default:
         res.redirect('/500');
         console.error(e);

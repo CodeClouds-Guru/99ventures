@@ -1,5 +1,5 @@
 const IpQualityScoreClass = require("../helpers/IpQualityScore");
-const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country } = require("../models");
+const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member } = require("../models");
 const { Op } = require("sequelize");
 const messageBox = {
     IP_BLACKLISTED: {
@@ -63,14 +63,17 @@ async function redirectWithErrorMessage(req, res, error_code) {
     const msg = error_code in messageBox ? messageBox[error_code] : 'Some unexpected error occured'
     if (['VPN_DETECTED', 'TOR_DETECTED', 'COUNTRY_CHANGED'].includes(error_code) && member && member.status !== 'suspended') {
         await MemberNote.create({
-            user_id: null,
+            user_id: 0,
             member_id: member.id,
             previous_status: member.status,
             current_status: 'suspended',
             note: error_code
         });
-        member.status = 'suspended';
-        await member.save();
+        await Member.update(
+            { status: 'suspended' },
+            { where: { id: member.id } }
+        );
+        req.session.member = { ...member, status: 'suspended' }
     }
     req.session.flash = { access_error: msg };
     res.redirect('/404');
@@ -87,7 +90,8 @@ async function checkIfCountryChanged(req, country_code) {
 }
 
 module.exports = async function (req, res, next) {
-    const ip = getIp(req);
+    // const ip = getIp(req);
+    const ip = '122.185.160.34'
     const company_portal_id = await getCompanyPortalId(req)
     const is_blacklisted_ip = await IpConfiguration.count({
         where: {
@@ -102,8 +106,6 @@ module.exports = async function (req, res, next) {
     }
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
-
-    console.info('ip', ip, 'ipQualityscore', geo)
 
     const is_blacklisted_isp = await IspConfiguration.count({
         where: {
@@ -141,6 +143,9 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
         return;
     }
+    /**
+     * Todo: Need to save the IP logs
+     */
     next();
 
 }
