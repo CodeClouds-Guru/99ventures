@@ -150,11 +150,11 @@ function GeneralConfiguration(props) {
                         google_captcha_status: response.data.results.data.is_google_captcha_used === 1,
                     }
                 })
-                response.data.results.data.google_captcha_configuration === 0 ? '' : setDefaultValues((defaultValues) => {
+                setDefaultValues((defaultValues) => {
                     return {
                         ...defaultValues,
-                        site_key: response.data.results.data.google_captcha_configuration.site_key,
-                        site_token: response.data.results.data.google_captcha_configuration.site_token,
+                        site_key: response.data.results.data.google_captcha_configuration ? response.data.results.data.google_captcha_configuration.site_key : '',
+                        site_token: response.data.results.data.google_captcha_configuration ? response.data.results.data.google_captcha_configuration.site_token : '',
                     }
                 })
             } else {

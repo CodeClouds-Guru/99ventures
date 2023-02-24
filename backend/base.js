@@ -100,7 +100,7 @@ function initializeSession(app) {
       secret: process.env.NODE_APP_SECRET,
       saveUninitialized: true,
       cookie: { maxAge: oneDay },
-      resave: false,
+      resave: true,
     })
   );
 }

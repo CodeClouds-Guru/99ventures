@@ -1,8 +1,8 @@
 $(() => {
     var loginErrors = [];
-    var loginErrorMsgs = [];
-    var dynamicErrorMsg = () => {
-        // loginErrors.includes('email') ? loginErrorMsgs.push('Valid')
+    // var loginErrorMsgs = [];
+    var dynamicError = (field, type) => {
+        type === 'add' ? loginErrors.push(field) : loginErrors.splice(loginErrors.indexOf(field))
     }
     var validateEmail = (email) => {
         return String(email)
@@ -27,14 +27,24 @@ $(() => {
         }
     }
     var loginFomValidation = () => {
-        $("input[name=email]").val().trim().length === 0 && !validateEmail($("input[name=email]").val().trim()) ? loginErrors.push('email') : '';
-        $("input[name=password]").val().trim().length === 0 ? loginErrors.push('password') : '';
+        var error_list = '';
+        var error_div = $('#error_div');
+        error_div.empty();
+        $("input[name=email]").val().trim().length === 0 && !validateEmail($("input[name=email]").val().trim()) && !loginErrors.includes('email') ? dynamicError('email', 'add') : dynamicError('email', 'remove');
+        $("input[name=password]").val().trim().length === 0 && !loginErrors.includes('password') ? dynamicError('password', 'add') : dynamicError('password', 'remove');
+
         console.log(loginErrors);
 
         if ($("input[name=email]").val().trim().length > 0 && validateEmail($("input[name=email]").val().trim()) && $("input[name=password]").val().trim().length > 0) {
             return true;
         }
         else {
+            error_list += '<ul>';
+            loginErrors.map(val => {
+                error_list += `<li>${val} is required</li>`
+            })
+            error_list += `</ul>`
+            error_div.html(error_list);
             console.log('Please fill all required fields');
             return false;
         }
