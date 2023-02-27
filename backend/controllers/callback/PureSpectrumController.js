@@ -70,7 +70,7 @@ class PureSpectrumController {
     async survey(req, res){
         try{
             //Save Surveys
-            const allSurveys = await PureSpectrumController.prototype.getSurveys();
+            const allSurveys = await PureSpectrumController.prototype.getSurveyFromAPI();
             
             if(allSurveys.length) {
                 const psObj = new PurespectrumHelper;
@@ -154,11 +154,11 @@ class PureSpectrumController {
     /**
      * To save the survey
      */
-    async getSurveys() {
+    async getSurveyFromAPI(req, res) {
         try{
             const psObj = new PurespectrumHelper;
-            const allSurveys = await psObj.fetchAndReturnData('/surveys');
-            if ('success' === allSurveys.apiStatus) {
+            const allSurveys = await psObj.fetchAndReturnData('/surveys');            
+            if ('success' === allSurveys.apiStatus && allSurveys.surveys) {                
                 const params = []
                 for(let survey of allSurveys.surveys ){
                     params.push({
@@ -174,12 +174,13 @@ class PureSpectrumController {
                 }
                 
                 const result = await Survey.bulkCreate(params, {
-                    updateOnDuplicate: ['id', 'survey_number'],
+                    updateOnDuplicate: ['survey_number'],
                     ignoreDuplicates: true,
                 });
                 return result;
+            } else {
+                return [];
             }
-            return;
         }
         catch (error) {
             console.error(error);

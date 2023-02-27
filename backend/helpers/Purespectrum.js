@@ -22,7 +22,7 @@ class Purespectrum {
 	constructor() {
 		this.instance = axios.create({
 			baseURL: 'http://staging.spectrumsurveys.com/suppliers/v2/',
-			timeout: 10000,
+			timeout: 20000,
 			headers: {
 				//Authorization: process.env.CINT_API_KEY,
 				Accept: 'application/json, text/plain, */*',

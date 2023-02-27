@@ -4,7 +4,13 @@ const PageParser = require('../helpers/PageParser');
 const Lucid = require('../helpers/Lucid');
 const Cint = require('../helpers/Cint');
 const PurespectrumHelper = require('../helpers/Purespectrum');
-const { Survey, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes } = require('../models');
+const { 
+  Survey, 
+  SurveyQuestion, 
+  SurveyQualification, 
+  SurveyAnswerPrecodes, 
+  MemberEligibilities 
+} = require('../models');
 
 
 const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthController");
@@ -63,99 +69,98 @@ router.get('/cint/entry-link', async (req, res) => {
 });
 
 router.get('/pure-spectrum/surveys', async(req, res) => {
-  // const memberAge = req.query.age;
-  // const memberGender = req.query.gender;
-  // const memberZip = req.query.zip;
-  // const genderCode = (memberGender === 'male') ? 111 : 112;
-
-  // const questions = await SurveyQuestion.findAll({
-  //   attributes: ['id', 'survey_provider_question_id'],
-  //   where: {
-  //     name: ['Age', 'Gender', 'Zipcode']
-  //   },
-  //   include: {
-  //     model: SurveyAnswerPrecodes,
-  //     where: {
-  //       option: [genderCode, memberAge]
-  //     }
-  //   }
-  // });
-
-
-  // const questions = await SurveyAnswerPrecodes.findAll({
-  //   attributes: ['id', 'option', 'purespectrum_precode'],
-  //   where: {
-  //     option: [111, 30]
-  //   },    
-  //   include: [
-  //     {
-  //       model: SurveyQuestion,
-  //       attributes: ['id', 'survey_provider_question_id'],
-  //       where: {
-  //         name: ['Age', 'Gender', 'Zipcode']
-  //       }
-  //     },
-  //     {
-  //       model: SurveyQualification
-  //     }
-  //   ]
-  // });
-  // res.send(questions);
-  const Zipcode = 229;
-  const genderCode = 111;
-  const age = 30;
-
-  const surveys = await Survey.findAll({
-    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-    where: {
-      survey_provider_id: 3,
-      status: "live",
-    },
+  const memberId = req.query.user_id;
+  const eligibilities = await MemberEligibilities.findAll({
+    attributes: ['survey_question_id', 'precode_id', 'text'],
+    where: {member_id: memberId},
     include: {
-      model: SurveyQualification,
-      attributes: ['id', 'survey_id', 'survey_question_id'],
-      required: true,
-      include: {
-        model: SurveyAnswerPrecodes,
-        attributes: ['id', 'option', 'purespectrum_precode'],
-        where: {
-          option: [genderCode, age]
-        },
-        required: true,
-        include: [
-          {
-            model: SurveyQuestion,
-            attributes: ['id', 'survey_provider_question_id'],
-            where: {
-              name: ['Age', 'Gender', 'Zipcode']
-            }
-          }
-        ],
+      model: SurveyQuestion,
+      attributes: ['name', 'question_text', 'survey_provider_question_id', 'question_type'],
+      where: {
+        survey_provider_id: 3
       }
     }
-  })
+  });
+  if(eligibilities){
+    const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.name);
+    const matchingAnswerCodes = eligibilities
+                                  .filter(eg => eg.SurveyQuestion.survey_provider_question_id !== 229) // Removed 229 (ZIP Code), beacuse this is open text question. We will not get the value from survey_answer_precodes
+                                  .map(eg => eg.precode_id);
 
-  var surveyHtml = '';
-  for(let survey of surveys) {
-    surveyHtml += `
-      <div class="survey-box" style="width: 45%; padding: 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem;">
-        <h5>${survey.name} - ${survey.cpi}</h5>
-        <a href="/pure-spectrum/entry-link?survey_number=${survey.survey_number}" target="_blank" style="border: 1px solid #33375f;background-color: #33375f;color: #fff;padding: 7px 36px;text-decoration: none;border-radius: 3px;">${survey.cpi}</a>
-      </div>
-    `
+    if(matchingAnswerCodes.length && matchingQuestionCodes.length){
+      const queryString = {};
+      eligibilities.map(eg => {
+        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
+      });
+      const generateQueryString = new URLSearchParams(queryString).toString();
+
+      const surveys = await Survey.findAll({
+        attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
+        where: {
+          survey_provider_id: 3,
+          status: "live",
+        },
+        include: {
+          model: SurveyQualification,
+          attributes: ['id', 'survey_id', 'survey_question_id'],
+          required: true,
+          include: {
+            model: SurveyAnswerPrecodes,
+            attributes: ['id', 'option', 'purespectrum_precode'],
+            where: {
+              // option: [genderCode, age]
+              option: matchingAnswerCodes
+            },
+            required: true,
+            include: [
+              {
+                model: SurveyQuestion,
+                attributes: ['id', 'survey_provider_question_id'],
+                where: {
+                  // name: ['Age', 'Gender', 'Zipcode']
+                  name: matchingQuestionCodes
+                }
+              }
+            ],
+          }
+        }
+      })
+
+      var surveyHtml = '';
+      for(let survey of surveys) {
+        let link = `/pure-spectrum/entry-link?survey_number=${survey.survey_number}${generateQueryString ? '&'+generateQueryString : ''}`;
+        surveyHtml += `
+          <div class="survey-box" style="width: 45%; padding: 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem;">
+            <h5>${survey.name} - ${survey.cpi}</h5>
+            <a href="${link}" target="_blank" style="border: 1px solid #33375f;background-color: #33375f;color: #fff;padding: 7px 36px;text-decoration: none;border-radius: 3px;">${survey.cpi}</a>
+          </div>
+        `
+      }
+      
+      res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="survey-container">${surveyHtml}</div>`);
+    } else {
+      res.send('No surveys have been matched!');
+    }
+  } else {
+    res.send('Member eiligibility not found!');
   }
-  
-
-  res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="survey-container">${surveyHtml}</div>`)
-
 
 });
 
 router.get('/pure-spectrum/entry-link', async(req, res) => {
+  const queryString = req.query;
+  queryString.bsec = 'a70mx8';
   const psObj = new PurespectrumHelper;
-  const data = await psObj.createData(`surveys/register/${req.query.survey_number}`);
+  const data = await psObj.createData(`surveys/register/${queryString.survey_number}`);
+  delete queryString['survey_number'];
+  const generateQueryString = new URLSearchParams(queryString).toString();
 
-  res.send(data)
+  if(data.apiStatus === 'success' && data.survey_entry_url) {
+    const entryLink = data.survey_entry_url +'&'+ generateQueryString;
+    res.send(entryLink)
+  } else {
+    res.send(data)
+  }
   
 })
 
