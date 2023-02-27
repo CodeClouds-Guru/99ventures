@@ -28,6 +28,8 @@ class PageParser {
     this.generateHtml = this.generateHtml.bind(this);
     this.convertComponentToHtml = this.convertComponentToHtml.bind(this);
     this.addDefaultAddOns = this.addDefaultAddOns.bind(this);
+    this.getSessionUser = this.getSessionUser.bind(this);
+    this.getFlashMessage = this.getFlashMessage.bind(this);
   }
 
   async getPageNLayout() {
@@ -40,14 +42,22 @@ class PageParser {
       errorObj.statusCode = 404;
       throw errorObj;
     }
+    if (this.page.auth_required === 1 && !this.sessionUser) {
+      const errorObj = new Error('Access Denied! Please Log in');
+      errorObj.statusCode = 401;
+      throw errorObj;
+    }
   }
 
   async preview(req) {
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
     }
-    if ('flash' in req.session && 'error' in req.session.flash) {
+    if ('flash' in req.session && req.session.flash) {
       this.sessionMessage = req.session.flash.error
+      if ('access_error' in req.session.flash) {
+        this.sessionMessage = req.session.flash.access_error.error_message
+      }
     }
     const page_content = await this.generateHtml();
     return page_content;
@@ -93,7 +103,7 @@ class PageParser {
     layout_html = await this.convertComponentToHtml(layout_html);
 
     const user = this.getSessionUser();
-    const error_message = this.getFlashMessage();
+    const error_message = this.getFlashMessage() || '';
 
     layout_html = eval('`' + layout_html + '`');
 

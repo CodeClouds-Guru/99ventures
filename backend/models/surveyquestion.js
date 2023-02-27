@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      SurveyQuestion.hasMany(models.SurveyAnswerPrecodes, {
+        foreignKey: 'purespectrum_precode',
+        sourceKey: 'survey_provider_question_id',
+      })
+
     }
   }
   SurveyQuestion.init({

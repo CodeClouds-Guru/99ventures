@@ -38,7 +38,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
+    restart: always
     env_file: ./.env
     ports:
       - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
@@ -67,6 +67,7 @@ services:
         - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     ports:
       - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+    restart: always
     environment: 
       - CLIENT_API_BASE_URL=$CLIENT_API_BASE_URL
     volumes:

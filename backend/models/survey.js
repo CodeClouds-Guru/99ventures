@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'survey_id',
         otherKey: 'member_transaction_id',
+      }),
+      Survey.hasMany(models.SurveyQualification, {
+        foreignKey: 'survey_id',
       })
     }
   }

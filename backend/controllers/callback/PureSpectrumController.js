@@ -174,7 +174,7 @@ class PureSpectrumController {
                 }
                 
                 const result = await Survey.bulkCreate(params, {
-                    updateOnDuplicate: ['survey_number'],
+                    updateOnDuplicate: ['id', 'survey_number'],
                     ignoreDuplicates: true,
                 });
                 return result;
