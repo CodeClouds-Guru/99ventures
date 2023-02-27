@@ -62,6 +62,7 @@ router.get('/cint/entry-link', async (req, res) => {
 //ROUTES FOR FRONTEND
 router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
+router.get("/email-verify", MemberAuthController.emailVerify);
 router.get("/survey", SurveyController.getSurvey);
 
 router.get('/:slug?', async (req, res) => {
