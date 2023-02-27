@@ -8,7 +8,7 @@ const {
   SurveyAnswerPrecodes,
 } = require('../../models');
 const db = require('../../models/index');
-const { QueryTypes } = require('sequelize');
+const { QueryTypes, Op } = require('sequelize');
 
 class SurveycallbackController {
   constructor() {
@@ -85,13 +85,13 @@ class SurveycallbackController {
             status: status
           }
           var survey_status = 'created';
-          var obj = await Survey.findOne({ where: { survey_number: record.survey_id } })
+          var obj = await Survey.findOne({ where: { survey_number: record.survey_id, survey_provider_id: survey_provider.id } })
           if (obj) {
             survey_status = 'updated'
-            await obj.update(data);
+            model = await obj.update(data);
           }
           else {
-            await Survey.create(data);
+            model = await Survey.create(data);
           }
 
           if (record.survey_qualifications.length > 0) {
@@ -99,15 +99,17 @@ class SurveycallbackController {
             //clear all the previous records if the status is updated
             if (survey_status === 'updated') {
               //get all qualification 
-              qualification_ids = await SurveyQualification.findAll({ where: { survey_id: model.id }, attributes: ['id'] })
-              qualification_ids = qualification_ids.map((qualification_id) => {
+              var qualification_ids_rows = await SurveyQualification.findAll({ where: { survey_id: model.id }, attributes: ['id'] })
+              qualification_ids = qualification_ids_rows.map((qualification_id) => {
                 return qualification_id.id
               })
               if (qualification_ids.length > 0) {
                 //remove qualifications
-                await SurveyQualification.destroy({ where: { id: qualification_ids }, force: true });
+                await SurveyQualification.destroy({
+                  where: { [Op.in]: { id: qualification_ids } }, force: true
+                });
                 await db.sequelize.query(
-                  "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (" + qualification_ids + ")", { type: QueryTypes.DELETE }
+                  "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (" + qualification_ids.join(',') + ")", { type: QueryTypes.DELETE }
                 );
               }
             }
@@ -120,7 +122,7 @@ class SurveycallbackController {
       const logger1 = require('../../helpers/Logger')(
         `lucid-sync-errror.log`
       );
-      logger1.error(error);
+      logger1.error(error.message);
     } finally {
       const logger1 = require('../../helpers/Logger')(
         `lucid.log`
@@ -154,7 +156,7 @@ class SurveycallbackController {
 
             var answer_precode = await SurveyAnswerPrecodes.findOne({ where: { lucid_precode: precode } });
             if (!answer_precode) {
-              await SurveyAnswerPrecodes.create({
+              answer_precode = await SurveyAnswerPrecodes.create({
                 option: '',
                 lucid_precode: precode,
               });
