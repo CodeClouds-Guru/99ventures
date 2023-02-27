@@ -74,7 +74,7 @@ const tabs = [
         module: 'downtime'
     },
     {
-        name: "IP/Country",
+        name: "Manage Access",
         component: IpConfiguration,
         module: 'ipconfigurations'
     },

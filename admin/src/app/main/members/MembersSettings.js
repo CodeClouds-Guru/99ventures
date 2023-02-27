@@ -22,7 +22,7 @@ const MembersSettings = () => {
             if (response.data.results.status) {
                 setFields(response.data.results.data.config_data)
             } else {
-                console.log('Error');
+                console.error('Failed to fetch Member Settings');
             }
         });
     }

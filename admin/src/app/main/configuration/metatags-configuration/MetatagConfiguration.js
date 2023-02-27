@@ -57,7 +57,7 @@ function MetatagConfiguration(props) {
                 setValue('keywords', result.Keywords, { shouldDirty: false, shouldValidate: true });
                 setValue('description', result.Description, { shouldDirty: false, shouldValidate: true });
             } else {
-                console.log('Error');
+                console.error('Failed to fetch Metatag Configuration');
             }
         });
     }

@@ -12,7 +12,10 @@ function IpConfiguration(props) {
     let [isps, setIsps] = useState([]);
     let [countryOptions, setCountryOptions] = useState([]);
     let [countryIsos, setCountryIsos] = useState([]);
-    let [countryValues, setCountryValues] = useState([]);
+    let [preSelectedCountryValues, setPreSelectedCountryValues] = useState([]);
+    let [browserOptions, setBrowserOptions] = useState([]);
+    let [browsers, setBrowsers] = useState([]);
+    let [preSelectedBrowserValues, setPreSelectedBrowserValues] = useState([]);
 
     const dispatch = useDispatch();
     const [permission, setPermission] = useState(false);
@@ -24,14 +27,18 @@ function IpConfiguration(props) {
         );
     }, [props.permission])
     useEffect(() => {
-        selectedCountries();
+        preSelectedCountries();
     }, [countryIsos])
+    useEffect(() => {
+        preSelectedBrowsers();
+    }, [browsers])
     const submit = (e) => {
         e.preventDefault();
         axios.post(jwtServiceConfig.saveIpConfiguration, {
             ips,
             isps,
-            countries: countryIsos
+            countries: countryIsos,
+            browsers: browsers
         }).then(res => {
             const variant = res.data.results.status ? 'success' : 'error';
             dispatch(showMessage({ variant, message: res.data.results.message }))
@@ -55,7 +62,14 @@ function IpConfiguration(props) {
         })
         setCountryIsos(iso)
     }
-    const selectedCountries = () => {
+    const handleBrowsers = (newValue) => {
+        let bro = [];
+        newValue.map((obj) => {
+            bro.push(obj.value)
+        })
+        setBrowsers(bro)
+    }
+    const preSelectedCountries = () => {
         let country_values = [];
         countryOptions.map((c, index1) => {
             countryIsos.map(ci => {
@@ -64,7 +78,18 @@ function IpConfiguration(props) {
                 }
             })
         })
-        setCountryValues(country_values)
+        setPreSelectedCountryValues(country_values)
+    }
+    const preSelectedBrowsers = () => {
+        let browser_values = [];
+        browserOptions.map((b, index1) => {
+            browsers.map(bv => {
+                if (b.value === bv) {
+                    browser_values.push(browserOptions[index1])
+                }
+            })
+        })
+        setPreSelectedBrowserValues(browser_values)
     }
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
@@ -73,6 +98,8 @@ function IpConfiguration(props) {
                 setIsps(res.data.results.data.isp_list)
                 setCountryOptions(res.data.results.all_country_list)
                 setCountryIsos(res.data.results.data.country_list)
+                setBrowserOptions(res.data.results.all_browser_list)
+                setBrowsers(res.data.results.data.browser_list)
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.errors }))
             }
@@ -113,7 +140,7 @@ function IpConfiguration(props) {
                             </CardContent>
                         </Card>
 
-                        <Card variant="outlined">
+                        <Card variant="outlined" className="mb-20">
                             <CardHeader title="Denied Country List" />
                             <CardContent>
                                 <Autocomplete
@@ -122,13 +149,35 @@ function IpConfiguration(props) {
                                     options={countryOptions}
                                     getOptionLabel={(option) => option.name}
                                     onChange={(event, newValue) => handleCountries(newValue)}
-                                    value={countryValues}
+                                    value={preSelectedCountryValues}
                                     filterSelectedOptions
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            label="Denies Countrie(s)"
+                                            label="Denied Countrie(s)"
                                             placeholder="Select Countrie(s)"
+                                        />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card variant="outlined">
+                            <CardHeader title="Denied Browser List" />
+                            <CardContent>
+                                <Autocomplete
+                                    multiple
+                                    id="tags-outlined"
+                                    options={browserOptions}
+                                    getOptionLabel={(option) => option.name}
+                                    onChange={(event, newValue) => handleBrowsers(newValue)}
+                                    value={preSelectedBrowserValues}
+                                    filterSelectedOptions
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Denied Browser(s)"
+                                            placeholder="Select Browser(s)"
                                         />
                                     )}
                                 />
