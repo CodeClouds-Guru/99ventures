@@ -156,7 +156,7 @@ class SurveycallbackController {
 
             var answer_precode = await SurveyAnswerPrecodes.findOne({ where: { lucid_precode: precode } });
             if (!answer_precode) {
-              await SurveyAnswerPrecodes.create({
+              answer_precode = await SurveyAnswerPrecodes.create({
                 option: '',
                 lucid_precode: precode,
               });
