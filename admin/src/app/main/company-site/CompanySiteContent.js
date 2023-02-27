@@ -59,7 +59,7 @@ function CompanySiteContent() {
                     setCompanySiteId(response.data.companies[0].id, response.data.companies[0].CompanyPortals[0].id);
                 }
             } else {
-                console.log('Error');
+                console.error('Failed to fetch Comapnies');
             }
         });
     }

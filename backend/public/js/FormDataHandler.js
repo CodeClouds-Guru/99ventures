@@ -1,4 +1,5 @@
 $(() => {
+    var current_url = window.location.href;
     var loginErrors = [];
     // var loginErrorMsgs = [];
     var dynamicError = (field, type) => {
@@ -52,5 +53,5 @@ $(() => {
     var login = () => {
         loginFomValidation() ? console.log('Logged in') : console.log('Validation failed');
     }
-    loginFormSanitisation();
+    current_url.includes('login') ? loginFormSanitisation() : console.log('gg');
 });

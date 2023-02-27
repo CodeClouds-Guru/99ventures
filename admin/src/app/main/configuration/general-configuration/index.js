@@ -158,7 +158,7 @@ function GeneralConfiguration(props) {
                     }
                 })
             } else {
-                console.log('Error');
+                console.error('Failed to fetch General Configuration');
             }
         });
     }
@@ -434,7 +434,7 @@ function GeneralConfiguration(props) {
                                         className="w-4/12"
                                         sx={defaultValues.google_captcha_status ? {
                                             background: '#ffffff', marginBottom: '-18px', justifyContent: 'center',
-                                        } : { marginLeft: '-1.05rem' }}
+                                        } : { justifyContent: 'center' }}
                                         {...field}
                                         control={<Switch
                                             className="mt-2"
