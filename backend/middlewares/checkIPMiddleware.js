@@ -90,8 +90,8 @@ async function checkIfCountryChanged(req, country_code) {
 }
 
 module.exports = async function (req, res, next) {
-    // const ip = getIp(req);
-    const ip = '122.185.160.34'
+    const ip = getIp(req);
+    // const ip = '122.185.160.34'
     const company_portal_id = await getCompanyPortalId(req)
     const is_blacklisted_ip = await IpConfiguration.count({
         where: {
@@ -106,6 +106,7 @@ module.exports = async function (req, res, next) {
     }
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
+    console.log('geo', geo);
 
     const is_blacklisted_isp = await IspConfiguration.count({
         where: {

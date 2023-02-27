@@ -167,8 +167,10 @@ router.get('/pure-spectrum/entry-link', async(req, res) => {
 
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require("../middlewares/checkIPMiddleware");
+const checkMemberAuth = require("../middlewares/checkMemberAuth");
 router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
+router.get("/email-verify", MemberAuthController.emailVerify);
 router.get("/survey", SurveyController.getSurvey);
 
 router.get('/404', async (req, res) => {
@@ -182,7 +184,7 @@ router.get('/500', async (req, res) => {
   res.render('page', { page_content });
 });
 
-router.get('/:slug?', [checkIPMiddleware], async (req, res) => {
+router.get('/:slug?', [checkMemberAuth, checkIPMiddleware], async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
     var page_content = await pagePerser.preview(req);

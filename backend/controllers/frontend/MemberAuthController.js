@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { Member, MemberBalance, IpLog, MemberReferral, Page, Setting } = require("../../models/index");
+const { Member, MemberBalance, IpLog, MemberReferral, Page, Setting,SurveyQuestion,MemberEligibilities } = require("../../models/index");
 const bcrypt = require("bcryptjs");
 const IpHelper = require("../../helpers/IpHelper");
 const IpQualityScoreClass = require("../../helpers/IpQualityScore");
@@ -10,6 +10,8 @@ class MemberAuthController {
     this.signup = this.signup.bind(this);
     this.referralDetails = this.referralDetails.bind(this);
     this.saveRegistrationBonus = this.saveRegistrationBonus.bind(this);
+    this.emailVerify = this.emailVerify.bind(this);
+    this.setMemberEligibility = this.setMemberEligibility.bind(this);
   }
   //login
   async login(req, res) {
@@ -276,6 +278,44 @@ class MemberAuthController {
     }
     //ip logs
     await IpLog.create(ip_logs)
+  }
+
+  //verify verify
+  async emailVerify(req,res){
+    // let hash_obj = Buffer.from(req.body.hash, "base64");
+    // hash_obj = hash_obj.toString("utf8");
+    // hash_obj = JSON.parse(hash_obj); 
+    // let member_details = await Member.findOne({where:{id:hash_obj.id,email:hash_obj.email}})
+    let member_details = await Member.findOne({where:{id:1,email:"demomember@mailinator.com"}})
+    if(member_details){
+      //set member eligibility
+      await this.setMemberEligibility(member_details.id)
+    }
+    res.redirect('/');
+    return
+  }
+
+  //set member eligibility
+  async setMemberEligibility(member_id){
+    //gender
+    let member_details = await Member.findOne({where:{id:1}})
+    let member_eligibility = []
+    if(member_details.gender == 'male'){
+      member_eligibility.push({member_id:member_id,survey_question_id:43,precode_id:23})
+    }else{
+      member_eligibility.push({member_id:member_id,survey_question_id:43,precode_id:22})
+    }
+    await MemberEligibilities.destroy({
+      where: { member_id:member_id },
+      force: true
+    })
+    await MemberEligibilities.bulkCreate(member_eligibility);
+    return
+    // let member_gender =  await SurveyQuestion.findAll({where:{name:'GENDER'}})
+    // member_gender.forEach(function (record, key) {
+    //   //get precodes
+    //   let precodes = await 
+    // })
   }
 
 }
