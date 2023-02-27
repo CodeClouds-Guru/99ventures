@@ -62,7 +62,7 @@ router.get('/cint/entry-link', async (req, res) => {
   }
 });
 
-router.get('/pure-spectrum/surveys', async(req, res) => {
+router.get('/pure-spectrum/surveys', async (req, res) => {
   // const memberAge = req.query.age;
   // const memberGender = req.query.gender;
   // const memberZip = req.query.zip;
@@ -136,7 +136,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
   })
 
   var surveyHtml = '';
-  for(let survey of surveys) {
+  for (let survey of surveys) {
     surveyHtml += `
       <div class="survey-box" style="width: 45%; padding: 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem;">
         <h5>${survey.name} - ${survey.cpi}</h5>
@@ -144,24 +144,25 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       </div>
     `
   }
-  
+
 
   res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="survey-container">${surveyHtml}</div>`)
 
 
 });
 
-router.get('/pure-spectrum/entry-link', async(req, res) => {
+router.get('/pure-spectrum/entry-link', async (req, res) => {
   const psObj = new PurespectrumHelper;
   const data = await psObj.createData(`surveys/register/${req.query.survey_number}`);
 
   res.send(data)
-  
+
 })
 
 
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require("../middlewares/checkIPMiddleware");
+const checkMemberAuth = require("../middlewares/checkMemberAuth");
 router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
 router.get("/email-verify", MemberAuthController.emailVerify);
@@ -178,7 +179,7 @@ router.get('/500', async (req, res) => {
   res.render('page', { page_content });
 });
 
-router.get('/:slug?', [checkIPMiddleware], async (req, res) => {
+router.get('/:slug?', [checkMemberAuth, checkIPMiddleware], async (req, res) => {
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
     var page_content = await pagePerser.preview(req);
