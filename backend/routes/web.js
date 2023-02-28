@@ -37,29 +37,25 @@ router.get('/cint/entry-link', async (req, res) => {
       for (let survey of surveys) {
         const entryLink = survey.entry_link;
         const rebuildEntryLink = entryLink.replace('SUBID', req.query.ssi);
-        tbodyData += `<tr>
-            <td>
-              <a href="${rebuildEntryLink}" target="_blank">${survey.name}</a>
-              <table style="width:100%">
-                  <tbody>
-                    <tr>
-                        <td style="">Conversion Rate <b>${survey.conversion_rate}</b>%</td>
-                        <td style="">Avg Time <b>5 minutes</b></td>
-                        <td style="">Remaining Completes: <b>${survey.remaining_completes}</b></td>
-                    </tr>
-                  </tbody>
-              </table>
-            </td>
-        </tr>`
+        tbodyData += `
+          <div style="display:flex; flex-direction: column;width: 45%;padding: 15px;border: 1px solid #fff;background-color: #fff;border-radius: 10px;
+          margin: 0 8px 8px 0;">
+            <a style="" href="${rebuildEntryLink}" target="_blank">
+              <h3 style="margin: 8px 0;">${survey.name}</h3>
+            </a>
+            <div>
+              <p style="margin: 8px 0;">Conversion Rate <b>${survey.conversion_rate}</b>%</p>
+              <p style="margin: 8px 0;">Avg Time <b>5 minutes</b></p>
+              <p style="margin: 8px 0;">Remaining Completes: <b>${survey.remaining_completes}</b></p>
+            </div>
+          </div>
+        
+        `
       }
     } else {
-      tbodyData += `<tr><td>No records found!</td></tr>`
+      tbodyData += `<p>No records found!</p>`
     }
-    const htmlData = `<table style="width:100%">
-          <tbody>
-            ${tbodyData}
-          </tbody>
-        </table>`
+    const htmlData = `<div style="width: 100%; display:flex; flex-wrap: wrap" class="survey-container">${tbodyData}</div>`
     res.send(htmlData)
   }
   catch (error) {
@@ -132,9 +128,9 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       for(let survey of surveys) {
         let link = `/pure-spectrum/entry-link?survey_number=${survey.survey_number}${generateQueryString ? '&'+generateQueryString : ''}`;
         surveyHtml += `
-          <div class="survey-box" style="width: 45%; padding: 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem;">
-            <h5>${survey.name} - ${survey.cpi}</h5>
-            <a href="${link}" target="_blank" style="border: 1px solid #33375f;background-color: #33375f;color: #fff;padding: 7px 36px;text-decoration: none;border-radius: 3px;">${survey.cpi}</a>
+          <div class="survey-box" style="width: 45%; padding: 20px 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem; border-radius: 10px;">
+            <h3 style="margin:0;">${survey.name} - ${survey.cpi}</h3>
+            <div style="text-align: right; margin-top: 3rem;"><a href="${link}" target="_blank" style="border: 1px solid #33375f;background-color: #33375f;color: #fff;padding: 7px 36px;text-decoration: none;border-radius: 3px;    box-shadow: 0 2px 12px #33375f;">${survey.cpi}</a></div>
           </div>
         `
       }
