@@ -9,11 +9,12 @@ const {
 } = require('../../models');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
-
+const PurespectrumHelper = require('../../helpers/Purespectrum');
 class SurveycallbackController {
   constructor() {
     this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this)
     this.syncSurvey = this.syncSurvey.bind(this)
+    // this.pureSpectrumPostBack = this.pureSpectrumPostBack.bind(this)
   }
 
   async save(req, res) {
@@ -21,8 +22,8 @@ class SurveycallbackController {
       `outcome-${req.params.provider}.log`
     );
     // console.log('===================req', req);
-    logger1.info(JSON.stringify(req.query));
-    logger1.info(JSON.stringify(req.body));
+    logger1.info('query: ' + JSON.stringify(req.query));
+    logger1.info('body: ' + JSON.stringify(req.body));
 
     const provider = req.params.provider;
     if (provider === 'cint') {
@@ -52,10 +53,13 @@ class SurveycallbackController {
         );
         res.send(req.query);
       }
+    } else if(provider === 'purespectrum'){
+      await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
     }
   }
 
   async syncSurvey(req, res) {
+
     let survey = req.body;
     try {
       // if (survey.length > 0) {
@@ -184,6 +188,49 @@ class SurveycallbackController {
       logger1.info(JSON.stringify(req.body));
     }
   }
+
+  async pureSpectrumPostBack(req, res) {
+    // res.send(req.body);
+    // return;
+    if(req.body.ps_rstatus == 21) // complete
+    {
+      const psObj = new PurespectrumHelper;
+      const surveyNumber = req.body.survey_id;
+      const surveyData = await psObj.fetchAndReturnData('/surveys/' + surveyNumber);
+      if ('success' === surveyData.apiStatus && surveyData.survey) {
+        const reward = surveyData.survey.cpi; 
+        const username = req.body.ps_custom_svar1;
+
+        let member = await Member.findOne({
+          attributes: ['id', 'username'],
+          where: {
+            username: username,
+          },
+        });
+        if (member) {
+          const note = req.params.provider;
+          const transaction_obj = {
+            member_id: member ? member.id : null,
+            amount: reward,
+            note: note,
+            type: 'credited',
+            amount_action: 'survey',
+            created_by: null,
+            payload: JSON.stringify(req.body),
+          };
+          console.log('transaction_obj', transaction_obj);
+          let result = await MemberTransaction.updateMemberTransactionAndBalance(
+            transaction_obj
+          );
+          res.send(req.body);
+        }
+      }
+    } else {
+      res.send('No Survey found');
+    }
+  }
+
+
 }
 
 module.exports = SurveycallbackController;
