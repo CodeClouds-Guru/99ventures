@@ -106,7 +106,7 @@ module.exports = async function (req, res, next) {
     }
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
-    console.log('geo', geo);
+    console.log('ip', ip, 'geo', geo);
 
     const is_blacklisted_isp = await IspConfiguration.count({
         where: {
@@ -131,11 +131,11 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'UNAVAILABLE_COUNTRY')
         return;
     }
-    if (geo.report.active_vpn) {
+    if (geo.report.vpn) {
         await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
         return;
     }
-    if (geo.report.active_tor) {
+    if (geo.report.tor) {
         await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
         return;
     }
