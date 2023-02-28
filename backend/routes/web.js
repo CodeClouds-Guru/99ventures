@@ -73,8 +73,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
     where: {
-      member_id: memberId,
-      status: 'member'
+      member_id: memberId
     },
     include: {
       model: SurveyQuestion,
