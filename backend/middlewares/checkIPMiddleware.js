@@ -1,6 +1,7 @@
 const IpQualityScoreClass = require("../helpers/IpQualityScore");
 const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member } = require("../models");
 const { Op } = require("sequelize");
+const { detect } = require('detect-browser');
 const messageBox = {
     IP_BLACKLISTED: {
         error_code: 'ACCX001',
@@ -79,6 +80,37 @@ async function redirectWithErrorMessage(req, res, error_code) {
     res.redirect('/404');
 }
 
+async function logIP(req, ip, geo) {
+    const member = getMemberOfThisSession(req);
+    if (member) {
+        const last_logged_ip = await IpLog.findOne({
+            where: {
+                member_id: member.id,
+            },
+            order: [['id', 'DESC']],
+        })
+        let flag = last_logged_ip && last_logged_ip.ip === ip;
+        if (!flag) {
+            const browser = detect();
+            await IpLog.create({
+                member_id: member.id,
+                ip: ip,
+                browser: browser ? browser.name : 'Unable to Detect',
+                browser_language: req.headers["accept-language"],
+                geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
+                isp: geo.report.ISP,
+                fraud_score: geo.report.fraud_score,
+                vpn: geo.report.vpn,
+                proxy: geo.report.proxy,
+                tor: geo.report.tor,
+                bot_status: geo.report.bot_status,
+                latitude: geo.report.latitude,
+                longitude: geo.report.longitude,
+            })
+        }
+    }
+}
+
 async function checkIfCountryChanged(req, country_code) {
     const member = getMemberOfThisSession(req);
     const existing_country = await Country.findOne({
@@ -90,8 +122,8 @@ async function checkIfCountryChanged(req, country_code) {
 }
 
 module.exports = async function (req, res, next) {
-    const ip = getIp(req);
-    // const ip = '122.185.160.34'
+    // const ip = getIp(req);
+    const ip = '122.185.160.34'
     const company_portal_id = await getCompanyPortalId(req)
     const is_blacklisted_ip = await IpConfiguration.count({
         where: {
@@ -144,9 +176,7 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
         return;
     }
-    /**
-     * Todo: Need to save the IP logs
-     */
+    await logIP(req, ip, geo)
     next();
 
 }

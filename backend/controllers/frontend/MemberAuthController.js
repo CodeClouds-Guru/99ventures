@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { Member, MemberBalance, IpLog, MemberReferral, Page, Setting,SurveyQuestion,MemberEligibilities } = require("../../models/index");
+const { Member, MemberBalance, IpLog, MemberReferral, Page, Setting, SurveyQuestion, MemberEligibilities } = require("../../models/index");
 const bcrypt = require("bcryptjs");
 const IpHelper = require("../../helpers/IpHelper");
 const IpQualityScoreClass = require("../../helpers/IpQualityScore");
@@ -44,45 +44,28 @@ class MemberAuthController {
       member_status = false
       member_message = error.details.map((err) => err.message);
     }
-
-    //check if IP is blacklisted
-    const ipHelper = new IpHelper();
-    let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
-    if (ip_ckeck.status) {
-      if (ip_ckeck.blacklisted) {
+    if (!member) {
+      member_status = false
+      member_message = "Email is not registered!"
+    } else {
+      let isMatch = false
+      if (!member.password) {
+        console.dir(member)
         member_status = false
-        member_message = "This IP is blacklisted!"
-      }
-      // if (ip_ckeck.vpn) {
-      //   member_status = false
-      //   member_message = "Please disconnect from VPN to access this site"
-      // }
-      if (!member) {
-        member_status = false
-        member_message = "Email is not registered!"
+        member_message = "Please Setup your account before login"
       } else {
-        let isMatch = false
-        if (!member.password) {
-          console.dir(member)
+        isMatch = await bcrypt.compare(value.password, member.password);
+        if (!isMatch) {
           member_status = false
-          member_message = "Please Setup your account before login"
+          member_message = "Invalid credentials!"
         } else {
-          isMatch = await bcrypt.compare(value.password, member.password);
-          if (!isMatch) {
-            member_status = false
-            member_message = "Invalid credentials!"
-          } else {
-            await this.geoTrack(req, ip, member)
-          }
-          if (member.status != 'member') {
-            member_status = false
-            member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
-          }
+          // await this.geoTrack(req, ip, member)
+        }
+        if (member.status != 'member') {
+          member_status = false
+          member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
         }
       }
-    } else {
-      member_status = false
-      member_message = "Failed to check IP"
     }
     if (member_status) {
       req.session.member = member
@@ -281,13 +264,13 @@ class MemberAuthController {
   }
 
   //verify verify
-  async emailVerify(req,res){
+  async emailVerify(req, res) {
     // let hash_obj = Buffer.from(req.body.hash, "base64");
     // hash_obj = hash_obj.toString("utf8");
     // hash_obj = JSON.parse(hash_obj); 
     // let member_details = await Member.findOne({where:{id:hash_obj.id,email:hash_obj.email}})
-    let member_details = await Member.findOne({where:{id:1,email:"demomember@mailinator.com"}})
-    if(member_details){
+    let member_details = await Member.findOne({ where: { id: 1, email: "demomember@mailinator.com" } })
+    if (member_details) {
       //set member eligibility
       await this.setMemberEligibility(member_details.id)
     }
@@ -296,17 +279,17 @@ class MemberAuthController {
   }
 
   //set member eligibility
-  async setMemberEligibility(member_id){
+  async setMemberEligibility(member_id) {
     //gender
-    let member_details = await Member.findOne({where:{id:1}})
+    let member_details = await Member.findOne({ where: { id: 1 } })
     let member_eligibility = []
-    if(member_details.gender == 'male'){
-      member_eligibility.push({member_id:member_id,survey_question_id:43,precode_id:23})
-    }else{
-      member_eligibility.push({member_id:member_id,survey_question_id:43,precode_id:22})
+    if (member_details.gender == 'male') {
+      member_eligibility.push({ member_id: member_id, survey_question_id: 43, precode_id: 23 })
+    } else {
+      member_eligibility.push({ member_id: member_id, survey_question_id: 43, precode_id: 22 })
     }
     await MemberEligibilities.destroy({
-      where: { member_id:member_id },
+      where: { member_id: member_id },
       force: true
     })
     await MemberEligibilities.bulkCreate(member_eligibility);
