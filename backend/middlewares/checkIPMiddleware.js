@@ -131,11 +131,11 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'UNAVAILABLE_COUNTRY')
         return;
     }
-    if (geo.report.vpn) {
+    if (geo.report.active_vpn) {
         await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
         return;
     }
-    if (geo.report.tor) {
+    if (geo.report.active_tor) {
         await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
         return;
     }
