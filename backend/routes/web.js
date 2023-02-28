@@ -21,7 +21,7 @@ const SurveyControllerClass = require("../controllers/frontend/SurveyController"
 const SurveyController = new SurveyControllerClass();
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
-// router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
+router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
 
 
 router.get('/cint/entry-link', async (req, res) => {
@@ -72,7 +72,9 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
   const memberId = req.query.user_id;
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
-    where: {member_id: memberId},
+    where: {
+      member_id: memberId
+    },
     include: {
       model: SurveyQuestion,
       attributes: ['name', 'question_text', 'survey_provider_question_id', 'question_type'],

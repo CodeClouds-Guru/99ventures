@@ -106,7 +106,7 @@ module.exports = async function (req, res, next) {
     }
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
-    console.log('geo', geo);
+    console.log('ip', ip, 'geo', geo);
 
     const is_blacklisted_isp = await IspConfiguration.count({
         where: {

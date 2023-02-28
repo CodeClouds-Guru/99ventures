@@ -16,8 +16,8 @@ router.get('/test-adgate', (req, res) => {
   res.send(req.query);
 });
 router.get('/postback/:offerwall', OfferwallPostbackController.save);
-
 router.all('/survey/:provider', SurveycallbackController.syncSurvey);
+router.all('/survey/outcome/:provider', SurveycallbackController.save);
 
 // for adscend PB test
 router.all('/postback-test/:offerwall', async (req, res) => {
@@ -27,6 +27,7 @@ router.all('/postback-test/:offerwall', async (req, res) => {
   logger1.info(JSON.stringify(req.body));
   res.send(req.query);
 });
+
 
 
 // router.all('/survey/outcome/:provider', async (req, res) => {
