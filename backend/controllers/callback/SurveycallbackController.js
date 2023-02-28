@@ -106,7 +106,12 @@ class SurveycallbackController {
               if (qualification_ids.length > 0) {
                 //remove qualifications
                 await SurveyQualification.destroy({
-                  where: { [Op.in]: { id: qualification_ids } }, force: true
+                  where: {
+                    id: {
+                      [Op.in]: qualification_ids
+                    }
+                  },
+                  force: true
                 });
                 await db.sequelize.query(
                   "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (" + qualification_ids.join(',') + ")", { type: QueryTypes.DELETE }
