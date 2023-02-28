@@ -162,7 +162,12 @@ router.get('/pure-spectrum/entry-link', async(req, res) => {
   
 })
 
-
+//socket call
+router.get('/socket-connect', async (req, res) => {
+  global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
+  res.send("hello")
+})
+  
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require("../middlewares/checkIPMiddleware");
 const checkMemberAuth = require("../middlewares/checkMemberAuth");
