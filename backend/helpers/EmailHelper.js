@@ -18,7 +18,7 @@ class EmailHelper {
         let search = { 'id': '1' };
         let all_details = {}
         const publicURL =
-              process.env.CLIENT_ORIGIN || "http://127.0.0.1:3000";
+            process.env.CLIENT_ORIGIN || "http://127.0.0.1:3000";
         try {
             if (payload.data.details != undefined && payload.data.details) {
                 all_details = payload.data.details
@@ -28,7 +28,7 @@ class EmailHelper {
                     'users': user
                 }
             }
-            all_details['logo'] = publicURL+'/assets/images/logo/logo.png'
+            all_details['logo'] = publicURL + '/assets/images/logo/logo.png'
             let email_action = await EmailAction.findOne({
                 where: { 'action': payload.action }, include: {
                     model: EmailTemplate,
@@ -36,7 +36,7 @@ class EmailHelper {
                     where: { company_portal_id: req.headers.site_id },
                 }
             })
-            if(email_action && email_action.EmailTemplates){
+            if (email_action && email_action.EmailTemplates) {
                 let email_template = email_action.EmailTemplates[0]
                 let email_body = ''
                 let email_subject = ''
@@ -70,19 +70,19 @@ class EmailHelper {
                         //set user details
                         email_body = await this.replaceVariables(all_details, match_variables, email_template.body)
                         email_subject = await this.replaceVariables(all_details, match_variables_subject, email_subject)
-                        console.log('all_details======',all_details)
+                        console.log('all_details======', all_details)
                     } else {
                         email_body = email_template.body
                     }
                 }
-                return { status:true,email_body: email_body, subject: email_subject }
-            }else{
-                return {status:false}
+                return { status: true, email_body: email_body, subject: email_subject }
+            } else {
+                return { status: false }
             }
-        }catch (error) {
+        } catch (error) {
             console.error("error sending email", error);
-            return {status:false}
-          }
+            return { status: false }
+        }
     }
     //company info
     async getCompanyInfo(req) {
@@ -108,7 +108,7 @@ class EmailHelper {
     //send mail
     async sendMail(body, to, subject) {
         // create reusable transporter object using the default SMTP transport
-        try{
+        try {
             let req = this.req_data
             let company_portal_id = req.headers.site_id
             let email_configurations = await EmailConfiguration.findAll({ where: { 'company_portal_id': company_portal_id } })
@@ -121,26 +121,22 @@ class EmailHelper {
                         pass: email_configurations[0].password,//"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
                     }
                 });
-                if(email_configurations[0].site_name_visible == '1'){
-                    subject = email_configurations[0].from_name+' - '+subject
+                if (email_configurations[0].site_name_visible == '1') {
+                    subject = email_configurations[0].from_name + ' - ' + subject
                 }
                 const mailData = {
-                    from: email_configurations[0].from_name+'<'+email_configurations[0].from_email+'>',//'info@moresurveys.com', // sender address
+                    from: email_configurations[0].from_name + '<' + email_configurations[0].from_email + '>',//'info@moresurveys.com', // sender address
                     to: to,   // list of receivers
                     subject: subject,
                     //text: 'That was easy!',
                     html: body,
                 };
-                transporter.sendMail(mailData, function (err, info) {
-                    if (err)
-                        console.log('err', err)
-                    else
-                        console.log('success====', info);
-                });
+                console.log('Mail Data', mailData);
+                await transporter.sendMail(mailData);
             }
-        }catch (error) {
+        } catch (error) {
             console.error("error sending email", error);
-          }
+        }
     }
 }
 module.exports = EmailHelper

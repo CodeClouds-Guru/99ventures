@@ -94,7 +94,7 @@ class SurveycallbackController {
             model = await Survey.create(data);
           }
 
-          if (record.survey_qualifications.length > 0) {
+          if ('survey_qualifications' in record && Array.isArray(record.survey_qualifications) && record.survey_qualifications.length > 0) {
             let qualification_ids = []
             //clear all the previous records if the status is updated
             if (survey_status === 'updated') {
