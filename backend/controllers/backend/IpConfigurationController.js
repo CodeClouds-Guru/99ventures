@@ -16,7 +16,7 @@ class IpConfigurationController extends Controller {
   //overide list function
   async list(req, res) {
     let company_portal_id = req.headers.site_id
-    
+
     //ip list
     let ip_list = await this.model.findAll({
       where: { status: 0, company_portal_id: company_portal_id },
@@ -44,48 +44,52 @@ class IpConfigurationController extends Controller {
     browser_list = browser_list.map((browser) => {
       return browser.browser
     })
-  
+
     //all country list
     let all_country_list = await Country.findAll()
     all_country_list = all_country_list.map((country) => {
       return {
-        name:country.name,
-        value:country.iso
+        name: country.name,
+        value: country.iso
       }
     })
 
     //all browser list 
     let all_browser_list = [
       {
-        name:"IE",
-        value:"ie"
+        name: "Microsoft Internet Explorer",
+        value: "microsoft internet explorer"
       },
       {
-        name:"Firefox",
-        value:"firefox"
+        name: "Microsoft Edge",
+        value: "microsoft edge"
       },
       {
-        name:"Chrome",
-        value:"chrome"
+        name: "Firefox",
+        value: "firefox"
       },
       {
-        name:"Canary",
-        value:"canary"
+        name: "Chrome",
+        value: "chrome"
       },
       {
-        name:"Safari",
-        value:"safari"
+        name: "Canary",
+        value: "canary"
       },
       {
-        name:"Opera",
-        value:"opera"
+        name: "Safari",
+        value: "safari"
+      },
+      {
+        name: "Opera",
+        value: "opera"
       },
     ]
     return {
       status: true,
-      data:{ip_list,isp_list,country_list,browser_list},
-      all_country_list:all_country_list,
-      all_browser_list:all_browser_list
+      data: { ip_list, isp_list, country_list, browser_list },
+      all_country_list: all_country_list,
+      all_browser_list: all_browser_list
     }
   }
   //override save function
