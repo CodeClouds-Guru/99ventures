@@ -22,8 +22,8 @@ class SurveycallbackController {
       `outcome-${req.params.provider}.log`
     );
     // console.log('===================req', req);
-    logger1.info(JSON.stringify(req.query));
-    logger1.info(JSON.stringify(req.body));
+    logger1.info('query: ' + JSON.stringify(req.query));
+    logger1.info('body: ' + JSON.stringify(req.body));
 
     const provider = req.params.provider;
     if (provider === 'cint') {
