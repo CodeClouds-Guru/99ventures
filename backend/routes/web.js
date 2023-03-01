@@ -187,7 +187,7 @@ router.get('/500', async (req, res) => {
   res.render('page', { page_content });
 });
 
-router.get('/:slug?', [checkMemberAuth, checkIPMiddleware], async (req, res) => {
+router.get('/:slug?', [checkMemberAuth], async (req, res) => {//checkIPMiddleware
   var pagePerser = new PageParser(req.params.slug || '/');
   try {
     var page_content = await pagePerser.preview(req);
