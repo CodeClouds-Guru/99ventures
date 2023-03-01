@@ -30,30 +30,30 @@ class PureSpectrumController {
             const psObj = new PurespectrumHelper;
             const allAttributes = await psObj.fetchAndReturnData('/attributes?localization=en_US&format=true');
             if ('success' === allAttributes.apiStatus) {
-                const qualAttributes = allAttributes.qual_attributes;
-                const params = []
-                for(let attr of qualAttributes) {
-                    params.push({
-                        question_text: attr.text,
-                        name: attr.desc,
-                        survey_provider_id: PureSpectrumController.providerId,
-                        survey_provider_question_id: attr.qualification_code,
-                        question_type: PureSpectrumController.questionType[attr.type],
-                        created_at: new Date()
-                    })
-                }
-                if(params.length){
-                    await SurveyQuestion.bulkCreate(params, {
-                        updateOnDuplicate: ['survey_provider_question_id'],
-                        ignoreDuplicates: true
+                const qualAttributes = allAttributes.qual_attributes;                
+                for(let attr of qualAttributes) {                    
+                    const checkExists = await SurveyQuestion.count({
+                        where: {
+                            survey_provider_id: PureSpectrumController.providerId,
+                            survey_provider_question_id: attr.qualification_code,
+                        },
                     });
-                    res.json({ status: true, message: 'Updated' });
-                } else {
-                    res.json({ status: true, message: 'No record to update!' });
+                    if(!checkExists) {
+                        await SurveyQuestion.create({
+                            question_text: attr.text,
+                            name: attr.desc,
+                            survey_provider_id: PureSpectrumController.providerId,
+                            survey_provider_question_id: attr.qualification_code,
+                            question_type: PureSpectrumController.questionType[attr.type],
+                            created_at: new Date()
+                        })
+                    }
                 }
-                return;
-
+                res.json({ status: true, message: 'Updated' });
+            } else {
+                res.json(allAttributes);
             }
+            return;
         }
         catch (error) {
             console.error(error);
@@ -158,7 +158,23 @@ class PureSpectrumController {
         try{
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');            
-            if ('success' === allSurveys.apiStatus && allSurveys.surveys) {                
+            if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
+                //-- Disabled all the previous surveys
+                const current_datetime = new Date();
+                Survey.update({
+                    status: PureSpectrumController.surveyStatus[33],
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        status: 'live',
+                        created_at: {
+                            [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
+                        },
+                    }
+                });
+                //----------
+
+                /*
                 const params = []
                 for(let survey of allSurveys.surveys ){
                     params.push({
@@ -174,10 +190,51 @@ class PureSpectrumController {
                 }
                 
                 const result = await Survey.bulkCreate(params, {
-                    updateOnDuplicate: ['survey_number'],
-                    ignoreDuplicates: true,
+                    updateOnDuplicate: ['loi', 'cpi', 'name', 'status', 'original_json']
                 });
                 return result;
+                */
+
+                for(let survey of allSurveys.surveys ){
+                    const checkExists = await Survey.count({
+                        where: {
+                            survey_provider_id: PureSpectrumController.providerId,
+                            survey_number: survey.survey_id,
+                        },
+                    });
+                    if(!checkExists) {
+                        await Survey.create({
+                            survey_provider_id: PureSpectrumController.providerId,
+                            loi: survey.survey_performance.overall.loi,
+                            cpi: survey.cpi,
+                            name: survey.survey_name,
+                            survey_number: survey.survey_id,
+                            status: PureSpectrumController.surveyStatus[survey.survey_status],
+                            original_json: survey,
+                            created_at: new Date()
+                        });
+                    } else {
+                        await Survey.update({
+                            survey_provider_id: PureSpectrumController.providerId,
+                            loi: survey.survey_performance.overall.loi,
+                            cpi: survey.cpi,
+                            name: survey.survey_name,
+                            status: PureSpectrumController.surveyStatus[survey.survey_status],
+                            original_json: survey,
+                            updated_at: new Date()
+                        }, {
+                            where: {
+                                survey_number: survey.survey_id,
+                            }
+                        });
+                    }
+                }
+                return await Survey.findAll({
+                    where: {
+                        status: 'live'
+                    }
+                });
+                
             } else {
                 return [];
             }

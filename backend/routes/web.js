@@ -6,6 +6,7 @@ const Cint = require('../helpers/Cint');
 const PurespectrumHelper = require('../helpers/Purespectrum');
 const { 
   Survey, 
+  SurveyProvider,
   SurveyQuestion, 
   SurveyQualification, 
   SurveyAnswerPrecodes, 
@@ -66,6 +67,16 @@ router.get('/cint/entry-link', async (req, res) => {
 
 router.get('/pure-spectrum/surveys', async(req, res) => {
   const memberId = req.query.user_id;
+  const provider = await SurveyProvider.findOne({
+    attributes: ['id'],
+    where: {
+      name: 'Purespectrum'
+    }
+  });
+  if(!provider) {
+    res.send('Survey Provider not found!');
+    return;
+  }
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
     where: {
@@ -75,7 +86,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       model: SurveyQuestion,
       attributes: ['name', 'question_text', 'survey_provider_question_id', 'question_type'],
       where: {
-        survey_provider_id: 3
+        survey_provider_id: provider.id
       }
     }
   });
@@ -155,7 +166,7 @@ router.get('/pure-spectrum/entry-link', async(req, res) => {
 
   if(data.apiStatus === 'success' && data.survey_entry_url) {
     const entryLink = data.survey_entry_url +'&'+ generateQueryString;
-    res.send(entryLink)
+    res.redirect(entryLink)
   } else {
     res.send(data)
   }
