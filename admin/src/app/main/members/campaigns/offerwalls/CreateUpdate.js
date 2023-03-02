@@ -19,7 +19,7 @@ import AddMore from 'app/shared-components/AddMore';
 const schema = yup.object().shape({
     premium_configuration: yup.string().required('Please enter Premium Configuration'),
     name: yup.string().required('Please enter Name'),
-    sub_id_prefix: yup.string().required('Please enter Sub ID Prefix'),
+    // sub_id_prefix: yup.string().notRequired(),
     mode: yup.string().required('Please enter Mode'),
     campaign_id_variable: yup.string().required('Please enter Campaign ID Variable'),
     campaign_name_variable: yup.string().required('Please enter Campaign Name Variable'),
@@ -51,7 +51,7 @@ const defaultValues = {
 };
 
 const CreateUpdate = () => {
-    const module = 'offerwalls';
+    const module = 'offer-walls';
     const campaignId = useParams().campaignId ? useParams().campaignId : '';
     const moduleId = useParams().moduleId || 'create';
     const [loading, setLoading] = useState(false);
@@ -84,7 +84,7 @@ const CreateUpdate = () => {
         'allowFromAnyIP' in dirtyFields ? delete dirtyFields.allowFromAnyIP : '';
         setValue('premium_configuration', '', { shouldDirty: true, shouldValidate: false });
         setValue('name', '', { shouldDirty: true, shouldValidate: false });
-        setValue('sub_id_prefix', '', { shouldDirty: true, shouldValidate: false });
+        setValue('sub_id_prefix', '', { shouldDirty: false, shouldValidate: false });
         setValue('mode', '', { shouldDirty: true, shouldValidate: false });
         setValue('campaign_id_variable', '', { shouldDirty: true, shouldValidate: false });
         setValue('campaign_name_variable', '', { shouldDirty: true, shouldValidate: false });
@@ -306,7 +306,6 @@ const CreateUpdate = () => {
                                         error={!!errors.sub_id_prefix}
                                         helperText={errors?.sub_id_prefix?.message}
                                         variant="outlined"
-                                        required
                                     />
                                 )}
                             />
@@ -614,7 +613,7 @@ const CreateUpdate = () => {
                                 color="secondary"
                                 className="w-1/3 mt-16"
                                 aria-label="Save"
-                                disabled={_.isEmpty(dirtyFields) || !isValid}
+                                disabled={moduleId === 'create' && (_.isEmpty(dirtyFields) || !isValid)}
                                 type="submit"
                                 size="large"
                                 loading={loading}
