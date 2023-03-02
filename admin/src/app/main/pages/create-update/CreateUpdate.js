@@ -378,7 +378,7 @@ const CreateUpdate = () => {
                         status: record.status,
                         name: record.name,
                         slug: record.slug,
-                        permalink: record.permalink === '/' ? domain : !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
+                        permalink: record.permalink === '/' ? domain : record.permalink !== domain + record.slug ? domain + record.slug : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,
