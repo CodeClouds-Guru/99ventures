@@ -29,6 +29,9 @@ class StaticPageController {
                 <p>You will receive your credit directly to your account balance shortly.</p>
                 <p id="ipel">In the meantime, check out more survey options below to continue earning.</p>`;
                 break;
+            case 'tentative':
+                content += `<p>You did not complete your survey.</p>`
+                break;
             case 'security':
                 content += `<p>The advertiser’s security system has detected some unusual activity and you have been blocked from attempting to complete this survey.</p>
               <p>Please ensure that all surveys are being completed correctly, and in line with the requirements of the advertiser to prevent similar issues in future.</p>
