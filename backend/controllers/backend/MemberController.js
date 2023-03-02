@@ -66,7 +66,7 @@ class MemberController extends Controller {
         let member_details = await Member.findOne({
           where: { email: req.body.email },
         });
-        
+
         let evntbus = eventBus.emit('send_email', {
           action: 'Welcome',
           data: {
@@ -76,7 +76,6 @@ class MemberController extends Controller {
           req: req,
         });
 
-        
         return res;
       }
     } catch (error) {
@@ -202,7 +201,7 @@ class MemberController extends Controller {
             include: { model: SurveyProvider, attributes: ['name'] },
           },
         });
-        console.log('survey_list', survey_list);
+        // console.log('survey_list', survey_list);
         for (let i = 0; i < survey_list.length; i++) {
           if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
             survey_list[i].setDataValue(
@@ -377,7 +376,9 @@ class MemberController extends Controller {
         request_data.avatar = file_name.files[0].filename;
 
         if (pre_avatar != '') {
-          let file_delete = await fileHelper.deleteFile(pre_avatar);
+          let file_delete = await fileHelper.deleteFile(
+            pre_avatar.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+          );
         }
       } else request_data.avatar = null;
       let model = await this.model.update(request_data, {

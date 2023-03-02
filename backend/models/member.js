@@ -2,7 +2,7 @@
 const { Model, Op } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
 const Joi = require('joi');
-const { MemberBalance } = require("../models");
+const { MemberBalance } = require('../models');
 
 const moment = require('moment');
 // const {MemberNote} = require("../models/index");
@@ -127,10 +127,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         get() {
           let rawValue = this.getDataValue('avatar') || null;
-          if (rawValue == null || rawValue == '') {
+          if (!rawValue || rawValue === '') {
             const publicURL =
               process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-            rawValue ? rawValue : `${publicURL}/images/demo-user.png`;
+            rawValue = `${publicURL}/images/demo-user.png`;
           } else {
             rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
@@ -184,11 +184,11 @@ module.exports = (sequelize, DataTypes) => {
           ]);
           //member referral code
           await sequelize.models.Member.update(
-              { referral_code: member.id + '0' + new Date().getTime() },
-              {
-                where: { id: member.id },
-              }
-            );
+            { referral_code: member.id + '0' + new Date().getTime() },
+            {
+              where: { id: member.id },
+            }
+          );
         },
       },
     }
@@ -350,14 +350,18 @@ module.exports = (sequelize, DataTypes) => {
     const field_name = req.body.field_name || '';
     const id = req.params.id || null;
     const notes = req.body.member_notes || null;
-    const member_ids = id ? [id] : Array.isArray(req.body.member_id) ? req.body.member_id : [req.body.member_id];
+    const member_ids = id
+      ? [id]
+      : Array.isArray(req.body.member_id)
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
         where: {
           id: {
-            [Op.in]: member_ids
-          }
+            [Op.in]: member_ids,
+          },
         },
       });
       let result = await Member.update(
@@ -367,25 +371,24 @@ module.exports = (sequelize, DataTypes) => {
         {
           where: {
             id: {
-              [Op.in]: member_ids
-            }
+              [Op.in]: member_ids,
+            },
           },
           return: true,
         }
       );
       if (notes) {
-        let data = []
-        members.forEach(element => {
+        let data = [];
+        members.forEach((element) => {
           data.push({
             user_id: req.user.id,
             member_id: element.dataValues.id,
             previous_status: element.dataValues.status,
             current_status: value,
             note: notes,
-          })
+          });
         });
-        if (data.length > 0)
-          await MemberNote.bulkCreate(data);
+        if (data.length > 0) await MemberNote.bulkCreate(data);
       }
       return result[0];
     } catch (error) {
