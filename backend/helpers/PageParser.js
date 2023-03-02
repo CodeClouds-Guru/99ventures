@@ -18,10 +18,11 @@ const defaultAddOns = [
   },
 ];
 class PageParser {
-  constructor(slug) {
+  constructor(slug, staticContent) {
     this.sessionUser = null;
     this.sessionMessage = '';
     this.slug = slug;
+    this.staticContent = staticContent;
     this.page = null;
     this.preview = this.preview.bind(this);
     this.getPageNLayout = this.getPageNLayout.bind(this);
@@ -67,7 +68,7 @@ class PageParser {
     await this.getPageNLayout();
     let layout_html = this.page.Layout.html;
     const page_title = this.page.name;
-    let content = this.page.html;
+    let content = this.staticContent ? this.staticContent : this.page.html;
     const page_keywords = this.page.keywords;
     const page_descriptions = this.page.descriptions;
     const page_meta_code = this.page.meta_code || '';
