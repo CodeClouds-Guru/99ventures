@@ -20,6 +20,8 @@ const PureSpectrumControllerClass = require("../controllers/callback/PureSpectru
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SurveyControllerClass = require("../controllers/frontend/SurveyController");
 const SurveyController = new SurveyControllerClass();
+const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
+const StaticPageController = new StaticPageControllerClass();
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
 router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
@@ -186,6 +188,7 @@ router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
 router.get("/email-verify", MemberAuthController.emailVerify);
 router.get("/survey", SurveyController.getSurvey);
+router.get("/survey/:status", StaticPageController.showStatus);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
@@ -197,6 +200,7 @@ router.get('/500', async (req, res) => {
   var page_content = await pagePerser.preview(req);
   res.render('page', { page_content });
 });
+
 
 router.get('/:slug?', [checkMemberAuth], async (req, res) => {//checkIPMiddleware
   var pagePerser = new PageParser(req.params.slug || '/');
