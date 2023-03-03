@@ -6,10 +6,11 @@ import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { getList, setPathObject, setLoading, setListData, setSelectedItem } from 'app/store/filemanager';
+import { getList, setPathObject, setLoading, setListData, setSelectedItem} from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
+
 
 const baseStyle = {
 	justifyContent: 'center',
@@ -104,6 +105,7 @@ function DragDropzone() {
 		maxFiles: selectConfig.max_no_of_uploads ?? 0,
 		accept: selectConfig.accept ?? {},
 		onDrop: acceptedFiles => {
+			console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
 				preview: URL.createObjectURL(file)
 			})));
@@ -148,7 +150,6 @@ function DragDropzone() {
 		}
 	});
 
-
 	const style = useMemo(() => ({
 		...(!listing.length ? baseStyle: {}),
 		...(isFocused ? focusedStyle : {}),
@@ -187,7 +188,7 @@ function DragDropzone() {
 			path = pathArry
 			dispatch(setPathObject(pathArry));
 		}
-		
+
 		dispatch(
 			getList(path.join('/'))
 		).then(response => {

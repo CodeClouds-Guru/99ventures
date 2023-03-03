@@ -9,7 +9,7 @@ import ImagePreview from './ImagePreview';
 import DragDropzone from './DragDropZone';
 import './FileManager.css';
 import FolderOptions from './components/FolderOptions';
-import { getConfig } from 'app/store/filemanager';
+import { getConfig, getAllFileTypes } from 'app/store/filemanager';
 import { useDispatch } from 'react-redux'; 
 
 const Index = () => {
@@ -19,6 +19,10 @@ const Index = () => {
 
     React.useEffect(()=>{
 		dispatch(getConfig());
+        /** 
+		 * To fetch all the filetypes
+		 */
+		dispatch(getAllFileTypes())
 	}, []);
 
     return (
