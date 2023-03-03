@@ -4,9 +4,10 @@ const PageParser = require('../helpers/PageParser');
 const Lucid = require('../helpers/Lucid');
 const Cint = require('../helpers/Cint');
 const PurespectrumHelper = require('../helpers/Purespectrum');
+const SqsHelper = require("../helpers/SqsHelper");
+
 const { 
   Survey, 
-  SurveyProvider,
   SurveyQuestion, 
   SurveyQualification, 
   SurveyAnswerPrecodes, 
@@ -20,8 +21,6 @@ const PureSpectrumControllerClass = require("../controllers/callback/PureSpectru
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SurveyControllerClass = require("../controllers/frontend/SurveyController");
 const SurveyController = new SurveyControllerClass();
-const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
-const StaticPageController = new StaticPageControllerClass();
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
 router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
@@ -69,16 +68,6 @@ router.get('/cint/entry-link', async (req, res) => {
 
 router.get('/pure-spectrum/surveys', async(req, res) => {
   const memberId = req.query.user_id;
-  const provider = await SurveyProvider.findOne({
-    attributes: ['id'],
-    where: {
-      name: 'Purespectrum'
-    }
-  });
-  if(!provider) {
-    res.send('Survey Provider not found!');
-    return;
-  }
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
     where: {
@@ -88,7 +77,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       model: SurveyQuestion,
       attributes: ['name', 'question_text', 'survey_provider_question_id', 'question_type'],
       where: {
-        survey_provider_id: provider.id
+        survey_provider_id: 3
       }
     }
   });
@@ -168,7 +157,7 @@ router.get('/pure-spectrum/entry-link', async(req, res) => {
 
   if(data.apiStatus === 'success' && data.survey_entry_url) {
     const entryLink = data.survey_entry_url +'&'+ generateQueryString;
-    res.redirect(entryLink)
+    res.send(entryLink)
   } else {
     res.send(data)
   }
@@ -180,7 +169,18 @@ router.get('/socket-connect', async (req, res) => {
   global.socket.emit("shoutbox", { name: 'Nandita', place: 'USA', message: 'Socket connected' });
   res.send("hello")
 })
-  
+
+//SQS
+router.post('/sqs-send-message', async (req, res) => {
+  const sqsHelper = new SqsHelper();
+  const send_message = await sqsHelper.sendData(req.body);
+  res.send(send_message)
+})
+router.get('/sqs-receive-message', async (req, res) => {
+  const sqsHelper = new SqsHelper();
+  const receive_message = await sqsHelper.receiveData();
+  res.send(receive_message)
+})
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require("../middlewares/checkIPMiddleware");
 const checkMemberAuth = require("../middlewares/checkMemberAuth");
@@ -188,7 +188,6 @@ router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
 router.get("/email-verify", MemberAuthController.emailVerify);
 router.get("/survey", SurveyController.getSurvey);
-router.get("/survey/:status", StaticPageController.showStatus);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
@@ -200,7 +199,6 @@ router.get('/500', async (req, res) => {
   var page_content = await pagePerser.preview(req);
   res.render('page', { page_content });
 });
-
 
 router.get('/:slug?', [checkMemberAuth], async (req, res) => {//checkIPMiddleware
   var pagePerser = new PageParser(req.params.slug || '/');

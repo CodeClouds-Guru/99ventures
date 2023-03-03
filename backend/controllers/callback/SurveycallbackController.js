@@ -10,6 +10,7 @@ const {
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
+const SqsHelper = require("../../helpers/SqsHelper");
 class SurveycallbackController {
   constructor() {
     this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this)
@@ -62,6 +63,15 @@ class SurveycallbackController {
 
     let survey = req.body;
     try {
+      //SQS 
+      const sqsHelper = new SqsHelper();
+      if (survey.length > 0) {
+        survey.forEach(async (element) => {
+          const send_message = await sqsHelper.sendData(element);
+          console.log(send_message)
+        })
+      }
+      //SQS
       // if (survey.length > 0) {
       //   const provider = req.params.provider;
       //   //get survey provider
