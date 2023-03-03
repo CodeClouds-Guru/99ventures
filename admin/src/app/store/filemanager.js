@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import types from 'src/app/main/settings/Types'
 import axios from 'axios';
 
 export const getList = createAsyncThunk(
@@ -199,6 +200,24 @@ export const getConfig = createAsyncThunk(
     }
 )
 
+export const getAllFileTypes =  createAsyncThunk(
+    'filemanager/getAllFileTypes',
+    async(params, {dispatch, }) => {
+        const allTypes = []
+        for(let type in types){
+            types[type].map(el => {
+                allTypes.push({
+                    ext: el.ext,
+                    mime_type: el.mime_type,
+                    obsolete_mime_type: el.obsolete_mime_type,
+                    color: el.color
+                })
+            })
+        }
+        return allTypes;
+    }
+)
+
 /**
  * jsonData is the replicate of the listData Array.
  * It has been used to filter the listData.
@@ -228,7 +247,8 @@ const initialState = {
     },
     metadata: {},
     metadataLoading: false,
-    config: {}
+    config: {},
+    allTypes: []
 }
 
 const fileManagerSlice = createSlice({
@@ -308,6 +328,9 @@ const fileManagerSlice = createSlice({
         },
         [getConfig.fulfilled]: (state, { payload }) => {
             state.config = payload
+        },
+        [getAllFileTypes.fulfilled]: (state, {payload}) => {
+            state.allTypes = payload
         }
     }
 });
