@@ -125,6 +125,28 @@ const types = {
             mime_type: 'text/javascript',
             checked: false
         },
+    ],
+    'fonts': [
+        {
+            ext: '.eot',
+            mime_type: 'application/vnd.ms-fontobject',
+            checked: false
+        },
+        {
+            ext: '.otf',
+            mime_type: 'font/otf',
+            checked: false
+        },
+        {
+            ext: '.woff',
+            mime_type: 'font/woff',
+            checked: false
+        },
+        {
+            ext: '.woff2',
+            mime_type: 'font/woff2',
+            checked: false
+        },
     ]
 }
 
