@@ -1,0 +1,10 @@
+[
+  {
+    "type": "script",
+    "src": "/js/jquery-v1.min.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/socket.js"
+  }
+]
