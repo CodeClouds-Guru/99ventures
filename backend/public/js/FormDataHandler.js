@@ -9,11 +9,7 @@ $(() => {
     const formHeading = $("#form_heading").get(0);
 
     var validateEmail = (email) => {
-        return String(email)
-            .toLowerCase()
-            .match(
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            );
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
     }
 
     var goTologin = () => {
@@ -59,7 +55,8 @@ $(() => {
         loginErrors = [];
         const emailField = $(loginForm).find('input[name="email"]').get(0);
         const passwordField = $(loginForm).find('input[name="password"]').get(0);
-        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val())) {
+        // console.log(validateEmail($(emailField).val()))
+        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val().trim())) {
             loginErrors.push({ field: $(emailField), message: 'Please enter a valid email' });
         }
         if ($(passwordField).val().trim().length < 8) {
