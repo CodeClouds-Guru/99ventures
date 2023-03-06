@@ -6,14 +6,14 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT
       },
       company_id: {
         allowNull: false,
         type: Sequelize.BIGINT
       },
       site_layout_id : {
-        type: Sequelize.TINYINT
+        type: Sequelize.BIGINT
       },
       domain: {
         type: Sequelize.STRING

@@ -114,7 +114,7 @@ module.exports = (sequelize, DataTypes) => {
             return moment(this.getDataValue('dob')).format('YYYY-MM-DD');
         },
       },
-      member_referral_id: DataTypes.INTEGER,
+      member_referral_id: DataTypes.BIGINT,
       password: DataTypes.STRING,
       last_active_on: 'TIMESTAMP',
       created_by: DataTypes.BIGINT,

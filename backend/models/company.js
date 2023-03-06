@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   Company.init(
     {
-      company_type_id: DataTypes.INTEGER,
+      company_type_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
       slug: {
         type: DataTypes.STRING,

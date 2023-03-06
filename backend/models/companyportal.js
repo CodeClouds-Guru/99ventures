@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       status: DataTypes.TINYINT,
-      site_layout_id: DataTypes.INTEGER,
+      site_layout_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
