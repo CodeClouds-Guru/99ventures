@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       option: DataTypes.STRING,
       lucid_precode: DataTypes.STRING,
       purespectrum_precode: DataTypes.STRING,
+      schlesigner_precode: DataTypes.STRING,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',

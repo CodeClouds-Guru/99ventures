@@ -21,9 +21,17 @@ const PureSpectrumControllerClass = require("../controllers/callback/PureSpectru
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SurveyControllerClass = require("../controllers/frontend/SurveyController");
 const SurveyController = new SurveyControllerClass();
+const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
+const StaticPageController = new StaticPageControllerClass();
+const SchlesignerControllerClass = require('../controllers/callback/SchlesignerController');
+const SchlesignerController = new SchlesignerControllerClass();
+
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
 router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
+router.get('/schlesigner-question', SchlesignerController.saveSurveyQuestionsAndAnswer);
+router.get('/schlesigner-survey', SchlesignerController.syncServeyAndQualification);
+
 
 
 router.get('/cint/entry-link', async (req, res) => {
@@ -68,6 +76,17 @@ router.get('/cint/entry-link', async (req, res) => {
 
 router.get('/pure-spectrum/surveys', async(req, res) => {
   const memberId = req.query.user_id;
+  
+  const provider = await SurveyProvider.findOne({
+    attributes: ['id'],
+    where: {
+      name: 'Purespectrum'
+    }
+  });
+  if(!provider) {
+    res.send('Survey Provider not found!');
+    return;
+  }
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
     where: {
@@ -81,6 +100,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       }
     }
   });
+
   if(eligibilities){
     const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.name);
     const matchingAnswerCodes = eligibilities
@@ -97,7 +117,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       const surveys = await Survey.findAll({
         attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
         where: {
-          survey_provider_id: 3,
+          survey_provider_id: provider.id,
           status: "live",
         },
         include: {
@@ -188,6 +208,7 @@ router.post("/login", MemberAuthController.login);
 router.post("/signup", MemberAuthController.signup);
 router.get("/email-verify", MemberAuthController.emailVerify);
 router.get("/survey", SurveyController.getSurvey);
+router.get("/survey/:status", StaticPageController.showStatus);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
