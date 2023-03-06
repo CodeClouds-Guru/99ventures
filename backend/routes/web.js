@@ -22,9 +22,15 @@ const SurveyControllerClass = require("../controllers/frontend/SurveyController"
 const SurveyController = new SurveyControllerClass();
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
+const SchlesignerControllerClass = require('../controllers/callback/SchlesignerController');
+const SchlesignerController = new SchlesignerControllerClass();
+
 
 router.get('/purespectrum-survey', PureSpectrumController.survey);
 router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
+router.get('/schlesigner-question', SchlesignerController.saveSurveyQuestionsAndAnswer);
+router.get('/schlesigner-survey', SchlesignerController.syncServeyAndQualification);
+
 
 
 router.get('/cint/entry-link', async (req, res) => {
@@ -69,6 +75,7 @@ router.get('/cint/entry-link', async (req, res) => {
 
 router.get('/pure-spectrum/surveys', async(req, res) => {
   const memberId = req.query.user_id;
+  
   const provider = await SurveyProvider.findOne({
     attributes: ['id'],
     where: {
@@ -92,6 +99,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       }
     }
   });
+
   if(eligibilities){
     const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.name);
     const matchingAnswerCodes = eligibilities
@@ -108,7 +116,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       const surveys = await Survey.findAll({
         attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
         where: {
-          survey_provider_id: 3,
+          survey_provider_id: provider.id,
           status: "live",
         },
         include: {

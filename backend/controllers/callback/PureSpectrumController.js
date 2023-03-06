@@ -231,7 +231,8 @@ class PureSpectrumController {
                 }
                 return await Survey.findAll({
                     where: {
-                        status: 'live'
+                        status: 'live',
+                        survey_provider_id: PureSpectrumController.providerId,
                     }
                 });
                 
