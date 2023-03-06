@@ -6,17 +6,8 @@ const {
   CompanyPortalAdditionalHeader,
 } = require('../models');
 const { QueryTypes, Op } = require('sequelize');
+const defaultAddOns = require("../config/frontend_static_files.json");
 
-const defaultAddOns = [
-  {
-    type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Scripted-essentials/jquery-v1.js',
-  },
-  {
-    type: 'script',
-    src: 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/Scripted-essentials/socket.js',
-  },
-];
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
@@ -96,6 +87,7 @@ class PageParser {
       : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
+    console.log('default_scripted_codes', default_scripted_codes);
     layout_html = layout_html.replaceAll('{{content}}', content);
     layout_html = layout_html.replaceAll(
       '${additional_header_script}',
@@ -134,10 +126,10 @@ class PageParser {
     defaultAddOns.forEach((item) => {
       switch (item.type) {
         case 'script':
-          str += `<script src="${item.src}"></script>`;
+          str += `<script src="${process.env.CLIENT_API_PUBLIC_URL}${item.src}"></script>`;
           break;
         case 'css':
-          str += `<link rel="stylesheet" href="${item.src}">`;
+          str += `<link rel="stylesheet" href="${process.env.CLIENT_API_PUBLIC_URL}${item.src}">`;
           break;
         default:
           break;

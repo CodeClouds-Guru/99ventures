@@ -6,5 +6,9 @@
   {
     "type": "script",
     "src": "/js/socket.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/FormDataHandler.js"
   }
 ]

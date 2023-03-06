@@ -51,6 +51,9 @@ services:
       - CLIENT_ORIGIN=$CLIENT_ORIGIN
       - APP_SECRET=$NODE_APP_SECRET
       - PORT=$NODE_DOCKER_PORT
+      - WDS_SOCKET_HOST=127.0.0.1 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
     networks:
       - backend
       - frontend
@@ -70,6 +73,9 @@ services:
     restart: always
     environment: 
       - CLIENT_API_BASE_URL=$CLIENT_API_BASE_URL
+      - WDS_SOCKET_HOST=127.0.0.1 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
     volumes:
       - ./admin:/usr/src/frontend
       - /usr/src/frontend/node_modules

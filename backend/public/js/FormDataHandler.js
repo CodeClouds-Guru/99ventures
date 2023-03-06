@@ -1,10 +1,6 @@
 $(() => {
-    var current_url = window.location.href;
     var loginErrors = [];
-    // var loginErrorMsgs = [];
-    var dynamicError = (field, type) => {
-        type === 'add' ? loginErrors.push(field) : loginErrors.splice(loginErrors.indexOf(field))
-    }
+    const form = $("#scripteed_login_form").get(0);
     var validateEmail = (email) => {
         return String(email)
             .toLowerCase()
@@ -13,45 +9,43 @@ $(() => {
             );
     }
     var loginFormSanitisation = () => {
-        const form = $("#scripteed_login_form");
-        if (form.length === 1 && ["email", "password", "remember_me", "login_button"].every((val) => Object.keys(form[0].elements).indexOf(val) > -1)) {
-            // form.attr("action", '/login');
-            form.attr("method", "POST");
-            console.log("Action set");
-            form.submit((event) => {
-                event.preventDefault();
-                login();
-            })
+        if (form && ["email", "password", "remember_me"].every((val) => Object.keys(form.elements).indexOf(val) > -1)) {
+            $(form).attr("action", '/login');
+            $(form).attr("method", "POST");
         }
         else {
             console.log("OOPS!!! Action not set");
         }
     }
     var loginFomValidation = () => {
-        var error_list = '';
-        var error_div = $('#error_div');
-        error_div.empty();
-        $("input[name=email]").val().trim().length === 0 && !validateEmail($("input[name=email]").val().trim()) && !loginErrors.includes('email') ? dynamicError('email', 'add') : dynamicError('email', 'remove');
-        $("input[name=password]").val().trim().length === 0 && !loginErrors.includes('password') ? dynamicError('password', 'add') : dynamicError('password', 'remove');
+        loginErrors = [];
+        const emailField = $(form).find('input[name="email"]').get(0);
+        const passwordField = $(form).find('input[name="password"]').get(0);
+        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val())) {
+            loginErrors.push({ field: $(emailField), message: 'Please enter a valid email' });
+        }
+        if ($(passwordField).val().trim().length < 8) {
+            loginErrors.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
+        }
+    }
+    displayErrors = () => {
+        loginErrors.forEach(item => {
+            item.field.parent().append('<span class="alert-msg invalid-message mt-1"><i class="fa-solid fa-circle-exclamation me-1"></i>' + item.message + '</span>')
+        });
+    }
 
+    if (form) {
+        loginFormSanitisation();
+    }
+
+    $(form).submit((e) => {
+        loginFomValidation();
         console.log(loginErrors);
-
-        if ($("input[name=email]").val().trim().length > 0 && validateEmail($("input[name=email]").val().trim()) && $("input[name=password]").val().trim().length > 0) {
-            return true;
+        if (loginErrors.length === 0) {    // if (loginErrors.length > 0) {
+            $(this).trigger(e.type);
+        } else {
+            e.preventDefault();
+            displayErrors();
         }
-        else {
-            error_list += '<ul>';
-            loginErrors.map(val => {
-                error_list += `<li>${val} is required</li>`
-            })
-            error_list += `</ul>`
-            error_div.html(error_list);
-            console.log('Please fill all required fields');
-            return false;
-        }
-    }
-    var login = () => {
-        loginFomValidation() ? console.log('Logged in') : console.log('Validation failed');
-    }
-    current_url.includes('login') ? loginFormSanitisation() : console.log('gg');
+    })
 });
