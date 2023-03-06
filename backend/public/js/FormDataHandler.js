@@ -29,6 +29,7 @@ $(() => {
         }
     }
     displayErrors = () => {
+        $('span.alert-msg').remove();
         loginErrors.forEach(item => {
             item.field.parent().append('<span class="alert-msg invalid-message mt-1"><i class="fa-solid fa-circle-exclamation me-1"></i>' + item.message + '</span>')
         });
