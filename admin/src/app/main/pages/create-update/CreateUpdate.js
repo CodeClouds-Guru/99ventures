@@ -181,11 +181,11 @@ const CreateUpdate = () => {
 
         // To enable JS in the editor
         cmdm.add('allowScripts', {
-            run: function(editor) {
-              editor.getConfig().allowScripts = 1;
+            run: function (editor) {
+                editor.getConfig().allowScripts = 1;
             },
-            stop: function(editor) {
-              editor.getConfig().allowScripts = 0;
+            stop: function (editor) {
+                editor.getConfig().allowScripts = 0;
             },
         });
 
@@ -377,8 +377,8 @@ const CreateUpdate = () => {
                         layout_id: record.layout_id,
                         status: record.status,
                         name: record.name,
-                        slug: record.slug,
-                        permalink: record.permalink === '/' ? domain : record.permalink !== domain + record.slug ? domain + record.slug : record.permalink,
+                        slug: record.slug === '/' ? '' : record.domain,
+                        permalink: record.permalink === domain ? domain : record.permalink !== domain + record.slug ? domain + record.slug : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,
