@@ -13,16 +13,16 @@ $(() => {
     }
 
     var goTologin = () => {
-        $(loginForm).removeClass('hide');
+        $(loginForm).removeClass('d-none');
         $(loginBtn).addClass('active');
-        $(signupForm).addClass('hide');
+        $(signupForm).addClass('d-none');
         $(signupBtn).removeClass('active');
         $(formHeading).text('Log In');
     }
     var goToRegister = () => {
-        $(signupForm).removeClass('hide');
+        $(signupForm).removeClass('d-none');
         $(signupBtn).addClass('active');
-        $(loginForm).addClass('hide');
+        $(loginForm).addClass('d-none');
         $(loginBtn).removeClass('active');
         $(formHeading).text('Sign Up');
     }
@@ -65,7 +65,9 @@ $(() => {
         const emailField = $(loginForm).find('input[name="email"]').get(0);
         const passwordField = $(loginForm).find('input[name="password"]').get(0);
         // console.log(validateEmail($(emailField).val()))
-        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val().trim())) {
+        if ($(emailField).val().trim().length === 0) {
+            errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
+        } else if (!validateEmail($(emailField).val().trim())) {
             errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
         }
         if ($(passwordField).val().trim().length < 8) {
