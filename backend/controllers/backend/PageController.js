@@ -7,6 +7,7 @@ class PageController extends Controller {
   }
   //override list function
   async list(req,res){
+    req.query.sort = req.query.sort || "updated_at";
     let response = await super.list(req);
     let pages = response.result.data
     await pages.forEach(function(page,key){
@@ -164,6 +165,7 @@ class PageController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
+    req.body.updated_at = new Date()
     //unique code checking
     let check_code = await this.model.findOne({
       where: { slug: req.body.slug,company_portal_id:req.headers.site_id },
