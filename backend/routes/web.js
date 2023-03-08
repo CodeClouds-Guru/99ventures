@@ -8,6 +8,7 @@ const SqsHelper = require("../helpers/SqsHelper");
 
 const { 
   Survey, 
+  SurveyProvider,
   SurveyQuestion, 
   SurveyQualification, 
   SurveyAnswerPrecodes, 
@@ -87,6 +88,9 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
     res.send('Survey Provider not found!');
     return;
   }
+  /**
+   * check and get member's eligibility
+   */
   const eligibilities = await MemberEligibilities.findAll({
     attributes: ['survey_question_id', 'precode_id', 'text'],
     where: {
@@ -94,9 +98,9 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
     },
     include: {
       model: SurveyQuestion,
-      attributes: ['name', 'question_text', 'survey_provider_question_id', 'question_type'],
+      attributes: ['name', 'survey_provider_question_id', 'question_type'],
       where: {
-        survey_provider_id: 3
+        survey_provider_id: provider.id
       }
     }
   });
@@ -106,6 +110,8 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
     const matchingAnswerCodes = eligibilities
                                   .filter(eg => eg.SurveyQuestion.survey_provider_question_id !== 229) // Removed 229 (ZIP Code), beacuse this is open text question. We will not get the value from survey_answer_precodes
                                   .map(eg => eg.precode_id);
+    // res.send(eligibilities);
+    // return;
 
     if(matchingAnswerCodes.length && matchingQuestionCodes.length){
       const queryString = {};
@@ -113,7 +119,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
         queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
       });
       const generateQueryString = new URLSearchParams(queryString).toString();
-
+      
       const surveys = await Survey.findAll({
         attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
         where: {
@@ -126,10 +132,9 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
           required: true,
           include: {
             model: SurveyAnswerPrecodes,
-            attributes: ['id', 'option', 'purespectrum_precode'],
+            attributes: ['id', 'option', 'precode'],
             where: {
-              // option: [genderCode, age]
-              option: matchingAnswerCodes
+              option: matchingAnswerCodes // [genderCode, age]
             },
             required: true,
             include: [
@@ -137,8 +142,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
                 model: SurveyQuestion,
                 attributes: ['id', 'survey_provider_question_id'],
                 where: {
-                  // name: ['Age', 'Gender', 'Zipcode']
-                  name: matchingQuestionCodes
+                  name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
                 }
               }
             ],

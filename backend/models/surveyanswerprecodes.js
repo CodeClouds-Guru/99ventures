@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 
       SurveyAnswerPrecodes.hasMany(models.SurveyQuestion, {
         foreignKey: 'survey_provider_question_id',
-        sourceKey: 'purespectrum_precode',
+        sourceKey: 'precode',
       });
 
       SurveyAnswerPrecodes.belongsToMany(models.SurveyQualification, {
@@ -26,9 +26,8 @@ module.exports = (sequelize, DataTypes) => {
   SurveyAnswerPrecodes.init(
     {
       option: DataTypes.STRING,
-      lucid_precode: DataTypes.STRING,
-      purespectrum_precode: DataTypes.STRING,
-      schlesigner_precode: DataTypes.STRING,
+      precode: DataTypes.STRING,
+      survey_provider_id:  DataTypes.BIGINT,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',

@@ -81,6 +81,7 @@ class PureSpectrumController {
                         if(quotas.length){
                             for(let quota of quotas){
                                 const questionData = await SurveyQuestion.findOne({
+                                    attributes:['id', 'type', 'survey_provider_question_id'],
                                     where: {
                                         survey_provider_question_id: quota.criteria[0].qualification_code,
                                         survey_provider_id: PureSpectrumController.providerId
@@ -109,7 +110,8 @@ class PureSpectrumController {
                                         if(criteria.condition_codes){
                                             const precodeData = await SurveyAnswerPrecodes.findOne({
                                                 where: {
-                                                    purespectrum_precode: criteria.qualification_code,
+                                                    precode: criteria.qualification_code,
+                                                    survey_provider_id: PureSpectrumController.providerId,
                                                     option: criteria.condition_codes[0]
                                                 }
                                             });
@@ -117,11 +119,11 @@ class PureSpectrumController {
                                                 await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                             }
                                         }
-                                        else if(criteria.range_sets){                                            
-
+                                        else if(criteria.range_sets){
                                             const precodeData = await SurveyAnswerPrecodes.findAll({
                                                 where: {
-                                                    purespectrum_precode: criteria.qualification_code,
+                                                    precode: criteria.qualification_code,
+                                                    survey_provider_id: PureSpectrumController.providerId,
                                                     option: {
                                                         [Op.between]: [criteria.range_sets[0].from, criteria.range_sets[0].to]
                                                     }
