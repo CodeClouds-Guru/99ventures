@@ -11,7 +11,8 @@ const {
   SurveyQuestion,
   SurveyQualification,
   SurveyAnswerPrecodes,
-  MemberEligibilities
+  MemberEligibilities,
+  SurveyProvider
 } = require('../models');
 
 
