@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_percent: DataTypes.STRING,
       postback_url: DataTypes.STRING,
       currency_max: DataTypes.STRING,
+      logo: DataTypes.STRING,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
