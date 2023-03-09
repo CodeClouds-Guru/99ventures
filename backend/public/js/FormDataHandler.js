@@ -7,6 +7,7 @@ $(() => {
     const loginForm = $("#scripteed_login_form").get(0);
     const signupForm = $("#scripteed_signup_form").get(0);
     const formHeading = $("#form_heading").get(0);
+    const logoutButton = $("#scripteed_logout_btn").get(0);
 
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -127,5 +128,12 @@ $(() => {
             e.preventDefault();
             displayErrors();
         }
+    })
+
+    $(logoutButton).click(e => {
+        e.preventDefault();
+        $('body').append('<form id="scripteed_logout_form"></form>');
+        $('#scripteed_logout_form').attr("action", "/logout").attr("method", "post");
+        $('#scripteed_logout_form').submit();
     })
 });
