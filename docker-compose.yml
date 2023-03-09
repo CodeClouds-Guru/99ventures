@@ -32,6 +32,7 @@ services:
       - LUCID_API_KEY=$LUCID_API_KEY
       - IP_QUALITY_SCORE_PRIVATE_KEY=$IP_QUALITY_SCORE_PRIVATE_KEY
       - PORT=4000
+      - DEV_MODE=0
     networks:
       - 99Bridge
     volumes:

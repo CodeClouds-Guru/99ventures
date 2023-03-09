@@ -6,12 +6,12 @@ const Cint = require('../helpers/Cint');
 const PurespectrumHelper = require('../helpers/Purespectrum');
 const SqsHelper = require("../helpers/SqsHelper");
 
-const { 
-  Survey, 
-  SurveyQuestion, 
-  SurveyQualification, 
-  SurveyAnswerPrecodes, 
-  MemberEligibilities 
+const {
+  Survey,
+  SurveyQuestion,
+  SurveyQualification,
+  SurveyAnswerPrecodes,
+  MemberEligibilities
 } = require('../models');
 
 
@@ -74,16 +74,16 @@ router.get('/cint/entry-link', async (req, res) => {
   }
 });
 
-router.get('/pure-spectrum/surveys', async(req, res) => {
+router.get('/pure-spectrum/surveys', async (req, res) => {
   const memberId = req.query.user_id;
-  
+
   const provider = await SurveyProvider.findOne({
     attributes: ['id'],
     where: {
       name: 'Purespectrum'
     }
   });
-  if(!provider) {
+  if (!provider) {
     res.send('Survey Provider not found!');
     return;
   }
@@ -101,13 +101,13 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
     }
   });
 
-  if(eligibilities){
+  if (eligibilities) {
     const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.name);
     const matchingAnswerCodes = eligibilities
-                                  .filter(eg => eg.SurveyQuestion.survey_provider_question_id !== 229) // Removed 229 (ZIP Code), beacuse this is open text question. We will not get the value from survey_answer_precodes
-                                  .map(eg => eg.precode_id);
+      .filter(eg => eg.SurveyQuestion.survey_provider_question_id !== 229) // Removed 229 (ZIP Code), beacuse this is open text question. We will not get the value from survey_answer_precodes
+      .map(eg => eg.precode_id);
 
-    if(matchingAnswerCodes.length && matchingQuestionCodes.length){
+    if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
       const queryString = {};
       eligibilities.map(eg => {
         queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
@@ -147,8 +147,8 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
       })
 
       var surveyHtml = '';
-      for(let survey of surveys) {
-        let link = `/pure-spectrum/entry-link?survey_number=${survey.survey_number}${generateQueryString ? '&'+generateQueryString : ''}`;
+      for (let survey of surveys) {
+        let link = `/pure-spectrum/entry-link?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
         surveyHtml += `
           <div class="survey-box" style="width: 45%; padding: 20px 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem; border-radius: 10px;">
             <h3 style="margin:0;">${survey.name} - ${survey.cpi}</h3>
@@ -156,7 +156,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
           </div>
         `
       }
-      
+
       res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="survey-container">${surveyHtml}</div>`);
     } else {
       res.send('No surveys have been matched!');
@@ -167,7 +167,7 @@ router.get('/pure-spectrum/surveys', async(req, res) => {
 
 });
 
-router.get('/pure-spectrum/entry-link', async(req, res) => {
+router.get('/pure-spectrum/entry-link', async (req, res) => {
   const queryString = req.query;
   queryString.bsec = 'a70mx8';
   const psObj = new PurespectrumHelper;
@@ -175,13 +175,13 @@ router.get('/pure-spectrum/entry-link', async(req, res) => {
   delete queryString['survey_number'];
   const generateQueryString = new URLSearchParams(queryString).toString();
 
-  if(data.apiStatus === 'success' && data.survey_entry_url) {
-    const entryLink = data.survey_entry_url +'&'+ generateQueryString;
+  if (data.apiStatus === 'success' && data.survey_entry_url) {
+    const entryLink = data.survey_entry_url + '&' + generateQueryString;
     res.send(entryLink)
   } else {
     res.send(data)
   }
-  
+
 })
 
 //socket call
@@ -232,6 +232,7 @@ router.get('/:slug?', [checkMemberAuth], async (req, res) => {//checkIPMiddlewar
         return;
       case 401:
         res.redirect('/');
+        console.log(req.params.slug)
         return;
       default:
         res.redirect('/500');

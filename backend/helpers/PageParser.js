@@ -5,16 +5,19 @@ const {
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
 } = require('../models');
+const util = require("util");
 const { QueryTypes, Op } = require('sequelize');
 const defaultAddOns = require("../config/frontend_static_files.json");
 
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
+    this.companyPortal = null;
     this.sessionMessage = '';
     this.slug = slug;
     this.staticContent = staticContent;
     this.page = null;
+    this.pageLayout = null;
     this.preview = this.preview.bind(this);
     this.getPageNLayout = this.getPageNLayout.bind(this);
     this.generateHtml = this.generateHtml.bind(this);
@@ -22,6 +25,7 @@ class PageParser {
     this.addDefaultAddOns = this.addDefaultAddOns.bind(this);
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
+    this.getCompanyPortal = this.getCompanyPortal.bind(this);
   }
 
   async getPageNLayout() {
@@ -29,7 +33,12 @@ class PageParser {
       where: { slug: this.slug },
       include: 'Layout',
     });
-    if (!this.page || !this.page.Layout) {
+    this.pageLayout = this.page.Layout;
+    if (!this.pageLayout) {
+      const portal = this.getCompanyPortal();
+      this.pageLayout = await Layout.findByPk(portal.site_layout_id);
+    }
+    if (!this.page || !this.pageLayout) {
       const errorObj = new Error('Sorry! Page not found');
       errorObj.statusCode = 404;
       throw errorObj;
@@ -42,6 +51,9 @@ class PageParser {
   }
 
   async preview(req) {
+    if ('company_portal' in req.session) {
+      this.companyPortal = req.session.company_portal;
+    }
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
     }
@@ -57,7 +69,7 @@ class PageParser {
 
   async generateHtml() {
     await this.getPageNLayout();
-    let layout_html = this.page.Layout.html;
+    let layout_html = this.pageLayout.html;
     const page_title = this.page.name;
     let content = this.staticContent ? this.staticContent : this.page.html;
     const page_keywords = this.page.keywords;
@@ -140,6 +152,9 @@ class PageParser {
 
   getSessionUser() {
     return this.sessionUser;
+  }
+  getCompanyPortal() {
+    return this.companyPortal;
   }
   getFlashMessage() {
     return this.sessionMessage;
