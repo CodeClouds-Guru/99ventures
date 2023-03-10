@@ -18,7 +18,7 @@ const handler = {
 	},
 };
 
-class Schlesigner {
+class Schlesinger {
 	constructor() {
 		this.instance = axios.create({
 			baseURL: 'https://api-hub.market-cube.com/',
@@ -70,4 +70,4 @@ class Schlesigner {
 	}
 }
 
-module.exports = Schlesigner;
+module.exports = Schlesinger;

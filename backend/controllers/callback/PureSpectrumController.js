@@ -9,7 +9,7 @@ class PureSpectrumController {
         2: 'singlepunch-alt',
         3: 'multipunch',
         4: 'range',
-        5: 'type 5',
+        5: 'open-ended',
         6: 'type 6'
     }
 
@@ -81,7 +81,7 @@ class PureSpectrumController {
                         if(quotas.length){
                             for(let quota of quotas){
                                 const questionData = await SurveyQuestion.findOne({
-                                    attributes:['id', 'type', 'survey_provider_question_id'],
+                                    attributes:['id', 'question_type', 'survey_provider_question_id'],
                                     where: {
                                         survey_provider_question_id: quota.criteria[0].qualification_code,
                                         survey_provider_id: PureSpectrumController.providerId

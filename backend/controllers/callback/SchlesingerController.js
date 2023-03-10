@@ -1,23 +1,28 @@
 const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes } = require('../../models');
-const SchlesignerHelper = require('../../helpers/Schlesigner');
+const SchlesingerHelper = require('../../helpers/Schlesinger');
 const { Op } = require("sequelize");
 
-class SchlesignerController {
+class SchlesingerController {
     static questionType = {
         1: 'singlepunch',
         2: 'multipunch',
-        3: 'open ended',
+        3: 'open-ended',
         4: 'dummy',
-        5: 'calculated dummy',
+        5: 'calculated-dummy',
         6: 'range',
         7: 'emailType',
         8: 'info',
         9: 'compound',
         10: 'calendar',
-        11: 'single punch image',
-        12: 'multi punch image',
+        11: 'single-punch-image',
+        12: 'multi-punch-image',
         14: 'videoType'
     }
+    /**
+     * "English - United States"
+     * language 3
+     */
+    static languageId = 3;
 
     constructor() {
         this.getProvider = this.getProvider.bind(this);
@@ -34,7 +39,7 @@ class SchlesignerController {
         const provider = await SurveyProvider.findOne({
             attributes: ['id'],
             where: {
-                name: 'Schlesigner'
+                name: 'Schlesinger'
             }
         });
         
@@ -48,8 +53,8 @@ class SchlesignerController {
      */
     async saveSurveyQuestionsAndAnswer(req, res) {
         try{
-            const schObj = new SchlesignerHelper;
-            const qualifications = await schObj.fetchAndReturnData('/definition-api/api/v1/definition/qualification-answers/lanaguge/4');
+            const schObj = new SchlesingerHelper;
+            const qualifications = await schObj.fetchAndReturnData('/definition-api/api/v1/definition/qualification-answers/lanaguge/' + SchlesingerController.languageId);
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications; 
                 const ansPrecode = [];               
@@ -66,14 +71,14 @@ class SchlesignerController {
                             name: attr.name,
                             survey_provider_id: this.providerId,
                             survey_provider_question_id: attr.qualificationId,
-                            question_type: SchlesignerController.questionType[attr.qualificationTypeId],
+                            question_type: SchlesingerController.questionType[attr.qualificationTypeId],
                             created_at: new Date()
                         })
                     }
                     if(question && question.survey_provider_question_id) {
                         const qualificationAnswers = attr.qualificationAnswers;
                         for(let qa of qualificationAnswers){
-                            if([3,6].includes(attr.qualificationTypeId) ){    // Ref to questionType
+                            if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
                                 await SurveyAnswerPrecodes.findOrCreate({
                                     where: {
                                         option: null,
@@ -81,6 +86,16 @@ class SchlesignerController {
                                         survey_provider_id: this.providerId
                                     }
                                 });
+                            } if([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59){ // Age
+                                for(let i = 15; i<=99; i++){
+                                    await SurveyAnswerPrecodes.findOrCreate({
+                                        where: {
+                                            option: i,
+                                            precode: attr.qualificationId,
+                                            survey_provider_id: this.providerId
+                                        }
+                                    });
+                                }
                             } else {
                                 await SurveyAnswerPrecodes.findOrCreate({
                                     where: {
@@ -115,14 +130,14 @@ class SchlesignerController {
             const allSurveys = await this.getSurveyFromAPI();
             // res.send(allSurveys)
             if(allSurveys.length) {
-                const psObj = new SchlesignerHelper;
+                const psObj = new SchlesingerHelper;
                 for(let survey of allSurveys) {
                     const surveyData = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/survey-qualifications/' + survey.survey_number);
                     if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
                         const surveyQualifications = surveyData.SurveyQualifications;
                         for(let ql of surveyQualifications){
                             const questionData = await SurveyQuestion.findOne({
-                                attributes:['id', 'type', 'survey_provider_question_id'],
+                                attributes:['id', 'question_type', 'survey_provider_question_id'],
                                 where: {
                                     survey_provider_question_id: ql.QualificationId,
                                     survey_provider_id: this.providerId
@@ -146,17 +161,36 @@ class SchlesignerController {
                                 }
 
 
-                                if(surveyQualification && surveyQualification.id) {                                    
-                                    const precodeData = await SurveyAnswerPrecodes.findOne({
-                                        where: {
-                                            precode: ql.QualificationId,
-                                            survey_provider_id: this.providerId,
-                                            option: (['open ended', 'range'].includes(questionData.type)) ? null : ql.AnswerIds
+                                if(surveyQualification && surveyQualification.id) {
+                                    if(questionData.question_type == 'range' && questionData.survey_provider_question_id == 59){
+                                        const start = ql.AnswerIds[0].split('-')[0];
+                                        const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
+                                        
+                                        const precodeData = await SurveyAnswerPrecodes.findAll({
+                                            where: {
+                                                precode: ql.QualificationId,
+                                                survey_provider_id: this.providerId,
+                                                option: {
+                                                    [Op.between]: [start, end]
+                                                }
+                                            }
+                                        });
+                                        if(precodeData && precodeData.length) {
+                                            await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                         }
-                                    });
-                                    if(precodeData && precodeData.id) {
-                                        await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                    } else {
+                                        const precodeData = await SurveyAnswerPrecodes.findOne({
+                                            where: {
+                                                precode: ql.QualificationId,
+                                                survey_provider_id: this.providerId,
+                                                option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
+                                            }
+                                        });
+                                        if(precodeData && precodeData.id) {
+                                            await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                        }
                                     }
+                                    
                                 }
                             }
                         }
@@ -181,7 +215,12 @@ class SchlesignerController {
             const psObj = new SchlesignerHelper();
             const allSurveys = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/allocated-surveys');            
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
-                for(let survey of allSurveys.Surveys ){
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === SchlesignerController.languageId);
+                if(!surveyData.length) {
+                    res.json({ status: true, message: 'No survey found for this language!' });
+                    return;
+                }
+                for(let survey of surveyData ){
                     const checkExists = await Survey.count({
                         where: {
                             survey_provider_id: this.providerId,
@@ -231,4 +270,4 @@ class SchlesignerController {
     }
 
 }
-module.exports = SchlesignerController;
+module.exports = SchlesingerController;

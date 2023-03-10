@@ -15,6 +15,22 @@ router.get('/test-adgate', (req, res) => {
   logger.info(JSON.stringify(req.query));
   res.send(req.query);
 });
+
+/**
+ * To Sync Servey
+ */
+const PureSpectrumControllerClass = require("../controllers/callback/PureSpectrumController");
+const PureSpectrumController = new PureSpectrumControllerClass();
+const SchlesingerControllerClass = require('../controllers/callback/SchlesingerController');
+const SchlesingerController = new SchlesingerControllerClass();
+
+router.get('/purespectrum-survey', PureSpectrumController.survey);
+router.get('/purespectrum-question', PureSpectrumController.saveSurveyQuestions);
+router.get('/schlesigner-question', SchlesingerController.saveSurveyQuestionsAndAnswer);
+router.get('/schlesigner-survey', SchlesingerController.syncServeyAndQualification);
+//------------------------
+
+
 router.get('/postback/:offerwall', OfferwallPostbackController.save);
 router.all('/survey/:provider', SurveycallbackController.syncSurvey);
 router.all('/survey/outcome/:provider', SurveycallbackController.save);

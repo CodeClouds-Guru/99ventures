@@ -11,7 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       MemberEligibilities.belongsTo(models.SurveyQuestion, {
         foreignKey: 'survey_question_id'
-      })
+      });
+
+      MemberEligibilities.belongsTo(models.Member, {
+        foreignKey: 'member_id',
+      });
     }
   }
   MemberEligibilities.init(
