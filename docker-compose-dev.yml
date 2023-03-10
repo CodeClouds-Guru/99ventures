@@ -54,6 +54,7 @@ services:
       - WDS_SOCKET_HOST=127.0.0.1 
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true 
+      - DEV_MODE=1
     networks:
       - backend
       - frontend

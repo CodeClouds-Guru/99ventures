@@ -301,5 +301,9 @@ class MemberAuthController {
     // })
   }
 
+  async logout(req, res) {
+    req.session.member = null;
+    res.redirect('/');
+  }
 }
 module.exports = MemberAuthController;

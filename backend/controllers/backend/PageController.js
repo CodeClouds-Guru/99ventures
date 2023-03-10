@@ -6,18 +6,19 @@ class PageController extends Controller {
     super("Page");
   }
   //override list function
-  async list(req,res){
+  async list(req, res) {
+    req.query.sort = req.query.sort || "updated_at";
     let response = await super.list(req);
     let pages = response.result.data
-    await pages.forEach(function(page,key){
-      if(page.slug == '404' || page.slug == '500'){
-        response.result.data[key].setDataValue('deletable',false)
-      }else{
-        response.result.data[key].setDataValue('deletable',true)
+    await pages.forEach(function (page, key) {
+      if (page.slug == '404' || page.slug == '500') {
+        response.result.data[key].setDataValue('deletable', false)
+      } else {
+        response.result.data[key].setDataValue('deletable', true)
       }
     })
     return response
-  } 
+  }
   //override add function
   async add(req, res) {
     let response = await super.add(req);
@@ -32,8 +33,8 @@ class PageController extends Controller {
       },
     });
     let default_layout = await Layout.findOne({
-                                        where: { code: 'default-layout',company_portal_id:site_id },
-                                      });
+      where: { code: 'default-layout', company_portal_id: site_id },
+    });
     fields.layout_id.value = default_layout.id;
     let components = await Component.findAll({
       where: {
@@ -105,7 +106,7 @@ class PageController extends Controller {
       },
     });
     let default_layout = await Layout.findOne({
-      where: { code: 'default-layout',company_portal_id:site_id },
+      where: { code: 'default-layout', company_portal_id: site_id },
     });
     fields.layout_id.value = default_layout.id;
     let components = await Component.findAll({
@@ -164,9 +165,11 @@ class PageController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
+    req.body.updated_at = new Date()
+    req.body.slug = req.body.slug || '/';
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug,company_portal_id:req.headers.site_id },
+      where: { slug: req.body.slug, company_portal_id: req.headers.site_id },
     });
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);
@@ -181,9 +184,10 @@ class PageController extends Controller {
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
+    req.body.slug = req.body.slug || '/';
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug, company_portal_id:req.headers.site_id, id: { [Op.ne]: req.params.id} },
+      where: { slug: req.body.slug, company_portal_id: req.headers.site_id, id: { [Op.ne]: req.params.id } },
     });
     if (check_code) {
       this.throwCustomError("Slug already in use.", 409);

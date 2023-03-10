@@ -7,22 +7,23 @@ $(() => {
     const loginForm = $("#scripteed_login_form").get(0);
     const signupForm = $("#scripteed_signup_form").get(0);
     const formHeading = $("#form_heading").get(0);
+    const logoutButton = $("#scripteed_logout_btn").get(0);
 
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
     }
 
     var goTologin = () => {
-        $(loginForm).removeClass('hide');
+        $(loginForm).removeClass('d-none');
         $(loginBtn).addClass('active');
-        $(signupForm).addClass('hide');
+        $(signupForm).addClass('d-none');
         $(signupBtn).removeClass('active');
         $(formHeading).text('Log In');
     }
     var goToRegister = () => {
-        $(signupForm).removeClass('hide');
+        $(signupForm).removeClass('d-none');
         $(signupBtn).addClass('active');
-        $(loginForm).addClass('hide');
+        $(loginForm).addClass('d-none');
         $(loginBtn).removeClass('active');
         $(formHeading).text('Sign Up');
     }
@@ -65,7 +66,9 @@ $(() => {
         const emailField = $(loginForm).find('input[name="email"]').get(0);
         const passwordField = $(loginForm).find('input[name="password"]').get(0);
         // console.log(validateEmail($(emailField).val()))
-        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val().trim())) {
+        if ($(emailField).val().trim().length === 0) {
+            errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
+        } else if (!validateEmail($(emailField).val().trim())) {
             errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
         }
         if ($(passwordField).val().trim().length < 8) {
@@ -125,5 +128,12 @@ $(() => {
             e.preventDefault();
             displayErrors();
         }
+    })
+
+    $(logoutButton).click(e => {
+        e.preventDefault();
+        $('body').append('<form id="scripteed_logout_form"></form>');
+        $('#scripteed_logout_form').attr("action", "/logout").attr("method", "post");
+        $('#scripteed_logout_form').submit();
     })
 });
