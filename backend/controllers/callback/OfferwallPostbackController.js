@@ -87,7 +87,7 @@ class OfferwallPostbackController {
             const transaction_obj = {
               member_id: member ? member.id : null,
               amount: payout_amount,
-              note: note,
+              note: offerwall_name,
               type: parseFloat(payout_amount) > 0 ? 'credited' : 'withdraw',
               amount_action: 'survey',
               created_by: null,
