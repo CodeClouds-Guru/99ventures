@@ -96,7 +96,7 @@ class OfferwallPostbackController {
                   ? JSON.stringify(req.body)
                   : JSON.stringify(req.query),
             };
-            //console.log('transaction_obj', transaction_obj);
+            console.log('transaction_obj', transaction_obj);
             let result =
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
