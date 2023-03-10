@@ -212,10 +212,10 @@ class SchlesingerController {
      */
     async getSurveyFromAPI(req, res) {
         try{
-            const psObj = new SchlesignerHelper();
+            const psObj = new SchlesingerHelper();
             const allSurveys = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/allocated-surveys');            
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
-                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === SchlesignerController.languageId);
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === SchlesingerController.languageId);
                 if(!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
