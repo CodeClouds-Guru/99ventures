@@ -56,7 +56,7 @@ class OfferwallPostbackController {
               attributes: ['id'],
             },
           });
-          //console.log('member', member);
+          console.log('member', member);
 
           if (member) {
             let payout_amount = 0;
