@@ -2,7 +2,8 @@ const axios = require('axios');
 class IpQualityScore {
     constructor() {
         this.baseUrl = 'https://ipqualityscore.com/api/json/';
-        this.privetKey = process.env.IP_QUALITY_SCORE_PRIVATE_KEY
+        this.privetKey = process.env.IP_QUALITY_SCORE_PRIVATE_KEY;
+        console.log(this.privetKey);
         this.instance = axios.create({
             baseURL: this.baseUrl,
         });
