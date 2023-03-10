@@ -38,7 +38,8 @@ class OfferwallPostbackController {
             offerwall_details.campaign_id_variable in req.body)
         ) {
           let username =
-            offerwall_name === 'adgate-postback'
+            offerwall_name === 'adgate-postback' ||
+            offerwall_name === 'adscendmedia-postback'
               ? req.query[offerwall_details.campaign_id_variable]
               : req.body[offerwall_details.campaign_id_variable];
 
@@ -63,7 +64,8 @@ class OfferwallPostbackController {
             let note = '';
             if (offerwall_details.campaign_name_variable in req.query) {
               payout_amount =
-                offerwall_name === 'adgate-postback'
+                offerwall_name === 'adgate-postback' ||
+                offerwall_name === 'adscendmedia-postback'
                   ? parseFloat(
                       req.query[offerwall_details.campaign_name_variable]
                     )
@@ -79,7 +81,8 @@ class OfferwallPostbackController {
             //     : 0;
             if (offerwall_details.sub_id_variable in req.query) {
               note =
-                offerwall_name === 'adgate-postback'
+                offerwall_name === 'adgate-postback' ||
+                offerwall_name === 'adscendmedia-postback'
                   ? req.query[offerwall_details.sub_id_variable]
                   : req.body[offerwall_details.sub_id_variable];
             }
@@ -92,7 +95,8 @@ class OfferwallPostbackController {
               amount_action: 'survey',
               created_by: null,
               payload:
-                offerwall_name === 'adgate-postback'
+                offerwall_name === 'adgate-postback' ||
+                offerwall_name === 'adscendmedia-postback'
                   ? JSON.stringify(req.body)
                   : JSON.stringify(req.query),
             };
@@ -102,7 +106,8 @@ class OfferwallPostbackController {
                 transaction_obj
               );
             res.send(
-              offerwall_name === 'adgate-postback'
+              offerwall_name === 'adgate-postback' ||
+                offerwall_name === 'adscendmedia-postback'
                 ? JSON.stringify(req.body)
                 : JSON.stringify(req.query)
             );
