@@ -257,10 +257,10 @@ router.get('/schlesigner/surveys', async (req, res) => {
 			UID: eligibilities[0].Member.username
 		};
 		eligibilities.map(eg => {
-			queryString['Q'+eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
+			queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
 		});
 		const generateQueryString = new URLSearchParams(queryString).toString();
-		
+
 		var surveyHtml = '';
 		for (let survey of surveys) {
 			let link = `/schlesigner/entry-link?survey_number=${survey.survey_number}&${generateQueryString}`;
@@ -275,12 +275,12 @@ router.get('/schlesigner/surveys', async (req, res) => {
 	} else {
 		res.send('Member eiligibility not found!');
 	}
-	
+
 	return;
 });
 
 router.get('/schlesigner/entry-link', async (req, res) => {
-	const queryString = req.query;	
+	const queryString = req.query;
 	const data = await Survey.findOne({
 		attributes: ['original_json'],
 		where: {
@@ -340,7 +340,7 @@ router.get('/500', async (req, res) => {
 	res.render('page', { page_content });
 });
 
-router.get('/:slug?', [checkMemberAuth], async (req, res) => {//checkIPMiddleware
+router.get('/:slug?', [checkMemberAuth, checkIPMiddleware], async (req, res) => {//checkIPMiddleware
 	var pagePerser = new PageParser(req.params.slug || '/');
 	try {
 		var page_content = await pagePerser.preview(req);
