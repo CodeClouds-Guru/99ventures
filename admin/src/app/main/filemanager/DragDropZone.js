@@ -36,36 +36,6 @@ const rejectStyle = {
 	borderRadius: 2,
 	borderStyle: 'dashed',
 };
-/*const thumbsContainer = {
-	display: 'flex',
-	flexDirection: 'row',
-	flexWrap: 'wrap',
-	marginTop: 16
-};
-
-const thumb = {
-	display: 'inline-flex',
-	borderRadius: 2,
-	border: '1px solid #eaeaea',
-	marginBottom: 8,
-	marginRight: 8,
-	width: 100,
-	height: 100,
-	padding: 4,
-	boxSizing: 'border-box'
-};
-
-const thumbInner = {
-	display: 'flex',
-	minWidth: 0,
-	overflow: 'hidden'
-};
-
-const img = {
-	display: 'block',
-	width: 'auto',
-	height: '100%'
-};*/
 
 const centerStyle = {
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
@@ -82,9 +52,10 @@ const centerStyle = {
     justifyContent: 'center'
 }
 
-function DragDropzone() {
+function DragDropzone(props) {
 	const dispatch = useDispatch();
-    const listing = useSelector(state=> state.filemanager.listData);
+    const listing = props.listing;
+    // const listing = useSelector(state=> state.filemanager.listData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const selectConfig = useSelector(state => state.filemanager.config);
@@ -103,7 +74,7 @@ function DragDropzone() {
         noClick: true,
 		maxSize: selectConfig.max_file_size ? selectConfig.max_file_size * Math.pow(1024, 2) : 1024,	// Bytes convert
 		maxFiles: selectConfig.max_no_of_uploads ?? 0,
-		accept: selectConfig.accept ?? {},
+		// accept: selectConfig.accept ?? {},
 		onDrop: acceptedFiles => {
 			console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
@@ -130,7 +101,7 @@ function DragDropzone() {
 					setBuffer(percentCompleted + diff);
 				}*/
 			}
-			handleFile(config, file)
+			// handleFile(config, file)
 		},
 		onDropRejected: (files) => {
 			const msgs = [];

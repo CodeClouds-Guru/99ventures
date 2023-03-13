@@ -14,7 +14,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
  */
 const style = {
 	grid: {
-		box: 'sm:w-128 md:w-136 h-136 p-16 flex-col',
+		box: 'sm:w-144 md:w-136 h-136 p-16 flex-col',
 		icon_btn: 'absolute',
 		nav_icon_adapter: 'flex-col',
 		icon: 'flex-auto w-full justify-center',
