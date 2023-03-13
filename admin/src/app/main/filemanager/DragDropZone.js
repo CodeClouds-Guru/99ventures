@@ -74,9 +74,9 @@ function DragDropzone(props) {
         noClick: true,
 		maxSize: selectConfig.max_file_size ? selectConfig.max_file_size * Math.pow(1024, 2) : 1024,	// Bytes convert
 		maxFiles: selectConfig.max_no_of_uploads ?? 0,
-		// accept: selectConfig.accept ?? {},
+		accept: selectConfig.accept ?? {},
 		onDrop: acceptedFiles => {
-			console.log(acceptedFiles)
+			// console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
 				preview: URL.createObjectURL(file)
 			})));
@@ -101,7 +101,7 @@ function DragDropzone(props) {
 					setBuffer(percentCompleted + diff);
 				}*/
 			}
-			// handleFile(config, file)
+			handleFile(config, file)
 		},
 		onDropRejected: (files) => {
 			const msgs = [];
