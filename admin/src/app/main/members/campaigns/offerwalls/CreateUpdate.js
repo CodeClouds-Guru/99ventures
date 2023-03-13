@@ -37,6 +37,7 @@ const defaultValues = {
     premium_configuration: '',
     name: '',
     sub_id_prefix: '',
+    logo: '',
     mode: '',
     campaign_id_variable: '',
     campaign_name_variable: '',
@@ -85,6 +86,7 @@ const CreateUpdate = () => {
         setValue('premium_configuration', '', { shouldDirty: true, shouldValidate: false });
         setValue('name', '', { shouldDirty: true, shouldValidate: false });
         setValue('sub_id_prefix', '', { shouldDirty: false, shouldValidate: false });
+        setValue('logo', '', { shouldDirty: false, shouldValidate: false });
         setValue('mode', '', { shouldDirty: true, shouldValidate: false });
         setValue('campaign_id_variable', '', { shouldDirty: true, shouldValidate: false });
         setValue('campaign_name_variable', '', { shouldDirty: true, shouldValidate: false });
@@ -106,6 +108,7 @@ const CreateUpdate = () => {
                     setValue('premium_configuration', response.data.results.result.premium_configuration, { shouldDirty: false, shouldValidate: true });
                     setValue('name', response.data.results.result.name, { shouldDirty: false, shouldValidate: true });
                     setValue('sub_id_prefix', response.data.results.result.sub_id_prefix, { shouldDirty: false, shouldValidate: true });
+                    setValue('logo', response.data.results.result.logo, { shouldDirty: false, shouldValidate: true });
                     setLogPostbackErrors(response.data.results.result.log_postback_errors === 1);
                     'logPostbackErrors' in dirtyFields ? delete dirtyFields.logPostbackErrors : '';
                     setSecureSubIDs(response.data.results.result.secure_sub_ids === 1);
@@ -166,7 +169,7 @@ const CreateUpdate = () => {
             }
         })
     }
-    const onSubmit = ({ premium_configuration, name, sub_id_prefix, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent }) => {
+    const onSubmit = ({ premium_configuration, name, sub_id_prefix, logo, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent }) => {
         // max
         if (allowFromAnyIP && IPs.length > 0) {
             dispatch(showMessage({ variant: 'error', message: 'IPs field should be blank' }));
@@ -182,6 +185,7 @@ const CreateUpdate = () => {
             premium_configuration: premium_configuration,
             name: name,
             sub_id_prefix: sub_id_prefix,
+            logo: logo,
             log_postback_errors: logPostbackErrors ? 1 : 0,
             secure_sub_ids: secureSubIDs ? 1 : 0,
             status: status ? 1 : 0,
@@ -339,6 +343,21 @@ const CreateUpdate = () => {
                                             labelPlacement="end"
                                         />
                                     </FormControl>
+                                )}
+                            />
+                            <Controller
+                                name="logo"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        className="w-1/2 mb-10 p-5"
+                                        {...field}
+                                        label="Logo (Paste here the file URL)"
+                                        type="text"
+                                        error={!!errors.name}
+                                        helperText={errors?.name?.message}
+                                        variant="outlined"
+                                    />
                                 )}
                             />
                             <Divider className="pb-10" textAlign="left"><h3>Postback</h3></Divider>
