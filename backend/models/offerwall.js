@@ -424,6 +424,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_percent: Joi.required().label('currency_percent'),
       currency_variable: Joi.required().label('currency_variable'),
       currency_max: Joi.optional().label('currency_max'),
+      logo: Joi.optional().label('logo'),
     });
     return schema.validate(req.body);
   };
