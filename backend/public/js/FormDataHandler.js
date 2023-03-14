@@ -53,7 +53,7 @@ $(() => {
         }
     }
     var signupFormSanitisation = () => {
-        if (signupForm && ["name", "email", "password", "confirm_password"].every((val) => Object.keys(signupForm.elements).indexOf(val) > -1)) {
+        if (signupForm && ["first_name", "last_name", "email", "password", "confirm_password"].every((val) => Object.keys(signupForm.elements).indexOf(val) > -1)) {
             $(signupForm).attr("action", '/signup');
             $(signupForm).attr("method", "POST");
         }
@@ -75,15 +75,18 @@ $(() => {
             errorsArray.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
         }
     }
-    var signupFomValidation = () => {
+    var signupFormValidation = () => {
         errorsArray = [];
-        const nameField = $(signupForm).find('input[name="name"]').get(0);
+        const firstNameField = $(signupForm).find('input[name="first_name"]').get(0);
+        const lastNameField = $(signupForm).find('input[name="last_name"]').get(0);
         const emailField = $(signupForm).find('input[name="email"]').get(0);
         const passwordField = $(signupForm).find('input[name="password"]').get(0);
         const confirmPasswordField = $(signupForm).find('input[name="confirm_password"]').get(0);
-        // console.log(validateEmail($(emailField).val()))
-        if ($(nameField).val().trim().length === 0) {
-            errorsArray.push({ field: $(nameField), message: 'Please enter name' });
+        if ($(firstNameField).val().trim().length === 0) {
+            errorsArray.push({ field: $(firstNameField), message: 'Please enter first name' });
+        }
+        if ($(lastNameField).val().trim().length === 0) {
+            errorsArray.push({ field: $(lastNameField), message: 'Please enter last name' });
         }
         if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val().trim())) {
             errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
@@ -91,7 +94,7 @@ $(() => {
         if ($(passwordField).val().trim().length < 8) {
             errorsArray.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
         }
-        if ($(passwordField).val().trim() === $(confirmPasswordField).val().trim()) {
+        if ($(confirmPasswordField).val().trim() === $(passwordField).val().trim()) {
             errorsArray.push({ field: $(confirmPasswordField), message: 'Password should be same as Confirm Password' });
         }
     }
@@ -120,7 +123,7 @@ $(() => {
         }
     })
     $(signupForm).submit((e) => {
-        signupFomValidation();
+        signupFormValidation();
         console.log(errorsArray);
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
