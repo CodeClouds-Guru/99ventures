@@ -79,7 +79,7 @@ class MemberAuthController {
   //signup
   async signup(req, res) {
     try {
-      let company_portal_id = req.headers.site_id
+      let company_portal_id = 1
       let ip = req.ip;
       if (Array.isArray(ip)) {
         ip = ip[0]
@@ -89,24 +89,24 @@ class MemberAuthController {
       const schema = Joi.object({
         first_name: Joi.string().required().label("First Name"),
         last_name: Joi.string().required().label("Last Name"),
-        gender: Joi.string().required().label("Gender"),
-        status: Joi.string().optional().label("Status"),
-        username: Joi.string().min(3).max(30).required().label("Username"),
+        gender: Joi.string().optional().allow("").label("Gender"),
+        status: Joi.string().optional().allow("").label("Status"),
+        // username: Joi.string().min(3).max(30).required().label("Username"),
         email: Joi.string().optional(),
-        company_portal_id: Joi.string().optional(),
-        company_id: Joi.string().optional(),
+        // company_portal_id: Joi.string().optional(),
+        // company_id: Joi.string().optional(),
         password: Joi.string().optional(),
-        dob: Joi.string().optional(),
-        phone_no: Joi.string().optional().label("Phone No"),
-        country_id: Joi.optional().label("Country"),
-        address_1: Joi.string().allow("").required().label("Address 1"),
-        address_2: Joi.string().allow("").optional().label("Address 2"),
-        address_3: Joi.string().allow("").optional().label("Address 3"),
-        zip_code: Joi.string().allow("").optional().label("Zip Code"),
-        avatar: Joi.optional().label("Avatar"),
-        country_code: Joi.optional().label("Country Code"),
-        state: Joi.optional().label("State"),
-        referral_code: Joi.optional().allow('').label("Referral Code"),
+        // dob: Joi.string().optional(),
+        // phone_no: Joi.string().optional().label("Phone No"),
+        // country_id: Joi.optional().label("Country"),
+        // address_1: Joi.string().allow("").required().label("Address 1"),
+        // address_2: Joi.string().allow("").optional().label("Address 2"),
+        // address_3: Joi.string().allow("").optional().label("Address 3"),
+        // zip_code: Joi.string().allow("").optional().label("Zip Code"),
+        // avatar: Joi.optional().label("Avatar"),
+        // country_code: Joi.optional().label("Country Code"),
+        // state: Joi.optional().label("State"),
+        // referral_code: Joi.optional().allow('').label("Referral Code"),
       });
       const { error, value } = schema.validate(req.body);
       let member_status = true
