@@ -22,6 +22,8 @@ const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
 const membertransaction = require('../../models/membertransaction');
+const { isNull } = require('lodash');
+const util = require('util');
 class MemberController extends Controller {
   constructor() {
     super('Member');
@@ -328,7 +330,7 @@ class MemberController extends Controller {
         company_portal_id: site_id,
       };
     }
-
+    options.distinct = true;
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;
