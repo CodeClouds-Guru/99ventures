@@ -27,7 +27,7 @@ $(() => {
         $(loginBtn).removeClass('active');
         $(formHeading).text('Sign Up');
     }
-    if ($(location).attr('hash') === 'signup') {
+    if ($(location).attr('hash') === '#signup') {
         goToRegister();
     }
     $(loginBtn).click((e) => {
