@@ -210,13 +210,8 @@ export const getAllFileTypes =  createAsyncThunk(
         const allTypes = []
         for(let type in fileTypes){
             fileTypes[type].map(el => {
-                allTypes.push({
-                    ext: el.ext,
-                    mime_type: el.mime_type,
-                    obsolete_mime_type: el.obsolete_mime_type,
-                    color: el.color
-                })
-            })
+                allTypes.push(el)
+            });
         }
         return allTypes;
     }
