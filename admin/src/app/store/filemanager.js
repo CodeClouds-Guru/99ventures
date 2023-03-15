@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import types from 'src/app/main/settings/Types'
+import fileTypes from 'src/app/main/settings/Types'
 import axios from 'axios';
 
 export const getList = createAsyncThunk(
@@ -178,7 +178,12 @@ export const getConfig = createAsyncThunk(
                         Object.keys(item.settings_value).map((el) => {
                             if(item.settings_value[el].length){
                                 item.settings_value[el].map(element => {
-                                    types[element] = [];
+                                    const filesExt = fileTypes[el].filter(fl=>fl.mime_type === element).map(fl => fl.ext)[0];                                    
+                                    if(types.hasOwnProperty(element)) {
+                                        types[element] = [...types[element], ...filesExt]
+                                    } else {
+                                        types[element] = filesExt;
+                                    }
                                 });
                             }
                         });
@@ -187,7 +192,6 @@ export const getConfig = createAsyncThunk(
                         acceptedTypes[item.settings_key] = item.settings_value;
                     }
                 });
-                // console.log(acceptedTypes)
                 return acceptedTypes;
             }
             return {};
@@ -204,8 +208,8 @@ export const getAllFileTypes =  createAsyncThunk(
     'filemanager/getAllFileTypes',
     async(params, {dispatch, }) => {
         const allTypes = []
-        for(let type in types){
-            types[type].map(el => {
+        for(let type in fileTypes){
+            fileTypes[type].map(el => {
                 allTypes.push({
                     ext: el.ext,
                     mime_type: el.mime_type,
