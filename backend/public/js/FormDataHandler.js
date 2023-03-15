@@ -94,8 +94,8 @@ $(() => {
         if ($(passwordField).val().trim().length < 8) {
             errorsArray.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
         }
-        if ($(confirmPasswordField).val().trim() === $(passwordField).val().trim()) {
-            errorsArray.push({ field: $(confirmPasswordField), message: 'Password should be same as Confirm Password' });
+        if ($(passwordField).val().trim() !== $(confirmPasswordField).val().trim()) {
+            errorsArray.push({ field: $(confirmPasswordField), message: 'Password mismatched' });
         }
     }
     displayErrors = () => {
