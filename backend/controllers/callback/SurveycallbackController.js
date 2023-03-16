@@ -74,7 +74,8 @@ class SurveycallbackController {
         survey.forEach(async (element) => {
           let lucid_data = {
             ...element,
-            survey_provider_id: survey_provider.id,
+            survey_provider_id: 'panda',
+            ///survey_provider.id,
           };
           // element['survey_provider_id'] = survey_provider.id;
           const send_message = await sqsHelper.sendData(lucid_data);
