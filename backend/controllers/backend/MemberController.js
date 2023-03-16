@@ -316,6 +316,7 @@ class MemberController extends Controller {
         model: IpLog,
         attributes: ['ip', 'isp', 'geo_location', 'browser'],
         order: [['id', 'DESC']],
+        limit: 1,
       },
       {
         model: MemberReferral,
@@ -330,7 +331,7 @@ class MemberController extends Controller {
         company_portal_id: site_id,
       };
     }
-    options.distinct = true;
+    // options.distinct = true;
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;

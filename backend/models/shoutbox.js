@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Shoutbox.extra_fields = ['Member.member_name'];
+  Shoutbox.extra_fields = ['Member.first_name'];
   Shoutbox.init(
     {
       company_id: DataTypes.BIGINT,
@@ -95,9 +95,9 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    '$Member.member_name$': {
-      field_name: 'member_name',
-      db_name: 'member_name',
+    '$Member.first_name$': {
+      field_name: 'Member.first_name',
+      db_name: 'Member.first_name',
       type: 'text',
       placeholder: 'Member Name',
       listing: true,

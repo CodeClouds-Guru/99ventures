@@ -164,6 +164,7 @@ class PureSpectrumController {
                 //-- Disabled all the previous surveys
                 const current_datetime = new Date();
                 Survey.update({
+                    survey_provider_id: PureSpectrumController.providerId,
                     status: PureSpectrumController.surveyStatus[33],
                     deleted_at: new Date()
                 }, {

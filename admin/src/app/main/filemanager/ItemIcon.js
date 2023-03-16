@@ -27,6 +27,11 @@ const badgeComponent = (type, color) => {
 	)
 }
 
+const getExtension = (filename) => {
+	let nameArry = filename.split('.');
+	return '.' + nameArry[nameArry.length - 1];
+}
+
 
 function ItemIcon(props) {
 	const selectTypes = useSelector(state => state.filemanager.allTypes)
@@ -60,9 +65,9 @@ function ItemIcon(props) {
 			</div>		
 		)
 	} else {
-		const type = selectTypes.filter(el => (el.mime_type === file.mime_type || el.obsolete_mime_type === file.mime_type ));
+		const type = selectTypes.filter(el => el.mime_type.includes(file.mime_type) && (el.ext.includes(getExtension(file.name))));
 		if(type.length){
-			return badgeComponent(type[0].ext, type[0].color);
+			return badgeComponent(type[0].label, type[0].color);
 		}
 	}
 	return badgeComponent('unknown', blueGrey[900])

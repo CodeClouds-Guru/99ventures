@@ -13,7 +13,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-
+import _ from 'src/@lodash/@lodash.js';
 
 const schema = yup.object().shape({
     max_file_size: yup
@@ -56,8 +56,8 @@ const FormField = () => {
     /**
      * Checkbox checked / unchecked 
      */
-    const handleCheck = (e) => {
-        const index = fileTypes[e.target.name].findIndex(el => el.mime_type === e.target.value);
+    const handleCheck = (e, v) => {
+        const index = fileTypes[e.target.name].findIndex(el => el.label === v.label);
         if (!e.target.checked && index >= 0) {
             fileTypes[e.target.name][index].checked = false
         } else {
@@ -98,7 +98,7 @@ const FormField = () => {
                         if (result[configIndx]['settings_value'][item]) {
                             filesData[item].push({
                                 ...el,
-                                checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type)) ? true : false
+                                checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type[0])) ? true : false
                             })
                         } else {
                             filesData[item].push({
@@ -123,7 +123,16 @@ const FormField = () => {
 
         Object.keys(fileTypes).map(key => {
             typeData[key] = [];
-            fileTypes[key].map(el => (el.checked) && typeData[key].push(el.mime_type))
+            let mimeTypes = fileTypes[key].filter(el => el.checked).map(el => el.mime_type);
+            for(let types of mimeTypes) {
+                if(types.length > 1) {
+                    for(let type of types) {
+                        typeData[key].push(type)
+                    }
+                } else {
+                    typeData[key].push(types[0])
+                }
+            }            
         });
 
         records.map(v => {
@@ -143,7 +152,7 @@ const FormField = () => {
         });
 
         // console.log(params); return;
-
+        
         setLoading(true);
         axios.post(jwtServiceConfig.settingsUpdate, { config_data: params })
             .then((response) => {
@@ -261,11 +270,11 @@ const FormField = () => {
                                                                     Object.keys(fileTypes).length && fileTypes[item][i].checked ? true : false
                                                                 }
                                                                 name={item}
-                                                                onChange={handleCheck}
-                                                                value={v.mime_type}
+                                                                onChange={()=> handleCheck(event, v)}
+                                                                value={v}
                                                             />
                                                         }
-                                                        label={v.ext}
+                                                        label={v.label}
                                                     />
                                                 )
                                             })
