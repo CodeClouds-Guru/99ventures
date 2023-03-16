@@ -89,8 +89,8 @@ class MemberAuthController {
       const schema = Joi.object({
         first_name: Joi.string().required().label("First Name"),
         last_name: Joi.string().required().label("Last Name"),
-        gender: Joi.string().optional().allow("").label("Gender"),
-        status: Joi.string().optional().allow("").label("Status"),
+        // gender: Joi.string().optional().allow("").label("Gender"),
+        // status: Joi.string().optional().allow("").label("Status"),
         // username: Joi.string().min(3).max(30).required().label("Username"),
         email: Joi.string().optional(),
         // company_portal_id: Joi.string().optional(),

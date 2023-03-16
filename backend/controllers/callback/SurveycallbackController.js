@@ -10,11 +10,11 @@ const {
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
-const SqsHelper = require("../../helpers/SqsHelper");
+const SqsHelper = require('../../helpers/SqsHelper');
 class SurveycallbackController {
   constructor() {
-    this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this)
-    this.syncSurvey = this.syncSurvey.bind(this)
+    this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this);
+    this.syncSurvey = this.syncSurvey.bind(this);
     // this.pureSpectrumPostBack = this.pureSpectrumPostBack.bind(this)
   }
 
@@ -54,22 +54,33 @@ class SurveycallbackController {
         );
         res.send(req.query);
       }
-    } else if(provider === 'purespectrum'){
+    } else if (provider === 'purespectrum') {
       await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
     }
   }
 
   async syncSurvey(req, res) {
-
     let survey = req.body;
     try {
-      //SQS 
+      //SQS
       const sqsHelper = new SqsHelper();
       if (survey.length > 0) {
+        const provider = req.params.provider;
+        //   //get survey provider
+        let survey_provider = await SurveyProvider.findOne({
+          attributes: ['id'],
+          where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
+        });
         survey.forEach(async (element) => {
-          const send_message = await sqsHelper.sendData(element);
-          console.log(send_message)
-        })
+          let lucid_data = {
+            // ...element,
+            survey_provider_id: 'panda',
+            ///survey_provider.id,
+          };
+          // element['survey_provider_id'] = survey_provider.id;
+          const send_message = await sqsHelper.sendData(lucid_data);
+          // console.log(send_message);
+        });
       }
       //SQS
       // if (survey.length > 0) {
@@ -112,7 +123,7 @@ class SurveycallbackController {
       //       let qualification_ids = []
       //       //clear all the previous records if the status is updated
       //       if (survey_status === 'updated') {
-      //         //get all qualification 
+      //         //get all qualification
       //         var qualification_ids_rows = await SurveyQualification.findAll({ where: { survey_id: model.id }, attributes: ['id'] })
       //         qualification_ids = qualification_ids_rows.map((qualification_id) => {
       //           return qualification_id.id
@@ -138,18 +149,16 @@ class SurveycallbackController {
       //   });
       // }
     } catch (error) {
-      const logger1 = require('../../helpers/Logger')(
-        `lucid-sync-errror.log`
-      );
+      const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
       logger1.error(error);
     } finally {
-      const logger1 = require('../../helpers/Logger')(
-        `lucid-${new Date()}.log`
-      );
-      logger1.info(JSON.stringify(req.body));
+      // const logger1 = require('../../helpers/Logger')(
+      //   `lucid-${new Date()}.log`
+      // );
+      // logger1.info(JSON.stringify(req.body));
       res.status(200).json({
         status: true,
-        message: "Data synced."
+        message: 'Data synced.',
       });
     }
   }
@@ -172,8 +181,9 @@ class SurveycallbackController {
           );
 
           record1.precodes.map(async (precode) => {
-
-            var answer_precode = await SurveyAnswerPrecodes.findOne({ where: { lucid_precode: precode } });
+            var answer_precode = await SurveyAnswerPrecodes.findOne({
+              where: { lucid_precode: precode },
+            });
             if (!answer_precode) {
               answer_precode = await SurveyAnswerPrecodes.create({
                 option: '',
@@ -191,9 +201,7 @@ class SurveycallbackController {
         }
       });
     } catch (error) {
-      const logger1 = require('../../helpers/Logger')(
-        `lucid-sync-errror.log`
-      );
+      const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
       logger1.info(JSON.stringify(req.query));
       logger1.info(JSON.stringify(req.body));
     }
@@ -202,13 +210,15 @@ class SurveycallbackController {
   async pureSpectrumPostBack(req, res) {
     // res.send(req.body);
     // return;
-    if(req.body.ps_rstatus == 21) // complete
-    {
-      const psObj = new PurespectrumHelper;
+    if (req.body.ps_rstatus == 21) {
+      // complete
+      const psObj = new PurespectrumHelper();
       const surveyNumber = req.body.survey_id;
-      const surveyData = await psObj.fetchAndReturnData('/surveys/' + surveyNumber);
+      const surveyData = await psObj.fetchAndReturnData(
+        '/surveys/' + surveyNumber
+      );
       if ('success' === surveyData.apiStatus && surveyData.survey) {
-        const reward = surveyData.survey.cpi; 
+        const reward = surveyData.survey.cpi;
         const username = req.body.ps_custom_svar1;
 
         let member = await Member.findOne({
@@ -229,9 +239,10 @@ class SurveycallbackController {
             payload: JSON.stringify(req.body),
           };
           console.log('transaction_obj', transaction_obj);
-          let result = await MemberTransaction.updateMemberTransactionAndBalance(
-            transaction_obj
-          );
+          let result =
+            await MemberTransaction.updateMemberTransactionAndBalance(
+              transaction_obj
+            );
           res.send(req.body);
         }
       }
@@ -239,8 +250,6 @@ class SurveycallbackController {
       res.send('No Survey found');
     }
   }
-
-
 }
 
 module.exports = SurveycallbackController;
