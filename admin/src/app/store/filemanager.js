@@ -178,7 +178,8 @@ export const getConfig = createAsyncThunk(
                         Object.keys(item.settings_value).map((el) => {
                             if(item.settings_value[el].length){
                                 item.settings_value[el].map(element => {
-                                    const filesExt = fileTypes[el].filter(fl=>fl.mime_type === element).map(fl => fl.ext)[0];                                    
+                                    const filesExt = fileTypes[el].filter(fl=> fl.mime_type.includes(element)).map(fl => fl.ext)[0];                                    
+                                    // console.log(filesExt)
                                     if(types.hasOwnProperty(element)) {
                                         types[element] = [...types[element], ...filesExt]
                                     } else {
