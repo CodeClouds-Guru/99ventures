@@ -74,7 +74,7 @@ class SurveycallbackController {
         survey.forEach(async (element) => {
           element.survey_provider_id = survey_provider.id;
           const send_message = await sqsHelper.sendData(element);
-          console.log(send_message);
+          // console.log(send_message);
         });
       }
       //SQS
