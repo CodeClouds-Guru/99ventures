@@ -71,10 +71,11 @@ class SurveycallbackController {
           attributes: ['id'],
           where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
         });
+        console.log(survey_provider.id);
         survey.forEach(async (element) => {
           let lucid_data = {
-            // ...element,
-            survey_provider_id: 'panda',
+            ...element,
+            survey_provider_id: survey_provider.id,
             ///survey_provider.id,
           };
           // element['survey_provider_id'] = survey_provider.id;
