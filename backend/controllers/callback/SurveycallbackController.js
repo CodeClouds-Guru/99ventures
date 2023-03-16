@@ -152,10 +152,10 @@ class SurveycallbackController {
       const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
       logger1.error(error);
     } finally {
-      const logger1 = require('../../helpers/Logger')(
-        `lucid-${new Date()}.log`
-      );
-      logger1.info(JSON.stringify(req.body));
+      // const logger1 = require('../../helpers/Logger')(
+      //   `lucid-${new Date()}.log`
+      // );
+      // logger1.info(JSON.stringify(req.body));
       res.status(200).json({
         status: true,
         message: 'Data synced.',
