@@ -227,7 +227,7 @@ router.get('/schlesigner/surveys', async (req, res) => {
 		const surveys = await Survey.findAll({
 			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
 			where: {
-				survey_provider_id: 4,
+				survey_provider_id: provider.id,
 				status: "live",
 			},
 			include: {
@@ -254,6 +254,10 @@ router.get('/schlesigner/surveys', async (req, res) => {
 				}
 			}
 		});
+		if (!surveys.length) {
+			res.send('No matching surveys!');
+			return;
+		}
 		const queryString = {
 			UID: eligibilities[0].Member.username
 		};
