@@ -73,7 +73,7 @@ class SurveycallbackController {
         });
         survey.forEach(async (element) => {
           let lucid_data = {
-            ...element,
+            // ...element,
             survey_provider_id: 'panda',
             ///survey_provider.id,
           };
