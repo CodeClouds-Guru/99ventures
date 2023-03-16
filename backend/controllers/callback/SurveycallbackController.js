@@ -72,7 +72,7 @@ class SurveycallbackController {
           where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
         });
         survey.forEach(async (element) => {
-          element.survey_provider_id = survey_provider.id;
+          element['survey_provider_id'] = survey_provider.id;
           const send_message = await sqsHelper.sendData(element);
           // console.log(send_message);
         });
