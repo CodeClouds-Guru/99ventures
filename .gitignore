@@ -11,3 +11,6 @@ admin/public/.DS_Store
 .vscode/*
 *.code-workspace
 logs
+lambda/sync-surveys/node_modules
+lambda/sync-surveys/.env
+lambda/sync-surveys/*.zip

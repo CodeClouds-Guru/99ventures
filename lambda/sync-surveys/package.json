@@ -1,0 +1,18 @@
+{
+  "name": "sync-surveys",
+  "version": "1.0.0",
+  "description": "Lambda Module which will trigger if a new record is pushed into SQS (99ventures-queue)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Sourabh Das (sourabh.das@codeclouds.in)",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1272.0",
+    "dotenv": "^16.0.1",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.21.3"
+  }
+}
