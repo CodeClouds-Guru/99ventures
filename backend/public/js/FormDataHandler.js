@@ -8,6 +8,7 @@ $(() => {
     const signupForm = $("#scripteed_signup_form").get(0);
     const formHeading = $("#form_heading").get(0);
     const logoutButton = $("#scripteed_logout_btn").get(0);
+    const ticketCreateForm = $("#scripteed_create_ticket_form").get(0);
 
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -61,7 +62,16 @@ $(() => {
             $(signupForm).attr("method", "POST");
         }
         else {
-            console.log("OOPS!!! Signup ction not set");
+            console.log("OOPS!!! Signup action not set");
+        }
+    }
+    var ticketCreateFormSanitisation = () => {
+        if (ticketCreateForm && ["ticket_subject", "ticket_file", "ticket_content"].every((val) => Object.keys(ticketCreateForm.elements).indexOf(val) > -1)) {
+            $(ticketCreateForm).attr("action", '/ticket/create');
+            $(ticketCreateForm).attr("method", "POST");
+        }
+        else {
+            console.log("OOPS!!! Ticket create action not set");
         }
     }
     var loginFomValidation = () => {
@@ -101,6 +111,21 @@ $(() => {
             errorsArray.push({ field: $(confirmPasswordField), message: 'Password mismatched' });
         }
     }
+    var ticketCreateFormValidation = () => {
+        errorsArray = [];
+        const ticketSubjectField = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
+        const ticketFileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
+        const ticketFileValue = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
+        const ticketContentField = $(ticketCreateForm).find('textare[name="ticket_content"]').text();
+        // console.log(ticketFileName, ticketFileValue)
+        // console.log(ticketSubjectField.val(), ticketContentField)
+        if ($(ticketSubjectField).val().trim().length === 0) {
+            errorsArray.push({ field: $(ticketSubjectField), message: 'Please enter ticket subject' });
+        }
+        if ($(ticketContentField).trim().length === 0) {
+            errorsArray.push({ field: $(ticketContentField), message: 'Please enter ticket content' });
+        }
+    }
     displayErrors = () => {
         $('span.alert-msg').remove();
         errorsArray.forEach(item => {
@@ -114,10 +139,11 @@ $(() => {
     if (signupForm) {
         signupFormSanitisation();
     }
-
+    if (ticketCreateForm) {
+        ticketCreateFormSanitisation();
+    }
     $(loginForm).submit((e) => {
         loginFomValidation();
-        console.log(errorsArray);
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
         } else {
@@ -127,6 +153,16 @@ $(() => {
     })
     $(signupForm).submit((e) => {
         signupFormValidation();
+        console.log(errorsArray);
+        if (errorsArray.length === 0) {
+            $(this).trigger(e.type);
+        } else {
+            e.preventDefault();
+            displayErrors();
+        }
+    })
+    $(ticketCreateForm).submit((e) => {
+        ticketCreateFormValidation();
         console.log(errorsArray);
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
