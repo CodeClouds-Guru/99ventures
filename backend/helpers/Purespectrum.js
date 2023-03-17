@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { Country } = require('../models/index');
 
 const handler = {
 	get(target, prop) {
@@ -67,6 +66,16 @@ class Purespectrum {
 	async deleteData(partUrl) {
 		const response = await this.instance.del(partUrl);
 		return response.data;
+	}
+
+	getSurveyStatus(statusId) {
+		const statusObj = {
+			11: 'draft',
+			22: 'live',
+			33: 'paused',
+			44: 'closed'
+		}
+		return statusObj[statusId];
 	}
 }
 

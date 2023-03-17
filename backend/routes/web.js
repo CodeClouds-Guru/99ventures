@@ -86,26 +86,29 @@ router.get('/pure-spectrum/surveys', async (req, res) => {
 		where: {
 			member_id: memberId
 		},
-		include: {
+		include: [{
 			model: SurveyQuestion,
 			attributes: ['id', 'survey_provider_question_id', 'question_type'],
 			where: {
 				survey_provider_id: provider.id
 			}
-		}
+		}, {
+			model: Member,
+			attributes: ['username']
+		}]
 	});
 
 	if (eligibilities) {
-		// const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.name);
 		const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
 		const matchingAnswerCodes = eligibilities
 			.filter(eg => eg.SurveyQuestion.question_type !== 'open-ended') // Removed open ended question. We will not get the value from survey_answer_precodes
 			.map(eg => eg.precode_id);
-		// res.send(matchingAnswerCodes);
-		// return;
 
 		if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
-			const queryString = {};
+			const queryString = {
+				ps_supplier_respondent_id: eligibilities[0].Member.username,
+				ps_supplier_sid: Date.now()
+			};
 			eligibilities.map(eg => {
 				queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
 			});
@@ -178,7 +181,7 @@ router.get('/pure-spectrum/entry-link', async (req, res) => {
 		res.send(data)
 	}
 
-})
+});
 
 router.get('/schlesigner/surveys', async (req, res) => {
 	const memberId = req.query.user_id;

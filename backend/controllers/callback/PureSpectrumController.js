@@ -13,12 +13,12 @@ class PureSpectrumController {
         6: 'type 6'
     }
 
-    static surveyStatus = {
-        11: 'draft',
-        22: 'live',
-        33: 'paused',
-        44: 'closed'
-    }
+    // static surveyStatus = {
+    //     11: 'draft',
+    //     22: 'live',
+    //     33: 'paused',
+    //     44: 'closed'
+    // }
     
     constructor() {}
 
@@ -164,11 +164,11 @@ class PureSpectrumController {
                 //-- Disabled all the previous surveys
                 const current_datetime = new Date();
                 Survey.update({
-                    survey_provider_id: PureSpectrumController.providerId,
-                    status: PureSpectrumController.surveyStatus[33],
+                    status: psObj.getSurveyStatus(33),
                     deleted_at: new Date()
                 }, {
                     where: {
+                        survey_provider_id: PureSpectrumController.providerId,
                         status: 'live',
                         created_at: {
                             [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
@@ -186,7 +186,7 @@ class PureSpectrumController {
                         cpi: survey.cpi,
                         name: survey.survey_name,
                         survey_number: survey.survey_id,
-                        status: PureSpectrumController.surveyStatus[survey.survey_status],
+                        status: psObj.getSurveyStatus(survey.survey_status),
                         original_json: survey,
                         created_at: new Date()
                     });
@@ -212,7 +212,7 @@ class PureSpectrumController {
                             cpi: survey.cpi,
                             name: survey.survey_name,
                             survey_number: survey.survey_id,
-                            status: PureSpectrumController.surveyStatus[survey.survey_status],
+                            status: psObj.getSurveyStatus(survey.survey_status),
                             original_json: survey,
                             created_at: new Date()
                         });
@@ -222,7 +222,7 @@ class PureSpectrumController {
                             loi: survey.survey_performance.overall.loi,
                             cpi: survey.cpi,
                             name: survey.survey_name,
-                            status: PureSpectrumController.surveyStatus[survey.survey_status],
+                            status: psObj.getSurveyStatus(survey.survey_status),
                             original_json: survey,
                             updated_at: new Date()
                         }, {
