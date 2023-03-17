@@ -68,6 +68,25 @@ class Schlesinger {
 		const response = await this.instance.del(partUrl);
 		return response.data;
 	}
+
+	getQuestionType(id) {
+		const questionType = {
+			1: 'singlepunch',
+			2: 'multipunch',
+			3: 'open-ended',
+			4: 'dummy',
+			5: 'calculated-dummy',
+			6: 'range',
+			7: 'emailType',
+			8: 'info',
+			9: 'compound',
+			10: 'calendar',
+			11: 'single-punch-image',
+			12: 'multi-punch-image',
+			14: 'videoType'
+		}
+		return questionType[id];
+	}
 }
 
 module.exports = Schlesinger;

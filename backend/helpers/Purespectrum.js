@@ -77,6 +77,18 @@ class Purespectrum {
 		}
 		return statusObj[statusId];
 	}
+
+	getQuestionType(id) {
+		const questionType = {
+			1: 'singlepunch',
+			2: 'singlepunch-alt',
+			3: 'multipunch',
+			4: 'range',
+			5: 'open-ended',
+			6: 'type 6'
+		}
+		return questionType[id];
+	}
 }
 
 module.exports = Purespectrum;
