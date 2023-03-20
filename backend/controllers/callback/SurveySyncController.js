@@ -2,6 +2,7 @@ const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswe
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const { Op } = require("sequelize");
+const { capitalizeFirstLetter } = require('../../helpers/global')
 
 class SurveySyncController {
 
@@ -16,16 +17,16 @@ class SurveySyncController {
         this.syncSurveyQualification = this.syncSurveyQualification.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
-        this.capitalizeFirstLetter = this.capitalizeFirstLetter.bind(this);
+
         this.schlesingerLanguageId = 3;
     }
 
     index(req, res){
-        const slug = req.params.slug;
+        const action = req.params.action;
         this.getProvider(req, res);        
-        if(slug === 'question') {
+        if(action === 'question') {
             this.syncSurveyQuestion(req, res);
-        } else if(slug === 'survey') {
+        } else if(action === 'survey') {
             this.syncSurveyQualification(req, res);
         }
     }
@@ -35,7 +36,7 @@ class SurveySyncController {
         const provider = await SurveyProvider.findOne({
             attributes: ['id'],
             where: {
-                name: this.capitalizeFirstLetter(providerName)
+                name: capitalizeFirstLetter(providerName)
             }
         });
         
@@ -288,7 +289,8 @@ class SurveySyncController {
     async schlesingerSurvey(req, res) {
         try{
             const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/allocated-surveys');            
+            const allSurveys = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/allocated-surveys');   
+                 
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId);
                 if(!surveyData.length) {
@@ -350,7 +352,7 @@ class SurveySyncController {
     async pureSpectrumQualification(req, res) {
         try{
             //Save Surveys
-            const allSurveys = await this.pureSpectrumSurvey();
+            const allSurveys = await this.pureSpectrumSurvey(req, res);
             
             if(allSurveys.length) {
                 const psObj = new PurespectrumHelper;
@@ -438,7 +440,7 @@ class SurveySyncController {
      */
     async schlesingerQualification(req, res) {
         try{
-            const allSurveys = await this.schlesingerSurvey();            
+            const allSurveys = await this.schlesingerSurvey(req, res);            
             if(allSurveys.length) {
                 const psObj = new SchlesingerHelper;
                 for(let survey of allSurveys) {
@@ -517,9 +519,6 @@ class SurveySyncController {
         }
     }
 
-    capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
 }
 
 module.exports = SurveySyncController

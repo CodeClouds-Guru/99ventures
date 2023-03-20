@@ -8,6 +8,7 @@ const {
 const util = require("util");
 const { QueryTypes, Op } = require('sequelize');
 const defaultAddOns = require("../config/frontend_static_files.json");
+const safeEval = require('safe-eval');
 
 class PageParser {
   constructor(slug, staticContent) {
@@ -110,7 +111,17 @@ class PageParser {
     const user = this.getSessionUser();
     const error_message = this.getFlashMessage() || '';
 
-    layout_html = eval('`' + layout_html + '`');
+    layout_html = safeEval('`' + layout_html + '`', {
+      page_title,
+      page_keywords,
+      page_descriptions,
+      page_meta_code,
+      user,
+      error_message,
+      layout_keywords,
+      layout_descriptions,
+      default_scripted_codes
+    });
 
     return layout_html;
   }
