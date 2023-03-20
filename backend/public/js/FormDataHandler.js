@@ -101,7 +101,9 @@ $(() => {
         if ($(lastNameField).val().trim().length === 0) {
             errorsArray.push({ field: $(lastNameField), message: 'Please enter last name' });
         }
-        if ($(emailField).val().trim().length === 0 && !validateEmail($(emailField).val().trim())) {
+        if ($(emailField).val().trim().length === 0) {
+            errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
+        } else if (!validateEmail($(emailField).val().trim())) {
             errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
         }
         if ($(passwordField).val().trim().length < 8) {
