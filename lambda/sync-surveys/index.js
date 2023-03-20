@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 require('dotenv').config();
 
-const { QueryTypes, Op } = require('sequelize');
+const { QueryTypes, Op, json } = require('sequelize');
 const {
   SurveyProvider,
   Survey,
@@ -58,76 +58,82 @@ const storeSurveyQualifications = async (record, model, survey_questions) => {
 
 exports.handler = async (event) => {
   console.log('event object', event);
-  if(event.Records){
-    event.Records.forEach(async (record) => {
-      record = record.body
-      let survey_questions = await SurveyQuestion.findAll({
-        attributes: ['survey_provider_question_id'],
-      });
-      let status = 'draft';
+  try{
+    if(event.Records){
+      event.Records.forEach(async (record) => {
+        record = JSON.parse(record.body)
+        let survey_questions = await SurveyQuestion.findAll({
+          attributes: ['survey_provider_question_id'],
+        });
+        let status = 'draft';
 
-      let model = {};
-      let data = {
-        survey_provider_id:
-          record.is_live == true || record.is_live == 'true' ? 'active' : 'draft',
-        loi: record.length_of_interview,
-        cpi: record.cpi,
-        name: record.survey_name,
-        survey_number: record.survey_id,
-        status: status,
-      };
-      var survey_status = 'created';
-      var obj = await Survey.findOne({
-        where: {
+        let model = {};
+        let data = {
+          survey_provider_id:
+            record.is_live == true || record.is_live == 'true' ? 'active' : 'draft',
+          loi: record.length_of_interview,
+          cpi: record.cpi,
+          name: record.survey_name,
           survey_number: record.survey_id,
-          survey_provider_id: record.survey_provider_id,
-        },
-      });
-      if (obj) {
-        survey_status = 'updated';
-        model = await obj.update(data);
-      } else {
-        model = await Survey.create(data);
-      }
-
-      if (
-        'survey_qualifications' in record &&
-        Array.isArray(record.survey_qualifications) &&
-        record.survey_qualifications.length > 0
-      ) {
-        let qualification_ids = [];
-        //clear all the previous records if the status is updated
-        if (survey_status === 'updated') {
-          //get all qualification
-          var qualification_ids_rows = await SurveyQualification.findAll({
-            where: { survey_id: model.id },
-            attributes: ['id'],
-          });
-          qualification_ids = qualification_ids_rows.map((qualification_id) => {
-            return qualification_id.id;
-          });
-          if (qualification_ids.length > 0) {
-            //remove qualifications
-            await SurveyQualification.destroy({
-              where: {
-                id: {
-                  [Op.in]: qualification_ids,
-                },
-              },
-              force: true,
-            });
-            await db.sequelize.query(
-              'DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (' +
-              qualification_ids.join(',') +
-              ')',
-              { type: QueryTypes.DELETE }
-            );
-          }
+          status: status,
+          original_json: record
+        };
+        var survey_status = 'created';
+        var obj = await Survey.findOne({
+          where: {
+            survey_number: record.survey_id,
+            survey_provider_id: record.survey_provider_id,
+          },
+        });
+        if (obj) {
+          survey_status = 'updated';
+          model = await obj.update(data);
+        } else {
+          model = await Survey.create(data);
         }
-        //store survey qualifications
-        await storeSurveyQualifications(record, model, survey_questions);
-      }
-    });
+
+        if (
+          'survey_qualifications' in record &&
+          Array.isArray(record.survey_qualifications) &&
+          record.survey_qualifications.length > 0
+        ) {
+          let qualification_ids = [];
+          //clear all the previous records if the status is updated
+          if (survey_status === 'updated') {
+            //get all qualification
+            var qualification_ids_rows = await SurveyQualification.findAll({
+              where: { survey_id: model.id },
+              attributes: ['id'],
+            });
+            qualification_ids = qualification_ids_rows.map((qualification_id) => {
+              return qualification_id.id;
+            });
+            if (qualification_ids.length > 0) {
+              //remove qualifications
+              await SurveyQualification.destroy({
+                where: {
+                  id: {
+                    [Op.in]: qualification_ids,
+                  },
+                },
+                force: true,
+              });
+              await db.sequelize.query(
+                'DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (' +
+                qualification_ids.join(',') +
+                ')',
+                { type: QueryTypes.DELETE }
+              );
+            }
+          }
+          //store survey qualifications
+          await storeSurveyQualifications(record, model, survey_questions);
+        }
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }finally {
+    return true;
   }
-  return true;
 };
