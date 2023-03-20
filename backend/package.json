@@ -36,6 +36,7 @@
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^5.0.0",
     "pluralize": "^8.0.0",
+    "safe-eval": "^0.4.1",
     "sequelize": "^6.21.3",
     "sequelize-cli": "^6.5.2",
     "sequelize-paginate": "^1.1.6",
