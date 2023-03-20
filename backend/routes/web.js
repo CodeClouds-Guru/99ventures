@@ -14,9 +14,13 @@ const {
 	SurveyQualification,
 	SurveyAnswerPrecodes,
 	MemberEligibilities,
-  OfferWall
+	OfferWall
 } = require('../models');
 
+router.get('/robots.txt', (req, res) => {
+	res.type('text/plain');
+	res.send("User-agent: *\nDisallow: /");
+});
 
 const MemberAuthControllerClass = require("../controllers/frontend/MemberAuthController");
 const MemberAuthController = new MemberAuthControllerClass();
@@ -309,26 +313,26 @@ router.get('/schlesigner/entry-link', async (req, res) => {
 
 })
 
-router.get('/offer-wall/list',async(req,res) => {
-  var offer_walls = await OfferWall.findAll({where:{status:'1'}})
-  if(offer_walls){
-    let offerHtml = ''
-    offer_walls.forEach(function (record, key) {
-		let offer_name = record.name.toLowerCase();
-		offer_name = offer_name.replaceAll(' ','-')
+router.get('/offer-wall/list', async (req, res) => {
+	var offer_walls = await OfferWall.findAll({ where: { status: '1' } })
+	if (offer_walls) {
+		let offerHtml = ''
+		offer_walls.forEach(function (record, key) {
+			let offer_name = record.name.toLowerCase();
+			offer_name = offer_name.replaceAll(' ', '-')
 
-      	let link = `/offer-wall/${offer_name}`;
+			let link = `/offer-wall/${offer_name}`;
 			offerHtml += `
 				<div class="offer-box" style="width: 45%; padding: 20px 10px; border: 1px solid #fff; background-color: #fff; margin-bottom: 1rem;margin-right: 1rem; border-radius: 10px;">
 					<h3 style="margin:0;">${record.name}</h3>
 					<div style="text-align: right; margin-top: 3rem;"><a href="${link}" target="_blank" style="border: 1px solid #33375f;background-color: #33375f;color: #fff;padding: 7px 36px;text-decoration: none;border-radius: 3px;    box-shadow: 0 2px 12px #33375f;">Click here</a></div>
 				</div>
 			`
-    })
-    res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="offer-container">${offerHtml}</div>`);
-  }else{
-    res.send('No records found!');
-  }
+		})
+		res.send(`<div style="width: 100%; display:flex; flex-wrap: wrap" class="offer-container">${offerHtml}</div>`);
+	} else {
+		res.send('No records found!');
+	}
 })
 
 
