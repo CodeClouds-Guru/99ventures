@@ -116,3 +116,5 @@ exports.createCommentSignature = (code) => {
 //   console.log(mystr);
 //   return mystr;
 // };
+
+exports.capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1)
