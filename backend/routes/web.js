@@ -28,6 +28,8 @@ const SurveyControllerClass = require("../controllers/frontend/SurveyController"
 const SurveyController = new SurveyControllerClass();
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
+const TicketControllerClass = require("../controllers/frontend/TicketController")
+const TicketController = new TicketControllerClass();
 
 
 router.get('/cint/entry-link', async (req, res) => {
@@ -362,6 +364,8 @@ router.get("/email-verify", MemberAuthController.emailVerify);
 router.post("/logout", MemberAuthController.logout);
 router.get("/survey", SurveyController.getSurvey);
 router.get("/survey/:status", StaticPageController.showStatus);
+router.post("/ticket/create", TicketController.saveTicketConversations);
+router.get("/ticket/ticket-list", TicketController.list);
 
 router.get('/404', async (req, res) => {
 	var pagePerser = new PageParser('404');
