@@ -82,7 +82,14 @@ router.post('/order-create', async (req, res) => {
   res.send(create_order);
 });
 
-router.get('/order-capture', async (req, res) => {
+router.post('/order-success', async (req, res) => {
+  console.log('paypal order-capture');
+  let paypal_class = new Paypal();
+  var capture_payment = await paypal_class.capturePayment(req, res);
+  res.send(capture_payment);
+});
+
+router.post('/order-capture', async (req, res) => {
   console.log('paypal order-capture');
   let paypal_class = new Paypal();
   var capture_payment = await paypal_class.capturePayment(req, res);

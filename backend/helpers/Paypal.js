@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { Console } = require('winston/lib/winston/transports');
-const { PaymentMethod, PaymentMethodCredential } = require('../models');
+const { MemberTransaction, PaymentMethodCredential } = require('../models');
 class Paypal {
   constructor() {
     this.clientId =
@@ -25,44 +25,40 @@ class Paypal {
   }
 
   async postAndReturnData(partUrl) {
-    this.instance = {
-      ...this.instance,
+    const instance = axios.create({
+      baseURL: this.baseURL.sandbox,
+      timeout: 10000,
       headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json, text/plain, */*',
         Authorization: `Basic ${this.auth}`,
       },
-      body: 'grant_type=client_credentials',
-    };
-
-    const response = await this.instance.post(partUrl);
-    console.log(response.data);
-    return response.data;
-    // const response = axios.create({
-    //   baseURL: this.baseURL.sandbox + partUrl,
-    //   timeout: 10000,
-    //   // method: post,
-    //   headers: {
-    //     Authorization: `Basic ${this.auth}`,
-    //   },
-    //   body: 'grant_type=client_credentials',
-    // });
-
-    // console.log('accessToken', response);
-    // return response;
+    });
+    const response = await instance.post(
+      partUrl,
+      'grant_type=client_credentials'
+    );
+    return response;
   }
 
-  async postWithPayload(partUrl, accessToken, payload) {
-    const response = axios.create({
-      baseURL: this.baseURL.sandbox + partUrl,
+  async postWithPayload(partUrl, accessToken, payload = '') {
+    const instance = axios.create({
+      baseURL: this.baseURL.sandbox,
       timeout: 10000,
       // method: post,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      data: payload,
     });
+    let response = {};
+    if (payload !== '') {
+      response = await instance.post(partUrl, payload);
+    } else {
+      response = await instance.post(partUrl);
+    }
     const jsonData = await this.handleResponse(response);
-    return response;
+    return jsonData;
   }
 
   async paypalConfig(site_id) {
@@ -87,24 +83,9 @@ class Paypal {
   // generate an access token using client id and app secret
   async generateAccessToken(site_id) {
     // this.paypalConfig(site_id);
-    // const response = await this.postAndReturnData('/v1/oauth2/token/');
-    // const jsonData = await this.handleResponse(response);
-    // console.log('jsonData', jsonData);
-    // return jsonData.access_token;
-    // const auth = Buffer.from(CLIENT_ID + ":" + APP_SECRET).toString("base64");
-    fetch(`${this.baseURL.sandbox}/v1/oauth2/token`, {
-      method: 'post',
-      body: 'grant_type=client_credentials',
-      headers: {
-        Authorization: `Basic ${this.auth}`,
-      },
-    }).then((resp) => {
-      console.log(resp);
-    });
-    return 'worked';
-    // const jsonData = await handleResponse(response);
-    // console.log('jsonData', jsonData);
-    // return jsonData.access_token;
+    const response = await this.postAndReturnData('/v1/oauth2/token/');
+    const jsonData = await this.handleResponse(response);
+    return jsonData.access_token;
   }
 
   // use the orders api to create an order
@@ -112,42 +93,79 @@ class Paypal {
     const site_id = req.headers.site_id || 1;
     const accessToken = await this.generateAccessToken(site_id);
     console.log('accessToken', accessToken);
-    // const payload = JSON.stringify({
-    //   intent: 'CAPTURE',
-    //   purchase_units: [
-    //     {
-    //       amount: {
-    //         currency_code: 'USD',
-    //         value: req.body.amount,
-    //       },
-    //     },
-    //   ],
-    // });
-    // const data = await this.postWithPayload(
-    //   this.baseURL.sandbox + '/v2/checkout/orders',
-    //   accessToken,
-    //   payload
-    // );
-    // return data;
+    const payload = JSON.stringify({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: '20.00',
+          },
+        },
+      ],
+    });
+    const data = await this.postWithPayload(
+      this.baseURL.sandbox + '/v2/checkout/orders',
+      accessToken,
+      payload
+    );
+    console.log('createOrder', data);
+    return data;
   }
 
   // use the orders api to capture payment for an order
   async capturePayment(req) {
     const site_id = req.headers.site_id || 1;
     const accessToken = await this.generateAccessToken(site_id);
-    const payload = {};
+    console.log(req.body.order_id);
     const data = await this.postWithPayload(
-      this.baseURL.sandbox + `/v2/checkout/orders/${req.body.order_id}/capture`,
-      accessToken,
-      payload
+      '/v2/checkout/orders/' + req.body.order_id + '/capture/',
+      accessToken
     );
     console.log('capturePayment', data);
     return data;
   }
 
+  //store in transaction
+  async capturePayment(req) {
+    const member_id = req.body.member_id || null;
+    const member = await Member.findOne({ where: { id: member_id } });
+    const transaction_obj = {
+      member_id: member_id,
+      amount: req.body.payout_amount,
+      note: 'Cash withdrawn',
+      type: parseFloat(req.body.payout_amount) > 0 ? 'credited' : 'withdraw',
+      amount_action: 'admin_adjustment',
+      created_by: req.user.id,
+      payload: req.body ? JSON.stringify(req.body) : null,
+    };
+    console.log('transaction_obj', transaction_obj);
+    let result = await MemberTransaction.updateMemberTransactionAndBalance(
+      transaction_obj
+    );
+    const member_name = member.first_name + ' ' + member.last_name;
+    //send mail
+    const eventBus = require('../eventBus');
+    let evntbus = eventBus.emit('send_email', {
+      action: 'Member Cash Withdrawal',
+      data: {
+        email: req.user.email,
+        details: {
+          desc:
+            member_name +
+            ' has withdrawn ' +
+            req.body.payout_amount +
+            ' on ' +
+            req.body.date,
+        },
+      },
+      req: req,
+    });
+  }
+
   async handleResponse(response) {
     if (response.status === 200 || response.status === 201) {
-      return response;
+      return response.data;
     }
   }
 }
