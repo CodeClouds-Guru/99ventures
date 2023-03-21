@@ -127,7 +127,7 @@ class Paypal {
   }
 
   //store in transaction
-  async capturePayment(req) {
+  async successPayment(req) {
     const member_id = req.body.member_id || null;
     const member = await Member.findOne({ where: { id: member_id } });
     const transaction_obj = {
