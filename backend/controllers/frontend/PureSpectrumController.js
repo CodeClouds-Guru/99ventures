@@ -112,7 +112,7 @@ class PureSpectrumController {
 
                 var surveyHtml = '';
                 for (let survey of surveys) {
-                    let link = `/pure-spectrum/entry-link?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
+                    let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
                     surveyHtml += `
                         <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                             <div class="bg-white card mb-2">
@@ -149,9 +149,9 @@ class PureSpectrumController {
     
         if (data.apiStatus === 'success' && data.survey_entry_url) {
             const entryLink = data.survey_entry_url + '&' + generateQueryString;
-            res.send(entryLink)
+            res.redirect(entryLink)
         } else {
-            res.send(data)
+            res.send('<p>Unable to get entry link!</p>')
         }
     }
 }
