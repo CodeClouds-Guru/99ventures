@@ -18,6 +18,10 @@ class SurveySyncController {
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
+        /**
+         * "English - United States"
+         * language 3
+         */
         this.schlesingerLanguageId = 3;
     }
 
