@@ -100,7 +100,7 @@ class PageParser {
       : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
-    console.log('default_scripted_codes', default_scripted_codes);
+    // console.log('default_scripted_codes', default_scripted_codes);
     layout_html = layout_html.replaceAll('{{content}}', content);
     layout_html = layout_html.replaceAll(
       '${additional_header_script}',

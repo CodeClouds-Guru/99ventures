@@ -17,7 +17,10 @@ class MemberAuthController {
   async login(req, res) {
     let company_portal_id = 1
     let redirect_page = await Page.findOne({ where: { company_portal_id: company_portal_id, after_signin: 1 } })
-    redirect_page = '/' + redirect_page ? redirect_page.slug : ''
+    if(redirect_page)
+      redirect_page = '/' + redirect_page.slug
+    else
+      redirect_page = '/'
     if (req.session.member) {
       res.redirect(redirect_page);
       return
@@ -79,7 +82,9 @@ class MemberAuthController {
   //signup
   async signup(req, res) {
     try {
-      let company_portal_id = 1
+      let company_portal_id = req.session.company_portal.id
+      req.headers.site_id = company_portal_id
+      let company_id = req.session.company_portal.company_id
       let ip = req.ip;
       if (Array.isArray(ip)) {
         ip = ip[0]
@@ -89,24 +94,9 @@ class MemberAuthController {
       const schema = Joi.object({
         first_name: Joi.string().required().label("First Name"),
         last_name: Joi.string().required().label("Last Name"),
-        // gender: Joi.string().optional().allow("").label("Gender"),
-        // status: Joi.string().optional().allow("").label("Status"),
-        // username: Joi.string().min(3).max(30).required().label("Username"),
         email: Joi.string().optional(),
-        // company_portal_id: Joi.string().optional(),
-        // company_id: Joi.string().optional(),
         password: Joi.string().optional(),
-        // dob: Joi.string().optional(),
-        // phone_no: Joi.string().optional().label("Phone No"),
-        // country_id: Joi.optional().label("Country"),
-        // address_1: Joi.string().allow("").required().label("Address 1"),
-        // address_2: Joi.string().allow("").optional().label("Address 2"),
-        // address_3: Joi.string().allow("").optional().label("Address 3"),
-        // zip_code: Joi.string().allow("").optional().label("Zip Code"),
-        // avatar: Joi.optional().label("Avatar"),
-        // country_code: Joi.optional().label("Country Code"),
-        // state: Joi.optional().label("State"),
-        // referral_code: Joi.optional().allow('').label("Referral Code"),
+        confirm_password: Joi.string().optional(),
       });
       const { error, value } = schema.validate(req.body);
       let member_status = true
@@ -121,33 +111,39 @@ class MemberAuthController {
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(value.password, salt);
-        const existing_email_or_username = await Member.count({
+        let existing_email_or_username = await Member.findOne({
           where: {
             company_portal_id: company_portal_id,
-            [Op.or]: {
-              email: req.body.email,
-              username: req.body.username,
-            },
+            email: req.body.email,
           },
         });
-
-        if (existing_email_or_username > 0) {
+        
+        if (existing_email_or_username) {
           member_status = false
           member_message = "Sorry! this username or email has already been taken"
         } else {
           req.body.membership_tier_id = 1;
-          let files = [];
-          if (req.files) {
-            files[0] = req.files.avatar;
-            const fileHelper = new FileHelper(files, 'members', req);
-            const file_name = await fileHelper.upload();
-            req.body.avatar = file_name.files[0].filename;
+          // let files = [];
+          // if (req.files) {
+          //   files[0] = req.files.avatar;
+          //   const fileHelper = new FileHelper(files, 'members', req);
+          //   const file_name = await fileHelper.upload();
+          //   req.body.avatar = file_name.files[0].filename;
+          // }
+          
+          let data = {
+            first_name: value.first_name,
+            last_name: value.last_name,
+            email: value.email,
+            password: password,
+            membership_tier_id:1,
+            company_portal_id:company_portal_id,
+            company_id:company_id,
+            status:'validating',
+            username:value.email.split('@')[0],
+            created_at: new Date()
           }
-
-          const res = await Member.create({
-            ...req.body,
-            password,
-          });
+          const res = await Member.create(data);
           //send mail
           const eventBus = require('../../eventBus');
           let member_details = await Member.findOne({
