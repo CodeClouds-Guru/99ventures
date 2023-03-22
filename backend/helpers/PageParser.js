@@ -9,7 +9,7 @@ const util = require("util");
 const { QueryTypes, Op } = require('sequelize');
 const defaultAddOns = require("../config/frontend_static_files.json");
 const safeEval = require('safe-eval');
-
+const Handlebars = require('handlebars');
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
@@ -100,7 +100,6 @@ class PageParser {
       : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
-    // console.log('default_scripted_codes', default_scripted_codes);
     layout_html = layout_html.replaceAll('{{content}}', content);
     layout_html = layout_html.replaceAll(
       '${additional_header_script}',
@@ -116,13 +115,16 @@ class PageParser {
       page_keywords,
       page_descriptions,
       page_meta_code,
-      user,
-      error_message,
       layout_keywords,
       layout_descriptions,
       default_scripted_codes
     });
-
+    const template = Handlebars.compile(layout_html);
+    layout_html = template({
+      user,
+      error_message,
+    });
+    console.log(user);
     return layout_html;
   }
 

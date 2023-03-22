@@ -10,7 +10,7 @@ module.exports = async function (req, res, next) {
     req.session.company_portal = company_portal;
     if ('member' in req.session && req.session.member) {
         const member = await Member.findOne({ where: { id: req.session.member.id } });
-        req.session.member = member;
+        req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
     }
     next();
 }
