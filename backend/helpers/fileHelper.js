@@ -60,6 +60,7 @@ class FileHelper {
         const blob = fs.readFileSync(imagePath)
         // const uploadedImage = await s3.upload({
         // if(this.private_file == '1'){}
+        console.log(path.concat(new_filename))
         const uploadedImage = await s3.putObject({
           Bucket: process.env.S3_BUCKET_NAME,
           Key: path.concat(new_filename),

@@ -25,40 +25,65 @@ class Paypal {
   }
 
   async postAndReturnData(partUrl) {
-    const instance = axios.create({
-      baseURL: this.baseURL.sandbox,
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json, text/plain, */*',
-        Authorization: `Basic ${this.auth}`,
-      },
-    });
-    const response = await instance.post(
-      partUrl,
-      'grant_type=client_credentials'
-    );
-    return response;
+    let resp = {
+      status: false,
+      report: null,
+      error: '',
+    };
+    try {
+      const instance = axios.create({
+        baseURL: this.baseURL.sandbox,
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json, text/plain, */*',
+          Authorization: `Basic ${this.auth}`,
+        },
+      });
+      let response = await instance.post(
+        partUrl,
+        'grant_type=client_credentials'
+      );
+      const jsonData = await this.handleResponse(response);
+      resp.status = true;
+      resp.report = jsonData.access_token;
+    } catch (e) {
+      resp.error = e.message;
+    } finally {
+      return resp;
+    }
   }
 
   async postWithPayload(partUrl, accessToken, payload = '') {
-    const instance = axios.create({
-      baseURL: this.baseURL.sandbox,
-      timeout: 10000,
-      // method: post,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    let response = {};
-    if (payload !== '') {
-      response = await instance.post(partUrl, payload);
-    } else {
-      response = await instance.post(partUrl);
+    let resp = {
+      status: false,
+      report: null,
+      error: '',
+    };
+    try {
+      const instance = axios.create({
+        baseURL: this.baseURL.sandbox,
+        timeout: 10000,
+        // method: post,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      let response = {};
+      if (payload !== '') {
+        response = await instance.post(partUrl, payload);
+      } else {
+        response = await instance.post(partUrl);
+      }
+      const jsonData = await this.handleResponse(response);
+      resp.status = true;
+      resp.report = jsonData;
+    } catch (e) {
+      resp.error = e.message;
+    } finally {
+      return resp;
     }
-    const jsonData = await this.handleResponse(response);
-    return jsonData;
   }
 
   async paypalConfig(site_id) {
@@ -84,8 +109,8 @@ class Paypal {
   async generateAccessToken(site_id) {
     // this.paypalConfig(site_id);
     const response = await this.postAndReturnData('/v1/oauth2/token/');
-    const jsonData = await this.handleResponse(response);
-    return jsonData.access_token;
+    console.log('postAndReturnData', response);
+    return response.report;
   }
 
   // use the orders api to create an order
