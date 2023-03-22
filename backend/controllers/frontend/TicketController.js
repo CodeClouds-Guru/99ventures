@@ -202,7 +202,7 @@ class TicketController extends Controller {
     try {
       switch (type) {
         case 'ticket_chat':
-          change = await this.saveTicketConversations(req);
+          change = await this.saveTicketConversations(req,res);
           break;
         default:
           const errorObj = new Error('Request failed.');
@@ -220,7 +220,12 @@ class TicketController extends Controller {
     }
   }
 
-  async saveTicketConversations(req) {
+  async saveTicketConversations(req,res) {
+    let company_portal_id = req.session.company_portal.id
+    req.headers.site_id = company_portal_id
+    let company_id = req.session.company_portal.company_id
+    req.headers.company_id = company_id
+
     let value = req.body.ticket_content || '';
     let subject = req.body.ticket_subject || '';
     let ticket_id = req.params.id || null;
@@ -240,14 +245,15 @@ class TicketController extends Controller {
             let data = {
                 ticket_id: ticket_id,
                 message: value,
-            };
-            data.member_id = member_id;
+                member_id:member_id
+            }
             let savedTicketConversation = await TicketConversation.create(data);
 
             if (savedTicketConversation.id > 0 && attachments) {
                 let files = [];
                 if (attachments.length > 1) files = attachments;
                 else files[0] = attachments;
+                console.log('files',files)
                 let fileHelper = new FileHelper(
                 files,
                 'tickets/' + savedTicketConversation.id,
