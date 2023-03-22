@@ -19,7 +19,7 @@ const PageController = new PageControllerClass();
 
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController');
 
-var Paypal = require('../helpers/Paypal');
+const Paypal = require('../helpers/Paypal');
 
 router.get('/', [AuthMiddleware], (req, res) => {
   const eventBus = require('../eventBus');
@@ -75,26 +75,26 @@ router.post(
 router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
 
 //paypal integration
-router.post('/order-create', async (req, res) => {
-  console.log('paypal order-create');
-  let paypal_class = new Paypal();
-  let create_order = await paypal_class.createOrder(req);
-  res.send(create_order);
-});
+// router.post('/order-create', async (req, res) => {
+//   console.log('paypal order-create');
+//   let paypal_class = new Paypal();
+//   let create_order = await paypal_class.createOrder(req);
+//   res.send(create_order);
+// });
 
-router.post('/order-success', async (req, res) => {
-  console.log('paypal order-capture');
-  let paypal_class = new Paypal();
-  var capture_payment = await paypal_class.capturePayment(req, res);
-  res.send(capture_payment);
-});
+// router.post('/order-success', async (req, res) => {
+//   console.log('paypal order-capture');
+//   let paypal_class = new Paypal();
+//   var capture_payment = await paypal_class.capturePayment(req, res);
+//   res.send(capture_payment);
+// });
 
-router.post('/order-capture', async (req, res) => {
-  console.log('paypal order-capture');
-  let paypal_class = new Paypal();
-  var capture_payment = await paypal_class.capturePayment(req, res);
-  res.send(capture_payment);
-});
+// router.post('/order-capture', async (req, res) => {
+//   console.log('paypal order-capture');
+//   let paypal_class = new Paypal();
+//   var capture_payment = await paypal_class.capturePayment(req, res);
+//   res.send(capture_payment);
+// });
 
 router.all(
   '/:module/:action?/:id?',

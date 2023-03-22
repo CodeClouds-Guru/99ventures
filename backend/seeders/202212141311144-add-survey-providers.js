@@ -30,7 +30,7 @@ module.exports = {
           created_at: new Date(),
         },
         {
-          name: 'Schlesigner',
+          name: 'Schlesinger',
           logo: null,
           status: 1,
           created_by: 1,
