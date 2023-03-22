@@ -67,6 +67,19 @@ router.get(
   '/survey-answer-precodes/',
   SurveyQuestionsController.saveAnswerPrecodes
 );
+router.get('/test-hbs', (req, res) => {
+  var Handlebars = require('handlebars');
+  const template = Handlebars.compile('\
+  <div class="stickyfooter">\
+    <div class="Left Bold">Total:</div>\
+      <div class="Right">\
+        <span class="Currency">{{PositionsTotal}}</span>\
+      </div>\
+    <div class="Clear" />\
+  </div>');
+  const html = template({ PositionsTotal: 34 });
+  res.send(html);
+})
 module.exports = {
   prefix: '/callback',
   router,

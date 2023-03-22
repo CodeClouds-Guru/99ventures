@@ -14,3 +14,6 @@ logs
 lambda/sync-surveys/node_modules
 lambda/sync-surveys/.env
 lambda/sync-surveys/*.zip
+.DS_Store
+backend/.DS_Store
+admin/.DS_Store
