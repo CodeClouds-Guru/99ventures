@@ -6,6 +6,7 @@ import MemberTransaction from './MemberTransaction';
 import Withdraws from './Withdraws';
 import MembersContent from './MembersContent';
 import CreateMember from './CreateMember';
+import Alerts from './Alerts';
 
 const UserConfig = {
     settings: {
@@ -66,6 +67,11 @@ const UserConfig = {
         {
             path: 'app/members/:moduleId/history',
             element: <MemberTransaction />,
+            auth: settingsConfig.defaultAuth
+        },
+        {
+            path: 'app/members/:moduleId/alerts',
+            element: <Alerts />,
             auth: settingsConfig.defaultAuth
         },
     ],
