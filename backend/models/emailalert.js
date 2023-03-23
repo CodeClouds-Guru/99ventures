@@ -33,5 +33,23 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: false,
     }
   );
+  EmailAlert.getEmailAlertList = async (member_id = '') => {
+    const { Member } = require('../models/index');
+    let options = {};
+    options.attributes = ['id', 'name'];
+    if (member_id !== '') {
+      options.include = {
+        model: Member,
+        as: 'MemberEmailAlerts',
+        where: { id: member_id },
+        required: false,
+        attributes: ['id'],
+      };
+    }
+
+    console.log(options);
+    return await EmailAlert.findAll(options);
+  };
+
   return EmailAlert;
 };
