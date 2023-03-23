@@ -55,6 +55,13 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.CampaignMember, {
         foreignKey: 'member_id',
       });
+      Member.belongsToMany(models.EmailAlert, {
+        as: 'MemberEmailAlerts',
+        through: 'email_alert_member',
+        foreignKey: 'member_id',
+        otherKey: 'email_alert_id',
+        timestamps: false,
+      });
     }
   }
   Member.validate = function (req) {

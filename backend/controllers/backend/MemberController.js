@@ -16,6 +16,7 @@ const {
   Survey,
   SurveyProvider,
   Company,
+  EmailAlert,
   sequelize,
 } = require('../../models/index');
 const db = require('../../models/index');
@@ -170,7 +171,6 @@ class MemberController extends Controller {
               attributes: ['name', 'value'],
             },
           },
-
           {
             model: MemberReferral,
             attributes: ['referral_email', 'ip', 'member_id'],
@@ -179,8 +179,16 @@ class MemberController extends Controller {
               attributes: ['referral_code', 'first_name', 'last_name', 'email'],
             },
           },
+          {
+            model: EmailAlert,
+            as: 'MemberEmailAlerts',
+            attributes: ['id', 'name'],
+            right: false,
+            through: {
+              attributes: [],
+            },
+          },
         ];
-        // options.include = [{ all: true, nested: true }];
         let result = await this.model.findOne(options);
         let country_list = await Country.getAllCountryList();
 
@@ -214,9 +222,15 @@ class MemberController extends Controller {
           survey_list[i].Surveys = null;
         }
 
+        //get all email alerts
+        let email_alerts = await EmailAlert.findAll({
+          attributes: ['id', 'name'],
+        });
+
         result.setDataValue('country_list', country_list);
         result.setDataValue('total_earnings', total_earnings);
         result.setDataValue('survey', survey_list);
+        result.setDataValue('email_alert_list', email_alerts);
 
         return {
           status: true,

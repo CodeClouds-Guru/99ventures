@@ -1,6 +1,11 @@
 const axios = require('axios');
 const { Console } = require('winston/lib/winston/transports');
-const { MemberTransaction, PaymentMethodCredential } = require('../models');
+const {
+  MemberTransaction,
+  PaymentMethodCredential,
+  WithdrawalRequest,
+  Member,
+} = require('../models');
 class Paypal {
   constructor() {
     this.clientId =
@@ -162,30 +167,55 @@ class Paypal {
       type: parseFloat(req.body.payout_amount) > 0 ? 'credited' : 'withdraw',
       amount_action: 'admin_adjustment',
       created_by: req.user.id,
+      transaction_id: req.body.transaction_id || null,
       payload: req.body ? JSON.stringify(req.body) : null,
     };
     console.log('transaction_obj', transaction_obj);
     let result = await MemberTransaction.updateMemberTransactionAndBalance(
       transaction_obj
     );
-    const member_name = member.first_name + ' ' + member.last_name;
-    //send mail
-    const eventBus = require('../eventBus');
-    let evntbus = eventBus.emit('send_email', {
-      action: 'Member Cash Withdrawal',
-      data: {
-        email: req.user.email,
-        details: {
-          desc:
-            member_name +
-            ' has withdrawn ' +
-            req.body.payout_amount +
-            ' on ' +
-            req.body.date,
+    if (result) {
+      const withdrawal_req_obj = {};
+
+      console.log('withdrawal_req_obj', withdrawal_req_obj);
+      let result = await WithdrawalRequest.update(withdrawal_req_obj, {
+        where: { id: req.body.request_id },
+      });
+      const member_name = member.first_name + ' ' + member.last_name;
+      //email
+      const eventBus = require('../eventBus');
+      //send mail to admin
+      let adminEventbus = eventBus.emit('send_email', {
+        action: 'Member Cash Withdrawal',
+        data: {
+          email: req.user.email,
+          details: {
+            desc:
+              member_name +
+              ' has withdrawn $' +
+              req.body.payout_amount +
+              ' on ' +
+              req.body.date,
+          },
         },
-      },
-      req: req,
-    });
+        req: req,
+      });
+      //send mail to admin
+      let memberEventbus = eventBus.emit('send_email', {
+        action: 'Withdrawal Approval',
+        data: {
+          email: member.email,
+          details: {
+            desc:
+              'Admin has approved your withdrawn request of $' +
+              req.body.payout_amount +
+              ' on ' +
+              req.body.date,
+          },
+        },
+        req: req,
+      });
+    }
   }
 
   async handleResponse(response) {
