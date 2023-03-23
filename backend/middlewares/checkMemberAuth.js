@@ -20,7 +20,7 @@ module.exports = async function (req, res, next) {
       );
       member.setDataValue('email_alert_list', email_alerts);
     }
-    console.log('-----------', member);
+    // console.log('-----------', member);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
   }
   next();
