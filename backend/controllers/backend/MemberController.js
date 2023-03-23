@@ -232,16 +232,7 @@ class MemberController extends Controller {
           result.setDataValue('survey', survey_list);
         } else {
           //get all email alerts
-          email_alerts = await EmailAlert.findAll({
-            attributes: ['id', 'name'],
-            include: {
-              model: Member,
-              as: 'MemberEmailAlerts',
-              where: { id: member_id },
-              required: false,
-              attributes: ['id'],
-            },
-          });
+          email_alerts = await EmailAlert.getEmailAlertList(member_id);
           result.email_alert_list = email_alerts;
         }
 
