@@ -221,6 +221,11 @@ const CreateUpdate = () => {
                 }
             }
         } 
+        document.addEventListener("fullscreenchange", function(e) {
+            if(document.fullscreenElement == null ) {
+                document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
+            }
+        });
         //-----
 
         cmdm.add('edit-code', {
