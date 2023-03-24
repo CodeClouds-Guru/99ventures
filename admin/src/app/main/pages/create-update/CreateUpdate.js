@@ -114,8 +114,22 @@ const CreateUpdate = () => {
         const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
         const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
         const pnm = editor.Panels
-        const rootContainer = document.createElement('div')
-        const btnEdit = document.createElement('button')
+        const fullscrBtn = document.createElement('button');
+        fullscrBtn.setAttribute('title', 'Fullscreen')
+        fullscrBtn.setAttribute('class', 'grapes-modal-editor-fullscreen');
+        fullscrBtn.innerHTML = '<i class="fa fa-arrows-alt" aria-hidden="true"></i>'
+        const rootContainer = document.createElement('div');
+        rootContainer.setAttribute('class', 'grapes-modal-editor-container');
+        const editorHeader =  document.createElement('div');
+        editorHeader.setAttribute('class', 'grapes-modal-editor-header');        
+        editorHeader.append(fullscrBtn);
+        const editorBody = document.createElement('div');
+        editorBody.setAttribute('class', 'grapes-modal-editor-body');
+        const editorFooter = document.createElement('div');
+        editorFooter.setAttribute('class', 'grapes-modal-editor-footer');
+        const btnEdit = document.createElement('button');
+        rootContainer.append(editorHeader)
+
         const codeViewerOpt = {
             readOnly: 0,
             theme: 'hopscotch',
@@ -136,7 +150,7 @@ const CreateUpdate = () => {
         cssCodeViewer.set({
             codeName: 'css',
             ...codeViewerOpt
-        })
+        });
 
         btnEdit.innerHTML = 'Save'
         btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
@@ -147,10 +161,26 @@ const CreateUpdate = () => {
             // editor.CssComposer.clear();            
             // const HTML_CSS = html.trim() + `<style>${css}</style>`
             editor.setComponents(html.trim());
-            editor.setStyle(css)
-            modal.close()
+            editor.setStyle(css);
+            modal.close();
+            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
+                document.exitFullscreen(); 
+            }
         }
-
+        
+        //-- Edit Code Fullscreen
+        fullscrBtn.onclick = function() {
+            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
+                document.exitFullscreen(); 
+            } else {
+                document.querySelector('.gjs-mdl-dialog').requestFullscreen(); 
+            }
+        } 
+        document.addEventListener("fullscreenchange", function(e) {
+            document.querySelector('.gjs-mdl-dialog').classList.toggle('gjs-fullscreen-mode');
+        });
+        //-----
+        
         cmdm.add('edit-code', {
             run: function (editor, sender) {
                 sender && sender.set('active', 0)
@@ -160,10 +190,12 @@ const CreateUpdate = () => {
                 var InnerHtml = editor.getHtml()
                 var Css = editor.getCss();
                 if (!htmlViewer && !cssViewer) {
-                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
-                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+                    const txtarea = editorTextAreaCreate(editorBody, 'HTML')
+                    const cssarea = editorTextAreaCreate(editorBody, 'CSS')
 
-                    rootContainer.append(btnEdit)
+                    editorFooter.append(btnEdit)
+                    rootContainer.append(editorBody)
+                    rootContainer.append(editorFooter)
                     htmlCodeViewer.init(txtarea)
                     cssCodeViewer.init(cssarea)
                     htmlViewer = htmlCodeViewer.editor
@@ -217,21 +249,21 @@ const CreateUpdate = () => {
         });
     }, []);
 
-    const editorTextAreaCreate = (rootContainer, title) => {
+    const editorTextAreaCreate = (editorBody, title) => {
         const container = document.createElement('div')
         const childContainer = document.createElement('div')
         const titleContainer = document.createElement('div')
         const txtarea = document.createElement('textarea')
 
         container.setAttribute('class', 'gjs-cm-editor-c')
-        childContainer.setAttribute('id', 'gjs-cm-css')
+        // childContainer.setAttribute('id', 'gjs-cm-css')
         childContainer.setAttribute('class', 'gjs-cm-editor')
-        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.setAttribute('class', 'gjs-cm-title')
         titleContainer.textContent = title
         childContainer.appendChild(titleContainer)
         childContainer.appendChild(txtarea)
         container.appendChild(childContainer)
-        rootContainer.appendChild(container)
+        editorBody.appendChild(container)
         return txtarea
     }
 
@@ -471,7 +503,7 @@ const CreateUpdate = () => {
             auth_required: event.target.checked,
         });
     }
-    return (
+    return ( 
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-2 px-16 sm:p-28 md:p-38 lg:p-52 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
