@@ -282,6 +282,17 @@ const CreateUpdate = () => {
 
         editor.onReady(() => {
             loadEditorData(editor);
+
+            // Collapsed all the blocks accordian by default
+            const categories = editor.BlockManager.getCategories();
+            categories.each(category => {
+                category.set('open', false).on('change:open', opened => {
+                    opened.get('open') && categories.each(category => {
+                        category !== opened && category.set('open', false)
+                    })
+                })
+            });
+            //------------ End ----------
         });
 
         editor.on('change:changesCount', (model) => {
@@ -374,6 +385,8 @@ const CreateUpdate = () => {
                 content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
             });
         })
+        // Custom Component block accordian set collapsed by default
+        editor.BlockManager.getCategories()._byId["Custom Component"].set("open", false)
     }
     const getLayoutOptions = (editor) => {
         axios.get(`/${module}/add`)
