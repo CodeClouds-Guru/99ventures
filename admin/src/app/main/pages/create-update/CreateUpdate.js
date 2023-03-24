@@ -18,6 +18,30 @@ import '../../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
 import { selectUser } from 'app/store/userSlice';
 
+const fullscreenEnable = () => {
+    if(document.querySelector('.gjs-mdl-dialog').requestFullscreen){
+        document.querySelector('.gjs-mdl-dialog').requestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        })
+    } else if(document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen){
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen(); 
+    } else if(document.querySelector('.gjs-mdl-dialog').msRequestFullscreen){
+        document.querySelector('.gjs-mdl-dialog').msRequestFullscreen(); 
+    }
+}
+
+const fullscreenDisable = () => {
+    if(document.exitFullscreen) {
+        document.exitFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
+        });
+    } else if(document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if(document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    }
+}
+
 const CreateUpdate = () => {
     const module = 'pages';
     const navigate = useNavigate();
@@ -104,6 +128,9 @@ const CreateUpdate = () => {
                     blocks: ['link-block', 'quote', 'text-basic'],
                 },
             },
+            modal: {
+                backdrop: false
+            },
         });
         moduleId === 'create' ? getLayoutOptions(editor) : '';
         setEditor(editor);
@@ -118,11 +145,16 @@ const CreateUpdate = () => {
         fullscrBtn.setAttribute('title', 'Fullscreen')
         fullscrBtn.setAttribute('class', 'grapes-modal-editor-fullscreen');
         fullscrBtn.innerHTML = '<i class="fa fa-arrows-alt" aria-hidden="true"></i>'
+        const closeBtn = document.createElement('button');
+        closeBtn.setAttribute('title', 'Close')
+        closeBtn.setAttribute('class', 'grapes-modal-editor-close');
+        closeBtn.innerHTML = '<i class="fa fa-times" aria-hidden="true"></i>'
         const rootContainer = document.createElement('div');
         rootContainer.setAttribute('class', 'grapes-modal-editor-container');
         const editorHeader =  document.createElement('div');
         editorHeader.setAttribute('class', 'grapes-modal-editor-header');        
         editorHeader.append(fullscrBtn);
+        editorHeader.append(closeBtn);
         const editorBody = document.createElement('div');
         editorBody.setAttribute('class', 'grapes-modal-editor-body');
         const editorFooter = document.createElement('div');
@@ -163,28 +195,32 @@ const CreateUpdate = () => {
             editor.setComponents(html.trim());
             editor.setStyle(css);
             modal.close();
-            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
-                document.exitFullscreen(); 
+            if(document.fullscreenElement !== null) {
+                fullscreenDisable();
             }
         }
 
-                
+        closeBtn.onclick = function () {
+            modal.close();
+            if(document.fullscreenElement !== null) {
+                fullscreenDisable(); 
+            }
+        }
         //-- Edit Code popup Fullscreen ON|OFF
         fullscrBtn.onclick = function() {
-            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
-                document.exitFullscreen(); 
-            } else {
-                document.querySelector('.gjs-mdl-dialog').requestFullscreen(); 
+            if(document.fullscreenElement !== null && document.fullscreenElement.classList.contains("gjs-editor-cont")) {
+                document.exitFullscreen().then(res => {
+                    fullscreenEnable()
+                })
+            }
+            else {
+                if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
+                    fullscreenDisable() 
+                } else {
+                    fullscreenEnable()                    
+                }
             }
         } 
-        document.addEventListener("fullscreenchange", function(e) {
-            document.querySelector('.gjs-mdl-dialog').classList.toggle('gjs-fullscreen-mode');
-        });
-        modal.onceClose(() => {
-            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
-                document.exitFullscreen(); 
-            }
-        });
         //-----
 
         cmdm.add('edit-code', {
@@ -242,6 +278,7 @@ const CreateUpdate = () => {
                 }
             ]
         );
+        
 
         editor.onReady(() => {
             loadEditorData(editor);

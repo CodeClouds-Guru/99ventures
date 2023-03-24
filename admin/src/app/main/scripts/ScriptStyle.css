@@ -27,12 +27,14 @@
 .gjs-pn-panel.gjs-pn-options.gjs-one-bg.gjs-two-color{z-index: 9;}
 .gjs-mdl-dialog{width: 100%;}
 .gjs-cm-editor-c .CodeMirror{height: 450px;}
-.grapes-modal-editor-fullscreen{position: absolute; top: 14px; right: 47px; font-size: 15px;}
-.grapes-modal-editor-fullscreen i:before{color: rgba(255, 255, 255, 0.3)}
-.grapes-modal-editor-fullscreen:hover i:before{color: rgba(255, 255, 255, 0.6)}
+.grapes-modal-editor-fullscreen, .grapes-modal-editor-close{position: absolute; top: 14px; right: 42px; font-size: 15px;}
+.grapes-modal-editor-close{right: 20px; font-size: 20px;}
+.grapes-modal-editor-fullscreen i:before, .grapes-modal-editor-close i:before{color: rgba(255, 255, 255, 0.3)}
+.grapes-modal-editor-fullscreen:hover i:before, .grapes-modal-editor-close:hover i:before{color: rgba(255, 255, 255, 0.6)}
 .gjs-fullscreen-mode .gjs-cm-editor-c .CodeMirror{height: 85vh;}
 .grapes-modal-editor-container{display: flex; flex-direction: column;}
 .grapes-modal-editor-body{display: flex; justify-content: space-between;}
+.gjs-mdl-btn-close{display: none;}
 @media only screen and (max-width: 1360px) {
     .gjs-pn-views{width: 20%;}
     .gjs-pn-options{right: 20%;}
