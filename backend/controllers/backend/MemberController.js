@@ -545,9 +545,10 @@ class MemberController extends Controller {
 
         await queryInterface.bulkInsert('email_alert_member', email_alerts);
       }
+      return true;
     } catch (error) {
       console.error(error);
-      this.throwCustomError('Unable to get data', 500);
+      this.throwCustomError('Unable to save data', 500);
     }
   }
 }
