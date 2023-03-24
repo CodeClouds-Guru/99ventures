@@ -167,8 +167,9 @@ const CreateUpdate = () => {
                 document.exitFullscreen(); 
             }
         }
-        
-        //-- Edit Code Fullscreen
+
+                
+        //-- Edit Code popup Fullscreen ON|OFF
         fullscrBtn.onclick = function() {
             if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
                 document.exitFullscreen(); 
@@ -179,8 +180,13 @@ const CreateUpdate = () => {
         document.addEventListener("fullscreenchange", function(e) {
             document.querySelector('.gjs-mdl-dialog').classList.toggle('gjs-fullscreen-mode');
         });
+        modal.onceClose(() => {
+            if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
+                document.exitFullscreen(); 
+            }
+        });
         //-----
-        
+
         cmdm.add('edit-code', {
             run: function (editor, sender) {
                 sender && sender.set('active', 0)
