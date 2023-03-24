@@ -57,7 +57,7 @@ $(() => {
         }
     }
     var signupFormSanitisation = () => {
-        if (signupForm && ["first_name", "last_name", "email", "password", "confirm_password"].every((val) => Object.keys(signupForm.elements).indexOf(val) > -1)) {
+        if (signupForm && ["first_name", "last_name", "email", "password", "confirm_password", "newsletter"].every((val) => Object.keys(signupForm.elements).indexOf(val) > -1)) {
             $(signupForm).attr("action", '/signup');
             $(signupForm).attr("method", "POST");
         }

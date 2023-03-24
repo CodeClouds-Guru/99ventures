@@ -178,7 +178,7 @@ const MemberDetails = () => {
      * Get Member Details
      */
     const getMemberData = (updateAvatar = true) => {
-        axios.post(jwtServiceConfig.getSingleMember + '/' + moduleId)
+        axios.get(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
                 setLoader(false);
                 if (res.data.results.data) {

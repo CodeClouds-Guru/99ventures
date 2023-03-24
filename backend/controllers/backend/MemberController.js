@@ -16,8 +16,10 @@ const {
   Survey,
   SurveyProvider,
   Company,
+  EmailAlert,
   sequelize,
 } = require('../../models/index');
+const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
@@ -90,133 +92,150 @@ class MemberController extends Controller {
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
     let member_id = req.params.id || null;
+    let type = req.query.type || null;
+    console.log(type);
     // let type = req.body.type || null;
     if (member_id) {
+      let country_list = [];
+      let email_alerts = [];
+      let total_earnings = {};
+      let survey_list = [];
+      let result = {};
       try {
-        let options = {};
-        options.attributes = [
-          'id',
-          'first_name',
-          'last_name',
-          'email',
-          'country_code',
-          'username',
-          'status',
-          'zip_code',
-          'phone_no',
-          'avatar',
-          'address_1',
-          'address_2',
-          'address_3',
-          'last_active_on',
-          'country_id',
-          'referral_code',
-          'member_referral_id',
-          'gender',
-        ];
+        if (type !== 'email_alert') {
+          let options = {};
+          options.attributes = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'country_code',
+            'username',
+            'status',
+            'zip_code',
+            'phone_no',
+            'avatar',
+            'address_1',
+            'address_2',
+            'address_3',
+            'last_active_on',
+            'country_id',
+            'referral_code',
+            'member_referral_id',
+            'gender',
+          ];
 
-        options.where = { id: member_id };
-        options.include = [
-          {
-            model: MembershipTier,
-            attributes: ['name'],
-          },
-          {
-            model: Country,
-            attributes: [['nicename', 'name']],
-          },
-          {
-            model: IpLog,
-            attributes: [
-              'geo_location',
-              'ip',
-              'isp',
-              'browser',
-              'browser_language',
-            ],
-            limit: 1,
-            order: [['created_at', 'DESC']],
-          },
-          {
-            model: MemberNote,
-            attributes: [
-              'user_id',
-              'member_id',
-              'previous_status',
-              'current_status',
-              'note',
-              'created_at',
-              'id',
-            ],
-            limit: 20,
-            order: [['created_at', 'DESC']],
-            include: {
-              model: User,
-              attributes: ['first_name', 'last_name', 'alias_name'],
+          options.where = { id: member_id };
+
+          options.include = [
+            {
+              model: MembershipTier,
+              attributes: ['name'],
             },
-          },
-          {
-            model: MemberTransaction,
-            attributes: ['member_payment_information_id'],
-            limit: 1,
+            {
+              model: Country,
+              attributes: [['nicename', 'name']],
+            },
+            {
+              model: IpLog,
+              attributes: [
+                'geo_location',
+                'ip',
+                'isp',
+                'browser',
+                'browser_language',
+              ],
+              limit: 1,
+              order: [['created_at', 'DESC']],
+            },
+            {
+              model: MemberNote,
+              attributes: [
+                'user_id',
+                'member_id',
+                'previous_status',
+                'current_status',
+                'note',
+                'created_at',
+                'id',
+              ],
+              limit: 20,
+              order: [['created_at', 'DESC']],
+              include: {
+                model: User,
+                attributes: ['first_name', 'last_name', 'alias_name'],
+              },
+            },
+            {
+              model: MemberTransaction,
+              attributes: ['member_payment_information_id'],
+              limit: 1,
+              where: {
+                member_id: member_id,
+                status: 2,
+                type: 'credited',
+              },
+              order: [['created_at', 'DESC']],
+              include: {
+                model: MemberPaymentInformation,
+                attributes: ['name', 'value'],
+              },
+            },
+            {
+              model: MemberReferral,
+              attributes: ['referral_email', 'ip', 'member_id'],
+              include: {
+                model: Member,
+                attributes: [
+                  'referral_code',
+                  'first_name',
+                  'last_name',
+                  'email',
+                ],
+              },
+            },
+          ];
+          result = await this.model.findOne(options);
+          country_list = await Country.getAllCountryList();
+
+          //get total earnings
+          total_earnings = await this.getTotalEarnings(member_id);
+
+          survey_list = await MemberTransaction.findAll({
+            attributes: ['amount', 'completed_at'],
+            limit: 5,
+            order: [['completed_at', 'DESC']],
             where: {
-              member_id: member_id,
-              status: 2,
               type: 'credited',
+              status: 2,
+              amount_action: 'survey',
+              member_id: member_id,
             },
-            order: [['created_at', 'DESC']],
             include: {
-              model: MemberPaymentInformation,
-              attributes: ['name', 'value'],
+              model: Survey,
+              attributes: ['id'],
+              include: { model: SurveyProvider, attributes: ['name'] },
             },
-          },
+          });
+          // console.log('survey_list', survey_list);
+          for (let i = 0; i < survey_list.length; i++) {
+            if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
+              survey_list[i].setDataValue(
+                'name',
+                survey_list[i].Surveys[0].SurveyProvider.name
+              );
+            else survey_list[i].setDataValue('name', null);
+            survey_list[i].Surveys = null;
+          }
 
-          {
-            model: MemberReferral,
-            attributes: ['referral_email', 'ip', 'member_id'],
-            include: {
-              model: Member,
-              attributes: ['referral_code', 'first_name', 'last_name', 'email'],
-            },
-          },
-        ];
-        // options.include = [{ all: true, nested: true }];
-        let result = await this.model.findOne(options);
-        let country_list = await Country.getAllCountryList();
-
-        //get total earnings
-        let total_earnings = await this.getTotalEarnings(member_id);
-
-        let survey_list = await MemberTransaction.findAll({
-          attributes: ['amount', 'completed_at'],
-          limit: 5,
-          order: [['completed_at', 'DESC']],
-          where: {
-            type: 'credited',
-            status: 2,
-            amount_action: 'survey',
-            member_id: member_id,
-          },
-          include: {
-            model: Survey,
-            attributes: ['id'],
-            include: { model: SurveyProvider, attributes: ['name'] },
-          },
-        });
-        // console.log('survey_list', survey_list);
-        for (let i = 0; i < survey_list.length; i++) {
-          if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
-            survey_list[i].setDataValue(
-              'name',
-              survey_list[i].Surveys[0].SurveyProvider.name
-            );
-          else survey_list[i].setDataValue('name', null);
-          survey_list[i].Surveys = null;
+          result.setDataValue('country_list', country_list);
+          result.setDataValue('total_earnings', total_earnings);
+          result.setDataValue('survey', survey_list);
+        } else {
+          //get all email alerts
+          email_alerts = await EmailAlert.getEmailAlertList(member_id);
+          result.email_alert_list = email_alerts;
         }
-
-        result.setDataValue('country_list', country_list);
-        result.setDataValue('total_earnings', total_earnings);
-        result.setDataValue('survey', survey_list);
 
         return {
           status: true,
@@ -254,6 +273,9 @@ class MemberController extends Controller {
         delete req.body.type;
       } else if (req.body.type == 'admin_adjustment') {
         result = await this.adminAdjustment(req);
+        delete req.body.type;
+      } else if (req.body.type == 'email_alerts') {
+        result = await this.saveEmailAlerts(req);
         delete req.body.type;
       } else {
         console.error(error);
@@ -499,6 +521,34 @@ class MemberController extends Controller {
       companies,
       country_list,
     };
+  }
+
+  async saveEmailAlerts(req) {
+    try {
+      let member_id = req.params.id;
+      let email_alerts = req.body.email_alerts;
+      if (email_alerts) {
+        //remove existing data
+        let alert_del = await db.sequelize.query(
+          `DELETE FROM email_alert_member WHERE member_id=?`,
+          {
+            replacements: [member_id],
+            type: QueryTypes.DELETE,
+          }
+        );
+        console.log('email_alerts', email_alerts);
+        email_alerts = email_alerts.map((alert) => {
+          return { email_alert_id: alert, member_id: member_id };
+        });
+        console.log('email_alerts after', email_alerts);
+        //bulck create member email alert
+
+        await queryInterface.bulkInsert('email_alert_member', email_alerts);
+      }
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError('Unable to get data', 500);
+    }
   }
 }
 

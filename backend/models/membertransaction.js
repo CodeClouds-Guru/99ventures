@@ -250,5 +250,58 @@ module.exports = (sequelize, DataTypes) => {
       return false;
     }
   };
+
+  MemberTransaction.getTransactionCount = async (member_id) => {
+    const { sequelize } = require('../models/index');
+    const moment = require('moment');
+    let option = {};
+
+    option.attributes = [
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+            .startOf('day')
+            .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
+            .endOf('day')
+            .format(
+              'YYYY-MM-DD HH:mm:ss'
+            )}' THEN MemberTransaction.amount ELSE 0 END)`
+        ),
+        'today',
+      ],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+            .subtract(6, 'days')
+            .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
+            .endOf('day')
+            .format(
+              'YYYY-MM-DD HH:mm:ss'
+            )}' THEN MemberTransaction.amount ELSE 0 END)`
+        ),
+        'week',
+      ],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+            .subtract(30, 'days')
+            .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
+            .endOf('day')
+            .format(
+              'YYYY-MM-DD HH:mm:ss'
+            )}' THEN MemberTransaction.amount ELSE 0 END)`
+        ),
+        'month',
+      ],
+    ];
+    option.where = {
+      member_id: member_id,
+      type: 'credited',
+      status: 2,
+    };
+    // console.log(option);
+    let response = await MemberTransaction.findOne(option);
+    return JSON.parse(JSON.stringify(response));
+  };
   return MemberTransaction;
 };
