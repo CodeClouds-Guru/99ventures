@@ -12,8 +12,8 @@
   color: #fff;
 }
  
-.custom-code-editor .gjs-cm-editor-c:first-of-type{width: 60%;} 
-.custom-code-editor .gjs-cm-editor-c:nth-child(2){width: 37%; margin-left: 10px;} 
+.custom-code-editor .gjs-cm-editor-c:first-of-type{width: 59%;} 
+.custom-code-editor .gjs-cm-editor-c:nth-child(2){width: 38%; margin-left: 10px;} 
 .custom-code-editor .gjs-btn-prim{margin-top: 10px}
 .custom-code-editor .gjs-cm-editor {
     padding-left: 0;
@@ -32,6 +32,7 @@
 .grapes-modal-editor-fullscreen:hover i:before{color: rgba(255, 255, 255, 0.6)}
 .gjs-fullscreen-mode .gjs-cm-editor-c .CodeMirror{height: 85vh;}
 .grapes-modal-editor-container{display: flex; flex-direction: column;}
+.grapes-modal-editor-body{display: flex; justify-content: space-between;}
 @media only screen and (max-width: 1360px) {
     .gjs-pn-views{width: 20%;}
     .gjs-pn-options{right: 20%;}
