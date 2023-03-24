@@ -19,6 +19,7 @@ const {
   EmailAlert,
   sequelize,
 } = require('../../models/index');
+const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
@@ -273,6 +274,9 @@ class MemberController extends Controller {
       } else if (req.body.type == 'admin_adjustment') {
         result = await this.adminAdjustment(req);
         delete req.body.type;
+      } else if (req.body.type == 'email_alerts') {
+        result = await this.saveEmailAlerts(req);
+        delete req.body.type;
       } else {
         console.error(error);
         this.throwCustomError('Type is required', 401);
@@ -517,6 +521,34 @@ class MemberController extends Controller {
       companies,
       country_list,
     };
+  }
+
+  async saveEmailAlerts(req) {
+    try {
+      let member_id = req.params.id;
+      let email_alerts = req.body.email_alerts;
+      if (email_alerts) {
+        //remove existing data
+        let alert_del = await db.sequelize.query(
+          `DELETE FROM email_alert_member WHERE member_id=?`,
+          {
+            replacements: [member_id],
+            type: QueryTypes.DELETE,
+          }
+        );
+        console.log('email_alerts', email_alerts);
+        email_alerts = email_alerts.map((alert) => {
+          return { email_alert_id: alert, member_id: member_id };
+        });
+        console.log('email_alerts after', email_alerts);
+        //bulck create member email alert
+
+        await queryInterface.bulkInsert('email_alert_member', email_alerts);
+      }
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError('Unable to get data', 500);
+    }
   }
 }
 

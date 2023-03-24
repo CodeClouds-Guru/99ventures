@@ -300,7 +300,8 @@ module.exports = (sequelize, DataTypes) => {
       status: 2,
     };
     // console.log(option);
-    return await MemberTransaction.findOne(option);
+    let response = await MemberTransaction.findOne(option);
+    return JSON.parse(JSON.stringify(response));
   };
   return MemberTransaction;
 };

@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   EmailAlert.getEmailAlertList = async (member_id = '') => {
     const { Member } = require('../models/index');
     let options = {};
-    options.attributes = ['id', 'name'];
+    options.attributes = ['id', 'name', 'slug'];
     if (member_id !== '') {
       options.include = {
         model: Member,

@@ -20,10 +20,7 @@ module.exports = async function (req, res, next) {
     const member = await Member.findOne({
       where: { id: req.session.member.id },
     });
-    //get email alerts
-    let email_alerts = await EmailAlert.getEmailAlertList(
-      req.session.member.id
-    );
+
     //get total earnings
     let total_earnings = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
@@ -34,12 +31,13 @@ module.exports = async function (req, res, next) {
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-    console.log('transaction_stat', transaction_stat);
-    member.setDataValue('email_alert_list', email_alerts);
-    member.setDataValue('total_earnings', total_earnings);
-    member.setDataValue('transaction_stat', transaction_stat);
 
-    console.log('-----------', member);
+    member.setDataValue('total_earnings', total_earnings.amount);
+    member.setDataValue('transaction_today', transaction_stat.today);
+    member.setDataValue('transaction_weekly', transaction_stat.week);
+    member.setDataValue('transaction_monthly', transaction_stat.month);
+
+    // console.log('-----------', member);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
   }
   next();
