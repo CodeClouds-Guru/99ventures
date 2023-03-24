@@ -166,8 +166,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return `${this.first_name} ${this.last_name}`;
-        }
-      }
+        },
+      },
     },
     {
       sequelize,
@@ -366,8 +366,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -409,5 +409,6 @@ module.exports = (sequelize, DataTypes) => {
       // this.throwCustomError("Unable to save data", 500);
     }
   };
+
   return Member;
 };
