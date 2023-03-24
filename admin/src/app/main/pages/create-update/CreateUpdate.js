@@ -23,10 +23,21 @@ const fullscreenEnable = () => {
         document.querySelector('.gjs-mdl-dialog').requestFullscreen().then(cb => {
             document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
         })
-    } else if(document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen){
-        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen(); 
+    } else if(
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen ||
+        typeof document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen === 'undefined'
+    ){
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
     } else if(document.querySelector('.gjs-mdl-dialog').msRequestFullscreen){
-        document.querySelector('.gjs-mdl-dialog').msRequestFullscreen(); 
+        document.querySelector('.gjs-mdl-dialog').msRequestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
+    } else if(document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen ){
+        document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
     }
 }
 
