@@ -70,33 +70,30 @@ const AlertsContent = () => {
 
     return (
         <div className="lg:w-full">
-            {/* <div className="flex items-start justify-between"> */}
             <Divider textAlign="left"><h3>E-mail Alerts</h3></Divider>
-            <Box className="mt-10 p-16 w-full border-2 border-r-2" >
-                {/* <div className=" w-full items-start justify-between"> */}
-                {alertsData.map((row) => {
-                    return (<div className="w-4/12 flex" key={row.id}>
-                        <div className="w-2/3 items-start justify-between">
-                            <b>{row.name}</b>
-                        </div>
-                        <div className="w-1/3 items-start justify-between">
-                            <Switch
-                                className="mb-32"
-                                checked={switchValues[row.id]}
-                                onChange={(event) => handleSwitch(event, row.id)}
-                                inputProps={{ 'aria-label': 'controlled' }}
-
-                            />
-                        </div>
-                    </div>)
-                })}
-                {/* </div> */}
-                {/* <Divider className="w-full my-10"></Divider> */}
+            <Box className="mt-10 p-16 w-full border-2 rounded-2xl">
+                <div className="w-full pt-10 flex flex-wrap">
+                    {alertsData.map((row) => {
+                        return (
+                            <div className="w-1/3 px-28 py-10 flex justify-between" key={row.id}>
+                                <div className="w-auto">
+                                    <b>{row.name}</b>
+                                </div>
+                                <div className="w-auto mr-32">
+                                    <Switch
+                                        sx={{ marginTop: '-1rem' }}
+                                        checked={switchValues[row.id]}
+                                        onChange={(event) => handleSwitch(event, row.id)}
+                                    />
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
                 <div className="flex w-full justify-end">
-                    <Button variant="contained" color="secondary" size="large" onClick={(event) => { event.preventDefault(); updateEmailAlerts() }}>Save</Button>
+                    <Button className="mr-20" variant="contained" color="secondary" size="large" onClick={(event) => { event.preventDefault(); updateEmailAlerts() }}>Save</Button>
                 </div>
             </Box>
-            {/* </div> */}
         </div>
     );
 }
