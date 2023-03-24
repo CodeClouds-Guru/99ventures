@@ -278,7 +278,7 @@ class MemberController extends Controller {
         result = await this.saveEmailAlerts(req);
         delete req.body.type;
       } else {
-        console.error(error);
+        // console.error(error);
         this.throwCustomError('Type is required', 401);
       }
       if (result) {

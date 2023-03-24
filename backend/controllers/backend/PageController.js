@@ -43,6 +43,9 @@ class PageController extends Controller {
           [Op.notLike]: "%-rev-%",
         },
       },
+      order: [
+        ['name', 'ASC'],
+      ],
     });
     layouts = layouts.map((layout) => {
       return {
@@ -116,6 +119,9 @@ class PageController extends Controller {
           [Op.notLike]: "%-rev-%",
         },
       },
+      order: [
+        ['name', 'ASC'],
+      ],
     });
     layouts = layouts.map((layout) => {
       return {
