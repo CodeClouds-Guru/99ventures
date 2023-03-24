@@ -137,7 +137,7 @@ function CreateEdit(props) {
         </>
 
       }
-      scroll={isMobile ? 'normal' : 'content'}
+      // scroll={isMobile ? 'normal' : 'content'}
     />
   );
 }
