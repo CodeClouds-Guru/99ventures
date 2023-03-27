@@ -81,7 +81,7 @@ module.exports = (sequelize, DataTypes) => {
       membership_tier_id: Joi.optional().label('Level'),
       address_1: Joi.string().allow('').required().label('Address 1'),
       address_2: Joi.string().allow('').optional().label('Address 2'),
-      address_3: Joi.string().allow('').optional().label('Address 3'),
+      city: Joi.string().allow('').optional().label('Address 3'),
       zip_code: Joi.string().allow('').optional().label('Zip Code'),
       avatar: Joi.optional().label('Avatar'),
       country_code: Joi.optional().label('Country Code'),
@@ -151,7 +151,7 @@ module.exports = (sequelize, DataTypes) => {
       referral_code: DataTypes.STRING,
       address_1: DataTypes.STRING,
       address_2: DataTypes.STRING,
-      address_3: DataTypes.STRING,
+      city: DataTypes.STRING,
       zip_code: DataTypes.STRING,
       country_id: {
         type: DataTypes.INTEGER,
