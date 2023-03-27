@@ -82,7 +82,6 @@ router.post('/logout', MemberAuthController.logout);
 router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
 router.post('/ticket/create', TicketController.saveTicketConversations);
-router.get('/ticket/ticket-list', TicketController.list);
 router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
