@@ -219,14 +219,14 @@ const CreateUpdate = () => {
             editor.setComponents(html.trim());
             editor.setStyle(css);
             modal.close();
-            if(document.fullscreenElement !== null) {
+            if(document.fullscreenElement !== null || document.webkitFullscreenElement !== null) {
                 exitfullscreenWindow();
             }
         }
 
         closeBtn.onclick = function () {
             modal.close();
-            if(document.fullscreenElement !== null) {
+            if(document.fullscreenElement !== null || document.webkitFullscreenElement !== null) {
                 exitfullscreenWindow(); 
             }
         }
