@@ -15,7 +15,9 @@ class MemberAuthController {
   }
   //login
   async login(req, res) {
-    let company_portal_id = 1
+    let company_portal_id = req.session.company_portal.id
+    req.headers.site_id = company_portal_id
+    let company_id = req.session.company_portal.company_id
     let redirect_page = await Page.findOne({ where: { company_portal_id: company_portal_id, after_signin: 1 } })
     if(redirect_page)
       redirect_page = '/' + redirect_page.slug
