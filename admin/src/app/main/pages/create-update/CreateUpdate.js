@@ -19,37 +19,42 @@ import Helper from 'src/app/helper';
 import { selectUser } from 'app/store/userSlice';
 
 const fullscreenEnable = () => {
+    var fullScrFn;
     if(document.querySelector('.gjs-mdl-dialog').requestFullscreen){
-        document.querySelector('.gjs-mdl-dialog').requestFullscreen().then(cb => {
-            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
-        })
+        fullScrFn = document.querySelector('.gjs-mdl-dialog').requestFullscreen();
     } else if(
         document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen ||
         typeof document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen === 'undefined'
     ){
-        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen().then(cb => {
-            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
-        }); 
+        fullScrFn = document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen(); 
     } else if(document.querySelector('.gjs-mdl-dialog').msRequestFullscreen){
-        document.querySelector('.gjs-mdl-dialog').msRequestFullscreen().then(cb => {
-            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
-        }); 
+        fullScrFn = document.querySelector('.gjs-mdl-dialog').msRequestFullscreen(); 
     } else if(document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen ){
-        document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen().then(cb => {
+        fullScrFn = document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen(); 
+    }
+
+    if(fullScrFn) {
+        fullScrFn.then(r => {
+            console.log('Open full screen');
             document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
-        }); 
+        })
     }
 }
 
-const fullscreenDisable = () => {
+const exitfullscreenWindow = () => {
+    var exitFn;
     if(document.exitFullscreen) {
-        document.exitFullscreen().then(cb => {
-            document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
-        });
+        exitFn = document.exitFullscreen();
     } else if(document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
+        exitFn = document.mozCancelFullScreen();
     } else if(document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
+        exitFn = document.webkitExitFullscreen();
+    }
+    if(exitFn) {
+        exitFn.then(r => {
+            console.log('exit full screen')
+            document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode')
+        })
     }
 }
 
@@ -207,35 +212,37 @@ const CreateUpdate = () => {
             editor.setStyle(css);
             modal.close();
             if(document.fullscreenElement !== null) {
-                fullscreenDisable();
+                exitfullscreenWindow();
             }
         }
 
         closeBtn.onclick = function () {
             modal.close();
             if(document.fullscreenElement !== null) {
-                fullscreenDisable(); 
+                exitfullscreenWindow(); 
             }
         }
         //-- Edit Code popup Fullscreen ON|OFF
-        fullscrBtn.onclick = function() {
-            if(document.fullscreenElement !== null && document.fullscreenElement.classList.contains("gjs-editor-cont")) {
+        fullscrBtn.onclick = function() {            
+            if((document.fullscreenElement !== null || document.webkitFullscreenElement !== null) && document.fullscreenElement.classList.contains("gjs-editor-cont")) {
                 document.exitFullscreen().then(res => {
                     fullscreenEnable()
                 })
             }
             else {
                 if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
-                    fullscreenDisable() 
+                    exitfullscreenWindow() 
                 } else {
                     fullscreenEnable()                    
                 }
             }
+            
         } 
         document.addEventListener("fullscreenchange", function(e) {
-            if(document.fullscreenElement == null ) {
+            if(document.fullscreenElement == null || document.webkitFullscreenElement == null) {
                 document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
             }
+            console.log(document.webkitFullscreenElement)
         });
         //-----
 
