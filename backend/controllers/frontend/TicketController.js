@@ -62,7 +62,8 @@ class TicketController {
             let savedTicket = await Ticket.create({
                 company_portal_id: req.session.company_portal.id,
                 member_id: member_id,
-                subject: subject
+                subject: subject,
+                status: 'open'
             });
             ticket_id = savedTicket.id
         }

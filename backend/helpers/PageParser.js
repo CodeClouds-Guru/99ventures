@@ -30,11 +30,12 @@ class PageParser {
   }
 
   async getPageNLayout() {
-    this.page = await Page.findOne({
+    const page = await Page.findOne({
       where: { slug: this.slug },
       include: 'Layout',
     });
-    this.pageLayout = this.page.Layout;
+    this.pageLayout = page ? page.Layout : null;
+    this.page = page;
     if (!this.pageLayout) {
       const portal = this.getCompanyPortal();
       this.pageLayout = await Layout.findByPk(portal.site_layout_id);
