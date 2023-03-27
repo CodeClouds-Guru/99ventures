@@ -117,7 +117,7 @@ class SchlesingerController {
 
             var surveyHtml = '';
             for (let survey of surveys) {
-                let link = `/schlesigner/entry-link?survey_number=${survey.survey_number}&${generateQueryString}`;
+                let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
                 surveyHtml += `
                     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                         <div class="bg-white card mb-2">
@@ -157,9 +157,9 @@ class SchlesingerController {
             const liveLink = data.original_json.LiveLink;
             const updatedLiveLink = liveLink.replace('[#scid#]', Date.now())
             const entryLink = updatedLiveLink + '&' + generateQueryString;
-            res.send(entryLink)
+            res.redirect(entryLink)
         } else {
-            res.send(data)
+            res.send('<p>Unable to get entry link!</p>');
         }
     }
 }

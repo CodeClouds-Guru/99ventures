@@ -18,6 +18,41 @@ import '../../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
 import { selectUser } from 'app/store/userSlice';
 
+const fullscreenEnable = () => {
+    if(document.querySelector('.gjs-mdl-dialog').requestFullscreen){
+        document.querySelector('.gjs-mdl-dialog').requestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        })
+    } else if(
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen ||
+        typeof document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen === 'undefined'
+    ){
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
+    } else if(document.querySelector('.gjs-mdl-dialog').msRequestFullscreen){
+        document.querySelector('.gjs-mdl-dialog').msRequestFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
+    } else if(document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen ){
+        document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
+        }); 
+    }
+}
+
+const fullscreenDisable = () => {
+    if(document.exitFullscreen) {
+        document.exitFullscreen().then(cb => {
+            document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
+        });
+    } else if(document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if(document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    }
+}
+
 const CreateUpdate = () => {
     const module = 'pages';
     const navigate = useNavigate();
@@ -104,6 +139,9 @@ const CreateUpdate = () => {
                     blocks: ['link-block', 'quote', 'text-basic'],
                 },
             },
+            modal: {
+                backdrop: false
+            },
         });
         moduleId === 'create' ? getLayoutOptions(editor) : '';
         setEditor(editor);
@@ -114,8 +152,27 @@ const CreateUpdate = () => {
         const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
         const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
         const pnm = editor.Panels
-        const rootContainer = document.createElement('div')
-        const btnEdit = document.createElement('button')
+        const fullscrBtn = document.createElement('button');
+        fullscrBtn.setAttribute('title', 'Fullscreen')
+        fullscrBtn.setAttribute('class', 'grapes-modal-editor-fullscreen');
+        fullscrBtn.innerHTML = '<i class="fa fa-arrows-alt" aria-hidden="true"></i>'
+        const closeBtn = document.createElement('button');
+        closeBtn.setAttribute('title', 'Close')
+        closeBtn.setAttribute('class', 'grapes-modal-editor-close');
+        closeBtn.innerHTML = '<i class="fa fa-times" aria-hidden="true"></i>'
+        const rootContainer = document.createElement('div');
+        rootContainer.setAttribute('class', 'grapes-modal-editor-container');
+        const editorHeader =  document.createElement('div');
+        editorHeader.setAttribute('class', 'grapes-modal-editor-header');        
+        editorHeader.append(fullscrBtn);
+        editorHeader.append(closeBtn);
+        const editorBody = document.createElement('div');
+        editorBody.setAttribute('class', 'grapes-modal-editor-body');
+        const editorFooter = document.createElement('div');
+        editorFooter.setAttribute('class', 'grapes-modal-editor-footer');
+        const btnEdit = document.createElement('button');
+        rootContainer.append(editorHeader)
+
         const codeViewerOpt = {
             readOnly: 0,
             theme: 'hopscotch',
@@ -136,7 +193,7 @@ const CreateUpdate = () => {
         cssCodeViewer.set({
             codeName: 'css',
             ...codeViewerOpt
-        })
+        });
 
         btnEdit.innerHTML = 'Save'
         btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
@@ -147,9 +204,40 @@ const CreateUpdate = () => {
             // editor.CssComposer.clear();            
             // const HTML_CSS = html.trim() + `<style>${css}</style>`
             editor.setComponents(html.trim());
-            editor.setStyle(css)
-            modal.close()
+            editor.setStyle(css);
+            modal.close();
+            if(document.fullscreenElement !== null) {
+                fullscreenDisable();
+            }
         }
+
+        closeBtn.onclick = function () {
+            modal.close();
+            if(document.fullscreenElement !== null) {
+                fullscreenDisable(); 
+            }
+        }
+        //-- Edit Code popup Fullscreen ON|OFF
+        fullscrBtn.onclick = function() {
+            if(document.fullscreenElement !== null && document.fullscreenElement.classList.contains("gjs-editor-cont")) {
+                document.exitFullscreen().then(res => {
+                    fullscreenEnable()
+                })
+            }
+            else {
+                if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
+                    fullscreenDisable() 
+                } else {
+                    fullscreenEnable()                    
+                }
+            }
+        } 
+        document.addEventListener("fullscreenchange", function(e) {
+            if(document.fullscreenElement == null ) {
+                document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
+            }
+        });
+        //-----
 
         cmdm.add('edit-code', {
             run: function (editor, sender) {
@@ -160,10 +248,12 @@ const CreateUpdate = () => {
                 var InnerHtml = editor.getHtml()
                 var Css = editor.getCss();
                 if (!htmlViewer && !cssViewer) {
-                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
-                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
+                    const txtarea = editorTextAreaCreate(editorBody, 'HTML')
+                    const cssarea = editorTextAreaCreate(editorBody, 'CSS')
 
-                    rootContainer.append(btnEdit)
+                    editorFooter.append(btnEdit)
+                    rootContainer.append(editorBody)
+                    rootContainer.append(editorFooter)
                     htmlCodeViewer.init(txtarea)
                     cssCodeViewer.init(cssarea)
                     htmlViewer = htmlCodeViewer.editor
@@ -204,9 +294,21 @@ const CreateUpdate = () => {
                 }
             ]
         );
+        
 
         editor.onReady(() => {
             loadEditorData(editor);
+
+            // Collapsed all the blocks accordian by default
+            const categories = editor.BlockManager.getCategories();
+            categories.each(category => {
+                category.set('open', false).on('change:open', opened => {
+                    opened.get('open') && categories.each(category => {
+                        category !== opened && category.set('open', false)
+                    })
+                })
+            });
+            //------------ End ----------
         });
 
         editor.on('change:changesCount', (model) => {
@@ -217,21 +319,21 @@ const CreateUpdate = () => {
         });
     }, []);
 
-    const editorTextAreaCreate = (rootContainer, title) => {
+    const editorTextAreaCreate = (editorBody, title) => {
         const container = document.createElement('div')
         const childContainer = document.createElement('div')
         const titleContainer = document.createElement('div')
         const txtarea = document.createElement('textarea')
 
         container.setAttribute('class', 'gjs-cm-editor-c')
-        childContainer.setAttribute('id', 'gjs-cm-css')
+        // childContainer.setAttribute('id', 'gjs-cm-css')
         childContainer.setAttribute('class', 'gjs-cm-editor')
-        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.setAttribute('class', 'gjs-cm-title')
         titleContainer.textContent = title
         childContainer.appendChild(titleContainer)
         childContainer.appendChild(txtarea)
         container.appendChild(childContainer)
-        rootContainer.appendChild(container)
+        editorBody.appendChild(container)
         return txtarea
     }
 
@@ -299,6 +401,8 @@ const CreateUpdate = () => {
                 content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
             });
         })
+        // Custom Component block accordian set collapsed by default
+        editor.BlockManager.getCategories()._byId["Custom Component"].set("open", false)
     }
     const getLayoutOptions = (editor) => {
         axios.get(`/${module}/add`)
@@ -471,7 +575,7 @@ const CreateUpdate = () => {
             auth_required: event.target.checked,
         });
     }
-    return (
+    return ( 
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-2 px-16 sm:p-28 md:p-38 lg:p-52 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
