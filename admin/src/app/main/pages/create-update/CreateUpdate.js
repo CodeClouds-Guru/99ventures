@@ -26,7 +26,8 @@ const fullscreenEnable = () => {
         document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen ||
         typeof document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen === 'undefined'
     ){
-        fullScrFn = document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen(); 
+        document.querySelector('.gjs-mdl-dialog').webkitRequestFullscreen(); 
+        document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
     } else if(document.querySelector('.gjs-mdl-dialog').msRequestFullscreen){
         fullScrFn = document.querySelector('.gjs-mdl-dialog').msRequestFullscreen(); 
     } else if(document.querySelector('.gjs-mdl-dialog').mozRequestFullScreen ){
@@ -39,7 +40,6 @@ const fullscreenEnable = () => {
             document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
         })
     }
-    return fullScrFn;
 }
 
 const exitfullscreenWindow = () => {
@@ -49,7 +49,8 @@ const exitfullscreenWindow = () => {
     } else if(document.mozCancelFullScreen) {
         exitFn = document.mozCancelFullScreen();
     } else if(document.webkitExitFullscreen) {
-        exitFn = document.webkitExitFullscreen();
+        document.webkitExitFullscreen();
+        document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode')
     }
     if(exitFn) {
         exitFn.then(r => {
@@ -236,10 +237,9 @@ const CreateUpdate = () => {
             exitfullscreenWindow();
         }
         fullscrBtn.onclick = function() {
-            fullscreenEnable().then(r => {
-                minimizeBtn.classList.remove('hide-btn')
-                fullscrBtn.classList.add('hide-btn');
-            });
+            minimizeBtn.classList.remove('hide-btn')
+            fullscrBtn.classList.add('hide-btn');
+            fullscreenEnable();
 
             /*const fullScrEl = document.fullscreenElement || document.webkitFullscreenElement;
             if(fullScrEl !== null && fullScrEl.classList.contains("gjs-editor-cont")){
@@ -258,7 +258,15 @@ const CreateUpdate = () => {
             
         } 
         document.addEventListener("fullscreenchange", function(e) {
-            if(document.fullscreenElement == null || document.webkitFullscreenElement == null) {
+            if(
+                (
+                    typeof document.fullscreenElement !== 'undefined' &&
+                    document.fullscreenElement == null
+                ) || (
+                    typeof document.webkitFullscreenElement !== 'undefined' &&
+                    document.webkitFullscreenElement == null
+                )
+            ) {
                 document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode');
                 minimizeBtn.classList.add('hide-btn')
                 fullscrBtn.classList.remove('hide-btn');
