@@ -34,7 +34,7 @@ class PageParser {
       where: { slug: this.slug },
       include: 'Layout',
     });
-    this.pageLayout = this.page.Layout;
+    this.pageLayout = this.page ? this.page.Layout : null;
     if (!this.pageLayout) {
       const portal = this.getCompanyPortal();
       this.pageLayout = await Layout.findByPk(portal.site_layout_id);

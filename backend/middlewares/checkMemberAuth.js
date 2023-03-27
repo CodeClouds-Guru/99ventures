@@ -22,8 +22,9 @@ module.exports = async function (req, res, next) {
     });
 
     if (member.status !== 'validating') {
-      req.session.flash = { error: "Please wait for admin approval to get into your account. For any other support please contact to our support team, they will help you." }
+      req.session.flash = { error: "Please verify your email to get into your account" }
       res.redirect('/notice');
+      return;
     }
 
     //get total earnings

@@ -19,7 +19,7 @@ class MemberAuthController {
     req.headers.site_id = company_portal_id
     let company_id = req.session.company_portal.company_id
     let redirect_page = await Page.findOne({ where: { company_portal_id: company_portal_id, after_signin: 1 } })
-    if(redirect_page)
+    if (redirect_page)
       redirect_page = '/' + redirect_page.slug
     else
       redirect_page = '/'
@@ -28,6 +28,7 @@ class MemberAuthController {
       return
     }
     const member = await Member.findOne({ where: { email: req.body.email, company_portal_id: company_portal_id } });
+    console.log(company_portal_id, member)
     let ip = req.ip;
     if (Array.isArray(ip)) {
       ip = ip[0]
@@ -119,7 +120,7 @@ class MemberAuthController {
             email: req.body.email,
           },
         });
-        
+
         if (existing_email_or_username) {
           member_status = false
           member_message = "Sorry! this username or email has already been taken"
@@ -132,17 +133,17 @@ class MemberAuthController {
           //   const file_name = await fileHelper.upload();
           //   req.body.avatar = file_name.files[0].filename;
           // }
-          
+
           let data = {
             first_name: value.first_name,
             last_name: value.last_name,
             email: value.email,
             password: password,
-            membership_tier_id:1,
-            company_portal_id:company_portal_id,
-            company_id:company_id,
-            status:'validating',
-            username:value.email.split('@')[0],
+            membership_tier_id: 1,
+            company_portal_id: company_portal_id,
+            company_id: company_id,
+            status: 'validating',
+            username: value.email.split('@')[0],
             created_at: new Date()
           }
           const res = await Member.create(data);
