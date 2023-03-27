@@ -18,6 +18,7 @@
 .custom-code-editor .gjs-cm-editor {
     padding-left: 0;
 }
+.hide-btn{display: none;}
 .gjs-rte-action:last-child{width: auto;}
  select.gjs-field option{background-color: #111827;}
 .gjs-pn-views{border-bottom: 0;}
