@@ -21,6 +21,11 @@ module.exports = async function (req, res, next) {
       where: { id: req.session.member.id },
     });
 
+    if (member.status !== 'validating') {
+      req.session.flash = { error: "Please wait for admin approval to get into your account. For any other support please contact to our support team, they will help you." }
+      res.redirect('/notice');
+    }
+
     //get total earnings
     let total_earnings = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
