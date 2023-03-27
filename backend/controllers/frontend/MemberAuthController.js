@@ -69,7 +69,7 @@ class MemberAuthController {
         }
         if (member.status != 'member') {
           member_status = false
-          member_message = "Your account status is <b>" + member.status + "</b>. Please contact to our admin!"
+          member_message = "Your account status is " + member.status + ". Please contact to our admin!"
         }
       }
     }
@@ -180,6 +180,7 @@ class MemberAuthController {
       }
       res.redirect('back')
     } catch (error) {
+      console.error(error);
       req.session.flash = { error: "Unable to save data" }
       res.redirect('back')
     }
