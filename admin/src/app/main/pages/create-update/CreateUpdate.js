@@ -36,7 +36,6 @@ const fullscreenEnable = () => {
 
     if(fullScrFn) {
         fullScrFn.then(r => {
-            console.log('Open full screen');
             document.querySelector('.gjs-mdl-dialog').classList.add('gjs-fullscreen-mode');
         })
     }
@@ -54,7 +53,6 @@ const exitfullscreenWindow = () => {
     }
     if(exitFn) {
         exitFn.then(r => {
-            console.log('exit full screen')
             document.querySelector('.gjs-mdl-dialog').classList.remove('gjs-fullscreen-mode')
         })
     }
@@ -239,23 +237,7 @@ const CreateUpdate = () => {
         fullscrBtn.onclick = function() {
             minimizeBtn.classList.remove('hide-btn')
             fullscrBtn.classList.add('hide-btn');
-            fullscreenEnable();
-
-            /*const fullScrEl = document.fullscreenElement || document.webkitFullscreenElement;
-            if(fullScrEl !== null && fullScrEl.classList.contains("gjs-editor-cont")){
-                console.log('Closing FullScr')
-                document.exitFullscreen().then(res => {
-                    fullscreenEnable()
-                })
-            }
-            else {
-                if(document.querySelector('.gjs-mdl-dialog').classList.contains('gjs-fullscreen-mode')) {
-                    exitfullscreenWindow() 
-                } else {
-                    fullscreenEnable()
-                }
-            }*/
-            
+            fullscreenEnable();            
         } 
         document.addEventListener("fullscreenchange", function(e) {
             if(
@@ -271,7 +253,6 @@ const CreateUpdate = () => {
                 minimizeBtn.classList.add('hide-btn')
                 fullscrBtn.classList.remove('hide-btn');
             }
-            console.log('esc')
         });
         //-----
 
