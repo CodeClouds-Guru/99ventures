@@ -81,7 +81,7 @@ module.exports = (sequelize, DataTypes) => {
       membership_tier_id: Joi.optional().label('Level'),
       address_1: Joi.string().allow('').required().label('Address 1'),
       address_2: Joi.string().allow('').optional().label('Address 2'),
-      address_3: Joi.string().allow('').optional().label('Address 3'),
+      city: Joi.string().allow('').optional().label('Address 3'),
       zip_code: Joi.string().allow('').optional().label('Zip Code'),
       avatar: Joi.optional().label('Avatar'),
       country_code: Joi.optional().label('Country Code'),
@@ -151,7 +151,7 @@ module.exports = (sequelize, DataTypes) => {
       referral_code: DataTypes.STRING,
       address_1: DataTypes.STRING,
       address_2: DataTypes.STRING,
-      address_3: DataTypes.STRING,
+      city: DataTypes.STRING,
       zip_code: DataTypes.STRING,
       country_id: {
         type: DataTypes.INTEGER,
@@ -408,6 +408,26 @@ module.exports = (sequelize, DataTypes) => {
       console.error(error);
       // this.throwCustomError("Unable to save data", 500);
     }
+  };
+
+  //update member avatar
+  Member.updateAvatar = async (req, member) => {
+    const FileHelper = require('../helpers/fileHelper');
+    let avatar = '';
+
+    let pre_avatar = member.avatar;
+    let files = [];
+    files[0] = req.files.avatar;
+    const fileHelper = new FileHelper(files, 'members', req);
+    const file_name = await fileHelper.upload();
+    avatar = file_name.files[0].filename;
+    console.log(file_name.files);
+    if (pre_avatar != '') {
+      let file_delete = await fileHelper.deleteFile(
+        pre_avatar.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+      );
+    }
+    return avatar;
   };
 
   return Member;

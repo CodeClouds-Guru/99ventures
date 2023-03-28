@@ -1,14 +1,16 @@
 $(() => {
     var errorsArray = [];
+    const loginForm = $("#scripteed_login_form").get(0);
     const loginBtn = $("#scripteed_login_btn").get(0);
+    const signupForm = $("#scripteed_signup_form").get(0);
     const signupBtn = $("#scripteed_signup_btn").get(0);
     const loginLink = $("#scripteed_login_link").get(0);
     const signupLink = $("#scripteed_signup_link").get(0);
-    const loginForm = $("#scripteed_login_form").get(0);
-    const signupForm = $("#scripteed_signup_form").get(0);
     const formHeading = $("#form_heading").get(0);
     const logoutButton = $("#scripteed_logout_btn").get(0);
     const ticketCreateForm = $("#scripteed_create_ticket_form").get(0);
+    const displayed_filename = $("#file_show");
+    const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
 
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -74,11 +76,19 @@ $(() => {
             console.log("OOPS!!! Ticket create action not set");
         }
     }
+    var profileDetailsFormSanitisation = () => {
+        if (profileDetailsForm && ["name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "completed_rewards", "completed_withdraws", "notifications", "referrals", "email_marketting"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
+            $(profileDetailsForm).attr("action", '/profile/update');
+            $(profileDetailsForm).attr("method", "POST");
+        }
+        else {
+            console.log("OOPS!!! Profile details update action not set");
+        }
+    }
     var loginFomValidation = () => {
         errorsArray = [];
         const emailField = $(loginForm).find('input[name="email"]').get(0);
         const passwordField = $(loginForm).find('input[name="password"]').get(0);
-        // console.log(validateEmail($(emailField).val()))
         if ($(emailField).val().trim().length === 0) {
             errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
         } else if (!validateEmail($(emailField).val().trim())) {
@@ -113,20 +123,70 @@ $(() => {
             errorsArray.push({ field: $(confirmPasswordField), message: 'Password mismatched' });
         }
     }
+    $("#choose-file").on('change', function () {
+        let fileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
+        fileName ? displayed_filename.text(fileName) : displayed_filename.text('')
+    })
     var ticketCreateFormValidation = () => {
         errorsArray = [];
         const ticketSubjectField = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
         const ticketFileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
         const ticketFileValue = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
         const ticketContentField = $(ticketCreateForm).find('textare[name="ticket_content"]').text();
-        // console.log(ticketFileName, ticketFileValue)
-        // console.log(ticketSubjectField.val(), ticketContentField)
         if ($(ticketSubjectField).val().trim().length === 0) {
             errorsArray.push({ field: $(ticketSubjectField), message: 'Please enter ticket subject' });
         }
         if ($(ticketContentField).trim().length === 0) {
             errorsArray.push({ field: $(ticketContentField), message: 'Please enter ticket content' });
         }
+    }
+    var profileDetailsFormValidation = () => {
+        errorsArray = [];
+        const name = $(profileDetailsForm).find('input[name="name"]').get(0);
+        const username = $(profileDetailsForm).find('input[name="username"]').get(0);
+        // const email = $(profileDetailsForm).find('input[name="email"]').get(0);
+        const phone_no = $(profileDetailsForm).find('input[name="phone_no"]').get(0);
+        const address_1 = $(profileDetailsForm).find('input[name="address_1"]').get(0);
+        // const address_2 = $(profileDetailsForm).find('input[name="address_2"]').get(0);
+        const city = $(profileDetailsForm).find('input[name="city"]').get(0);
+        const state = $(profileDetailsForm).find('input[name="state"]').get(0);
+        const country = $(profileDetailsForm).find('input[name="country"]').get(0);
+        const zipcode = $(profileDetailsForm).find('input[name="zipcode"]').get(0);
+        // const completed_rewards = $(profileDetailsForm).find('input[name="completed_rewards"]').get(0);
+        // const completed_withdraws = $(profileDetailsForm).find('input[name="completed_withdraws"]').get(0);
+        // const notifications = $(profileDetailsForm).find('input[name="notifications"]').get(0);
+        // const referrals = $(profileDetailsForm).find('input[name="referrals"]').get(0);
+        // const email_marketting = $(profileDetailsForm).find('input[name="email_marketting"]').get(0);
+        if ($(name).val().trim().length === 0) {
+            errorsArray.push({ field: $(name), message: 'Please enter name' });
+        }
+        if ($(username).val().trim().length === 0) {
+            errorsArray.push({ field: $(username), message: 'Please enter username' });
+        }
+        // if ($(email).val().val().trim().length === 0) {
+        //     errorsArray.push({ field: $(email), message: 'Please enter a email' });
+        // } else if (!validateEmail($(email).val().val().trim())) {
+        //     errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
+        // }
+        if ($(phone_no).val().trim().length === 0) {
+            errorsArray.push({ field: $(phone_no), message: 'Please enter phone' });
+        }
+        if ($(address_1).val().trim().length === 0) {
+            errorsArray.push({ field: $(address_1), message: 'Please enter address_1' });
+        }
+        if ($(city).val().trim().length === 0) {
+            errorsArray.push({ field: $(city), message: 'Please enter city' });
+        }
+        if ($(state).val()) {
+            errorsArray.push({ field: $(state), message: 'Please enter state' });
+        }
+        if ($(country).val()) {
+            errorsArray.push({ field: $(country), message: 'Please enter country' });
+        }
+        if ($(zipcode).val().trim().length === 0) {
+            errorsArray.push({ field: $(zipcode), message: 'Please enter zipcode' });
+        }
+
     }
     displayErrors = () => {
         $('span.alert-msg').remove();
@@ -144,6 +204,9 @@ $(() => {
     if (ticketCreateForm) {
         ticketCreateFormSanitisation();
     }
+    if (profileDetailsForm) {
+        profileDetailsFormSanitisation();
+    }
     $(loginForm).submit((e) => {
         loginFomValidation();
         if (errorsArray.length === 0) {
@@ -155,7 +218,6 @@ $(() => {
     })
     $(signupForm).submit((e) => {
         signupFormValidation();
-        console.log(errorsArray);
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
         } else {
@@ -165,7 +227,6 @@ $(() => {
     })
     $(ticketCreateForm).submit((e) => {
         ticketCreateFormValidation();
-        console.log(errorsArray);
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
         } else {
@@ -173,7 +234,15 @@ $(() => {
             displayErrors();
         }
     })
-
+    $(profileDetailsForm).submit((e) => {
+        profileDetailsFormValidation();
+        if (errorsArray.length === 0) {
+            $(this).trigger(e.type);
+        } else {
+            e.preventDefault();
+            displayErrors();
+        }
+    })
     $(logoutButton).click(e => {
         e.preventDefault();
         $('body').append('<form id="scripteed_logout_form"></form>');

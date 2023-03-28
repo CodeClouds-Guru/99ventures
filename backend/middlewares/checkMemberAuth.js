@@ -5,6 +5,7 @@ const {
   MemberTransaction,
   MemberBalance,
 } = require('../models');
+const { sequelize } = require('../models/index');
 module.exports = async function (req, res, next) {
   const dev_mode = process.env.DEV_MODE || '1';
   if (dev_mode === '1') {
@@ -21,8 +22,14 @@ module.exports = async function (req, res, next) {
       where: { id: req.session.member.id },
     });
 
+    // if (member.status === 'validating') {
+    //   req.session.flash = { error: "Please verify your email to get into your account" }
+    //   res.redirect('/notice');
+    //   return;
+    // }
+
     //get total earnings
-    let total_earnings = await MemberBalance.findOne({
+    let total_withdraws = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
       attribute: ['amount'],
     });
@@ -32,13 +39,14 @@ module.exports = async function (req, res, next) {
       req.session.member.id
     );
 
-    member.setDataValue('total_earnings', total_earnings.amount);
-    member.setDataValue('transaction_today', transaction_stat.today);
-    member.setDataValue('transaction_weekly', transaction_stat.week);
-    member.setDataValue('transaction_monthly', transaction_stat.month);
+    member.setDataValue('total_withdraws', total_withdraws.amount);
+    member.setDataValue('total_earnings', transaction_stat.total || 0.0);
+    member.setDataValue('transaction_today', transaction_stat.today || 0.0);
+    member.setDataValue('transaction_weekly', transaction_stat.week || 0.0);
+    member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
 
-    // console.log('-----------', member);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
+    // console.log('-----------', req.session.member);
   }
   next();
 };

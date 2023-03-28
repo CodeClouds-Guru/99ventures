@@ -1,5 +1,6 @@
 'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class EmailAlert extends Model {
     /**
@@ -51,5 +52,37 @@ module.exports = (sequelize, DataTypes) => {
     return await EmailAlert.findAll(options);
   };
 
+  EmailAlert.saveEmailAlerts = async (member_id, email_alerts) => {
+    if (email_alerts) {
+      const { sequelize } = require('../models/index');
+      const queryInterface = sequelize.getQueryInterface();
+      const db = require('../models/index');
+      const { QueryTypes } = require('sequelize');
+      let resp = true;
+
+      try {
+        //remove existing data
+        let alert_del = await db.sequelize.query(
+          `DELETE FROM email_alert_member WHERE member_id=?`,
+          {
+            replacements: [member_id],
+            type: QueryTypes.DELETE,
+          }
+        );
+        email_alerts = email_alerts.map((alert) => {
+          return { email_alert_id: alert, member_id: member_id };
+        });
+        //bulck create member email alert
+        await queryInterface.bulkInsert('email_alert_member', email_alerts);
+
+        resp = true;
+      } catch (error) {
+        console.error(error);
+        resp = false;
+      } finally {
+        return resp;
+      }
+    }
+  };
   return EmailAlert;
 };

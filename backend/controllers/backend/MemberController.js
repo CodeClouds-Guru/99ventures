@@ -117,7 +117,7 @@ class MemberController extends Controller {
             'avatar',
             'address_1',
             'address_2',
-            'address_3',
+            'city',
             'last_active_on',
             'country_id',
             'referral_code',
@@ -275,7 +275,9 @@ class MemberController extends Controller {
         result = await this.adminAdjustment(req);
         delete req.body.type;
       } else if (req.body.type == 'email_alerts') {
-        result = await this.saveEmailAlerts(req);
+        let member_id = req.params.id;
+        let email_alerts = req.body.email_alerts;
+        result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
         delete req.body.type;
       } else {
         // console.error(error);
@@ -326,8 +328,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
@@ -438,7 +440,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -523,34 +525,34 @@ class MemberController extends Controller {
     };
   }
 
-  async saveEmailAlerts(req) {
-    try {
-      let member_id = req.params.id;
-      let email_alerts = req.body.email_alerts;
-      if (email_alerts) {
-        //remove existing data
-        let alert_del = await db.sequelize.query(
-          `DELETE FROM email_alert_member WHERE member_id=?`,
-          {
-            replacements: [member_id],
-            type: QueryTypes.DELETE,
-          }
-        );
-        console.log('email_alerts', email_alerts);
-        email_alerts = email_alerts.map((alert) => {
-          return { email_alert_id: alert, member_id: member_id };
-        });
-        console.log('email_alerts after', email_alerts);
-        //bulck create member email alert
+  // async saveEmailAlerts(req) {
+  //   try {
+  //     let member_id = req.params.id;
+  //     let email_alerts = req.body.email_alerts;
+  //     if (email_alerts) {
+  //       //remove existing data
+  //       let alert_del = await db.sequelize.query(
+  //         `DELETE FROM email_alert_member WHERE member_id=?`,
+  //         {
+  //           replacements: [member_id],
+  //           type: QueryTypes.DELETE,
+  //         }
+  //       );
+  //       console.log('email_alerts', email_alerts);
+  //       email_alerts = email_alerts.map((alert) => {
+  //         return { email_alert_id: alert, member_id: member_id };
+  //       });
+  //       console.log('email_alerts after', email_alerts);
+  //       //bulck create member email alert
 
-        await queryInterface.bulkInsert('email_alert_member', email_alerts);
-      }
-      return true;
-    } catch (error) {
-      console.error(error);
-      this.throwCustomError('Unable to save data', 500);
-    }
-  }
+  //       await queryInterface.bulkInsert('email_alert_member', email_alerts);
+  //     }
+  //     return true;
+  //   } catch (error) {
+  //     console.error(error);
+  //     this.throwCustomError('Unable to save data', 500);
+  //   }
+  // }
 }
 
 module.exports = MemberController;
