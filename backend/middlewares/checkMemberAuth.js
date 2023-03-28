@@ -21,11 +21,11 @@ module.exports = async function (req, res, next) {
       where: { id: req.session.member.id },
     });
 
-    if (member.status !== 'validating') {
-      req.session.flash = { error: "Please verify your email to get into your account" }
-      res.redirect('/notice');
-      return;
-    }
+    // if (member.status === 'validating') {
+    //   req.session.flash = { error: "Please verify your email to get into your account" }
+    //   res.redirect('/notice');
+    //   return;
+    // }
 
     //get total earnings
     let total_earnings = await MemberBalance.findOne({

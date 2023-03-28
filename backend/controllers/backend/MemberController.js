@@ -117,7 +117,7 @@ class MemberController extends Controller {
             'avatar',
             'address_1',
             'address_2',
-            'address_3',
+            'city',
             'last_active_on',
             'country_id',
             'referral_code',
@@ -326,8 +326,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
@@ -438,7 +438,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
