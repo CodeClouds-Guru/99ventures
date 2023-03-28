@@ -344,8 +344,8 @@ class MemberAuthController {
 
   //update member profile
   async profileUpdate(req, res) {
-    // const member_id = req.session.member.id;
-    const member_id = req.params.id;
+    const member_id = req.session.member.id;
+    // const member_id = req.params.id;
     let member_status = true;
     let member_message = 'Successfully updated!';
     let member = await Member.findOne({ where: { id: member_id } });
