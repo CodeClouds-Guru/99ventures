@@ -77,7 +77,7 @@ $(() => {
         }
     }
     var profileDetailsFormSanitisation = () => {
-        if (profileDetailsForm && ["name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "completed_rewards", "completed_withdraws", "notifications", "referrals", "email_marketting"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
+        if (profileDetailsForm && ["first_name", "last_name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "email_alerts[]"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
             $(profileDetailsForm).attr("action", '/profile/update');
             $(profileDetailsForm).attr("method", "POST");
         }
@@ -132,17 +132,20 @@ $(() => {
         const ticketSubjectField = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
         const ticketFileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
         const ticketFileValue = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
-        const ticketContentField = $(ticketCreateForm).find('textare[name="ticket_content"]').text();
+        const ticketContentField = $(ticketCreateForm).find('textarea[name="ticket_content"]').val();
+        // const ticketContentField = $('#ticket_content').get(0);
         if ($(ticketSubjectField).val().trim().length === 0) {
             errorsArray.push({ field: $(ticketSubjectField), message: 'Please enter ticket subject' });
         }
-        if ($(ticketContentField).trim().length === 0) {
+        console.log(ticketContentField)
+        if ($.trim(ticketContentField) === '') {
             errorsArray.push({ field: $(ticketContentField), message: 'Please enter ticket content' });
         }
     }
     var profileDetailsFormValidation = () => {
         errorsArray = [];
-        const name = $(profileDetailsForm).find('input[name="name"]').get(0);
+        const first_name = $(profileDetailsForm).find('input[name="first_name"]').get(0);
+        const last_name = $(profileDetailsForm).find('input[name="last_name"]').get(0);
         const username = $(profileDetailsForm).find('input[name="username"]').get(0);
         // const email = $(profileDetailsForm).find('input[name="email"]').get(0);
         const phone_no = $(profileDetailsForm).find('input[name="phone_no"]').get(0);
@@ -152,16 +155,15 @@ $(() => {
         const state = $(profileDetailsForm).find('input[name="state"]').get(0);
         const country = $(profileDetailsForm).find('input[name="country"]').get(0);
         const zipcode = $(profileDetailsForm).find('input[name="zipcode"]').get(0);
-        // const completed_rewards = $(profileDetailsForm).find('input[name="completed_rewards"]').get(0);
-        // const completed_withdraws = $(profileDetailsForm).find('input[name="completed_withdraws"]').get(0);
-        // const notifications = $(profileDetailsForm).find('input[name="notifications"]').get(0);
-        // const referrals = $(profileDetailsForm).find('input[name="referrals"]').get(0);
-        // const email_marketting = $(profileDetailsForm).find('input[name="email_marketting"]').get(0);
-        if ($(name).val().trim().length === 0) {
-            errorsArray.push({ field: $(name), message: 'Please enter name' });
+
+        if ($(first_name).val().trim().length === 0) {
+            errorsArray.push({ field: $(first_name), message: 'Please enter First Name' });
+        }
+        if ($(last_name).val().trim().length === 0) {
+            errorsArray.push({ field: $(last_name), message: 'Please enter Last Name' });
         }
         if ($(username).val().trim().length === 0) {
-            errorsArray.push({ field: $(username), message: 'Please enter username' });
+            errorsArray.push({ field: $(username), message: 'Please enter Username' });
         }
         // if ($(email).val().val().trim().length === 0) {
         //     errorsArray.push({ field: $(email), message: 'Please enter a email' });
@@ -169,22 +171,22 @@ $(() => {
         //     errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
         // }
         if ($(phone_no).val().trim().length === 0) {
-            errorsArray.push({ field: $(phone_no), message: 'Please enter phone' });
+            errorsArray.push({ field: $(phone_no), message: 'Please enter Phone' });
         }
         if ($(address_1).val().trim().length === 0) {
-            errorsArray.push({ field: $(address_1), message: 'Please enter address_1' });
+            errorsArray.push({ field: $(address_1), message: 'Please enter Address 1' });
         }
         if ($(city).val().trim().length === 0) {
-            errorsArray.push({ field: $(city), message: 'Please enter city' });
+            errorsArray.push({ field: $(city), message: 'Please enter City' });
         }
         if ($(state).val()) {
-            errorsArray.push({ field: $(state), message: 'Please enter state' });
+            errorsArray.push({ field: $(state), message: 'Please enter State' });
         }
         if ($(country).val()) {
-            errorsArray.push({ field: $(country), message: 'Please enter country' });
+            errorsArray.push({ field: $(country), message: 'Please enter Country' });
         }
         if ($(zipcode).val().trim().length === 0) {
-            errorsArray.push({ field: $(zipcode), message: 'Please enter zipcode' });
+            errorsArray.push({ field: $(zipcode), message: 'Please enter Zipcode' });
         }
 
     }
