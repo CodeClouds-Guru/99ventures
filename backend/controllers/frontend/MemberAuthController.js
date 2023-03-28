@@ -349,7 +349,8 @@ class MemberAuthController {
     let member_status = true;
     let member_message = 'Successfully updated!';
     let member = await Member.findOne({ where: { id: member_id } });
-
+    req.headers.company_id = req.session.member.company_id;
+    req.headers.site_id = req.session.member.company_portal_id;
     const schema = Joi.object({
       first_name: Joi.string().required().label('First Name'),
       last_name: Joi.string().required().label('Last Name'),
@@ -374,8 +375,9 @@ class MemberAuthController {
     request_data.updated_by = member_id;
     request_data.avatar = null;
     if (req.files) {
-      request_data.avatar = await Member.updateAvatar(req.files, member);
+      request_data.avatar = await Member.updateAvatar(req, member);
     }
+    console.log(request_data);
     let model = await Member.update(request_data, {
       where: { id: member_id },
     });

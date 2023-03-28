@@ -86,7 +86,7 @@ router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.post(
-  '/profile/update/:id?',
+  '/profile/update',
   [checkMemberAuth],
   MemberAuthController.profileUpdate
 );
