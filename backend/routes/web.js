@@ -4,7 +4,7 @@ const PageParser = require('../helpers/PageParser');
 const Lucid = require('../helpers/Lucid');
 // const Cint = require('../helpers/Cint');
 // const PurespectrumHelper = require('../helpers/Purespectrum');
-const SqsHelper = require("../helpers/SqsHelper");
+const SqsHelper = require('../helpers/SqsHelper');
 const { OfferWall } = require('../models');
 
 router.get('/robots.txt', (req, res) => {
@@ -18,12 +18,12 @@ const SurveyControllerClass = require('../controllers/frontend/SurveyController'
 const SurveyController = new SurveyControllerClass();
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
-const PureSpectrumControllerClass = require("../controllers/frontend/PureSpectrumController");
-const PureSpectrumController = new PureSpectrumControllerClass;
-const SchlesingerControllerClass = require("../controllers/frontend/SchlesingerController");
-const SchlesingerController = new SchlesingerControllerClass;
+const PureSpectrumControllerClass = require('../controllers/frontend/PureSpectrumController');
+const PureSpectrumController = new PureSpectrumControllerClass();
+const SchlesingerControllerClass = require('../controllers/frontend/SchlesingerController');
+const SchlesingerController = new SchlesingerControllerClass();
 const CintControllerClass = require('../controllers/frontend/CintController');
-const CintController = new CintControllerClass;
+const CintController = new CintControllerClass();
 const TicketControllerClass = require('../controllers/frontend/TicketController');
 const TicketController = new TicketControllerClass();
 
@@ -85,6 +85,11 @@ router.post('/ticket/create', TicketController.saveTicketConversations);
 router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
+router.post(
+  '/profile/update/:id?',
+  [checkMemberAuth],
+  MemberAuthController.profileUpdate
+);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');

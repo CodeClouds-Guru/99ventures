@@ -210,7 +210,7 @@ module.exports = (sequelize, DataTypes) => {
 
     const { QueryTypes, Op } = require('sequelize');
     const { MemberBalance } = require('../models/index');
-    console.log(data);
+    // console.log(data);
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
       {
@@ -234,7 +234,7 @@ module.exports = (sequelize, DataTypes) => {
       balance: modified_total_earnings,
       payload: data.payload || null,
     };
-    console.log(transaction_data);
+    // console.log(transaction_data);
     let transaction = await MemberTransaction.create(transaction_data, {
       silent: true,
     });
@@ -265,7 +265,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'today',
       ],
@@ -277,7 +277,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'week',
       ],
@@ -289,10 +289,11 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'month',
       ],
+      [sequelize.fn('sum', sequelize.col('amount')), 'total'],
     ];
     option.where = {
       member_id: member_id,
@@ -301,6 +302,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
+    console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
   return MemberTransaction;

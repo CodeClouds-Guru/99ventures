@@ -3,6 +3,7 @@ const { Model, Op } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
 const Joi = require('joi');
 const { MemberBalance } = require('../models');
+const FileHelper = require('../helpers/fileHelper');
 
 const moment = require('moment');
 // const {MemberNote} = require("../models/index");
@@ -407,6 +408,31 @@ module.exports = (sequelize, DataTypes) => {
     } catch (error) {
       console.error(error);
       // this.throwCustomError("Unable to save data", 500);
+    }
+  };
+
+  //update member avatar
+  Member.updateAvatar = async (files, member) => {
+    let avatar = '';
+    try {
+      if (files) {
+        let pre_avatar = member.avatar;
+        let files = [];
+        files[0] = files.avatar;
+        const fileHelper = new FileHelper(files, 'members', req);
+        const file_name = await fileHelper.upload();
+        avatar = file_name.files[0].filename;
+
+        if (pre_avatar != '') {
+          let file_delete = await fileHelper.deleteFile(
+            pre_avatar.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+          );
+        }
+      } else avatar = null;
+
+      return avatar;
+    } catch (error) {
+      console.error(error);
     }
   };
 
