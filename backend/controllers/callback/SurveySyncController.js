@@ -363,13 +363,13 @@ class SurveySyncController {
                 for(let survey of allSurveys) {
                     const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
                     if ('success' === surveyData.apiStatus) {
-                        const quotas = surveyData.survey.quotas;
-                        if(quotas.length){
-                            for(let quota of quotas){
+                        const qualifications = surveyData.survey.qualifications;
+                        if(qualifications.length){
+                            for(let qualification of qualifications){
                                 const questionData = await SurveyQuestion.findOne({
                                     attributes:['id', 'question_type', 'survey_provider_question_id'],
                                     where: {
-                                        survey_provider_question_id: quota.criteria[0].qualification_code,
+                                        survey_provider_question_id: qualification.qualification_code,
                                         survey_provider_id: this.providerId
                                     }
                                 });
@@ -392,26 +392,25 @@ class SurveySyncController {
                                     }
                                     // Survey Precode Check and survey_answer_precode_survey_qualifications save
                                     if(surveyQualification && surveyQualification.id) {
-                                        const criteria = quota.criteria[0];
-                                        if(criteria.condition_codes){
+                                        if(qualification.condition_codes){
                                             const precodeData = await SurveyAnswerPrecodes.findOne({
                                                 where: {
-                                                    precode: criteria.qualification_code,
+                                                    precode: qualification.qualification_code,
                                                     survey_provider_id: this.providerId,
-                                                    option: criteria.condition_codes[0]
+                                                    option: qualification.condition_codes
                                                 }
                                             });
                                             if(precodeData && precodeData.id) {
                                                 await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                             }
                                         }
-                                        else if(criteria.range_sets){
+                                        else if(qualification.range_sets){
                                             const precodeData = await SurveyAnswerPrecodes.findAll({
                                                 where: {
-                                                    precode: criteria.qualification_code,
+                                                    precode: qualification.qualification_code,
                                                     survey_provider_id: this.providerId,
                                                     option: {
-                                                        [Op.between]: [criteria.range_sets[0].from, criteria.range_sets[0].to]
+                                                        [Op.between]: [qualification.range_sets[0].from, qualification.range_sets[0].to]
                                                     }
                                                 }
                                             });
