@@ -35,7 +35,7 @@
 .gjs-fullscreen-mode .gjs-cm-editor-c .CodeMirror{height: 85vh;}
 .grapes-modal-editor-container{display: flex; flex-direction: column;}
 .grapes-modal-editor-body{display: flex; justify-content: space-between;}
-.gjs-mdl-btn-close{display: none;}
+.custom-code-editor .gjs-mdl-btn-close{display: none;}
 @media only screen and (max-width: 1360px) {
     .gjs-pn-views{width: 20%;}
     .gjs-pn-options{right: 20%;}
