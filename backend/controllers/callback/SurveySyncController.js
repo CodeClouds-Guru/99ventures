@@ -293,7 +293,7 @@ class SurveySyncController {
     async schlesingerSurvey(req, res) {
         try{
             const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/allocated-surveys');   
+            const allSurveys = await psObj.fetchAndReturnData('/api/v2/survey/allocated-surveys');   
                  
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId);
@@ -447,7 +447,7 @@ class SurveySyncController {
             if(allSurveys.length) {
                 const psObj = new SchlesingerHelper;
                 for(let survey of allSurveys) {
-                    const surveyData = await psObj.fetchAndReturnData('/supply-api-v2/api/v2/survey/survey-qualifications/' + survey.survey_number);
+                    const surveyData = await psObj.fetchAndReturnData('/api/v2/survey/survey-qualifications/' + survey.survey_number);
                     if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
                         const surveyQualifications = surveyData.SurveyQualifications;
                         for(let ql of surveyQualifications){

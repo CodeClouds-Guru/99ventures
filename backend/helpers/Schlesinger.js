@@ -21,10 +21,9 @@ const handler = {
 class Schlesinger {
 	constructor() {
 		this.instance = axios.create({
-			baseURL: 'https://api-hub.market-cube.com/',
+			baseURL: 'https://api-hub.market-cube.com/supply-api-v2/',
 			timeout: 20000,
 			headers: {
-				//Authorization: process.env.CINT_API_KEY,
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
 				'X-MC-SUPPLY-KEY': '1002:0466198A-A78B-4F6C-8CE2-4A79FBC8FA41'
