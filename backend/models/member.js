@@ -410,5 +410,25 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
+  //update member avatar
+  Member.updateAvatar = async (req, member) => {
+    const FileHelper = require('../helpers/fileHelper');
+    let avatar = '';
+
+    let pre_avatar = member.avatar;
+    let files = [];
+    files[0] = req.files.avatar;
+    const fileHelper = new FileHelper(files, 'members', req);
+    const file_name = await fileHelper.upload();
+    avatar = file_name.files[0].filename;
+    console.log(file_name.files);
+    if (pre_avatar != '') {
+      let file_delete = await fileHelper.deleteFile(
+        pre_avatar.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+      );
+    }
+    return avatar;
+  };
+
   return Member;
 };

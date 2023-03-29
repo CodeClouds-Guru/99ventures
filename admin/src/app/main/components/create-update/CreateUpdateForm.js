@@ -304,6 +304,17 @@ const CreateUpdate = (props) => {
 
         editor.onReady(() => {
             loadEditorData(editor);
+
+            // Collapsed all the blocks accordian by default
+            const categories = editor.BlockManager.getCategories();
+            categories.each(category => {
+                category.set('open', false).on('change:open', opened => {
+                    opened.get('open') && categories.each(category => {
+                        category !== opened && category.set('open', false)
+                    })
+                })
+            });
+            //------------ End ----------
         });
 
         editor.on('change:changesCount', (model) => {
