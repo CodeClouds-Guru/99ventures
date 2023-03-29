@@ -13,6 +13,7 @@ const {
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
 const IpQualityScoreClass = require('../../helpers/IpQualityScore');
+
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -344,54 +345,129 @@ class MemberAuthController {
 
   //update member profile
   async profileUpdate(req, res) {
-    const member_id = req.session.member.id;
-    // const member_id = req.params.id;
-    let member_status = true;
-    let member_message = 'Successfully updated!';
-    let member = await Member.findOne({ where: { id: member_id } });
-    req.headers.company_id = req.session.member.company_id;
-    req.headers.site_id = req.session.member.company_portal_id;
-    const schema = Joi.object({
-      first_name: Joi.string().required().label('First Name'),
-      last_name: Joi.string().required().label('Last Name'),
-      country_id: Joi.number().required().label('Country'),
-      zip_code: Joi.number().required().label('Zipcode'),
-      city: Joi.string().required().label('City'),
-      gender: Joi.string().required().label('Gender'),
-      phone_no: Joi.string().required().label('Phone number'),
-      country_code: Joi.number().optional().label('Phone code'),
-      address_1: Joi.string().allow('').required().label('Address 1'),
-      address_2: Joi.string().allow('').optional().label('Address 2'),
-      email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
-    });
-    const { error, value } = schema.validate(req.body);
+    try {
+      const member_id = req.session.member.id;
+      // const member_id = req.params.id;
+      let member_status = true;
+      let member_message = 'Successfully updated!';
+      let member = await Member.findOne({ where: { id: member_id } });
+      req.headers.company_id = req.session.company_portal.company_id;
+      req.headers.site_id = req.session.company_portal.id;
 
-    if (error) {
-      member_status = false;
-      member_message = error.details.map((err) => err.message);
-    }
-    req.body.username = member.username;
-    let request_data = req.body;
-    request_data.updated_by = member_id;
-    request_data.avatar = null;
-    if (req.files) {
-      request_data.avatar = await Member.updateAvatar(req, member);
-    }
-    console.log(request_data);
-    let model = await Member.update(request_data, {
-      where: { id: member_id },
-    });
+      const schema = Joi.object({
+        first_name: Joi.string().required().label('First Name'),
+        last_name: Joi.string().required().label('Last Name'),
+        username: Joi.string().required().label('User Name'),
+        country: Joi.number().required().label('Country'),
+        zipcode: Joi.number().required().label('Zipcode'),
+        city: Joi.string().required().label('City'),
+        gender: Joi.string().required().label('Gender'),
+        phone_no: Joi.string().required().label('Phone number'),
+        // country_code: Joi.number().optional().label('Phone code'),
+        address_1: Joi.string().allow('').required().label('Address 1'),
+        address_2: Joi.string().allow('').optional().label('Address 2'),
+        email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
+      });
+      const { error, value } = schema.validate(req.body);
 
-    if (req.body.email_alerts && req.body.email_alerts.length > 0) {
-      let email_alerts = req.body.email_alerts;
-      member_status = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
+      if (error) {
+        member_status = false;
+        member_message = error.details.map((err) => err.message);
+      }
+      // console.log(member);
+      if (member.profile_completed_on == null) {
+        await Member.creditBonusByType(member, 'complete_profile_bonus', req);
+        req.body.profile_completed_on = new Date();
+      }
+      req.body.country_id = req.body.country;
+      req.body.zip_code = req.body.zipcode;
+      let request_data = req.body;
+      request_data.updated_by = member_id;
+      request_data.avatar = null;
+      if (req.files) {
+        request_data.avatar = await Member.updateAvatar(req, member);
+      }
+      // console.log(request_data);
+      let model = await Member.update(request_data, {
+        where: { id: member_id },
+      });
+
+      if (req.body.email_alerts && req.body.email_alerts.length > 0) {
+        let email_alerts = req.body.email_alerts;
+        member_status = await EmailAlert.saveEmailAlerts(
+          member_id,
+          email_alerts
+        );
+      }
+      if (member_status) {
+        req.session.flash = { message: member_message };
+      } else {
+        req.session.flash = { error: member_message };
+      }
+      // console.log(req.session.flash);
+      res.redirect('back');
+    } catch (error) {
+      console.log(error);
+      req.session.flash = { error: 'Unable to save data' };
+      res.redirect('back');
     }
-    if (member_status) {
-      req.session.flash = { message: member_message };
-    } else {
-      req.session.flash = { error: member_message };
+  }
+
+  //change password
+  async changePassword(req, res) {
+    try {
+      const member_id = req.session.member.id;
+      // const member_id = req.params.id;
+      const schema = Joi.object({
+        old_password: Joi.string().required(),
+        new_password: Joi.string()
+          .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+          .required(),
+        confirm_password: Joi.string().required(),
+      });
+      let member_status = true;
+      let member_message = 'Successfully updated!';
+      const { error, value } = schema.validate(req.body);
+
+      if (error) {
+        member_status = false;
+        member_message = error.details.map((err) => err.message);
+      }
+      //member details
+      let member = await Member.findOne({ where: { id: member_id } });
+      const isMatch = await bcrypt.compare(
+        req.body.old_password,
+        member.password
+      );
+
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(value.new_password, salt);
+
+      if (!isMatch) {
+        member_status = false;
+        member_message = 'Incorrect old password';
+      }
+      if (req.body.new_password !== req.body.confirm_password) {
+        member_status = false;
+        member_message = 'New password and confirm password are different';
+      }
+
+      if (member_status) {
+        let update_member = await Member.update(
+          { password: password },
+          { where: { id: member_id } }
+        );
+        req.session.flash = { message: member_message };
+      } else {
+        req.session.flash = { error: member_message };
+      }
+      // res.redirect('back');
+      res.json({ results: req.session.flash });
+    } catch (error) {
+      console.log(error);
+      req.session.flash = { error: 'Unable to save data' };
+      res.redirect('back');
     }
-    return res.send({ status: member_status, user: member_message });
   }
   async logout(req, res) {
     req.session.member = null;

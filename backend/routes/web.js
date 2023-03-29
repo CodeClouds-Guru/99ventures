@@ -86,9 +86,14 @@ router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.post(
-  '/profile/update',
+  '/profile/update/:id?',
   [checkMemberAuth],
   MemberAuthController.profileUpdate
+);
+router.post(
+  '/password/update/:id?',
+  [checkMemberAuth],
+  MemberAuthController.changePassword
 );
 
 router.get('/404', async (req, res) => {
