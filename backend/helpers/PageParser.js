@@ -10,6 +10,7 @@ const { QueryTypes, Op } = require('sequelize');
 const defaultAddOns = require("../config/frontend_static_files.json");
 const safeEval = require('safe-eval');
 const Handlebars = require('handlebars');
+const ScriptParser = require('./ScriptParser');
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
@@ -23,6 +24,7 @@ class PageParser {
     this.getPageNLayout = this.getPageNLayout.bind(this);
     this.generateHtml = this.generateHtml.bind(this);
     this.convertComponentToHtml = this.convertComponentToHtml.bind(this);
+    this.convertScriptToHtml = this.convertScriptToHtml.bind(this);
     this.addDefaultAddOns = this.addDefaultAddOns.bind(this);
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
@@ -106,7 +108,28 @@ class PageParser {
       '${additional_header_script}',
       additional_headers
     );
+    var data = {
+      msg: "jkjkk"
+    }
+    var do_script = async function(script_id,params = []){
+      var scriptParser = new ScriptParser()
+      var script_html = await scriptParser.parseScript(script_id,data);
+      data.push(script_html.data)
+      console.log('data yyy',data)
+      return script_html.script_html
+    }
+    console.log('data',data)
+    Object.assign({}, data);
+    console.log(data)
+    // layout_html = layout_html.replaceAll(
+    //   '${do_script("s2-1679901091138")}',
+    //   "<p>hello</p>"
+    // );
+
+    //get script ids
+    // layout_html = await this.convertScriptToHtml(layout_html);
     layout_html = await this.convertComponentToHtml(layout_html);
+    
 
     const user = this.getSessionUser();
     const error_message = this.getFlashMessage() || '';
@@ -118,11 +141,13 @@ class PageParser {
       page_meta_code,
       layout_keywords,
       layout_descriptions,
-      default_scripted_codes
+      default_scripted_codes,
+      do_script
     });
     const template = Handlebars.compile(layout_html);
     layout_html = template({
       user,
+      data,
       error_message,
     });
     console.log(user);
@@ -147,6 +172,19 @@ class PageParser {
     return layout_html;
   }
 
+  //convert script ids to html
+  async convertScriptToHtml(layout_html) {
+    // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
+    var regex_match = layout_html.match(/\${do_script(.*?)}/g);
+    console.log('regex_match',regex_match)
+    
+    if (regex_match) {
+      await regex_match.forEach(async(script_id) => {
+        // layout_html = await scriptParser.parseScript(layout_html,script_id);
+      });
+    }
+    return layout_html;
+  }
   addDefaultAddOns() {
     var str = '';
     defaultAddOns.forEach((item) => {
