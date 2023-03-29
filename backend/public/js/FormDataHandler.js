@@ -9,8 +9,9 @@ $(() => {
     const formHeading = $("#form_heading").get(0);
     const logoutButton = $("#scripteed_logout_btn").get(0);
     const ticketCreateForm = $("#scripteed_create_ticket_form").get(0);
-    const displayed_filename = $("#file_show");
+    const showFilename = $("#file_show");
     const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
+    const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -77,7 +78,7 @@ $(() => {
         }
     }
     var profileDetailsFormSanitisation = () => {
-        if (profileDetailsForm && ["first_name", "last_name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "email_alerts[]"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
+        if (profileDetailsForm && ["avatar", "first_name", "last_name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "email_alerts[]"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
             $(profileDetailsForm).attr("action", '/profile/update');
             $(profileDetailsForm).attr("method", "POST");
         }
@@ -85,59 +86,63 @@ $(() => {
             console.log("OOPS!!! Profile details update action not set");
         }
     }
+    var changePasswordFormSanitisation = () => {
+        if (changePasswordForm && ["old_password", "new_password", "confirm_password"].every((val) => Object.keys(changePasswordForm.elements).indexOf(val) > -1)) {
+            $(changePasswordForm).attr("action", '/password/update');
+            $(changePasswordForm).attr("method", "POST");
+        }
+        else {
+            console.log("OOPS!!! Change password action not set");
+        }
+    }
     var loginFomValidation = () => {
         errorsArray = [];
-        const emailField = $(loginForm).find('input[name="email"]').get(0);
-        const passwordField = $(loginForm).find('input[name="password"]').get(0);
-        if ($(emailField).val().trim().length === 0) {
-            errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
-        } else if (!validateEmail($(emailField).val().trim())) {
-            errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
+        const email = $(loginForm).find('input[name="email"]').get(0);
+        const password = $(loginForm).find('input[name="password"]').get(0);
+        if ($(email).val().trim().length === 0) {
+            errorsArray.push({ field: $(email), message: 'Please enter a email' });
+        } else if (!validateEmail($(email).val().trim())) {
+            errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
         }
-        if ($(passwordField).val().trim().length < 8) {
-            errorsArray.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
+        if ($(password).val().trim().length < 8) {
+            errorsArray.push({ field: $(password), message: 'Password should be greater than 7 characters' });
         }
     }
     var signupFormValidation = () => {
         errorsArray = [];
-        const firstNameField = $(signupForm).find('input[name="first_name"]').get(0);
-        const lastNameField = $(signupForm).find('input[name="last_name"]').get(0);
-        const emailField = $(signupForm).find('input[name="email"]').get(0);
-        const passwordField = $(signupForm).find('input[name="password"]').get(0);
-        const confirmPasswordField = $(signupForm).find('input[name="confirm_password"]').get(0);
-        if ($(firstNameField).val().trim().length === 0) {
-            errorsArray.push({ field: $(firstNameField), message: 'Please enter first name' });
+        const first_name = $(signupForm).find('input[name="first_name"]').get(0);
+        const last_name = $(signupForm).find('input[name="last_name"]').get(0);
+        const email = $(signupForm).find('input[name="email"]').get(0);
+        const password = $(signupForm).find('input[name="password"]').get(0);
+        const confirm_password = $(signupForm).find('input[name="confirm_password"]').get(0);
+        if ($(first_name).val().trim().length === 0) {
+            errorsArray.push({ field: $(first_name), message: 'Please enter first name' });
         }
-        if ($(lastNameField).val().trim().length === 0) {
-            errorsArray.push({ field: $(lastNameField), message: 'Please enter last name' });
+        if ($(last_name).val().trim().length === 0) {
+            errorsArray.push({ field: $(last_name), message: 'Please enter last name' });
         }
-        if ($(emailField).val().trim().length === 0) {
-            errorsArray.push({ field: $(emailField), message: 'Please enter a email' });
-        } else if (!validateEmail($(emailField).val().trim())) {
-            errorsArray.push({ field: $(emailField), message: 'Please enter a valid email' });
+        if ($(email).val().trim().length === 0) {
+            errorsArray.push({ field: $(email), message: 'Please enter a email' });
+        } else if (!validateEmail($(email).val().trim())) {
+            errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
         }
-        if ($(passwordField).val().trim().length < 8) {
-            errorsArray.push({ field: $(passwordField), message: 'Password should be greater than 7 characters' });
+        if ($(password).val().trim().length < 8) {
+            errorsArray.push({ field: $(password), message: 'Password should be greater than 7 characters' });
         }
-        if ($(passwordField).val().trim() !== $(confirmPasswordField).val().trim()) {
-            errorsArray.push({ field: $(confirmPasswordField), message: 'Password mismatched' });
+        if ($(password).val().trim() !== $(confirm_password).val().trim()) {
+            errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
         }
     }
-    $("#choose-file").on('change', function () {
-        let fileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
-        fileName ? displayed_filename.text(fileName) : displayed_filename.text('')
-    })
     var ticketCreateFormValidation = () => {
         errorsArray = [];
-        const ticketSubjectField = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
-        const ticketFileName = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
-        const ticketFileValue = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
+        const ticket_subject = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
+        const ticket_file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
+        const ticket_file_value = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
         const ticketContentField = $(ticketCreateForm).find('textarea[name="ticket_content"]').val();
         // const ticketContentField = $('#ticket_content').get(0);
-        if ($(ticketSubjectField).val().trim().length === 0) {
-            errorsArray.push({ field: $(ticketSubjectField), message: 'Please enter ticket subject' });
+        if ($(ticket_subject).val().trim().length === 0) {
+            errorsArray.push({ field: $(ticket_subject), message: 'Please enter ticket subject' });
         }
-        console.log(ticketContentField)
         if ($.trim(ticketContentField) === '') {
             errorsArray.push({ field: $(ticketContentField), message: 'Please enter ticket content' });
         }
@@ -150,12 +155,10 @@ $(() => {
         // const email = $(profileDetailsForm).find('input[name="email"]').get(0);
         const phone_no = $(profileDetailsForm).find('input[name="phone_no"]').get(0);
         const address_1 = $(profileDetailsForm).find('input[name="address_1"]').get(0);
-        // const address_2 = $(profileDetailsForm).find('input[name="address_2"]').get(0);
         const city = $(profileDetailsForm).find('input[name="city"]').get(0);
-        const state = $(profileDetailsForm).find('input[name="state"]').get(0);
-        const country = $(profileDetailsForm).find('input[name="country"]').get(0);
+        // const state = $(profileDetailsForm).find('select[name="state"]').get(0);
+        // const country = $(profileDetailsForm).find('select[name="country"]').get(0);
         const zipcode = $(profileDetailsForm).find('input[name="zipcode"]').get(0);
-
         if ($(first_name).val().trim().length === 0) {
             errorsArray.push({ field: $(first_name), message: 'Please enter First Name' });
         }
@@ -179,17 +182,40 @@ $(() => {
         if ($(city).val().trim().length === 0) {
             errorsArray.push({ field: $(city), message: 'Please enter City' });
         }
-        if ($(state).val()) {
-            errorsArray.push({ field: $(state), message: 'Please enter State' });
-        }
-        if ($(country).val()) {
-            errorsArray.push({ field: $(country), message: 'Please enter Country' });
-        }
+        // if ($(state).val().length===0) {
+        //     errorsArray.push({ field: $(state), message: 'Please enter State' });
+        // }
+        // if ($(country).val().length===0) {
+        //     errorsArray.push({ field: $(country), message: 'Please enter Country' });
+        // }
         if ($(zipcode).val().trim().length === 0) {
             errorsArray.push({ field: $(zipcode), message: 'Please enter Zipcode' });
         }
 
     }
+    var ChangePasswordFomValidation = () => {
+        errorsArray = [];
+        const old_password = $(changePasswordForm).find('input[name="old_password"]').get(0);
+        const new_password = $(changePasswordForm).find('input[name="new_password"]').get(0);
+        const confirm_password = $(changePasswordForm).find('input[name="confirm_password"]').get(0);
+        if ($(old_password).val().trim().length < 8) {
+            errorsArray.push({ field: $(old_password), message: 'Old Password should be greater than 7 characters' });
+        }
+        if ($(new_password).val().trim().length < 8) {
+            errorsArray.push({ field: $(new_password), message: 'Old Password should be greater than 7 characters' });
+        }
+        if ($(new_password).val().trim() !== $(confirm_password).val().trim()) {
+            errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
+        }
+    }
+    $("#choose-file").on('change', function () {
+        let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
+        file_name ? showFilename.text(file_name) : showFilename.text('')
+    })
+    $("#member-picture").on('change', function () {
+        let file_name = $(profileDetailsForm).find('input[name="avatar"]').val().replace(/C:\\fakepath\\/i, '')
+        file_name ? showFilename.text(file_name) : showFilename.text('')
+    })
     displayErrors = () => {
         $('span.alert-msg').remove();
         errorsArray.forEach(item => {
@@ -208,6 +234,9 @@ $(() => {
     }
     if (profileDetailsForm) {
         profileDetailsFormSanitisation();
+    }
+    if (changePasswordForm) {
+        changePasswordFormSanitisation();
     }
     $(loginForm).submit((e) => {
         loginFomValidation();
@@ -238,6 +267,15 @@ $(() => {
     })
     $(profileDetailsForm).submit((e) => {
         profileDetailsFormValidation();
+        if (errorsArray.length === 0) {
+            $(this).trigger(e.type);
+        } else {
+            e.preventDefault();
+            displayErrors();
+        }
+    })
+    $(changePasswordForm).submit((e) => {
+        ChangePasswordFomValidation();
         if (errorsArray.length === 0) {
             $(this).trigger(e.type);
         } else {
