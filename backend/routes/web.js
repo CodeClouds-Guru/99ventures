@@ -90,6 +90,11 @@ router.post(
   [checkMemberAuth],
   MemberAuthController.profileUpdate
 );
+router.post(
+  '/password/update',
+  [checkMemberAuth],
+  MemberAuthController.changePassword
+);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');

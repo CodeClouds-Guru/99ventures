@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       script_html: Joi.string().required().label("Script HTML"),
       script_json: Joi.object().required().label("Script JSON"),
       status: Joi.optional(),
+      module: Joi.optional().allow("").label("Code"),
     });
     return schema.validate(req.body);
   };
@@ -31,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       code: DataTypes.STRING,
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
+      module: DataTypes.STRING,
       script_html: DataTypes.TEXT('long'),
       status: {
         type: DataTypes.TINYINT,
@@ -78,6 +80,19 @@ module.exports = (sequelize, DataTypes) => {
       placeholder: "Script ID",
       listing: true,
       show_in_form: false,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    module: {
+      field_name: "module",
+      db_name: "module",
+      type: "text",
+      placeholder: "Module",
+      listing: true,
+      show_in_form: true,
       sort: true,
       required: false,
       value: "",

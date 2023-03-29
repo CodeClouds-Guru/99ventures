@@ -229,7 +229,7 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
-        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "address_3", "country_id", "membership_tier_id", "phone_no", "gender"];
+        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "city", "country_id", "membership_tier_id", "phone_no", "gender"];
         const formdata = new FormData();
         formdata.append("avatar", avatarFile);
         formdata.append("type", 'basic_details');
@@ -805,7 +805,7 @@ const MemberDetails = () => {
                                                 {
                                                     editMode ? (
                                                         <TextField
-                                                            type="tel"
+                                                            type="text"
                                                             id="standard-helperText"
                                                             defaultValue={memberData.address_2}
                                                             variant="standard"
@@ -825,25 +825,25 @@ const MemberDetails = () => {
                                     </ListItem>
                                     <ListItem disablePadding>
                                         <ListItemText className="sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3" sx={listItemTextStyle} primary={
-                                            <Typography variant="subtitle" sx={labelStyling}>Address Line 3:</Typography>
+                                            <Typography variant="subtitle" sx={labelStyling}>City:</Typography>
                                         } />
                                         <ListItemText className="sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
                                             <>
                                                 {
                                                     editMode ? (
                                                         <TextField
-                                                            type="tel"
+                                                            type="text"
                                                             id="standard-helperText"
-                                                            defaultValue={memberData.address_3}
+                                                            defaultValue={memberData.city}
                                                             variant="standard"
                                                             sx={textFieldStyle}
                                                             onChange={
-                                                                (e) => setMemberData({ ...memberData, address_3: e.target.value })
+                                                                (e) => setMemberData({ ...memberData, city: e.target.value })
                                                             }
                                                         />
                                                     ) : (
                                                         <Typography variant="body1" className="sm:text-lg  md:text-lg lg:text-sm xl:text-base">
-                                                            {memberData.address_3 ? memberData.address_3 : '--'}
+                                                            {memberData.city ? memberData.city : '--'}
                                                         </Typography>
                                                     )
                                                 }
