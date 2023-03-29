@@ -96,13 +96,15 @@ class EmailHelper {
     }
     //replace email variables
     async replaceVariables(details, replace_data, email_body) {
-        replace_data.forEach(function (value, key) {
-            let new_value = value;
-            new_value = new_value.replace('${', '');
-            new_value = new_value.replace('}', '');
-            replace_data[key] = eval('details' + '.' + new_value)
-            email_body = email_body.replaceAll(value, replace_data[key])
-        })
+        if(replace_data){
+            replace_data.forEach(function (value, key) {
+                let new_value = value;
+                new_value = new_value.replace('${', '');
+                new_value = new_value.replace('}', '');
+                replace_data[key] = eval('details' + '.' + new_value)
+                email_body = email_body.replaceAll(value, replace_data[key])
+            })
+        }
         return email_body
     }
     //send mail
