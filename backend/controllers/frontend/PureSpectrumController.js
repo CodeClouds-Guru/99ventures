@@ -24,13 +24,16 @@ class PureSpectrumController {
         else if(action === 'entrylink')
             this.generateEntryLink(req, res);
         else 
-            res.send('<p>Something went wrong!</p>');
+            throw error('Invalid access!');
     }
 
     surveys = async (req, res) => {
         const memberId = req.query.user_id;
         if (!memberId) {
-            res.send('<p>Member id not found!</p>');
+            res.json({
+                status: false,
+                message: 'Member id not found!'
+            });
             return;
         }
         const provider = await SurveyProvider.findOne({
@@ -40,7 +43,10 @@ class PureSpectrumController {
             }
         });
         if (!provider) {
-            res.send('<p>Survey Provider not found!</p>');
+            res.json({
+                status: false,
+                message: 'Survey Provider not found!'
+            });
             return;
         }
         /**
@@ -130,12 +136,22 @@ class PureSpectrumController {
                     `
                 }
 
-                res.send(surveyHtml);
+                res.send({
+                    status: true,
+                    message: 'Success',
+                    result: surveyHtml
+                });
             } else {
-                res.send('<p>No surveys have been matched!</p>');
+                res.json({
+                    staus: false,
+                    message: 'No surveys have been matched!'
+                });
             }
         } else {
-            res.send('<p>Member eiligibility not found!</p>');
+            res.json({
+                status: false,
+                message: 'Member eiligibility not found!'
+            });
         }
     }
 
@@ -151,7 +167,7 @@ class PureSpectrumController {
             const entryLink = data.survey_entry_url + '&' + generateQueryString;
             res.redirect(entryLink)
         } else {
-            res.send('<p>Unable to get entry link!</p>')
+            res.send('Unable to get entry link!')
         }
     }
 }
