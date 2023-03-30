@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
       module: DataTypes.STRING,
+      action_type: DataTypes.STRING,
       script_html: DataTypes.TEXT('long'),
       status: {
         type: DataTypes.TINYINT,
@@ -98,6 +99,19 @@ module.exports = (sequelize, DataTypes) => {
       value: "",
       width: "50",
       searchable: true,
+    },
+    action_type: {
+      field_name: "action_type",
+      db_name: "action_type",
+      type: "text",
+      placeholder: "Action Type",
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
     },
     company_portal_id: {
       field_name: "company_portal_id",
