@@ -26,6 +26,8 @@ const CintControllerClass = require('../controllers/frontend/CintController');
 const CintController = new CintControllerClass();
 const TicketControllerClass = require('../controllers/frontend/TicketController');
 const TicketController = new TicketControllerClass();
+const LucidControllerClass = require('../controllers/frontend/LucidController');
+const LucidController = new LucidControllerClass();
 
 router.get('/offer-wall/list', async (req, res) => {
   var offer_walls = await OfferWall.findAll({ where: { status: '1' } });
@@ -85,6 +87,8 @@ router.post('/ticket/create', TicketController.saveTicketConversations);
 router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
+router.get('/lucid/:action', LucidController.index);
+
 router.post(
   '/profile/update',
   [checkMemberAuth],
