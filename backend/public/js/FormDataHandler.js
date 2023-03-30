@@ -13,10 +13,22 @@ $(() => {
     const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
     const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
+    $("#choose-file").on('change', function () {
+        let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
+        file_name ? showFilename.text(file_name) : showFilename.text('')
+    });
+    $("#member-picture").on('change', function () {
+        let file_name = $(profileDetailsForm).find('input[name="avatar"]').val().replace(/C:\\fakepath\\/i, '')
+        file_name ? showFilename.text(file_name) : showFilename.text('')
+    });
+    $('i.bi').click((event) => {
+        let field = $(event.target).parent().siblings('input');
+        $(field).attr('type', $(field).attr('type') === 'password' ? 'text' : 'password');
+        $(event.target).toggleClass('bi-eye-slash-fill');
+    });
     var validateEmail = (email) => {
         return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
     }
-
     var goTologin = () => {
         $(loginForm).removeClass('d-none');
         $(loginBtn).addClass('active');
@@ -88,8 +100,8 @@ $(() => {
     }
     var changePasswordFormSanitisation = () => {
         if (changePasswordForm && ["old_password", "new_password", "confirm_password"].every((val) => Object.keys(changePasswordForm.elements).indexOf(val) > -1)) {
-            $(changePasswordForm).attr("action", '/password/update');
-            $(changePasswordForm).attr("method", "POST");
+            // $(changePasswordForm).attr("action", '/password/update');
+            // $(changePasswordForm).attr("method", "POST");
         }
         else {
             console.log("OOPS!!! Change password action not set");
@@ -208,14 +220,6 @@ $(() => {
             errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
         }
     }
-    $("#choose-file").on('change', function () {
-        let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
-        file_name ? showFilename.text(file_name) : showFilename.text('')
-    })
-    $("#member-picture").on('change', function () {
-        let file_name = $(profileDetailsForm).find('input[name="avatar"]').val().replace(/C:\\fakepath\\/i, '')
-        file_name ? showFilename.text(file_name) : showFilename.text('')
-    })
     displayErrors = () => {
         $('span.alert-msg').remove();
         errorsArray.forEach(item => {
@@ -274,10 +278,21 @@ $(() => {
             displayErrors();
         }
     })
-    $(changePasswordForm).submit((e) => {
+    $('#scripteed_change_password_btn').click((e) => {
         ChangePasswordFomValidation();
         if (errorsArray.length === 0) {
-            $(this).trigger(e.type);
+            $.ajax({
+                type: "POST",
+                url: '/password/update',
+                data: {
+                    old_password: $(changePasswordForm).find('input[name="old_password"]').get(0).value.trim(),
+                    new_password: $(changePasswordForm).find('input[name="new_password"]').get(0).value.trim(),
+                    confirm_password: $(changePasswordForm).find('input[name="confirm_password"]').get(0).value.trim(),
+                },
+                success: (response) => {
+                    console.log(response.results)
+                },
+            });
         } else {
             e.preventDefault();
             displayErrors();
