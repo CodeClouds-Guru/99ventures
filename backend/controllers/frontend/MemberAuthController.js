@@ -328,11 +328,12 @@ class MemberAuthController {
   async profileUpdate(req, res) {
     let member_status = true;
     let member_message = 'Successfully updated!';
+    const method = req.method;
     try {
       const member_id = req.session.member.id;
-      const method = req.method;
+
       // const member_id = req.params.id;
-      console.log(method);
+      // console.log(method);
       let member = await Member.findOne({ where: { id: member_id } });
 
       if (method === 'POST') {
@@ -381,8 +382,8 @@ class MemberAuthController {
           where: { id: member_id },
         });
         //set eligibility
-        await this.setMemberEligibility(member_id)
-        
+        await this.setMemberEligibility(member_id);
+
         if (req.body.email_alerts && req.body.email_alerts.length > 0) {
           let email_alerts = req.body.email_alerts;
           member_status = await EmailAlert.saveEmailAlerts(
@@ -393,7 +394,7 @@ class MemberAuthController {
       }
       if (method === 'PUT') {
         let rsp = await this.changePassword(req, member);
-        console.log(rsp);
+        // console.log(rsp);
 
         member_status = rsp.member_status;
         member_message = rsp.member_message;
@@ -414,46 +415,47 @@ class MemberAuthController {
       }
     }
   }
-   //set member eligibility
-   async setMemberEligibility(member_id) {
+  //set member eligibility
+  async setMemberEligibility(member_id) {
     //gender
     let member_details = await Member.findOne({ where: { id: member_id } });
     let member_eligibility = [];
-    
+
     //eligibility entry for gender
-    let nmae_list = ['GENDER','ZIP','STATE','REGION','AGE']
-    let questions = await SurveyQuestion.findAll({where:{name:nmae_list}})
-    
-    if(questions.length){
-      questions.forEach(function(record,key){
-        
-        if(record.survey_provider_id){
-          let precode = ''
-          switch(record.name){
+    let nmae_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
+    let questions = await SurveyQuestion.findAll({
+      where: { name: nmae_list },
+    });
+
+    if (questions.length) {
+      questions.forEach(function (record, key) {
+        if (record.survey_provider_id) {
+          let precode = '';
+          switch (record.name) {
             case 'GENDER':
-              if(record.survey_provider_id == 1){
+              if (record.survey_provider_id == 1) {
                 if (member_details.gender == 'male') {
-                  precode = 1
-                }else if (member_details.gender == 'female'){
-                  precode = 2
-                } 
+                  precode = 1;
+                } else if (member_details.gender == 'female') {
+                  precode = 2;
+                }
               }
               break;
             case 'ZIP':
-              precode = member_details.zip_code
+              precode = member_details.zip_code;
               break;
             // case 'STATE':
             //   precode = member_details.zip_code
             //   break;
             case 'REGION':
-              precode = member_details.city
+              precode = member_details.city;
               break;
             case 'AGE':
-              if(member_details.dob){
-                var dob = new Date(member_details.dob);  
-                var month_diff = Date.now() - dob.getTime();  
-                var age_dt = new Date(month_diff);   
-                var year = age_dt.getUTCFullYear();  
+              if (member_details.dob) {
+                var dob = new Date(member_details.dob);
+                var month_diff = Date.now() - dob.getTime();
+                var age_dt = new Date(month_diff);
+                var year = age_dt.getUTCFullYear();
                 precode = Math.abs(year - 1970);
               }
               break;
@@ -464,7 +466,7 @@ class MemberAuthController {
             precode_id: precode,
           });
         }
-      })
+      });
     }
     await MemberEligibilities.bulkCreate(member_eligibility, {
       updateOnDuplicate: ['precode_id'],
