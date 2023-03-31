@@ -46,7 +46,7 @@ module.exports = async function (req, res, next) {
     member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
 
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
-    console.log('-----------', req.session);
+    // console.log('-----------', req.session);
   }
   next();
 };

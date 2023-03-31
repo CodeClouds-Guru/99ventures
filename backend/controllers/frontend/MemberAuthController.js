@@ -323,37 +323,6 @@ class MemberAuthController {
     return;
   }
 
-  //set member eligibility
-  async setMemberEligibility(member_id) {
-    //gender
-    let member_details = await Member.findOne({ where: { id: 1 } });
-    let member_eligibility = [];
-    if (member_details.gender == 'male') {
-      member_eligibility.push({
-        member_id: member_id,
-        survey_question_id: 43,
-        precode_id: 23,
-      });
-    } else {
-      member_eligibility.push({
-        member_id: member_id,
-        survey_question_id: 43,
-        precode_id: 22,
-      });
-    }
-    await MemberEligibilities.destroy({
-      where: { member_id: member_id },
-      force: true,
-    });
-    await MemberEligibilities.bulkCreate(member_eligibility);
-    return;
-    // let member_gender =  await SurveyQuestion.findAll({where:{name:'GENDER'}})
-    // member_gender.forEach(function (record, key) {
-    //   //get precodes
-    //   let precodes = await
-    // })
-  }
-
   //update member profile
   async profileUpdate(req, res) {
     let member_status = true;
@@ -369,26 +338,26 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        const schema = Joi.object({
-          first_name: Joi.string().required().label('First Name'),
-          last_name: Joi.string().required().label('Last Name'),
-          username: Joi.string().required().label('User Name'),
-          country: Joi.number().required().label('Country'),
-          zipcode: Joi.number().required().label('Zipcode'),
-          city: Joi.string().required().label('City'),
-          gender: Joi.string().required().label('Gender'),
-          phone_no: Joi.string().required().label('Phone number'),
-          // country_code: Joi.number().optional().label('Phone code'),
-          address_1: Joi.string().allow('').required().label('Address 1'),
-          address_2: Joi.string().allow('').optional().label('Address 2'),
-          email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
-        });
-        const { error, value } = schema.validate(req.body);
+        // const schema = Joi.object({
+        //   first_name: Joi.string().required().label('First Name'),
+        //   last_name: Joi.string().required().label('Last Name'),
+        //   username: Joi.string().required().label('User Name'),
+        //   country: Joi.number().required().label('Country'),
+        //   zipcode: Joi.number().required().label('Zipcode'),
+        //   city: Joi.string().required().label('City'),
+        //   gender: Joi.string().required().label('Gender'),
+        //   phone_no: Joi.string().required().label('Phone number'),
+        //   // country_code: Joi.number().optional().label('Phone code'),
+        //   address_1: Joi.string().allow('').required().label('Address 1'),
+        //   address_2: Joi.string().allow('').optional().label('Address 2'),
+        //   email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
+        // });
+        // const { error, value } = schema.validate(req.body);
 
-        if (error) {
-          member_status = false;
-          member_message = error.details.map((err) => err.message);
-        }
+        // if (error) {
+        //   member_status = false;
+        //   member_message = error.details.map((err) => err.message);
+        // }
         // console.log(member);
         if (member.profile_completed_on == null) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
@@ -410,7 +379,9 @@ class MemberAuthController {
         let model = await Member.update(request_data, {
           where: { id: member_id },
         });
-
+        //set eligibility
+        await this.setMemberEligibility(member_id)
+        
         if (req.body.email_alerts && req.body.email_alerts.length > 0) {
           let email_alerts = req.body.email_alerts;
           member_status = await EmailAlert.saveEmailAlerts(
@@ -440,7 +411,64 @@ class MemberAuthController {
       res.redirect('back');
     }
   }
-
+   //set member eligibility
+   async setMemberEligibility(member_id) {
+    //gender
+    let member_details = await Member.findOne({ where: { id: member_id } });
+    let member_eligibility = [];
+    
+    //eligibility entry for gender
+    let nmae_list = ['GENDER','ZIP','STATE','REGION','AGE']
+    let questions = await SurveyQuestion.findAll({where:{name:nmae_list}})
+    
+    if(questions.length){
+      questions.forEach(function(record,key){
+        
+        if(record.survey_provider_id){
+          let precode = ''
+          switch(record.name){
+            case 'GENDER':
+              if(record.survey_provider_id == 1){
+                if (member_details.gender == 'male') {
+                  precode = 1
+                }else if (member_details.gender == 'female'){
+                  precode = 2
+                } 
+              }
+              break;
+            case 'ZIP':
+              precode = member_details.zip_code
+              break;
+            // case 'STATE':
+            //   precode = member_details.zip_code
+            //   break;
+            case 'REGION':
+              precode = member_details.city
+              break;
+            case 'AGE':
+              if(member_details.dob){
+                var dob = new Date(member_details.dob);  
+                var month_diff = Date.now() - dob.getTime();  
+                var age_dt = new Date(month_diff);   
+                var year = age_dt.getUTCFullYear();  
+                precode = Math.abs(year - 1970);
+              }
+              break;
+          }
+          member_eligibility.push({
+            member_id: member_id,
+            survey_question_id: record.id,
+            precode_id: precode,
+          });
+        }
+      })
+    }
+    await MemberEligibilities.bulkCreate(member_eligibility, {
+      updateOnDuplicate: ['precode_id'],
+      ignoreDuplicates: true,
+    });
+    return;
+  }
   //change password
   async changePassword(req, member) {
     let member_status = true;

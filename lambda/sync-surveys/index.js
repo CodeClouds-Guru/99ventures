@@ -70,12 +70,11 @@ exports.handler = async (event) => {
         let model = {};
         let data = {
           survey_provider_id:record.survey_provider_id,
-          status:record.is_live == true || record.is_live == 'true' ? 'active' : 'draft',
+          status:record.is_live || record.is_live === 'true' ? 'active' : 'draft',
           loi: record.length_of_interview,
           cpi: record.cpi,
           name: record.survey_name,
           survey_number: record.survey_id,
-          status: status,
           original_json: record
         };
         var survey_status = 'created';
