@@ -13,6 +13,7 @@ const {
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
 const IpQualityScoreClass = require('../../helpers/IpQualityScore');
+const eventBus = require('../../eventBus');
 
 class MemberAuthController {
   constructor() {
@@ -23,6 +24,8 @@ class MemberAuthController {
     this.saveRegistrationBonus = this.saveRegistrationBonus.bind(this);
     this.emailVerify = this.emailVerify.bind(this);
     this.setMemberEligibility = this.setMemberEligibility.bind(this);
+    this.profileUpdate = this.profileUpdate.bind(this);
+    this.changePassword = this.changePassword.bind(this);
   }
   //login
   async login(req, res) {
@@ -90,6 +93,10 @@ class MemberAuthController {
     }
     if (member_status) {
       req.session.member = member;
+      let activityEventbus = eventBus.emit('member_activity', {
+        member_id: member.id,
+        action: 'Member Logged In',
+      });
       res.redirect(redirect_page);
     } else {
       req.session.flash = { error: member_message };
@@ -187,6 +194,10 @@ class MemberAuthController {
           await this.saveRegistrationBonus(member_details);
         }
         if (member_status) {
+          let activityEventbus = eventBus.emit('member_activity', {
+            member_id: member_details.id,
+            action: 'Member Sign Up',
+          });
           req.session.flash = { message: member_message };
         } else {
           req.session.flash = { error: member_message };
@@ -345,79 +356,98 @@ class MemberAuthController {
 
   //update member profile
   async profileUpdate(req, res) {
+    let member_status = true;
+    let member_message = 'Successfully updated!';
     try {
       const member_id = req.session.member.id;
+      const method = req.method;
       // const member_id = req.params.id;
-      let member_status = true;
-      let member_message = 'Successfully updated!';
+      console.log(method);
       let member = await Member.findOne({ where: { id: member_id } });
-      req.headers.company_id = req.session.company_portal.company_id;
-      req.headers.site_id = req.session.company_portal.id;
 
-      const schema = Joi.object({
-        first_name: Joi.string().required().label('First Name'),
-        last_name: Joi.string().required().label('Last Name'),
-        username: Joi.string().required().label('User Name'),
-        country: Joi.number().required().label('Country'),
-        zipcode: Joi.number().required().label('Zipcode'),
-        city: Joi.string().required().label('City'),
-        gender: Joi.string().required().label('Gender'),
-        phone_no: Joi.string().required().label('Phone number'),
-        // country_code: Joi.number().optional().label('Phone code'),
-        address_1: Joi.string().allow('').required().label('Address 1'),
-        address_2: Joi.string().allow('').optional().label('Address 2'),
-        email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
-      });
-      const { error, value } = schema.validate(req.body);
+      if (method === 'POST') {
+        req.headers.company_id = req.session.company_portal.company_id;
+        req.headers.site_id = req.session.company_portal.id;
 
-      if (error) {
-        member_status = false;
-        member_message = error.details.map((err) => err.message);
-      }
-      // console.log(member);
-      if (member.profile_completed_on == null) {
-        await Member.creditBonusByType(member, 'complete_profile_bonus', req);
-        req.body.profile_completed_on = new Date();
-      }
-      req.body.country_id = req.body.country;
-      req.body.zip_code = req.body.zipcode;
-      let request_data = req.body;
-      request_data.updated_by = member_id;
-      request_data.avatar = null;
-      if (req.files) {
-        request_data.avatar = await Member.updateAvatar(req, member);
-      }
-      // console.log(request_data);
-      let model = await Member.update(request_data, {
-        where: { id: member_id },
-      });
+        const schema = Joi.object({
+          first_name: Joi.string().required().label('First Name'),
+          last_name: Joi.string().required().label('Last Name'),
+          username: Joi.string().required().label('User Name'),
+          country: Joi.number().required().label('Country'),
+          zipcode: Joi.number().required().label('Zipcode'),
+          city: Joi.string().required().label('City'),
+          gender: Joi.string().required().label('Gender'),
+          phone_no: Joi.string().required().label('Phone number'),
+          // country_code: Joi.number().optional().label('Phone code'),
+          address_1: Joi.string().allow('').required().label('Address 1'),
+          address_2: Joi.string().allow('').optional().label('Address 2'),
+          email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
+        });
+        const { error, value } = schema.validate(req.body);
 
-      if (req.body.email_alerts && req.body.email_alerts.length > 0) {
-        let email_alerts = req.body.email_alerts;
-        member_status = await EmailAlert.saveEmailAlerts(
-          member_id,
-          email_alerts
-        );
+        if (error) {
+          member_status = false;
+          member_message = error.details.map((err) => err.message);
+        }
+        // console.log(member);
+        if (member.profile_completed_on == null) {
+          await Member.creditBonusByType(member, 'complete_profile_bonus', req);
+          req.body.profile_completed_on = new Date();
+          let activityEventbus = eventBus.emit('member_activity', {
+            member_id: member.id,
+            action: 'Profile Completed',
+          });
+        }
+        req.body.country_id = req.body.country;
+        req.body.zip_code = req.body.zipcode;
+        let request_data = req.body;
+        request_data.updated_by = member_id;
+        request_data.avatar = null;
+        if (req.files) {
+          request_data.avatar = await Member.updateAvatar(req, member);
+        }
+        // console.log(request_data);
+        let model = await Member.update(request_data, {
+          where: { id: member_id },
+        });
+
+        if (req.body.email_alerts && req.body.email_alerts.length > 0) {
+          let email_alerts = req.body.email_alerts;
+          member_status = await EmailAlert.saveEmailAlerts(
+            member_id,
+            email_alerts
+          );
+        }
       }
+      if (method === 'PUT') {
+        let rsp = await this.changePassword(req, member);
+        console.log(rsp);
+
+        member_status = rsp.member_status;
+        member_message = rsp.member_message;
+      }
+    } catch (error) {
+      console.log(error);
+      member_status = false;
+      member_message = 'Unable to save data';
+      // res.redirect('back');
+    } finally {
       if (member_status) {
         req.session.flash = { message: member_message };
       } else {
         req.session.flash = { error: member_message };
       }
-      // console.log(req.session.flash);
-      res.redirect('back');
-    } catch (error) {
-      console.log(error);
-      req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
   }
 
   //change password
-  async changePassword(req, res) {
+  async changePassword(req, member) {
+    let member_status = true;
+    let member_message = 'Successfully updated!';
     try {
-      const member_id = req.session.member.id;
-      // const member_id = req.params.id;
+      // const member_id = req.session.member.id;
+      const member_id = member.id;
       const schema = Joi.object({
         old_password: Joi.string().required(),
         new_password: Joi.string()
@@ -425,8 +455,7 @@ class MemberAuthController {
           .required(),
         confirm_password: Joi.string().required(),
       });
-      let member_status = true;
-      let member_message = 'Successfully updated!';
+
       const { error, value } = schema.validate(req.body);
 
       if (error) {
@@ -434,7 +463,6 @@ class MemberAuthController {
         member_message = error.details.map((err) => err.message);
       }
       //member details
-      let member = await Member.findOne({ where: { id: member_id } });
       const isMatch = await bcrypt.compare(
         req.body.old_password,
         member.password
@@ -457,16 +485,17 @@ class MemberAuthController {
           { password: password },
           { where: { id: member_id } }
         );
-        req.session.flash = { message: member_message };
-      } else {
-        req.session.flash = { error: member_message };
+        let activityEventbus = eventBus.emit('member_activity', {
+          member_id: member.id,
+          action: 'Password Changed',
+        });
       }
-      // res.redirect('back');
-      res.json({ results: req.session.flash });
     } catch (error) {
       console.log(error);
-      req.session.flash = { error: 'Unable to save data' };
-      res.redirect('back');
+      member_status = false;
+      member_message = 'Unable to save data';
+    } finally {
+      return { member_status, member_message };
     }
   }
   async logout(req, res) {

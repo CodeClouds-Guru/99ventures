@@ -89,16 +89,16 @@ router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);
 
-router.post(
-  '/profile/update',
+router.all(
+  '/profile/update/',
   [checkMemberAuth],
   MemberAuthController.profileUpdate
 );
-router.post(
-  '/password/update',
-  [checkMemberAuth],
-  MemberAuthController.changePassword
-);
+// router.post(
+//   '/password/update/:id?',
+//   [checkMemberAuth],
+//   MemberAuthController.changePassword
+// );
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');

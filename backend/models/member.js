@@ -433,42 +433,48 @@ module.exports = (sequelize, DataTypes) => {
 
   //profile completion bonus
   Member.creditBonusByType = async (member, bonus_key, req) => {
-    const { Setting, MemberTransaction } = require('../models/index');
-    const eventBus = require('../eventBus');
-    let bonus = await Setting.findOne({
-      where: {
-        settings_key: bonus_key,
-        company_portal_id: req.headers.site_id,
-      },
-    });
-    let data = {
-      type: 'credited',
-      amount: parseFloat(bonus.settings_value),
-      status: 2,
-      note: bonus_key,
-      member_id: member.id,
-      amount_action: 'admin_adjustment',
-      balance: parseFloat(bonus.settings_value),
-    };
-    let resp = await MemberTransaction.updateMemberTransactionAndBalance(data);
-    if (resp) {
-      let memberEventbus = eventBus.emit('send_email', {
-        action: 'Member Profile Completion',
-        data: {
-          email: 'debosmita.dey@codeclouds.co.in',
-          details: {
-            desc:
-              'Congratulation! You got a bonus of $' +
-              parseFloat(bonus.settings_value) +
-              ' on sucessfully completing your profile on ' +
-              new Date(),
-            members: JSON.parse(JSON.stringify(member)),
-          },
+    try {
+      const { Setting, MemberTransaction } = require('../models/index');
+      const eventBus = require('../eventBus');
+      let bonus = await Setting.findOne({
+        where: {
+          settings_key: bonus_key,
+          company_portal_id: req.headers.site_id,
         },
-        req: req,
       });
+      let data = {
+        type: 'credited',
+        amount: parseFloat(bonus.settings_value),
+        status: 2,
+        note: bonus_key,
+        member_id: member.id,
+        amount_action: 'admin_adjustment',
+        balance: parseFloat(bonus.settings_value),
+      };
+      let resp = await MemberTransaction.updateMemberTransactionAndBalance(
+        data
+      );
+      if (resp) {
+        let mailEventbus = eventBus.emit('send_email', {
+          action: 'Member Profile Completion',
+          data: {
+            email: 'debosmita.dey@codeclouds.co.in',
+            details: {
+              desc:
+                'Congratulation! You got a bonus of $' +
+                parseFloat(bonus.settings_value) +
+                ' on sucessfully completing your profile on ' +
+                new Date(),
+              members: JSON.parse(JSON.stringify(member)),
+            },
+          },
+          req: req,
+        });
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
     }
-    return true;
   };
 
   return Member;
