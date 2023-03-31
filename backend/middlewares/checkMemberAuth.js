@@ -21,7 +21,6 @@ module.exports = async function (req, res, next) {
     const member = await Member.findOne({
       where: { id: req.session.member.id },
     });
-
     // if (member.status === 'validating') {
     //   req.session.flash = { error: "Please verify your email to get into your account" }
     //   res.redirect('/notice');
@@ -46,7 +45,6 @@ module.exports = async function (req, res, next) {
     member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
 
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
-    console.log('-----------', req.session);
   }
   next();
 };

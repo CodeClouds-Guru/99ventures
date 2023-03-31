@@ -94,10 +94,10 @@ router.post(
   [checkMemberAuth],
   MemberAuthController.profileUpdate
 );
-router.post(
-  '/password/update',
+router.put(
+  '/profile/update',
   [checkMemberAuth],
-  MemberAuthController.changePassword
+  MemberAuthController.profileUpdate
 );
 
 router.get('/404', async (req, res) => {
