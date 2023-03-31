@@ -208,6 +208,7 @@ class MemberAuthController {
       }
       
     } catch (error) {
+      console.log(error)
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
