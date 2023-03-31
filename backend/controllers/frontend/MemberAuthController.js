@@ -413,7 +413,7 @@ class MemberAuthController {
       if (method === 'POST') {
         res.redirect('back');
       } else {
-        return { status: member_status, message: member_message };
+        res.json({ status: member_status, message: member_message });
       }
     }
   }
