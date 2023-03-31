@@ -9,6 +9,7 @@ const {
   SurveyQuestion,
   MemberEligibilities,
   MembershipTier,
+  MemberTransaction,
   EmailAlert,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
