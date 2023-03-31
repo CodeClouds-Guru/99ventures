@@ -127,10 +127,10 @@ class MemberAuthController {
       // const { error, value } = schema.validate(req.body);
       let member_status = true;
       let member_message = 'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
-      if (error) {
-        member_status = false;
-        member_message = error.details.map((err) => err.message);
-      }
+      // if (error) {
+      //   member_status = false;
+      //   member_message = error.details.map((err) => err.message);
+      // }
       //check if IP is blacklisted
       const ipHelper = new IpHelper();
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
@@ -143,7 +143,7 @@ class MemberAuthController {
             email: req.body.email,
           },
         });
-
+        let member_details = []
         if (existing_email_or_username) {
           member_status = false;
           member_message =
@@ -173,7 +173,7 @@ class MemberAuthController {
           const res = await Member.create(data);
           //send mail
           const eventBus = require('../../eventBus');
-          let member_details = await Member.findOne({
+          member_details = await Member.findOne({
             where: { email: req.body.email },
           });
 
@@ -279,6 +279,7 @@ class MemberAuthController {
       member_id: member_details.id,
       amount_action: 'admin_adjustment',
       balance: registration_bonus.settings_value,
+      completed_at: new Date()
     });
   }
   //geo track
