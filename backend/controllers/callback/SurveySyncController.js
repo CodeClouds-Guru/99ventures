@@ -121,7 +121,8 @@ class SurveySyncController {
     async schlesingerSurveyQuestions(req, res){
         try{
             const schObj = new SchlesingerHelper;
-            const qualifications = await schObj.fetchAndReturnData('/definition-api/api/v1/definition/qualification-answers/lanaguge/' + this.schlesingerLanguageId);
+            const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + this.schlesingerLanguageId);
+                        
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications; 
                 const ansPrecode = [];               
@@ -293,10 +294,11 @@ class SurveySyncController {
     async schlesingerSurvey(req, res) {
         try{
             const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchAndReturnData('/api/v2/survey/allocated-surveys');   
-                 
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
+            
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId);
+                
                 if(!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
@@ -447,7 +449,7 @@ class SurveySyncController {
             if(allSurveys.length) {
                 const psObj = new SchlesingerHelper;
                 for(let survey of allSurveys) {
-                    const surveyData = await psObj.fetchAndReturnData('/api/v2/survey/survey-qualifications/' + survey.survey_number);
+                    const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
                     if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
                         const surveyQualifications = surveyData.SurveyQualifications;
                         for(let ql of surveyQualifications){
