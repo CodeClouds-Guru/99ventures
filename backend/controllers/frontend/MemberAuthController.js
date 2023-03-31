@@ -338,26 +338,26 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        // const schema = Joi.object({
-        //   first_name: Joi.string().required().label('First Name'),
-        //   last_name: Joi.string().required().label('Last Name'),
-        //   username: Joi.string().required().label('User Name'),
-        //   country: Joi.number().required().label('Country'),
-        //   zipcode: Joi.number().required().label('Zipcode'),
-        //   city: Joi.string().required().label('City'),
-        //   gender: Joi.string().required().label('Gender'),
-        //   phone_no: Joi.string().required().label('Phone number'),
-        //   // country_code: Joi.number().optional().label('Phone code'),
-        //   address_1: Joi.string().allow('').required().label('Address 1'),
-        //   address_2: Joi.string().allow('').optional().label('Address 2'),
-        //   email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
-        // });
-        // const { error, value } = schema.validate(req.body);
+        const schema = Joi.object({
+          first_name: Joi.string().required().label('First Name'),
+          last_name: Joi.string().required().label('Last Name'),
+          username: Joi.string().required().label('User Name'),
+          country: Joi.number().required().label('Country'),
+          zipcode: Joi.number().required().label('Zipcode'),
+          city: Joi.string().required().label('City'),
+          gender: Joi.string().required().label('Gender'),
+          phone_no: Joi.string().required().label('Phone number'),
+          // country_code: Joi.number().optional().label('Phone code'),
+          address_1: Joi.string().allow('').required().label('Address 1'),
+          address_2: Joi.string().allow('').optional().label('Address 2'),
+          email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
+        });
+        const { error, value } = schema.validate(req.body);
 
-        // if (error) {
-        //   member_status = false;
-        //   member_message = error.details.map((err) => err.message);
-        // }
+        if (error) {
+          member_status = false;
+          member_message = error.details.map((err) => err.message);
+        }
         // console.log(member);
         if (member.profile_completed_on == null) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
