@@ -187,7 +187,7 @@ class MemberAuthController {
 
           //Referral code
           let referrer = '';
-          if (req.body.referral_code != '') {
+          if (req.body.referral_code) {
             await this.referralDetails(req, res);
             //signed up with referral code
           }
@@ -216,7 +216,7 @@ class MemberAuthController {
 
   //referral
   async referralDetails(req, res) {
-    if (req.body.referral_code != '') {
+    if (req.body.referral_code) {
       referrer = await Member.findOne({
         where: { referral_code: req.body.referral_code },
       });
