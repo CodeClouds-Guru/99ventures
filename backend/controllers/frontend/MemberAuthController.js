@@ -125,7 +125,7 @@ class MemberAuthController {
       });
       const { error, value } = schema.validate(req.body);
       let member_status = true;
-      let member_message = 'Registered successfully!';
+      let member_message = 'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
       if (error) {
         member_status = false;
         member_message = error.details.map((err) => err.message);
@@ -200,11 +200,13 @@ class MemberAuthController {
             action: 'Member Sign Up',
           });
           req.session.flash = { message: member_message };
+          res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
+          res.redirect('back');
         }
       }
-      res.redirect('back');
+      
     } catch (error) {
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
