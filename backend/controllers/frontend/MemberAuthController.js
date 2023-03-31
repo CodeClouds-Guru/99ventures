@@ -117,14 +117,14 @@ class MemberAuthController {
       } else {
         ip = ip.replace('::ffff:', '');
       }
-      const schema = Joi.object({
-        first_name: Joi.string().required().label('First Name'),
-        last_name: Joi.string().required().label('Last Name'),
-        email: Joi.string().optional(),
-        password: Joi.string().optional(),
-        confirm_password: Joi.string().optional(),
-      });
-      const { error, value } = schema.validate(req.body);
+      // const schema = Joi.object({
+      //   first_name: Joi.string().required().label('First Name'),
+      //   last_name: Joi.string().required().label('Last Name'),
+      //   email: Joi.string().optional(),
+      //   password: Joi.string().optional(),
+      //   confirm_password: Joi.string().optional(),
+      // });
+      // const { error, value } = schema.validate(req.body);
       let member_status = true;
       let member_message = 'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
       if (error) {
@@ -136,7 +136,7 @@ class MemberAuthController {
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
-        const password = await bcrypt.hash(value.password, salt);
+        const password = await bcrypt.hash(req.body.password, salt);
         let existing_email_or_username = await Member.findOne({
           where: {
             company_portal_id: company_portal_id,
@@ -159,15 +159,15 @@ class MemberAuthController {
           // }
 
           let data = {
-            first_name: value.first_name,
-            last_name: value.last_name,
-            email: value.email,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email: req.body.email,
             password: password,
             membership_tier_id: 1,
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
-            username: value.email.split('@')[0],
+            username: req.body.email.split('@')[0],
             created_at: new Date(),
           };
           const res = await Member.create(data);
