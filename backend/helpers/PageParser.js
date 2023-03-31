@@ -114,13 +114,13 @@ class PageParser {
     var do_script = async function(script_id,params = []){
       var scriptParser = new ScriptParser()
       var script_html = await scriptParser.parseScript(script_id,data);
-      data.push(script_html.data)
+      // data.push(script_html.data)
       console.log('data yyy',data)
       return script_html.script_html
     }
-    console.log('data',data)
+    // console.log('data',data)
     Object.assign({}, data);
-    console.log(data)
+    // console.log(data)
     // layout_html = layout_html.replaceAll(
     //   '${do_script("s2-1679901091138")}',
     //   "<p>hello</p>"
@@ -150,7 +150,7 @@ class PageParser {
       data,
       error_message,
     });
-    console.log(user);
+    // console.log(user);
     return layout_html;
   }
 
@@ -176,7 +176,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    console.log('regex_match',regex_match)
+    // console.log('regex_match',regex_match)
     
     if (regex_match) {
       await regex_match.forEach(async(script_id) => {

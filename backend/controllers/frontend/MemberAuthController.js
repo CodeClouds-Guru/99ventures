@@ -9,6 +9,7 @@ const {
   SurveyQuestion,
   MemberEligibilities,
   MembershipTier,
+  MemberTransaction,
   EmailAlert,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
@@ -116,33 +117,33 @@ class MemberAuthController {
       } else {
         ip = ip.replace('::ffff:', '');
       }
-      const schema = Joi.object({
-        first_name: Joi.string().required().label('First Name'),
-        last_name: Joi.string().required().label('Last Name'),
-        email: Joi.string().optional(),
-        password: Joi.string().optional(),
-        confirm_password: Joi.string().optional(),
-      });
-      const { error, value } = schema.validate(req.body);
+      // const schema = Joi.object({
+      //   first_name: Joi.string().required().label('First Name'),
+      //   last_name: Joi.string().required().label('Last Name'),
+      //   email: Joi.string().optional(),
+      //   password: Joi.string().optional(),
+      //   confirm_password: Joi.string().optional(),
+      // });
+      // const { error, value } = schema.validate(req.body);
       let member_status = true;
-      let member_message = 'Registered successfully!';
-      if (error) {
-        member_status = false;
-        member_message = error.details.map((err) => err.message);
-      }
+      let member_message = 'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
+      // if (error) {
+      //   member_status = false;
+      //   member_message = error.details.map((err) => err.message);
+      // }
       //check if IP is blacklisted
       const ipHelper = new IpHelper();
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
-        const password = await bcrypt.hash(value.password, salt);
+        const password = await bcrypt.hash(req.body.password, salt);
         let existing_email_or_username = await Member.findOne({
           where: {
             company_portal_id: company_portal_id,
             email: req.body.email,
           },
         });
-
+        let member_details = []
         if (existing_email_or_username) {
           member_status = false;
           member_message =
@@ -158,21 +159,21 @@ class MemberAuthController {
           // }
 
           let data = {
-            first_name: value.first_name,
-            last_name: value.last_name,
-            email: value.email,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email: req.body.email,
             password: password,
             membership_tier_id: 1,
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
-            username: value.email.split('@')[0],
+            username: req.body.email.split('@')[0],
             created_at: new Date(),
           };
           const res = await Member.create(data);
           //send mail
           const eventBus = require('../../eventBus');
-          let member_details = await Member.findOne({
+          member_details = await Member.findOne({
             where: { email: req.body.email },
           });
 
@@ -187,7 +188,7 @@ class MemberAuthController {
 
           //Referral code
           let referrer = '';
-          if (req.body.referral_code != '') {
+          if (req.body.referral_code) {
             await this.referralDetails(req, res);
             //signed up with referral code
           }
@@ -200,12 +201,15 @@ class MemberAuthController {
             action: 'Member Sign Up',
           });
           req.session.flash = { message: member_message };
+          res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
+          res.redirect('back');
         }
       }
-      res.redirect('back');
+      
     } catch (error) {
+      console.log(error)
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
@@ -213,7 +217,7 @@ class MemberAuthController {
 
   //referral
   async referralDetails(req, res) {
-    if (req.body.referral_code != '') {
+    if (req.body.referral_code) {
       referrer = await Member.findOne({
         where: { referral_code: req.body.referral_code },
       });
@@ -275,6 +279,7 @@ class MemberAuthController {
       member_id: member_details.id,
       amount_action: 'admin_adjustment',
       balance: registration_bonus.settings_value,
+      completed_at: new Date()
     });
   }
   //geo track

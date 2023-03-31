@@ -21,31 +21,30 @@ const storeSurveyQualifications = async (record, model, survey_questions) => {
         let model1 = await SurveyQualification.create(
           {
             survey_id: model.id,
-            survey_question_id: record1.question_id,
+            survey_question_id: obj.id,
             logical_operator: record1.logical_operator,
           },
           { silent: true }
         );
 
         record1.precodes.map(async (precode) => {
+          let precode_data = {
+            option:precode,
+            precode: record1.question_id,
+            survey_provider_id: model.survey_provider_id,
+          }
           var answer_precode = await SurveyAnswerPrecodes.findOne({
-            where: {
-              precode: precode,
-              survey_provider_id: model.survey_provider_id,
-            },
+            where: precode_data,
           });
           if (!answer_precode) {
-            answer_precode = await SurveyAnswerPrecodes.create({
-              option: '',
-              precode: precode,
-              survey_provider_id: model.survey_provider_id,
-            });
+            answer_precode = await SurveyAnswerPrecodes.create(precode_data);
           }
           await db.sequelize.query(
             'INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES (?, ?)',
             {
               type: QueryTypes.INSERT,
               replacements: [model1.id, answer_precode.id],
+              ignoreDuplicates:true
             }
           );
         });
@@ -65,8 +64,6 @@ exports.handler = async (event) => {
         let survey_questions = await SurveyQuestion.findAll({
           attributes: ['survey_provider_question_id'],
         });
-        let status = 'draft';
-
         let model = {};
         let data = {
           survey_provider_id:record.survey_provider_id,
