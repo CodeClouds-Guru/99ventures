@@ -8,6 +8,7 @@ const {
   Setting,
   SurveyQuestion,
   MemberEligibilities,
+  MembershipTier,
   EmailAlert,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
@@ -408,7 +409,9 @@ class MemberAuthController {
       } else {
         req.session.flash = { error: member_message };
       }
-      res.redirect('back');
+      if (method === 'POST') {
+        res.redirect('back');
+      }
     }
   }
    //set member eligibility
