@@ -85,9 +85,9 @@ class MemberAuthController {
         if (member.status != 'member') {
           member_status = false;
           member_message =
-            'Your account status is <b>' +
+            'Your account status is ' +
             member.status +
-            '</b>. Please contact to our admin!';
+            '. Please contact to our admin!';
         }
       }
     }
