@@ -13,6 +13,13 @@ $(() => {
     const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
     const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
+    let snackbar = `<div
+        class="snackbar alert d-flex align-items-center bg-danger text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed bottom-0 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
+        <p class="m-0 me-auto snack_msg"></p>
+        <button class="btn-close btn-close-white"></button>
+    </div>`;
+    $("body").append(snackbar);
+
     $("#choose-file").on('change', function () {
         let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
         file_name ? showFilename.text(file_name) : showFilename.text('')
@@ -109,6 +116,7 @@ $(() => {
     }
     var loginFomValidation = () => {
         errorsArray = [];
+        $('span.alert-msg').remove();
         const email = $(loginForm).find('input[name="email"]').get(0);
         const password = $(loginForm).find('input[name="password"]').get(0);
         if ($(email).val().trim().length === 0) {
@@ -122,6 +130,7 @@ $(() => {
     }
     var signupFormValidation = () => {
         errorsArray = [];
+        $('span.alert-msg').remove();
         const first_name = $(signupForm).find('input[name="first_name"]').get(0);
         const last_name = $(signupForm).find('input[name="last_name"]').get(0);
         const email = $(signupForm).find('input[name="email"]').get(0);
@@ -147,6 +156,7 @@ $(() => {
     }
     var ticketCreateFormValidation = () => {
         errorsArray = [];
+        $('span.alert-msg').remove();
         const ticket_subject = $(ticketCreateForm).find('input[name="ticket_subject"]').get(0);
         const ticket_file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '');
         const ticket_file_value = $(ticketCreateForm).find('input[name="ticket_file"]').prop('files');
@@ -161,6 +171,7 @@ $(() => {
     }
     var profileDetailsFormValidation = () => {
         errorsArray = [];
+        $('span.alert-msg').remove();
         const first_name = $(profileDetailsForm).find('input[name="first_name"]').get(0);
         const last_name = $(profileDetailsForm).find('input[name="last_name"]').get(0);
         const username = $(profileDetailsForm).find('input[name="username"]').get(0);
@@ -207,6 +218,7 @@ $(() => {
     }
     var ChangePasswordFomValidation = () => {
         errorsArray = [];
+        $('span.alert-msg').remove();
         const old_password = $(changePasswordForm).find('input[name="old_password"]').get(0);
         const new_password = $(changePasswordForm).find('input[name="new_password"]').get(0);
         const confirm_password = $(changePasswordForm).find('input[name="confirm_password"]').get(0);
@@ -226,7 +238,20 @@ $(() => {
             item.field.parent().append('<span class="alert-msg invalid-message mt-1"><i class="fa-solid fa-circle-exclamation me-1"></i>' + item.message + '</span>')
         });
     }
-
+    showSnackbar = (msg) => {
+        $('.snackbar .snack_msg').text(msg);
+        $(".snackbar").addClass('show');
+        setTimeout(function () {
+            $(".snackbar").removeClass('show');
+        }, 3000);
+    }
+    hideSnackbar = () => {
+        $(".snackbar .btn-close").click(function (e) {
+            e.preventDefault();
+            $('.snackbar .snack_msg').text('');
+            $(".snackbar").removeClass('show');
+        });
+    }
     if (loginForm) {
         loginFormSanitisation();
     }
@@ -282,15 +307,24 @@ $(() => {
         ChangePasswordFomValidation();
         if (errorsArray.length === 0) {
             $.ajax({
-                type: "POST",
-                url: '/password/update',
+                type: "PUT",
+                url: '/profile/update',
                 data: {
                     old_password: $(changePasswordForm).find('input[name="old_password"]').get(0).value.trim(),
                     new_password: $(changePasswordForm).find('input[name="new_password"]').get(0).value.trim(),
                     confirm_password: $(changePasswordForm).find('input[name="confirm_password"]').get(0).value.trim(),
                 },
                 success: (response) => {
-                    console.log(response.results)
+                    if (response.status) {
+                        showSnackbar(response.message);
+                        $('#return_message').text('');
+                        $('#scripteed_change_password_cancel_btn').click();
+                        $(changePasswordForm).find('input[name="old_password"]').get(0).value = '';
+                        $(changePasswordForm).find('input[name="new_password"]').get(0).value = '';
+                        $(changePasswordForm).find('input[name="confirm_password"]').get(0).value = '';
+                    } else {
+                        $('#return_message').text(response.message);
+                    }
                 },
             });
         } else {
