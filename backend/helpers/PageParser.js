@@ -5,9 +5,9 @@ const {
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
 } = require('../models');
-const util = require("util");
+const util = require('util');
 const { QueryTypes, Op } = require('sequelize');
-const defaultAddOns = require("../config/frontend_static_files.json");
+const defaultAddOns = require('../config/frontend_static_files.json');
 const safeEval = require('safe-eval');
 const Handlebars = require('handlebars');
 const ScriptParser = require('./ScriptParser');
@@ -62,10 +62,11 @@ class PageParser {
       this.sessionUser = req.session.member;
     }
     if ('flash' in req.session && req.session.flash) {
-      this.sessionMessage = req.session.flash.error
+      this.sessionMessage = req.session.flash.error;
       if ('access_error' in req.session.flash) {
-        this.sessionMessage = req.session.flash.access_error.error_message
+        this.sessionMessage = req.session.flash.access_error.error_message;
       }
+      delete req.session.flash;
     }
     const page_content = await this.generateHtml();
     return page_content;
@@ -109,15 +110,15 @@ class PageParser {
       additional_headers
     );
     var data = {
-      msg: "jkjkk"
-    }
-    var do_script = async function(script_id,params = []){
-      var scriptParser = new ScriptParser()
-      var script_html = await scriptParser.parseScript(script_id,data);
+      msg: 'jkjkk',
+    };
+    var do_script = async function (script_id, params = []) {
+      var scriptParser = new ScriptParser();
+      var script_html = await scriptParser.parseScript(script_id, data);
       // data.push(script_html.data)
-      console.log('data yyy',data)
-      return script_html.script_html
-    }
+      console.log('data yyy', data);
+      return script_html.script_html;
+    };
     // console.log('data',data)
     Object.assign({}, data);
     // console.log(data)
@@ -129,7 +130,6 @@ class PageParser {
     //get script ids
     // layout_html = await this.convertScriptToHtml(layout_html);
     layout_html = await this.convertComponentToHtml(layout_html);
-    
 
     const user = this.getSessionUser();
     const error_message = this.getFlashMessage() || '';
@@ -142,7 +142,7 @@ class PageParser {
       layout_keywords,
       layout_descriptions,
       default_scripted_codes,
-      do_script
+      do_script,
     });
     const template = Handlebars.compile(layout_html);
     layout_html = template({
@@ -150,6 +150,8 @@ class PageParser {
       data,
       error_message,
     });
+    this.sessionMessage = '';
+
     // console.log(user);
     return layout_html;
   }
@@ -177,9 +179,9 @@ class PageParser {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
     // console.log('regex_match',regex_match)
-    
+
     if (regex_match) {
-      await regex_match.forEach(async(script_id) => {
+      await regex_match.forEach(async (script_id) => {
         // layout_html = await scriptParser.parseScript(layout_html,script_id);
       });
     }
