@@ -374,15 +374,9 @@ const CreateUpdateForm = () => {
 
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
-            generatedHTML +=
-                `<html>
-                <head>
-                    <title>${allData.name}</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    ${css}
-                </head>
-                ${editor.getHtml()}            
-            </html>`;
+            const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
+            const htmlData = editor.getHtml().match(reg)[1];
+            generatedHTML +=`${css}\n${htmlData}`;
         }
         return generatedHTML;
     }
