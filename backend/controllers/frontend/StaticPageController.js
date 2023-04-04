@@ -3,6 +3,7 @@ const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
 const { Member } = require("../../models");
 const Handlebars = require('handlebars');
+const util = require('util')
 class StaticPageController {
     constructor() { }
 
@@ -73,7 +74,7 @@ class StaticPageController {
             }
             const scriptParser = new ScriptParser()
             const parsed = await scriptParser.parseScript(req.query.script, user, params);
-            console.dir(parsed)
+            console.log(util.inspect(parsed, false, null, true))
             const template = Handlebars.compile(parsed.script_html);
             var html = template({
                 data: parsed.data,

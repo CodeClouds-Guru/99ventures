@@ -35,7 +35,6 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
-            console.log(data);
             break;
         }
       }
