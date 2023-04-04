@@ -28,7 +28,7 @@ function eraseCookie(name) {
 
 function passWord() {
     var count = 1;
-    var pass1 = prompt('Please Enter Your Password', ' ');
+    var pass1 = prompt('Please Enter Your Password', '');
     while (count < maxattempt) {
         if (!pass1)
             history.go(-1);
@@ -38,7 +38,7 @@ function passWord() {
             break;
         }
         count += 1;
-        pass1 = prompt('Please Enter Your Password', ' ');
+        pass1 = prompt('Please Enter Your Password', '');
     }
 
     if (count === maxattempt) {

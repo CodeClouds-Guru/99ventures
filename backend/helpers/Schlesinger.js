@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { Country } = require('../models/index');
 
 const handler = {
 	get(target, prop) {
@@ -20,53 +19,44 @@ const handler = {
 
 class Schlesinger {
 	constructor() {
-		this.instance = axios.create({
-			baseURL: 'https://api-hub.market-cube.com/supply-api-v2/',
+		this.instance = {
 			timeout: 20000,
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
-				'X-MC-SUPPLY-KEY': '1002:0466198A-A78B-4F6C-8CE2-4A79FBC8FA41'
+				'X-MC-SUPPLY-KEY': (process.env.DEV_MODE == 1) ? '1002:0466198A-A78B-4F6C-8CE2-4A79FBC8FA41' : '1581:4e297b6e-3f09-424b-ac5f-c1f39205241c'
 			},
-		});
-		this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
-		this.createData = this.createData.bind(this);
+		};
+		
+		this.fetchSellerAPI = this.fetchSellerAPI.bind(this);
+		this.fetchDefinitionAPI = this.fetchDefinitionAPI.bind(this);
 		return new Proxy(this, handler);
 	}
 
-	async fetchAndReturnData(partUrl) {
-		const response = await this.instance.get(partUrl);
-		return response.data;
-	}
-
-	async createData(partUrl, payload) {
-		this.instance = {
+	/**
+	 * This is for the seller API
+	 */
+	async fetchSellerAPI(partUrl) {
+		const instance = axios.create({
 			...this.instance,
-			Accept: 'application/json, text/plain, */*',
-			'Content-Type': 'application/json',
-			data: payload,
-		};
-
-		const response = await this.instance.post(partUrl);
+			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/supply-api-v2/' : 'https://api.sample-cube.com',
+		});
+		const response = await instance.get(partUrl);
 		return response.data;
 	}
 
-	async updateData(partUrl, payload) {
-		this.instance = {
+	/**
+	 * This is for the definition API
+	 */
+	async fetchDefinitionAPI(partUrl) {
+		const instance = axios.create({
 			...this.instance,
-			Accept: 'application/json, text/plain, */*',
-			'Content-Type': 'application/json',
-			data: payload,
-		};
-
-		const response = await this.instance.put(partUrl);
+			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/definition-api/' : 'https://definitions.sample-cube.com/',
+		});
+		
+		const response = await instance.get(partUrl);
 		return response.data;
-	}
-
-	async deleteData(partUrl) {
-		const response = await this.instance.del(partUrl);
-		return response.data;
-	}
+	}	
 
 	getQuestionType(id) {
 		const questionType = {

@@ -121,7 +121,7 @@ class SchlesingerController {
                     return;
                 }
                 const queryString = {
-                    UID: eligibilities[0].Member.username
+                    uid: eligibilities[0].Member.username
                 };
                 eligibilities.map(eg => {
                     queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
@@ -171,23 +171,31 @@ class SchlesingerController {
     }
 
     generateEntryLink = async(req, res) => {
-        const queryString = req.query;
-        const data = await Survey.findOne({
-            attributes: ['original_json'],
-            where: {
-                survey_number: queryString.survey_number
+        try{
+            const queryString = req.query;
+            const data = await Survey.findOne({
+                attributes: ['original_json'],
+                where: {
+                    survey_number: queryString.survey_number
+                }
+            });        
+            
+            if (data && data.original_json) {
+                delete queryString['survey_number'];
+                const params = Object.fromEntries(new URLSearchParams(queryString));
+                const liveLink = data.original_json.LiveLink;
+                const liveLinkArry = liveLink.split('?');
+                const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
+                params.pid = Date.now();
+                delete liveLinkParams['zid'];   // We dont have any value for zid
+                const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
+                res.redirect(entryLink)
+            } else {
+                res.send('Unable to get entry link!');
             }
-        });
-        delete queryString['survey_number'];
-        const generateQueryString = new URLSearchParams(queryString).toString();
-
-        if (data && data.original_json) {
-            const liveLink = data.original_json.LiveLink;
-            const updatedLiveLink = liveLink.replace('[#scid#]', Date.now())
-            const entryLink = updatedLiveLink + '&' + generateQueryString;
-            res.redirect(entryLink)
-        } else {
-            res.send('Unable to get entry link!');
+        } catch (error) {
+            console.error(error);
+            throw error;
         }
     }
 }

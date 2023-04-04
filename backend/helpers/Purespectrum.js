@@ -20,10 +20,10 @@ const handler = {
 class Purespectrum {
 	constructor() {
 		this.instance = axios.create({
+			// baseURL: (process.env.DEV_MODE === 0) ? 'http://staging.spectrumsurveys.com/suppliers/v2/' : 'https://api.spectrumsurveys.com/suppliers/v2/',
 			baseURL: 'http://staging.spectrumsurveys.com/suppliers/v2/',
 			timeout: 20000,
 			headers: {
-				//Authorization: process.env.CINT_API_KEY,
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
 				'access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYzZkZmYxY2ZlNWEzMGI4ZTI4NjNjYiIsInVzcl9pZCI6IjI0MDgiLCJpYXQiOjE2NzM5Nzc4NDF9.nSZ01i3FsezOsunZmTxql3_QtS_jnaFWm4ZXfYFTtw4'
