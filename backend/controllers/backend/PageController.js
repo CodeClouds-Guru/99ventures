@@ -1,9 +1,10 @@
 const Controller = require("./Controller");
 const { Op } = require("sequelize");
-const { Layout, Component, Page } = require("../../models/index");
+const { Layout, Component, Page, Script } = require("../../models/index");
 class PageController extends Controller {
   constructor() {
     super("Page");
+    this.updateFields = this.updateFields.bind(this);
   }
   //override list function
   async list(req, res) {
@@ -19,21 +20,103 @@ class PageController extends Controller {
     })
     return response
   }
+  async updateFields(fields, site_id) {
+    let layouts = await Layout.findAll({
+      where: {
+        company_portal_id: site_id,
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      },
+      attributes: [
+        'id',
+        ['name', 'value']
+      ]
+    });
+    let default_layout = await Layout.findOne({
+      where: { code: 'default-layout', company_portal_id: site_id },
+    });
+    fields.layout_id.value = default_layout.id;
+    let components = await Component.findAll({
+      where: {
+        company_portal_id: site_id,
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      },
+      order: [
+        ['name', 'ASC'],
+      ],
+      attributes: [
+        'id',
+        'html',
+        ['name', 'value']
+      ]
+    });
+    let scripts = await Script.findAll({
+      where: {
+        company_portal_id: site_id
+      },
+      attributes: [
+        'id',
+        'config_json',
+        ['name', 'value'],
+        ['script_html', 'html'],
+      ]
+    });
+    fields = {
+      ...fields,
+      'layouts': {
+        field_name: "layout",
+        db_name: "layouts",
+        type: "select",
+        placeholder: "Layout",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: layouts,
+      },
+      'components': {
+        field_name: "component",
+        db_name: "components",
+        type: "select",
+        placeholder: "Component",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: components,
+      },
+      'scripts': {
+        field_name: "script",
+        db_name: "scripts",
+        type: "select",
+        placeholder: "Script",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: scripts,
+      }
+    }
+    return fields;
+  }
   //override add function
   async add(req, res) {
     let response = await super.add(req);
     let fields = { ...response.fields };
     const site_id = req.header("site_id");
-    let other_details = await this.getOtherDetails(site_id)
-    
-    let default_layout = await Layout.findOne({
-      where: { code: 'default-layout', company_portal_id: site_id },
-    });
-    fields.layout_id.value = default_layout.id;
-    
-    fields.layouts = other_details.layouts
-    fields.components = other_details.components
-
+    fields = await this.updateFields(fields, site_id);
     return {
       status: true,
       fields,
@@ -43,17 +126,9 @@ class PageController extends Controller {
   async edit(req, res) {
     let response = await super.edit(req);
     let fields = { ...response.fields };
+
     const site_id = req.header("site_id");
-    let other_details = await this.getOtherDetails(site_id)
-    
-    let default_layout = await Layout.findOne({
-      where: { code: 'default-layout', company_portal_id: site_id },
-    });
-    fields.layout_id.value = default_layout.id;
-
-    fields.layouts = other_details.layouts
-    fields.components = other_details.components
-
+    fields = await this.updateFields(fields, site_id);
     response.fields = fields;
     return response;
   }
@@ -146,65 +221,6 @@ class PageController extends Controller {
     //   result:page_content
     // })
     res.render("page", { page_content: page_content });
-  }
-
-  //get other details
-  async getOtherDetails(site_id){
-    //get layout
-    let layouts = await Layout.findAll({
-      attributes: ["id", ["name","value"]],
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-    });
-
-    //get components
-    let components = await Component.findAll({
-      attributes: ["id", ["name","value"],"html"],
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-      order: [
-        ['name', 'ASC'],
-      ],
-    });
-
-    return {
-      layouts:{
-        field_name: "layout",
-        db_name: "layouts",
-        type: "select",
-        placeholder: "Layout",
-        listing: false,
-        show_in_form: true,
-        sort: true,
-        required: true,
-        value: "",
-        width: "50",
-        searchable: true,
-        options: layouts,
-      },
-      components:{
-        field_name: "component",
-        db_name: "components",
-        type: "select",
-        placeholder: "Component",
-        listing: false,
-        show_in_form: true,
-        sort: true,
-        required: true,
-        value: "",
-        width: "50",
-        searchable: true,
-        options: components,
-      }
-    }
   }
 }
 

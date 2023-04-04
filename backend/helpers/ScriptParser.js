@@ -21,12 +21,21 @@ class ScriptParser {
             const order = 'order' in params ? params.order : 'desc';
             const pageNo = 'pageNo' in params ? params.pageno : 1;
             const where = this.getModuleWhere(script.module, user);
+            // console.log({
+            //   ...where,
+            //   order: [[Sequelize.literal(orderBy), order]],
+            //   limit: perPage,
+            //   offset: (pageNo - 1) * perPage,
+            //   include: { all: true }
+            // })
             data = await Models[script.module].findAll({
-              where: where,
+              subQuery: false,
               order: [[Sequelize.literal(orderBy), order]],
               limit: perPage,
-              offset: (pageNo - 1) * perPage
+              offset: (pageNo - 1) * perPage,
+              ...where,
             });
+            console.log(data);
             break;
         }
       }
@@ -39,31 +48,22 @@ class ScriptParser {
   getModuleWhere(module, user) {
     switch (module) {
       case 'Ticket':
-        return { member_id: user.id }
+        return { where: { member_id: user.id } }
+      case 'MemberTransaction':
+        return {
+          include: { model: Models.Member },
+          attributes: [
+            'created_at',
+            'id',
+            'amount',
+            [Sequelize.literal('Member.avatar'), 'avatar'],
+            [Sequelize.literal('Member.username'), 'username'],
+          ],
+          where: { type: 'credited' }
+        }
       default:
         return null;
     }
   }
-
-  //offerwall list
-  // async getOfferWallList(){
-  //   try{
-  //     var offer_walls = await OfferWall.findAll({ where: { status: '1' } });
-  //     return offer_walls
-  //   }catch(err){
-  //     console.log(err)
-  //     return
-  //   }
-  // }
-  // //member ticket list
-  // async getTicketList(){
-  //   try{
-  //     var tickets = await Ticket.findAll({ where: { member_id: req.session.member.id } });
-  //     return tickets
-  //   }catch(err){
-  //     console.log(err)
-  //     return
-  //   }
-  // }
 }
 module.exports = ScriptParser;
