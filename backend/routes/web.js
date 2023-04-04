@@ -79,7 +79,7 @@ const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
-router.get('/email-verify', MemberAuthController.emailVerify);
+router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
 router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
