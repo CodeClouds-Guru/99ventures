@@ -130,6 +130,7 @@ module.exports = (sequelize, DataTypes) => {
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
+      email_verified_on: 'TIMESTAMP',
       profile_completed_on: 'TIMESTAMP',
       avatar: {
         type: DataTypes.STRING,

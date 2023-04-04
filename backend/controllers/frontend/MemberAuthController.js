@@ -16,6 +16,8 @@ const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
 const IpQualityScoreClass = require('../../helpers/IpQualityScore');
 const eventBus = require('../../eventBus');
+const { genarateHash } = require('../../helpers/global');
+const { decodeHash } = require('../../helpers/global');
 
 class MemberAuthController {
   constructor() {
@@ -126,7 +128,8 @@ class MemberAuthController {
       // });
       // const { error, value } = schema.validate(req.body);
       let member_status = true;
-      let member_message = 'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
+      let member_message =
+        'Registered successfully! We have sent a mail to your registered email. Please confirm your email.';
       // if (error) {
       //   member_status = false;
       //   member_message = error.details.map((err) => err.message);
@@ -143,7 +146,7 @@ class MemberAuthController {
             email: req.body.email,
           },
         });
-        let member_details = []
+        let member_details = [];
         if (existing_email_or_username) {
           member_status = false;
           member_message =
@@ -177,6 +180,10 @@ class MemberAuthController {
             where: { email: req.body.email },
           });
 
+          let hash_obj = { id: member_details.id, email: req.body.email };
+          var buf = genarateHash(JSON.stringify(hash_obj));
+          member_details.email_confirmation_link =
+            req.session.company_portal.domain + '/email-verify/' + buf;
           let evntbus = eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
@@ -207,9 +214,8 @@ class MemberAuthController {
           res.redirect('back');
         }
       }
-      
     } catch (error) {
-      console.log(error)
+      console.log(error);
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
@@ -279,7 +285,7 @@ class MemberAuthController {
       member_id: member_details.id,
       amount_action: 'admin_adjustment',
       balance: registration_bonus.settings_value,
-      completed_at: new Date()
+      completed_at: new Date(),
     });
   }
   //geo track
@@ -314,16 +320,28 @@ class MemberAuthController {
 
   //verify verify
   async emailVerify(req, res) {
-    // let hash_obj = Buffer.from(req.body.hash, "base64");
-    // hash_obj = hash_obj.toString("utf8");
-    // hash_obj = JSON.parse(hash_obj);
-    // let member_details = await Member.findOne({where:{id:hash_obj.id,email:hash_obj.email}})
+    let hash_obj = decodeHash(req.params.hash);
+    console.log('hash_obj', hash_obj);
     let member_details = await Member.findOne({
-      where: { id: 1, email: 'demomember@mailinator.com' },
+      where: { id: hash_obj.id, email: hash_obj.email },
     });
+    console.log('member_details', member_details);
     if (member_details) {
+      let model = await Member.update(
+        {
+          email_verified_on: new Date(),
+          status: 'member',
+        },
+        {
+          where: { id: member_details.id },
+        }
+      );
       //set member eligibility
       await this.setMemberEligibility(member_details.id);
+      let activityEventbus = eventBus.emit('member_activity', {
+        member_id: member_details.id,
+        action: 'Email Verified',
+      });
     }
     res.redirect('/');
     return;

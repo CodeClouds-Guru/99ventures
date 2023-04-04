@@ -80,6 +80,8 @@ class PageParser {
     const page_keywords = this.page.keywords;
     const page_descriptions = this.page.descriptions;
     const page_meta_code = this.page.meta_code || '';
+    const user = this.getSessionUser();
+    const error_message = this.getFlashMessage() || '';
     let layout_keywords = await CompanyPortalMetaTag.findOne({
       where: {
         tag_name: 'Keywords',
@@ -109,30 +111,8 @@ class PageParser {
       '${additional_header_script}',
       additional_headers
     );
-    var data = {
-      msg: 'jkjkk',
-    };
-    var do_script = async function (script_id, params = []) {
-      var scriptParser = new ScriptParser();
-      var script_html = await scriptParser.parseScript(script_id, data);
-      // data.push(script_html.data)
-      console.log('data yyy', data);
-      return script_html.script_html;
-    };
-    // console.log('data',data)
-    Object.assign({}, data);
-    // console.log(data)
-    // layout_html = layout_html.replaceAll(
-    //   '${do_script("s2-1679901091138")}',
-    //   "<p>hello</p>"
-    // );
-
-    //get script ids
-    // layout_html = await this.convertScriptToHtml(layout_html);
     layout_html = await this.convertComponentToHtml(layout_html);
 
-    const user = this.getSessionUser();
-    const error_message = this.getFlashMessage() || '';
 
     layout_html = safeEval('`' + layout_html + '`', {
       page_title,
@@ -142,12 +122,10 @@ class PageParser {
       layout_keywords,
       layout_descriptions,
       default_scripted_codes,
-      do_script,
     });
     const template = Handlebars.compile(layout_html);
     layout_html = template({
       user,
-      data,
       error_message,
     });
     this.sessionMessage = '';
@@ -178,7 +156,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    // console.log('regex_match',regex_match)
+    console.log('regex_match', regex_match)
 
     if (regex_match) {
       await regex_match.forEach(async (script_id) => {

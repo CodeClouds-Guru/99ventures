@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       script_json: Joi.object().required().label("Script JSON"),
       status: Joi.optional(),
       module: Joi.optional().allow("").label("Code"),
+      action_type: Joi.optional()
     });
     return schema.validate(req.body);
   };
@@ -35,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       module: DataTypes.STRING,
       action_type: DataTypes.STRING,
       script_html: DataTypes.TEXT('long'),
+      action_type: DataTypes.STRING,
       status: {
         type: DataTypes.TINYINT,
         // get() {

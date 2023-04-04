@@ -161,12 +161,12 @@ class EmailHelper {
             '>', //'info@moresurveys.com', // sender address
           to: to, // list of receivers
           // from: 'sourabh.das@codeclouds.in',
-          // to: 'nandita.bardhan@codeclouds.co.in',
+          // to: 'debosmita.dey@codeclouds.co.in',
           subject: subject,
           //text: 'That was easy!',
           html: body,
         };
-        // console.log('Mail Data', mailData);
+        console.log('Mail Data', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {

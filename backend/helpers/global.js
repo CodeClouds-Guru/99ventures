@@ -7,19 +7,19 @@
  * Description: Similar to asset() helper in laravel
  * @param {String} part_url
  */
-require("dotenv").config();
+require('dotenv').config();
 
-const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
-const fs = require("fs");
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 // const axios = require('axios')
 
-exports.asset = (part_url = "") => {
+exports.asset = (part_url = '') => {
   base_asset_url = process.env.URI;
-  if (base_asset_url.slice(-1) !== "/") {
-    base_asset_url += "/";
+  if (base_asset_url.slice(-1) !== '/') {
+    base_asset_url += '/';
   }
-  if (part_url[0] === "/") {
+  if (part_url[0] === '/') {
     part_url = part_url.substr(1);
   }
   return base_asset_url + part_url;
@@ -59,20 +59,20 @@ exports.generateToken = (params) => {
 //   )
 
 exports.stringToSlug = (str) => {
-  str = str.replace(/^\s+|\s+$/g, ""); // trim
+  str = str.replace(/^\s+|\s+$/g, ''); // trim
   str = str.toLowerCase();
 
   // remove accents, swap ñ for n, etc
-  var from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;";
-  var to = "aaaaeeeeiiiioooouuuunc------";
+  var from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:;';
+  var to = 'aaaaeeeeiiiioooouuuunc------';
   for (var i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
   }
 
   str = str
-    .replace(/[^a-z0-9 -]/g, "") // remove invalid chars
-    .replace(/\s+/g, "-") // collapse whitespace and replace by -
-    .replace(/-+/g, "-"); // collapse dashes
+    .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, '-') // collapse whitespace and replace by -
+    .replace(/-+/g, '-'); // collapse dashes
 
   return str;
 };
@@ -94,7 +94,7 @@ exports.createCommentSignature = (code) => {
   //   'start': `<!-- ${code} starts -->`,
   //   'end': `<!-- ${code} ends -->`
   // }
-  return { start: "", end: "" };
+  return { start: '', end: '' };
 };
 
 // exports.cryptoEncryption = (str) => {
@@ -116,5 +116,14 @@ exports.createCommentSignature = (code) => {
 //   console.log(mystr);
 //   return mystr;
 // };
-
-exports.capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1)
+exports.genarateHash = (hash_obj) => {
+  var buf = Buffer.from(hash_obj, 'utf8');
+  return buf.toString('base64');
+};
+exports.decodeHash = (str) => {
+  let hash_obj = Buffer.from(str, 'base64');
+  hash_obj = hash_obj.toString('utf8');
+  return JSON.parse(hash_obj);
+};
+exports.capitalizeFirstLetter = (string) =>
+  string.charAt(0).toUpperCase() + string.slice(1);

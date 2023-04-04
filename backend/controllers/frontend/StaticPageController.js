@@ -1,8 +1,10 @@
 
 const PageParser = require('../../helpers/PageParser');
-
+const ScriptParser = require('../../helpers/ScriptParser');
+const { Member } = require("../../models");
+const Handlebars = require('handlebars');
 class StaticPageController {
-    constructor() {}
+    constructor() { }
 
     /**
      * Show Survey Status
@@ -51,6 +53,42 @@ class StaticPageController {
         var pagePerser = new PageParser('survey', content);
         var page_content = await pagePerser.preview(req);
         res.render('page', { page_content });
+    }
+
+    /**
+     * Get Script data
+     * @param {*} req 
+     * @param {*} res 
+     */
+    async getScripts(req, res) {
+        var resp = {
+            status: false,
+            error: '',
+            html: '',
+        }
+        try {
+            const params = req.query;
+            if (req.query.member) {
+                var user = await Member.findOne({ where: { id: req.query.member } })
+            }
+            const scriptParser = new ScriptParser()
+            const parsed = await scriptParser.parseScript(req.query.script, user, params);
+            console.dir(parsed)
+            const template = Handlebars.compile(parsed.script_html);
+            var html = template({
+                data: parsed.data,
+            });
+            resp = {
+                ...resp,
+                status: true,
+                html
+            }
+        } catch (e) {
+            resp.error = e.message
+        } finally {
+            res.json(resp);
+        }
+
     }
 
 }

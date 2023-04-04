@@ -14,5 +14,9 @@
   {
     "type": "script",
     "src": "/js/FormDataHandler.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/ScriptHandler.js"
   }
 ]
