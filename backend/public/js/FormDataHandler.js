@@ -1,4 +1,41 @@
 $(() => {
+    var displayErrors = () => {
+        $('span.alert-msg').remove();
+        errorsArray.forEach(item => {
+            let field_name = item.field.attr('name');
+            let element = '<span class="alert-msg invalid-message mt-1 lh-sm"><i class="fa-solid fa-circle-exclamation me-1"></i>' + item.message + '</span>';
+            ['password', 'confirm_password', 'old_password', 'new_password'].includes(field_name) ? item.field.parent().parent().append(element) : item.field.parent().append(element);
+        });
+    }
+    var showSnackbar = (msg) => {
+        $('.snackbar .snack_msg').text(msg);
+        $(".snackbar").addClass('show');
+        setTimeout(function () {
+            $(".snackbar").removeClass('show');
+        }, 3000);
+    }
+    var hideSnackbar = () => {
+        $(".snackbar .btn-close").click(function (e) {
+            e.preventDefault();
+            $('.snackbar .snack_msg').text('');
+            $(".snackbar").removeClass('show');
+        });
+    }
+    let errorMsgDiv = `<div id="scripteed_error_message_div" class="d-none">
+    {{error_message}}</div>`;
+    // $('body').append(errorMsgDiv);
+
+    let snackbar = `<div
+    class="snackbar alert d-flex align-items-center bg-danger text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed bottom-0 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
+    <p class="m-0 me-auto snack_msg"></p>
+    <button class="btn-close btn-close-white"></button>
+    </div>`;
+    $("body").append(snackbar);
+    let errorMsg = $('#scripteed_error_message_div').text();
+    if (errorMsg.length > 0) {
+        showSnackbar(errorMsg);
+    }
+
     var errorsArray = [];
     const loginForm = $("#scripteed_login_form").get(0);
     const loginBtn = $("#scripteed_login_btn").get(0);
@@ -13,12 +50,6 @@ $(() => {
     const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
     const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
-    let snackbar = `<div
-        class="snackbar alert d-flex align-items-center bg-danger text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed bottom-0 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
-        <p class="m-0 me-auto snack_msg"></p>
-        <button class="btn-close btn-close-white"></button>
-    </div>`;
-    $("body").append(snackbar);
 
     $("#choose-file").on('change', function () {
         let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
@@ -226,31 +257,11 @@ $(() => {
             errorsArray.push({ field: $(old_password), message: 'Old Password should be greater than 7 characters' });
         }
         if ($(new_password).val().trim().length < 8) {
-            errorsArray.push({ field: $(new_password), message: 'Old Password should be greater than 7 characters' });
+            errorsArray.push({ field: $(new_password), message: 'New Password should be greater than 7 characters' });
         }
         if ($(new_password).val().trim() !== $(confirm_password).val().trim()) {
             errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
         }
-    }
-    displayErrors = () => {
-        $('span.alert-msg').remove();
-        errorsArray.forEach(item => {
-            item.field.parent().append('<span class="alert-msg invalid-message mt-1"><i class="fa-solid fa-circle-exclamation me-1"></i>' + item.message + '</span>')
-        });
-    }
-    showSnackbar = (msg) => {
-        $('.snackbar .snack_msg').text(msg);
-        $(".snackbar").addClass('show');
-        setTimeout(function () {
-            $(".snackbar").removeClass('show');
-        }, 3000);
-    }
-    hideSnackbar = () => {
-        $(".snackbar .btn-close").click(function (e) {
-            e.preventDefault();
-            $('.snackbar .snack_msg').text('');
-            $(".snackbar").removeClass('show');
-        });
     }
     if (loginForm) {
         loginFormSanitisation();
