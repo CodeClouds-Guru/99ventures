@@ -24,71 +24,16 @@ class PageController extends Controller {
     let response = await super.add(req);
     let fields = { ...response.fields };
     const site_id = req.header("site_id");
-    let layouts = await Layout.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-    });
+    let other_details = await this.getOtherDetails(site_id)
+    
     let default_layout = await Layout.findOne({
       where: { code: 'default-layout', company_portal_id: site_id },
     });
     fields.layout_id.value = default_layout.id;
-    let components = await Component.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-      order: [
-        ['name', 'ASC'],
-      ],
-    });
-    layouts = layouts.map((layout) => {
-      return {
-        id: layout.id,
-        value: layout.name,
-      };
-    });
-    components = components.map((component) => {
-      return {
-        id: component.id,
-        value: component.name,
-        html: component.html,
-      };
-    });
+    
+    fields.layouts = other_details.layouts
+    fields.components = other_details.components
 
-    fields.layouts = {
-      field_name: "layout",
-      db_name: "layouts",
-      type: "select",
-      placeholder: "Layout",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: layouts,
-    };
-    fields.components = {
-      field_name: "component",
-      db_name: "components",
-      type: "select",
-      placeholder: "Component",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: components,
-    };
     return {
       status: true,
       fields,
@@ -98,73 +43,17 @@ class PageController extends Controller {
   async edit(req, res) {
     let response = await super.edit(req);
     let fields = { ...response.fields };
-
     const site_id = req.header("site_id");
-    let layouts = await Layout.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-    });
+    let other_details = await this.getOtherDetails(site_id)
+    
     let default_layout = await Layout.findOne({
       where: { code: 'default-layout', company_portal_id: site_id },
     });
     fields.layout_id.value = default_layout.id;
-    let components = await Component.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-      order: [
-        ['name', 'ASC'],
-      ],
-    });
-    layouts = layouts.map((layout) => {
-      return {
-        id: layout.id,
-        value: layout.name,
-      };
-    });
-    components = components.map((component) => {
-      return {
-        id: component.id,
-        value: component.name,
-        html: component.html,
-      };
-    });
 
-    fields.layouts = {
-      field_name: "layout",
-      db_name: "layouts",
-      type: "select",
-      placeholder: "Layout",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: layouts,
-    };
-    fields.components = {
-      field_name: "component",
-      db_name: "components",
-      type: "select",
-      placeholder: "Component",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: components,
-    };
+    fields.layouts = other_details.layouts
+    fields.components = other_details.components
+
     response.fields = fields;
     return response;
   }
@@ -257,6 +146,65 @@ class PageController extends Controller {
     //   result:page_content
     // })
     res.render("page", { page_content: page_content });
+  }
+
+  //get other details
+  async getOtherDetails(site_id){
+    //get layout
+    let layouts = await Layout.findAll({
+      attributes: ["id", ["name","value"]],
+      where: {
+        company_portal_id: site_id,
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      },
+    });
+
+    //get components
+    let components = await Component.findAll({
+      attributes: ["id", ["name","value"],"html"],
+      where: {
+        company_portal_id: site_id,
+        code: {
+          [Op.notLike]: "%-rev-%",
+        },
+      },
+      order: [
+        ['name', 'ASC'],
+      ],
+    });
+
+    return {
+      layouts:{
+        field_name: "layout",
+        db_name: "layouts",
+        type: "select",
+        placeholder: "Layout",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: layouts,
+      },
+      components:{
+        field_name: "component",
+        db_name: "components",
+        type: "select",
+        placeholder: "Component",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: components,
+      }
+    }
   }
 }
 

@@ -3,7 +3,7 @@
 module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.addColumn('scripts', 'config_json', {
-            type: Sequelize.STRING
+            type: Sequelize.JSON
         });
     },
     async down(queryInterface, Sequelize) {
