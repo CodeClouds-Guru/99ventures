@@ -4,6 +4,7 @@ const { Layout, Component, Page, Script } = require("../../models/index");
 class PageController extends Controller {
   constructor() {
     super("Page");
+    this.updateFields = this.updateFields.bind(this);
   }
   //override list function
   async list(req, res) {
@@ -19,11 +20,7 @@ class PageController extends Controller {
     })
     return response
   }
-  //override add function
-  async add(req, res) {
-    let response = await super.add(req);
-    let fields = { ...response.fields };
-    const site_id = req.header("site_id");
+  async updateFields(fields, site_id) {
     let layouts = await Layout.findAll({
       where: {
         company_portal_id: site_id,
@@ -31,6 +28,10 @@ class PageController extends Controller {
           [Op.notLike]: "%-rev-%",
         },
       },
+      attributes: [
+        'id',
+        ['name', 'value']
+      ]
     });
     let default_layout = await Layout.findOne({
       where: { code: 'default-layout', company_portal_id: site_id },
@@ -46,82 +47,11 @@ class PageController extends Controller {
       order: [
         ['name', 'ASC'],
       ],
-    });
-    layouts = layouts.map((layout) => {
-      return {
-        id: layout.id,
-        value: layout.name,
-      };
-    });
-    components = components.map((component) => {
-      return {
-        id: component.id,
-        value: component.name,
-        html: component.html,
-      };
-    });
-
-    fields.layouts = {
-      field_name: "layout",
-      db_name: "layouts",
-      type: "select",
-      placeholder: "Layout",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: layouts,
-    };
-    fields.components = {
-      field_name: "component",
-      db_name: "components",
-      type: "select",
-      placeholder: "Component",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: components,
-    };
-    return {
-      status: true,
-      fields,
-    };
-  }
-  //override edit function
-  async edit(req, res) {
-    let response = await super.edit(req);
-    let fields = { ...response.fields };
-
-    const site_id = req.header("site_id");
-    let layouts = await Layout.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-    });
-    let default_layout = await Layout.findOne({
-      where: { code: 'default-layout', company_portal_id: site_id },
-    });
-    fields.layout_id.value = default_layout.id;
-    let components = await Component.findAll({
-      where: {
-        company_portal_id: site_id,
-        code: {
-          [Op.notLike]: "%-rev-%",
-        },
-      },
-      order: [
-        ['name', 'ASC'],
-      ],
+      attributes: [
+        'id',
+        'html',
+        ['name', 'value']
+      ]
     });
     let scripts = await Script.findAll({
       where: {
@@ -129,22 +59,10 @@ class PageController extends Controller {
       },
       attributes: [
         'id',
+        'config_json',
         ['name', 'value'],
         ['script_html', 'html'],
       ]
-    });
-    layouts = layouts.map((layout) => {
-      return {
-        id: layout.id,
-        value: layout.name,
-      };
-    });
-    components = components.map((component) => {
-      return {
-        id: component.id,
-        value: component.name,
-        html: component.html,
-      };
     });
     fields = {
       ...fields,
@@ -191,7 +109,26 @@ class PageController extends Controller {
         options: scripts,
       }
     }
+    return fields;
+  }
+  //override add function
+  async add(req, res) {
+    let response = await super.add(req);
+    let fields = { ...response.fields };
+    const site_id = req.header("site_id");
+    fields = await this.updateFields(fields, site_id);
+    return {
+      status: true,
+      fields,
+    };
+  }
+  //override edit function
+  async edit(req, res) {
+    let response = await super.edit(req);
+    let fields = { ...response.fields };
 
+    const site_id = req.header("site_id");
+    fields = await this.updateFields(fields, site_id);
     response.fields = fields;
     return response;
   }
