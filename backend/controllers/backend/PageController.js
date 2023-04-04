@@ -1,6 +1,6 @@
 const Controller = require("./Controller");
 const { Op } = require("sequelize");
-const { Layout, Component, Page } = require("../../models/index");
+const { Layout, Component, Page, Script } = require("../../models/index");
 class PageController extends Controller {
   constructor() {
     super("Page");
@@ -123,6 +123,16 @@ class PageController extends Controller {
         ['name', 'ASC'],
       ],
     });
+    let scripts = await Script.findAll({
+      where: {
+        company_portal_id: site_id
+      },
+      attributes: [
+        'id',
+        ['name', 'value'],
+        ['script_html', 'html'],
+      ]
+    });
     layouts = layouts.map((layout) => {
       return {
         id: layout.id,
@@ -136,35 +146,52 @@ class PageController extends Controller {
         html: component.html,
       };
     });
+    fields = {
+      ...fields,
+      'layouts': {
+        field_name: "layout",
+        db_name: "layouts",
+        type: "select",
+        placeholder: "Layout",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: layouts,
+      },
+      'components': {
+        field_name: "component",
+        db_name: "components",
+        type: "select",
+        placeholder: "Component",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: components,
+      },
+      'scripts': {
+        field_name: "script",
+        db_name: "scripts",
+        type: "select",
+        placeholder: "Script",
+        listing: false,
+        show_in_form: true,
+        sort: true,
+        required: true,
+        value: "",
+        width: "50",
+        searchable: true,
+        options: scripts,
+      }
+    }
 
-    fields.layouts = {
-      field_name: "layout",
-      db_name: "layouts",
-      type: "select",
-      placeholder: "Layout",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: layouts,
-    };
-    fields.components = {
-      field_name: "component",
-      db_name: "components",
-      type: "select",
-      placeholder: "Component",
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: "",
-      width: "50",
-      searchable: true,
-      options: components,
-    };
     response.fields = fields;
     return response;
   }

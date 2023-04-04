@@ -84,6 +84,7 @@ class StaticPageController {
                 html
             }
         } catch (e) {
+            console.error(e)
             resp.error = e.message
         } finally {
             res.json(resp);
