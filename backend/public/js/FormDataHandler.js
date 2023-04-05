@@ -21,9 +21,6 @@ $(() => {
             $(".snackbar").removeClass('show');
         });
     }
-    let errorMsgDiv = `<div id="scripteed_error_message_div" class="d-none">
-    {{error_message}}</div>`;
-    // $('body').append(errorMsgDiv);
 
     let snackbar = `<div
     class="snackbar alert d-flex align-items-center bg-danger text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed bottom-0 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
@@ -32,7 +29,7 @@ $(() => {
     </div>`;
     $("body").append(snackbar);
     let errorMsg = $('#scripteed_error_message_div').text();
-    if (errorMsg.length > 0) {
+    if (errorMsg.trim().length > 0) {
         showSnackbar(errorMsg);
     }
 
@@ -326,15 +323,12 @@ $(() => {
                     confirm_password: $(changePasswordForm).find('input[name="confirm_password"]').get(0).value.trim(),
                 },
                 success: (response) => {
+                    showSnackbar(response.message);
                     if (response.status) {
-                        showSnackbar(response.message);
-                        $('#return_message').text('');
                         $('#scripteed_change_password_cancel_btn').click();
                         $(changePasswordForm).find('input[name="old_password"]').get(0).value = '';
                         $(changePasswordForm).find('input[name="new_password"]').get(0).value = '';
                         $(changePasswordForm).find('input[name="confirm_password"]').get(0).value = '';
-                    } else {
-                        $('#return_message').text(response.message);
                     }
                 },
             });
