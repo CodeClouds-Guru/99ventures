@@ -11,6 +11,7 @@ const defaultAddOns = require('../config/frontend_static_files.json');
 const safeEval = require('safe-eval');
 const Handlebars = require('handlebars');
 const ScriptParser = require('./ScriptParser');
+const moment = require('moment');
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
@@ -29,6 +30,9 @@ class PageParser {
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
+    Handlebars.registerHelper("format", function (options) {
+      return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
+    });
   }
 
   async getPageNLayout() {

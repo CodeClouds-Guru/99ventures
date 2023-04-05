@@ -60,6 +60,8 @@ class PageController extends Controller {
       attributes: [
         'id',
         'config_json',
+        'code',
+        'action_type',
         ['name', 'value'],
         ['script_html', 'html'],
       ]
