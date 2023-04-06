@@ -1,5 +1,5 @@
 const Models = require('../models');
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -10,7 +10,7 @@ class ScriptParser {
   async parseScript(script_id, user, params) {
     var data = [];
     var script_html = '';
-    let script = await Models.Script.findOne({ where: { 'code': script_id } })
+    let script = await Models.Script.findOne({ where: { code: script_id } });
     if (script) {
       script_html = script.script_html;
       if (script.module) {
@@ -36,18 +36,28 @@ class ScriptParser {
               ...where,
             });
             break;
+          case 'profile_update':
+            const member_where = this.getModuleWhere(script.module, user);
+            data = await Models[script.module].findOne({
+              ...member_where,
+            });
+            data.email_alerts = await Models.EmailAlert.getEmailAlertList(
+              user.id
+            );
+            data.country_list = await Models.Country.getAllCountryList();
+            break;
         }
       }
     }
     return {
       data: JSON.parse(JSON.stringify(data)),
-      script_html
-    }
+      script_html,
+    };
   }
   getModuleWhere(module, user) {
     switch (module) {
       case 'Ticket':
-        return { where: { member_id: user.id } }
+        return { where: { member_id: user.id } };
       case 'MemberTransaction':
         return {
           include: { model: Models.Member },
@@ -58,8 +68,12 @@ class ScriptParser {
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
           ],
-          where: { type: 'credited' }
-        }
+          where: { type: 'credited' },
+        };
+      case 'Member':
+        return {
+          include: { model: Models.MembershipTier, attributes: ['name'] },
+        };
       default:
         return null;
     }
