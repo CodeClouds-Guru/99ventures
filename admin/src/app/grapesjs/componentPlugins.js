@@ -2,17 +2,17 @@ import grapesjs from 'grapesjs';
 import axios from 'axios';
 
 export const customComponents = grapesjs.plugins.add('custom-component', async (editor, opts) => {
-    axios.get(`/pages/add`)
+    axios.get(`/scripts?page=1&show=100&module=scripts`)
         .then((response) => {
             if (response.data.results) {
-                const jsonData = response.data.results.fields.scripts.options;
+                const jsonData = response.data.results.result.data;                
                 jsonData.forEach(val => {
-                    if(val.config_json){
+                    if(val.config_json){                        
                         editor.Components.addType('component_'+val.id, {
                             isComponent: el => el.classList?.contains('component_'+val.id),
                             model: {
                                 defaults: {
-                                    name: val.value, // Simple custom name
+                                    name: val.name, // Simple custom name
                                     style: {
                                         width: '100%',
                                         height: '10px',
@@ -40,7 +40,7 @@ export const scriptBlockManager = grapesjs.plugins.add('script-block-manager', a
             if (response.data.results) {
                 const jsonData = response.data.results.result.data;
                 jsonData.forEach(val => {
-                    editor.BlockManager.add(`block-${val.name}`, {
+                    editor.BlockManager.add(`block-${val.id}`, {
                         label: val.name,
                         category: 'Scripts',
                         attributes: {
@@ -48,7 +48,7 @@ export const scriptBlockManager = grapesjs.plugins.add('script-block-manager', a
                         },
                         content: (val.config_json)
                                 ? `<div data-script="${val.code}" data-gjs-type="component_${val.id}"></div>`
-                                : `<div data-script="'+val.code+'"></div>`
+                                : `<div data-script="${val.code}"></div>`
 
                         // content: (val.config_json) ? {type: 'component_'+val.id} : '<div data-script="'+val.code+'"></div>'
                     });

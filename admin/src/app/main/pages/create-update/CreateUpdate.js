@@ -33,8 +33,7 @@ const CreateUpdate = () => {
     const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
     const [changeCount, setChangeCount] = useState(0);
-    const [layoutOptions, setLayoutOptions] = useState([]);
-    const [components, setComponents] = useState([]);
+    const [layoutOptions, setLayoutOptions] = useState([]);    
     const domain = `https://${user.loggedin_portal.domain}/`;
     const [expanded, setExpanded] = useState('panel1');
   
@@ -190,21 +189,6 @@ const CreateUpdate = () => {
         dynamicErrorMsg('name', event.target.value.trim());
     }
 
-    const createCustomComponentForEditor = (components_val, editor) => {
-        components_val.map((val) => {
-            editor.BlockManager.add(`block-${val.value}`, {
-                label: val.value,
-                category: 'Custom Component',
-                attributes: {
-                    class: 'fa fa-square'
-                },
-                content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
-            });
-        })
-        // Custom Component block accordian set collapsed by default
-        editor.BlockManager.getCategories()._byId["Custom Component"].set("open", false)
-    }
-
     const getLayoutOptions = (editor) => {
         axios.get(`/${module}/add`)
             .then((response) => {
@@ -214,7 +198,6 @@ const CreateUpdate = () => {
                         ...allData,
                         layout_id: response.data.results.fields.layout_id.value
                     });
-                    // setComponents(response.data.results.fields.components.options);
                     loadEditorData(editor);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
@@ -276,7 +259,6 @@ const CreateUpdate = () => {
             .then((response) => {
                 if (response.data.results.result) {
                     setLayoutOptions(response.data.results.fields.layouts.options);
-                    // setComponents(response.data.results.fields.components.options);
                     const record = response.data.results.result;
                     setAllData(allData => ({
                         ...allData,
@@ -293,6 +275,7 @@ const CreateUpdate = () => {
                         auth_required: !!record.auth_required,
                     }));
 
+                    //-- Whenever all the custom async components & Blocks will be loaded, the canvas data will be set
                     const storageManager = editor.Storage;
                     storageManager.getStorageOptions()['key'] = `gjs-pages-${moduleId}`;
                     setStorageKey(`gjs-pages-${moduleId}`);
