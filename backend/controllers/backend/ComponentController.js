@@ -1,9 +1,9 @@
-const Controller = require("./Controller");
-const { Op } = require("sequelize");
-const { Component } = require("../../models/index");
+const Controller = require('./Controller');
+const { Op } = require('sequelize');
+const { Component } = require('../../models/index');
 class ComponentController extends Controller {
   constructor() {
-    super("Component");
+    super('Component');
     this.componentRevisionUpdate = this.componentRevisionUpdate.bind(this);
   }
   //override save function
@@ -13,7 +13,7 @@ class ComponentController extends Controller {
     let response = await super.save(req);
     return {
       status: true,
-      message: "Component added.",
+      message: 'Component added.',
       id: response.result.id,
     };
   }
@@ -27,7 +27,7 @@ class ComponentController extends Controller {
     const countBackups = await this.model.count({
       where: {
         code: {
-          [Op.like]: previous.code + "-rev-%",
+          [Op.like]: previous.code + '-rev-%',
         },
       },
     });
@@ -45,7 +45,7 @@ class ComponentController extends Controller {
     // let response = await super.update(req);
     return {
       status: true,
-      message: "Component updated.",
+      message: 'Component updated.',
     };
   }
   //override delete function
@@ -53,37 +53,37 @@ class ComponentController extends Controller {
     let response = await super.delete(req);
     return {
       status: true,
-      message: "Component deleted.",
+      message: 'Component deleted.',
     };
   }
 
   //override list function
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    if ("where" in options) {
+    if ('where' in options) {
       if (Op.and in options['where']) {
         options['where'] = {
           [Op.and]: {
             ...options['where'][Op.and],
             code: {
-              [Op.notLike]: "%-rev-%",
+              [Op.notLike]: '%-rev-%',
             },
-          }
-        }
+          },
+        };
       } else {
         options['where'] = {
           [Op.and]: {
             ...options['where'],
             code: {
-              [Op.notLike]: "%-rev-%",
+              [Op.notLike]: '%-rev-%',
             },
-          }
-        }
+          },
+        };
       }
     } else {
       options.where = {
         code: {
-          [Op.notLike]: "%-rev-%",
+          [Op.notLike]: '%-rev-%',
         },
       };
     }
@@ -103,13 +103,13 @@ class ComponentController extends Controller {
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
-        attributes: ["id", "name", "created_at"],
+        attributes: ['id', 'name', 'created_at', 'updated_at'],
         where: {
           code: {
-            [Op.like]: model.code + "-rev-%",
+            [Op.like]: model.code + '-rev-%',
           },
         },
-        order: [["created_at", "DESC"]],
+        order: [['created_at', 'DESC']],
       });
 
       let fields = this.model.fields;
@@ -137,7 +137,7 @@ class ComponentController extends Controller {
         code: previous.code,
         component_json: current.component_json,
         updated_by: req.user.id,
-        created_at: new Date(),
+        // created_at: new Date(),
       };
 
       let model_update = this.model.update(update_data, {
@@ -151,13 +151,13 @@ class ComponentController extends Controller {
         name: previous.name,
         html: previous.html,
         component_json: previous.component_json,
-        code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
+        code: previous.code + '-rev-' + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
         created_at: previous.created_at,
         // updated_at: previous.created_at,
       };
-      console.log("==================", create_data);
+      console.log('==================', create_data);
       let model = await Component.create(create_data);
       // let saveResponse = await super.save(createData);
     } else {

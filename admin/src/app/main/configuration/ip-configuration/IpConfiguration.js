@@ -1,4 +1,4 @@
-import { Button, Paper, Card, CardContent, CardHeader } from '@mui/material';
+import { Button, Paper, Card, CardContent, CardHeader, Autocomplete, TextField } from '@mui/material';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -10,6 +10,13 @@ import jwtServiceConfig from '../../../auth/services/jwtService/jwtServiceConfig
 function IpConfiguration(props) {
     let [ips, setIps] = useState([]);
     let [isps, setIsps] = useState([]);
+    let [countryOptions, setCountryOptions] = useState([]);
+    let [countryIsos, setCountryIsos] = useState([]);
+    let [preSelectedCountryValues, setPreSelectedCountryValues] = useState([]);
+    let [browserOptions, setBrowserOptions] = useState([]);
+    let [browsers, setBrowsers] = useState([]);
+    let [preSelectedBrowserValues, setPreSelectedBrowserValues] = useState([]);
+
     const dispatch = useDispatch();
     const [permission, setPermission] = useState(false);
 
@@ -19,12 +26,19 @@ function IpConfiguration(props) {
             (props.permission('save') || props.permission('update'))
         );
     }, [props.permission])
-
+    useEffect(() => {
+        preSelectedCountries();
+    }, [countryIsos])
+    useEffect(() => {
+        preSelectedBrowsers();
+    }, [browsers])
     const submit = (e) => {
         e.preventDefault();
         axios.post(jwtServiceConfig.saveIpConfiguration, {
             ips,
             isps,
+            countries: countryIsos,
+            browsers: browsers
         }).then(res => {
             const variant = res.data.results.status ? 'success' : 'error';
             dispatch(showMessage({ variant, message: res.data.results.message }))
@@ -41,12 +55,51 @@ function IpConfiguration(props) {
     const onIspChangeFromChild = (val) => {
         setIsps(val);
     }
-
+    const handleCountries = (newValue) => {
+        let iso = [];
+        newValue.map((obj) => {
+            iso.push(obj.value)
+        })
+        setCountryIsos(iso)
+    }
+    const handleBrowsers = (newValue) => {
+        let bro = [];
+        newValue.map((obj) => {
+            bro.push(obj.value)
+        })
+        setBrowsers(bro)
+    }
+    const preSelectedCountries = () => {
+        let country_values = [];
+        countryOptions.map((c, index1) => {
+            countryIsos.map(ci => {
+                if (c.value === ci) {
+                    country_values.push(countryOptions[index1])
+                }
+            })
+        })
+        setPreSelectedCountryValues(country_values)
+    }
+    const preSelectedBrowsers = () => {
+        let browser_values = [];
+        browserOptions.map((b, index1) => {
+            browsers.map(bv => {
+                if (b.value === bv) {
+                    browser_values.push(browserOptions[index1])
+                }
+            })
+        })
+        setPreSelectedBrowserValues(browser_values)
+    }
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
             if (res.data.results.status) {
                 setIps(res.data.results.data.ip_list)
                 setIsps(res.data.results.data.isp_list)
+                setCountryOptions(res.data.results.all_country_list)
+                setCountryIsos(res.data.results.data.country_list)
+                setBrowserOptions(res.data.results.all_browser_list)
+                setBrowsers(res.data.results.data.browser_list)
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.errors }))
             }
@@ -58,7 +111,7 @@ function IpConfiguration(props) {
 
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
                     <div className="flex flex-col justify-center w-full">
                         <Card variant="outlined" className="mb-20">
@@ -74,7 +127,7 @@ function IpConfiguration(props) {
                             </CardContent>
                         </Card>
 
-                        <Card variant="outlined">
+                        <Card variant="outlined" className="mb-20">
                             <CardHeader title="Denied ISP List" />
                             <CardContent>
                                 <AddMore
@@ -83,6 +136,50 @@ function IpConfiguration(props) {
                                     placeholder="Enter ISP"
                                     onChange={onIspChangeFromChild}
                                     validationRegex="([^\s])"
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card variant="outlined" className="mb-20">
+                            <CardHeader title="Denied Country List" />
+                            <CardContent>
+                                <Autocomplete
+                                    multiple
+                                    id="tags-outlined"
+                                    options={countryOptions}
+                                    getOptionLabel={(option) => option.name}
+                                    onChange={(event, newValue) => handleCountries(newValue)}
+                                    value={preSelectedCountryValues}
+                                    filterSelectedOptions
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Denied Countrie(s)"
+                                            placeholder="Select Countrie(s)"
+                                        />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card variant="outlined">
+                            <CardHeader title="Denied Browser List" />
+                            <CardContent>
+                                <Autocomplete
+                                    multiple
+                                    id="tags-outlined"
+                                    options={browserOptions}
+                                    getOptionLabel={(option) => option.name}
+                                    onChange={(event, newValue) => handleBrowsers(newValue)}
+                                    value={preSelectedBrowserValues}
+                                    filterSelectedOptions
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Denied Browser(s)"
+                                            placeholder="Select Browser(s)"
+                                        />
+                                    )}
                                 />
                             </CardContent>
                         </Card>

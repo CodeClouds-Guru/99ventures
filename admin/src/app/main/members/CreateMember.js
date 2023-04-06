@@ -66,8 +66,9 @@ const schema = yup.object().shape({
     username: yup.string().required('Please enter Username'),
     status: yup.string().required('Please enter Status'),
     address_1: yup.string().required('Please enter Address 1'),
+    city: yup.string().required('Please enter City'),
     phone_no: yup.number().required('Please enter Phone').typeError('Please insert only number'),
-    zip_code: yup.number().required('Please enter Zipcode').typeError('Please insert only number'),
+    zip_code: yup.string().required('Please enter ZIP Code'),
     country_id: yup.string().required('Please enter Country'),
     // dob: yup.string().required('Please enter DOB'),
     gender: yup.string().required('Please enter Gender'),
@@ -83,13 +84,15 @@ const defaultValues = {
     status: '',
     address_1: '',
     address_2: '',
-    address_3: '',
+    city: '',
     zip_code: '',
     phone_no: '',
     country_id: '',
     // dob: '',
     gender: '',
 };
+
+const acceptAvatarMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/svg+xml"];
 
 const CreateMember = () => {
     const module = 'members';
@@ -108,7 +111,6 @@ const CreateMember = () => {
         defaultValues,
         resolver: yupResolver(schema),
     });
-
     const { isValid, dirtyFields, errors } = formState;
 
     useEffect(() => {
@@ -121,7 +123,7 @@ const CreateMember = () => {
         setValue('status', '', { shouldDirty: true, shouldValidate: false });
         setValue('address_1', '', { shouldDirty: true, shouldValidate: false });
         setValue('address_2', '', { shouldDirty: true, shouldValidate: false });
-        setValue('address_3', '', { shouldDirty: true, shouldValidate: false });
+        setValue('city', '', { shouldDirty: true, shouldValidate: false });
         setValue('zip_code', '', { shouldDirty: true, shouldValidate: false });
         setValue('phone_no', '', { shouldDirty: true, shouldValidate: false });
         setValue('country_id', '', { shouldDirty: true, shouldValidate: false });
@@ -136,6 +138,16 @@ const CreateMember = () => {
         document.getElementById('contained-button-file').click();
     }
     const selectedFile = (event) => {
+        const file = event.target.files[0];
+        const fileSizeInMB = Math.round(file.size / 1000 / 1000); //MiB
+        if (fileSizeInMB > 2) {
+            dispatch(showMessage({ variant: 'error', message: 'Image should be less than of 2 MB' }));
+            return;
+        }
+        if (!acceptAvatarMimeTypes.includes(file.type)) {
+            dispatch(showMessage({ variant: 'error', message: 'Invalid image type!' }));
+            return;
+        }
         event.target.files.length > 0 ? setAvatar(event.target.files[0]) : setAvatar('')
     }
     const makeAvatarBlank = () => {
@@ -196,7 +208,7 @@ const CreateMember = () => {
                 dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }));
             })
     }
-    const onSubmit = ({ first_name, last_name, email, username, status, address_1, address_2, address_3, zip_code, phone_no, country_id, gender }) => {
+    const onSubmit = ({ first_name, last_name, email, username, status, address_1, address_2, city, zip_code, phone_no, country_id, gender }) => {
         let form_data = new FormData();
         form_data.append('company_id', companyId);
         form_data.append('company_portal_id', companyPortalId);
@@ -209,7 +221,7 @@ const CreateMember = () => {
         form_data.append('status', status);
         form_data.append('address_1', address_1);
         form_data.append('address_2', address_2);
-        form_data.append('address_3', address_3);
+        form_data.append('city', city);
         form_data.append('zip_code', zip_code);
         form_data.append('phone_no', phone_no);
         form_data.append('country_id', country_id);
@@ -538,17 +550,18 @@ const CreateMember = () => {
                                         )}
                                     />
                                     <Controller
-                                        name="address_3"
+                                        name="city"
                                         control={control}
                                         render={({ field }) => (
                                             <TextField
                                                 className="w-1/2 mb-10 p-5"
                                                 {...field}
-                                                label="Address 3"
+                                                label="City"
                                                 type="text"
-                                                error={!!errors.address_3}
-                                                helperText={errors?.address_3?.message}
+                                                error={!!errors.city}
+                                                helperText={errors?.city?.message}
                                                 variant="outlined"
+                                                required
                                             />
                                         )}
                                     />
@@ -600,6 +613,7 @@ const CreateMember = () => {
                                     disabled={_.isEmpty(dirtyFields) || !isValid}
                                     type="submit"
                                     size="large"
+                                    loading={loading}
                                 >
                                     Save
                                 </LoadingButton>

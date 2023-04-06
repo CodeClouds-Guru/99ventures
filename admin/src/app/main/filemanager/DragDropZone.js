@@ -6,10 +6,11 @@ import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { getList, setPathObject, setLoading, setListData, setSelectedItem } from 'app/store/filemanager';
+import { getList, setPathObject, setLoading, setListData, setSelectedItem} from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
+
 
 const baseStyle = {
 	justifyContent: 'center',
@@ -35,36 +36,6 @@ const rejectStyle = {
 	borderRadius: 2,
 	borderStyle: 'dashed',
 };
-/*const thumbsContainer = {
-	display: 'flex',
-	flexDirection: 'row',
-	flexWrap: 'wrap',
-	marginTop: 16
-};
-
-const thumb = {
-	display: 'inline-flex',
-	borderRadius: 2,
-	border: '1px solid #eaeaea',
-	marginBottom: 8,
-	marginRight: 8,
-	width: 100,
-	height: 100,
-	padding: 4,
-	boxSizing: 'border-box'
-};
-
-const thumbInner = {
-	display: 'flex',
-	minWidth: 0,
-	overflow: 'hidden'
-};
-
-const img = {
-	display: 'block',
-	width: 'auto',
-	height: '100%'
-};*/
 
 const centerStyle = {
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
@@ -81,9 +52,10 @@ const centerStyle = {
     justifyContent: 'center'
 }
 
-function DragDropzone() {
+function DragDropzone(props) {
 	const dispatch = useDispatch();
-    const listing = useSelector(state=> state.filemanager.listData);
+    const listing = props.listing;
+    // const listing = useSelector(state=> state.filemanager.listData);
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const selectConfig = useSelector(state => state.filemanager.config);
@@ -104,6 +76,7 @@ function DragDropzone() {
 		maxFiles: selectConfig.max_no_of_uploads ?? 0,
 		accept: selectConfig.accept ?? {},
 		onDrop: acceptedFiles => {
+			// console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
 				preview: URL.createObjectURL(file)
 			})));
@@ -148,7 +121,6 @@ function DragDropzone() {
 		}
 	});
 
-
 	const style = useMemo(() => ({
 		...(!listing.length ? baseStyle: {}),
 		...(isFocused ? focusedStyle : {}),
@@ -187,7 +159,7 @@ function DragDropzone() {
 			path = pathArry
 			dispatch(setPathObject(pathArry));
 		}
-		
+
 		dispatch(
 			getList(path.join('/'))
 		).then(response => {

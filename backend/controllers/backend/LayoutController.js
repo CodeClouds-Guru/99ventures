@@ -1,37 +1,38 @@
-const Controller = require("./Controller");
-const { Op } = require("sequelize");
-const { Layout, Component } = require("../../models/index");
+const Controller = require('./Controller');
+const { Op } = require('sequelize');
+const { Layout, Component } = require('../../models/index');
 class LayoutController extends Controller {
   constructor() {
-    super("Layout");
+    super('Layout');
     this.layoutRevisionUpdate = this.layoutRevisionUpdate.bind(this);
   }
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    let layout_html = req.body.html
-    if(layout_html.includes('{{content}}')){
+    let layout_html = req.body.html;
+    if (layout_html.includes('{{content}}')) {
       let response = await super.save(req);
       return {
         status: true,
-        message: "Layout added.",
+        message: 'Layout added.',
         id: response.result.id,
       };
-    }else{
-      this.throwCustomError("{{content}} is missing.", 401);
+    } else {
+      this.throwCustomError('{{content}} is missing.', 401);
     }
   }
   //override update function
   async update(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    let layout_html = req.body.html
-    if(layout_html.includes('{{content}}')){
-      let rev_layout_id = req.body.rev_layout_id || null; //5
+    let layout_html = req.body.html;
+    let rev_layout_id = req.body.rev_layout_id || null; //5
+
+    if (rev_layout_id || layout_html.includes('{{content}}')) {
       let previous = await this.model.findByPk(req.params.id); //1
       const countBackups = await this.model.count({
         where: {
           code: {
-            [Op.like]: previous.code + "-rev-%",
+            [Op.like]: previous.code + '-rev-%',
           },
         },
       });
@@ -46,10 +47,10 @@ class LayoutController extends Controller {
 
       return {
         status: true,
-        message: "Layout updated.",
+        message: 'Layout updated.',
       };
-    }else{
-      this.throwCustomError("{{content}} is missing.", 401);
+    } else {
+      this.throwCustomError('{{content}} is missing.', 401);
     }
   }
 
@@ -57,11 +58,11 @@ class LayoutController extends Controller {
   async add(req, res) {
     let company_portal_id = req.headers.site_id;
     let components = await Component.findAll({
-      attributes: ["name", "html", "code", "component_json"],
+      attributes: ['name', 'html', 'code', 'component_json'],
       where: {
         company_portal_id: company_portal_id,
         code: {
-          [Op.notLike]: "%-rev-%",
+          [Op.notLike]: '%-rev-%',
         },
       },
     });
@@ -77,19 +78,19 @@ class LayoutController extends Controller {
     try {
       let company_portal_id = req.headers.site_id;
       let components = await Component.findAll({
-        attributes: ["name", "html", "code", "component_json"],
+        attributes: ['name', 'html', 'code', 'component_json'],
         where: { company_portal_id: company_portal_id },
       });
       let model = await this.model.findByPk(req.params.id);
 
       const allBackups = await this.model.findAndCountAll({
-        attributes: ["id", "name", "created_at"],
+        attributes: ['id', 'name', 'created_at', 'updated_at'],
         where: {
           code: {
-            [Op.like]: model.code + "-rev-%",
+            [Op.like]: model.code + '-rev-%',
           },
         },
-        order: [["created_at", "DESC"]],
+        order: [['created_at', 'DESC']],
       });
 
       let fields = this.model.fields;
@@ -109,36 +110,36 @@ class LayoutController extends Controller {
     let response = await super.delete(req);
     return {
       status: true,
-      message: "Layout deleted.",
+      message: 'Layout deleted.',
     };
   }
 
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    if ("where" in options){
-      if(Op.and in options['where']){
+    if ('where' in options) {
+      if (Op.and in options['where']) {
         options['where'] = {
           [Op.and]: {
             ...options['where'][Op.and],
             code: {
-              [Op.notLike]: "%-rev-%",
+              [Op.notLike]: '%-rev-%',
             },
-          }
-        }
-      }else{
+          },
+        };
+      } else {
         options['where'] = {
           [Op.and]: {
             ...options['where'],
             code: {
-              [Op.notLike]: "%-rev-%",
+              [Op.notLike]: '%-rev-%',
             },
-          }
-        }
+          },
+        };
       }
-    }else{
+    } else {
       options.where = {
         code: {
-          [Op.notLike]: "%-rev-%",
+          [Op.notLike]: '%-rev-%',
         },
       };
     }
@@ -161,7 +162,7 @@ class LayoutController extends Controller {
         html: current.html,
         layout_json: current.layout_json,
         updated_by: req.user.id,
-        created_at: new Date(),
+        // created_at: new Date(),
       };
 
       let model_update = this.model.update(update_data, {
@@ -175,13 +176,13 @@ class LayoutController extends Controller {
         name: previous.name,
         html: previous.html,
         layout_json: previous.layout_json,
-        code: previous.code + "-rev-" + (parseInt(req.countBackups) + 1),
+        code: previous.code + '-rev-' + (parseInt(req.countBackups) + 1),
         company_portal_id: req.headers.site_id,
         created_by: req.user.id,
         created_at: previous.created_at,
         // updated_at: previous.created_at,
       };
-      console.log("==================", create_data);
+      console.log('==================', create_data);
       let model = await Layout.create(create_data);
       // let saveResponse = await super.save(createData);
     } else {

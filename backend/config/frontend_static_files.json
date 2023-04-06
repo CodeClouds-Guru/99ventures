@@ -1,0 +1,22 @@
+[
+  {
+    "type": "script",
+    "src": "/js/SiteLock.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/jquery-v1.min.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/socket.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/FormDataHandler.js"
+  },
+  {
+    "type": "script",
+    "src": "/js/ScriptHandler.js"
+  }
+]

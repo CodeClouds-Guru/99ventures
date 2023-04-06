@@ -1,5 +1,6 @@
 const Models = require("../../models");
 const { Op } = Models.Sequelize;
+const Sequelize = require("sequelize");
 class Controller {
   constructor(modelName) {
     // this.list = this.list.bind(this);
@@ -28,22 +29,23 @@ class Controller {
     var search = req.query.search || "";
     let sort_field = req.query.sort || "id";
     let sort_order = req.query.sort_order || "desc";
-    
+
     let fields = this.model.fields;
     let extra_fields = this.model.extra_fields || [];
-    let attributes = Object.keys(fields).filter(
-      (attr) => extra_fields.indexOf(attr) == -1
-    );
-    let searchable_fields = [...attributes].filter((key) => {
-      if (fields[key] && fields[key]["searchable"]) {
-        return true;
+    let attributes = Object.values(fields).filter(
+      (attr) => extra_fields.indexOf(attr.db_name) == -1
+    ).map(attr => attr.db_name);
+    let searchable_fields = [];
+    for (const key in fields) {
+      if (('searchable' in fields[key]) && (fields[key].searchable)) {
+        searchable_fields.push(key)
       }
-    });
+    }
     let options = {
       attributes,
       page,
       paginate: show,
-      order: [[sort_field, sort_order]],
+      order: [[Sequelize.literal(sort_field), sort_order]],
     };
     if (search != "") {
       options["where"] = {
@@ -55,6 +57,7 @@ class Controller {
       };
     }
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
+
     if ("where" in options && query_where) {
       options['where'] = {
         [Op.and]: {
@@ -62,11 +65,12 @@ class Controller {
           ...options['where']
         }
       }
-    }else if (query_where != null) {
+    } else if (query_where != null) {
       options['where'] = {
-          ...query_where
+        ...query_where
       }
     }
+    
     return options;
   }
 

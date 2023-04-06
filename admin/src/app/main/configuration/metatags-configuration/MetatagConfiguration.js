@@ -57,7 +57,7 @@ function MetatagConfiguration(props) {
                 setValue('keywords', result.Keywords, { shouldDirty: false, shouldValidate: true });
                 setValue('description', result.Description, { shouldDirty: false, shouldValidate: true });
             } else {
-                console.log('Error');
+                console.error('Failed to fetch Metatag Configuration');
             }
         });
     }
@@ -67,7 +67,7 @@ function MetatagConfiguration(props) {
      * Metatags data post
      */
     const onSubmit = (data) => {
-        if(data.keywords === '' && data.description === '' && data.header_script === ''){
+        if (data.keywords === '' && data.description === '' && data.header_script === '') {
             dispatch(showMessage({ variant: 'error', message: 'Please enter the value!' }));
             return;
         }
@@ -80,7 +80,7 @@ function MetatagConfiguration(props) {
             tag_name: 'Description'
         }];
         setLoading(true);
-        axios.post(jwtServiceConfig.saveMetaTagsConfiguration, { meta: params, header_script: {content: data.header_script} })
+        axios.post(jwtServiceConfig.saveMetaTagsConfiguration, { meta: params, header_script: { content: data.header_script } })
             .then((response) => {
                 if (response.data.results.status) {
                     setLoading(false);
@@ -98,7 +98,7 @@ function MetatagConfiguration(props) {
     return (
         <div>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0">
                         <form
                             name="metatagsFormControl"
@@ -109,7 +109,7 @@ function MetatagConfiguration(props) {
                             <Typography variant="h6">Additional Header Script</Typography>
                             <Typography variant="caption">Place any tracking script like Google Analytics, Facebook pixel etc.</Typography>
                             <Divider className="my-20" />
-                            
+
                             <Controller
                                 name="header_script"
                                 control={control}
@@ -119,13 +119,13 @@ function MetatagConfiguration(props) {
                                             <code>
                                                 <TextareaAutosize
                                                     {...field}
-                                                    maxRows={ 10 }
+                                                    maxRows={10}
                                                     aria-label="maximum height"
                                                     placeholder={
                                                         "#Add your tracking script like Google Analytics, Facebook pixel etc. \n" +
                                                         "Ex., \n<script>\n \t//...Add your script \n</script>"
                                                     }
-                                                    className="custom-code-editor"                                         
+                                                    className="custom-code-editor"
                                                 />
                                             </code>
                                         </pre>
@@ -133,7 +133,7 @@ function MetatagConfiguration(props) {
                                     </>
                                 )}
                             />
-                                
+
                             <Divider className="my-24" light />
                             <Typography variant="h6">Meta Tags</Typography>
                             <Typography variant="caption">Add your meta keywords and description</Typography>
@@ -146,7 +146,7 @@ function MetatagConfiguration(props) {
                                         {...field}
                                         label="Keywords"
                                         id="fullWidth"
-                                        className="mb-24"                                        
+                                        className="mb-24"
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -163,7 +163,7 @@ function MetatagConfiguration(props) {
                                         {...field}
                                         label="Description"
                                         id="fullWidth"
-                                        className="mb-24"                                        
+                                        className="mb-24"
                                         multiline
                                         rows={4}
                                         fullWidth
@@ -172,7 +172,7 @@ function MetatagConfiguration(props) {
                                 )}
                             />
 
-                            
+
                             {
                                 (permission) ?
                                     <div className='flex items-center justify-center'>

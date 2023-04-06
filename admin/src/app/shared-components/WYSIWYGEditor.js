@@ -40,7 +40,7 @@ const WYSIWYGEditor = forwardRef((props, ref) => {
   }
 
   return (
-    <Root className={clsx('rounded-4 border-1 overflow-hidden w-full', props.className)} ref={ref}>
+    <Root className={clsx('rounded-4 border-1 overflow-hidden w-full', props.className)}>
       <Editor ref={ref} {...mutatedProps} editorState={editorState} onEditorStateChange={onEditorStateChange} />
     </Root>
   );

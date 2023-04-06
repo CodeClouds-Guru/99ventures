@@ -38,7 +38,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
+    restart: always
     env_file: ./.env
     ports:
       - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
@@ -51,6 +51,10 @@ services:
       - CLIENT_ORIGIN=$CLIENT_ORIGIN
       - APP_SECRET=$NODE_APP_SECRET
       - PORT=$NODE_DOCKER_PORT
+      - WDS_SOCKET_HOST=127.0.0.1 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
+      - DEV_MODE=1
     networks:
       - backend
       - frontend
@@ -67,8 +71,12 @@ services:
         - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     ports:
       - $REACT_LOCAL_PORT:$REACT_DOCKER_PORT
+    restart: always
     environment: 
       - CLIENT_API_BASE_URL=$CLIENT_API_BASE_URL
+      - WDS_SOCKET_HOST=127.0.0.1 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
     volumes:
       - ./admin:/usr/src/frontend
       - /usr/src/frontend/node_modules

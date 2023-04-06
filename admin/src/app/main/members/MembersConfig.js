@@ -3,9 +3,10 @@ import Downline from './Downline';
 import Index from './Index';
 import IPLogs from './IPlogs';
 import MemberTransaction from './MemberTransaction';
-import Withdraws from './Withdraws'
-import MembersList from './listing/Listing';
+import Withdraws from './Withdraws';
+import MembersContent from './MembersContent';
 import CreateMember from './CreateMember';
+import Alerts from './Alerts';
 
 const UserConfig = {
     settings: {
@@ -21,7 +22,7 @@ const UserConfig = {
                     display: true,
                 },
                 footer: {
-                    display: true,
+                    display: false,
                 },
                 leftSidePanel: {
                     display: true,
@@ -35,7 +36,7 @@ const UserConfig = {
     routes: [
         {
             path: 'app/members',
-            element: <MembersList />,
+            element: <MembersContent />,
             auth: settingsConfig.defaultAuth
         },
         {
@@ -66,6 +67,11 @@ const UserConfig = {
         {
             path: 'app/members/:moduleId/history',
             element: <MemberTransaction />,
+            auth: settingsConfig.defaultAuth
+        },
+        {
+            path: 'app/members/:moduleId/alerts',
+            element: <Alerts />,
             auth: settingsConfig.defaultAuth
         },
     ],

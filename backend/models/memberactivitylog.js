@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class MemberActivityLog extends Model {
     /**
@@ -13,24 +11,34 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  MemberActivityLog.init({
-    member_id: DataTypes.BIGINT,
-    action: DataTypes.STRING,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: "TIMESTAMP",
-    updated_at: "TIMESTAMP",
-    deleted_at: "TIMESTAMP",
-  }, {
-    sequelize,
-    modelName: 'MemberActivityLog',
-    timestamps: true,
-    paranoid: true,
-    createdAt: "created_at", // alias createdAt as created_date
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    tableName: "member_activity_logs",
-  });
+  MemberActivityLog.init(
+    {
+      member_id: DataTypes.BIGINT,
+      action: DataTypes.STRING,
+      created_by: DataTypes.BIGINT,
+      updated_by: DataTypes.BIGINT,
+      deleted_by: DataTypes.BIGINT,
+      created_at: 'TIMESTAMP',
+      updated_at: 'TIMESTAMP',
+      deleted_at: 'TIMESTAMP',
+    },
+    {
+      sequelize,
+      modelName: 'MemberActivityLog',
+      timestamps: true,
+      paranoid: true,
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'member_activity_logs',
+    }
+  );
+  MemberActivityLog.addMemberActivity = async (data) => {
+    let transaction = await MemberActivityLog.create({
+      member_id: data.member_id,
+      action: data.action,
+      created_by: data.member_id,
+    });
+  };
   return MemberActivityLog;
 };

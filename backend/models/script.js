@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       script_html: Joi.string().required().label("Script HTML"),
       script_json: Joi.object().required().label("Script JSON"),
       status: Joi.optional(),
+      module: Joi.optional().allow("").label("Code"),
+      action_type: Joi.optional(),
+      config_json: Joi.optional()
     });
     return schema.validate(req.body);
   };
@@ -31,7 +34,10 @@ module.exports = (sequelize, DataTypes) => {
       code: DataTypes.STRING,
       company_portal_id: DataTypes.BIGINT,
       name: DataTypes.STRING,
+      module: DataTypes.STRING,
       script_html: DataTypes.TEXT('long'),
+      action_type: DataTypes.STRING,
+      config_json: DataTypes.JSON,
       status: {
         type: DataTypes.TINYINT,
         // get() {
@@ -83,6 +89,32 @@ module.exports = (sequelize, DataTypes) => {
       value: "",
       width: "50",
       searchable: true,
+    },
+    module: {
+      field_name: "module",
+      db_name: "module",
+      type: "text",
+      placeholder: "Module",
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: true,
+    },
+    action_type: {
+      field_name: "action_type",
+      db_name: "action_type",
+      type: "text",
+      placeholder: "Action Type",
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: false,
+      value: "",
+      width: "50",
+      searchable: false,
     },
     company_portal_id: {
       field_name: "company_portal_id",

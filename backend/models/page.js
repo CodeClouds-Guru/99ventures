@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     permalink: DataTypes.STRING,
     is_homepage: DataTypes.TINYINT,
+    after_signin: DataTypes.TINYINT,
     slug: DataTypes.STRING,
     name: DataTypes.STRING,
     page_json: DataTypes.JSON,
@@ -61,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       meta_code: Joi.optional().allow('').label('Meta Code'),
       layout_id: Joi.required().label('Layout ID'),
       auth_required: Joi.optional().allow('').label('Auth required'),
+      updated_at: Joi.optional().allow('').label('Updated At'),
     })
     return schema.validate(req.body)
   }
@@ -145,8 +147,8 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
     page_json: {
-      field_name: 'layout_json',
-      db_name: 'layout_json',
+      field_name: 'page_json',
+      db_name: 'page_json',
       type: 'text',
       placeholder: 'JSON',
       listing: false,
@@ -170,11 +172,11 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    created_at: {
-      field_name: 'created_at',
-      db_name: 'created_at',
+    status: {
+      field_name: 'status',
+      db_name: 'status',
       type: 'text',
-      placeholder: 'Created at',
+      placeholder: 'Status',
       listing: true,
       show_in_form: false,
       sort: true,

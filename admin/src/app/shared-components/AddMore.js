@@ -10,8 +10,10 @@ export default function AddMore(props) {
     let [errorMsg, setErrorMsg] = useState('');
     const dispatch = useDispatch();
     const [permisson, setPermission] = useState(false);
+    const [required, setRequired] = useState(false);
 
     useEffect(() => {
+        setRequired(props.required || false);
         if (props.data) {
             setDataset(props.data);
         }
@@ -29,10 +31,10 @@ export default function AddMore(props) {
             let reg = null;
             try {
                 reg = new RegExp(props.validationRegex);
-            } catch(e) {
+            } catch (e) {
                 reg = null;
             }
-            console.log(reg)
+            // console.log(reg)
             return reg && reg.test(input)
         }
         return true;
@@ -42,7 +44,7 @@ export default function AddMore(props) {
         if (e.key === 'Enter') {
             const item = e.target.value;
             if (!dataset.includes(item)) {
-                if(validateInput(item)) {
+                if (validateInput(item)) {
                     dataset.push(item);
                     setDataset([...dataset])
                     props.onChange(dataset);
@@ -63,7 +65,8 @@ export default function AddMore(props) {
                     variant="outlined"
                     fullWidth
                     onKeyDown={getText}
-                    disabled={ !permisson }
+                    disabled={!permisson}
+                    required={required}
                 />
                 <FormHelperText>
                     Press Enter to add

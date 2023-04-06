@@ -6,7 +6,7 @@ module.exports = {
       type: Sequelize.STRING,
     });
     await queryInterface.addColumn("members", "country_id", {
-      type: Sequelize.INTEGER,
+      type: Sequelize.BIGINT,
     });
   },
 

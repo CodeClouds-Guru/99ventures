@@ -13,7 +13,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
-
+import _ from 'src/@lodash/@lodash.js';
 
 const schema = yup.object().shape({
     max_file_size: yup
@@ -34,7 +34,7 @@ const FormField = () => {
     const { hasPermission } = usePermission('settings');
     const [expanded, setExpanded] = useState(false);
     const [fileTypes, setFileTypes] = useState({});
-    const [loading, setLoading] =  useState(false);
+    const [loading, setLoading] = useState(false);
     const [records, setRecords] = useState([]);
 
     const handleChange = (panel) => (event, isExpanded) => {
@@ -56,17 +56,17 @@ const FormField = () => {
     /**
      * Checkbox checked / unchecked 
      */
-    const handleCheck = (e) => {
-        const index = fileTypes[e.target.name].findIndex(el => el.mime_type === e.target.value);
-        if(!e.target.checked && index >=0) {
+    const handleCheck = (e, v) => {
+        const index = fileTypes[e.target.name].findIndex(el => el.label === v.label);
+        if (!e.target.checked && index >= 0) {
             fileTypes[e.target.name][index].checked = false
-        } else {            
+        } else {
             fileTypes[e.target.name][index].checked = true
         }
-        setFileTypes({...fileTypes});
-    }   
+        setFileTypes({ ...fileTypes });
+    }
 
-    useEffect(()=>{
+    useEffect(() => {
         setValue('max_file_size', '', { shouldDirty: true, shouldValidate: false });
         setValue('max_no_of_uploads', '', { shouldDirty: true, shouldValidate: false });
         fetchData();
@@ -83,22 +83,22 @@ const FormField = () => {
                 const configIndx = result.findIndex(el => el.settings_key === 'file_manager_configuration');
                 const fileSizeIndx = result.findIndex(el => el.settings_key === 'max_file_size');
                 const uploadIndx = result.findIndex(el => el.settings_key === 'max_no_of_uploads');
-                
-                if(result[fileSizeIndx].settings_value){
+
+                if (result[fileSizeIndx].settings_value) {
                     setValue('max_file_size', result[fileSizeIndx].settings_value, { shouldDirty: true, shouldValidate: true });
                 }
-                if(result[uploadIndx].settings_value){
+                if (result[uploadIndx].settings_value) {
                     setValue('max_no_of_uploads', result[uploadIndx].settings_value, { shouldDirty: true, shouldValidate: true });
                 }
-                
+
                 const filesData = {};
                 Object.keys(types).map((item, key) => {
                     filesData[item] = []
                     types[item].map(el => {
-                        if(result[configIndx]['settings_value'][item]){
+                        if (result[configIndx]['settings_value'][item]) {
                             filesData[item].push({
                                 ...el,
-                                checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type)) ? true : false
+                                checked: (result[configIndx]['settings_value'] && result[configIndx]['settings_value'][item].includes(el.mime_type[0])) ? true : false
                             })
                         } else {
                             filesData[item].push({
@@ -109,7 +109,7 @@ const FormField = () => {
                 });
                 setFileTypes(filesData);
             } else {
-                console.log('Error');
+                console.error('Failed to fetch Settings');
             }
         });
     }
@@ -123,11 +123,20 @@ const FormField = () => {
 
         Object.keys(fileTypes).map(key => {
             typeData[key] = [];
-            fileTypes[key].map(el => (el.checked) && typeData[key].push(el.mime_type))
+            let mimeTypes = fileTypes[key].filter(el => el.checked).map(el => el.mime_type);
+            for(let types of mimeTypes) {
+                if(types.length > 1) {
+                    for(let type of types) {
+                        typeData[key].push(type)
+                    }
+                } else {
+                    typeData[key].push(types[0])
+                }
+            }            
         });
 
         records.map(v => {
-            if(v.settings_key === 'file_manager_configuration'){
+            if (v.settings_key === 'file_manager_configuration') {
                 params.push({
                     id: v.id,
                     key: v.settings_key,
@@ -140,15 +149,15 @@ const FormField = () => {
                     value: data[v.settings_key]
                 });
             }
-        });        
+        });
 
         // console.log(params); return;
-
+        
         setLoading(true);
         axios.post(jwtServiceConfig.settingsUpdate, { config_data: params })
             .then((response) => {
                 if (response.data.results.status) {
-                    setLoading(false);                    
+                    setLoading(false);
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
@@ -159,39 +168,39 @@ const FormField = () => {
 
     const handleSelectAll = (e) => {
         var newFileTypes = [];
-        if(!e.target.checked) {
+        if (!e.target.checked) {
             newFileTypes = fileTypes[e.target.name].map(el => {
-                return {...el, checked: false}
+                return { ...el, checked: false }
             })
         } else {
             newFileTypes = fileTypes[e.target.name].map(el => {
-                return {...el, checked: true}
+                return { ...el, checked: true }
             })
         }
-        setFileTypes({...fileTypes, [e.target.name]: newFileTypes});
+        setFileTypes({ ...fileTypes, [e.target.name]: newFileTypes });
     }
 
     return (
         <Box className="p-32" >
-            <form style={{ display: 'flex', flexWrap: 'wrap' }} onSubmit={ handleSubmit(formSubmit) }>
+            <form style={{ display: 'flex', flexWrap: 'wrap' }} onSubmit={handleSubmit(formSubmit)}>
                 <div className='w-full flex mb-20'>
                     <Controller
                         name="max_file_size"
-                        control={ control }
+                        control={control}
                         render={({ field }) => (
                             <TextField
                                 {...field}
                                 type="tel"
                                 label="Max File Size"
                                 id="outlined-start-adornment"
-                                sx={{ width: '100%'}}
+                                sx={{ width: '100%' }}
                                 className="mr-10"
                                 InputProps={{
                                     startAdornment: <InputAdornment position="start">MB</InputAdornment>,
                                 }}
                                 onKeyPress={(event) => {
                                     if (!/[0-9]/.test(event.key)) {
-                                      event.preventDefault();
+                                        event.preventDefault();
                                     }
                                 }}
                             />
@@ -199,19 +208,19 @@ const FormField = () => {
                     />
                     <Controller
                         name="max_no_of_uploads"
-                        control={ control }
+                        control={control}
                         render={({ field }) => (
-                            <TextField 
+                            <TextField
                                 {...field}
                                 type="tel"
                                 label="Max no. of uploads"
                                 id="outlined-start-adornment"
-                                sx={{ width: '100%'}}  
+                                sx={{ width: '100%' }}
                                 onKeyPress={(event) => {
                                     if (!/[0-9]/.test(event.key)) {
-                                      event.preventDefault();
+                                        event.preventDefault();
                                     }
-                                }}              
+                                }}
                             />
                         )}
                     />
@@ -224,27 +233,27 @@ const FormField = () => {
                             return (
                                 <Accordion key={indx} expanded={expanded === 'panel' + indx} onChange={handleChange('panel' + indx)}>
                                     <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1bh-content"
-                                    id="panel1bh-header"
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1bh-content"
+                                        id="panel1bh-header"
                                     >
                                         <Typography sx={{ width: '33%', flexShrink: 0 }} className="font-semibold">
-                                            <FormControlLabel 
+                                            <FormControlLabel
                                                 control={
-                                                    <Checkbox 
-                                                        checked= {
+                                                    <Checkbox
+                                                        checked={
                                                             (
-                                                                Object.keys(fileTypes).length && 
+                                                                Object.keys(fileTypes).length &&
                                                                 fileTypes[item].length === fileTypes[item].filter(fl => fl.checked === true).length
                                                             ) ? true : false
                                                         }
-                                                        sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }} 
-                                                        onChange={ handleSelectAll } 
-                                                        value={ item }
-                                                        name={ item }
+                                                        sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
+                                                        onChange={handleSelectAll}
+                                                        value={item}
+                                                        name={item}
                                                     />
-                                                } 
-                                                label={ item.toUpperCase() } 
+                                                }
+                                                label={item.toUpperCase()}
                                             />
                                         </Typography>
                                     </AccordionSummary>
@@ -252,20 +261,20 @@ const FormField = () => {
                                         {
                                             types[item].map((v, i) => {
                                                 return (
-                                                    <FormControlLabel 
-                                                        key={i} 
+                                                    <FormControlLabel
+                                                        key={i}
                                                         control={
-                                                            <Checkbox 
-                                                                sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }} 
-                                                                checked={ 
+                                                            <Checkbox
+                                                                sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
+                                                                checked={
                                                                     Object.keys(fileTypes).length && fileTypes[item][i].checked ? true : false
-                                                                } 
-                                                                name={item} 
-                                                                onChange={handleCheck} 
-                                                                value={ v.mime_type } 
+                                                                }
+                                                                name={item}
+                                                                onChange={()=> handleCheck(event, v)}
+                                                                value={v}
                                                             />
-                                                        } 
-                                                        label={v.ext} 
+                                                        }
+                                                        label={v.label}
                                                     />
                                                 )
                                             })
@@ -282,22 +291,22 @@ const FormField = () => {
                             className="flex"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
-                            >
+                        >
                             <LoadingButton
                                 className="whitespace-nowrap mx-4 mt-5"
                                 variant="contained"
                                 color="secondary"
                                 type="submit"
-                                disabled={ !Object.keys(dirtyFields).length || !isValid}
-                                loading={ loading }
+                                disabled={!Object.keys(dirtyFields).length || !isValid}
+                                loading={loading}
                             >
                                 Update
                             </LoadingButton>
-                            
+
                         </motion.div>
                     )
                 }
-                
+
             </form>
         </Box>
     )

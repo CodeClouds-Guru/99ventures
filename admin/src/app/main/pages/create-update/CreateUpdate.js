@@ -17,6 +17,8 @@ import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 import '../../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
 import { selectUser } from 'app/store/userSlice';
+import { customComponents, scriptBlockManager, customCodeEditor } from '../componentPlugins'
+import { customCheckboxTrait, memberTrait } from '../traitPlugins'
 
 const CreateUpdate = () => {
     const module = 'pages';
@@ -24,7 +26,9 @@ const CreateUpdate = () => {
     const dispatch = useDispatch();
     const user = useSelector(selectUser);
     const moduleId = useParams().moduleId;
-    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-pages-${moduleId}` : `gjs-pages-new`;
+    // const storageKey = '';
+    // const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-pages-${moduleId}` : `gjs-pages-new`;
+    const [storageKey, setStorageKey] = useState('');
     const [loading, setLoading] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [editor, setEditor] = useState({});
@@ -34,6 +38,10 @@ const CreateUpdate = () => {
     const [components, setComponents] = useState([]);
     const domain = `https://${user.loggedin_portal.domain}/`;
     const [expanded, setExpanded] = useState('panel1');
+    // const [ready, setReady] = useState(false);
+    // const [scriptJson, setScriptJson] = useState([]);
+    // const [scriptBlocks, setScriptBlocks] = useState([]);
+
 
     const handleChangeExpand = (panel) => (event, newExpanded) => {
         setExpanded(newExpanded ? panel : false);
@@ -54,19 +62,21 @@ const CreateUpdate = () => {
 
     useEffect(() => {
         const editor = grapesjs.init({
+            // autorender: false,
             container: '#gjs',
+            allowScripts: 1,
             protectedCss: '',   // disabled default CSS
             height: '700px',
             width: '100%',
             style: '.txt-red{color: red}',
-            plugins: ["gjs-preset-webpage"],
+            plugins: ["gjs-preset-webpage", customCodeEditor, customComponents, scriptBlockManager, customCheckboxTrait, memberTrait],
             storageManager: {
                 id: 'gjs-',
                 type: 'local',
                 options: {
                     local: { key: storageKey }
                 },
-                autosave: true,
+                autosave: !false,
                 storeComponents: true,
                 storeStyles: true,
                 storeHtml: true,
@@ -101,135 +111,77 @@ const CreateUpdate = () => {
                         flexGrid: 1,
                     },
                     blocks: ['link-block', 'quote', 'text-basic'],
-                },
+                }
+            },
+            modal: {
+                backdrop: false
             },
         });
-        moduleId === 'create' ? getLayoutOptions(editor) : '';
-        setEditor(editor);
-
-        const pfx = editor.getConfig().stylePrefix
-        const modal = editor.Modal
-        const cmdm = editor.Commands
-        const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
-        const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
-        const pnm = editor.Panels
-        const rootContainer = document.createElement('div')
-        const btnEdit = document.createElement('button')
-        const codeViewerOpt = {
-            readOnly: 0,
-            theme: 'hopscotch',
-            autoBeautify: true,
-            autoCloseTags: true,
-            autoCloseBrackets: true,
-            lineWrapping: true,
-            styleActiveLine: true,
-            smartIndent: true,
-            indentWithTabs: true
-        }
-
-        htmlCodeViewer.set({
-            codeName: 'htmlmixed',
-            ...codeViewerOpt
-        })
-
-        cssCodeViewer.set({
-            codeName: 'css',
-            ...codeViewerOpt
-        })
-
-        btnEdit.innerHTML = 'Save'
-        btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
-        btnEdit.onclick = function () {
-            const html = htmlCodeViewer.editor.getValue()
-            const css = cssCodeViewer.editor.getValue()
-            editor.DomComponents.getWrapper().set('content', '')
-            // editor.CssComposer.clear();            
-            // const HTML_CSS = html.trim() + `<style>${css}</style>`
-            editor.setComponents(html.trim());
-            editor.setStyle(css)
-            modal.close()
-        }
-
-        cmdm.add('edit-code', {
-            run: function (editor, sender) {
-                sender && sender.set('active', 0)
-                var htmlViewer = htmlCodeViewer.editor
-                var cssViewer = cssCodeViewer.editor
-                modal.setTitle('Edit code')
-                var InnerHtml = editor.getHtml()
-                var Css = editor.getCss();
-                if (!htmlViewer && !cssViewer) {
-                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
-                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
-
-                    rootContainer.append(btnEdit)
-                    htmlCodeViewer.init(txtarea)
-                    cssCodeViewer.init(cssarea)
-                    htmlViewer = htmlCodeViewer.editor
-                    cssViewer = cssCodeViewer.editor
-                }
-                modal.setContent('')
-                modal.setContent(rootContainer)
-                htmlCodeViewer.setContent(InnerHtml)
-                cssCodeViewer.setContent(Css)
-                modal.open({ attributes: { class: 'custom-code-editor' } })
-                htmlViewer.refresh()
-                cssViewer.refresh()
-            }
-        })
-
-        // Removed default read-only code editor btn from toolbar
-        pnm.removeButton("options", 'export-template');
-
-        pnm.addButton('options',
-            [
-                {
-                    id: 'edit',
-                    className: 'fa fa-code',
-                    command: 'edit-code',
-                    attributes: {
-                        title: 'Edit Code'
-                    }
-                }
-            ]
-        );
-
-        editor.onReady(() => {
-            loadEditorData(editor);
-        });
-
-        editor.on('change:changesCount', (model) => {
-            const changes = model.get('changesCount');
-            if (changes) {
-                setChangeCount(changeCount => changeCount + 1)
-            }
-        });
+        setEditor(editor); 
     }, []);
 
-    const editorTextAreaCreate = (rootContainer, title) => {
+    useEffect(()=>{
+        if(Object.keys(editor).length){
+            getLayoutOptions(editor);           
+            
+            editor.onReady(() => {    
+                // Collapsed all the blocks accordian by default
+                const categories = editor.BlockManager.getCategories();
+                categories.each(category => {
+                    category.set('open', false).on('change:open', opened => {
+                        opened.get('open') && categories.each(category => {
+                            category !== opened && category.set('open', false)
+                        })
+                    })
+                });
+                //------------ End ----------
+            })
+        }
+    }, [editor])
+
+    /*useEffect(()=>{
+        getLayoutOptions();
+        
+    }, []);*/
+
+    /*useEffect(()=>{
+        if(scriptJson.length){
+            //blockManagerForScripts(scriptBlocks, editor)
+            // if (moduleId !== 'create' && !isNaN(moduleId)) {
+            //     getSingleRecordById(moduleId, editor);
+            // }
+            
+            loadEditorData(editor);
+
+        }
+    }, [scriptJson]);*/
+
+    /*const editorTextAreaCreate = (editorBody, title) => {
         const container = document.createElement('div')
         const childContainer = document.createElement('div')
         const titleContainer = document.createElement('div')
         const txtarea = document.createElement('textarea')
 
         container.setAttribute('class', 'gjs-cm-editor-c')
-        childContainer.setAttribute('id', 'gjs-cm-css')
+        // childContainer.setAttribute('id', 'gjs-cm-css')
         childContainer.setAttribute('class', 'gjs-cm-editor')
-        titleContainer.setAttribute('id', 'gjs-cm-title')
+        titleContainer.setAttribute('class', 'gjs-cm-title')
         titleContainer.textContent = title
         childContainer.appendChild(titleContainer)
         childContainer.appendChild(txtarea)
         container.appendChild(childContainer)
-        rootContainer.appendChild(container)
+        editorBody.appendChild(container)
         return txtarea
-    }
+    }*/
 
     const loadEditorData = async (editor) => {
         if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId, editor);
         } else {
             const storageManager = editor.Storage;
-            const data = storageManager.load();
+            storageManager.getStorageOptions()['key'] = 'gjs-pages-new';
+            setStorageKey('gjs-pages-new')
+            const data = await storageManager.load();           
             editor.loadProjectData(data);
             setAllData(prevData => {
                 return {
@@ -277,6 +229,7 @@ const CreateUpdate = () => {
         }));
         dynamicErrorMsg('name', event.target.value.trim());
     }
+
     const createCustomComponentForEditor = (components_val, editor) => {
         components_val.map((val) => {
             editor.BlockManager.add(`block-${val.value}`, {
@@ -288,7 +241,33 @@ const CreateUpdate = () => {
                 content: '&nbsp;' + val.html // this nbsp added to add a blank space to add the HTML comment on the starting
             });
         })
+        // Custom Component block accordian set collapsed by default
+        editor.BlockManager.getCategories()._byId["Custom Component"].set("open", false)
     }
+
+    /*const blockManagerForScripts = (jsonData, editor) => {
+        jsonData.map((val) => {
+            editor.BlockManager.add(`block-${val.value}`, {
+                label: val.value,
+                category: 'Scripts',
+                attributes: {
+                    class: 'fa fa-code'
+                },
+                /*content: (val.config_json)
+                        ? '<div data-script="'+val.id+'" data-gjs-type="'+val.config_json+'"></div>'
+                        : '<div data-script="'+val.id+'"></div>' *
+                content: (val.config_json) ? {type: 'component_'+val.id} : '<div data-script="'+val.id+'"></div>'
+            });
+        })
+        // Custom Component block accordian set collapsed by default
+        // editor.BlockManager.getCategories()._byId["Custom Component"].set("open", false)
+
+        // setTimeout(()=>{
+        //     editor.render();
+        //     console.log('render')
+        // }, 2000)
+    }*/
+
     const getLayoutOptions = (editor) => {
         axios.get(`/${module}/add`)
             .then((response) => {
@@ -299,7 +278,25 @@ const CreateUpdate = () => {
                         layout_id: response.data.results.fields.layout_id.value
                     });
                     setComponents(response.data.results.fields.components.options);
+                    loadEditorData(editor);
+
+                    /*const jsonData = response.data.results.fields.scripts.options;
+                    const componentJson = [];
+                    jsonData.map((val) => {
+                        if(val.config_json){
+                            componentJson.push({
+                                type_name: 'component_'+val.id,
+                                name: val.value,
+                                traits: val.config_json
+                            });
+                        }                  
+                    });
+                    setScriptJson(componentJson);
+                    setScriptBlocks(jsonData)
+                    console.log(componentJson)
+
                     createCustomComponentForEditor(response.data.results.fields.components.options, editor);
+                    blockManagerForScripts(response.data.results.fields.scripts.options, editor);*/
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -366,8 +363,8 @@ const CreateUpdate = () => {
                         layout_id: record.layout_id,
                         status: record.status,
                         name: record.name,
-                        slug: record.slug,
-                        permalink: record.permalink === '/' ? domain : !record.permalink.includes(domain) ? domain + record.permalink : record.permalink,
+                        slug: record.slug === '/' ? '' : record.slug,
+                        permalink: record.permalink === domain ? domain : record.permalink !== domain + record.slug ? domain + record.slug : record.permalink,
                         html: record.html,
                         page_json: record.page_json,
                         keywords: record.keywords,
@@ -375,8 +372,13 @@ const CreateUpdate = () => {
                         meta_code: record.meta_code,
                         auth_required: !!record.auth_required,
                     }));
-                    createCustomComponentForEditor(response.data.results.fields.components.options, editor);
+                    // createCustomComponentForEditor(response.data.results.fields.components.options, editor);
+
+                    const storageManager = editor.Storage;
+                    storageManager.getStorageOptions()['key'] = `gjs-pages-${moduleId}`;
+                    setStorageKey(`gjs-pages-${moduleId}`);
                     editor.loadProjectData(record.page_json);
+
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     setChangeCount(changeCount => changeCount - 1);
@@ -460,7 +462,7 @@ const CreateUpdate = () => {
             auth_required: event.target.checked,
         });
     }
-    return (
+    return ( 
         <>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
                 <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-2 px-16 sm:p-28 md:p-38 lg:p-52 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">

@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,17 +25,20 @@ function List(props) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const user = useSelector(selectUser);
+
 	const { module } = props;
 	const searchable = props.searchable ?? true;
 	const editable = props.editable ?? true;
 	const addable = props.addable ?? true;
 	const deletable = props.deletable ?? true;
 	// const where = props.where ?? {};
-	const showModuleHeading = props.moduleHeading ?? '';
+	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
+	const queryParams = props.params ?? {};
 
 	const [modules, setModules] = useState([]);
 	const [searchText, setSearchText] = useState('');
+	const [searchKeywords, setSearchKeywords] = useState('');
 	const [fields, setFields] = useState({});
 	const [totalRecords, setTotalRecords] = useState(0);
 
@@ -57,10 +60,11 @@ function List(props) {
 		startDate: '',
 		endDate: '',
 	});
-
+	const [actionsMenu, setActionsMenu] = useState(null);
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
+		setSearchKeywords('');
 		setOrder({
 			direction: 'desc',
 			id: 'id',
@@ -76,7 +80,8 @@ function List(props) {
 			page: page + 1,
 			show: rowsPerPage,
 			module,
-			where
+			where,
+			...queryParams
 		}
 		/* order is added if it's not the very first call os API listing */
 		if (!firstCall) {
@@ -85,7 +90,21 @@ function List(props) {
 		}
 
 		axios.get(`/${module}`, { params }).then(res => {
-			setFields(res.data.results.fields);
+			let fields_var = res.data.results.fields;
+			module === 'campaigns' ? fields_var.actions = {
+				db_name: "actions",
+				field_name: "actions",
+				listing: true,
+				placeholder: "Actions",
+				required: false,
+				searchable: false,
+				show_in_form: false,
+				sort: false,
+				type: "text",
+				value: "",
+				width: "50"
+			} : '';
+			setFields(fields_var);
 			setModules(res.data.results.result.data);
 			setTotalRecords(res.data.results.result.total)
 			setLoading(false);
@@ -116,12 +135,21 @@ function List(props) {
 
 	useEffect(() => {
 		fetchModules();
-	}, [searchText, page, rowsPerPage, order, where]);
+	}, [searchText, page, rowsPerPage, order, where, props.params]);
 
+	/**
+	 * Unmounted the sate value
+	 */
 	useEffect(() => {
-		resetModulesListConfig();
-		setFirstCall(true);
+		return () => {
+			resetModulesListConfig();
+		}
 	}, [module]);
+
+	// useEffect(() => {
+	// 	resetModulesListConfig();
+	// 	setFirstCall(true);
+	// }, [module]);
 
 	useEffect(() => {
 		setData(modules);
@@ -133,6 +161,15 @@ function List(props) {
 		}
 	}, [moduleDeleted]);
 
+	const debounceFn = useCallback(_.debounce((val) => {
+		setSearchText(val);
+	}, 1000), []);
+
+	const handleSearchtext = (ev) => {
+		setFirstCall(true);
+		setSearchKeywords(ev.target.value);
+		debounceFn(ev.target.value);
+	}
 
 
 	function handleRequestSort(event, property) {
@@ -170,8 +207,13 @@ function List(props) {
 		}
 	}
 
-	function handleClick(item) {
-		editable ? handelNavigate(item) : '';
+	function handleClick(item, e) {
+		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root'))) {
+			handelNavigate(item)
+		} else {
+			e.stopPropagation();
+			// return false;
+		}
 	}
 
 	function handelNavigate(item) {
@@ -222,9 +264,17 @@ function List(props) {
 		setRowsPerPage(event.target.value);
 		setFirstCall(true);
 	}
+	function openActionsMenu(event) {
+		setActionsMenu(event.currentTarget);
+	}
 
+	function closeActionsMenu() {
+		setActionsMenu(null);
+	}
 	const processFieldValue = (value, fieldConfig) => {
-		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'activity_date')) {
+		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
+			value = Helper.parseTimeStamp(value)
+		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at') && value) {
 			value = moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
@@ -251,10 +301,10 @@ function List(props) {
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
-			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "error"} />
-		} else if (module === 'member-transactions' && field.field_name === 'completed_at') {
+			return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === "credited" ? "success" : "withdraw" ? "error" : "warning"} />
+		} /*else if (module === 'member-transactions' && field.field_name === 'completed_at') {
 			return Helper.parseTimeStamp(processFieldValue(n[field.field_name], field))
-		} else if (module === 'member-transactions' && field.field_name === 'note') {
+		}*/ else if (module === 'member-transactions' && field.field_name === 'note') {
 			return processFieldValue(n[field.field_name], field) ? (
 				<Tooltip title={processFieldValue(n[field.field_name], field)} placement="top-start" arrow>
 					<FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:chat-alt</FuseSvgIcon>
@@ -272,6 +322,62 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+		} else if (module === 'campaigns') {
+			if (field.field_name === 'status') {
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+			}
+			if (field.field_name === 'actions') {
+				return (
+					<>
+						<IconButton
+							aria-owns={actionsMenu ? `actionsMenu_${n.id}` : null}
+							aria-haspopup="true"
+							onClick={openActionsMenu}
+							size="large"
+							className="listingExtraMenu"
+							sx={{ zIndex: 999 }}
+							id={`actionsMenu_${n.id}`}
+						>
+							<FuseSvgIcon
+								sx={{ pointerEvents: 'none' }}
+								className="listingExtraMenu"
+							>material-outline:settings</FuseSvgIcon>
+						</IconButton>
+						<Menu
+							id={`actionsMenu_${n.id}`}
+							anchorEl={actionsMenu}
+							open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${n.id}`)}
+							onClose={closeActionsMenu}
+						>
+							<MenuList>
+								<MenuItem
+									onClick={(event) => {
+										event.stopPropagation();
+										navigate(`/app/campaigns/${n.id}/report`)
+									}}
+								>
+									<ListItemIcon className="min-w-40">
+										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+									</ListItemIcon>
+									<ListItemText primary="Report" />
+								</MenuItem>
+								{/* <MenuItem
+									onClick={(event) => {
+										event.stopPropagation();
+										navigate(`/app/campaigns/${n.id}/offerwalls`)
+									}}
+								>
+									<ListItemIcon className="min-w-40">
+										<FuseSvgIcon>material-outline:attach_money</FuseSvgIcon>
+									</ListItemIcon>
+									<ListItemText primary="Offerwalls" />
+								</MenuItem> */}
+							</MenuList>
+						</Menu>
+					</>
+				)
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else {
 			return processFieldValue(n[field.field_name], field)
 		}
@@ -302,126 +408,135 @@ function List(props) {
 	return (
 		<div>
 			{/* // header */}
-			<div className='w-full flex py-32 px-24 md:px-32'>
-				{
-					showModuleHeading === '' && (
-						<Typography
-							component={motion.span}
-							initial={{ x: -20 }}
-							animate={{ x: 0, transition: { delay: 0.2 } }}
-							delay={300}
-							className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
-						>
-							{module.split('-').join(' ')}
-						</Typography>
-					)
-				}
-				<div className="flex items-center justify-end space-x-8 w-full ml-auto">
-					{
-						(module === 'member-transactions' && location.pathname.includes('history')) && (
-							<>
-								{
-									datepickerStatus && (
-										<DateRangePicker
-											wrapperClassName="filter-daterange-picker"
-											open={datepickerStatus}
-											toggle={() => setDatepickerStatus(!datepickerStatus)}
-											onChange={dateRangeSelected}
-										/>
-									)
-								}
-								<Paper
-									component={motion.div}
-									initial={{ y: -20, opacity: 0 }}
-									animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-									className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
-									sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+
+			{
+				(showModuleHeading || searchable || addable) && (
+					<div className='w-full flex py-32 px-24 md:px-32'>
+						{
+							showModuleHeading && (
+								<Typography
+									component={motion.span}
+									initial={{ x: -20 }}
+									animate={{ x: 0, transition: { delay: 0.2 } }}
+									delay={300}
+									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
-									<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
-									<Input
-										label="Select a date range"
-										className="datepicker--input"
-										placeholder="Select daterange"
-										disabled
-										disableUnderline
-										size="small"
-										onClick={() => setDatepickerStatus(!datepickerStatus)}
-										value={
-											dateRange && dateRange.startDate
-												? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
-												: ''
+									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
+								</Typography>
+							)
+						}
+						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
+							{
+								(module === 'member-transactions' && location.pathname.includes('history')) && (
+									<>
+										{
+											datepickerStatus && (
+												<div className="date-range-wrapper member-txn-list">
+													<DateRangePicker
+														wrapperClassName="filter-daterange-picker"
+														open={datepickerStatus}
+														toggle={() => setDatepickerStatus(!datepickerStatus)}
+														onChange={dateRangeSelected}
+													/>
+												</div>
+											)
 										}
-									/>
-									{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
-								</Paper>
-								<FormControl sx={{ minWidth: 120 }} size="small">
-									<InputLabel id="demo-simple-select-label">Type</InputLabel>
-									<Select
-										labelId="demo-simple-select-label"
-										id="demo-simple-select"
-										value={txnType}
-										label="Type"
-										className="rounded-full"
-										sx={{ lineHeight: '17px' }}
-										onChange={
-											(e) => {
-												setTxnType(e.target.value);
-												if (e.target.value) {
-													setWhere({ ...where, type: e.target.value });
-												} else {
-													setWhere(props.where);
+										<Paper
+											component={motion.div}
+											initial={{ y: -20, opacity: 0 }}
+											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
+											className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
+											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+										>
+											<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
+											<Input
+												label="Select a date range"
+												className="datepicker--input"
+												placeholder="Select daterange"
+												disabled
+												disableUnderline
+												size="small"
+												onClick={() => setDatepickerStatus(!datepickerStatus)}
+												value={
+													dateRange && dateRange.startDate
+														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
+														: ''
 												}
-											}
-										}
-									>
-										<MenuItem value="">
-											<em>--Select--</em>
-										</MenuItem>
-										<MenuItem value="credited">Credited</MenuItem>
-										<MenuItem value="withdraw">Withdraw</MenuItem>
-									</Select>
-								</FormControl>
-							</>
-						)
-					}
+											/>
+											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
+										</Paper>
+										<FormControl sx={{ minWidth: 120 }} size="small">
+											<InputLabel id="demo-simple-select-label">Type</InputLabel>
+											<Select
+												labelId="demo-simple-select-label"
+												id="demo-simple-select"
+												value={txnType}
+												label="Type"
+												className="rounded-full"
+												sx={{ lineHeight: '17px' }}
+												onChange={
+													(e) => {
+														setTxnType(e.target.value);
+														if (e.target.value) {
+															setWhere({ ...where, type: e.target.value });
+														} else {
+															setWhere(props.where);
+														}
+													}
+												}
+											>
+												<MenuItem value="">
+													<em>--Select--</em>
+												</MenuItem>
+												<MenuItem value="credited">Credited</MenuItem>
+												<MenuItem value="withdraw">Withdraw</MenuItem>
+												<MenuItem value="reversal">Reversal</MenuItem>
+											</Select>
+										</FormControl>
+									</>
+								)
+							}
 
-					{searchable && <Paper
-						component={motion.div}
-						initial={{ y: -20, opacity: 0 }}
-						animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-						className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
-					>
-						<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
+							{searchable && <Paper
+								component={motion.div}
+								initial={{ y: -20, opacity: 0 }}
+								animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
+								className="flex items-center w-full sm:max-w-256 space-x-8 px-16 rounded-full border-1 shadow-0"
+							>
+								<FuseSvgIcon color="disabled">heroicons-solid:search</FuseSvgIcon>
 
-						<Input
-							placeholder={`Search ${module.split('-').join(' ')}`}
-							className="flex flex-1"
-							disableUnderline
-							fullWidth
-							value={searchText}
-							inputProps={{
-								'aria-label': `Search ${module}`,
-							}}
-							onChange={(ev) => { setFirstCall(true); setSearchText(ev.target.value) }}
-						/>
-					</Paper>}
-					{addable && <motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-					>
-						<Button
-							className=""
-							component={Link}
-							to={customAddURL}
-							variant="contained"
-							color="secondary"
-							startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
-						>
-							Add
-						</Button>
-					</motion.div>}
-				</div>
-			</div>
+								<Input
+									placeholder={`Search ${module !== 'offer-walls' ? module.split('-').join(' ') : 'offerwalls'}`}
+									className="flex flex-1"
+									disableUnderline
+									fullWidth
+									value={searchKeywords}
+									inputProps={{
+										'aria-label': `Search ${module}`,
+									}}
+									onChange={handleSearchtext}
+								/>
+							</Paper>}
+							{addable && <motion.div
+								initial={{ opacity: 0, x: 20 }}
+								animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+							>
+								<Button
+									className=""
+									component={Link}
+									to={customAddURL}
+									variant="contained"
+									color="secondary"
+									startIcon={<FuseSvgIcon>heroicons-outline:plus</FuseSvgIcon>}
+								>
+									Add
+								</Button>
+							</motion.div>}
+						</div>
+					</div>
+				)
+			}
+
 
 			{/* // body */}
 			<div className="w-full flex flex-col min-h-full">
@@ -460,7 +575,7 @@ function List(props) {
 												tabIndex={-1}
 												key={n.id}
 												selected={isSelected}
-												onClick={(event) => handleClick(n)}
+												onClick={(event) => handleClick(n, event)}
 											>{module === 'tickets' ? '' :
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox

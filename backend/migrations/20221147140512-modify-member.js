@@ -4,7 +4,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.removeColumn("members", "referer");
     await queryInterface.addColumn("members", "member_referral_id", {
-      type: Sequelize.INTEGER,
+      type: Sequelize.BIGINT,
     });
   },
 

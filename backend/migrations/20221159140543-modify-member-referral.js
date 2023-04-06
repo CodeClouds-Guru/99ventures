@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.changeColumn("member_referrals", "referral_id", {
-      type: Sequelize.INTEGER,
+      type: Sequelize.BIGINT,
       comment: 'It will store member id who has been referred',
     });
   },

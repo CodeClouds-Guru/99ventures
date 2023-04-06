@@ -100,7 +100,9 @@ const History = (props) => {
                                             Component Name: { item.name }
                                         </Typography>
                                         <Typography variant="caption" className="italic" color="text.secondary" >
-                                            Created At: { Helper.parseTimeStamp(item.created_at) }
+                                            {
+                                                (selectRevision.length - 1 === indx) ? `Created At: ${ Helper.parseTimeStamp(item.created_at) }` : `Last Updated At: ${ Helper.parseTimeStamp(item.updated_at) }`
+                                            }
                                         </Typography>
                                     </div>
                                     <div className='icon-div'>

@@ -22,7 +22,7 @@ function TabPanel(props) {
                 aria-labelledby={`simple-tab-${index}`}
                 {...other}
             >
-               <Box sx={{ p: 3 }}>
+                <Box sx={{ p: 3 }}>
                     <Typography component={'div'}>{children}</Typography>
                 </Box>
             </div>
@@ -72,9 +72,9 @@ const tabs = [
         name: "Downtime",
         component: DowntimeConfiguration,
         module: 'downtime'
-    },    
+    },
     {
-        name: "IP",
+        name: "Manage Access",
         component: IpConfiguration,
         module: 'ipconfigurations'
     },
@@ -95,16 +95,16 @@ const tabs = [
 function ConfigurationContent() {
     const [value, setValue] = useState(0);
     const [selectedTab, setSelectedTab] = useState('');
-    
+
     const tabPanel = () => {
         let initialIndx = 0;
         return tabs.map((tab, indx) => {
             const { hasPermission } = usePermission(tab.module);
             const Component = tab.component;
-            if(hasPermission('view')) {
-                return(
-                    <TabPanel value={ value } panel={ selectedTab } panelIndx={ `simple-tab-${indx}`} index={ ++initialIndx } key={ indx }>                            
-                        <Component permission={ hasPermission } />
+            if (hasPermission('view')) {
+                return (
+                    <TabPanel value={value} panel={selectedTab} panelIndx={`simple-tab-${indx}`} index={++initialIndx} key={indx}>
+                        <Component permission={hasPermission} />
                     </TabPanel>
                 )
             }
@@ -114,13 +114,15 @@ function ConfigurationContent() {
     const handleChange = (event, newValue) => {
         setValue(newValue);
         setSelectedTab(event.target.id);
-    };    
+    };
 
-    
+
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} scrollButtons={false}
+                    textColor="secondary"
+                    indicatorColor="secondary"
                     aria-label="visible arrows tabs example"
                     sx={{
                         [`& .${tabsClasses.scrollButtons}`]: {
@@ -129,8 +131,8 @@ function ConfigurationContent() {
                     }}>
                     {
                         tabs.map((tab, indx) => {
-                            const { hasPermission } = usePermission(tab.module);  
-                            return hasPermission('view') && <Tab key={ indx } label={ tab.name } {...a11yProps(indx)} />;
+                            const { hasPermission } = usePermission(tab.module);
+                            return hasPermission('view') && <Tab key={indx} label={tab.name} {...a11yProps(indx)} />;
                         })
                     }
                 </Tabs>

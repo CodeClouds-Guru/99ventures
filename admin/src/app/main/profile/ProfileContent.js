@@ -13,6 +13,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import UploadIcon from '@mui/icons-material/Upload';
 import Account from './account/Account';
 import Password from './password/Password';
+import CustomLoader from 'app/shared-components/customLoader/Index';
 
 const Root = styled('div')(({ theme }) => ({
     '& .username, & .email': {
@@ -49,6 +50,15 @@ const Root = styled('div')(({ theme }) => ({
         background: 'rgba(255,255,255,0.5)',
         padding: '6px',
         borderRadius: '50%',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        '& svg': {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+        }
     }
 }));
 function TabPanel(props) {
@@ -90,6 +100,7 @@ function ProfileContent() {
     const user = useSelector(selectUser);
     const [tabValue, setTabValue] = useState(0);
     const [avatar, setAvatar] = useState('');
+    const [loading, setLoading] = useState(false);
     const handleChangeTab = (event, newValue) => {
         setTabValue(newValue);
     };
@@ -148,11 +159,13 @@ function ProfileContent() {
         element.classList.add('hidden');
     }
     const uploadAvatar = () => {
+        setLoading(true);
         let form_data = new FormData();
         form_data.append('type', 'change_avatar');
         form_data.append('avatar', avatar);
         axios.post(jwtServiceConfig.updateProfile, form_data)
             .then((response) => {
+                setLoading(false);
                 if (response.data.status) {
                     jwtService.getProfile().then(user => dispatch(setUser(user)));
                     makeAvatarBlank();
@@ -179,10 +192,13 @@ function ProfileContent() {
                     <label htmlFor="contained-button-file" onMouseEnter={addOverlay} onMouseLeave={removeOverlay}>
                         <IconButton onClick={openFileSelectDialog}>
                             <div id="avatar-div" className="items-center justify-center hidden">
+
                                 <span className="image-edit">
-                                    <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
+                                    {!loading ? <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action">
                                         feather:camera
-                                    </FuseSvgIcon>
+                                    </FuseSvgIcon> : <CustomLoader />
+                                    }
+
                                 </span>
                             </div>
                             <Avatar
@@ -199,10 +215,10 @@ function ProfileContent() {
                                 {user.first_name + ' ' + user.last_name}
                             </Avatar>
                         </IconButton>
-                        <div className="flex justify-center items-center mt-4">
+                        {!loading && <div className="flex justify-center items-center mt-4">
                             {uploadIcon()}
                             {removeAvatar()}
-                        </div>
+                        </div>}
                     </label>
                 </div>
                 <Typography className="username text-14 whitespace-nowrap font-medium">

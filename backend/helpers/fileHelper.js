@@ -2,6 +2,8 @@ const AWS = require('aws-sdk')
 const assert = require('assert')
 var fs = require('fs')
 const ArchieverClass = require("../helpers/Archiever");
+const mime = require('mime-types')
+
 class FileHelper {
   constructor(files, model, req, new_filename) {
     this.company_id = ''
@@ -43,20 +45,29 @@ class FileHelper {
       file_name = file_name.replaceAll('.'+file_name_arr[file_name_arr.length - 1],'')
       file_name = file_name.replaceAll(' ','-')
       file_name = file_name.replaceAll(/[^a-zA-Z0-9 ]/g,'')
-      var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
+      // var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
+      var new_filename = file_name+'.'+file_name_arr[file_name_arr.length - 1]
+      let mime_type = mime.lookup(
+        new_filename
+      );
+      if(!mime_type)
+      {
+        mime_type = "image/jpeg";
+      }
       try {
         let s3 = await this.s3Connect()
         const imagePath = file.tempFilePath
         const blob = fs.readFileSync(imagePath)
-
         // const uploadedImage = await s3.upload({
         // if(this.private_file == '1'){}
+        console.log(path.concat(new_filename))
         const uploadedImage = await s3.putObject({
           Bucket: process.env.S3_BUCKET_NAME,
           Key: path.concat(new_filename),
           Body: blob,
           ACL: this.private,
-          Metadata: metadata
+          Metadata: metadata,
+          ContentType:mime_type
         }).promise()
         this.response.status = true
         this.response.files[key] = {
@@ -64,6 +75,7 @@ class FileHelper {
         }
       } catch (e) {
         this.response.trace = e
+        console.log(e)
       }
     }
     return this.response
@@ -136,7 +148,9 @@ class FileHelper {
     };
 
     listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key: Key });
+      if(Key != '' && Key !='/'){
+        deleteParams.Delete.Objects.push({ Key: Key });
+      }
     });
     await s3.deleteObjects(deleteParams).promise();
     return true

@@ -8,4 +8,12 @@ frontend/node_modules
 .DS_Store
 admin/src/.DS_Store
 admin/public/.DS_Store
+.vscode/*
 *.code-workspace
+logs
+lambda/sync-surveys/node_modules
+lambda/sync-surveys/.env
+lambda/sync-surveys/*.zip
+.DS_Store
+backend/.DS_Store
+admin/.DS_Store

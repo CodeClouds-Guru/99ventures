@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -6,28 +6,37 @@ module.exports = {
      * Add seed commands here.
      **/
     await queryInterface.bulkInsert(
-      "email_actions",
+      'email_actions',
       [
         {
-          action: "Invitation",
+          action: 'Invitation',
         },
         {
-          action: "Welcome",
+          action: 'Welcome',
         },
         {
-          action: "Forgot Password",
+          action: 'Forgot Password',
         },
         {
-          action: "Account Deactivated",
+          action: 'Account Deactivated',
         },
         {
-          action: "Withdraw Request",
+          action: 'Withdraw Request',
         },
         {
-          action: "Payment Confirmation",
+          action: 'Payment Confirmation',
         },
         {
-          action: "Contact Us",
+          action: 'Contact Us',
+        },
+        {
+          action: 'Member Profile Completion',
+        },
+        {
+          action: 'Member Cash Withdrawal',
+        },
+        {
+          action: 'Withdrawal Approval',
         },
       ],
       {}
@@ -41,5 +50,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
+    await queryInterface.bulkDelete('email_actions', null, {});
   },
 };

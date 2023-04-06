@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class CaptchaOption extends Model {
+  class SurveyQuestion extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,16 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      CaptchaOption.belongsToMany(models.CompanyPortal, {
-        through: 'captcha_option_company_portal',
-        timestamps: false,
-        foreignKey: 'captcha_option_id',
-        otherKey: 'company_portal_id',
+      SurveyQuestion.hasMany(models.SurveyAnswerPrecodes, {
+        foreignKey: 'precode',
+        sourceKey: 'survey_provider_question_id',
       })
+
     }
   }
-  CaptchaOption.init({
+  SurveyQuestion.init({
+    question_text: DataTypes.STRING,
     name: DataTypes.STRING,
+    survey_provider_id: DataTypes.BIGINT,
+    survey_provider_question_id: DataTypes.BIGINT,
+    question_type: DataTypes.STRING,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,
@@ -29,13 +32,13 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
-    modelName: 'CaptchaOption',
+    modelName: 'SurveyQuestion',
     timestamps: true,
     paranoid: true,
     createdAt: 'created_at', // alias createdAt as created_date
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',
-    tableName: 'captcha_options',
+    tableName: 'survey_questions',
   });
-  return CaptchaOption;
+  return SurveyQuestion;
 };

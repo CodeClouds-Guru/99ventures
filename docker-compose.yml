@@ -28,9 +28,16 @@ services:
       - DEFAULT_REGION=$AWS_DEFAULT_REGION
       - CLIENT_API_PUBLIC_URL=$LIVE_CLIENT_API_PUBLIC_URL
       - S3_BUCKET_OBJECT_URL=$S3_BUCKET_OBJECT_URL
+      - SQS_QUEUE_URL=$SQS_QUEUE_URL
+      - LUCID_API_KEY=$LUCID_API_KEY
+      - IP_QUALITY_SCORE_PRIVATE_KEY=$IP_QUALITY_SCORE_PRIVATE_KEY
       - PORT=4000
+      - DEV_MODE=0
     networks:
       - 99Bridge
+    volumes:
+      - ./backend:/usr/src/backend
+      - /usr/src/backend/node_modules
 
   admin:
     depends_on:

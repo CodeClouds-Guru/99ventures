@@ -28,24 +28,52 @@ const navigationConfig = [
       classes: 'px-8 bg-pink-600 text-white rounded-full',
     },
   },
+  // {
+  //   id: 'members',
+  //   title: 'Members',
+  //   translate: 'Members',
+  //   type: 'item',
+  //   icon: 'heroicons-outline:user-group',
+  //   url: 'app/members',
+  //   end: true,
+  // },
   {
-    id: 'members',
+    id: 'membersMenu',
     title: 'Members',
     translate: 'Members',
-    type: 'item',
+    type: 'collapse',
     icon: 'heroicons-outline:user-group',
-    url: 'app/members',
-    end: true,
+    depends_on: ['members', 'campaigns'],
+    children: [
+      {
+        id: 'members',
+        title: 'Members',
+        type: 'item',
+        icon: 'heroicons-outline:view-list',
+        url: 'app/members',
+        end: true,
+      },
+      {
+        id: 'campaigns',
+        title: 'Campaigns',
+        translate: 'Campaigns',
+        type: 'item',
+        icon: 'material-outline:campaign',
+        url: 'app/campaigns',
+        end: true,
+      },
+      {
+        id: 'offerwalls',
+        title: 'Offerwalls',
+        translate: 'Offerwalls',
+        type: 'item',
+        icon: 'material-outline:attach_money',
+        url: 'app/offer-walls',
+        end: true,
+      },
+    ],
   },
-  {
-    id: 'campaigns',
-    title: 'Campaigns',
-    translate: 'Campaigns',
-    type: 'item',
-    icon: 'material-outline:campaign',
-    url: 'app/campaigns',
-    end: true,
-  },
+
   {
     id: 'administration',
     title: 'Administration',
@@ -153,7 +181,31 @@ const navigationConfig = [
         end: true,
       },
     ]
-  }
+  },
+  {
+    id: 'shoutboxMenu',
+    title: 'Shoutbox',
+    type: 'collapse',
+    icon: 'heroicons-solid:speakerphone',
+    children: [
+      {
+        id: 'shoutbox',
+        title: 'Shoutbox List',
+        type: 'item',
+        icon: 'heroicons-outline:view-list',
+        url: 'app/shoutbox',
+        end: true,
+      },
+      {
+        id: 'shoutboxconfigurations',
+        title: 'Configurations',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/shoutbox-configurations',
+        end: true,
+      },
+    ]
+  },
 ];
 
 export default navigationConfig;

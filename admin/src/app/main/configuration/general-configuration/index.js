@@ -2,7 +2,7 @@ import * as React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl, ListItemSecondaryAction, ListItemIcon } from '@mui/material';
+import { Button, Box, Modal, Paper, MenuItem, Select, Divider, List, ListItem, ListItemButton, IconButton, ListItemText, Typography, CardContent, TextField, InputLabel, FormControl, ListItemSecondaryAction, ListItemIcon, Tooltip, FormControlLabel, Switch } from '@mui/material';
 import * as yup from 'yup';
 import _ from '@lodash';
 import { useEffect, useState } from 'react';
@@ -32,6 +32,9 @@ const schema = yup.object().shape({
     home_page_id: yup
         .string()
         .required('Please choose a Home Page'),
+    redirect_page_id: yup
+        .string()
+        .required('Please choose a Redirect Page'),
     default_template_id: yup
         .string()
         .required('Please select a default layout'),
@@ -49,7 +52,6 @@ const replyFormSchema = yup.object().shape({
 
 function GeneralConfiguration(props) {
     const dispatch = useDispatch();
-    const [captchaOptions, setCaptchaOptions] = useState([])
     const [generalReplies, setGeneralReplies] = useState([])
     const [layoutOptions, setLayoutOptions] = useState([])
     const [pageOptions, setPageOptions] = useState([])
@@ -58,8 +60,11 @@ function GeneralConfiguration(props) {
 
     const [defaultValues, setDefaultValues] = useState({
         home_page_id: 0,
+        redirect_page_id: 0,
         default_template_id: 0,
-        default_captcha_option_id: 0
+        google_captcha_status: false,
+        site_key: '',
+        site_token: '',
     });
 
     const {
@@ -75,9 +80,23 @@ function GeneralConfiguration(props) {
     });
 
     const selectHomePage = (event) => {
+        if (event.target.value === defaultValues.redirect_page_id) {
+            dispatch(showMessage({ variant: 'error', message: 'Selected page should be different' }));
+            return false;
+        }
         setDefaultValues({
             ...defaultValues,
             home_page_id: event.target.value,
+        });
+    }
+    const selectRedirectPage = (event) => {
+        if (event.target.value === defaultValues.home_page_id) {
+            dispatch(showMessage({ variant: 'error', message: 'Selected page should be different' }));
+            return false;
+        }
+        setDefaultValues({
+            ...defaultValues,
+            redirect_page_id: event.target.value,
         });
     }
     const selectLayoutOption = (event) => {
@@ -86,16 +105,26 @@ function GeneralConfiguration(props) {
             default_template_id: event.target.value,
         })
     }
-    const selectCaptchaOption = (event) => {
+    const handleCaptchaStatus = (event) => {
         setDefaultValues({
             ...defaultValues,
-            default_captcha_option_id: event.target.value
+            google_captcha_status: event.target.checked
+        })
+    }
+    const handleSiteKey = (event) => {
+        setDefaultValues({
+            ...defaultValues,
+            site_key: event.target.value
+        })
+    }
+    const handleSiteToken = (event) => {
+        setDefaultValues({
+            ...defaultValues,
+            site_token: event.target.value
         })
     }
 
-
     const onDrop = ({ removedIndex, addedIndex }) => {
-        console.log({ removedIndex, addedIndex });
         setGeneralReplies(items => arrayMoveImmutable(items, removedIndex, addedIndex));
     };
 
@@ -109,18 +138,27 @@ function GeneralConfiguration(props) {
     const fetchData = () => {
         axios.get(jwtServiceConfig.getGeneralConfiguration).then((response) => {
             if (response.data.results.status) {
-                setCaptchaOptions([...response.data.results.data.captcha_options, { id: 0, name: 'Select Captcha Option' }])
-                setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Home Page' }])
+                setPageOptions([...response.data.results.data.page_options, { id: 0, name: 'Select Page' }])
                 setLayoutOptions([...response.data.results.data.layout_options, { id: 0, name: 'Select default layout' }])
                 setGeneralReplies([...response.data.results.data.general_replies])
-                setDefaultValues({
-                    ...defaultValues,
-                    home_page_id: response.data.results.data.home_page_id,
-                    default_template_id: response.data.results.data.default_template_id,
-                    default_captcha_option_id: response.data.results.data.default_captcha_option_id
+                setDefaultValues((defaultValues) => {
+                    return {
+                        ...defaultValues,
+                        home_page_id: response.data.results.data.home_page_id,
+                        redirect_page_id: response.data.results.data.redirect_page_id,
+                        default_template_id: response.data.results.data.default_template_id,
+                        google_captcha_status: response.data.results.data.is_google_captcha_used === 1,
+                    }
+                })
+                setDefaultValues((defaultValues) => {
+                    return {
+                        ...defaultValues,
+                        site_key: response.data.results.data.google_captcha_configuration ? response.data.results.data.google_captcha_configuration.site_key : '',
+                        site_token: response.data.results.data.google_captcha_configuration ? response.data.results.data.google_captcha_configuration.site_token : '',
+                    }
                 })
             } else {
-                console.log('Error');
+                console.error('Failed to fetch General Configuration');
             }
         });
     }
@@ -195,8 +233,11 @@ function GeneralConfiguration(props) {
         });
         const params = {
             selected_page_id: defaultValues.home_page_id,
+            redirect_page_id: defaultValues.redirect_page_id,
             selected_template_id: defaultValues.default_template_id,
-            selected_captcha_id: defaultValues.default_captcha_option_id,
+            is_google_captcha_used: defaultValues.google_captcha_status ? 1 : 0,
+            site_key: defaultValues.google_captcha_status ? defaultValues.site_key : '',
+            site_token: defaultValues.google_captcha_status ? defaultValues.site_token : '',
             auto_response_new_data: responses
         }
 
@@ -254,9 +295,6 @@ function GeneralConfiguration(props) {
             >
                 <Box sx={modalStyle}>
                     <h2 id="child-modal-title mb-24">Auto Responder</h2>
-                    {/* <p id="child-modal-description">
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    </p> */}
                     <form
                         name="AutoresponderForm"
                         noValidate
@@ -307,7 +345,7 @@ function GeneralConfiguration(props) {
                 </Box>
             </Modal>
             <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-0 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0">
                         <Typography variant="h6">General Configurations</Typography>
                         <Typography variant="body2">Please configure the below details</Typography>
@@ -323,25 +361,50 @@ function GeneralConfiguration(props) {
                                 name="home_page_id"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <FormControl fullWidth>
-                                        <InputLabel id="home_page">Homepage</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="home_page"
-                                            className="mb-24"
-                                            id="demo-simple-select"
-                                            value={defaultValues.home_page_id}
-                                            label="Homepage"
-                                            onChange={selectHomePage}
-                                            required
-                                            disabled={!permission}
-                                        >
-                                            {getFormattedOptions(pageOptions)}
-                                        </Select>
-                                    </FormControl>
+                                    <Tooltip title="Please select 'Published' page only" placement="top">
+                                        <FormControl fullWidth>
+                                            <InputLabel id="home_page">Homepage</InputLabel>
+                                            <Select
+                                                {...field}
+                                                labelId="home_page"
+                                                className="mb-24"
+                                                id="demo-simple-select"
+                                                value={defaultValues.home_page_id}
+                                                label="Homepage"
+                                                onChange={selectHomePage}
+                                                required
+                                                disabled={!permission}
+                                            >
+                                                {getFormattedOptions(pageOptions)}
+                                            </Select>
+                                        </FormControl>
+                                    </Tooltip>
                                 )}
                             />
-
+                            <Controller
+                                name="redirect_page_id"
+                                control={generalFormControl}
+                                render={({ field }) => (
+                                    <Tooltip title="Please select 'Published' page only" placement="top">
+                                        <FormControl fullWidth>
+                                            <InputLabel id="redirect_page">Redirect Page</InputLabel>
+                                            <Select
+                                                {...field}
+                                                labelId="redirect_page"
+                                                className="mb-24"
+                                                id="demo-simple-select"
+                                                value={defaultValues.redirect_page_id}
+                                                label="Redirect Page"
+                                                onChange={selectRedirectPage}
+                                                required
+                                                disabled={!permission}
+                                            >
+                                                {getFormattedOptions(pageOptions)}
+                                            </Select>
+                                        </FormControl>
+                                    </Tooltip>
+                                )}
+                            />
                             <Controller
                                 name="default_template_id"
                                 control={generalFormControl}
@@ -363,29 +426,65 @@ function GeneralConfiguration(props) {
                                     </FormControl>
                                 )}
                             />
-
                             <Controller
-                                name="default_captcha_option_id"
+                                name="google_captcha_status"
                                 control={generalFormControl}
                                 render={({ field }) => (
-                                    <FormControl fullWidth>
-                                        <InputLabel id="captcha_option">Captcha</InputLabel>
-                                        <Select
-                                            {...field}
-                                            labelId="captcha_option"
-                                            className="mb-24"
-                                            id="demo-simple-select"
-                                            value={defaultValues.default_captcha_option_id}
-                                            label="Captcha"
-                                            onChange={selectCaptchaOption}
+                                    <FormControlLabel
+                                        className="w-4/12"
+                                        sx={defaultValues.google_captcha_status ? {
+                                            background: '#ffffff', marginBottom: '-18px', justifyContent: 'center',
+                                        } : { justifyContent: 'center' }}
+                                        {...field}
+                                        control={<Switch
+                                            className="mt-2"
+                                            labelId="google_captcha_status"
                                             disabled={!permission}
-                                        >
-                                            {getFormattedOptions(captchaOptions)}
-                                        </Select>
-                                    </FormControl>
+                                            checked={defaultValues.google_captcha_status}
+                                            onChange={handleCaptchaStatus}
+                                        />}
+                                        label="Google Captcha"
+                                        labelPlacement="start"
+                                    />
                                 )}
                             />
-                            <Divider className="mb-24" />
+                            {defaultValues.google_captcha_status &&
+                                <Box className="border-2 p-24" sx={{ borderRadius: 2 }}>
+                                    <Controller
+                                        name="site_key"
+                                        control={generalFormControl}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                className="w-1/2 pr-10"
+                                                label="Site Key"
+                                                variant="outlined"
+                                                required={defaultValues.google_captcha_status}
+                                                fullWidth
+                                                onChange={handleSiteKey}
+                                                value={defaultValues.site_key}
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="site_token"
+                                        control={generalFormControl}
+                                        render={({ field }) => (
+                                            <TextField
+                                                className="w-1/2"
+                                                {...field}
+                                                label="Site Token"
+                                                variant="outlined"
+                                                required={defaultValues.google_captcha_status}
+                                                fullWidth
+                                                onChange={handleSiteToken}
+                                                value={defaultValues.site_token}
+                                            />
+                                        )}
+                                    />
+                                </Box>
+                            }
+                            <Divider className="mt-20 mb-24" />
                             <h3>
                                 Replies
                                 <Button
@@ -399,13 +498,14 @@ function GeneralConfiguration(props) {
                                 </Button>
                             </h3>
 
-                            <CardContent>
-                                <List>
-                                    <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                        {getReplies(generalReplies)}
-                                    </Container>
-                                </List>
-                            </CardContent>
+                            {generalReplies.length > 0 &&
+                                <CardContent>
+                                    <List>
+                                        <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                            {getReplies(generalReplies)}
+                                        </Container>
+                                    </List>
+                                </CardContent>}
 
                             {
                                 (permission) ?

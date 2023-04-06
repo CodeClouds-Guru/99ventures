@@ -19,24 +19,32 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'survey_id',
         otherKey: 'member_transaction_id',
+      }),
+      Survey.hasMany(models.SurveyQualification, {
+        foreignKey: 'survey_id',
       })
     }
   }
   Survey.init({
     survey_provider_id: DataTypes.BIGINT,
-    ioi: DataTypes.FLOAT,
-    payout: DataTypes.FLOAT,
-    convertion_rate: DataTypes.FLOAT,
-    score: DataTypes.FLOAT,
-    statistic_rating_count: DataTypes.FLOAT,
-    statistic_rating_avg: DataTypes.FLOAT,
-    type: DataTypes.STRING,
-    payout_publisher_usd: DataTypes.FLOAT,
-    href: DataTypes.STRING
+    loi: DataTypes.FLOAT,
+    cpi: DataTypes.FLOAT,
+    name: DataTypes.STRING,
+    survey_number: DataTypes.STRING,
+    status: DataTypes.STRING,
+    original_json: DataTypes.JSON,
+    created_at: 'TIMESTAMP',
+    updated_at: 'TIMESTAMP',
+    deleted_at: 'TIMESTAMP'
   }, {
     sequelize,
     modelName: 'Survey',
     tableName: 'surveys',
+    timestamps: true,
+    paranoid: true,
+    createdAt: 'created_at', // alias createdAt as created_date
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
   });
   return Survey;
 };

@@ -6,6 +6,7 @@ import Logo from '../../../../shared-components/Logo';
 import NavbarToggleButton from '../../../../shared-components/NavbarToggleButton';
 import UserNavbarHeader from '../../../../shared-components/UserNavbarHeader';
 import Navigation from '../../../../shared-components/Navigation';
+import UserNavbarFooter from '../../../../shared-components/UserNavbarFooter';
 
 const Root = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
@@ -53,6 +54,7 @@ function NavbarStyle1Content(props) {
           <img className="w-full max-w-64" src="assets/images/logo/logo.png" alt="footer logo" />
         </div>
       </StyledContent>
+      <UserNavbarFooter className="sticky" />
     </Root>
   );
 }

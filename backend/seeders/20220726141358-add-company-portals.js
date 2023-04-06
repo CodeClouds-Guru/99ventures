@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert("company_portals", [
+    await queryInterface.bulkInsert('company_portals', [
       {
         id: 1,
-        domain: "testdomain.com",
-        name: "Test Site",
+        domain: 'moresurveys.com',
+        name: 'Test Site',
         status: 1,
         created_by: 1,
         company_id: 1,
@@ -14,8 +14,8 @@ module.exports = {
       {
         id: 2,
         company_id: 2,
-        domain: "99ventures.com",
-        name: "99 Ventures",
+        domain: '99ventures.com',
+        name: '99 Ventures',
         status: 1,
         created_by: 1,
         created_at: new Date(),
@@ -24,6 +24,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("company_portals", null, {});
+    await queryInterface.bulkDelete('company_portals', null, {});
   },
 };

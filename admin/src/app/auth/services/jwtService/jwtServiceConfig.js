@@ -53,7 +53,15 @@ const jwtServiceConfig = {
   membersSave: 'members/save',
   getSingleMember: 'members/view',
   memberUpdate: 'members/update',
-  memberDelete: 'members/delete'
+  memberDelete: 'members/delete',
+  campaignsSave: 'campaigns/save',
+  getSingleCampaign: 'campaigns/view',
+  campaignUpdate: 'campaigns/update',
+  offerwallsSave: 'offer-walls/save',
+  getSingleOfferwall: 'offer-walls/view',
+  offerwallUpdate: 'offer-walls/update',
+  shoutboxConfigurations: 'shoutbox-configurations',
+  shoutboxConfigurationUpdate: 'shoutbox-configurations/update',
 };
 
 export default jwtServiceConfig;
