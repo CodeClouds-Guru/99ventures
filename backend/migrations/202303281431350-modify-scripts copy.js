@@ -2,8 +2,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.addColumn('scripts', 'config_json', {
-            type: Sequelize.JSON
+        await queryInterface.addColumn('scripts', 'module', {
+            type: Sequelize.STRING,
         });
     },
     async down(queryInterface, Sequelize) {

@@ -29,6 +29,8 @@ const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 
+const frontendrRouter = require('./frontend')
+
 router.get('/offer-wall/list', async (req, res) => {
   var offer_walls = await OfferWall.findAll({ where: { status: '1' } });
   if (offer_walls) {
@@ -74,66 +76,11 @@ router.get('/sqs-receive-message', async (req, res) => {
   const receive_message = await sqsHelper.receiveData();
   res.send(receive_message);
 });
+
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
-router.post('/login', MemberAuthController.login);
-router.post('/signup', MemberAuthController.signup);
-router.get('/email-verify/:hash', MemberAuthController.emailVerify);
-router.post('/logout', MemberAuthController.logout);
-router.get('/survey', SurveyController.getSurvey);
-router.get('/survey/:status', StaticPageController.showStatus);
-router.get('/get-scripts', StaticPageController.getScripts);
-router.post('/ticket/create', TicketController.saveTicketConversations);
-router.get('/cint/surveys', CintController.survey);
-router.get('/pure-spectrum/:action', PureSpectrumController.index);
-router.get('/schlesigner/:action', SchlesingerController.index);
-router.get('/lucid/:action', LucidController.index);
-
-router.post(
-  '/profile/update',
-  [checkMemberAuth],
-  MemberAuthController.profileUpdate
-);
-router.put(
-  '/profile/update',
-  [checkMemberAuth],
-  MemberAuthController.profileUpdate
-);
-
-router.get('/404', async (req, res) => {
-  var pagePerser = new PageParser('404');
-  var page_content = await pagePerser.preview(req);
-  res.render('page', { page_content });
-});
-router.get('/500', async (req, res) => {
-  var pagePerser = new PageParser('500');
-  var page_content = await pagePerser.preview(req);
-  res.render('page', { page_content });
-});
-
-router.get('/:slug?', [checkMemberAuth], async (req, res) => {
-  //checkIPMiddleware
-  var pagePerser = new PageParser(req.params.slug || '/');
-  try {
-    var page_content = await pagePerser.preview(req);
-  } catch (e) {
-    switch (e.statusCode) {
-      case 404:
-        res.redirect('/404');
-        return;
-      case 401:
-        res.redirect('/');
-        return;
-      default:
-        res.redirect('/500');
-        console.error(e);
-        return;
-    }
-    page_content = await pagePerser.preview();
-  }
-  res.render('page', { page_content });
-});
+router.use(frontendrRouter,checkMemberAuth)
 
 module.exports = {
   prefix: '/',
