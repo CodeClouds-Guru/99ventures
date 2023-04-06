@@ -17,6 +17,7 @@ module.exports = async function (req, res, next) {
     });
   }
   req.session.company_portal = company_portal;
+  console.log('mmmmmmmmmmmmmmmm',req.session.company_portal)
   if ('member' in req.session && req.session.member) {
     const member = await Member.findOne({
       where: { id: req.session.member.id },
