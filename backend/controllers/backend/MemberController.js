@@ -227,10 +227,11 @@ class MemberController extends Controller {
             else survey_list[i].setDataValue('name', null);
             survey_list[i].Surveys = null;
           }
-
+          let membership_tier = await MembershipTier.findAll();
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
+          result.setDataValue('membership_tier', membership_tier);
         } else {
           //get all email alerts
           email_alerts = await EmailAlert.getEmailAlertList(member_id);
@@ -328,8 +329,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
@@ -440,7 +441,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
