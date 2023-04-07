@@ -227,7 +227,9 @@ class MemberController extends Controller {
             else survey_list[i].setDataValue('name', null);
             survey_list[i].Surveys = null;
           }
-          let membership_tier = await MembershipTier.findAll();
+          let membership_tier = await MembershipTier.findAll({
+            attributes: ['id', 'name'],
+          });
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
