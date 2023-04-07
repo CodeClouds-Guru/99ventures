@@ -47,6 +47,7 @@ class ScriptParser {
             data.setDataValue('email_alerts', email_alerts);
             let country_list = await Models.Country.getAllCountryList();
             data.setDataValue('country_list', country_list);
+            // console.log(data.country_id);
             break;
         }
       }
@@ -74,6 +75,7 @@ class ScriptParser {
         };
       case 'Member':
         return {
+          where: { id: user.id },
           include: { model: Models.MembershipTier, attributes: ['name'] },
         };
       default:
