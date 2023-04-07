@@ -41,10 +41,12 @@ class ScriptParser {
             data = await Models[script.module].findOne({
               ...member_where,
             });
-            data.email_alerts = await Models.EmailAlert.getEmailAlertList(
+            let email_alerts = await Models.EmailAlert.getEmailAlertList(
               user.id
             );
-            data.country_list = await Models.Country.getAllCountryList();
+            data.setDataValue('email_alerts', email_alerts);
+            let country_list = await Models.Country.getAllCountryList();
+            data.setDataValue('country_list', country_list);
             break;
         }
       }
