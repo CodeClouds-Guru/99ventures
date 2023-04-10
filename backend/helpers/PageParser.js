@@ -30,37 +30,34 @@ class PageParser {
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
-    Handlebars.registerHelper("format", function (options) {
+    Handlebars.registerHelper('format', function (options) {
       return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
     });
     Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
       switch (operator) {
         case '==':
-          return (v1 == v2) ? options.fn(this) : options.inverse(this);
+          return v1 == v2 ? options.fn(this) : options.inverse(this);
         case '===':
-          return (v1 === v2) ? options.fn(this) : options.inverse(this);
+          return v1 === v2 ? options.fn(this) : options.inverse(this);
         case '!=':
-          return (v1 != v2) ? options.fn(this) : options.inverse(this);
+          return v1 != v2 ? options.fn(this) : options.inverse(this);
         case '!==':
-          return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+          return v1 !== v2 ? options.fn(this) : options.inverse(this);
         case '<':
-          return (v1 < v2) ? options.fn(this) : options.inverse(this);
+          return v1 < v2 ? options.fn(this) : options.inverse(this);
         case '<=':
-          return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+          return v1 <= v2 ? options.fn(this) : options.inverse(this);
         case '>':
-          return (v1 > v2) ? options.fn(this) : options.inverse(this);
+          return v1 > v2 ? options.fn(this) : options.inverse(this);
         case '>=':
-          return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+          return v1 >= v2 ? options.fn(this) : options.inverse(this);
         case '&&':
-          return (v1 && v2) ? options.fn(this) : options.inverse(this);
+          return v1 && v2 ? options.fn(this) : options.inverse(this);
         case '||':
-          return (v1 || v2) ? options.fn(this) : options.inverse(this);
+          return v1 || v2 ? options.fn(this) : options.inverse(this);
         default:
           return options.inverse(this);
       }
-    });
-    Handlebars.registerHelper('ifNotEquals', function (arg1, arg2, options) {
-      return (arg1 !== arg2) ? options.fn(this) : options.inverse(this);
     });
   }
 
@@ -146,7 +143,6 @@ class PageParser {
     );
     layout_html = await this.convertComponentToHtml(layout_html);
 
-
     layout_html = safeEval('`' + layout_html + '`', {
       page_title,
       page_keywords,
@@ -189,7 +185,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    console.log('regex_match', regex_match)
+    console.log('regex_match', regex_match);
 
     if (regex_match) {
       await regex_match.forEach(async (script_id) => {
