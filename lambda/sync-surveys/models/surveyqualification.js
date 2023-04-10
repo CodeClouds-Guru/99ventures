@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'survey_qualification_id',
         otherKey: 'survey_answer_precode_id',
+        onDelete: 'CASCADE',
+        hooks: true,
       })
     }
   }
