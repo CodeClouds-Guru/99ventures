@@ -17,6 +17,7 @@ class PageParser {
     this.sessionUser = null;
     this.companyPortal = null;
     this.sessionMessage = '';
+    this.sessionFlash = {};
     this.slug = slug;
     this.staticContent = staticContent;
     this.page = null;
@@ -30,6 +31,7 @@ class PageParser {
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
+    this.getFlashObject = this.getFlashObject.bind(this);
     Handlebars.registerHelper('format', function (options) {
       return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
     });
@@ -92,6 +94,7 @@ class PageParser {
       this.sessionUser = req.session.member;
     }
     if ('flash' in req.session && req.session.flash) {
+      this.sessionFlash = req.session.flash;
       this.sessionMessage = req.session.flash.error;
       if ('access_error' in req.session.flash) {
         this.sessionMessage = req.session.flash.access_error.error_message;
@@ -153,9 +156,11 @@ class PageParser {
       default_scripted_codes,
     });
     const template = Handlebars.compile(layout_html);
+    const flash = this.getFlashObject();
     layout_html = template({
       user,
       error_message,
+      flash
     });
     this.sessionMessage = '';
 
@@ -219,6 +224,9 @@ class PageParser {
   }
   getFlashMessage() {
     return this.sessionMessage;
+  }
+  getFlashObject() {
+    return this.sessionFlash;
   }
 }
 module.exports = PageParser;
