@@ -14,7 +14,7 @@ const db = require('./models/index');
 const storeSurveyQualifications = async (record, model, survey_questions) => {
   try {
     record.survey_qualifications.map(async (record1) => {
-      let obj = await survey_questions.find(
+      let obj = survey_questions.find(
       (val) => val.survey_provider_question_id === record1.question_id
       );
       if (obj) {
@@ -34,17 +34,18 @@ const storeSurveyQualifications = async (record, model, survey_questions) => {
           option:precode,
           precode: record1.question_id
         }
-        var answer_precode = await SurveyAnswerPrecodes.findOne({
+        var answer_precode = await SurveyAnswerPrecodes.findOrCreate({
           where: precode_data,
         });
-        if (!answer_precode) {
-          answer_precode = await SurveyAnswerPrecodes.create(precode_data);
-        }
+        // if (!answer_precode) {
+        //   answer_precode = await SurveyAnswerPrecodes.create(precode_data);
+        // }
+        
         await db.sequelize.query(
         'INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES (?, ?)',
         {
           type: QueryTypes.INSERT,
-          replacements: [model1.id, answer_precode.id],
+          replacements: [model1.id, answer_precode[0].id],
         }
         );
       });
@@ -55,14 +56,22 @@ const storeSurveyQualifications = async (record, model, survey_questions) => {
     }
 };
 
-exports.handler = async (event) => {
+exports.handler = async(event) => {
   console.log('event object', event);
+  // restart connection pool to ensure connections are not re-used across invocations
+  // db.sequelize.connectionManager.initPools();
+
+  // // restore `getConnection()` if it has been overwritten by `close()`
+  // if (db.sequelize.connectionManager.hasOwnProperty("getConnection")) {
+  //   delete db.sequelize.connectionManager.getConnection;
+  // }
   try{
     if(event.Records){
       event.Records.forEach(async (record) => {
         record = JSON.parse(record.body)
         let survey_questions = await SurveyQuestion.findAll({
           attributes: ['survey_provider_question_id','id'],
+          raw:true
         });
         let model = {};
         let data = {
@@ -81,13 +90,20 @@ exports.handler = async (event) => {
             survey_provider_id: record.survey_provider_id,
           },
         });
+        let survey_record_id = 0
         if (obj) {
-          survey_status = 'updated';
-          model = await obj.update(data);
+          data.id = obj.id
+          await Survey.destroy({where:{id:obj.id},force:true})
+          await SurveyQualification.destroy({
+            where: { survey_id: obj.id },
+            force: true,
+          });
+          // survey_status = 'updated';
+          // model = await obj.update(data);
         } else {
-          model = await Survey.create(data);
+          // model = await Survey.create(data);
         }
-
+        model = await Survey.create(data);
         if (
           'survey_qualifications' in record &&
           Array.isArray(record.survey_qualifications) &&
@@ -95,33 +111,35 @@ exports.handler = async (event) => {
         ) {
           let qualification_ids = [];
           //clear all the previous records if the status is updated
-          if (survey_status === 'updated') {
+          //////////////
+           
+          /*if (survey_status === 'updated') {
             //get all qualification
-            var qualification_ids_rows = await SurveyQualification.findAll({
-              where: { survey_id: model.id },
-              attributes: ['id'],
-            });
-            qualification_ids = qualification_ids_rows.map((qualification_id) => {
-              return qualification_id.id;
-            });
-            if (qualification_ids.length > 0) {
-              //remove qualifications
-              await SurveyQualification.destroy({
-                where: {
-                  id: {
-                    [Op.in]: qualification_ids,
-                  },
-                },
-                force: true,
-              });
-              await db.sequelize.query(
-                'DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (' +
-                qualification_ids.join(',') +
-                ')',
-                { type: QueryTypes.DELETE }
-              );
-            }
-          }
+            // var qualification_ids_rows = await SurveyQualification.findAll({
+            //   where: { survey_id: model.id },
+            //   attributes: ['id'],
+            // });
+            // qualification_ids = qualification_ids_rows.map((qualification_id) => {
+            //   return qualification_id.id;
+            // });
+            // if (qualification_ids.length > 0) {
+            //   //remove qualifications
+            //   await SurveyQualification.destroy({
+            //     where: {
+            //       id: {
+            //         [Op.in]: qualification_ids,
+            //       },
+            //     },
+            //     force: true,
+            //   });
+            //   await db.sequelize.query(
+            //     'DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (' +
+            //     qualification_ids.join(',') +
+            //     ')',
+            //     { type: QueryTypes.DELETE }
+            //   );
+            // }
+          }*/
           //store survey qualifications
           await storeSurveyQualifications(record, model, survey_questions);
         }
@@ -130,6 +148,8 @@ exports.handler = async (event) => {
   } catch (error) {
     console.error(error);
   }finally {
+    await db.sequelize.close()
+    // await db.sequelize.connectionManager.close();
     return true;
   }
 };

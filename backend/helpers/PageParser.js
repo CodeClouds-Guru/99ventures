@@ -59,16 +59,6 @@ class PageParser {
           return options.inverse(this);
       }
     });
-    Handlebars.registerHelper('ifNotEquals', function (arg1, arg2, options) {
-      return arg1 !== arg2 ? options.fn(this) : options.inverse(this);
-    });
-    // Handlebars.registerHelper('select', function (v1, v2) {
-    //   if (v1 === v2) {
-    //     return new Handlebars.SafeString('selected=selected');
-    //   } else {
-    //     return '';
-    //   }
-    // });
   }
 
   async getPageNLayout() {
