@@ -203,17 +203,16 @@ class SchlesingerController {
                     }
                     else {
                         this.updateSurvey(queryString.survey_number);
-                        req.session.flash = { error_message: 'No quota exists!' };
-                        // req.session.flash = { message: 'Survey quota does not exists!' };
+                        req.session.flash = { error: 'No quota exists!', redirect_url: '/schlesigner' };
                         res.redirect('/notice');
                     }                    
                 } else {
                     this.updateSurvey(queryString.survey_number);
-                    req.session.flash = { error_message: 'Survey quota does not exists!' };
+                    req.session.flash = { error: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
                     res.redirect('/notice');
                 }
             } else {
-                req.session.flash = { error_message: 'Unable to get entry link!' };
+                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/schlesigner' };
                 res.redirect('/notice');
             }
         } catch (error) {
