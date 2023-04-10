@@ -6,7 +6,8 @@ const {
     SurveyQualification,
     SurveyAnswerPrecodes,
     MemberEligibilities
-} = require('../../models')
+} = require('../../models');
+const SchlesingerHelper = require('../../helpers/Schlesinger');
 
 class SchlesingerController {
 
@@ -178,25 +179,58 @@ class SchlesingerController {
                 where: {
                     survey_number: queryString.survey_number
                 }
-            });        
-            
+            });
+
             if (data && data.original_json) {
-                delete queryString['survey_number'];
-                const params = Object.fromEntries(new URLSearchParams(queryString));
-                const liveLink = data.original_json.LiveLink;
-                const liveLinkArry = liveLink.split('?');
-                const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
-                params.pid = Date.now();
-                delete liveLinkParams['zid'];   // We dont have any value for zid
-                const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
-                res.redirect(entryLink)
+                const schObj = new SchlesingerHelper;
+                const result = await schObj.fetchSellerAPI('api/v2/survey/survey-quotas/' + queryString.survey_number);
+                
+                if(
+                    result.Result.Success === true && 
+                    result.Result.TotalCount != 0
+                ) {
+                    const surveyQuota = result.SurveyQuotas.filter(sv => sv.TotalRemaining > 1);
+                    if( surveyQuota.length ){
+                        delete queryString['survey_number'];
+                        const params = Object.fromEntries(new URLSearchParams(queryString));
+                        const liveLink = data.original_json.LiveLink;
+                        const liveLinkArry = liveLink.split('?');
+                        const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
+                        params.pid = Date.now();
+                        delete liveLinkParams['zid'];   // We dont have any value for zid
+                        const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
+                        res.redirect(entryLink)
+                    }
+                    else {
+                        this.updateSurvey(queryString.survey_number);
+                        req.session.flash = { error_message: 'No quota exists!' };
+                        // req.session.flash = { message: 'Survey quota does not exists!' };
+                        res.redirect('/notice');
+                    }                    
+                } else {
+                    this.updateSurvey(queryString.survey_number);
+                    req.session.flash = { error_message: 'Survey quota does not exists!' };
+                    res.redirect('/notice');
+                }
             } else {
-                res.send('Unable to get entry link!');
+                req.session.flash = { error_message: 'Unable to get entry link!' };
+                res.redirect('/notice');
             }
         } catch (error) {
             console.error(error);
             throw error;
         }
+    }
+
+    updateSurvey = async(surveyNumber) => {
+        await Survey.update({
+            status: 'draft',
+            deleted_at: new Date()
+        }, {
+            where: {
+                survey_number: surveyNumber
+            }
+        });
     }
 }
 
