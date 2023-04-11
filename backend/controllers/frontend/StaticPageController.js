@@ -63,7 +63,7 @@ class StaticPageController {
     var resp = {
       status: false,
       error: '',
-      html: '',
+      html: ''
     };
     try {
       const params = req.query;
@@ -81,11 +81,12 @@ class StaticPageController {
       const template = Handlebars.compile(parsed.script_html);
       var html = template({
         data: parsed.data,
+        page_count:parsed.page_count
       });
       resp = {
         ...resp,
         status: true,
-        html,
+        html
       };
     } catch (e) {
       console.error(e);
