@@ -2,6 +2,7 @@ const Models = require('../models');
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const safeEval = require('safe-eval');
+const util = require("util")
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -24,7 +25,7 @@ class ScriptParser {
             const pageNo = 'pageNo' in params ? params.pageno : 1;
             const param_where =
               'where' in params
-                ? JSON.parse(safeEval('`' + params.where + '`', Op))
+                ? JSON.parse(params.where)
                 : null;
 
             let where = this.getModuleWhere(script.module, user);
