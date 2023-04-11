@@ -5,34 +5,27 @@ const path = require('path')
 const Sequelize = require('sequelize')
 const basename = path.basename(__filename)
 const db = {}
-
-// if (config.use_env_variable) {
-//   sequelize = new Sequelize(process.env[config.use_env_variable], config);
-// } else {
-//   sequelize = new Sequelize(config.database, config.username, config.password, config);
-// }
-
-console.log('DB environment', {
-    DB_NAME: process.env.DB_NAME,
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST || '127.0.0.1',
-    dialect: 'mysql',
-    port: process.env.DB_PORT || 3306,
-})
-
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-        host: process.env.DB_HOST || '127.0.0.1',
-        dialect: 'mysql',
-        port: process.env.DB_PORT || 3306,
-        logging: false,
-        pool:{max:4, min:0, idle:0, acquire: 60000,evict: 60000}
+var sequelize = null;
+if (!sequelize) {
+    sequelize = new Sequelize(
+        process.env.DB_NAME,
+        process.env.DB_USER,
+        process.env.DB_PASSWORD,
+        {
+            host: process.env.DB_HOST || '127.0.0.1',
+            dialect: 'mysql',
+            port: process.env.DB_PORT || 3306,
+            logging: false,
+            pool: { max: 4, min: 0, idle: 0, acquire: 60000, evict: 60000 }
+        }
+    )
+} else {
+    sequelize.connectionManager.initPools();
+    // restore `getConnection()` if it has been overwritten by `close()`
+    if (sequelize.connectionManager.hasOwnProperty("getConnection")) {
+        delete sequelize.connectionManager.getConnection;
     }
-)
+}
 
 fs.readdirSync(__dirname)
     .filter((file) => {
