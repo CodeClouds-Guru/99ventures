@@ -369,7 +369,7 @@ class MemberAuthController {
           username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.number().required().label('Zipcode'),
-          city: Joi.string().required().label('City'),
+          city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
           // country_code: Joi.number().optional().label('Phone code'),

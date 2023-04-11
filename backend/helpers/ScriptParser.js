@@ -1,5 +1,7 @@
 const Models = require('../models');
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
+const safeEval = require('safe-eval');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -20,14 +22,20 @@ class ScriptParser {
             const orderBy = 'orderBy' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
             const pageNo = 'pageNo' in params ? params.pageno : 1;
-            const where = this.getModuleWhere(script.module, user);
-            // console.log({
-            //   ...where,
-            //   order: [[Sequelize.literal(orderBy), order]],
-            //   limit: perPage,
-            //   offset: (pageNo - 1) * perPage,
-            //   include: { all: true }
-            // })
+            const param_where =
+              'where' in params
+                ? JSON.parse(safeEval('`' + params.where + '`', Op))
+                : null;
+
+            let where = this.getModuleWhere(script.module, user);
+
+            if (param_where)
+              where.where = {
+                ...where.where,
+                ...param_where,
+              };
+
+            console.log(where);
             data = await Models[script.module].findAll({
               subQuery: false,
               order: [[Sequelize.literal(orderBy), order]],
@@ -35,6 +43,7 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
+            console.log(data);
             break;
           case 'profile_update':
             const member_where = this.getModuleWhere(script.module, user);
