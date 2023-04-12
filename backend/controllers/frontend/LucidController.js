@@ -162,7 +162,7 @@ class LucidController {
                 "SupplierLinkTypeCode":"OWS",
                 "TrackingTypeCode":"S2S"
             });
-            const result = await lcObj.createData('/Supply/v1/SupplierLinks/Create/' + surveyNumber +'/6373', payload);
+            const result = await lcObj.createData('/Supply/v1/SupplierLinks/Create/33396875/6373', payload);
             res.send(result)
 
             // var data = JSON.stringify({
