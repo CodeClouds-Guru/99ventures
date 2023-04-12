@@ -32,6 +32,7 @@ class Lucid {
     this.createData = this.createData.bind(this);
     this.updateData = this.updateData.bind(this);
     this.deleteData = this.deleteData.bind(this);
+    // this.createEntryLink = this.createEntryLink.bind(this);
     return new Proxy(this, handler);
   }
   async fetchAndReturnData(partUrl) {
@@ -45,7 +46,7 @@ class Lucid {
       'Content-Type': 'application/json',
       data: payload,
     };
-
+    
     const response = await this.instance.post(partUrl);
     return response.data;
   }
@@ -447,6 +448,16 @@ class Lucid {
   }
   /*------------------- Demand - Entry Links ----------------*/
   /******************* END Of All Del Apis *******************/
+
+  /*------------------- Entry Link Create Start ----------------*/
+  /*async createEntryLink(surveyNumber) {
+    
+     
+    
+  }*/
+  /*------------------- Entry Link Create End ----------------*/
+
+
 }
 
 module.exports = Lucid;
