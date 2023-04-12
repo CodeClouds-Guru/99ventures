@@ -430,7 +430,15 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
-        req.session.member.avatar = request_data.avatar;
+        let rawValue = request_data.avatar;
+        if (!rawValue || rawValue === '') {
+          const publicURL =
+            process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+          rawValue = `${publicURL}/images/demo-user.png`;
+        } else {
+          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+        }
+        req.session.member.avatar = rawValue;
 
         req.session.flash = { message: member_message };
       } else {
