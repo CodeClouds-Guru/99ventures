@@ -85,6 +85,7 @@ module.exports = (sequelize, DataTypes) => {
       zip_code: Joi.string().allow('').optional().label('Zip Code'),
       avatar: Joi.optional().label('Avatar'),
       country_code: Joi.optional().label('Country Code'),
+      state: Joi.string().allow('').optional().label('State'),
     });
     return schema.validate(req.body);
   };
@@ -170,6 +171,7 @@ module.exports = (sequelize, DataTypes) => {
           return `${this.first_name} ${this.last_name}`;
         },
       },
+      state: DataTypes.STRING,
     },
     {
       sequelize,

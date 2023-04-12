@@ -352,6 +352,7 @@ class MemberAuthController {
     let member_status = true;
     let member_message = 'Successfully updated!';
     const method = req.method;
+    let request_data = {};
     try {
       const member_id = req.session.member.id;
 
@@ -369,7 +370,7 @@ class MemberAuthController {
           username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.number().required().label('Zipcode'),
-          city: Joi.string().required().label('City'),
+          city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
           // country_code: Joi.number().optional().label('Phone code'),
@@ -384,7 +385,7 @@ class MemberAuthController {
           member_message = error.details.map((err) => err.message);
         }
         // console.log(member);
-        if (member.profile_completed_on == null) {
+        if (!member.profile_completed_on) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
           req.body.profile_completed_on = new Date();
           let activityEventbus = eventBus.emit('member_activity', {
@@ -394,9 +395,9 @@ class MemberAuthController {
         }
         req.body.country_id = req.body.country;
         req.body.zip_code = req.body.zipcode;
-        let request_data = req.body;
+        request_data = req.body;
         request_data.updated_by = member_id;
-        request_data.avatar = null;
+        // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
@@ -429,6 +430,16 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
+        let rawValue = request_data.avatar;
+        if (!rawValue || rawValue === '') {
+          const publicURL =
+            process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+          rawValue = `${publicURL}/images/demo-user.png`;
+        } else {
+          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+        }
+        req.session.member.avatar = rawValue;
+
         req.session.flash = { message: member_message };
       } else {
         req.session.flash = { error: member_message };
