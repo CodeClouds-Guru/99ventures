@@ -430,7 +430,7 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
-        req.session.member = request_data;
+        req.session.member.avatar = request_data.avatar;
 
         req.session.flash = { message: member_message };
       } else {
