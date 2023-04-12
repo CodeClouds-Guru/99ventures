@@ -384,7 +384,7 @@ class MemberAuthController {
           member_message = error.details.map((err) => err.message);
         }
         // console.log(member);
-        if (member.profile_completed_on == null) {
+        if (!member.profile_completed_on) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
           req.body.profile_completed_on = new Date();
           let activityEventbus = eventBus.emit('member_activity', {
@@ -396,7 +396,7 @@ class MemberAuthController {
         req.body.zip_code = req.body.zipcode;
         let request_data = req.body;
         request_data.updated_by = member_id;
-        request_data.avatar = null;
+        // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
@@ -429,6 +429,8 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
+        req.session.member = request_data;
+
         req.session.flash = { message: member_message };
       } else {
         req.session.flash = { error: member_message };
