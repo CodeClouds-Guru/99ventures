@@ -352,6 +352,7 @@ class MemberAuthController {
     let member_status = true;
     let member_message = 'Successfully updated!';
     const method = req.method;
+    let request_data = {};
     try {
       const member_id = req.session.member.id;
 
@@ -394,7 +395,7 @@ class MemberAuthController {
         }
         req.body.country_id = req.body.country;
         req.body.zip_code = req.body.zipcode;
-        let request_data = req.body;
+        request_data = req.body;
         request_data.updated_by = member_id;
         // request_data.avatar = null;
         if (req.files) {
