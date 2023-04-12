@@ -353,12 +353,13 @@ class MemberAuthController {
     let member_message = 'Successfully updated!';
     const method = req.method;
     let request_data = {};
+    let member = {};
     try {
       const member_id = req.session.member.id;
 
       // const member_id = req.params.id;
       // console.log(method);
-      let member = await Member.findOne({ where: { id: member_id } });
+      member = await Member.findOne({ where: { id: member_id } });
 
       if (method === 'POST') {
         req.headers.company_id = req.session.company_portal.company_id;
@@ -401,7 +402,7 @@ class MemberAuthController {
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
-        // console.log(request_data);
+        console.log(request_data);
         let model = await Member.update(request_data, {
           where: { id: member_id },
         });
@@ -430,15 +431,10 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
-        let rawValue = request_data.avatar;
-        if (!rawValue || rawValue === '') {
-          const publicURL =
-            process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-          rawValue = `${publicURL}/images/demo-user.png`;
-        } else {
-          rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
-        }
-        req.session.member.avatar = rawValue;
+        if (request_data.avatar) {
+          req.session.member.avatar =
+            process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
+        } else req.session.member.avatar = member.avatar;
 
         req.session.flash = { message: member_message };
       } else {
