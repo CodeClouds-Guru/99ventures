@@ -12,6 +12,7 @@ class ScriptParser {
   }
   async parseScript(script_id, user, params) {
     var data = [];
+    var page_count = 0
     var script_html = '';
     let script = await Models.Script.findOne({ where: { code: script_id } });
     if (script) {
@@ -19,10 +20,17 @@ class ScriptParser {
       if (script.module) {
         switch (script.action_type) {
           case 'list':
-            const perPage = 'perPage' in params ? params.perpage : 12;
-            const orderBy = 'orderBy' in params ? params.orderby : 'id';
+            const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+            const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
-            const pageNo = 'pageNo' in params ? params.pageno : 1;
+            const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+            // console.log({
+            //   ...where,
+            //   order: [[Sequelize.literal(orderBy), order]],
+            //   limit: perPage,
+            //   offset: (pageNo - 1) * perPage,
+            //   include: { all: true }
+            // })
             const param_where =
               'where' in params
                 ? JSON.parse(params.where)
@@ -44,7 +52,9 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
-            console.log(data);
+            var data_count = await Models[script.module].findAndCountAll({...where})
+            page_count = Math.ceil(data_count.count/perPage)
+            // console.log(data);
             break;
           case 'profile_update':
             const member_where = this.getModuleWhere(script.module, user);
@@ -62,9 +72,11 @@ class ScriptParser {
         }
       }
     }
+    
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
+      page_count
     };
   }
   getModuleWhere(module, user) {

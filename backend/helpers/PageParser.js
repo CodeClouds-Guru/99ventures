@@ -61,6 +61,15 @@ class PageParser {
           return options.inverse(this);
       }
     });
+    Handlebars.registerHelper('for', function(from, to, incr, block) {
+      var accum = '';
+      for(var i = from; i <= to; i += incr)
+          accum += block.fn(i);
+      return accum;
+    });
+    Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+  });
   }
 
   async getPageNLayout() {
