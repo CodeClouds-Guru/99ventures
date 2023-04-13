@@ -36,12 +36,16 @@
 .grapes-modal-editor-container{display: flex; flex-direction: column;}
 .grapes-modal-editor-body{display: flex; justify-content: space-between;}
 .custom-code-editor .gjs-mdl-btn-close{display: none;}
+@media only screen and (max-width: 1400px) {
+    .gjs-mdl-dialog{width: 57%;}
+    .gjs-cm-editor-c .CodeMirror{height: 400px;}
+}
 @media only screen and (max-width: 1360px) {
     .gjs-pn-views{width: 20%;}
     .gjs-pn-options{right: 20%;}
     .gjs-pn-views-container{width: 20%;}
     .gjs-cv-canvas{width: 80%;}
-    .gjs-mdl-dialog{width: 90%;}
+    .gjs-mdl-dialog{width: 55%;}
 } 
 @media only screen and (max-width: 768px) {
     .gjs-pn-views-container{width: 25%;}
