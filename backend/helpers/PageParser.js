@@ -108,6 +108,9 @@ class PageParser {
       if ('access_error' in req.session.flash) {
         this.sessionMessage = req.session.flash.access_error.error_message;
       }
+      if ('message' in req.session.flash) {
+        this.sessionMessage = req.session.flash.message;
+      }
       delete req.session.flash;
     }
     const page_content = await this.generateHtml();
