@@ -157,55 +157,11 @@ class LucidController {
     generateEntryLink = async (req, res) => {
         try{
             const lcObj = new LucidHelper;
-            const surveyNumber = req.query.survey_number;
-            const payload = JSON.stringify({
-                "SupplierLinkTypeCode":"OWS",
-                "TrackingTypeCode":"S2S"
-            });
-            const result = await lcObj.createData('/Supply/v1/SupplierLinks/Create/33396875/6373', payload);
+            const surveyNumber = req.query.survey_number;            
+            const result = await lcObj.createEntryLink(33786113);
             res.send(result)
-
-            // var data = JSON.stringify({
-            //     "SupplierLinkTypeCode": "OWS",
-            //     "TrackingTypeCode": "S2S"
-            //   });
-              
-            //   var config = {
-            //     method: 'post',
-            //     url: 'https://api.samplicio.us/Supply/v1/SupplierLinks/Create/33374569/6373',
-            //     headers: { 
-            //       'Authorization': '1E1E0F7F-77B6-4732-9ED3-9D2953A7BF3F', 
-            //       'Content-Type': 'application/json',
-            //     },
-            //     data : data
-            //   };
-              
-            //   const response = await axios(config);
-            //   res.send(response)
-              
-            // const payload = {
-            //     "SupplierLinkTypeCode":"OWS",
-            //     "TrackingTypeCode":"S2S"
-            //   };
-              
-            //   const instance = axios.create({
-            //     baseURL: 'https://api.samplicio.us',
-            //     timeout: 10000,
-            //     headers: {
-            //       Authorization: process.env.LUCID_API_KEY,
-            //       Accept: 'application/json, text/plain, */*',
-            //       'Content-Type': 'application/json',
-            //     },
-            //     data: JSON.stringify(payload)
-            //   });
-              
-            //   const response = await instance.post('/Supply/v1/SupplierLinks/Create/' + surveyNumber +'/6373');
-            //   res.send(response)
-
-
         }
-        catch(error) {
-            
+        catch(error) {            
             console.error("Lucid Error: ", error)
             throw error;
         }

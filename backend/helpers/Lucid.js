@@ -32,7 +32,7 @@ class Lucid {
     this.createData = this.createData.bind(this);
     this.updateData = this.updateData.bind(this);
     this.deleteData = this.deleteData.bind(this);
-    // this.createEntryLink = this.createEntryLink.bind(this);
+    this.createEntryLink = this.createEntryLink.bind(this);
     return new Proxy(this, handler);
   }
   async fetchAndReturnData(partUrl) {
@@ -450,11 +450,32 @@ class Lucid {
   /******************* END Of All Del Apis *******************/
 
   /*------------------- Entry Link Create Start ----------------*/
-  /*async createEntryLink(surveyNumber) {
+  async createEntryLink(surveyNumber) {
+    const payload = {
+      "SupplierLinkTypeCode": "OWS",
+      "TrackingTypeCode": "S2S"
+    };
     
-     
+    const instance = {
+      headers: { 
+        'Authorization': '1E1E0F7F-77B6-4732-9ED3-9D2953A7BF3F', 
+        'Content-Type': 'application/json',
+      }
+    };
     
-  }*/
+    const response = await axios.post(
+      'https://api.samplicio.us/Supply/v1/SupplierLinks/Create/' + surveyNumber +'/6373', 
+      payload, 
+      instance
+    )
+    .catch(err => {
+      console.log('Lucid Error');
+      return err;
+    });
+
+    return response;    
+    
+  }
   /*------------------- Entry Link Create End ----------------*/
 
 
