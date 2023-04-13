@@ -1,4 +1,5 @@
 const Lucid = require("./handlers/Lucid");
+const db = require('./models/index');
 const main = async (event) => {
   if (event.Records) {
     event.Records.forEach(async record => {
@@ -18,7 +19,8 @@ const main = async (event) => {
   }
 }
 
-exports.handler = async (event, context) => {
+// exports.handler = 
+let abc = async (event, context) => {
   try {
     context.callbackWaitsForEmptyEventLoop = false;
     return await main(event);
