@@ -2,7 +2,8 @@ const Models = require('../models');
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const safeEval = require('safe-eval');
-const util = require("util")
+const util = require("util");
+const { ceil } = require('lodash');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -44,7 +45,7 @@ class ScriptParser {
                 ...param_where,
               };
 
-            console.log(where);
+            // console.log(where);
             data = await Models[script.module].findAll({
               subQuery: false,
               order: [[Sequelize.literal(orderBy), order]],
@@ -52,6 +53,10 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
+            if(script.module == 'Shoutbox'){//format the date
+              data = await this.formatDate(data,'created_at')
+              // console.log(data)
+            }
             var data_count = await Models[script.module].findAndCountAll({...where})
             page_count = Math.ceil(data_count.count/perPage)
             // console.log(data);
@@ -100,9 +105,22 @@ class ScriptParser {
           where: { id: user.id },
           include: { model: Models.MembershipTier, attributes: ['name'] },
         };
+      case 'Shoutbox':
+        return {
+          attributes: ['verbose','created_at'],
+        };
       default:
         return null;
     }
+  }
+  //format the date
+  async formatDate(data,date_field){
+    data.forEach(function callback(element, index) {
+      let d = new Date(element[date_field])
+      data[index].setDataValue('date',d.toLocaleDateString())
+      data[index].setDataValue('time',d.toLocaleTimeString())
+    })
+    return data
   }
 }
 module.exports = ScriptParser;

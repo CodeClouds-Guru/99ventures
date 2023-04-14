@@ -19,8 +19,7 @@ const main = async (event) => {
   }
 }
 
-// exports.handler = 
-let abc = async (event, context) => {
+exports.handler = async (event, context) => {
   try {
     context.callbackWaitsForEmptyEventLoop = false;
     return await main(event);
