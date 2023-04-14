@@ -200,6 +200,13 @@ class SurveySyncController {
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');            
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
+                const surveyData = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5);
+               
+                if(!surveyData.length) {
+                    res.json({ status: true, message: 'No survey found for this language!' });
+                    return;
+                }
+
                 //-- Disabled all the previous surveys
                 const current_datetime = new Date();
                 Survey.update({
@@ -237,7 +244,7 @@ class SurveySyncController {
                 return result;
                 */
 
-                for(let survey of allSurveys.surveys ){
+                for(let survey of surveyData ){                    
                     const checkExists = await Survey.count({
                         where: {
                             survey_provider_id: this.providerId,
@@ -272,6 +279,7 @@ class SurveySyncController {
                     }
                 }
                 return await Survey.findAll({
+                    attributes:['id', 'survey_number', 'loi', 'cpi'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
@@ -297,7 +305,7 @@ class SurveySyncController {
             const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
             
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
-                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId);
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
                 
                 if(!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
@@ -336,6 +344,7 @@ class SurveySyncController {
                     }
                 }
                 return await Survey.findAll({
+                    attributes:['id', 'survey_number', 'loi', 'cpi'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
@@ -359,7 +368,6 @@ class SurveySyncController {
         try{
             //Save Surveys
             const allSurveys = await this.pureSpectrumSurvey(req, res);
-            
             if(allSurveys.length) {
                 const psObj = new PurespectrumHelper;
                 for(let survey of allSurveys) {
@@ -445,11 +453,13 @@ class SurveySyncController {
      */
     async schlesingerQualification(req, res) {
         try{
-            const allSurveys = await this.schlesingerSurvey(req, res);            
+            const allSurveys = await this.schlesingerSurvey(req, res);  
             if(allSurveys.length) {
                 const psObj = new SchlesingerHelper;
-                for(let survey of allSurveys) {
+                
+                for(let survey of allSurveys) {                    
                     const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
+
                     if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
                         const surveyQualifications = surveyData.SurveyQualifications;
                         for(let ql of surveyQualifications){
@@ -512,6 +522,7 @@ class SurveySyncController {
                             }
                         }
                     }
+                    break;
                 }
                 res.json({ status: true, message: 'Data updated'});
             } else {
@@ -519,6 +530,7 @@ class SurveySyncController {
             }
         }
         catch (error) {
+            console.error('=================');
             console.error(error);
             throw error;
         }
