@@ -381,8 +381,11 @@ function List(props) {
 			return processFieldValue(n[field.field_name], field)
 		} else if (copyScriptId && field.field_name === 'code') {
 			return (
-				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="top-end">
-					<span className="flex cursor-pointer" onClick={(e) => { e.stopPropagation(); Helper.copyTextToClipboard(processFieldValue(n[field.field_name], field)); dispatch(showMessage({ variant: 'success', message: processFieldValue(n[field.field_name], field) + ' Copied' })); }}>
+				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
+					<span className="flex cursor-pointer" style={{
+						width
+							: 'fit-content'
+					}} onClick={(e) => { e.stopPropagation(); Helper.copyTextToClipboard(processFieldValue(n[field.field_name], field)); dispatch(showMessage({ variant: 'success', message: processFieldValue(n[field.field_name], field) + ' Copied' })); }}>
 						{processFieldValue(n[field.field_name], field)}
 						<FuseSvgIcon className="text-48 pt-2 pl-2" size={18} color="action">material-solid:content_copy</FuseSvgIcon>
 					</span>
