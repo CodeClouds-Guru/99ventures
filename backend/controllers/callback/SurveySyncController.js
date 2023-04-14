@@ -209,7 +209,7 @@ class SurveySyncController {
 
                 //-- Disabled all the previous surveys
                 const current_datetime = new Date();
-                Survey.update({
+                await Survey.update({
                     status: psObj.getSurveyStatus(33),
                     deleted_at: new Date()
                 }, {
@@ -311,6 +311,23 @@ class SurveySyncController {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
+
+                //-- Disabled all the previous surveys
+                const current_datetime = new Date();
+                await Survey.update({
+                    status: 'paused',
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_provider_id: this.providerId,
+                        status: 'live',
+                        created_at: {
+                            [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
+                        },
+                    }
+                });
+                //----------
+
                 for(let survey of surveyData ){
                     const checkExists = await Survey.count({
                         where: {
@@ -455,8 +472,7 @@ class SurveySyncController {
         try{
             const allSurveys = await this.schlesingerSurvey(req, res);  
             if(allSurveys.length) {
-                const psObj = new SchlesingerHelper;
-                
+                const psObj = new SchlesingerHelper;                
                 for(let survey of allSurveys) {                    
                     const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
 
@@ -522,7 +538,6 @@ class SurveySyncController {
                             }
                         }
                     }
-                    break;
                 }
                 res.json({ status: true, message: 'Data updated'});
             } else {
@@ -530,7 +545,6 @@ class SurveySyncController {
             }
         }
         catch (error) {
-            console.error('=================');
             console.error(error);
             throw error;
         }
