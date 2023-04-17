@@ -39,7 +39,7 @@ class Schlesinger {
 	async fetchSellerAPI(partUrl) {
 		const instance = axios.create({
 			...this.instance,
-			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/supply-api-v2/' : 'https://api.sample-cube.com',
+			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/supply-api-v2/' : 'https://api.sample-cube.com/',
 		});
 		const response = await instance.get(partUrl);
 		return response.data;
