@@ -159,7 +159,7 @@ class ScriptParser {
     <script>\
 	    $(document).ready(function () {\
         $(document).on("click",".page-item",function(e) {\
-          e.stopPropagation();\
+          e.stopImmediatePropagation();\
           var page = $(this).data("page");\
           var div_element = document.querySelector("[data-script='`+script_id+`']");\
           $(div_element).data("pageno",page);\
