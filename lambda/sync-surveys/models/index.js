@@ -16,7 +16,7 @@ if (!sequelize) {
             dialect: 'mysql',
             port: process.env.DB_PORT || 3306,
             logging: false,
-            pool: { max: 1, min: 0, idle: 1000, acquire: 60000, evict: 60000 }
+            pool: { max: 4, min: 0, idle: 0, acquire: 60000, evict: 60000 }
         }
 
     );

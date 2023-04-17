@@ -60,6 +60,11 @@ class ScriptParser {
             var data_count = await Models[script.module].findAndCountAll({...where})
             page_count = Math.ceil(data_count.count/perPage)
             // console.log(data);
+
+            //pagination
+            if('pagination' in params && params.pagination === 'true'){
+              script_html = await this.appendPagination(script_html,script_id) 
+            }
             break;
           case 'profile_update':
             const member_where = this.getModuleWhere(script.module, user);
@@ -109,6 +114,10 @@ class ScriptParser {
         return {
           attributes: ['verbose','created_at'],
         };
+      case 'MemberReferral':
+        return{
+          include: {model: Models.Member,attributes: ['first_name','last_name']}
+        }
       default:
         return null;
     }
@@ -121,6 +130,59 @@ class ScriptParser {
       data[index].setDataValue('time',d.toLocaleTimeString())
     })
     return data
+  }
+  //append pagination
+  async appendPagination(script_html,script_id){
+    script_html = script_html + `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
+    <nav aria-label="Page navigation example">\
+      <ul class="pagination mb-0">\
+      <li class="page-item">\
+        <a href="#" aria-label="Previous" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-left">\
+        <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" fill-rule="evenodd">\
+        </path>\
+        </svg></a>\
+      </li>\
+      {{#for 1 page_count 1}}\
+      <li data-page="{{this}}" class="page-item active">\
+        <a href="javascript:void(0)" class="page-link">{{this}}</a>\
+      </li>\
+      {{/for}}\
+      <li class="page-item">\
+        <a href="#" aria-label="Next" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-right">\
+        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" fill-rule="evenodd">\
+        </path>\
+        </svg></a>\
+      </li>\
+      </ul>\
+    </nav>\
+    </div>\
+    <script>\
+	    $(document).ready(function () {\
+        $(document).on("click",".page-item",function(e) {\
+          e.stopPropagation();\
+          var page = $(this).data("page");\
+          var div_element = document.querySelector("[data-script='`+script_id+`']");\
+          $(div_element).data("pageno",page);\
+          callPagination(div_element);\
+        });\
+        function callPagination(element) {\
+          var dataAttrs = $(element).data();\
+          var params = {pageno: 1,perpage: 10,orderby: null,order: null,script: "",member: null,...dataAttrs};\
+          $.ajax({\
+            url: '/get-scripts/',\
+            type: "GET",\
+            data: params,\
+            success: function (res) {\
+              if (res.status) {\
+                $(element).html(res.html);\
+              }\
+            }
+          })\
+        }
+      });\
+  </script>`; 
+  console.log(script_html)
+  return script_html;
   }
 }
 module.exports = ScriptParser;

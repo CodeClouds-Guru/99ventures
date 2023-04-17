@@ -69,7 +69,11 @@ class PageParser {
     });
     Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
-  });
+    });
+    Handlebars.registerHelper('dateFormat', function(date) {
+      let d = new Date(date)
+      return d.toLocaleDateString()
+    });
   }
 
   async getPageNLayout() {
