@@ -63,7 +63,7 @@ class ScriptParser {
 
             //pagination
             if('pagination' in params && params.pagination === 'true'){
-              // script_html = await this.appendPagination(script_html,script_id) 
+              script_html = await this.appendPagination(script_html,script_id) 
             }
             break;
           case 'profile_update':
@@ -133,7 +133,7 @@ class ScriptParser {
   }
   //append pagination
   async appendPagination(script_html,script_id){
-    script_html = script_html + '<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
+    script_html = script_html + `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
       <li class="page-item">\
@@ -158,28 +158,30 @@ class ScriptParser {
     </div>\
     <script>\
 	    $(document).ready(function () {\
-	  $(document).on("click",".page-item",function(e) {\
-		e.preventDefault()\
-		let page = $(this).data("page")\
-		let div_element = document.querySelector("[data-script='+script_id+']");\
-		$(div_element).data("pageno",page)\
-		callPagination(div_element)\
-	  })\
-	  function callPagination(element) {\
-		console.log("post")\
-		const dataAttrs = $(element).data();\
-		let params = {pageno: 1,perpage: 10,orderby: null,order: null,script: "",member: null,...dataAttrs}\
-		$.ajax({\
-		  url: `/get-scripts/`,\
-		  type: "GET",\
-		  data: params,\
-		  success: function (res) {\
-			if (res.status) {\
-			  $(element).html(res.html)\
-			}\
-		  }});\
-	  })\
-  </script>'; 
+        $(document).on("click",".page-item",function(e) {\
+          e.stopPropagation();\
+          var page = $(this).data("page");\
+          var div_element = document.querySelector("[data-script='`+script_id+`']");\
+          $(div_element).data("pageno",page);\
+          callPagination(div_element);\
+        });\
+        function callPagination(element) {\
+          var dataAttrs = $(element).data();\
+          var params = {pageno: 1,perpage: 10,orderby: null,order: null,script: "",member: null,...dataAttrs};\
+          $.ajax({\
+            url: '/get-scripts/',\
+            type: "GET",\
+            data: params,\
+            success: function (res) {\
+              if (res.status) {\
+                $(element).html(res.html);\
+              }\
+            }
+          })\
+        }
+      });\
+  </script>`; 
+  console.log(script_html)
   return script_html;
   }
 }
