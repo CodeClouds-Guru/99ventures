@@ -53,13 +53,13 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
-            var data_count = await Models[script.module].findAndCountAll({...where})
-            page_count = Math.ceil(data_count.count/perPage)
+            var data_count = await Models[script.module].findAndCountAll({ ...where })
+            page_count = Math.ceil(data_count.count / perPage)
             // console.log(data);
 
             //pagination
-            if('pagination' in params && params.pagination === 'true'){
-              script_html = await this.appendPagination(script_html,script_id,pageNo) 
+            if ('pagination' in params && params.pagination === 'true') {
+              script_html = await this.appendPagination(script_html, script_id, pageNo)
             }
             break;
           case 'profile_update':
@@ -78,7 +78,7 @@ class ScriptParser {
         }
       }
     }
-    
+
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -108,18 +108,18 @@ class ScriptParser {
         };
       case 'Shoutbox':
         return {
-          attributes: ['verbose','created_at'],
+          attributes: ['verbose', 'created_at'],
         };
       case 'MemberReferral':
-        return{
-          include: {model: Models.Member,attributes: ['first_name','last_name']}
+        return {
+          include: { model: Models.Member, attributes: ['first_name', 'last_name'] }
         }
       default:
         return null;
     }
   }
   //append pagination
-  async appendPagination(script_html,script_id,page_no){
+  async appendPagination(script_html, script_id, page_no) {
     script_html = script_html + `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
@@ -130,9 +130,16 @@ class ScriptParser {
         </svg></a>\
       </li>\
       {{#for 1 page_count 1}}\
-      <li data-page="{{this}}" class="page-item" data-id="`+script_id+`-{{this}}">\
-        <a href="javascript:void(0)" class="page-link">{{this}}</a>\
-      </li>\
+        {{#ifCond this "==" '`+ page_no + `'}}\
+          <li data-page="{{this}}" class="page-item active" data-id="`+ script_id + `-{{this}}">\
+            <a href="javascript:void(0)" class="page-link">{{this}}</a>\
+          </li>\
+        {{/ifCond}}
+        {{#ifCond this "!=" '`+ page_no + `'}}\
+          <li data-page="{{this}}" class="page-item" data-id="`+ script_id + `-{{this}}">\
+            <a href="javascript:void(0)" class="page-link">{{this}}</a>\
+          </li>\
+        {{/ifCond}}\
       {{/for}}\
       <li class="page-item">\
         <a href="#" aria-label="Next" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-right">\
@@ -148,7 +155,7 @@ class ScriptParser {
         $(document).on("click",".page-item",function(e) {\
           e.stopImmediatePropagation();\
           var page = $(this).data("page");\
-          var div_element = document.querySelector("[data-script='`+script_id+`']");\
+          var div_element = document.querySelector("[data-script='`+ script_id + `']");\
           $(div_element).data("pageno",page);\
           callPagination(div_element);\
         });\
@@ -162,15 +169,15 @@ class ScriptParser {
             success: function (res) {\
               if (res.status) {\
                 $(element).html(res.html);\
-                var page_element = document.querySelector("[data-id='`+script_id+`-`+page_no+`']");\
+                var page_element = document.querySelector("[data-id='`+ script_id + `-` + page_no + `']");\
                 $(page_element).addClass("active");\
               }\
             }
           })\
         }
       });\
-  </script>`; 
-  return script_html;
+  </script>`;
+    return script_html;
   }
 }
 module.exports = ScriptParser;
