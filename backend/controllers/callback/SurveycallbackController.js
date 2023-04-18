@@ -34,6 +34,7 @@ class SurveycallbackController {
 		} else if (provider === 'purespectrum') {
 			await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
 		}
+		res.send(provider)
 	}
 
 	async syncSurvey(req, res) {
