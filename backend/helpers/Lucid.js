@@ -458,7 +458,7 @@ class Lucid {
     
     const instance = {
       headers: { 
-        'Authorization': '1E1E0F7F-77B6-4732-9ED3-9D2953A7BF3F', 
+        'Authorization': process.env.LUCID_API_KEY, 
         'Content-Type': 'application/json',
       }
     };
@@ -469,8 +469,7 @@ class Lucid {
       instance
     )
     .catch(err => {
-      console.log('Lucid Error');
-      return err;
+      throw err;
     });
 
     return response;    
