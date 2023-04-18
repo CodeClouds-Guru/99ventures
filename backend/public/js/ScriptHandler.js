@@ -6,6 +6,7 @@ $(() => {
 
     function callAndReplaceScripts(element) {
         const dataAttrs = $(element).data();
+        console.log('data-attrs', dataAttrs);
         let params = {
             pageno: 1,
             perpage: 10,
@@ -14,6 +15,9 @@ $(() => {
             script: '',
             member: null,
             ...dataAttrs
+        }
+        if (params.where && typeof params.where === 'object' && params.where) {
+            params.where = JSON.stringify(params.where)
         }
         $.ajax({
             url: `/get-scripts/`,
