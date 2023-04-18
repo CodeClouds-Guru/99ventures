@@ -53,10 +53,6 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
-            if(script.module == 'Shoutbox'){//format the date
-              data = await this.formatDate(data,'created_at')
-              // console.log(data)
-            }
             var data_count = await Models[script.module].findAndCountAll({...where})
             page_count = Math.ceil(data_count.count/perPage)
             // console.log(data);
@@ -121,15 +117,6 @@ class ScriptParser {
       default:
         return null;
     }
-  }
-  //format the date
-  async formatDate(data,date_field){
-    data.forEach(function callback(element, index) {
-      let d = new Date(element[date_field])
-      data[index].setDataValue('date',d.toLocaleDateString())
-      data[index].setDataValue('time',d.toLocaleTimeString())
-    })
-    return data
   }
   //append pagination
   async appendPagination(script_html,script_id,page_no){

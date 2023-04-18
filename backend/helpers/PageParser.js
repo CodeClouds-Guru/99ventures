@@ -74,6 +74,10 @@ class PageParser {
       let d = new Date(date)
       return d.toLocaleDateString()
     });
+    Handlebars.registerHelper('timeFormat', function(date) {
+      let d = new Date(date)
+      return d.toLocaleTimeString()
+    });
   }
 
   async getPageNLayout() {
