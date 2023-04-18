@@ -96,6 +96,7 @@ class ScriptParser {
             'created_at',
             'id',
             'amount',
+            'status',
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
           ],
