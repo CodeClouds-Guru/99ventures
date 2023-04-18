@@ -12,6 +12,7 @@ const safeEval = require('safe-eval');
 const Handlebars = require('handlebars');
 const ScriptParser = require('./ScriptParser');
 const moment = require('moment');
+const { realpathSync } = require('fs');
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
@@ -70,13 +71,17 @@ class PageParser {
     Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
       return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
     });
-    Handlebars.registerHelper('dateFormat', function(date) {
-      let d = new Date(date)
-      return d.toLocaleDateString()
+    Handlebars.registerHelper('dateFormat', function(date,format) {
+      if(date)
+        return format ? moment(date).format(format) :  moment(date).format('DD/MM/YYYY')
+      else
+        return
     });
-    Handlebars.registerHelper('timeFormat', function(date) {
-      let d = new Date(date)
-      return d.toLocaleTimeString()
+    Handlebars.registerHelper('timeFormat', function(date,format) {
+      if(date)
+        return format ? moment(date).format(format) :  moment(date).format('hh:mm a')
+      else
+        return
     });
   }
 
