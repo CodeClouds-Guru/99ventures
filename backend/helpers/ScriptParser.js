@@ -63,7 +63,7 @@ class ScriptParser {
 
             //pagination
             if('pagination' in params && params.pagination === 'true'){
-              script_html = await this.appendPagination(script_html,script_id) 
+              script_html = await this.appendPagination(script_html,script_id,pageNo) 
             }
             break;
           case 'profile_update':
@@ -132,7 +132,8 @@ class ScriptParser {
     return data
   }
   //append pagination
-  async appendPagination(script_html,script_id){
+  async appendPagination(script_html,script_id,page_no){
+    console.log(page_no)
     script_html = script_html + `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
@@ -143,7 +144,7 @@ class ScriptParser {
         </svg></a>\
       </li>\
       {{#for 1 page_count 1}}\
-      <li data-page="{{this}}" class="page-item active">\
+      <li data-page="{{this}}" class="page-item" data-id="`+script_id+`-{{this}}">\
         <a href="javascript:void(0)" class="page-link">{{this}}</a>\
       </li>\
       {{/for}}\
@@ -175,6 +176,8 @@ class ScriptParser {
             success: function (res) {\
               if (res.status) {\
                 $(element).html(res.html);\
+                var page_element = document.querySelector("[data-id='`+script_id+`-`+page_no+`']");\
+                $(page_element).addClass("active");\
               }\
             }
           })\
