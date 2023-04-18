@@ -169,8 +169,6 @@ class ScriptParser {
             success: function (res) {\
               if (res.status) {\
                 $(element).html(res.html);\
-                var page_element = document.querySelector("[data-id='`+ script_id + `-` + page_no + `']");\
-                $(page_element).addClass("active");\
               }\
             }
           })\
