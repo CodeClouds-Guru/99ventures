@@ -11,8 +11,7 @@ module.exports = {
         {
           company_portal_id: 1,
           event_name: 'Survey and Offer completions',
-          verbose:
-            'Credit amount, username and the survey name would be included.EG. %username% just earned %amount% with %survey supplier%',
+          verbose:'${members.first_name} just earned ${amount} with ${surveys.name}',
           event_slug: 'survey-and-offer-completions',
           status: 1,
           created_at: new Date(),
@@ -22,7 +21,7 @@ module.exports = {
           company_portal_id: 1,
           event_name: 'Promo code redemption',
           verbose:
-            'Only username would be included EG. %username% just redeemed a promo code.',
+            '${members.first_name} just redeemed a promo code.',
           event_slug: 'promo-code-redemption',
           status: 1,
           created_at: new Date(),
@@ -32,7 +31,7 @@ module.exports = {
           company_portal_id: 1,
           event_name: 'Contest winners',
           verbose:
-            'Inform members of contest winners. Username, prize amount and contest name would be included. EG. %username% won %prize amount% in the %contest name% contest',
+            '${members.first_name} won ${amount} in the ${contests.name} contest',
           event_slug: 'contest-winners',
           status: 1,
           created_at: new Date(),
@@ -42,7 +41,7 @@ module.exports = {
           company_portal_id: 1,
           event_name: 'Withdrawal requests',
           verbose:
-            'Inform members of all withdrawal requests that are made. Username and withdrawal amount would be included. EG. %username% - we have received your withdrawal request for %withdrawal amount%',
+            '${members.first_name} - we have received your withdrawal request for ${withdrawal_requests.amount}',
           event_slug: 'withdrawal-requests',
           status: 1,
           created_at: new Date(),
@@ -52,7 +51,7 @@ module.exports = {
           company_portal_id: 2,
           event_name: 'Survey and Offer completions',
           verbose:
-            'Credit amount, username and the survey name would be included.EG. %username% just earned %amount% with %survey supplier%',
+            '${members.first_name} just earned ${amount} with ${surveys.name}',
           event_slug: 'survey-and-offer-completions',
           status: 1,
           created_at: new Date(),
@@ -62,7 +61,7 @@ module.exports = {
           company_portal_id: 2,
           event_name: 'Promo code redemption',
           verbose:
-            'Only username would be included EG. %username% just redeemed a promo code.',
+            '${members.first_name} just redeemed a promo code.',
           event_slug: 'promo-code-redemption',
           status: 1,
           created_at: new Date(),
@@ -72,7 +71,7 @@ module.exports = {
           company_portal_id: 2,
           event_name: 'Contest winners',
           verbose:
-            'Inform members of contest winners. Username, prize amount and contest name would be included. EG. %username% won %prize amount% in the %contest name% contest',
+            '${members.first_name} won ${amount} in the ${contests.name} contest',
           event_slug: 'contest-winners',
           status: 1,
           created_at: new Date(),
@@ -82,7 +81,7 @@ module.exports = {
           company_portal_id: 2,
           event_name: 'Withdrawal requests',
           verbose:
-            'Inform members of all withdrawal requests that are made. Username and withdrawal amount would be included. EG. %username% - we have received your withdrawal request for %withdrawal amount%',
+            '${members.first_name} - we have received your withdrawal request for ${withdrawal_requests.amount}',
           event_slug: 'withdrawal-requests',
           status: 1,
           created_at: new Date(),
