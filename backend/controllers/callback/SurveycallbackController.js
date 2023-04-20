@@ -33,6 +33,10 @@ class SurveycallbackController {
 			await SurveycallbackController.prototype.cintPostBack(req, res);
 		} else if (provider === 'purespectrum') {
 			await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
+		} else if(provider === 'schlesinger'){
+			await SurveycallbackController.prototype.schlesingerPostBack(req, res);
+		} else if(provider === 'lucid') {
+			await SurveycallbackController.prototype.lucidPostback(req, res);
 		}
 		res.send(provider)
 	}
@@ -321,6 +325,73 @@ class SurveycallbackController {
 			res.redirect('/survey/' + requestParam.status)
 		}
 		return;
+	}
+
+	async schlesingerPostBack(req, res) {
+		const queryData = req.query;
+		const tmpVar = queryData.pid.split('-');
+		const surveyNumber = tmpVar[1];
+		if (queryData.status === 'complete') {
+			try{
+				const survey = await Survey.findOne({
+					attributes: ['cpi'],
+					where: {
+						survey_number: surveyNumber
+					}
+				});
+				if(survey){
+					let member = await Member.findOne({
+						attributes: ['id', 'username'],
+						where: {
+							username: queryData.uid,
+						},
+					});
+
+					if (member) {
+						const transaction_obj = {
+							member_id: member.id,
+							amount: survey.cpi,
+							note: 'Pure Spectrum survey (#'+surveyNumber+') completion',
+							type: 'credited',
+							amount_action: 'survey',
+							created_by: null,
+							payload: JSON.stringify(req.query),
+						};
+						await MemberTransaction.updateMemberTransactionAndBalance(
+							transaction_obj
+						);
+					} else {
+						const logger1 = require('../../helpers/Logger')(`schlesinger-postback-errror.log`);
+						logger1.error('Unable to find member!');
+					}
+				}
+			}
+			catch(error) {
+				const logger1 = require('../../helpers/Logger')(`schlesinger-postback-errror.log`);
+				logger1.error(error);
+			}
+		}
+		res.json({'message': 'success'});
+	}
+
+	async lucidPostback(req, res){
+		/*if (member) {
+			const note = provider;
+			const transaction_obj = {
+				member_id: member ? member.id : null,
+				amount: reward,
+				note: note + ' ' + req.params.status,
+				type: 'credited',
+				amount_action: 'survey',
+				created_by: null,
+				payload: JSON.stringify(req.query),
+			};
+			console.log('transaction_obj', transaction_obj);
+			let result = await MemberTransaction.updateMemberTransactionAndBalance(
+				transaction_obj
+			);
+			res.send(req.query);
+		}*/
 	}
 }
 
