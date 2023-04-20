@@ -32,7 +32,7 @@ class SurveycallbackController {
 		if (provider === 'cint') {
 			await SurveycallbackController.prototype.cintPostBack(req, res);
 		} else if (provider === 'purespectrum') {
-			await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
+			return await SurveycallbackController.prototype.pureSpectrumPostBack(req, res);
 		} else if(provider === 'schlesinger'){
 			await SurveycallbackController.prototype.schlesingerPostBack(req, res);
 		} else if(provider === 'lucid') {
@@ -227,14 +227,14 @@ class SurveycallbackController {
 	 */
 	async pureSpectrumPostBack(req, res) {
 		const requestParam = req.query;
-		if (requestParam.status === 'over-quota') {
+		if (requestParam.status === 'quota') {
 			try {
 				const psObj = new PurespectrumHelper();
 				const surveyNumber = requestParam.survey_id;
 				const surveyData = await psObj.fetchAndReturnData(
 					'/surveys/' + surveyNumber
 					);
-				if(surveyData.apiStatus === 'success' && surveyData.survey) {				
+				if(surveyData.apiStatus === 'success' && surveyData.survey) {
 					const currentSurveySts = surveyData.survey.survey_status;
 					await Survey.update({
 						status: psObj.getSurveyStatus(currentSurveySts)
@@ -249,23 +249,20 @@ class SurveycallbackController {
 			} catch (error) {
 				const logger1 = require('../../helpers/Logger')(`purespectrum-postback-errror.log`);
 				logger1.error(error);
-			} finally {
-				res.redirect('/survey/' + requestParam.status);
 			}
 		} 
 		else if (requestParam.status === 'complete' && requestParam.ps_rstatus == 21) {
 			// complete
 			try{
-				const psObj = new PurespectrumHelper();
 				const surveyNumber = requestParam.survey_id;
-				const surveyData = await psObj.fetchAndReturnData(
-					'/surveys/' + surveyNumber
-				);
-				
-				if ('success' === surveyData.apiStatus && surveyData.survey) {
-					const reward = surveyData.survey.cpi;
+				const survey = await Survey.findOne({
+					attributes: ['cpi'],
+					where: {
+						survey_number: surveyNumber
+					}
+				});
+				if(survey){
 					const username = requestParam.ps_supplier_respondent_id;
-
 					let member = await Member.findOne({
 						attributes: ['id', 'username'],
 						where: {
@@ -274,8 +271,8 @@ class SurveycallbackController {
 					});
 					if (member) {
 						const transaction_obj = {
-							member_id: member ? member.id : null,
-							amount: reward,
+							member_id: member.id,
+							amount: survey.cpi,
 							note: 'Pure Spectrum survey (#'+surveyNumber+') completion',
 							type: 'credited',
 							amount_action: 'survey',
@@ -286,21 +283,21 @@ class SurveycallbackController {
 							transaction_obj
 						);
 					} else {
-						throw {name: 'error', message: 'Unable to find member!'}
+						const logger1 = require('../../helpers/Logger')(`purespectrum-postback-errror.log`);
+						logger1.error('Unable to find member!');
 					}
-				} else {
-					throw {name: 'error', message: 'Survey not found!'}
+				}
+				else {
+					const logger1 = require('../../helpers/Logger')(`purespectrum-postback-errror.log`);
+					logger1.error('Survey not found!');
 				}
 			}
 			catch(error) {
 				const logger1 = require('../../helpers/Logger')(`purespectrum-postback-errror.log`);
 				logger1.error(error);
-			} finally {
-				res.redirect('/survey/' + requestParam.status);
 			}
-		} else {
-			res.redirect('/survey/' + requestParam.status)
 		}
+		res.redirect('/survey-' + requestParam.status)
 		return;
 	}
 
@@ -328,7 +325,7 @@ class SurveycallbackController {
 						const transaction_obj = {
 							member_id: member.id,
 							amount: survey.cpi,
-							note: 'Pure Spectrum survey (#'+surveyNumber+') completion',
+							note: 'Schlesinger survey (#'+surveyNumber+') completion',
 							type: 'credited',
 							amount_action: 'survey',
 							created_by: null,
