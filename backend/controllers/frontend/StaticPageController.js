@@ -3,6 +3,7 @@ const ScriptParser = require('../../helpers/ScriptParser');
 const { Member } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
+
 class StaticPageController {
   constructor() {}
 
@@ -10,7 +11,11 @@ class StaticPageController {
    * Show Survey Status
    */
   async showStatus(req, res) {
-    let content = '';
+    //Redirecting user to the static page.
+    //Page have to be created from admin
+    res.redirect('/survey-' + req.params.status);
+
+    /*let content = '';
     switch (req.params.status) {
       case 'termination':
         content += '<h1>Survey Termination</h1>';
@@ -51,7 +56,7 @@ class StaticPageController {
 
     var pagePerser = new PageParser('survey', content);
     var page_content = await pagePerser.preview(req);
-    res.render('page', { page_content });
+    res.render('page', { page_content });*/
   }
 
   /**
