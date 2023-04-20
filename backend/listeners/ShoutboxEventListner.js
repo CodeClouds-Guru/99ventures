@@ -4,21 +4,16 @@ class ShoutboxEventListner {
     }
     async listen(payload) {
         const { ShoutboxConfiguration,Shoutbox } = require('./models/index');
+        const safeEval = require('safe-eval');
+
         try{
             let event_slug = payload.action
-            let shoutbox_verbose = await ShoutboxConfiguration.findOne({where:{event_slug:event_slug},attributes:['verbose']})
+            let shoutbox_verbose = await ShoutboxConfiguration.findOne({where:{event_slug:event_slug,company_portal_id:payload.company_portal_id,status:1},attributes:['verbose']})
             if(shoutbox_verbose){
-                let all_details = payload.data
+                let all_details = payload.data ? payload.data : {}
                 let verbose = shoutbox_verbose.verbose
-                let match_variables = verbose.match(/\${(.*?)}/g);
-                if(match_variables){
-                    match_variables.forEach(function (value, key) {
-                        let new_value = value;
-                        new_value = new_value.replace('${', '');
-                        new_value = new_value.replace('}', '');
-                        match_variables[key] = eval('all_details' + '.' + new_value);
-                        verbose = verbose.replaceAll(value, match_variables[key]);
-                    });
+                if(all_details){
+                    verbose = safeEval('`' + verbose + '`', all_details);
                     await Shoutbox.create({
                         company_id: payload.company_id,
                         company_portal_id: payload.company_portal_id,
