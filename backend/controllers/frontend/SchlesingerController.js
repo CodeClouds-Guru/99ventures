@@ -174,16 +174,17 @@ class SchlesingerController {
     generateEntryLink = async(req, res) => {
         try{
             const queryString = req.query;
+            const surveyNumber = queryString['survey_number'];
             const data = await Survey.findOne({
                 attributes: ['original_json'],
                 where: {
-                    survey_number: queryString.survey_number
+                    survey_number: surveyNumber
                 }
             });
 
             if (data && data.original_json) {
                 const schObj = new SchlesingerHelper;
-                const result = await schObj.fetchSellerAPI('api/v2/survey/survey-quotas/' + queryString.survey_number);
+                const result = await schObj.fetchSellerAPI('api/v2/survey/survey-quotas/' + surveyNumber);
                 
                 if(
                     result.Result.Success === true && 
@@ -196,18 +197,19 @@ class SchlesingerController {
                         const liveLink = data.original_json.LiveLink;
                         const liveLinkArry = liveLink.split('?');
                         const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
-                        params.pid = Date.now();
+                        params.pid = Date.now()+'-'+surveyNumber;
                         delete liveLinkParams['zid'];   // We dont have any value for zid
                         const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
+                        // res.send(entryLink)
                         res.redirect(entryLink)
                     }
                     else {
-                        this.updateSurvey(queryString.survey_number);
+                        this.updateSurvey(surveyNumber);
                         req.session.flash = { error: 'No quota exists!', redirect_url: '/schlesigner' };
                         res.redirect('/notice');
                     }                    
                 } else {
-                    this.updateSurvey(queryString.survey_number);
+                    this.updateSurvey(surveyNumber);
                     req.session.flash = { error: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
                     res.redirect('/notice');
                 }
