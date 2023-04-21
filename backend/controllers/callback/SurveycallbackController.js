@@ -11,7 +11,7 @@ const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const SqsHelper = require('../../helpers/SqsHelper');
-
+const eventBus = require('../../eventBus');
 
 class SurveycallbackController {
 	constructor() {
@@ -218,6 +218,17 @@ class SurveycallbackController {
 			let result = await MemberTransaction.updateMemberTransactionAndBalance(
 				transaction_obj
 			);
+			//event for shoutbox
+			let evntbus = eventBus.emit('happening_now', {
+				action: 'survey-and-offer-completions',
+				company_portal_id:req.session.company_portal.id,
+				company_id:req.session.company_portal.company_id,
+				data: {
+				  members:req.session.member,
+				  amount:'$'+amount,
+				  surveys:{name:provider}
+			  },
+			});
 			res.send(req.query);
 		}
 	}
@@ -282,6 +293,18 @@ class SurveycallbackController {
 						await MemberTransaction.updateMemberTransactionAndBalance(
 							transaction_obj
 						);
+						//event for shoutbox
+						let evntbus = eventBus.emit('happening_now', {
+							action: 'survey-and-offer-completions',
+							company_portal_id:req.session.company_portal.id,
+							company_id:req.session.company_portal.company_id,
+							data: {
+							  members:req.session.member,
+							  amount:'$'+amount,
+							  surveys:{name:'Pure Spectrum'}
+						  },
+						});
+						
 					} else {
 						const logger1 = require('../../helpers/Logger')(`purespectrum-postback-errror.log`);
 						logger1.error('Unable to find member!');
