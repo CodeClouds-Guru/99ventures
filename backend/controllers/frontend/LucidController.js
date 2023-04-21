@@ -9,12 +9,15 @@ const {
 } = require('../../models');
 const { Op } = require('sequelize')
 const LucidHelper = require('../../helpers/Lucid')
+const Crypto = require('crypto');
+const { generateHashForLucid } = require('../../helpers/global')
 
 class LucidController {
 
     constructor(){
         this.index = this.index.bind(this);
         this.surveys = this.surveys.bind(this);
+        this.rebuildEntryLink =  this.rebuildEntryLink.bind(this)
     }
 
     index = (req, res) => {
@@ -108,10 +111,17 @@ class LucidController {
                         }
                     }
                 });
+                
                 if(surveys.length){
+                    const queryString = {};
+                    eligibilities.map(eg => {
+                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
+                    });
+                    const generateQueryString = new URLSearchParams(queryString).toString();
+                    
                     var surveyHtml = '';
                     for (let survey of surveys) {
-                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}`;
+                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
                         surveyHtml += `
                             <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                                 <div class="bg-white card mb-2">
@@ -159,15 +169,21 @@ class LucidController {
 
     }
 
-    surveyQuotaChecking = async(req, res) => {
-
-    }
-
-    generateEntryLink = async (req, res) => {
+    generateEntryLink = async (req, res) => {        
         try{
             const lcObj = new LucidHelper;
             const surveyNumber = req.query.survey_number;    
             const quota = await lcObj.showQuota(surveyNumber);
+            const queryParams = req.query;
+            const params = {
+                MID: Date.now(),
+                PID: req.query.uid,
+                ...queryParams
+            }
+            delete params.survey_number
+            delete params.uid
+            
+            var entrylink;
             if(quota.SurveyStillLive == true) {
                 const survey = await Survey.findOne({
                     attributes: ['url'],
@@ -175,8 +191,8 @@ class LucidController {
                         survey_number: surveyNumber
                     }
                 });
-                if(survey && survey.url){
-                    res.redirect(survey.url);
+                if(survey && survey.url){                   
+                    entrylink = survey.url;
                 } else {
                     const result = await lcObj.createEntryLink(surveyNumber);
                     if(result.data && result.data.SupplierLink) {
@@ -187,10 +203,12 @@ class LucidController {
                             where: {
                                 survey_number: surveyNumber
                             }
-                        })
-                        res.send(url);
+                        });
+                        entrylink = url;
                     }
                 }
+                const URL = this.rebuildEntryLink(process.env.DEV_MODE, entrylink, params);
+                res.send(URL);
             } else {
                 await Survey.update({
                     status: 'draft',
@@ -208,6 +226,21 @@ class LucidController {
             console.error(error);
             req.session.flash = { error: error.message, redirect_url: '/lucid' };
             res.redirect('/notice');
+        }
+    }
+
+    rebuildEntryLink = (mode, url, queryParams) => {
+        if(mode == 1) {
+            delete queryParams.PID;
+            const params = new URLSearchParams(queryParams).toString();
+            const urlTobeHashed = url+'&MID='+queryParams.MID+'&';
+            const hash = generateHashForLucid(urlTobeHashed);
+            return url +'&'+params+'&hash='+hash;
+        } else {
+            const params = new URLSearchParams(queryParams).toString();
+            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID;
+            const hash = generateHashForLucid(urlTobeHashed);
+            return url +'&'+params+'&hash='+hash;
         }
     }
 
