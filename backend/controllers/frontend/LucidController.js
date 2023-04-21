@@ -208,7 +208,7 @@ class LucidController {
                     }
                 }
                 const URL = this.rebuildEntryLink(process.env.DEV_MODE, entrylink, params);
-                res.send(URL);
+                res.redirect(URL);
             } else {
                 await Survey.update({
                     status: 'draft',
