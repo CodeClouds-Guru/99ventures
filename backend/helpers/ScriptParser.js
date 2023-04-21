@@ -68,7 +68,7 @@ class ScriptParser {
               // data.total = total;
               data.setDataValue('total', total);
 
-              console.log(data);
+              // console.log(data);
             }
 
             //pagination

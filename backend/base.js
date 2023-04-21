@@ -34,7 +34,7 @@ function setup(app) {
   );
 
   app.use(express.static(path.join(__dirname, '/public')));
-  app.use(cookieParser());
+  app.use(cookieParser('scripted-' + process.env.NODE_APP_SECRET));
 
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
