@@ -33,6 +33,7 @@ class Lucid {
     this.updateData = this.updateData.bind(this);
     this.deleteData = this.deleteData.bind(this);
     this.createEntryLink = this.createEntryLink.bind(this);
+    this.showQuota = this.showQuota.bind(this);
     return new Proxy(this, handler);
   }
   async fetchAndReturnData(partUrl) {
@@ -477,6 +478,16 @@ class Lucid {
   }
   /*------------------- Entry Link Create End ----------------*/
 
+  /*------------------- Supply Integration - Quotas ---------------------*/
+  async showQuota(surveyNumber) {
+    console.log(surveyNumber)
+    const data = await this.fetchAndReturnData(
+      '/Supply/v1/SurveyQuotas/BySurveyNumber/'+surveyNumber+'/6373'
+    );
+    return data;
+  }
+  /*------------------- Supply Integration - Quotas End---------------------*/
+  
 
 }
 

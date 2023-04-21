@@ -159,31 +159,49 @@ class LucidController {
 
     }
 
+    surveyQuotaChecking = async(req, res) => {
+
+    }
+
     generateEntryLink = async (req, res) => {
         try{
             const lcObj = new LucidHelper;
-            const surveyNumber = req.query.survey_number;          
-            const survey = await Survey.findOne({
-                attributes: ['url'],
-                where: {
-                    survey_number: surveyNumber
+            const surveyNumber = req.query.survey_number;    
+            const quota = await lcObj.showQuota(surveyNumber);
+            if(quota.SurveyStillLive == true) {
+                const survey = await Survey.findOne({
+                    attributes: ['url'],
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+                if(survey && survey.url){
+                    res.redirect(survey.url);
+                } else {
+                    const result = await lcObj.createEntryLink(surveyNumber);
+                    if(result.data && result.data.SupplierLink) {
+                        const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
+                        await Survey.update({
+                            url: url
+                        }, {
+                            where: {
+                                survey_number: surveyNumber
+                            }
+                        })
+                        res.send(url);
+                    }
                 }
-            });
-            if(survey && survey.url){
-                res.redirect(survey.url);
             } else {
-                const result = await lcObj.createEntryLink(surveyNumber);
-                if(result.data && result.data.SupplierLink) {
-                    const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
-                    await Survey.update({
-                        url: url
-                    }, {
-                        where: {
-                            survey_number: surveyNumber
-                        }
-                    })
-                    res.send(url);
-                }
+                await Survey.update({
+                    status: 'draft',
+                    deleted_at: new Date()
+                },{
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+                req.session.flash = { error: 'Survey is not live now!', redirect_url: '/lucid' };
+                res.redirect('/notice');
             }
         }
         catch(error) {            
