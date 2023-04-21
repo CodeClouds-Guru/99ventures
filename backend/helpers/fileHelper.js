@@ -42,16 +42,15 @@ class FileHelper {
       var file = this.files[key]
       let file_name = file.name;
       let file_name_arr = file_name.split('.')
-      file_name = file_name.replaceAll('.'+file_name_arr[file_name_arr.length - 1],'')
-      file_name = file_name.replaceAll(' ','-')
-      file_name = file_name.replaceAll(/[^a-zA-Z0-9 ]/g,'')
+      file_name = file_name.replaceAll('.' + file_name_arr[file_name_arr.length - 1], '')
+      file_name = file_name.replaceAll(' ', '-')
+      file_name = file_name.replaceAll(/[^a-zA-Z0-9 ]/g, '')
       // var new_filename = file_name+Date.now()+'.'+file_name_arr[file_name_arr.length - 1]
-      var new_filename = file_name+'.'+file_name_arr[file_name_arr.length - 1]
+      var new_filename = file_name + '.' + file_name_arr[file_name_arr.length - 1]
       let mime_type = mime.lookup(
         new_filename
       );
-      if(!mime_type)
-      {
+      if (!mime_type) {
         mime_type = "image/jpeg";
       }
       try {
@@ -67,7 +66,7 @@ class FileHelper {
           Body: blob,
           ACL: this.private,
           Metadata: metadata,
-          ContentType:mime_type
+          ContentType: mime_type
         }).promise()
         this.response.status = true
         this.response.files[key] = {
@@ -101,6 +100,12 @@ class FileHelper {
 
   //s3 bucket connection
   s3Connect() {
+    console.log({
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      region: process.env.AWS_DEFAULT_REGION,
+      signatureVersion: "v4"
+    });
     let s3 = new AWS.S3({
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
@@ -148,7 +153,7 @@ class FileHelper {
     };
 
     listedObjects.Contents.forEach(({ Key }) => {
-      if(Key != '' && Key !='/'){
+      if (Key != '' && Key != '/') {
         deleteParams.Delete.Objects.push({ Key: Key });
       }
     });
@@ -176,7 +181,7 @@ class FileHelper {
     let s3 = this.s3Connect()
     let get_objects = await s3.getObject({
       Bucket: process.env.S3_BUCKET_NAME,
-      Key:this.model
+      Key: this.model
     }).promise()
 
     return get_objects
@@ -218,16 +223,16 @@ class FileHelper {
     const data = await s3.listObjects({ Bucket: process.env.S3_BUCKET_NAME, Prefix: this.model }).promise();
     // await s3.listObjects({ Bucket: process.env.S3_BUCKET_NAME, Prefix: this.model }, function (err, data) {
 
-      if (data.Contents.length) {
-          data.Contents.forEach(async ({ Key }) => {
-          var params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
-            Key: Key.replace(pre_model, model_structure)
-          };
-          let copy_obj = await s3.copyObject(params).promise();
-        });
-      }
+    if (data.Contents.length) {
+      data.Contents.forEach(async ({ Key }) => {
+        var params = {
+          Bucket: process.env.S3_BUCKET_NAME,
+          CopySource: process.env.S3_BUCKET_NAME + '/' + Key,
+          Key: Key.replace(pre_model, model_structure)
+        };
+        let copy_obj = await s3.copyObject(params).promise();
+      });
+    }
     // });
     if (req_type == 'rename') {
       this.deleteFile(this.model)
@@ -238,27 +243,27 @@ class FileHelper {
     }
   }
   //update metadata 
-  async updateMetadata(metadata){
+  async updateMetadata(metadata) {
     let s3 = this.s3Connect()
     var params = {
       Bucket: process.env.S3_BUCKET_NAME,
       CopySource: process.env.S3_BUCKET_NAME + '/' + this.model,
       Key: this.model,
       Metadata: metadata,
-      MetadataDirective:'REPLACE'
+      MetadataDirective: 'REPLACE'
     };
     let copy_obj = await s3.copyObject(params).promise();
     console.log(copy_obj)
     return true
   }
   //create zip files
-  async zipFiles(res){
+  async zipFiles(res) {
     const archiver = new ArchieverClass('files');
     let s3 = this.s3Connect()
     let flag = false
-    
-    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg','CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
-    for(let i = 0; i < object_keys.length; i++){
+
+    let object_keys = ['CodeClouds/1/file-manager/abc/new abc/folder2/1665990268319grapefruit-slice-332-332.jpg', 'CodeClouds/1/file-manager/abc/new abc/folder2/1665990379708grapefruit-slice-332-332.jpg']
+    for (let i = 0; i < object_keys.length; i++) {
       let file_structure = []
       file_structure = object_keys[i].split('/')
       let s3File = await s3.getObject({
