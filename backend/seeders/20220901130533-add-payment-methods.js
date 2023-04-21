@@ -6,10 +6,10 @@ module.exports = {
      * Add seed commands here.
      **/
     await queryInterface.bulkInsert("payment_methods", [
-      { name: "Paypal", slug: "paypal" },
-      { name: "Skrill", slug: "skrill" },
-      { name: "Bitcoin", slug: "bitcoin" },
-      { name: "Wise Payment", slug: "wise_payment" },
+      { id:1,name: "Paypal", slug: "paypal",status:'1' },
+      { id:2,name: "Skrill", slug: "skrill",status:'1' },
+      { id:3,name: "Bitcoin", slug: "bitcoin",status:'1' },
+      { id:4,name: "Wise Payment", slug: "wise_payment",status:'1' },
     ]);
   },
 

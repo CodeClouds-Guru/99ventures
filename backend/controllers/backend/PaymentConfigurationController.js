@@ -5,6 +5,7 @@ const {
   PaymentMethod,
 } = require("../../models/index");
 const bcrypt = require("bcryptjs");
+const FileHelper = require('../../helpers/fileHelper');
 class PaymentConfigurationController extends Controller {
   constructor() {
     super("PaymentMethod");
@@ -18,7 +19,7 @@ class PaymentConfigurationController extends Controller {
       const company_id = req.header("company_id") || 1;
       const mask_auth = req.query.auth || false;
       let payment_method_list = await PaymentMethod.findAll({
-        attributes: ["name", "slug"],
+        attributes: ["name", "slug","logo","status","id"],
         include: {
           model: PaymentMethodCredential,
           required: false,
@@ -63,7 +64,7 @@ class PaymentConfigurationController extends Controller {
   }
   async update(req, res) {
     try {
-      const update_credentials = req.body.credentials || [];
+      let update_credentials = req.body.credentials || [];
       let data = [];
       data = update_credentials.map((values) => {
         return {
@@ -71,11 +72,23 @@ class PaymentConfigurationController extends Controller {
           id: values.id,
         };
       });
-      // console.log(data);
       const insertNewData = await PaymentMethodCredential.bulkCreate(data, {
         updateOnDuplicate: ["id", "value"],
         ignoreDuplicates: true,
       });
+      let logo = ''
+      //update payment method 
+      let payment_method_data = {
+        status: req.body.status
+      }
+      if (req.files) {
+        files[0] = req.files.logo;
+        const fileHelper = new FileHelper(files, 'payment-methods', req);
+        const file_name = await fileHelper.upload();
+        logo = file_name.files[0].filename;
+        payment_method_data.logo = logo
+      }
+      await PaymentMethod.update(payment_method_data,{where:{id:req.body.id}})
       if (insertNewData) {
         return{
           status: true,

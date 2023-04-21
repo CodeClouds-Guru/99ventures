@@ -19,6 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       slug: DataTypes.STRING,
+      logo: DataTypes.STRING,
+      status: DataTypes.ENUM('0', '1'),
     },
     {
       sequelize,

@@ -38,7 +38,12 @@ module.exports = (sequelize, DataTypes) => {
       status: DataTypes.TINYINT,
       note: DataTypes.STRING,
       amount_action: {
-        type: DataTypes.ENUM('admin_adjustment', 'survey', 'referral'),
+        type: DataTypes.ENUM(
+          'admin_adjustment',
+          'survey',
+          'referral',
+          'member_withdrawal'
+        ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
           rawValue = rawValue.replaceAll('_',' ')
