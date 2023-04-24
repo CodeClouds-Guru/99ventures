@@ -36,7 +36,7 @@ class SurveycallbackController {
 		} else if(provider === 'schlesinger'){
 			await SurveycallbackController.prototype.schlesingerPostBack(req, res);
 		} else if(provider === 'lucid') {
-			await SurveycallbackController.prototype.lucidPostback(req, res);
+			return await SurveycallbackController.prototype.lucidPostback(req, res);
 		}
 		res.send(provider)
 	}
@@ -371,24 +371,59 @@ class SurveycallbackController {
 		res.json({'message': 'success'});
 	}
 
+	/**
+	 * Lucid Callback details integration & redirect to page
+	 */
 	async lucidPostback(req, res){
-		/*if (member) {
-			const note = provider;
-			const transaction_obj = {
-				member_id: member ? member.id : null,
-				amount: reward,
-				note: note + ' ' + req.params.status,
-				type: 'credited',
-				amount_action: 'survey',
-				created_by: null,
-				payload: JSON.stringify(req.query),
-			};
-			console.log('transaction_obj', transaction_obj);
-			let result = await MemberTransaction.updateMemberTransactionAndBalance(
-				transaction_obj
-			);
-			res.send(req.query);
-		}*/
+		const requestParam = req.query;
+		if(requestParam.status === 'complete') {
+			try{
+				const surveyNumber = requestParam.survey_id;
+				const survey = await Survey.findOne({
+					attributes: ['cpi'],
+					where: {
+						survey_number: surveyNumber
+					}
+				});
+				if(survey){
+					const username = requestParam.pid;
+					let member = await Member.findOne({
+						attributes: ['id', 'username'],
+						where: {
+							username: username,
+						},
+					});
+					if (member) {
+						const transaction_obj = {
+							member_id: member.id,
+							amount: survey.cpi,
+							note: 'Lucid survey (#'+surveyNumber+') completion',
+							type: 'credited',
+							amount_action: 'survey',
+							created_by: null,
+							payload: JSON.stringify(req.body),
+						};						
+						await MemberTransaction.updateMemberTransactionAndBalance(
+							transaction_obj
+						);
+					}
+					else {
+						const logger1 = require('../../helpers/Logger')(`lucid-postback-errror.log`);
+						logger1.error('Unable to find member!');
+					}
+				} 
+				else {
+					const logger1 = require('../../helpers/Logger')(`lucid-postback-errror.log`);
+					logger1.error('Survey not found!');
+				}
+			}
+			catch(error) {
+				const logger1 = require('../../helpers/Logger')(`lucid-postback-errror.log`);
+				logger1.error(error);
+			}
+		}
+		res.redirect('/survey-' + requestParam.status);
+		return;
 	}
 }
 
