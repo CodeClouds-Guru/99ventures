@@ -89,7 +89,6 @@ const PaymentGateway = (props) => {
 			.catch(error => console.log(error))
 	}
 
-
 	return (
 		<Box
 			sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 'auto' }}
@@ -118,7 +117,8 @@ const PaymentGateway = (props) => {
 							index={indx}
 							className="w-full"
 						>
-							<PaymentCredentials gateway={gateway.name} credentials={gateway.credentials} permission={hasPermission} />
+							<PaymentCredentials gateway={gateway.name} details={gateway} permission={hasPermission} />
+							{/* credentials={gateway.credentials} */}
 						</TabPanel>
 					)
 				})

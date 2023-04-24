@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, TextField, Modal, Button, Typography, Divider, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton } from '@mui/material';
+import { Box, TextField, Modal, Button, Typography, Divider, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Switch, Avatar } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -34,16 +34,19 @@ const PaymentCredentials = (props) => {
     const confirmAccountStatus = useSelector(state => state.account.confirm_account);
     const user = useSelector(selectUser);
     const [loading, setLoading] = React.useState(false);
-    const [credentials, setCredentials] = React.useState(props.credentials);
+    // const [credentials, setCredentials] = React.useState(props.details.credentials);
+    const [details, setDetials] = React.useState(props.details);
     const [permission, setPermission] = React.useState(false);
     const [toggleModal, setToggleModal] = React.useState(false);
+    const [logo, setLogo] = React.useState('');
+    const [status, setStatus] = React.useState(props.details.status === 1 || props.details.status === '1');
 
     /**
      * Default Value object creation and validation object creation
      */
     const defaultValues = {};
     const validationFields = {};
-    credentials.map(val => {
+    details.credentials.map(val => {
         defaultValues[val.slug] = val.value;
         Object.assign(validationFields, {
             [val.slug]: yup.string().required(`Please enter ${val.name}`)
@@ -61,8 +64,8 @@ const PaymentCredentials = (props) => {
             )
         }
 
-        if (props.credentials) {
-            props.credentials.map(val => {
+        if (props.details.credentials) {
+            props.details.credentials.map(val => {
                 setValue(val.slug, val.value, { shouldDirty: false, shouldValidate: true });
             });
         }
@@ -80,24 +83,32 @@ const PaymentCredentials = (props) => {
     });
 
     const formSubmit = (data) => {
-        const params = credentials.map(cr => {
+        let form_data = new FormData();
+        const params = details.credentials.map(cr => {
             return {
                 id: cr.id,
                 value: data[cr.slug]
             }
         });
 
-        credentials.map((cr, indx) => {
-            credentials[indx].value = data[cr.slug]
+        details.credentials.map((cr, indx) => {
+            details.credentials[indx].value = data[cr.slug]
         });
+        form_data.append('credentials', JSON.stringify(params));
+        form_data.append('id', props.details.id);
+        form_data.append('logo', logo);
+        form_data.append('status', status ? 1 : 0);
 
         setLoading(true)
-        axios.post(jwtServiceConfig.savePaymentMethodConfiguration, { credentials: params })
+        axios.post(jwtServiceConfig.savePaymentMethodConfiguration, form_data)
             .then((response) => {
                 setLoading(false)
                 if (response.data.results.status) {
-                    setCredentials(credentials);
+                    // setCredentials(credentials);
+                    setDetials(props.details)
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                    setLogo('');
+                    setStatus('');
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
@@ -153,7 +164,12 @@ const PaymentCredentials = (props) => {
         setShowPassword(false);
         modalFormReset({ password: '' })
     }
-
+    const handleStatus = (event) => {
+        setStatus(event.target.checked);
+    }
+    const selectedFile = (event) => {
+        event.target.files.length > 0 ? setLogo(event.target.files[0]) : '';
+    }
     return (
         <>
             <Modal
@@ -234,8 +250,56 @@ const PaymentCredentials = (props) => {
                     className="flex flex-col justify-center w-full mt-24"
                     onSubmit={handleSubmit(formSubmit)}
                 >
+                    <div className="w-1/2">
+                        <Avatar
+                            sx={{
+                                backgroundColor: 'background.paper',
+                                color: 'text.secondary',
+                                height: 150,
+                                width: 150
+                            }}
+                            className="avatar text-50 font-bold edit-hover"
+                            src={details.logo}
+                            alt="Avatar"
+                        >
+                        </Avatar>
+                        <input
+                            accept="image/*"
+                            id={details.id}
+                            type="file"
+                            onChange={(event) => selectedFile(event)}
+                            name={details.logo}
+                            disabled={
+                                (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
+                            }
+                        />
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            edge="end"
+                        >
+                            {!showPassword ? <VisibilityOff /> : ''}
+                        </IconButton>
+                    </div>
+                    <div className="w-1/2">
+                        Status <Switch
+                            className="mb-0"
+                            checked={status}
+                            onChange={(event) => handleStatus(event)}
+                            disabled={
+                                (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
+                            }
+                        />
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            edge="end"
+                        >
+                            {!showPassword ? <VisibilityOff /> : ''}
+                        </IconButton>
+                    </div>
                     {
-                        credentials.map((el, indx) => {
+                        details.credentials.map((el, indx) => {
                             return (
                                 <Controller
                                     key={indx}
@@ -287,7 +351,7 @@ const PaymentCredentials = (props) => {
                                     size="large"
                                     disabled={
                                         (!confirmAccountStatus || !isValid) &&
-                                        (Object.keys(dirtyFields).length != credentials.length) // If no. of dirtyfields & total no. of fields count check
+                                        (Object.keys(dirtyFields).length != details.credentials.length) // If no. of dirtyfields & total no. of fields count check
                                     }
                                 >
                                     Save

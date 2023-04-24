@@ -19,7 +19,7 @@ class PaymentConfigurationController extends Controller {
       const company_id = req.header("company_id") || 1;
       const mask_auth = req.query.auth || false;
       let payment_method_list = await PaymentMethod.findAll({
-        attributes: ["name", "slug","logo","status","id"],
+        attributes: ["name", "slug", "logo", "status", "id"],
         include: {
           model: PaymentMethodCredential,
           required: false,
@@ -55,7 +55,7 @@ class PaymentConfigurationController extends Controller {
         }
         return {
           status: true,
-          data: {payment_method_list:payment_method_list},
+          data: { payment_method_list: Object.values(payment_method_list) },
         };
       }
     } catch (err) {
@@ -64,7 +64,9 @@ class PaymentConfigurationController extends Controller {
   }
   async update(req, res) {
     try {
-      let update_credentials = req.body.credentials || [];
+      var files = [];
+      let update_credentials = req.body.credentials || '[]';
+      update_credentials = JSON.parse(update_credentials);
       let data = [];
       data = update_credentials.map((values) => {
         return {
@@ -79,7 +81,7 @@ class PaymentConfigurationController extends Controller {
       let logo = ''
       //update payment method 
       let payment_method_data = {
-        status: req.body.status
+        status: req.body.status.toString() ?? '0'
       }
       if (req.files) {
         files[0] = req.files.logo;
@@ -88,9 +90,9 @@ class PaymentConfigurationController extends Controller {
         logo = file_name.files[0].filename;
         payment_method_data.logo = logo
       }
-      await PaymentMethod.update(payment_method_data,{where:{id:req.body.id}})
+      await PaymentMethod.update(payment_method_data, { where: { id: req.body.id } })
       if (insertNewData) {
-        return{
+        return {
           status: true,
           message: "Data Saved",
         }
