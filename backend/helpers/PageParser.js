@@ -33,66 +33,66 @@ class PageParser {
     this.getFlashMessage = this.getFlashMessage.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
     this.getFlashObject = this.getFlashObject.bind(this);
-    Handlebars.registerHelper('format', function (options) {
-      return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
-    });
-    Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
-      switch (operator) {
-        case '==':
-          return v1 == v2 ? options.fn(this) : options.inverse(this);
-        case '===':
-          return v1 === v2 ? options.fn(this) : options.inverse(this);
-        case '!=':
-          return v1 != v2 ? options.fn(this) : options.inverse(this);
-        case '!==':
-          return v1 !== v2 ? options.fn(this) : options.inverse(this);
-        case '<':
-          return v1 < v2 ? options.fn(this) : options.inverse(this);
-        case '<=':
-          return v1 <= v2 ? options.fn(this) : options.inverse(this);
-        case '>':
-          return v1 > v2 ? options.fn(this) : options.inverse(this);
-        case '>=':
-          return v1 >= v2 ? options.fn(this) : options.inverse(this);
-        case '&&':
-          return v1 && v2 ? options.fn(this) : options.inverse(this);
-        case '||':
-          return v1 || v2 ? options.fn(this) : options.inverse(this);
-        default:
-          return options.inverse(this);
-      }
-    });
-    Handlebars.registerHelper('for', function(from, to, incr, block) {
-      var accum = '';
-      for(var i = from; i <= to; i += incr)
-          accum += block.fn(i);
-      return accum;
-    });
-    Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
-      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
-    });
-    Handlebars.registerHelper('dateFormat', function(date,format) {
-      if(date)
-        return format ? moment(date).format(format) :  moment(date).format('DD/MM/YYYY')
-      else
-        return
-    });
-    Handlebars.registerHelper('timeFormat', function(date,format) {
-      if(date)
-        return format ? moment(date).format(format) :  moment(date).format('hh:mm a')
-      else
-        return
-    });
-    Handlebars.registerHelper('switch', function(value, options) {
-      this.switch_value = value;
-      return options.fn(this);
-    });
-    
-    Handlebars.registerHelper('case', function(value, options) {
-      if (value == this.switch_value) {
-        return options.fn(this);
-      }
-    });
+    // Handlebars.registerHelper('format', function (options) {
+    //   return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
+    // });
+    // Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+    //   switch (operator) {
+    //     case '==':
+    //       return v1 == v2 ? options.fn(this) : options.inverse(this);
+    //     case '===':
+    //       return v1 === v2 ? options.fn(this) : options.inverse(this);
+    //     case '!=':
+    //       return v1 != v2 ? options.fn(this) : options.inverse(this);
+    //     case '!==':
+    //       return v1 !== v2 ? options.fn(this) : options.inverse(this);
+    //     case '<':
+    //       return v1 < v2 ? options.fn(this) : options.inverse(this);
+    //     case '<=':
+    //       return v1 <= v2 ? options.fn(this) : options.inverse(this);
+    //     case '>':
+    //       return v1 > v2 ? options.fn(this) : options.inverse(this);
+    //     case '>=':
+    //       return v1 >= v2 ? options.fn(this) : options.inverse(this);
+    //     case '&&':
+    //       return v1 && v2 ? options.fn(this) : options.inverse(this);
+    //     case '||':
+    //       return v1 || v2 ? options.fn(this) : options.inverse(this);
+    //     default:
+    //       return options.inverse(this);
+    //   }
+    // });
+    // Handlebars.registerHelper('for', function(from, to, incr, block) {
+    //   var accum = '';
+    //   for(var i = from; i <= to; i += incr)
+    //       accum += block.fn(i);
+    //   return accum;
+    // });
+    // Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+    //   return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+    // });
+    // Handlebars.registerHelper('dateFormat', function(date,format) {
+    //   if(date)
+    //     return format ? moment(date).format(format) :  moment(date).format('DD/MM/YYYY')
+    //   else
+    //     return
+    // });
+    // Handlebars.registerHelper('timeFormat', function(date,format) {
+    //   if(date)
+    //     return format ? moment(date).format(format) :  moment(date).format('hh:mm a')
+    //   else
+    //     return
+    // });
+    // Handlebars.registerHelper('switch', function(value, options) {
+    //   this.switch_value = value;
+    //   return options.fn(this);
+    // });
+
+    // Handlebars.registerHelper('case', function(value, options) {
+    //   if (value == this.switch_value) {
+    //     return options.fn(this);
+    //   }
+    // });
   }
 
   async getPageNLayout() {
