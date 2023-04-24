@@ -17,7 +17,6 @@ class SurveycallbackController {
 	constructor() {
 		this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this);
 		this.syncSurvey = this.syncSurvey.bind(this);
-		// this.pureSpectrumPostBack = this.pureSpectrumPostBack.bind(this)
 	}
 
 	async save(req, res) {
@@ -324,6 +323,9 @@ class SurveycallbackController {
 		return;
 	}
 
+	/**
+	 * Schlesinger Callback details integration
+	 */
 	async schlesingerPostBack(req, res) {
 		const queryData = req.query;
 		const tmpVar = queryData.pid.split('-');
