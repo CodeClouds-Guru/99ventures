@@ -89,7 +89,7 @@ class StaticPageController {
         page_count: parsed.page_count,
         other_details: parsed.other_details,
       });
-      console.log('======', html);
+      // console.log('======', html);
       resp = {
         ...resp,
         status: true,

@@ -115,32 +115,40 @@ class PureSpectrumController {
                         }
                     }
                 });
-
-                var surveyHtml = '';
-                for (let survey of surveys) {
-                    let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
-                    surveyHtml += `
-                        <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                            <div class="bg-white card mb-2">
-                                <div class="card-body position-relative">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="text-primary m-0">${survey.name}</h6>
-                                    </div>
-                                    <div class="text-primary small">5 Minutes</div>
-                                    <div class="d-grid mt-1">
-                                        <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+               
+                if(surveys && surveys.length){
+                    var surveyHtml = '';
+                    for (let survey of surveys) {
+                        let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
+                        surveyHtml += `
+                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                                <div class="bg-white card mb-2">
+                                    <div class="card-body position-relative">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-primary m-0">${survey.name}</h6>
+                                        </div>
+                                        <div class="text-primary small">5 Minutes</div>
+                                        <div class="d-grid mt-1">
+                                            <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `
+                        `
+                    }
+                    res.send({
+                        status: true,
+                        message: 'Success',
+                        result: surveyHtml
+                    });
                 }
-
-                res.send({
-                    status: true,
-                    message: 'Success',
-                    result: surveyHtml
-                });
+                else {
+                    res.send({
+                        status: true,
+                        message: 'No survey found!',
+                        result: surveyHtml
+                    });
+                }
             } else {
                 res.json({
                     staus: false,

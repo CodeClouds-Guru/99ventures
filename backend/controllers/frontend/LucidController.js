@@ -169,7 +169,7 @@ class LucidController {
 
     }
 
-    generateEntryLink = async (req, res) => {        
+    generateEntryLink = async (req, res) => {
         try{
             const lcObj = new LucidHelper;
             const surveyNumber = req.query.survey_number;    
@@ -191,7 +191,7 @@ class LucidController {
                         survey_number: surveyNumber
                     }
                 });
-                if(survey && survey.url){                   
+                if(survey && survey.url){
                     entrylink = survey.url;
                 } else {
                     const result = await lcObj.createEntryLink(surveyNumber);
@@ -207,7 +207,7 @@ class LucidController {
                         entrylink = url;
                     }
                 }
-                const URL = this.rebuildEntryLink(process.env.DEV_MODE, entrylink, params);
+                const URL = this.rebuildEntryLink(entrylink, params);
                 res.redirect(URL);
             } else {
                 await Survey.update({
@@ -222,23 +222,27 @@ class LucidController {
                 res.redirect('/notice');
             }
         }
-        catch(error) {            
+        catch(error) {
             console.error(error);
             req.session.flash = { error: error.message, redirect_url: '/lucid' };
             res.redirect('/notice');
         }
     }
 
-    rebuildEntryLink = (mode, url, queryParams) => {
-        if(mode == 1) {
+    /**
+     * Rebuild the entry link with hash
+     * NOTE: When hashing URLs the base string should include the entire URL, up to and including the `&` preceding the hashing parameter.
+     */
+    rebuildEntryLink = (url, queryParams) => {
+        if(process.env.DEV_MODE == 1) {
             delete queryParams.PID;
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&MID='+queryParams.MID+'&';
+            const urlTobeHashed = url+'&MID='+queryParams.MID+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);
             return url +'&'+params+'&hash='+hash;
         } else {
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID;
+            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);
             return url +'&'+params+'&hash='+hash;
         }

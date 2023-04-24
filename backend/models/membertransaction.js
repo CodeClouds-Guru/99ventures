@@ -46,11 +46,12 @@ module.exports = (sequelize, DataTypes) => {
         ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
-          rawValue = rawValue.replaceAll('_',' ')
-          return rawValue.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index)
-            {
-                return index == 0 ? word.toUpperCase() : word.toLowerCase() ;
-            }).replace(/\s+/g, ' ');
+          rawValue = rawValue.replaceAll('_', ' ');
+          return rawValue
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+              return index == 0 ? word.toUpperCase() : word.toLowerCase();
+            })
+            .replace(/\s+/g, ' ');
         },
       },
       currency: DataTypes.STRING,
@@ -317,7 +318,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
-    console.log(response);
+    // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
   return MemberTransaction;

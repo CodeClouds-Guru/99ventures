@@ -29,7 +29,7 @@ const LucidController = new LucidControllerClass();
 //ROUTES FOR FRONTEND
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
 
-router.post('/login', [checkMemberAuth],MemberAuthController.login);
+router.post('/login', [checkMemberAuth], MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
@@ -42,14 +42,10 @@ router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);
 
-router.post(
-  '/profile/update',
-  MemberAuthController.profileUpdate
-);
-router.put(
-  '/profile/update',
-  MemberAuthController.profileUpdate
-);
+router.post('/profile/update', MemberAuthController.profileUpdate);
+router.put('/profile/update', MemberAuthController.profileUpdate);
+
+router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');

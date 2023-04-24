@@ -14,6 +14,7 @@ class ScriptParser {
   }
   async parseScript(script_id, user, params) {
     var data = [];
+    var other_details;
     var page_count = 0;
     var script_html = '';
     let script = await Models.Script.findOne({ where: { code: script_id } });
@@ -26,13 +27,7 @@ class ScriptParser {
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
             const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
-            // console.log({
-            //   ...where,
-            //   order: [[Sequelize.literal(orderBy), order]],
-            //   limit: perPage,
-            //   offset: (pageNo - 1) * perPage,
-            //   include: { all: true }
-            // })
+
             const param_where =
               'where' in params ? JSON.parse(params.where) : null;
 
@@ -44,7 +39,6 @@ class ScriptParser {
                 ...param_where,
               };
 
-            // console.log(where);
             data = await Models[script.module].findAll({
               subQuery: false,
               order: [[Sequelize.literal(orderBy), order]],
@@ -56,7 +50,6 @@ class ScriptParser {
               ...where,
             });
             page_count = Math.ceil(data_count.count / perPage);
-            // console.log(data);
 
             if (script.module == 'MemberReferral') {
               let total = await Models[script.module].findOne({
@@ -65,10 +58,7 @@ class ScriptParser {
                 ],
                 where: { member_id: user.id },
               });
-              // data.total = total;
-              data.setDataValue('total', total);
-
-              // console.log(data);
+              other_details = JSON.parse(JSON.stringify(total));
             }
 
             //pagination
@@ -91,7 +81,58 @@ class ScriptParser {
             data.setDataValue('email_alerts', email_alerts);
             let country_list = await Models.Country.getAllCountryList();
             data.setDataValue('country_list', country_list);
-            // console.log(data.country_id);
+            break;
+          case 'member_withdrawal':
+            const condition = this.getModuleWhere(script.module, user);
+            data = await Models[script.module].findAll({
+              ...condition,
+            });
+            let transaction_data = await Models.MemberTransaction.findOne({
+              attributes: [
+                'completed_at',
+                [
+                  sequelize.literal(
+                    `(SELECT count(id) FROM member_transactions WHERE member_id = ` +
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
+                  ),
+                  'transaction_count',
+                ],
+                [
+                  sequelize.literal(
+                    `(SELECT sum(amount) FROM member_transactions WHERE member_id = ` +
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal')`
+                  ),
+                  'total_withdrawal_amount',
+                ],
+                [
+                  sequelize.literal(
+                    `(SELECT amount FROM member_balances WHERE member_id = ` +
+                      user.id +
+                      ` AND amount_type = 'cash')`
+                  ),
+                  'member_balance',
+                ],
+              ],
+              where: {
+                member_id: user.id,
+                status: 2,
+                amount_action: 'member_withdrawal',
+              },
+            });
+            other_details = JSON.parse(JSON.stringify(transaction_data));
+            console.log(other_details);
+            if (other_details.transaction_count >= 2) {
+              data = {
+                ...data,
+                [data.length]: {
+                  name: 'Paypal Instant Payment',
+                  slug: 'paypal_instant_payment',
+                  logo: null,
+                },
+              };
+            }
             break;
         }
       }
@@ -101,6 +142,7 @@ class ScriptParser {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
       page_count,
+      other_details,
     };
   }
   getModuleWhere(module, user) {
@@ -136,8 +178,12 @@ class ScriptParser {
         return {
           include: {
             model: Models.Member,
-            // attributes: ['first_name', 'last_name'],
           },
+        };
+      case 'PaymentMethod':
+        return {
+          attributes: ['name', 'slug', 'logo'],
+          where: { status: 'active' },
         };
       default:
         return null;
