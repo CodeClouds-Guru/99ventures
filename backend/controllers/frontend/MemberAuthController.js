@@ -11,6 +11,9 @@ const {
   MembershipTier,
   MemberTransaction,
   EmailAlert,
+  PaymentMethod,
+  MemberPaymentInformation,
+  WithdrawalRequest,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -18,6 +21,7 @@ const IpQualityScoreClass = require('../../helpers/IpQualityScore');
 const eventBus = require('../../eventBus');
 const { genarateHash } = require('../../helpers/global');
 const { decodeHash } = require('../../helpers/global');
+const { response } = require('express');
 
 class MemberAuthController {
   constructor() {
@@ -30,6 +34,9 @@ class MemberAuthController {
     this.setMemberEligibility = this.setMemberEligibility.bind(this);
     this.profileUpdate = this.profileUpdate.bind(this);
     this.changePassword = this.changePassword.bind(this);
+    this.memberWithdrawal = this.memberWithdrawal.bind(this);
+    this.withdraw = this.withdraw.bind(this);
+    this.sendMailEvent = this.sendMailEvent.bind(this);
   }
   //login
   async login(req, res) {
@@ -566,6 +573,124 @@ class MemberAuthController {
   async logout(req, res) {
     req.session.member = null;
     res.redirect('/');
+  }
+
+  //Add Payment Credentials
+  async addPaymentCredentials(req, res) {}
+
+  //Member Withdrawal
+  async memberWithdrawal(req, res) {
+    console.log(req);
+    let member_status = false;
+    let member_message = 'Unable to save data';
+    let response = [];
+    const method = req.method;
+    try {
+      if (method === 'POST') {
+        let request_data = req.body;
+        member_status = await this.withdraw(request_data);
+      }
+    } catch (error) {
+      console.log(error);
+      member_status = false;
+      member_message = 'Error occured';
+    } finally {
+      if (member_status) {
+        req.session.flash = { message: member_message };
+      } else {
+        req.session.flash = { error: member_message };
+      }
+      if (method === 'POST') {
+        res.redirect('back');
+      } else {
+        res.json({
+          status: member_status,
+          message: member_message,
+          data: response,
+        });
+      }
+    }
+  }
+
+  //Add Payment Credentials
+  async withdraw(request_data) {
+    //get member
+    let member = await Member.findOne({ where: { id: member_id } });
+
+    let withdrawal_req_data = {
+      member_id: request_data.member_id,
+      amount: request_data.amount,
+      amount_type: 'cash',
+      currency: 'USD',
+      status: 'pending',
+    };
+
+    if (request_data.payment_method !== 'paypal_instant_payment') {
+      withdrawal_req_data.note = 'Withdrawal request auto approved';
+      withdrawal_req_data.transaction_made_by = request_data.member_id;
+      withdrawal_req_data.status = 'approved';
+
+      //Insert into member transaction and update balance
+      await MemberTransaction.updateMemberTransactionAndBalance({
+        member_id: request_data.member_id,
+        amount: -request_data.amount,
+        note: admin_note,
+        type: 'withdraw',
+        amount_action: 'member_withdrawal',
+        created_by: request_data.member_id,
+      });
+
+      // email body for member
+      let member_mail = await this.sendMailEvent({
+        action: 'Withdraw Request Member',
+        data: {
+          email: member.email,
+          details: { members: member },
+        },
+        req: request_data,
+      });
+      // email body for admin
+      let admin_mail = await this.sendMailEvent({
+        action: 'Withdraw Request Admin',
+        data: {
+          email: member.email,
+          details: { members: member },
+        },
+        req: request_data,
+      });
+    } else {
+      // email body for member
+      let member_mail = await this.sendMailEvent({
+        action: 'Withdraw Request Member',
+        data: {
+          email: member.email,
+          details: { members: member },
+        },
+        req: request_data,
+      });
+      // email body for admin
+      // let admin_mail = await this.sendMailEvent({
+      //   action: 'Withdraw Request Admin',
+      //   data: {
+      //     email: member.email,
+      //     details: { members: member },
+      //   },
+      //   req: request_data,
+      // });
+    }
+    // Insert in WithdrawalRequest
+    const res = await WithdrawalRequest.create(withdrawal_req_data);
+
+    //member activity
+    const activityEventbus = eventBus.emit('member_activity', {
+      member_id: request_data.member_id,
+      action: 'Member cash withdrawal request',
+    });
+  }
+
+  //send mail event call
+  async sendMailEvent(mail_data) {
+    return eventBus.emit('send_email', mail_data);
   }
 }
 module.exports = MemberAuthController;

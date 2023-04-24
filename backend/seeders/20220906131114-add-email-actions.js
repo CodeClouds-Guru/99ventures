@@ -21,7 +21,10 @@ module.exports = {
           action: 'Account Deactivated',
         },
         {
-          action: 'Withdraw Request',
+          action: 'Withdraw Request Member',
+        },
+        {
+          action: 'Withdraw Request Admin',
         },
         {
           action: 'Payment Confirmation',
