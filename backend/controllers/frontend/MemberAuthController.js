@@ -587,8 +587,11 @@ class MemberAuthController {
     const method = req.method;
     try {
       if (method === 'POST') {
-        let request_data = req.body;
-        member_status = await this.withdraw(request_data);
+        req.headers.site_id = req.session.company_portal.id;
+        req.headers.company_id = req.session.company_portal.company_id;
+
+        req.body.member_id = req.session.member.id;
+        member_status = await this.withdraw(req);
       }
     } catch (error) {
       console.log(error);
@@ -613,9 +616,12 @@ class MemberAuthController {
   }
 
   //Add Payment Credentials
-  async withdraw(request_data) {
+  async withdraw(req) {
+    let request_data = req.body;
     //get member
-    let member = await Member.findOne({ where: { id: member_id } });
+    let member = await Member.findOne({
+      where: { id: request_data.member_id },
+    });
 
     let withdrawal_req_data = {
       member_id: request_data.member_id,
@@ -625,7 +631,7 @@ class MemberAuthController {
       status: 'pending',
     };
 
-    if (request_data.payment_method !== 'paypal_instant_payment') {
+    if (request_data.payment_method === 'paypal_instant_payment') {
       withdrawal_req_data.note = 'Withdrawal request auto approved';
       withdrawal_req_data.transaction_made_by = request_data.member_id;
       withdrawal_req_data.status = 'approved';
@@ -634,57 +640,29 @@ class MemberAuthController {
       await MemberTransaction.updateMemberTransactionAndBalance({
         member_id: request_data.member_id,
         amount: -request_data.amount,
-        note: admin_note,
+        note: 'Withdrawal request for $' + request_data.amount,
         type: 'withdraw',
         amount_action: 'member_withdrawal',
         created_by: request_data.member_id,
       });
-
-      // email body for member
-      let member_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Member',
-        data: {
-          email: member.email,
-          details: { members: member },
-        },
-        req: request_data,
-      });
-      // email body for admin
-      let admin_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Admin',
-        data: {
-          email: member.email,
-          details: { members: member },
-        },
-        req: request_data,
-      });
-    } else {
-      // email body for member
-      let member_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Member',
-        data: {
-          email: member.email,
-          details: { members: member },
-        },
-        req: request_data,
-      });
-      // email body for admin
-      // let admin_mail = await this.sendMailEvent({
-      //   action: 'Withdraw Request Admin',
-      //   data: {
-      //     email: member.email,
-      //     details: { members: member },
-      //   },
-      //   req: request_data,
-      // });
     }
-    // Insert in WithdrawalRequest
+    // Insert in WxithdrawalRequest
     const res = await WithdrawalRequest.create(withdrawal_req_data);
 
     //member activity
     const activityEventbus = eventBus.emit('member_activity', {
       member_id: request_data.member_id,
       action: 'Member cash withdrawal request',
+    });
+
+    // email body for member
+    let member_mail = await this.sendMailEvent({
+      action: 'Withdraw Request Member',
+      data: {
+        email: member.email,
+        details: { members: member },
+      },
+      req: req,
     });
   }
 
