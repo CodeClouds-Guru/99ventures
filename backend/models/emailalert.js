@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       };
     }
 
-    console.log(options);
+    // console.log(options);
     return await EmailAlert.findAll(options);
   };
 
