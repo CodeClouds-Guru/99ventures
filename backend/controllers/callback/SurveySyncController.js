@@ -3,6 +3,7 @@ const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const { Op } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
+const SqsHelper = require('../../helpers/SqsHelper');
 
 class SurveySyncController {
 
@@ -18,6 +19,7 @@ class SurveySyncController {
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
+        this.schlesingerSurveySaveToSQS = this.schlesingerSurveySaveToSQS.bind(this)
         /**
          * "English - United States"
          * language 3
@@ -68,6 +70,7 @@ class SurveySyncController {
         }
         else if(provider === 'schlesinger') {
             this.schlesingerQualification(req, res);
+            // this.schlesingerSurveySaveToSQS(req, res)
         } 
         else {
             res.send(provider);
@@ -547,6 +550,38 @@ class SurveySyncController {
         catch (error) {
             console.error(error);
             throw error;
+        }
+    }
+
+    /** 
+     * SQS
+     */
+    async schlesingerSurveySaveToSQS(req, res) {
+        try{
+            const psObj = new SchlesingerHelper();
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
+            
+            if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
+                
+                if(!surveyData.length) {
+                    res.json({ status: true, message: 'No survey found for this language!' });
+                    return;
+                }
+                const sqsHelper = new SqsHelper();
+                surveyData.forEach(async (element) => {
+                    let body = {
+                        ...element,
+                        survey_provider_id: this.providerId,
+                    };
+                    const send_message = await sqsHelper.sendData(body);
+                    console.log(send_message);
+                });                         
+            }
+        }
+        catch(error) {
+            const logger1 = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+			logger1.error(error);
         }
     }
 
