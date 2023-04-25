@@ -117,7 +117,7 @@ const PaymentGateway = (props) => {
 							index={indx}
 							className="w-full"
 						>
-							<PaymentCredentials gateway={gateway.name} details={gateway} permission={hasPermission} />
+							<PaymentCredentials retrieveGateways={retrieveGateways} gateway={gateway.name} details={gateway} permission={hasPermission} />
 							{/* credentials={gateway.credentials} */}
 						</TabPanel>
 					)

@@ -123,21 +123,12 @@ class ScriptParser {
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
             console.log(other_details);
-            if (other_details.transaction_count >= 2) {
-              data = {
-                ...data,
-                [data.length]: {
-                  name: 'Paypal Instant Payment',
-                  slug: 'paypal_instant_payment',
-                  logo: null,
-                },
-              };
-            }
+
             break;
         }
       }
     }
-
+    console.log(JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -180,10 +171,10 @@ class ScriptParser {
             model: Models.Member,
           },
         };
-      case 'PaymentMethod':
+      case 'WithdrawalType':
         return {
-          attributes: ['name', 'slug', 'logo'],
-          where: { status: 'active' },
+          attributes: ['name', 'slug', 'payment_method_id'],
+          include: { model: Models.PaymentMethod, attributes: ['name'] },
         };
       default:
         return null;
@@ -193,7 +184,7 @@ class ScriptParser {
   async appendPagination(script_html, script_id, page_no) {
     script_html =
       script_html +
-      `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
+      `<div class="pagination-sec d-flex justify-content-center justify-content-md-end py-2 py-xl-4 px-3 px-lg-4 rounded-bottom">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
       <li class="page-item">\
