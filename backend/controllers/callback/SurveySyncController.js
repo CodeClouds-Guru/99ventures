@@ -69,8 +69,8 @@ class SurveySyncController {
             this.pureSpectrumQualification(req, res);
         }
         else if(provider === 'schlesinger') {
-            this.schlesingerQualification(req, res);
-            // this.schlesingerSurveySaveToSQS(req, res)
+            // this.schlesingerQualification(req, res);
+            this.schlesingerSurveySaveToSQS(req, res)
         } 
         else {
             res.send(provider);
@@ -574,14 +574,24 @@ class SurveySyncController {
                         ...element,
                         survey_provider_id: this.providerId,
                     };
+                    const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
+                    if (qualifications.Result.Success && qualifications.Result.TotalCount !=0) {
+                        body.qualifications = qualifications.SurveyQualifications;
+                    }
+                    // res.send(body);
+                    // return;
                     const send_message = await sqsHelper.sendData(body);
-                    console.log(send_message);
-                });                         
+                    console.log('send_message', send_message);
+                });
+                res.send('Sending to SQS')
+            } else {
+                res.send('No survey found!');
             }
         }
         catch(error) {
-            const logger1 = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
-			logger1.error(error);
+            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+			logger.error(error);
+            res.send(error)
         }
     }
 

@@ -1,6 +1,9 @@
 const Lucid = require("./handlers/Lucid");
 const db = require('./models/index');
+const Schlesinger = require('./handlers/Schlesinger');
+
 const main = async (event) => {
+
   if (event.Records) {
     event.Records.forEach(async record => {
       var record = JSON.parse(record.body);
@@ -10,6 +13,11 @@ const main = async (event) => {
           case '1':
             const obj = new Lucid(record);
             await obj.sync();
+            break;
+          case 4:
+          case '4':
+            const sobj = new Schlesinger(record);
+            await sobj.main();
             break;
           default:
             break;
