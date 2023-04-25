@@ -34,7 +34,7 @@ class PaymentConfigurationController extends Controller {
       if (mask_auth === true || mask_auth === "true") {
         return {
           status: true,
-          payment_method_list,
+          data: { payment_method_list: Object.values(payment_method_list) },
         };
       } else {
         // if (mask_auth === "false" || mask_auth === false) {
