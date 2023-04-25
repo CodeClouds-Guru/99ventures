@@ -30,6 +30,9 @@ class PaymentConfigurationController extends Controller {
           },
         },
       });
+      for (let k = 0; k < payment_method_list.length; k++) {
+        payment_method_list[k].status = parseInt(payment_method_list[k].status)
+      }
       // console.log('==================',typeof mask_auth, mask_auth)
       if (mask_auth === true || mask_auth === "true") {
         return {
