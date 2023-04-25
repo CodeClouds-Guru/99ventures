@@ -82,4 +82,10 @@ module.exports = [
             }
         }
     },
+    {
+        name: 'toLower',
+        fn: function (value) {
+            return value.toLowerCase();
+        }
+    },
 ]
