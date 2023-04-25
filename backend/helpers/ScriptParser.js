@@ -184,7 +184,7 @@ class ScriptParser {
   async appendPagination(script_html, script_id, page_no) {
     script_html =
       script_html +
-      `<div class="pagination-sec d-flex justify-content-center justify-content-md-end mt-0 mt-lg-3 mt-xl-4 py-2 py-lg-0">\
+      `<div class="pagination-sec d-flex justify-content-center justify-content-md-end py-2 py-xl-4 px-3 px-lg-4 rounded-bottom">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
       <li class="page-item">\
