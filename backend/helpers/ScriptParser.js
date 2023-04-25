@@ -123,7 +123,7 @@ class ScriptParser {
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
             console.log(other_details);
-            if (other_details.transaction_count >= 2) {
+            if (other_details && other_details.transaction_count >= 2) {
               data = {
                 ...data,
                 [data.length]: {
