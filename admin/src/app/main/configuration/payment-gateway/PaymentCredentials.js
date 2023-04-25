@@ -39,8 +39,7 @@ const PaymentCredentials = (props) => {
     const [permission, setPermission] = React.useState(false);
     const [toggleModal, setToggleModal] = React.useState(false);
     const [logo, setLogo] = React.useState('');
-    const [status, setStatus] = React.useState(props.details.status === 1 || props.details.status === '1');
-
+    const [status, setStatus] = React.useState(false);
     /**
      * Default Value object creation and validation object creation
      */
@@ -58,6 +57,7 @@ const PaymentCredentials = (props) => {
      * Props changed event listener
      */
     React.useEffect(() => {
+        setStatus(props.details.status === 1)
         if (props.permission) {
             setPermission(
                 (props.permission('save') || props.permission('update'))
@@ -107,13 +107,18 @@ const PaymentCredentials = (props) => {
                     // setCredentials(credentials);
                     setDetials(props.details)
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
+                    props.retrieveGateways();
+                    document.querySelector('.gateway_logo').value = '';
                     setLogo('');
-                    setStatus('');
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
             })
-            .catch(error => dispatch(showMessage({ variant: 'error', message: error.response.data.errors })));
+            .catch(error => {
+                setLoading(false);
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            }
+            );
     }
 
     const {
@@ -250,53 +255,46 @@ const PaymentCredentials = (props) => {
                     className="flex flex-col justify-center w-full mt-24"
                     onSubmit={handleSubmit(formSubmit)}
                 >
-                    <div className="w-1/2">
-                        <Avatar
-                            sx={{
-                                backgroundColor: 'background.paper',
-                                color: 'text.secondary',
-                                height: 150,
-                                width: 150
-                            }}
-                            className="avatar text-50 font-bold edit-hover"
-                            src={details.logo}
-                            alt="Avatar"
-                        >
-                        </Avatar>
-                        <input
-                            accept="image/*"
-                            id={details.id}
-                            type="file"
-                            onChange={(event) => selectedFile(event)}
-                            name={details.logo}
-                            disabled={
-                                (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
-                            }
-                        />
-                        <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleClickShowPassword}
-                            edge="end"
-                        >
-                            {!showPassword ? <VisibilityOff /> : ''}
-                        </IconButton>
-                    </div>
-                    <div className="w-1/2">
-                        Status <Switch
-                            className="mb-0"
-                            checked={status}
-                            onChange={(event) => handleStatus(event)}
-                            disabled={
-                                (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
-                            }
-                        />
-                        <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleClickShowPassword}
-                            edge="end"
-                        >
-                            {!showPassword ? <VisibilityOff /> : ''}
-                        </IconButton>
+                    <div className="flex w-full mb-20 justify-center items-center">
+                        <div className="flex w-1/2 justify-end pr-36">
+                            <Avatar
+                                sx={{
+                                    backgroundColor: 'background.paper',
+                                    color: 'text.secondary',
+                                    height: 100,
+                                    width: 100
+                                }}
+                                className="avatar text-50 font-bold edit-hover"
+                                src={props.details.logo}
+                                alt="Avatar"
+                            >
+                            </Avatar>
+                        </div>
+                        <div className="flex-col justify-center w-1/2 my-20 pl-36">
+                            <div className="pb-36">
+                                <input
+                                    accept="image/*"
+                                    id={details.id}
+                                    type="file"
+                                    className="gateway_logo"
+                                    onChange={(event) => selectedFile(event)}
+                                    name={details.logo}
+                                    disabled={
+                                        (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
+                                    }
+                                />
+                            </div>
+                            <div className>
+                                Status <Switch
+                                    className="mb-0"
+                                    checked={status}
+                                    onChange={(event) => { event.preventDefault(); handleStatus(event) }}
+                                    disabled={
+                                        (!permission) ? true : ((details.credentials[0].auth && !confirmAccountStatus) ? true : false)
+                                    }
+                                />
+                            </div>
+                        </div>
                     </div>
                     {
                         details.credentials.map((el, indx) => {
