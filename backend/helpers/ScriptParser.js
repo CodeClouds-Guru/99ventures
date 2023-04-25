@@ -123,21 +123,12 @@ class ScriptParser {
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
             console.log(other_details);
-            if (other_details && other_details.transaction_count >= 2) {
-              data = {
-                ...data,
-                [data.length]: {
-                  name: 'Paypal Instant Payment',
-                  slug: 'paypal_instant_payment',
-                  logo: null,
-                },
-              };
-            }
+
             break;
         }
       }
     }
-
+    console.log(JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -180,10 +171,10 @@ class ScriptParser {
             model: Models.Member,
           },
         };
-      case 'PaymentMethod':
+      case 'WithdrawalType':
         return {
-          attributes: ['name', 'slug', 'logo'],
-          where: { status: 'active' },
+          attributes: ['name', 'slug', 'payment_method_id'],
+          include: { model: Models.PaymentMethod, attributes: ['name'] },
         };
       default:
         return null;

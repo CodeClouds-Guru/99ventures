@@ -9,18 +9,20 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      WithdrawalType.belongsTo(models.PaymentMethod, {
+        foreignKey: 'payment_method_id',
+      });
     }
   }
   WithdrawalType.init(
     {
       name: DataTypes.STRING,
       slug: DataTypes.STRING,
+      payment_method_id: DataTypes.BIGINT,
     },
     {
       sequelize,
       modelName: 'WithdrawalType',
-      timestamps: true,
-      paranoid: true,
       tableName: 'withdrawal_types',
     }
   );
