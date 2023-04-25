@@ -11,9 +11,6 @@ class Schlesinger {
         this.surveyQualificationSync = this.surveyQualificationSync.bind(this);
     }
 
-    /**
-     * 
-     */
     async main() {
         const surveyId = this.surveySync();
         this.surveyQualificationSync(surveyId);
@@ -31,8 +28,8 @@ class Schlesinger {
         var surveyId = checkExists.id;
         if(checkExists) {
             await Models.Survey.update({
-                loi: this.record.survey.LOI,
-                cpi: this.record.survey.CPI,
+                loi: this.record.LOI,
+                cpi: this.record.CPI,
                 name: null,
                 original_json: this.record,
                 updated_at: new Date()
@@ -44,8 +41,8 @@ class Schlesinger {
         } else {
             const survey = await Models.Survey.create({
                 survey_provider_id: this.record.survey_provider_id,
-                loi: this.record.survey.LOI,
-                cpi: this.record.survey.CPI,
+                loi: this.record.LOI,
+                cpi: this.record.CPI,
                 name: null,
                 survey_number: this.record.SurveyId,
                 status: 'live',
