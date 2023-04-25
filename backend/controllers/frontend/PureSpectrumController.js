@@ -18,6 +18,13 @@ class PureSpectrumController {
     }
 
     index = (req, res) => {
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -30,7 +37,7 @@ class PureSpectrumController {
     surveys = async (req, res) => {
         const memberId = req.query.user_id;
         if (!memberId) {
-            res.json({
+            res.status(422).json({
                 status: false,
                 message: 'Member id not found!'
             });
