@@ -110,7 +110,6 @@ const PaymentCredentials = (props) => {
                     props.retrieveGateways();
                     document.querySelector('.gateway_logo').value = '';
                     setLogo('');
-                    // setStatus(props.details.status === 1);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
