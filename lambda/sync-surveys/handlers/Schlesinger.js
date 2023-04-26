@@ -18,7 +18,7 @@ class Schlesinger {
     }
 
     surveySync = async()=> {
-        const checkExists = await Survey.findOne({
+        const checkExists = await Models.Survey.findOne({
             attributes: ['id'],
             where: {
                 survey_provider_id: this.record.survey_provider_id,
@@ -28,7 +28,7 @@ class Schlesinger {
         
         if(checkExists) {
             var surveyId = checkExists.id;
-            await Survey.update({
+            await Models.Survey.update({
                 loi: this.record.LOI,
                 cpi: this.record.CPI,
                 name: null,
@@ -40,7 +40,7 @@ class Schlesinger {
                 }
             });
         } else {
-            const survey = await Survey.create({
+            const survey = await Models.Survey.create({
                 survey_provider_id: this.record.survey_provider_id,
                 loi: this.record.LOI,
                 cpi: this.record.CPI,
@@ -61,7 +61,7 @@ class Schlesinger {
             const qualifications = this.record.qualifications;
             if(qualifications.length){
                 for(let ql of qualifications){
-                    const questionData = await SurveyQuestion.findOne({
+                    const questionData = await Models.SurveyQuestion.findOne({
                         attributes:['id', 'question_type', 'survey_provider_question_id'],
                         where: {
                             survey_provider_question_id: ql.QualificationId,
@@ -70,14 +70,14 @@ class Schlesinger {
                     });
 
                     if(questionData && questionData.id) {
-                        var surveyQualification = await SurveyQualification.findOne({
+                        var surveyQualification = await Models.SurveyQualification.findOne({
                             where: {
                                 survey_id: surveyId,
                                 survey_question_id: questionData.id,
                             },
                         });
                         if (surveyQualification == null) {
-                            var surveyQualification = await SurveyQualification.create({
+                            var surveyQualification = await Models.SurveyQualification.create({
                                 survey_id: surveyId,
                                 survey_question_id: questionData.id,
                                 logical_operator: 'OR',
@@ -91,7 +91,7 @@ class Schlesinger {
                                 const start = ql.AnswerIds[0].split('-')[0];
                                 const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
                                 
-                                const precodeData = await SurveyAnswerPrecodes.findAll({
+                                const precodeData = await Models.SurveyAnswerPrecodes.findAll({
                                     where: {
                                         precode: ql.QualificationId,
                                         survey_provider_id: this.record.survey_provider_id,
@@ -104,7 +104,7 @@ class Schlesinger {
                                     await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                 }
                             } else {
-                                const precodeData = await SurveyAnswerPrecodes.findOne({
+                                const precodeData = await Models.SurveyAnswerPrecodes.findOne({
                                     where: {
                                         precode: ql.QualificationId,
                                         survey_provider_id: this.record.survey_provider_id,
