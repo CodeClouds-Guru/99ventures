@@ -578,8 +578,6 @@ class SurveySyncController {
                     if (qualifications.Result.Success && qualifications.Result.TotalCount !=0) {
                         body.qualifications = qualifications.SurveyQualifications;
                     }
-                    // res.send(body);
-                    // return;
                     const send_message = await sqsHelper.sendData(body);
                     console.log('send_message', send_message);
                 });
