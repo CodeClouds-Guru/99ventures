@@ -6,21 +6,26 @@ const {
     SurveyQualification,
     SurveyAnswerPrecodes,
     MemberEligibilities
-} = require('../../models')
+} = require('../../models');
+const { Op } = require('sequelize')
+const LucidHelper = require('../../helpers/Lucid')
+const Crypto = require('crypto');
+const { generateHashForLucid } = require('../../helpers/global')
 
 class LucidController {
 
     constructor(){
         this.index = this.index.bind(this);
         this.surveys = this.surveys.bind(this);
+        this.rebuildEntryLink =  this.rebuildEntryLink.bind(this)
     }
 
     index = (req, res) => {
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
-        // else if(action === 'entrylink')
-        //     this.generateEntryLink(req, res);
+        else if(action === 'entrylink')
+            this.generateEntryLink(req, res);
         else 
             throw error('Invalid access!');
     }
@@ -80,7 +85,7 @@ class LucidController {
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
                         survey_provider_id: provider.id,
-                        status: "live",
+                        status: "active",
                     },
                     include: {
                         model: SurveyQualification,
@@ -106,33 +111,46 @@ class LucidController {
                         }
                     }
                 });
-
-                var surveyHtml = '';
-                for (let survey of surveys) {
-                    let link = `#`;
-                    surveyHtml += `
-                        <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                            <div class="bg-white card mb-2">
-                                <div class="card-body position-relative">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="text-primary m-0">${survey.name}</h6>
-                                    </div>
-                                    <div class="text-primary small">5 Minutes</div>
-                                    <div class="d-grid mt-1">
-                                        <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                
+                if(surveys.length){
+                    const queryString = {};
+                    eligibilities.map(eg => {
+                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
+                    });
+                    const generateQueryString = new URLSearchParams(queryString).toString();
+                    
+                    var surveyHtml = '';
+                    for (let survey of surveys) {
+                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
+                        surveyHtml += `
+                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                                <div class="bg-white card mb-2">
+                                    <div class="card-body position-relative">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-primary m-0">${survey.name}</h6>
+                                        </div>
+                                        <div class="text-primary small">5 Minutes</div>
+                                        <div class="d-grid mt-1">
+                                            <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `
+                        `
+                    }
+                    
+                    res.send({
+                        status: true,
+                        message: 'Success',
+                        result: surveyHtml
+                    });
                 }
-
-                res.send({
-                    status: true,
-                    message: 'Success',
-                    result: surveyHtml
-                });
-                
+                else {
+                    res.json({
+                        staus: false,
+                        message: 'Surveys not found!'
+                    });
+                }
             }
             else {
                 res.json({
@@ -149,6 +167,85 @@ class LucidController {
         }
 
 
+    }
+
+    generateEntryLink = async (req, res) => {
+        try{
+            const lcObj = new LucidHelper;
+            const surveyNumber = req.query.survey_number;    
+            const quota = await lcObj.showQuota(surveyNumber);
+            const queryParams = req.query;
+            const params = {
+                MID: Date.now(),
+                PID: req.query.uid,
+                ...queryParams
+            }
+            delete params.survey_number
+            delete params.uid
+            
+            var entrylink;
+            if(quota.SurveyStillLive == true) {
+                const survey = await Survey.findOne({
+                    attributes: ['url'],
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+                if(survey && survey.url){
+                    entrylink = survey.url;
+                } else {
+                    const result = await lcObj.createEntryLink(surveyNumber);
+                    if(result.data && result.data.SupplierLink) {
+                        const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
+                        await Survey.update({
+                            url: url
+                        }, {
+                            where: {
+                                survey_number: surveyNumber
+                            }
+                        });
+                        entrylink = url;
+                    }
+                }
+                const URL = this.rebuildEntryLink(entrylink, params);
+                res.redirect(URL);
+            } else {
+                await Survey.update({
+                    status: 'draft',
+                    deleted_at: new Date()
+                },{
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+                req.session.flash = { error: 'Survey is not live now!', redirect_url: '/lucid' };
+                res.redirect('/notice');
+            }
+        }
+        catch(error) {
+            console.error(error);
+            req.session.flash = { error: error.message, redirect_url: '/lucid' };
+            res.redirect('/notice');
+        }
+    }
+
+    /**
+     * Rebuild the entry link with hash
+     * NOTE: When hashing URLs the base string should include the entire URL, up to and including the `&` preceding the hashing parameter.
+     */
+    rebuildEntryLink = (url, queryParams) => {
+        if(process.env.DEV_MODE == 1) {
+            delete queryParams.PID;
+            const params = new URLSearchParams(queryParams).toString();
+            const urlTobeHashed = url+'&MID='+queryParams.MID+'&'+params+'&';
+            const hash = generateHashForLucid(urlTobeHashed);
+            return url +'&'+params+'&hash='+hash;
+        } else {
+            const params = new URLSearchParams(queryParams).toString();
+            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID+'&'+params+'&';
+            const hash = generateHashForLucid(urlTobeHashed);
+            return url +'&'+params+'&hash='+hash;
+        }
     }
 
 }

@@ -11,6 +11,9 @@ const {
   MembershipTier,
   MemberTransaction,
   EmailAlert,
+  PaymentMethod,
+  MemberPaymentInformation,
+  WithdrawalRequest,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -18,6 +21,7 @@ const IpQualityScoreClass = require('../../helpers/IpQualityScore');
 const eventBus = require('../../eventBus');
 const { genarateHash } = require('../../helpers/global');
 const { decodeHash } = require('../../helpers/global');
+const { response } = require('express');
 
 class MemberAuthController {
   constructor() {
@@ -30,6 +34,9 @@ class MemberAuthController {
     this.setMemberEligibility = this.setMemberEligibility.bind(this);
     this.profileUpdate = this.profileUpdate.bind(this);
     this.changePassword = this.changePassword.bind(this);
+    this.memberWithdrawal = this.memberWithdrawal.bind(this);
+    this.withdraw = this.withdraw.bind(this);
+    this.sendMailEvent = this.sendMailEvent.bind(this);
   }
   //login
   async login(req, res) {
@@ -352,12 +359,14 @@ class MemberAuthController {
     let member_status = true;
     let member_message = 'Successfully updated!';
     const method = req.method;
+    let request_data = {};
+    let member = {};
     try {
       const member_id = req.session.member.id;
 
       // const member_id = req.params.id;
       // console.log(method);
-      let member = await Member.findOne({ where: { id: member_id } });
+      member = await Member.findOne({ where: { id: member_id } });
 
       if (method === 'POST') {
         req.headers.company_id = req.session.company_portal.company_id;
@@ -369,13 +378,13 @@ class MemberAuthController {
           username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.number().required().label('Zipcode'),
-          city: Joi.string().required().label('City'),
+          city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
           // country_code: Joi.number().optional().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
-          email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
+          // email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
 
@@ -384,7 +393,7 @@ class MemberAuthController {
           member_message = error.details.map((err) => err.message);
         }
         // console.log(member);
-        if (member.profile_completed_on == null) {
+        if (!member.profile_completed_on) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
           req.body.profile_completed_on = new Date();
           let activityEventbus = eventBus.emit('member_activity', {
@@ -394,13 +403,13 @@ class MemberAuthController {
         }
         req.body.country_id = req.body.country;
         req.body.zip_code = req.body.zipcode;
-        let request_data = req.body;
+        request_data = req.body;
         request_data.updated_by = member_id;
-        request_data.avatar = null;
+        // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
-        // console.log(request_data);
+        console.log(request_data);
         let model = await Member.update(request_data, {
           where: { id: member_id },
         });
@@ -429,6 +438,11 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
+        if (request_data.avatar) {
+          req.session.member.avatar =
+            process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
+        } else req.session.member.avatar = member.avatar;
+
         req.session.flash = { message: member_message };
       } else {
         req.session.flash = { error: member_message };
@@ -559,6 +573,102 @@ class MemberAuthController {
   async logout(req, res) {
     req.session.member = null;
     res.redirect('/');
+  }
+
+  //Add Payment Credentials
+  async addPaymentCredentials(req, res) {}
+
+  //Member Withdrawal
+  async memberWithdrawal(req, res) {
+    console.log(req);
+    let member_status = false;
+    let member_message = 'Unable to save data';
+    let response = [];
+    const method = req.method;
+    try {
+      if (method === 'POST') {
+        req.headers.site_id = req.session.company_portal.id;
+        req.headers.company_id = req.session.company_portal.company_id;
+
+        req.body.member_id = req.session.member.id;
+        member_status = await this.withdraw(req);
+      }
+    } catch (error) {
+      console.log(error);
+      member_status = false;
+      member_message = 'Error occured';
+    } finally {
+      if (member_status) {
+        req.session.flash = { message: member_message };
+      } else {
+        req.session.flash = { error: member_message };
+      }
+      if (method === 'POST') {
+        res.redirect('back');
+      } else {
+        res.json({
+          status: member_status,
+          message: member_message,
+          data: response,
+        });
+      }
+    }
+  }
+
+  //Add Payment Credentials
+  async withdraw(req) {
+    let request_data = req.body;
+    //get member
+    let member = await Member.findOne({
+      where: { id: request_data.member_id },
+    });
+
+    let withdrawal_req_data = {
+      member_id: request_data.member_id,
+      amount: request_data.amount,
+      amount_type: 'cash',
+      currency: 'USD',
+      status: 'pending',
+    };
+
+    if (request_data.payment_method === 'paypal_instant_payment') {
+      withdrawal_req_data.note = 'Withdrawal request auto approved';
+      withdrawal_req_data.transaction_made_by = request_data.member_id;
+      withdrawal_req_data.status = 'approved';
+
+      //Insert into member transaction and update balance
+      await MemberTransaction.updateMemberTransactionAndBalance({
+        member_id: request_data.member_id,
+        amount: -request_data.amount,
+        note: 'Withdrawal request for $' + request_data.amount,
+        type: 'withdraw',
+        amount_action: 'member_withdrawal',
+        created_by: request_data.member_id,
+      });
+    }
+    // Insert in WxithdrawalRequest
+    const res = await WithdrawalRequest.create(withdrawal_req_data);
+
+    //member activity
+    const activityEventbus = eventBus.emit('member_activity', {
+      member_id: request_data.member_id,
+      action: 'Member cash withdrawal request',
+    });
+
+    // email body for member
+    let member_mail = await this.sendMailEvent({
+      action: 'Withdraw Request Member',
+      data: {
+        email: member.email,
+        details: { members: member },
+      },
+      req: req,
+    });
+  }
+
+  //send mail event call
+  async sendMailEvent(mail_data) {
+    return eventBus.emit('send_email', mail_data);
   }
 }
 module.exports = MemberAuthController;

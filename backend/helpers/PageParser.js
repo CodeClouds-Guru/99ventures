@@ -12,11 +12,13 @@ const safeEval = require('safe-eval');
 const Handlebars = require('handlebars');
 const ScriptParser = require('./ScriptParser');
 const moment = require('moment');
+const { realpathSync } = require('fs');
 class PageParser {
   constructor(slug, staticContent) {
     this.sessionUser = null;
     this.companyPortal = null;
     this.sessionMessage = '';
+    this.sessionFlash = {};
     this.slug = slug;
     this.staticContent = staticContent;
     this.page = null;
@@ -30,9 +32,7 @@ class PageParser {
     this.getSessionUser = this.getSessionUser.bind(this);
     this.getFlashMessage = this.getFlashMessage.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
-    Handlebars.registerHelper("format", function (options) {
-      return options.fn(this) ? moment(options.fn(this)).format('llll') : '';
-    });
+    this.getFlashObject = this.getFlashObject.bind(this);
   }
 
   async getPageNLayout() {
@@ -66,9 +66,13 @@ class PageParser {
       this.sessionUser = req.session.member;
     }
     if ('flash' in req.session && req.session.flash) {
+      this.sessionFlash = req.session.flash;
       this.sessionMessage = req.session.flash.error;
       if ('access_error' in req.session.flash) {
         this.sessionMessage = req.session.flash.access_error.error_message;
+      }
+      if ('message' in req.session.flash) {
+        this.sessionMessage = req.session.flash.message;
       }
       delete req.session.flash;
     }
@@ -117,7 +121,6 @@ class PageParser {
     );
     layout_html = await this.convertComponentToHtml(layout_html);
 
-
     layout_html = safeEval('`' + layout_html + '`', {
       page_title,
       page_keywords,
@@ -128,9 +131,11 @@ class PageParser {
       default_scripted_codes,
     });
     const template = Handlebars.compile(layout_html);
+    const flash = this.getFlashObject();
     layout_html = template({
       user,
       error_message,
+      flash
     });
     this.sessionMessage = '';
 
@@ -160,7 +165,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    console.log('regex_match', regex_match)
+    console.log('regex_match', regex_match);
 
     if (regex_match) {
       await regex_match.forEach(async (script_id) => {
@@ -194,6 +199,9 @@ class PageParser {
   }
   getFlashMessage() {
     return this.sessionMessage;
+  }
+  getFlashObject() {
+    return this.sessionFlash;
   }
 }
 module.exports = PageParser;

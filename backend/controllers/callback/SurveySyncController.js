@@ -3,6 +3,7 @@ const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const { Op } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
+const SqsHelper = require('../../helpers/SqsHelper');
 
 class SurveySyncController {
 
@@ -18,6 +19,7 @@ class SurveySyncController {
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
+        this.schlesingerSurveySaveToSQS = this.schlesingerSurveySaveToSQS.bind(this)
         /**
          * "English - United States"
          * language 3
@@ -67,7 +69,8 @@ class SurveySyncController {
             this.pureSpectrumQualification(req, res);
         }
         else if(provider === 'schlesinger') {
-            this.schlesingerQualification(req, res);
+            // this.schlesingerQualification(req, res);
+            this.schlesingerSurveySaveToSQS(req, res)
         } 
         else {
             res.send(provider);
@@ -200,9 +203,16 @@ class SurveySyncController {
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');            
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
+                const surveyData = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5);
+               
+                if(!surveyData.length) {
+                    res.json({ status: true, message: 'No survey found for this language!' });
+                    return;
+                }
+
                 //-- Disabled all the previous surveys
                 const current_datetime = new Date();
-                Survey.update({
+                await Survey.update({
                     status: psObj.getSurveyStatus(33),
                     deleted_at: new Date()
                 }, {
@@ -237,7 +247,7 @@ class SurveySyncController {
                 return result;
                 */
 
-                for(let survey of allSurveys.surveys ){
+                for(let survey of surveyData ){                    
                     const checkExists = await Survey.count({
                         where: {
                             survey_provider_id: this.providerId,
@@ -272,6 +282,7 @@ class SurveySyncController {
                     }
                 }
                 return await Survey.findAll({
+                    attributes:['id', 'survey_number', 'loi', 'cpi'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
@@ -297,12 +308,29 @@ class SurveySyncController {
             const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
             
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
-                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId);
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
                 
                 if(!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
+
+                //-- Disabled all the previous surveys
+                const current_datetime = new Date();
+                await Survey.update({
+                    status: 'paused',
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_provider_id: this.providerId,
+                        status: 'live',
+                        created_at: {
+                            [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
+                        },
+                    }
+                });
+                //----------
+
                 for(let survey of surveyData ){
                     const checkExists = await Survey.count({
                         where: {
@@ -336,6 +364,7 @@ class SurveySyncController {
                     }
                 }
                 return await Survey.findAll({
+                    attributes:['id', 'survey_number', 'loi', 'cpi'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
@@ -359,7 +388,6 @@ class SurveySyncController {
         try{
             //Save Surveys
             const allSurveys = await this.pureSpectrumSurvey(req, res);
-            
             if(allSurveys.length) {
                 const psObj = new PurespectrumHelper;
                 for(let survey of allSurveys) {
@@ -445,11 +473,12 @@ class SurveySyncController {
      */
     async schlesingerQualification(req, res) {
         try{
-            const allSurveys = await this.schlesingerSurvey(req, res);            
+            const allSurveys = await this.schlesingerSurvey(req, res);  
             if(allSurveys.length) {
-                const psObj = new SchlesingerHelper;
-                for(let survey of allSurveys) {
+                const psObj = new SchlesingerHelper;                
+                for(let survey of allSurveys) {                    
                     const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
+
                     if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
                         const surveyQualifications = surveyData.SurveyQualifications;
                         for(let ql of surveyQualifications){
@@ -521,6 +550,48 @@ class SurveySyncController {
         catch (error) {
             console.error(error);
             throw error;
+        }
+    }
+
+    /** 
+     * SQS
+     */
+    async schlesingerSurveySaveToSQS(req, res) {
+        try{
+            const psObj = new SchlesingerHelper();
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
+            
+            if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
+                
+                if(!surveyData.length) {
+                    res.json({ status: true, message: 'No survey found for this language!' });
+                    return;
+                }
+                const sqsHelper = new SqsHelper();
+                surveyData.forEach(async (element) => {
+                    let body = {
+                        ...element,
+                        survey_provider_id: this.providerId,
+                    };
+                    const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
+                    if (qualifications.Result.Success && qualifications.Result.TotalCount !=0) {
+                        body.qualifications = qualifications.SurveyQualifications;
+                    }
+                    // res.send(body);
+                    // return;
+                    const send_message = await sqsHelper.sendData(body);
+                    console.log('send_message', send_message);
+                });
+                res.send('Sending to SQS')
+            } else {
+                res.send('No survey found!');
+            }
+        }
+        catch(error) {
+            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+			logger.error(error);
+            res.send(error)
         }
     }
 

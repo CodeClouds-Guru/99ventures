@@ -96,7 +96,7 @@ class TicketController {
 
             let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
         }
-        req.session.flash = { message: "Ticket submited."}
+        req.session.flash = { message: "Ticket submitted successfully."}
        
     } catch (error) {
       req.session.flash = { error: "Unable to submit ticket."}

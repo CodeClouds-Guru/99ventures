@@ -7,6 +7,9 @@ const db = require('./config/database');
 const { engine } = require('express-handlebars');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const Handlebars = require('handlebars');
+const HandlebarHelpers = require("./config/handlebars_helpers");
+
 /**
  * This functions initialize an express app
  * @returns Object (Express)
@@ -34,7 +37,7 @@ function setup(app) {
   );
 
   app.use(express.static(path.join(__dirname, '/public')));
-  app.use(cookieParser());
+  app.use(cookieParser('scripted-' + process.env.NODE_APP_SECRET));
 
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,7 +60,10 @@ function initializeHandlebars(app) {
   app.engine('handlebars', engine());
   app.set('view engine', 'handlebars');
   app.set('views', './views');
-  app.set('trust proxy', true)
+  app.set('trust proxy', true);
+  HandlebarHelpers.forEach(helper => {
+    Handlebars.registerHelper(helper.name, helper.fn);
+  })
 }
 
 /**

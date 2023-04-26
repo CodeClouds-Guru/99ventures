@@ -12,26 +12,37 @@ module.exports = {
         {
           name: 'Paypal',
           slug: 'paypal',
+          payment_method_id: 1,
+        },
+        {
+          name: 'Instant Paypal',
+          slug: 'instant_paypal',
+          payment_method_id: 1,
         },
         {
           name: 'Skrill',
           slug: 'skrill',
+          payment_method_id: 2,
         },
         {
           name: 'Gift Card Pass',
           slug: 'gift_card_pass',
+          payment_method_id: 3,
         },
         {
           name: 'Venmo',
           slug: 'venmo',
+          payment_method_id: 3,
         },
         {
           name: 'E-gift Cards',
           slug: 'e_gift_cards',
+          payment_method_id: 3,
         },
         {
           name: 'E-gift Cards',
           slug: 'e_gift_cards',
+          payment_method_id: 3,
         },
       ],
       {}

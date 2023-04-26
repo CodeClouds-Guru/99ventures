@@ -37,7 +37,23 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       status: DataTypes.TINYINT,
       note: DataTypes.STRING,
-      amount_action: DataTypes.ENUM('admin_adjustment', 'survey', 'referral'),
+      amount_action: {
+        type: DataTypes.ENUM(
+          'admin_adjustment',
+          'survey',
+          'referral',
+          'member_withdrawal'
+        ),
+        get() {
+          let rawValue = this.getDataValue('amount_action') || null;
+          rawValue = rawValue.replaceAll('_', ' ');
+          return rawValue
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+              return index == 0 ? word.toUpperCase() : word.toLowerCase();
+            })
+            .replace(/\s+/g, ' ');
+        },
+      },
       currency: DataTypes.STRING,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
@@ -302,7 +318,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
-    console.log(response);
+    // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
   return MemberTransaction;

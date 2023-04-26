@@ -6,6 +6,7 @@ const Lucid = require('../helpers/Lucid');
 // const PurespectrumHelper = require('../helpers/Purespectrum');
 const SqsHelper = require('../helpers/SqsHelper');
 const { OfferWall } = require('../models');
+const { csrfErrorHandler, doubleCsrfProtection } = require("../config/csrf");
 
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -80,7 +81,7 @@ router.get('/sqs-receive-message', async (req, res) => {
 //ROUTES FOR FRONTEND
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
-router.use(frontendrRouter.router, checkMemberAuth)
+router.use(frontendrRouter.router, [checkMemberAuth])
 
 module.exports = {
   prefix: '/',

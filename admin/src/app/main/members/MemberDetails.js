@@ -615,11 +615,9 @@ const MemberDetails = () => {
                                                 }
                                             >
                                                 <option value="">--Select--</option>
-                                                <option value="1">Level 1</option>
-                                                <option value="2">Level 2</option>
-                                                <option value="3">Level 3</option>
-                                                <option value="4">Level 4</option>
-                                                <option value="5">Level 5</option>
+                                                {memberData.membership_tier.map(val => (
+                                                    <option value={val.id}>{val.name}</option>
+                                                ))}
                                             </TextField>
                                         </div>
                                     ) : (
@@ -689,6 +687,7 @@ const MemberDetails = () => {
                                                     })
                                                 }
                                             >
+                                                <option value="">--Select--</option>
                                                 <option value="male">Male</option>
                                                 <option value="female">Female</option>
                                                 <option value="other">Other</option>

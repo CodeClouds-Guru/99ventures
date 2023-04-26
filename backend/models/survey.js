@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     survey_number: DataTypes.STRING,
     status: DataTypes.STRING,
+    url: DataTypes.STRING,
     original_json: DataTypes.JSON,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',

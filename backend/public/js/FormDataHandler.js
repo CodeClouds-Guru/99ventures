@@ -1,4 +1,5 @@
 $(() => {
+    var errorsArray = [];
     var displayErrors = () => {
         $('span.alert-msg').remove();
         errorsArray.forEach(item => {
@@ -33,7 +34,6 @@ $(() => {
         showSnackbar(errorMsg);
     }
 
-    var errorsArray = [];
     const loginForm = $("#scripteed_login_form").get(0);
     const loginBtn = $("#scripteed_login_btn").get(0);
     const signupForm = $("#scripteed_signup_form").get(0);
@@ -43,19 +43,10 @@ $(() => {
     const formHeading = $("#form_heading").get(0);
     const logoutButton = $("#scripteed_logout_btn").get(0);
     const ticketCreateForm = $("#scripteed_create_ticket_form").get(0);
-    const showFilename = $("#file_show");
-    const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
-    const changePasswordForm = $("#scripteed_change_password_form").get(0);
+    // const showFilename = $("#file_show");
+    // const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
+    // const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
-
-    $("#choose-file").on('change', function () {
-        let file_name = $(ticketCreateForm).find('input[name="ticket_file"]').val().replace(/C:\\fakepath\\/i, '')
-        file_name ? showFilename.text(file_name) : showFilename.text('')
-    });
-    $("#member-picture").on('change', function () {
-        let file_name = $(profileDetailsForm).find('input[name="avatar"]').val().replace(/C:\\fakepath\\/i, '')
-        file_name ? showFilename.text(file_name) : showFilename.text('')
-    });
     $('i.bi').click((event) => {
         let field = $(event.target).parent().siblings('input');
         $(field).attr('type', $(field).attr('type') === 'password' ? 'text' : 'password');
@@ -124,24 +115,6 @@ $(() => {
             console.log("OOPS!!! Ticket create action not set");
         }
     }
-    var profileDetailsFormSanitisation = () => {
-        if (profileDetailsForm && ["avatar", "first_name", "last_name", "username", "email", "phone_no", "address_1", "address_2", "city", "state", "country", "zipcode", "email_alerts[]"].every((val) => Object.keys(profileDetailsForm.elements).indexOf(val) > -1)) {
-            $(profileDetailsForm).attr("action", '/profile/update');
-            $(profileDetailsForm).attr("method", "POST");
-        }
-        else {
-            console.log("OOPS!!! Profile details update action not set");
-        }
-    }
-    var changePasswordFormSanitisation = () => {
-        if (changePasswordForm && ["old_password", "new_password", "confirm_password"].every((val) => Object.keys(changePasswordForm.elements).indexOf(val) > -1)) {
-            // $(changePasswordForm).attr("action", '/password/update');
-            // $(changePasswordForm).attr("method", "POST");
-        }
-        else {
-            console.log("OOPS!!! Change password action not set");
-        }
-    }
     var loginFomValidation = () => {
         errorsArray = [];
         $('span.alert-msg').remove();
@@ -197,69 +170,72 @@ $(() => {
             errorsArray.push({ field: $(ticketContentField), message: 'Please enter ticket content' });
         }
     }
-    var profileDetailsFormValidation = () => {
-        errorsArray = [];
-        $('span.alert-msg').remove();
-        const first_name = $(profileDetailsForm).find('input[name="first_name"]').get(0);
-        const last_name = $(profileDetailsForm).find('input[name="last_name"]').get(0);
-        const username = $(profileDetailsForm).find('input[name="username"]').get(0);
-        // const email = $(profileDetailsForm).find('input[name="email"]').get(0);
-        const phone_no = $(profileDetailsForm).find('input[name="phone_no"]').get(0);
-        const address_1 = $(profileDetailsForm).find('input[name="address_1"]').get(0);
-        const city = $(profileDetailsForm).find('input[name="city"]').get(0);
-        // const state = $(profileDetailsForm).find('select[name="state"]').get(0);
-        // const country = $(profileDetailsForm).find('select[name="country"]').get(0);
-        const zipcode = $(profileDetailsForm).find('input[name="zipcode"]').get(0);
-        if ($(first_name).val().trim().length === 0) {
-            errorsArray.push({ field: $(first_name), message: 'Please enter First Name' });
-        }
-        if ($(last_name).val().trim().length === 0) {
-            errorsArray.push({ field: $(last_name), message: 'Please enter Last Name' });
-        }
-        if ($(username).val().trim().length === 0) {
-            errorsArray.push({ field: $(username), message: 'Please enter Username' });
-        }
-        // if ($(email).val().val().trim().length === 0) {
-        //     errorsArray.push({ field: $(email), message: 'Please enter a email' });
-        // } else if (!validateEmail($(email).val().val().trim())) {
-        //     errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
-        // }
-        if ($(phone_no).val().trim().length === 0) {
-            errorsArray.push({ field: $(phone_no), message: 'Please enter Phone' });
-        }
-        if ($(address_1).val().trim().length === 0) {
-            errorsArray.push({ field: $(address_1), message: 'Please enter Address 1' });
-        }
-        if ($(city).val().trim().length === 0) {
-            errorsArray.push({ field: $(city), message: 'Please enter City' });
-        }
-        // if ($(state).val().length===0) {
-        //     errorsArray.push({ field: $(state), message: 'Please enter State' });
-        // }
-        // if ($(country).val().length===0) {
-        //     errorsArray.push({ field: $(country), message: 'Please enter Country' });
-        // }
-        if ($(zipcode).val().trim().length === 0) {
-            errorsArray.push({ field: $(zipcode), message: 'Please enter Zipcode' });
-        }
+    // var profileDetailsFormValidation = () => {
+    //     errorsArray = [];
+    //     $('span.alert-msg').remove();
+    //     const first_name = $(profileDetailsForm).find('input[name="first_name"]').get(0);
+    //     const last_name = $(profileDetailsForm).find('input[name="last_name"]').get(0);
+    //     const username = $(profileDetailsForm).find('input[name="username"]').get(0);
+    //     // const email = $(profileDetailsForm).find('input[name="email"]').get(0);
+    //     const phone_no = $(profileDetailsForm).find('input[name="phone_no"]').get(0);
+    //     const address_1 = $(profileDetailsForm).find('input[name="address_1"]').get(0);
+    //     const city = $(profileDetailsForm).find('input[name="city"]').get(0);
+    //     const state = $(profileDetailsForm).find('select[name="state"]').get(0);
+    //     const country = $(profileDetailsForm).find('select[name="country"]').get(0);
+    //     const zipcode = $(profileDetailsForm).find('input[name="zipcode"]').get(0);
 
-    }
-    var ChangePasswordFomValidation = () => {
-        errorsArray = [];
-        $('span.alert-msg').remove();
-        const old_password = $(changePasswordForm).find('input[name="old_password"]').get(0);
-        const new_password = $(changePasswordForm).find('input[name="new_password"]').get(0);
-        const confirm_password = $(changePasswordForm).find('input[name="confirm_password"]').get(0);
-        if ($(old_password).val().trim().length < 8) {
-            errorsArray.push({ field: $(old_password), message: 'Old Password should be greater than 7 characters' });
-        }
-        if ($(new_password).val().trim().length < 8) {
-            errorsArray.push({ field: $(new_password), message: 'New Password should be greater than 7 characters' });
-        }
-        if ($(new_password).val().trim() !== $(confirm_password).val().trim()) {
-            errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
-        }
-    }
+    //     console.log(phone_no, address_1, city, state, country, zipcode)
+
+    //     if ($(first_name).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(first_name), message: 'Please enter First Name' });
+    //     }
+    //     if ($(last_name).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(last_name), message: 'Please enter Last Name' });
+    //     }
+    //     if ($(username).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(username), message: 'Please enter Username' });
+    //     }
+    //     // if ($(email).val().val().trim().length === 0) {
+    //     //     errorsArray.push({ field: $(email), message: 'Please enter a email' });
+    //     // } else if (!validateEmail($(email).val().val().trim())) {
+    //     //     errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
+    //     // }
+    //     if ($(phone_no).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(phone_no), message: 'Please enter Phone' });
+    //     }
+    //     if ($(address_1).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(address_1), message: 'Please enter Address 1' });
+    //     }
+    //     if ($(city).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(city), message: 'Please enter City' });
+    //     }
+    //     if ($(state).val().length === 0) {
+    //         errorsArray.push({ field: $(state), message: 'Please enter State' });
+    //     }
+    //     if ($(country).val().length === 0) {
+    //         errorsArray.push({ field: $(country), message: 'Please enter Country' });
+    //     }
+    //     if ($(zipcode).val().trim().length === 0) {
+    //         errorsArray.push({ field: $(zipcode), message: 'Please enter Zipcode' });
+    //     }
+
+    // }
+    // var ChangePasswordFomValidation = () => {
+    //     errorsArray = [];
+    //     $('span.alert-msg').remove();
+    //     const old_password = $(changePasswordForm).find('input[name="old_password"]').get(0);
+    //     const new_password = $(changePasswordForm).find('input[name="new_password"]').get(0);
+    //     const confirm_password = $(changePasswordForm).find('input[name="confirm_password"]').get(0);
+    //     if ($(old_password).val().trim().length < 8) {
+    //         errorsArray.push({ field: $(old_password), message: 'Old Password should be greater than 7 characters' });
+    //     }
+    //     if ($(new_password).val().trim().length < 8) {
+    //         errorsArray.push({ field: $(new_password), message: 'New Password should be greater than 7 characters' });
+    //     }
+    //     if ($(new_password).val().trim() !== $(confirm_password).val().trim()) {
+    //         errorsArray.push({ field: $(confirm_password), message: 'Password mismatched' });
+    //     }
+    // }
     if (loginForm) {
         loginFormSanitisation();
     }
@@ -268,12 +244,6 @@ $(() => {
     }
     if (ticketCreateForm) {
         ticketCreateFormSanitisation();
-    }
-    if (profileDetailsForm) {
-        profileDetailsFormSanitisation();
-    }
-    if (changePasswordForm) {
-        changePasswordFormSanitisation();
     }
     $(loginForm).submit((e) => {
         loginFomValidation();
@@ -302,41 +272,42 @@ $(() => {
             displayErrors();
         }
     })
-    $(profileDetailsForm).submit((e) => {
-        profileDetailsFormValidation();
-        if (errorsArray.length === 0) {
-            $(this).trigger(e.type);
-        } else {
-            e.preventDefault();
-            displayErrors();
-        }
-    })
-    $('#scripteed_change_password_btn').click((e) => {
-        ChangePasswordFomValidation();
-        if (errorsArray.length === 0) {
-            $.ajax({
-                type: "PUT",
-                url: '/profile/update',
-                data: {
-                    old_password: $(changePasswordForm).find('input[name="old_password"]').get(0).value.trim(),
-                    new_password: $(changePasswordForm).find('input[name="new_password"]').get(0).value.trim(),
-                    confirm_password: $(changePasswordForm).find('input[name="confirm_password"]').get(0).value.trim(),
-                },
-                success: (response) => {
-                    showSnackbar(response.message);
-                    if (response.status) {
-                        $('#scripteed_change_password_cancel_btn').click();
-                        $(changePasswordForm).find('input[name="old_password"]').get(0).value = '';
-                        $(changePasswordForm).find('input[name="new_password"]').get(0).value = '';
-                        $(changePasswordForm).find('input[name="confirm_password"]').get(0).value = '';
-                    }
-                },
-            });
-        } else {
-            e.preventDefault();
-            displayErrors();
-        }
-    })
+    // $(profileDetailsForm).submit((e) => {
+    //     console.log(e)
+    //     profileDetailsFormValidation();
+    //     if (errorsArray.length === 0) {
+    //         $(this).trigger(e.type);
+    //     } else {
+    //         e.preventDefault();
+    //         displayErrors();
+    //     }
+    // })
+    // $('#scripteed_change_password_btn').click((e) => {
+    //     ChangePasswordFomValidation();
+    //     if (errorsArray.length === 0) {
+    //         $.ajax({
+    //             type: "PUT",
+    //             url: '/profile/update',
+    //             data: {
+    //                 old_password: $(changePasswordForm).find('input[name="old_password"]').get(0).value.trim(),
+    //                 new_password: $(changePasswordForm).find('input[name="new_password"]').get(0).value.trim(),
+    //                 confirm_password: $(changePasswordForm).find('input[name="confirm_password"]').get(0).value.trim(),
+    //             },
+    //             success: (response) => {
+    //                 showSnackbar(response.message);
+    //                 if (response.status) {
+    //                     $('#scripteed_change_password_cancel_btn').click();
+    //                     $(changePasswordForm).find('input[name="old_password"]').get(0).value = '';
+    //                     $(changePasswordForm).find('input[name="new_password"]').get(0).value = '';
+    //                     $(changePasswordForm).find('input[name="confirm_password"]').get(0).value = '';
+    //                 }
+    //             },
+    //         });
+    //     } else {
+    //         e.preventDefault();
+    //         displayErrors();
+    //     }
+    // })
     $(logoutButton).click(e => {
         e.preventDefault();
         $('body').append('<form id="scripteed_logout_form"></form>');

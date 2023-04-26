@@ -5,6 +5,7 @@ const {
   PaymentMethod,
 } = require("../../models/index");
 const bcrypt = require("bcryptjs");
+const FileHelper = require('../../helpers/fileHelper');
 class PaymentConfigurationController extends Controller {
   constructor() {
     super("PaymentMethod");
@@ -18,7 +19,7 @@ class PaymentConfigurationController extends Controller {
       const company_id = req.header("company_id") || 1;
       const mask_auth = req.query.auth || false;
       let payment_method_list = await PaymentMethod.findAll({
-        attributes: ["name", "slug"],
+        attributes: ["name", "slug", "logo", "status", "id"],
         include: {
           model: PaymentMethodCredential,
           required: false,
@@ -29,11 +30,14 @@ class PaymentConfigurationController extends Controller {
           },
         },
       });
+      for (let k = 0; k < payment_method_list.length; k++) {
+        payment_method_list[k].status = parseInt(payment_method_list[k].status)
+      }
       // console.log('==================',typeof mask_auth, mask_auth)
       if (mask_auth === true || mask_auth === "true") {
         return {
           status: true,
-          payment_method_list,
+          data: { payment_method_list: Object.values(payment_method_list) },
         };
       } else {
         // if (mask_auth === "false" || mask_auth === false) {
@@ -54,7 +58,7 @@ class PaymentConfigurationController extends Controller {
         }
         return {
           status: true,
-          data: {payment_method_list:payment_method_list},
+          data: { payment_method_list: Object.values(payment_method_list) },
         };
       }
     } catch (err) {
@@ -63,7 +67,9 @@ class PaymentConfigurationController extends Controller {
   }
   async update(req, res) {
     try {
-      const update_credentials = req.body.credentials || [];
+      var files = [];
+      let update_credentials = req.body.credentials || '[]';
+      update_credentials = JSON.parse(update_credentials);
       let data = [];
       data = update_credentials.map((values) => {
         return {
@@ -71,13 +77,25 @@ class PaymentConfigurationController extends Controller {
           id: values.id,
         };
       });
-      // console.log(data);
       const insertNewData = await PaymentMethodCredential.bulkCreate(data, {
         updateOnDuplicate: ["id", "value"],
         ignoreDuplicates: true,
       });
+      let logo = ''
+      //update payment method 
+      let payment_method_data = {
+        status: req.body.status.toString() ?? '0'
+      }
+      if (req.files) {
+        files[0] = req.files.logo;
+        const fileHelper = new FileHelper(files, 'payment-methods', req);
+        const file_name = await fileHelper.upload();
+        logo = file_name.files[0].filename;
+        payment_method_data.logo = logo
+      }
+      await PaymentMethod.update(payment_method_data, { where: { id: req.body.id } })
       if (insertNewData) {
-        return{
+        return {
           status: true,
           message: "Data Saved",
         }

@@ -26,9 +26,7 @@ export const customCheckboxTrait = grapesjs.plugins.add('custom-trait-types', as
                 elInput.querySelector('input[type="checkbox"]').removeAttribute('checked')
             }
         }
-    })
-
-
+    });
 })
 
 export const memberTrait = grapesjs.plugins.add('member-trait', async (editor, opts) => {

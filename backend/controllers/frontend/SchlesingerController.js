@@ -6,7 +6,8 @@ const {
     SurveyQualification,
     SurveyAnswerPrecodes,
     MemberEligibilities
-} = require('../../models')
+} = require('../../models');
+const SchlesingerHelper = require('../../helpers/Schlesinger');
 
 class SchlesingerController {
 
@@ -17,6 +18,13 @@ class SchlesingerController {
     }
 
     index = (req, res) => {
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -30,7 +38,7 @@ class SchlesingerController {
         try{
             const memberId = req.query.user_id;
             if (!memberId) {
-                res.json({
+                res.status(422).json({
                     status: false,
                     message: 'Member id not found!'
                 });
@@ -173,30 +181,64 @@ class SchlesingerController {
     generateEntryLink = async(req, res) => {
         try{
             const queryString = req.query;
+            const surveyNumber = queryString['survey_number'];
             const data = await Survey.findOne({
                 attributes: ['original_json'],
                 where: {
-                    survey_number: queryString.survey_number
+                    survey_number: surveyNumber
                 }
-            });        
-            
+            });
+
             if (data && data.original_json) {
-                delete queryString['survey_number'];
-                const params = Object.fromEntries(new URLSearchParams(queryString));
-                const liveLink = data.original_json.LiveLink;
-                const liveLinkArry = liveLink.split('?');
-                const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
-                params.pid = Date.now();
-                delete liveLinkParams['zid'];   // We dont have any value for zid
-                const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
-                res.redirect(entryLink)
+                const schObj = new SchlesingerHelper;
+                const result = await schObj.fetchSellerAPI('api/v2/survey/survey-quotas/' + surveyNumber);
+                
+                if(
+                    result.Result.Success === true && 
+                    result.Result.TotalCount != 0
+                ) {
+                    const surveyQuota = result.SurveyQuotas.filter(sv => sv.TotalRemaining > 1);
+                    if( surveyQuota.length ){
+                        delete queryString['survey_number'];
+                        const params = Object.fromEntries(new URLSearchParams(queryString));
+                        const liveLink = data.original_json.LiveLink;
+                        const liveLinkArry = liveLink.split('?');
+                        const liveLinkParams = Object.fromEntries(new URLSearchParams(liveLinkArry[1]))
+                        params.pid = Date.now()+'-'+surveyNumber;
+                        delete liveLinkParams['zid'];   // We dont have any value for zid
+                        const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
+                        // res.send(entryLink)
+                        res.redirect(entryLink)
+                    }
+                    else {
+                        this.updateSurvey(surveyNumber);
+                        req.session.flash = { error: 'No quota exists!', redirect_url: '/schlesigner' };
+                        res.redirect('/notice');
+                    }                    
+                } else {
+                    this.updateSurvey(surveyNumber);
+                    req.session.flash = { error: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
+                    res.redirect('/notice');
+                }
             } else {
-                res.send('Unable to get entry link!');
+                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/schlesigner' };
+                res.redirect('/notice');
             }
         } catch (error) {
             console.error(error);
             throw error;
         }
+    }
+
+    updateSurvey = async(surveyNumber) => {
+        await Survey.update({
+            status: 'draft',
+            deleted_at: new Date()
+        }, {
+            where: {
+                survey_number: surveyNumber
+            }
+        });
     }
 }
 

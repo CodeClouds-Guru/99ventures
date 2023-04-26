@@ -32,6 +32,8 @@ class Lucid {
     this.createData = this.createData.bind(this);
     this.updateData = this.updateData.bind(this);
     this.deleteData = this.deleteData.bind(this);
+    this.createEntryLink = this.createEntryLink.bind(this);
+    this.showQuota = this.showQuota.bind(this);
     return new Proxy(this, handler);
   }
   async fetchAndReturnData(partUrl) {
@@ -45,7 +47,7 @@ class Lucid {
       'Content-Type': 'application/json',
       data: payload,
     };
-
+    
     const response = await this.instance.post(partUrl);
     return response.data;
   }
@@ -447,6 +449,46 @@ class Lucid {
   }
   /*------------------- Demand - Entry Links ----------------*/
   /******************* END Of All Del Apis *******************/
+
+  /*------------------- Entry Link Create Start ----------------*/
+  async createEntryLink(surveyNumber) {
+    const payload = {
+      "SupplierLinkTypeCode": "OWS",
+      "TrackingTypeCode": "S2S"
+    };
+    
+    const instance = {
+      headers: { 
+        'Authorization': process.env.LUCID_API_KEY, 
+        'Content-Type': 'application/json',
+      }
+    };
+    
+    const response = await axios.post(
+      'https://api.samplicio.us/Supply/v1/SupplierLinks/Create/' + surveyNumber +'/6373', 
+      payload, 
+      instance
+    )
+    .catch(err => {
+      throw err;
+    });
+
+    return response;    
+    
+  }
+  /*------------------- Entry Link Create End ----------------*/
+
+  /*------------------- Supply Integration - Quotas ---------------------*/
+  async showQuota(surveyNumber) {
+    console.log(surveyNumber)
+    const data = await this.fetchAndReturnData(
+      '/Supply/v1/SurveyQuotas/BySurveyNumber/'+surveyNumber+'/6373'
+    );
+    return data;
+  }
+  /*------------------- Supply Integration - Quotas End---------------------*/
+  
+
 }
 
 module.exports = Lucid;

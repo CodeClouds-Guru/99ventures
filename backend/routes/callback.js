@@ -16,6 +16,11 @@ router.get('/test-adgate', (req, res) => {
   res.send(req.query);
 });
 
+
+router.get('/postback/:offerwall', OfferwallPostbackController.save);
+router.all('/survey/:provider', SurveycallbackController.syncSurvey);
+router.all('/survey/outcome/:provider', SurveycallbackController.save);
+
 /**
  * To Sync Servey
  */
@@ -23,11 +28,6 @@ const SurveySyncControllerClass = require('../controllers/callback/SurveySyncCon
 const SurveySyncController = new SurveySyncControllerClass();
 router.get('/survey/:provider/:action', SurveySyncController.index);
 //------------------------
-
-
-router.get('/postback/:offerwall', OfferwallPostbackController.save);
-router.all('/survey/:provider', SurveycallbackController.syncSurvey);
-router.all('/survey/outcome/:provider', SurveycallbackController.save);
 
 // for adscend PB test
 router.all('/postback-test/:offerwall', async (req, res) => {

@@ -24,7 +24,7 @@ class Schlesinger {
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
-				'X-MC-SUPPLY-KEY': (process.env.DEV_MODE == 1) ? '1002:0466198A-A78B-4F6C-8CE2-4A79FBC8FA41' : '1581:4e297b6e-3f09-424b-ac5f-c1f39205241c'
+				'X-MC-SUPPLY-KEY': (process.env.DEV_MODE == 1) ? '1002:0466198A-A78B-4F6C-8CE2-4A79FBC8FA41' : '1583:6d4a14bc-11a4-4525-a20c-50f2fa99cc49'
 			},
 		};
 		
@@ -39,7 +39,7 @@ class Schlesinger {
 	async fetchSellerAPI(partUrl) {
 		const instance = axios.create({
 			...this.instance,
-			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/supply-api-v2/' : 'https://api.sample-cube.com',
+			baseURL: (process.env.DEV_MODE == 1) ? 'https://api-hub.market-cube.com/supply-api-v2/' : 'https://api.sample-cube.com/',
 		});
 		const response = await instance.get(partUrl);
 		return response.data;

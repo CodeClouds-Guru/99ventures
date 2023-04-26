@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   MemberReferral.init({
     member_id: DataTypes.BIGINT,
     referral_id: DataTypes.BIGINT,
+    referral_email:DataTypes.STRING,
     geo_location: DataTypes.STRING,
     ip: DataTypes.STRING,
     join_date: "TIMESTAMP",

@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'survey_qualification_id',
         otherKey: 'survey_answer_precode_id',
+        onDelete: 'CASCADE',
+        hooks: true,
       })
     }
   }
@@ -33,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: 'SurveyQualification',
       timestamps: true,
-      paranoid: true,
+      // paranoid: true,
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',

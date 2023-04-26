@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       option: DataTypes.STRING,
       precode: DataTypes.STRING,
-      survey_provider_id:  DataTypes.BIGINT,
+      survey_provider_id: DataTypes.BIGINT,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: 'SurveyAnswerPrecodes',
       timestamps: true,
-      paranoid: true,
+      // paranoid: true,
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
