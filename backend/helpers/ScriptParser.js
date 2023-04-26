@@ -34,7 +34,7 @@ class ScriptParser {
             let where = this.getModuleWhere(script.module, user);
 
             if (param_where)
-              where.where = {
+              where.where =  {
                 ...where.where,
                 ...param_where,
               };
@@ -142,6 +142,7 @@ class ScriptParser {
         return { where: { member_id: user.id } };
       case 'MemberTransaction':
         return {
+          where: { member_id: user.id },
           include: { model: Models.Member },
           attributes: [
             'created_at',
@@ -177,7 +178,7 @@ class ScriptParser {
           include: { model: Models.PaymentMethod, attributes: ['name'] },
         };
       default:
-        return null;
+        return {'where':{}};
     }
   }
   //append pagination

@@ -75,6 +75,8 @@ class StaticPageController {
       if (req.query.member) {
         var user = await Member.findOne({ where: { id: req.query.member } });
         // console.log('===========', user);
+      }else{
+        var user = req.session.member
       }
       const scriptParser = new ScriptParser();
       const parsed = await scriptParser.parseScript(
