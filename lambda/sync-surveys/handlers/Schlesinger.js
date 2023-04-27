@@ -1,7 +1,6 @@
 const Models = require("../models");
 const { Op, Model } = require("sequelize");
 
-
 class Schlesinger {
 
     constructor(record) {
@@ -12,12 +11,23 @@ class Schlesinger {
     }
 
     async main() {
+        console.log('Main Func');
         const surveyId = await this.surveySync();
         await this.surveyQualificationSync(surveyId);
         return true;
     }
 
     surveySync = async()=> {
+        const params = {
+            loi: this.record.LOI,
+            cpi: this.record.CPI,
+            name: null,
+            original_json: this.record,
+            updated_at: new Date(),
+            survey_number: this.record.SurveyId,
+            survey_provider_id: this.record.survey_provider_id
+        }
+
         const checkExists = await Models.Survey.findOne({
             attributes: ['id'],
             where: {
@@ -25,100 +35,55 @@ class Schlesinger {
                 survey_number: this.record.SurveyId,
             },
         });
-        
-        if(checkExists) {
-            var surveyId = checkExists.id;
-            await Models.Survey.update({
-                loi: this.record.LOI,
-                cpi: this.record.CPI,
-                name: null,
-                original_json: this.record,
-                updated_at: new Date()
-            }, {
-                where: {
-                    survey_number: this.record.SurveyId,
-                }
-            });
-        } else {
-            const survey = await Models.Survey.create({
-                survey_provider_id: this.record.survey_provider_id,
-                loi: this.record.LOI,
-                cpi: this.record.CPI,
-                name: null,
-                survey_number: this.record.SurveyId,
-                status: 'live',
-                original_json: this.record,
-                created_at: new Date()
-            });
-            surveyId = survey.id;
+        if(checkExists) { 
+            params.id = checkExists.id;
+            await checkExists.destroy();
         }
-
-        return surveyId;
+        const survey = await Models.Survey.create(params);
+        console.log('surveySync Func');
+        return survey.id;
     }
 
     surveyQualificationSync = async(surveyId) => {
+        console.log('surveySync Func');
         if(this.record.qualifications){
             const qualifications = this.record.qualifications;
             if(qualifications.length){
-                for(let ql of qualifications){
-                    const questionData = await Models.SurveyQuestion.findOne({
-                        attributes:['id', 'question_type', 'survey_provider_question_id'],
-                        where: {
-                            survey_provider_question_id: ql.QualificationId,
-                            survey_provider_id: this.record.survey_provider_id
+                const qualificationIds = qualifications.map(ql => ql.QualificationId);
+                const questionData = await Models.SurveyQuestion.findAll({
+                    attributes:['id', 'question_type', 'survey_provider_question_id'],
+                    where: {
+                        survey_provider_id: this.record.survey_provider_id,
+                        survey_provider_question_id: {
+                            [Op.in]: qualificationIds
                         }
-                    });
-
-                    if(questionData && questionData.id) {
-                        var surveyQualification = await Models.SurveyQualification.findOne({
-                            where: {
-                                survey_id: surveyId,
-                                survey_question_id: questionData.id,
-                            },
-                        });
-                        if (surveyQualification == null) {
-                            var surveyQualification = await Models.SurveyQualification.create({
-                                survey_id: surveyId,
-                                survey_question_id: questionData.id,
-                                logical_operator: 'OR',
-                                created_at: new Date()
-                            }, { silent: true });
-                        }
-
-
-                        if(surveyQualification && surveyQualification.id) {
-                            if(questionData.question_type == 'range' && questionData.survey_provider_question_id == 59){
-                                const start = ql.AnswerIds[0].split('-')[0];
-                                const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
-                                
-                                const precodeData = await Models.SurveyAnswerPrecodes.findAll({
-                                    where: {
-                                        precode: ql.QualificationId,
-                                        survey_provider_id: this.record.survey_provider_id,
-                                        option: {
-                                            [Op.between]: [start, end]
-                                        }
-                                    }
-                                });
-                                if(precodeData && precodeData.length) {
-                                    await surveyQualification.addSurveyAnswerPrecodes(precodeData);
-                                }
-                            } else {
-                                const precodeData = await Models.SurveyAnswerPrecodes.findOne({
-                                    where: {
-                                        precode: ql.QualificationId,
-                                        survey_provider_id: this.record.survey_provider_id,
-                                        option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
-                                    }
-                                });
-                                if(precodeData && precodeData.id) {
-                                    await surveyQualification.addSurveyAnswerPrecodes(precodeData);
-                                }
-                            }
-                            
+                    },
+                    include: {
+                        model: Models.SurveyAnswerPrecodes
+                    }
+                });
+        
+                const params = questionData.map(qd => {
+                    let params = {
+                        survey_id: surveyId,
+                        survey_question_id: qd.id,
+                        logical_operator: 'OR',
+                        created_at: new Date(),
+                    }
+                    if(qd.SurveyAnswerPrecodes && qd.SurveyAnswerPrecodes.length){
+                        const data = qd.SurveyAnswerPrecodes.filter(pr=> qualifications.some(ql=> ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
+                        if(data && data.length){
+                            params.SurveyAnswerPrecodes = data
                         }
                     }
-                }
+                    return params;
+                });
+
+                params.forEach(async el => {
+                    const surveyQualification = await Models.SurveyQualification.create(el);
+                    await surveyQualification.addSurveyAnswerPrecodes(el.SurveyAnswerPrecodes);
+                });
+    
             }
         }
         return true;
