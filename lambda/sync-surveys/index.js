@@ -1,6 +1,6 @@
 const Lucid = require("./handlers/Lucid");
 const Schlesinger = require('./handlers/Schlesinger');
-const db = require('./models/index');
+const db = require('./models');
 
 const main = async (event) => {
 

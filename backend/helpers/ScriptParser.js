@@ -36,7 +36,7 @@ class ScriptParser {
             let where = this.getModuleWhere(script.module, user);
 
             if (param_where)
-              where.where =  {
+              where.where = {
                 ...where.where,
                 ...param_where,
               };
@@ -365,11 +365,21 @@ class ScriptParser {
         };
       case 'WithdrawalType':
         return {
-          attributes: ['name', 'slug', 'payment_method_id'],
-          include: { model: Models.PaymentMethod, attributes: ['name'] },
+          attributes: [
+            'name',
+            'slug',
+            'payment_method_id',
+            'logo',
+            'min_amount',
+            'max_amount',
+          ],
+          include: {
+            model: Models.PaymentMethod,
+            attributes: ['name'],
+          },
         };
       default:
-        return {'where':{}};
+        return { where: {} };
     }
   }
   //append pagination
