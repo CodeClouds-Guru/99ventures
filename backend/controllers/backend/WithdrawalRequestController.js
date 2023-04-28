@@ -1,10 +1,11 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
-
+const { Op } = require('sequelize');
 const { Member, User } = require('../../models/index');
 class WithdrawalRequestController extends Controller {
   constructor() {
     super('WithdrawalRequest');
+    this.changeStatus = this.changeStatus.bind(this);
   }
 
   //list
@@ -59,6 +60,8 @@ class WithdrawalRequestController extends Controller {
   //update
   async update(req, res) {
     const action_type = req.body.action_type || 'capture';
+    let model_ids = req.body.model_ids || [];
+    let note = req.body.note || '';
     const paypal_class = new Paypal();
     var response = {};
     var response_message = '';
@@ -78,10 +81,16 @@ class WithdrawalRequestController extends Controller {
         response = await paypal_class.successPayment(req, res);
         response_message = 'Transaction successful';
         break;
-      case 'reject':
-        response = await paypal_class.successPayment(req, res);
+      case 'rejected':
+        // response = await paypal_class.successPayment(req, res);
+        response = await this.changeStatus(model_ids,note,action_type)
         response_message = 'Withdrawal request rejected';
         break;
+        case 'approved':
+          // response = await paypal_class.successPayment(req, res);
+          response = await this.changeStatus(model_ids,note,action_type)
+          response_message = 'Withdrawal request approved';
+          break;
       default:
         response_message = 'Payment processed';
     }
@@ -91,6 +100,24 @@ class WithdrawalRequestController extends Controller {
       message: response_message,
       response,
     };
+  }
+  async changeStatus(model_ids,note,action_type){
+    let response = []
+    if(model_ids.length){
+      let update_data = {
+        note: note,
+        status:action_type
+      }
+      response = await this.model.update(update_data, {
+        where: {
+          id: {
+            [Op.in]: model_ids,
+          },
+        },
+        return: true,
+      });
+    }
+    return response
   }
 }
 
