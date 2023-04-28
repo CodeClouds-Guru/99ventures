@@ -30,6 +30,13 @@ module.exports = [
           return v1 && v2 ? options.fn(this) : options.inverse(this);
         case '||':
           return v1 || v2 ? options.fn(this) : options.inverse(this);
+        case 'in':
+          var v2_arr = v2.split(',').map((x) => Number(x));
+          if (v2_arr.indexOf(v1) >= 0) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
         default:
           return options.inverse(this);
       }
