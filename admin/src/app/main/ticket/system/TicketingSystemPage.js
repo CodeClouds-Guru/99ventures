@@ -479,7 +479,7 @@ function TicketingSystemPage(props) {
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <i><b>{`${val.User.alias_name}`}
+                                                            <i><b>{`${val.User ? val.User.alias_name : 'Application Firewall'}`}
                                                                 <span style={{ fontSize: '8px' }}> - More Surveys Support Team</span></b></i>
                                                         </span>
 
