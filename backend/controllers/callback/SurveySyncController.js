@@ -1,6 +1,7 @@
 const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes } = require('../../models');
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
+const TolunaHelper = require('../../helpers/Toluna');
 const { Op } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
 const SqsHelper = require('../../helpers/SqsHelper');
@@ -16,6 +17,7 @@ class SurveySyncController {
         this.schlesingerQualification = this.schlesingerQualification.bind(this);
         this.syncSurveyQuestion = this.syncSurveyQuestion.bind(this);
         this.syncSurveyQualification = this.syncSurveyQualification.bind(this);
+        this.tolunaSurveyQuestions = this.tolunaSurveyQuestions.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
@@ -57,7 +59,10 @@ class SurveySyncController {
         }
         else if(provider === 'schlesinger') {
             this.schlesingerSurveyQuestions(req, res);
-        } 
+        }  
+        else if(provider === 'toluna') {
+            this.tolunaSurveyQuestions(req, res);
+        }
         else {
             res.send(provider);
         }
@@ -71,7 +76,7 @@ class SurveySyncController {
         else if(provider === 'schlesinger') {
             // this.schlesingerQualification(req, res);
             this.schlesingerSurveySaveToSQS(req, res)
-        } 
+        }
         else {
             res.send(provider);
         }
@@ -590,6 +595,59 @@ class SurveySyncController {
             const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
 			logger.error(error);
             res.send(error)
+        }
+    }
+
+    /**
+     * Toluna Question & Answer Sync
+     */
+    async tolunaSurveyQuestions(req, res){
+        try{
+            const payload = {
+                "CultureIDs": [1, 3],   //1&3 = "en-us"
+                "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
+                "LastUpdateDate": "",
+                "IncludeComputed" : "true",
+                "IncludeRoutables": "true",
+                "IncludeDemographics": "true"
+            }
+            const tObj = new TolunaHelper;
+            const questions = await tObj.getQuestionsAnswer(payload);
+            
+            const params = questions.map(qs => {
+                let surveyAnswerPrecodes = qs.TranslatedAnswers.map(ans => {
+                    return{
+                        survey_provider_id: this.providerId,
+                        precode: qs.TranslatedQuestion.QuestionID,
+                        option:  ans.AnswerID 
+                    }
+                });
+                
+                let params = {
+                    question_text: qs.TranslatedQuestion.InternalName,
+                    name: qs.TranslatedQuestion.DisplayNameTranslation,
+                    survey_provider_id: this.providerId,
+                    survey_provider_question_id: qs.TranslatedQuestion.QuestionID,
+                    question_type: qs.AnswerType,
+                    created_at: new Date(),
+                    SurveyAnswerPrecodes: surveyAnswerPrecodes                
+                };
+                
+                return params;
+            });
+
+            await SurveyQuestion.bulkCreate(params, {
+                include: [{
+                    model: SurveyAnswerPrecodes
+                }]
+            });            
+            res.send('Data Updated!');
+            return;
+            
+        } catch (error) {
+            const logger = require('../../helpers/Logger')(`toluna-qna-errror.log`);
+			logger.error(error);
+            throw error;
         }
     }
 
