@@ -24,6 +24,7 @@ const UserDetails = () => {
                         editable={false}
                         addable={false}
                         deletable={false}
+                        actionable={true}
                         moduleHeading={false}
                     />
                 </Box>

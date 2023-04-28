@@ -31,6 +31,7 @@ function List(props) {
 	const editable = props.editable ?? true;
 	const addable = props.addable ?? true;
 	const deletable = props.deletable ?? true;
+	const actionable = props.actionable ?? false;
 	// const where = props.where ?? {};
 	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
@@ -52,7 +53,7 @@ function List(props) {
 		direction: 'desc',
 		id: 'id',
 	});
-	const [moduleDeleted, setModuleDeleted] = useState(false);
+	const [moduleActioned, setModuleActioned] = useState(false);
 	const [firstCall, setFirstCall] = useState(true);
 	const [txnType, setTxnType] = useState('');
 	const [where, setWhere] = useState(props.where);
@@ -157,10 +158,10 @@ function List(props) {
 	}, [modules])
 
 	useEffect(() => {
-		if (moduleDeleted) {
+		if (moduleActioned) {
 			fetchModules();
 		}
-	}, [moduleDeleted]);
+	}, [moduleActioned]);
 
 	const debounceFn = useCallback(_.debounce((val) => {
 		setSearchText(val);
@@ -190,19 +191,36 @@ function List(props) {
 	function handleSelectAllClick(event) {
 		if (event.target.checked) {
 			setSelected(data.map((n) => {
-				return module === 'pages' && (n.slug === '500' || n.slug === '404') ? null : n.id
+				console.log(n.status)
+				return (module === 'pages' && (n.slug === '500' || n.slug === '404') || (module === 'withdrawal-requests' && n.status !== 'pending')) ? null : n.id
 			}));
 			return;
 		}
 		setSelected([]);
-		setModuleDeleted(false);
+		setModuleActioned(false);
 	}
 
 	async function handleDeselect(selectedIds) {
+		// let url = `${module}/delete`;
+		// let params = { data: { modelIds: selectedIds } };
+		// if (module === 'withdrawal-requests') {
+		// 	url = `${module}/update`;
+		// 	params = { data: { model_ids: selectedIds, action_type: 'approved' } }
+		// }
 		try {
-			await axios.delete(`${module}/delete`, { data: { modelIds: selectedIds } });
+			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } });
 			setSelected([]);
-			setModuleDeleted(true);
+			setModuleActioned(true);
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	async function handleWithdrawalRequestsReject(selectedIds, note) {
+		try {
+			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note })
+			setSelected([]);
+			setModuleActioned(true);
 		} catch (error) {
 			console.log(error);
 		}
@@ -252,7 +270,7 @@ function List(props) {
 		}
 
 		setSelected(newSelected);
-		setModuleDeleted(false);
+		setModuleActioned(false);
 	}
 
 	function handleChangePage(event, value) {
@@ -275,7 +293,7 @@ function List(props) {
 	const processFieldValue = (value, fieldConfig) => {
 		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
 			value = Helper.parseTimeStamp(value)
-		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at') && value) {
+		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'requested_on') && value) {
 			value = moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
@@ -322,6 +340,16 @@ function List(props) {
 			else if (status === 'failed')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+		} else if (module === 'withdrawal-requests' && field.field_name === 'status') {
+			const status = processFieldValue(n[field.field_name], field);
+			if (status === 'pending')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
+			else if (status === 'approved')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+			else if (status === 'rejected')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			else if (status === 'expired')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'campaigns') {
 			if (field.field_name === 'status') {
@@ -562,6 +590,7 @@ function List(props) {
 							onRequestSort={handleRequestSort}
 							rowCount={data.length}
 							onMenuItemClick={handleDeselect}
+							onWithdrawalRequestsReject={handleWithdrawalRequestsReject}
 							{...props}
 							fields={fields}
 						/>
@@ -591,7 +620,7 @@ function List(props) {
 												onClick={(event) => handleClick(n, event)}
 											>{module === 'tickets' ? '' :
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
-													{(module === 'pages' && (n.slug === '500' || n.slug === '404')) ? '' : isDeletable(n) && <Checkbox
+													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
 														checked={isSelected}
 														onClick={(event) => event.stopPropagation()}
 														onChange={(event) => handleCheck(event, n.id)}

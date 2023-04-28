@@ -6,7 +6,7 @@ module.exports = {
       'survey_answer_precode_survey_qualifications',
       {
         survey_qualification_id: {
-          type: Sequelize.BIGINT,
+          type: Sequelize.BIGINT
         },
         survey_answer_precode_id: {
           type: Sequelize.BIGINT,

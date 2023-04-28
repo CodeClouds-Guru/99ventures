@@ -205,8 +205,7 @@ class TicketController extends Controller {
 
   //update for all type of updation
   async update(req, res) {
-    console.log(req);
-
+    
     const member_id = req.body.member_id || null;
     // const user_id = req.body.user_id || null;
     // const attachments = req.files ? req.files.attachments : [];
@@ -237,7 +236,6 @@ class TicketController extends Controller {
       console.error(error);
       this.throwCustomError('Unable to get data', 500);
     } finally {
-      if (change)
         return {
           status: true,
           message: 'Data updated.',
@@ -247,9 +245,11 @@ class TicketController extends Controller {
 
   // //update for all type of updation
 
-  async changeStatus(value, field_name, ticket_id) {
-    // console.log(value, field_name, ticket_id, "--------------");
+  async changeStatus(req) {
     try {
+      let field_name = req.body.field_name
+      let value = req.body.value
+      let ticket_id = req.body.id
       let update = await Ticket.changeStatus(field_name, value, ticket_id);
       // console.log(update);
       if (update > 0) return true;
