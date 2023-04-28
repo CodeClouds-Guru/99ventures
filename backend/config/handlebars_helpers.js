@@ -90,4 +90,16 @@ module.exports = [
       return value.toLowerCase();
     },
   },
+  {
+    name: 'toUpper',
+    fn: function (value) {
+      return value.toUpperCase();
+    },
+  },
+  {
+    name: 'ucFirst',
+    fn: function (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);;
+    },
+  },
 ];
