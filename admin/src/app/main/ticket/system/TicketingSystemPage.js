@@ -201,7 +201,7 @@ function TicketingSystemPage(props) {
     }
 
     const setEditorValue = (value) => {
-        wysiwygEditorRef.current.props.onEditorStateChange( EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))) )
+        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
     }
 
 
@@ -291,9 +291,11 @@ function TicketingSystemPage(props) {
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
                                             <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
-                                                    <span style={{ fontSize: '12px' }}>
-                                                        <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
-                                                    </span>
+                                                    {Object.keys(val).length > 0 &&
+                                                        <span style={{ fontSize: '12px' }}>
+                                                            <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                        </span>
+                                                    }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
                                                 <div>
