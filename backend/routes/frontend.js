@@ -8,6 +8,10 @@ router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow: /');
 });
+const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
+const checkMemberAuth = require('../middlewares/checkMemberAuth');
+// frontendrRouter.router.use(checkIPMiddleware);
+router.use(checkMemberAuth);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
@@ -25,11 +29,10 @@ const TicketControllerClass = require('../controllers/frontend/TicketController'
 const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
+const TolunaControllerClass = require('../controllers/frontend/TolunaController');
+const TolunaController = new TolunaControllerClass();
 
-//ROUTES FOR FRONTEND
-const checkMemberAuth = require('../middlewares/checkMemberAuth');
-
-router.post('/login', [checkMemberAuth], MemberAuthController.login);
+router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
@@ -41,6 +44,7 @@ router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);
+router.get('/toluna/surveys', TolunaController.getSurveys);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);

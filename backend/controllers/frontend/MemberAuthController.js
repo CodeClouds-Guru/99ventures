@@ -14,6 +14,7 @@ const {
   PaymentMethod,
   MemberPaymentInformation,
   WithdrawalRequest,
+  WithdrawalType,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -22,6 +23,7 @@ const eventBus = require('../../eventBus');
 const { genarateHash } = require('../../helpers/global');
 const { decodeHash } = require('../../helpers/global');
 const { response } = require('express');
+const { ResourceGroups } = require('aws-sdk');
 
 class MemberAuthController {
   constructor() {
@@ -82,7 +84,6 @@ class MemberAuthController {
     } else {
       let isMatch = false;
       if (!member.password) {
-        console.dir(member);
         member_status = false;
         member_message = 'Please Setup your account before login';
       } else {
@@ -222,7 +223,7 @@ class MemberAuthController {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
@@ -328,11 +329,9 @@ class MemberAuthController {
   //verify verify
   async emailVerify(req, res) {
     let hash_obj = decodeHash(req.params.hash);
-    console.log('hash_obj', hash_obj);
     let member_details = await Member.findOne({
       where: { id: hash_obj.id, email: hash_obj.email },
     });
-    console.log('member_details', member_details);
     if (member_details) {
       let model = await Member.update(
         {
@@ -363,9 +362,6 @@ class MemberAuthController {
     let member = {};
     try {
       const member_id = req.session.member.id;
-
-      // const member_id = req.params.id;
-      // console.log(method);
       member = await Member.findOne({ where: { id: member_id } });
 
       if (method === 'POST') {
@@ -392,7 +388,6 @@ class MemberAuthController {
           member_status = false;
           member_message = error.details.map((err) => err.message);
         }
-        // console.log(member);
         if (!member.profile_completed_on) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
           req.body.profile_completed_on = new Date();
@@ -409,7 +404,6 @@ class MemberAuthController {
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
-        console.log(request_data);
         let model = await Member.update(request_data, {
           where: { id: member_id },
         });
@@ -426,13 +420,12 @@ class MemberAuthController {
       }
       if (method === 'PUT') {
         let rsp = await this.changePassword(req, member);
-        // console.log(rsp);
 
         member_status = rsp.member_status;
         member_message = rsp.member_message;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Unable to save data';
       // res.redirect('back');
@@ -563,7 +556,7 @@ class MemberAuthController {
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Unable to save data';
     } finally {
@@ -576,11 +569,10 @@ class MemberAuthController {
   }
 
   //Add Payment Credentials
-  async addPaymentCredentials(req, res) {}
+  async addPaymentCredentials(req, res) { }
 
   //Member Withdrawal
   async memberWithdrawal(req, res) {
-    console.log(req);
     let member_status = false;
     let member_message = 'Unable to save data';
     let response = [];
@@ -591,10 +583,12 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
 
         req.body.member_id = req.session.member.id;
-        member_status = await this.withdraw(req);
+        let resp = await this.withdraw(req);
+        member_status = resp.member_status;
+        member_message = resp.member_message;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Error occured';
     } finally {
@@ -603,29 +597,67 @@ class MemberAuthController {
       } else {
         req.session.flash = { error: member_message };
       }
-      if (method === 'POST') {
-        res.redirect('back');
-      } else {
-        res.json({
-          status: member_status,
-          message: member_message,
-          data: response,
-        });
-      }
+
+      res.json({
+        status: member_status,
+        message: member_message,
+        data: response,
+      });
     }
   }
 
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
+    var withdrawal_amount = parseFloat(request_data.amount);
     //get member
     let member = await Member.findOne({
       where: { id: request_data.member_id },
+      include: {
+        model: MemberBalance,
+        as: 'member_amounts',
+        attributes: ['amount'],
+        where: { amount_type: 'cash' },
+      },
     });
-
+    member = JSON.parse(JSON.stringify(member));
+    // console.log(member);
+    let withdrawal_type = await WithdrawalType.findOne({
+      where: { id: request_data.withdrawal_type_id },
+      attributes: [
+        'name',
+        'slug',
+        'payment_method_id',
+        'logo',
+        'min_amount',
+        'max_amount',
+      ],
+    });
+    withdrawal_type = JSON.parse(JSON.stringify(withdrawal_type));
+    if (withdrawal_amount < parseFloat(withdrawal_type.min_amount)) {
+      return {
+        member_status: false,
+        member_message:
+          'Amount must be more than $' + withdrawal_type.min_amount,
+      };
+    }
+    if (withdrawal_amount >= parseFloat(withdrawal_type.max_amount)) {
+      return {
+        member_status: false,
+        member_message:
+          'Amount must be less than $' + withdrawal_type.max_amount,
+      };
+    }
+    // console.log(JSON.parse(JSON.stringify(member)));
+    if (withdrawal_amount >= parseFloat(member.member_amounts[0].amount)) {
+      return {
+        member_status: false,
+        member_message: 'Please check your balance',
+      };
+    }
     let withdrawal_req_data = {
       member_id: request_data.member_id,
-      amount: request_data.amount,
+      amount: withdrawal_amount,
       amount_type: 'cash',
       currency: 'USD',
       status: 'pending',
@@ -639,8 +671,8 @@ class MemberAuthController {
       //Insert into member transaction and update balance
       await MemberTransaction.updateMemberTransactionAndBalance({
         member_id: request_data.member_id,
-        amount: -request_data.amount,
-        note: 'Withdrawal request for $' + request_data.amount,
+        amount: -withdrawal_amount,
+        note: 'Withdrawal request for $' + withdrawal_amount,
         type: 'withdraw',
         amount_action: 'member_withdrawal',
         created_by: request_data.member_id,
@@ -664,6 +696,10 @@ class MemberAuthController {
       },
       req: req,
     });
+    return {
+      member_status: true,
+      member_message: 'Withdrawal request processed',
+    };
   }
 
   //send mail event call

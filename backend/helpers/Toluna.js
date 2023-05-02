@@ -20,7 +20,7 @@ const handler = {
 class Toluna {
 	constructor() {
 		this.instance = {
-			timeout: 30000,
+			timeout: 50000,
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -74,13 +74,17 @@ class Toluna {
      * @returns 
      */
     async updateMember(payload) {
-        const instance = axios.create({
-            ...this.instance,
-            baseURL: this.panelSurviceAPI + '/Respondent',
-            data: payload,
-        });
-        const response = await instance.put();
-        return response.data;
+        try{
+            const instance = axios.create({
+                ...this.instance,
+                baseURL: this.panelSurviceAPI
+            });
+            const response = await instance.put('/Respondent', payload);
+            return response;
+        } catch(error) {
+            console.error(error.response.data)
+            throw error.response.data;
+        }
     }
 
     /**
