@@ -8,6 +8,10 @@ router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow: /');
 });
+const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
+const checkMemberAuth = require('../middlewares/checkMemberAuth');
+// frontendrRouter.router.use(checkIPMiddleware);
+router.use(checkMemberAuth);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
@@ -28,10 +32,7 @@ const LucidController = new LucidControllerClass();
 const TolunaControllerClass = require('../controllers/frontend/TolunaController');
 const TolunaController = new TolunaControllerClass();
 
-//ROUTES FOR FRONTEND
-const checkMemberAuth = require('../middlewares/checkMemberAuth');
-
-router.post('/login', [checkMemberAuth], MemberAuthController.login);
+router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);

@@ -82,7 +82,6 @@ class MemberAuthController {
     } else {
       let isMatch = false;
       if (!member.password) {
-        console.dir(member);
         member_status = false;
         member_message = 'Please Setup your account before login';
       } else {
@@ -222,7 +221,7 @@ class MemberAuthController {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       req.session.flash = { error: 'Unable to save data' };
       res.redirect('back');
     }
@@ -328,11 +327,9 @@ class MemberAuthController {
   //verify verify
   async emailVerify(req, res) {
     let hash_obj = decodeHash(req.params.hash);
-    console.log('hash_obj', hash_obj);
     let member_details = await Member.findOne({
       where: { id: hash_obj.id, email: hash_obj.email },
     });
-    console.log('member_details', member_details);
     if (member_details) {
       let model = await Member.update(
         {
@@ -363,9 +360,6 @@ class MemberAuthController {
     let member = {};
     try {
       const member_id = req.session.member.id;
-
-      // const member_id = req.params.id;
-      // console.log(method);
       member = await Member.findOne({ where: { id: member_id } });
 
       if (method === 'POST') {
@@ -392,7 +386,6 @@ class MemberAuthController {
           member_status = false;
           member_message = error.details.map((err) => err.message);
         }
-        // console.log(member);
         if (!member.profile_completed_on) {
           await Member.creditBonusByType(member, 'complete_profile_bonus', req);
           req.body.profile_completed_on = new Date();
@@ -409,7 +402,6 @@ class MemberAuthController {
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
         }
-        console.log(request_data);
         let model = await Member.update(request_data, {
           where: { id: member_id },
         });
@@ -426,13 +418,12 @@ class MemberAuthController {
       }
       if (method === 'PUT') {
         let rsp = await this.changePassword(req, member);
-        // console.log(rsp);
 
         member_status = rsp.member_status;
         member_message = rsp.member_message;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Unable to save data';
       // res.redirect('back');
@@ -563,7 +554,7 @@ class MemberAuthController {
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Unable to save data';
     } finally {
@@ -576,11 +567,10 @@ class MemberAuthController {
   }
 
   //Add Payment Credentials
-  async addPaymentCredentials(req, res) {}
+  async addPaymentCredentials(req, res) { }
 
   //Member Withdrawal
   async memberWithdrawal(req, res) {
-    console.log(req);
     let member_status = false;
     let member_message = 'Unable to save data';
     let response = [];
@@ -594,7 +584,7 @@ class MemberAuthController {
         member_status = await this.withdraw(req);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       member_status = false;
       member_message = 'Error occured';
     } finally {
