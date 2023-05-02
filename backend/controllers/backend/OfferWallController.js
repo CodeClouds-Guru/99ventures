@@ -29,11 +29,11 @@ class OfferWallController extends Controller {
     let existing_offerwall = await OfferWall.count({
       where: {
         company_portal_id: company_portal_id,
-        name: req.body.name
+        name: req.body.name,
       },
     });
     if (existing_offerwall > 0) {
-      this.throwCustomError("Sorry! this name has already been taken", 409);
+      this.throwCustomError('Sorry! this name has already been taken', 409);
     }
     let company_portal_domain = await CompanyPortal.findOne({
       attributes: ['domain'],
@@ -81,11 +81,11 @@ class OfferWallController extends Controller {
         where: {
           company_portal_id: company_portal_id,
           name: req.body.name,
-          id: { [Op.ne]: id }
+          id: { [Op.ne]: id },
         },
       });
       if (existing_offerwall > 0) {
-        this.throwCustomError("Sorry! this name has already been taken", 409);
+        this.throwCustomError('Sorry! this name has already been taken', 409);
       }
       delete request_data.ips;
       let model = await this.model.update(request_data, { where: { id } });
@@ -114,7 +114,8 @@ class OfferWallController extends Controller {
     try {
       const site_id = req.header('site_id') || 1;
       let report = req.query.report || 0;
-      req.query.sort = req.query.sort === 'campaign_name' ? 'Campaign.name' : req.query.sort;
+      req.query.sort =
+        req.query.sort === 'campaign_name' ? 'Campaign.name' : req.query.sort;
       var options = super.getQueryOptions(req);
       const campaign_id = parseInt(req.query.campaign_id) || null;
       options['where'] = {
@@ -124,9 +125,9 @@ class OfferWallController extends Controller {
           ...(parseInt(report) == 1 && { campaign_id: campaign_id }),
         },
       };
-      console.log(
-        util.inspect(options, { showHidden: false, depth: null, colors: true })
-      );
+      // console.log(
+      //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+      // );
 
       let page = req.query.page || 1;
       let limit = parseInt(req.query.show) || 10; // per page record
@@ -223,6 +224,6 @@ class OfferWallController extends Controller {
     };
   }
   //get report details
-  async getReport(req) { }
+  async getReport(req) {}
 }
 module.exports = OfferWallController;

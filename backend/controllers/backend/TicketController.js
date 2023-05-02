@@ -205,7 +205,6 @@ class TicketController extends Controller {
 
   //update for all type of updation
   async update(req, res) {
-    
     const member_id = req.body.member_id || null;
     // const user_id = req.body.user_id || null;
     // const attachments = req.files ? req.files.attachments : [];
@@ -236,10 +235,10 @@ class TicketController extends Controller {
       console.error(error);
       this.throwCustomError('Unable to get data', 500);
     } finally {
-        return {
-          status: true,
-          message: 'Data updated.',
-        };
+      return {
+        status: true,
+        message: 'Data updated.',
+      };
     }
   }
 
@@ -247,9 +246,9 @@ class TicketController extends Controller {
 
   async changeStatus(req) {
     try {
-      let field_name = req.body.field_name
-      let value = req.body.value
-      let ticket_id = req.body.id
+      let field_name = req.body.field_name;
+      let value = req.body.value;
+      let ticket_id = req.body.id;
       let update = await Ticket.changeStatus(field_name, value, ticket_id);
       // console.log(update);
       if (update > 0) return true;
@@ -286,7 +285,7 @@ class TicketController extends Controller {
           req
         );
         const file_name = await fileHelper.upload();
-        console.log(file_name);
+        // console.log(file_name);
         const dataFiles = file_name.files.map((values) => {
           return {
             ticket_conversation_id: savedTicketConversation.id,

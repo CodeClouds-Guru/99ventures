@@ -129,9 +129,9 @@ class ScriptParser {
               },
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
-            console.log(other_details);
+            // console.log(other_details);
             const condition = this.getModuleWhere(script.module, user);
-            if (other_details.transaction_count < 6) {
+            if (other_details.transaction_count < 5) {
               condition.where = {
                 ...condition.where,
                 slug: {
@@ -167,7 +167,7 @@ class ScriptParser {
         }
       }
     }
-    console.log('script data', JSON.parse(JSON.stringify(data)));
+    // console.log('script data', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -406,6 +406,7 @@ class ScriptParser {
             'logo',
             'min_amount',
             'max_amount',
+            'id',
           ],
           include: {
             model: Models.PaymentMethod,

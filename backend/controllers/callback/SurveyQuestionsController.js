@@ -60,7 +60,7 @@ class SurveyQuestionsController {
         }
       });
     }
-    console.log(precodes);
+    // console.log(precodes);
     res.json({ status: true, message: 'Updated', precodes: precodes });
     return;
   }

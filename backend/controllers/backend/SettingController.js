@@ -1,16 +1,16 @@
-const Controller = require("./Controller");
-const { Setting } = require("../../models/index");
+const Controller = require('./Controller');
+const { Setting } = require('../../models/index');
 
 class SettingController extends Controller {
   constructor() {
-    super("Setting");
+    super('Setting');
   }
 
   async update(req, res) {
-    console.log(req);
+    // console.log(req);
     const update_data = req.body.config_data || [];
-    const site_id = req.header("site_id") || 1;
-    const company_id = req.header("company_id") || 1;
+    const site_id = req.header('site_id') || 1;
+    const company_id = req.header('company_id') || 1;
 
     try {
       let data = [];
@@ -25,16 +25,16 @@ class SettingController extends Controller {
       // await Setting.destroy({
       //   where: { company_portal_id: site_id },
       // });
-      console.log(data);
+      // console.log(data);
 
       let model = await Setting.bulkCreate(data, {
-        updateOnDuplicate: ["id", "settings_key", "settings_value"],
+        updateOnDuplicate: ['id', 'settings_key', 'settings_value'],
         ignoreDuplicates: true,
       });
 
       return {
         status: true,
-        message: "Record has been updated successfully",
+        message: 'Record has been updated successfully',
       };
     } catch (error) {
       throw error;
@@ -43,16 +43,20 @@ class SettingController extends Controller {
 
   async list(req, res) {
     try {
-      const site_id = req.header("site_id") || 1;
-      const company_id = req.header("company_id") || 1;
-      let type = req.query.type || ''
+      const site_id = req.header('site_id') || 1;
+      const company_id = req.header('company_id') || 1;
+      let type = req.query.type || '';
       let where = {
-        company_portal_id: site_id
-      }
-      if(type == 'member'){
-        where['settings_key'] = ['referral_percentage','registration_bonus']
-      }else{
-        where['settings_key'] = ['file_manager_configuration','max_file_size','max_no_of_uploads']
+        company_portal_id: site_id,
+      };
+      if (type == 'member') {
+        where['settings_key'] = ['referral_percentage', 'registration_bonus'];
+      } else {
+        where['settings_key'] = [
+          'file_manager_configuration',
+          'max_file_size',
+          'max_no_of_uploads',
+        ];
       }
       let config_data = await Setting.findAll({
         // attributes: [
@@ -68,7 +72,7 @@ class SettingController extends Controller {
         data: { config_data },
       };
     } catch (err) {
-      this.throwCustomError("Unable to get data", 500);
+      this.throwCustomError('Unable to get data', 500);
     }
   }
 }
