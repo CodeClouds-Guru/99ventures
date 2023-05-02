@@ -1,7 +1,7 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
 const { Op } = require('sequelize');
-const { Member, User } = require('../../models/index');
+const { Member, User,WithdrawalType } = require('../../models/index');
 class WithdrawalRequestController extends Controller {
   constructor() {
     super('WithdrawalRequest');
@@ -10,34 +10,45 @@ class WithdrawalRequestController extends Controller {
 
   //list
   async list(req, res) {
-    var options = super.getQueryOptions(req);
-    options.include = [
-      {
-        model: Member,
-        attributes: ['first_name', 'last_name'],
-      },
-      {
-        model: User,
-        attributes: ['alias_name'],
-      },
-    ];
-    const { docs, pages, total } = await this.model.paginate(options);
-    docs.forEach(function (record, key) {
-      if (record.dataValues.Member != null) {
-        record.dataValues['Member.first_name'] =
-          record.dataValues.Member.dataValues.first_name +
-          ' ' +
-          record.dataValues.Member.dataValues.last_name;
+    var withdrawal_type = req.query.type
+    if(withdrawal_type === 'withdrawal-types'){
+      let withdrawal_type_list = await WithdrawalType.findAll({attributes:['id','name','slug']})
+      return {
+        result:{
+          data: withdrawal_type_list
+        }
       }
-      if (record.dataValues.User != null) {
-        record.dataValues['User.alias_name'] =
-          record.dataValues.User.dataValues.alias_name;
-      }
-    });
-    return {
-      result: { data: docs, pages, total },
-      fields: this.model.fields,
-    };
+    }
+    else{
+      var options = super.getQueryOptions(req);
+      options.include = [
+        {
+          model: Member,
+          attributes: ['first_name', 'last_name'],
+        },
+        {
+          model: User,
+          attributes: ['alias_name'],
+        },
+      ];
+      const { docs, pages, total } = await this.model.paginate(options);
+      docs.forEach(function (record, key) {
+        if (record.dataValues.Member != null) {
+          record.dataValues['Member.first_name'] =
+            record.dataValues.Member.dataValues.first_name +
+            ' ' +
+            record.dataValues.Member.dataValues.last_name;
+        }
+        if (record.dataValues.User != null) {
+          record.dataValues['User.alias_name'] =
+            record.dataValues.User.dataValues.alias_name;
+        }
+      });
+      return {
+        result: { data: docs, pages, total },
+        fields: this.model.fields,
+      };
+    }
   }
 
   //save
