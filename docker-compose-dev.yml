@@ -59,6 +59,11 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true 
       - DEV_MODE=1
+      - IP_CORE_URL=$IP_CORE_URL
+      - IP_REF_DATA_URL=$IP_REF_DATA_URL
+      - IP_ES_URL=$IP_ES_URL
+      - PARTNER_AUTH_KEY=$PARTNER_AUTH_KEY
+      - PARTNER_GUID=$PARTNER_GUID
     networks:
       - backend
       - frontend
