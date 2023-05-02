@@ -231,69 +231,39 @@ class SurveySyncController {
                 });
                 //----------
 
-                /*
-                const params = []
-                for(let survey of allSurveys.surveys ){
-                    params.push({
+                const surveyIds = surveyData.map(sr => sr.survey_id);                
+                const existingSurveys = await Survey.findAll({
+                    attributes: ['id', 'survey_number'],
+                    where: {
                         survey_provider_id: this.providerId,
-                        loi: survey.survey_performance.overall.loi,
-                        cpi: survey.cpi,
-                        name: survey.survey_name,
-                        survey_number: survey.survey_id,
-                        status: psObj.getSurveyStatus(survey.survey_status),
-                        original_json: survey,
+                        survey_number: {
+                            [Op.in] : surveyIds
+                        }
+                    }
+                });
+
+                const insertParams = surveyData.map(sr => {
+                    let data = existingSurveys.find(row => row.survey_number == sr.survey_id);
+                    let params = {
+                        survey_provider_id: this.providerId,
+                        loi: sr.survey_performance.overall.loi,
+                        cpi: sr.cpi,
+                        name: sr.survey_name,
+                        survey_number: sr.survey_id,
+                        status: psObj.getSurveyStatus(sr.survey_status),
+                        original_json: sr,
                         created_at: new Date()
-                    });
-                }
-                
-                const result = await Survey.bulkCreate(params, {
-                    updateOnDuplicate: ['loi', 'cpi', 'name', 'status', 'original_json']
+                    }
+                    if(data) {
+                        params.id = data.id
+                    }
+                    return params;
+                });
+
+                const result = await Survey.bulkCreate(insertParams, {
+                    updateOnDuplicate: ["loi", "cpi", "status", "name", "original_json"] 
                 });
                 return result;
-                */
-
-                for(let survey of surveyData ){                    
-                    const checkExists = await Survey.count({
-                        where: {
-                            survey_provider_id: this.providerId,
-                            survey_number: survey.survey_id,
-                        },
-                    });
-                    if(!checkExists) {
-                        await Survey.create({
-                            survey_provider_id: this.providerId,
-                            loi: survey.survey_performance.overall.loi,
-                            cpi: survey.cpi,
-                            name: survey.survey_name,
-                            survey_number: survey.survey_id,
-                            status: psObj.getSurveyStatus(survey.survey_status),
-                            original_json: survey,
-                            created_at: new Date()
-                        });
-                    } else {
-                        await Survey.update({
-                            survey_provider_id: this.providerId,
-                            loi: survey.survey_performance.overall.loi,
-                            cpi: survey.cpi,
-                            name: survey.survey_name,
-                            status: psObj.getSurveyStatus(survey.survey_status),
-                            original_json: survey,
-                            updated_at: new Date()
-                        }, {
-                            where: {
-                                survey_number: survey.survey_id,
-                            }
-                        });
-                    }
-                }
-                return await Survey.findAll({
-                    attributes:['id', 'survey_number', 'loi', 'cpi'],
-                    where: {
-                        status: 'live',
-                        survey_provider_id: this.providerId,
-                    }
-                });
-                
             } else {
                 return [];
             }
