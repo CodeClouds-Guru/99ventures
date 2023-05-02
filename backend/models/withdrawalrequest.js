@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       updated_at: 'TIMESTAMP',
       transaction_made_by: DataTypes.BIGINT,
       note: DataTypes.TEXT,
+      payment_email: DataTypes.STRING,
     },
     {
       sequelize,

@@ -254,6 +254,8 @@ module.exports = (sequelize, DataTypes) => {
     let transaction = await MemberTransaction.create(transaction_data, {
       silent: true,
     });
+    transaction = JSON.parse(JSON.stringify(transaction));
+    // console.log(transaction.id);
     let balance = await MemberBalance.update(
       { amount: modified_total_earnings },
       {
@@ -261,7 +263,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
     if (transaction && balance) {
-      return true;
+      return { status: true, transaction_id: transaction.id };
     } else {
       return false;
     }

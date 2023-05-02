@@ -17,7 +17,7 @@ class OfferwallPostbackController {
     logger1.info(JSON.stringify(req.body));
     //----
 
-    console.log(req.params.offerwall);
+    // console.log(req.params.offerwall);
     if (req.query.status === '1' || req.body.status === '1') {
       try {
         const offerwall_name = req.params.offerwall;
@@ -30,7 +30,7 @@ class OfferwallPostbackController {
           ],
           where: { name: offerwall_name },
         });
-        console.log('offerwall_details', offerwall_details);
+        // console.log('offerwall_details', offerwall_details);
 
         if (
           offerwall_details &&
@@ -55,7 +55,7 @@ class OfferwallPostbackController {
               attributes: ['id'],
             },
           });
-          console.log('member', member);
+          // console.log('member', member);
 
           if (member) {
             let payout_amount = 0;
@@ -95,7 +95,7 @@ class OfferwallPostbackController {
                 ? JSON.stringify(req.body)
                 : JSON.stringify(req.query),
             };
-            console.log('transaction_obj', transaction_obj);
+            // console.log('transaction_obj', transaction_obj);
             let result =
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
