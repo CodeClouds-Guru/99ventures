@@ -28,8 +28,9 @@ import OfferwallsConfig from '../main/members/campaigns/offerwalls/OfferwallsCon
 import ShoutboxConfig from '../main/shoutbox/ShoutboxConfig';
 import ConfigurationsConfig from '../main/shoutbox/configurations/ConfigurationsConfig';
 import PaypalConfig from '../main/paypal/PaypalConfig';
+import WithdrawalRequestsConfig from '../main/members/withdrawal-requests/WithdrawalRequestsConfig';
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set

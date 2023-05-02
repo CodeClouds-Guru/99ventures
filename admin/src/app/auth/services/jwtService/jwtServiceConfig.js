@@ -62,6 +62,7 @@ const jwtServiceConfig = {
   offerwallUpdate: 'offer-walls/update',
   shoutboxConfigurations: 'shoutbox-configurations',
   shoutboxConfigurationUpdate: 'shoutbox-configurations/update',
+  getWithdrawalRequests: 'withdrawal-requests',
 };
 
 export default jwtServiceConfig;

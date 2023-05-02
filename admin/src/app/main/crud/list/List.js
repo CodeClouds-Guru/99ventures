@@ -191,7 +191,6 @@ function List(props) {
 	function handleSelectAllClick(event) {
 		if (event.target.checked) {
 			setSelected(data.map((n) => {
-				console.log(n.status)
 				return (module === 'pages' && (n.slug === '500' || n.slug === '404') || (module === 'withdrawal-requests' && n.status !== 'pending')) ? null : n.id
 			}));
 			return;
@@ -208,7 +207,17 @@ function List(props) {
 		// 	params = { data: { model_ids: selectedIds, action_type: 'approved' } }
 		// }
 		try {
-			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } });
+			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to approve' }))
+			}) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
+			});
 			setSelected([]);
 			setModuleActioned(true);
 		} catch (error) {
@@ -218,7 +227,12 @@ function List(props) {
 
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
-			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note })
+			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to reject' }))
+			});
 			setSelected([]);
 			setModuleActioned(true);
 		} catch (error) {
