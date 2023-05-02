@@ -14,6 +14,7 @@ const {
   PaymentMethod,
   MemberPaymentInformation,
   WithdrawalRequest,
+  WithdrawalType,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -22,6 +23,7 @@ const eventBus = require('../../eventBus');
 const { genarateHash } = require('../../helpers/global');
 const { decodeHash } = require('../../helpers/global');
 const { response } = require('express');
+const { ResourceGroups } = require('aws-sdk');
 
 class MemberAuthController {
   constructor() {
@@ -581,7 +583,9 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
 
         req.body.member_id = req.session.member.id;
-        member_status = await this.withdraw(req);
+        let resp = await this.withdraw(req);
+        member_status = resp.member_status;
+        member_message = resp.member_message;
       }
     } catch (error) {
       console.error(error);
@@ -593,29 +597,67 @@ class MemberAuthController {
       } else {
         req.session.flash = { error: member_message };
       }
-      if (method === 'POST') {
-        res.redirect('back');
-      } else {
-        res.json({
-          status: member_status,
-          message: member_message,
-          data: response,
-        });
-      }
+
+      res.json({
+        status: member_status,
+        message: member_message,
+        data: response,
+      });
     }
   }
 
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
+    var withdrawal_amount = parseFloat(request_data.amount);
     //get member
     let member = await Member.findOne({
       where: { id: request_data.member_id },
+      include: {
+        model: MemberBalance,
+        as: 'member_amounts',
+        attributes: ['amount'],
+        where: { amount_type: 'cash' },
+      },
     });
-
+    member = JSON.parse(JSON.stringify(member));
+    // console.log(member);
+    let withdrawal_type = await WithdrawalType.findOne({
+      where: { id: request_data.withdrawal_type_id },
+      attributes: [
+        'name',
+        'slug',
+        'payment_method_id',
+        'logo',
+        'min_amount',
+        'max_amount',
+      ],
+    });
+    withdrawal_type = JSON.parse(JSON.stringify(withdrawal_type));
+    if (withdrawal_amount < parseFloat(withdrawal_type.min_amount)) {
+      return {
+        member_status: false,
+        member_message:
+          'Amount must be more than $' + withdrawal_type.min_amount,
+      };
+    }
+    if (withdrawal_amount >= parseFloat(withdrawal_type.max_amount)) {
+      return {
+        member_status: false,
+        member_message:
+          'Amount must be less than $' + withdrawal_type.max_amount,
+      };
+    }
+    // console.log(JSON.parse(JSON.stringify(member)));
+    if (withdrawal_amount >= parseFloat(member.member_amounts[0].amount)) {
+      return {
+        member_status: false,
+        member_message: 'Please check your balance',
+      };
+    }
     let withdrawal_req_data = {
       member_id: request_data.member_id,
-      amount: request_data.amount,
+      amount: withdrawal_amount,
       amount_type: 'cash',
       currency: 'USD',
       status: 'pending',
@@ -629,8 +671,8 @@ class MemberAuthController {
       //Insert into member transaction and update balance
       await MemberTransaction.updateMemberTransactionAndBalance({
         member_id: request_data.member_id,
-        amount: -request_data.amount,
-        note: 'Withdrawal request for $' + request_data.amount,
+        amount: -withdrawal_amount,
+        note: 'Withdrawal request for $' + withdrawal_amount,
         type: 'withdraw',
         amount_action: 'member_withdrawal',
         created_by: request_data.member_id,
@@ -654,6 +696,10 @@ class MemberAuthController {
       },
       req: req,
     });
+    return {
+      member_status: true,
+      member_message: 'Withdrawal request processed',
+    };
   }
 
   //send mail event call
