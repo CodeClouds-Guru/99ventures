@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: Joi.required().label('Company portal'),
       name: Joi.string().required().label('Name'),
       script_html: Joi.string().required().label('Script HTML'),
-      script_json: Joi.object().required().label('Script JSON'),
+      script_json: Joi.object().optional(),
       status: Joi.optional(),
       module: Joi.optional().allow('').label('Code'),
       action_type: Joi.optional(),

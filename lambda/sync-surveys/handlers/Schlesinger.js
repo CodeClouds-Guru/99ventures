@@ -70,10 +70,23 @@ class Schlesinger {
                         logical_operator: 'OR',
                         created_at: new Date(),
                     }
+                    // if(qd.SurveyAnswerPrecodes && qd.SurveyAnswerPrecodes.length){
+                    //     const data = qd.SurveyAnswerPrecodes.filter(pr=> qualifications.some(ql=> ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
+                    //     if(data && data.length){
+                    //         params.SurveyAnswerPrecodes = data
+                    //     }
+                    // }
                     if(qd.SurveyAnswerPrecodes && qd.SurveyAnswerPrecodes.length){
-                        const data = qd.SurveyAnswerPrecodes.filter(pr=> qualifications.some(ql=> ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
-                        if(data && data.length){
-                            params.SurveyAnswerPrecodes = data
+                        if(qd.question_type == 'range'){
+                            const data = qualifications.find(ql=> ql.QualificationId == qd.survey_provider_question_id);
+                            const range = data.AnswerIds[0].split("-")
+                            const result = qd.SurveyAnswerPrecodes.filter(pr => pr.option >= range[0] && pr.option <= range[1]);
+                            params.SurveyAnswerPrecodes = result;                            
+                        } else {
+                            const data = qd.SurveyAnswerPrecodes.filter(pr=> qualifications.some(ql=> ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
+                            if(data && data.length){
+                                params.SurveyAnswerPrecodes = data
+                            }
                         }
                     }
                     return params;

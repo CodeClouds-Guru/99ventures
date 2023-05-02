@@ -30,7 +30,7 @@ function CreateEditHeader(props) {
   return (
     <>
       {module === 'tickets' ? '' :
-        <div className="flex flex-col sm:flex-row flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-10">
+        <div className="flex flex-col sm:flex-row flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-1 max-h-112">
           <div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0 w-full sm:max-w-full min-w-0">
             <motion.div
               initial={{ x: 20, opacity: 0 }}
