@@ -17,14 +17,6 @@ const Index = () => {
 
     useEffect(() => {
         getWithdrawalTypes();
-
-        // setWithdrawalTypes([
-        //     { "id": "1", "name": "Paypal", "slug": "paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": null },
-        //     { "id": "2", "name": "Instant Paypal", "slug": "instant_paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": "50.00" },
-        //     { "id": "3", "name": "Skrill", "slug": "skrill", "payment_method_id": "2", "logo": null, "min_amount": "5.00", "max_amount": null },
-        //     { "id": "4", "name": "Gift Card Pass", "slug": "gift_card_pass", "payment_method_id": "3", "logo": null, "min_amount": null, "max_amount": null },
-        //     { "id": "5", "name": "Venmo", "slug": "venmo", "payment_method_id": "3", "logo": null, "min_amount": "20.00", "max_amount": null }
-        // ])
     }, []);
     useEffect(() => {
         !withdrawalTypeID ? '' : setListElem(<List module={module}
