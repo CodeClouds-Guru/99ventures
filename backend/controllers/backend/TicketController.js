@@ -101,7 +101,7 @@ class TicketController extends Controller {
         ];
         options.where = { [Op.and]: { id: ticket_id } };
         options.order = [
-          [TicketConversation, 'created_at', 'DESC'],
+          [TicketConversation, 'created_at', 'ASC'],
           [Member, MemberNote, 'created_at', 'DESC'],
         ];
         options.include = [
