@@ -495,7 +495,7 @@ class MemberController extends Controller {
       //     where: { id: total_earnings[0].id },
       //   }
       // );
-      if (result) {
+      if (result.status) {
         return true;
       } else {
         return false;

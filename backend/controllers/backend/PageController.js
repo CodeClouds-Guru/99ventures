@@ -1,37 +1,34 @@
-const Controller = require("./Controller");
-const { Op } = require("sequelize");
-const { Layout, Component, Page, Script } = require("../../models/index");
+const Controller = require('./Controller');
+const { Op } = require('sequelize');
+const { Layout, Component, Page, Script } = require('../../models/index');
 class PageController extends Controller {
   constructor() {
-    super("Page");
+    super('Page');
     this.updateFields = this.updateFields.bind(this);
   }
   //override list function
   async list(req, res) {
-    req.query.sort = req.query.sort || "updated_at";
+    req.query.sort = req.query.sort || 'updated_at';
     let response = await super.list(req);
-    let pages = response.result.data
+    let pages = response.result.data;
     await pages.forEach(function (page, key) {
       if (page.slug == '404' || page.slug == '500') {
-        response.result.data[key].setDataValue('deletable', false)
+        response.result.data[key].setDataValue('deletable', false);
       } else {
-        response.result.data[key].setDataValue('deletable', true)
+        response.result.data[key].setDataValue('deletable', true);
       }
-    })
-    return response
+    });
+    return response;
   }
   async updateFields(fields, site_id) {
     let layouts = await Layout.findAll({
       where: {
         company_portal_id: site_id,
         code: {
-          [Op.notLike]: "%-rev-%",
+          [Op.notLike]: '%-rev-%',
         },
       },
-      attributes: [
-        'id',
-        ['name', 'value']
-      ]
+      attributes: ['id', ['name', 'value']],
     });
     let default_layout = await Layout.findOne({
       where: { code: 'default-layout', company_portal_id: site_id },
@@ -41,21 +38,15 @@ class PageController extends Controller {
       where: {
         company_portal_id: site_id,
         code: {
-          [Op.notLike]: "%-rev-%",
+          [Op.notLike]: '%-rev-%',
         },
       },
-      order: [
-        ['name', 'ASC'],
-      ],
-      attributes: [
-        'id',
-        'html',
-        ['name', 'value']
-      ]
+      order: [['name', 'ASC']],
+      attributes: ['id', 'html', ['name', 'value']],
     });
     let scripts = await Script.findAll({
       where: {
-        company_portal_id: site_id
+        company_portal_id: site_id,
       },
       attributes: [
         'id',
@@ -64,60 +55,60 @@ class PageController extends Controller {
         'action_type',
         ['name', 'value'],
         ['script_html', 'html'],
-      ]
+      ],
     });
     fields = {
       ...fields,
-      'layouts': {
-        field_name: "layout",
-        db_name: "layouts",
-        type: "select",
-        placeholder: "Layout",
+      layouts: {
+        field_name: 'layout',
+        db_name: 'layouts',
+        type: 'select',
+        placeholder: 'Layout',
         listing: false,
         show_in_form: true,
         sort: true,
         required: true,
-        value: "",
-        width: "50",
+        value: '',
+        width: '50',
         searchable: true,
         options: layouts,
       },
-      'components': {
-        field_name: "component",
-        db_name: "components",
-        type: "select",
-        placeholder: "Component",
+      components: {
+        field_name: 'component',
+        db_name: 'components',
+        type: 'select',
+        placeholder: 'Component',
         listing: false,
         show_in_form: true,
         sort: true,
         required: true,
-        value: "",
-        width: "50",
+        value: '',
+        width: '50',
         searchable: true,
         options: components,
       },
-      'scripts': {
-        field_name: "script",
-        db_name: "scripts",
-        type: "select",
-        placeholder: "Script",
+      scripts: {
+        field_name: 'script',
+        db_name: 'scripts',
+        type: 'select',
+        placeholder: 'Script',
         listing: false,
         show_in_form: true,
         sort: true,
         required: true,
-        value: "",
-        width: "50",
+        value: '',
+        width: '50',
         searchable: true,
         options: scripts,
-      }
-    }
+      },
+    };
     return fields;
   }
   //override add function
   async add(req, res) {
     let response = await super.add(req);
     let fields = { ...response.fields };
-    const site_id = req.header("site_id");
+    const site_id = req.header('site_id');
     fields = await this.updateFields(fields, site_id);
     return {
       status: true,
@@ -129,7 +120,7 @@ class PageController extends Controller {
     let response = await super.edit(req);
     let fields = { ...response.fields };
 
-    const site_id = req.header("site_id");
+    const site_id = req.header('site_id');
     fields = await this.updateFields(fields, site_id);
     response.fields = fields;
     return response;
@@ -137,19 +128,19 @@ class PageController extends Controller {
   //override save function
   async save(req, res) {
     req.body.company_portal_id = req.headers.site_id;
-    req.body.updated_at = new Date()
+    req.body.updated_at = new Date();
     req.body.slug = req.body.slug || '/';
     //unique code checking
     let check_code = await this.model.findOne({
       where: { slug: req.body.slug, company_portal_id: req.headers.site_id },
     });
     if (check_code) {
-      this.throwCustomError("Slug already in use.", 409);
+      this.throwCustomError('Slug already in use.', 409);
     }
     let response = await super.save(req);
     return {
       status: true,
-      message: "Page added.",
+      message: 'Page added.',
       id: response.result.id,
     };
   }
@@ -159,15 +150,19 @@ class PageController extends Controller {
     req.body.slug = req.body.slug || '/';
     //unique code checking
     let check_code = await this.model.findOne({
-      where: { slug: req.body.slug, company_portal_id: req.headers.site_id, id: { [Op.ne]: req.params.id } },
+      where: {
+        slug: req.body.slug,
+        company_portal_id: req.headers.site_id,
+        id: { [Op.ne]: req.params.id },
+      },
     });
     if (check_code) {
-      this.throwCustomError("Slug already in use.", 409);
+      this.throwCustomError('Slug already in use.', 409);
     }
     let response = await super.update(req);
     return {
       status: true,
-      message: "Page updated.",
+      message: 'Page updated.',
     };
   }
   //override delete function
@@ -175,7 +170,7 @@ class PageController extends Controller {
     let response = await super.delete(req);
     return {
       status: true,
-      message: "Page deleted.",
+      message: 'Page deleted.',
     };
   }
   //page preview
@@ -193,36 +188,36 @@ class PageController extends Controller {
         id: page_details[0].layout_id,
       },
     });
-    let layout_content = "";
-    let layout_value = layout_details[0].layout_json.body["value"];
+    let layout_content = '';
+    let layout_value = layout_details[0].layout_json.body['value'];
 
     layout_value.forEach(async (value) => {
-      if (value.code == "{{content}}") {
+      if (value.code == '{{content}}') {
         // layout_content = layout_content+value.code+' '
-        layout_content = layout_content + page_details[0].html + " ";
+        layout_content = layout_content + page_details[0].html + ' ';
       } else {
-        let component_code = value.code.replaceAll("{", "");
-        component_code = component_code.replaceAll("}", "");
+        let component_code = value.code.replaceAll('{', '');
+        component_code = component_code.replaceAll('}', '');
         let component_details = await Component.findAll({
           where: {
             code: component_code,
           },
         });
-        layout_content = layout_content + " " + component_details[0].html;
+        layout_content = layout_content + ' ' + component_details[0].html;
         // layout_content = layout_content+"${convert_component('"+component_code+"')} "
-        console.log(value.code);
-        console.log(component_details[0].html);
+        // console.log(value.code);
+        // console.log(component_details[0].html);
       }
     });
     var page_body = page_details[0].html;
-    console.log("layout_content", layout_content);
+    // console.log('layout_content', layout_content);
     // layout_content = layout_content.replace("{{content}}", page_body);
-    let page_content = eval("`" + layout_content + "`");
+    let page_content = eval('`' + layout_content + '`');
 
     // res.json({
     //   result:page_content
     // })
-    res.render("page", { page_content: page_content });
+    res.render('page', { page_content: page_content });
   }
 }
 

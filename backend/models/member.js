@@ -457,7 +457,7 @@ module.exports = (sequelize, DataTypes) => {
       let resp = await MemberTransaction.updateMemberTransactionAndBalance(
         data
       );
-      if (resp) {
+      if (resp.status) {
         let mailEventbus = eventBus.emit('send_email', {
           action: 'Member Profile Completion',
           data: {

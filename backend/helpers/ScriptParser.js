@@ -4,8 +4,17 @@ const { Op } = require('sequelize');
 const safeEval = require('safe-eval');
 const util = require('util');
 const { ceil } = require('lodash');
-const { sequelize,MemberEligibilities,Member,SurveyQuestion,Survey,SurveyAnswerPrecodes,SurveyQualification,SurveyProvider } = require('../models/index');
-const axios = require('axios')
+const {
+  sequelize,
+  MemberEligibilities,
+  Member,
+  SurveyQuestion,
+  Survey,
+  SurveyAnswerPrecodes,
+  SurveyQualification,
+  SurveyProvider,
+} = require('../models/index');
+const axios = require('axios');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -29,7 +38,7 @@ class ScriptParser {
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
-            
+
             const param_where =
               'where' in params ? JSON.parse(params.where) : null;
 
@@ -85,10 +94,6 @@ class ScriptParser {
             data.setDataValue('country_list', country_list);
             break;
           case 'member_withdrawal':
-            const condition = this.getModuleWhere(script.module, user);
-            data = await Models[script.module].findAll({
-              ...condition,
-            });
             let transaction_data = await Models.MemberTransaction.findOne({
               attributes: [
                 'completed_at',
@@ -124,15 +129,32 @@ class ScriptParser {
               },
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
-            console.log(other_details);
+            // console.log(other_details);
+            const condition = this.getModuleWhere(script.module, user);
+            if (other_details.transaction_count < 5) {
+              condition.where = {
+                ...condition.where,
+                slug: {
+                  [Op.notLike]: 'instant_paypal',
+                },
+              };
+            }
 
+            data = await Models[script.module].findAll({
+              ...condition,
+            });
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
-            let temp_survey_list = await this.getSurveys(user,survey,script.module,params)
-            data = temp_survey_list.surveys
-            if(temp_survey_list.status)
-              page_count = temp_survey_list.page_count
+            let temp_survey_list = await this.getSurveys(
+              user,
+              survey,
+              script.module,
+              params
+            );
+            data = temp_survey_list.surveys;
+            if (temp_survey_list.status)
+              page_count = temp_survey_list.page_count;
             //pagination
             if ('pagination' in params && params.pagination === 'true') {
               script_html = await this.appendPagination(
@@ -141,11 +163,11 @@ class ScriptParser {
                 pageNo
               );
             }
-            break
+            break;
         }
       }
     }
-    console.log('script data',JSON.parse(JSON.stringify(data)));
+    // console.log('script data', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -154,178 +176,190 @@ class ScriptParser {
     };
   }
   //get survey
-  async getSurveys(user,survey_provider_id,script_module,params){
-      let memberId = user.id
-      if (!memberId) {
-          
-          return{
-            status:false,
-            message: 'Member id not found!',
-            surveys:[]
-        }
-      }
-      const provider = await SurveyProvider.findOne({
-          attributes: ['id'],
-          where: {
-              id: survey_provider_id
-          }
-      });
-      if (!provider) {
-          return{
-            status:false,
-            message: 'Survey Provider not found!',
-            surveys:[]
-          }
-      }
-      
-      /**
-       * check and get member's eligibility
-       */
+  async getSurveys(user, survey_provider_id, script_module, params) {
+    let memberId = user.id;
+    if (!memberId) {
+      return {
+        status: false,
+        message: 'Member id not found!',
+        surveys: [],
+      };
+    }
+    const provider = await SurveyProvider.findOne({
+      attributes: ['id'],
+      where: {
+        id: survey_provider_id,
+      },
+    });
+    if (!provider) {
+      return {
+        status: false,
+        message: 'Survey Provider not found!',
+        surveys: [],
+      };
+    }
 
-      const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
-      const orderBy = 'orderby' in params ? params.orderby : 'id';
-      const order = 'order' in params ? params.order : 'desc';
-      const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
-      const param_where =
-              'where' in params ? JSON.parse(params.where) : null;
+    /**
+     * check and get member's eligibility
+     */
 
-      let where = this.getModuleWhere(script_module, user);
-      where.where['survey_provider_id'] = provider.id
-      where.where['status'] = 'live'
-      if (param_where)
-        where.where =  {
-          ...where.where,
-          ...param_where,
-        };
-      const eligibilities = await MemberEligibilities.findAll({
-          attributes: ['survey_question_id', 'precode_id', 'text'],
+    const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+    const orderBy = 'orderby' in params ? params.orderby : 'id';
+    const order = 'order' in params ? params.order : 'desc';
+    const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+    const param_where = 'where' in params ? JSON.parse(params.where) : null;
+
+    let where = this.getModuleWhere(script_module, user);
+    where.where['survey_provider_id'] = provider.id;
+    where.where['status'] = 'live';
+    if (param_where)
+      where.where = {
+        ...where.where,
+        ...param_where,
+      };
+    const eligibilities = await MemberEligibilities.findAll({
+      attributes: ['survey_question_id', 'precode_id', 'text'],
+      where: {
+        member_id: memberId,
+      },
+      include: [
+        {
+          model: SurveyQuestion,
+          attributes: ['id', 'survey_provider_question_id', 'question_type'],
           where: {
-              member_id: memberId
+            survey_provider_id: provider.id,
           },
-          include: [{
-              model: SurveyQuestion,
-              attributes: ['id', 'survey_provider_question_id', 'question_type'],
+        },
+        {
+          model: Member,
+          attributes: ['username'],
+        },
+      ],
+    });
+
+    if (eligibilities) {
+      const matchingQuestionCodes = eligibilities.map(
+        (eg) => eg.SurveyQuestion.id
+      );
+      const matchingAnswerCodes = eligibilities
+        .filter((eg) => eg.SurveyQuestion.question_type !== 'open-ended') // Removed open ended question. We will not get the value from survey_answer_precodes
+        .map((eg) => eg.precode_id);
+
+      if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
+        const queryString = {
+          ps_supplier_respondent_id: eligibilities[0].Member.username,
+          ps_supplier_sid: Date.now(),
+        };
+        eligibilities.map((eg) => {
+          queryString[eg.SurveyQuestion.survey_provider_question_id] =
+            eg.precode_id;
+        });
+        const generateQueryString = new URLSearchParams(queryString).toString();
+
+        const surveys = await Survey.findAll({
+          subQuery: false,
+          order: [[Sequelize.literal(orderBy), order]],
+          limit: perPage,
+          offset: (pageNo - 1) * perPage,
+          attributes: [
+            'id',
+            'survey_provider_id',
+            'loi',
+            'cpi',
+            'name',
+            'survey_number',
+            'url',
+          ],
+          // where: {
+          //     survey_provider_id: provider.id,
+          //     status: "live",
+          // },
+          include: {
+            model: SurveyQualification,
+            attributes: ['id', 'survey_id', 'survey_question_id'],
+            required: true,
+            include: {
+              model: SurveyAnswerPrecodes,
+              attributes: ['id', 'option', 'precode'],
               where: {
-                  survey_provider_id: provider.id
-              }
-          }, {
-              model: Member,
-              attributes: ['username']
-          }]
-      });
-
-      if (eligibilities) {
-          const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-          const matchingAnswerCodes = eligibilities
-              .filter(eg => eg.SurveyQuestion.question_type !== 'open-ended') // Removed open ended question. We will not get the value from survey_answer_precodes
-              .map(eg => eg.precode_id);
-
-          if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
-              const queryString = {
-                  ps_supplier_respondent_id: eligibilities[0].Member.username,
-                  ps_supplier_sid: Date.now()
-              };
-              eligibilities.map(eg => {
-                  queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
-              });
-              const generateQueryString = new URLSearchParams(queryString).toString();
-
-              const surveys = await Survey.findAll({
-                  subQuery: false,
-                  order: [[Sequelize.literal(orderBy), order]],
-                  limit: perPage,
-                  offset: (pageNo - 1) * perPage,
-                  attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number', 'url'],
-                  // where: {
-                  //     survey_provider_id: provider.id,
-                  //     status: "live",
-                  // },
-                  include: {
-                      model: SurveyQualification,
-                      attributes: ['id', 'survey_id', 'survey_question_id'],
-                      required: true,
-                      include: {
-                          model: SurveyAnswerPrecodes,
-                          attributes: ['id', 'option', 'precode'],
-                          where: {
-                              option: matchingAnswerCodes // [111, 30]
-                          },
-                          required: true,
-                          include: [
-                              {
-                                  model: SurveyQuestion,
-                                  attributes: ['id', 'survey_provider_question_id'],
-                                  where: {
-                                      id: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                      // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                  }
-                              }
-                          ],
-                      }
+                option: matchingAnswerCodes, // [111, 30]
+              },
+              required: true,
+              include: [
+                {
+                  model: SurveyQuestion,
+                  attributes: ['id', 'survey_provider_question_id'],
+                  where: {
+                    id: matchingQuestionCodes, // ['Age', 'Gender', 'Zipcode']
+                    // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
                   },
-                  ...where
-
-              });
-              var data_count = await Survey.findAndCountAll({
-                subQuery: false,
-                distinct:'id',
-                include: {
-                  model: SurveyQualification,
-                  required: true,
-                  include: {
-                      model: SurveyAnswerPrecodes,
-                      where: {
-                          option: matchingAnswerCodes // [111, 30]
-                      },
-                      required: true,
-                      include: [
-                          {
-                              model: SurveyQuestion,
-                              where: {
-                                  id: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                  // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                              }
-                          }
-                      ],
-                  }
                 },
-                ...where,
-              });
-              let page_count = Math.ceil(data_count.count / perPage);
-             
-              if(surveys && surveys.length){
-                  var surveyHtml = '';
-                  surveys.forEach(function (survey,key) {
-                    let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
-                    surveys[key].setDataValue('link',link)
-                  })
-                  return{
-                      status:true,
-                      surveys:surveys,
-                      page_count:page_count
-                  }
-              }
-              else {
-                  return{
-                      status:false,
-                      message: 'Surveys not found!',
-                      surveys:[]
-                  }
-              }
-          } else {
-              return{
-                  status:false,
-                  message: 'No surveys have been matched!',
-                  surveys:[]
-              }
-          }
+              ],
+            },
+          },
+          ...where,
+        });
+        var data_count = await Survey.findAndCountAll({
+          subQuery: false,
+          distinct: 'id',
+          include: {
+            model: SurveyQualification,
+            required: true,
+            include: {
+              model: SurveyAnswerPrecodes,
+              where: {
+                option: matchingAnswerCodes, // [111, 30]
+              },
+              required: true,
+              include: [
+                {
+                  model: SurveyQuestion,
+                  where: {
+                    id: matchingQuestionCodes, // ['Age', 'Gender', 'Zipcode']
+                    // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
+                  },
+                },
+              ],
+            },
+          },
+          ...where,
+        });
+        let page_count = Math.ceil(data_count.count / perPage);
+
+        if (surveys && surveys.length) {
+          var surveyHtml = '';
+          surveys.forEach(function (survey, key) {
+            let link = `/pure-spectrum/entrylink?survey_number=${
+              survey.survey_number
+            }${generateQueryString ? '&' + generateQueryString : ''}`;
+            surveys[key].setDataValue('link', link);
+          });
+          return {
+            status: true,
+            surveys: surveys,
+            page_count: page_count,
+          };
+        } else {
+          return {
+            status: false,
+            message: 'Surveys not found!',
+            surveys: [],
+          };
+        }
       } else {
-          return{
-              status:false,
-              message: 'Member eiligibility not found!',
-              surveys:[]
-          }
+        return {
+          status: false,
+          message: 'No surveys have been matched!',
+          surveys: [],
+        };
       }
+    } else {
+      return {
+        status: false,
+        message: 'Member eiligibility not found!',
+        surveys: [],
+      };
+    }
   }
   getModuleWhere(module, user) {
     switch (module) {
@@ -372,6 +406,7 @@ class ScriptParser {
             'logo',
             'min_amount',
             'max_amount',
+            'id',
           ],
           include: {
             model: Models.PaymentMethod,

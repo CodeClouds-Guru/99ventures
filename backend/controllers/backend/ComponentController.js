@@ -157,7 +157,7 @@ class ComponentController extends Controller {
         created_at: previous.created_at,
         // updated_at: previous.created_at,
       };
-      console.log('==================', create_data);
+      // console.log('==================', create_data);
       let model = await Component.create(create_data);
       // let saveResponse = await super.save(createData);
     } else {

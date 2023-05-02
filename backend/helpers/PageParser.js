@@ -135,7 +135,7 @@ class PageParser {
     layout_html = template({
       user,
       error_message,
-      flash
+      flash,
     });
     this.sessionMessage = '';
 
@@ -165,7 +165,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    console.log('regex_match', regex_match);
+    // console.log('regex_match', regex_match);
 
     if (regex_match) {
       await regex_match.forEach(async (script_id) => {

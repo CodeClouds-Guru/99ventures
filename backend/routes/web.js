@@ -79,9 +79,7 @@ router.get('/sqs-receive-message', async (req, res) => {
 });
 
 //ROUTES FOR FRONTEND
-const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
-const checkMemberAuth = require('../middlewares/checkMemberAuth');
-router.use([checkMemberAuth], frontendrRouter.router);
+router.use(frontendrRouter.router);
 
 module.exports = {
   prefix: '/',
