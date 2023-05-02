@@ -4,8 +4,17 @@ const { Op } = require('sequelize');
 const safeEval = require('safe-eval');
 const util = require('util');
 const { ceil } = require('lodash');
-const { sequelize, MemberEligibilities, Member, SurveyQuestion, Survey, SurveyAnswerPrecodes, SurveyQualification, SurveyProvider } = require('../models/index');
-const axios = require('axios')
+const {
+  sequelize,
+  MemberEligibilities,
+  Member,
+  SurveyQuestion,
+  Survey,
+  SurveyAnswerPrecodes,
+  SurveyQualification,
+  SurveyProvider,
+} = require('../models/index');
+const axios = require('axios');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -85,34 +94,30 @@ class ScriptParser {
             data.setDataValue('country_list', country_list);
             break;
           case 'member_withdrawal':
-            const condition = this.getModuleWhere(script.module, user);
-            data = await Models[script.module].findAll({
-              ...condition,
-            });
             let transaction_data = await Models.MemberTransaction.findOne({
               attributes: [
                 'completed_at',
                 [
                   sequelize.literal(
                     `(SELECT count(id) FROM member_transactions WHERE member_id = ` +
-                    user.id +
-                    ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
                   ),
                   'transaction_count',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT sum(amount) FROM member_transactions WHERE member_id = ` +
-                    user.id +
-                    ` AND status= 2 AND amount_action='member_withdrawal')`
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal')`
                   ),
                   'total_withdrawal_amount',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT amount FROM member_balances WHERE member_id = ` +
-                    user.id +
-                    ` AND amount_type = 'cash')`
+                      user.id +
+                      ` AND amount_type = 'cash')`
                   ),
                   'member_balance',
                 ],
@@ -124,7 +129,20 @@ class ScriptParser {
               },
             });
             other_details = JSON.parse(JSON.stringify(transaction_data));
+            console.log(other_details);
+            const condition = this.getModuleWhere(script.module, user);
+            if (other_details.transaction_count < 6) {
+              condition.where = {
+                ...condition.where,
+                slug: {
+                  [Op.notLike]: 'instant_paypal',
+                },
+              };
+            }
 
+            data = await Models[script.module].findAll({
+              ...condition,
+            });
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -149,7 +167,7 @@ class ScriptParser {
         }
       }
     }
-    // console.log('script data',JSON.parse(JSON.stringify(data)));
+    console.log('script data', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -220,36 +238,12 @@ class ScriptParser {
     });
 
     if (eligibilities) {
-      const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-      const matchingAnswerCodes = eligibilities
-        .filter(eg => eg.SurveyQuestion.question_type !== 'open-ended') // Removed open ended question. We will not get the value from survey_answer_precodes
-        .map(eg => eg.precode_id);
-=======
-        member_id: memberId,
-      },
-      include: [
-        {
-          model: SurveyQuestion,
-          attributes: ['id', 'survey_provider_question_id', 'question_type'],
-          where: {
-            survey_provider_id: provider.id,
-          },
-        },
-        {
-          model: Member,
-          attributes: ['username'],
-        },
-      ],
-    });
-
-    if (eligibilities) {
       const matchingQuestionCodes = eligibilities.map(
         (eg) => eg.SurveyQuestion.id
       );
       const matchingAnswerCodes = eligibilities
         .filter((eg) => eg.SurveyQuestion.question_type !== 'open-ended') // Removed open ended question. We will not get the value from survey_answer_precodes
         .map((eg) => eg.precode_id);
->>>>>>> f3302e62 (commit for withdrawal request submit)
 
       if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
         const queryString = {
