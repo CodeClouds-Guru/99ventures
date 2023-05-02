@@ -367,8 +367,16 @@ class ScriptParser {
         return { where: { member_id: user.id } };
       case 'MemberTransaction':
         return {
-          where: { member_id: user.id },
-          include: { model: Models.Member },
+          where: user ? { member_id: user.id } : null,
+          include: [
+            { model: Models.Member },
+            {
+              model: Models.WithdrawalRequest,
+              include: {
+                model: Models.WithdrawalType,
+              }
+            }
+          ],
           attributes: [
             'created_at',
             'id',

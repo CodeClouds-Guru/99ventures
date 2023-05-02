@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: 'WithdrawalType',
       tableName: 'withdrawal_types',
+      timestamps: false,
     }
   );
   return WithdrawalType;

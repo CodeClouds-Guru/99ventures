@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
       WithdrawalRequest.belongsTo(models.User, {
         foreignKey: 'transaction_made_by',
       });
+      WithdrawalRequest.hasOne(models.WithdrawalType, {
+        foreignKey: 'id',
+      });
     }
   }
   WithdrawalRequest.init(
