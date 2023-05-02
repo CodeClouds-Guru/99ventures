@@ -33,6 +33,11 @@ services:
       - IP_QUALITY_SCORE_PRIVATE_KEY=$IP_QUALITY_SCORE_PRIVATE_KEY
       - PORT=4000
       - DEV_MODE=0
+      - IP_CORE_URL=$IP_CORE_URL
+      - IP_REF_DATA_URL=$IP_REF_DATA_URL
+      - IP_ES_URL=$IP_ES_URL
+      - PARTNER_AUTH_KEY=$PARTNER_AUTH_KEY
+      - PARTNER_GUID=$PARTNER_GUID
     networks:
       - 99Bridge
     volumes:

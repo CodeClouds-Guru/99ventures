@@ -25,6 +25,8 @@ const TicketControllerClass = require('../controllers/frontend/TicketController'
 const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
+const TolunaControllerClass = require('../controllers/frontend/TolunaController');
+const TolunaController = new TolunaControllerClass();
 
 //ROUTES FOR FRONTEND
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
@@ -41,6 +43,7 @@ router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);
+router.get('/toluna/surveys', TolunaController.getSurveys);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);

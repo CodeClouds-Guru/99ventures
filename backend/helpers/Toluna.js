@@ -20,7 +20,7 @@ const handler = {
 class Toluna {
 	constructor() {
 		this.instance = {
-			timeout: 30000,
+			timeout: 50000,
 			headers: {
 				'Content-Type': 'application/json',
 			},
