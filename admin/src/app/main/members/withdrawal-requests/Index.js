@@ -11,20 +11,20 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 const Index = () => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const module = 'withdrawal-requests';
-    // const { moduleId } = useParams();
     const [withdrawalTypes, setWithdrawalTypes] = useState([]);
     const [withdrawalTypeID, setWithdrawalTypeID] = useState(null);
     const [listElem, setListElem] = useState('');
-    useEffect(() => {
-        // getWithdrawalTypes();
 
-        setWithdrawalTypes([
-            { "id": "1", "name": "Paypal", "slug": "paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": null },
-            { "id": "2", "name": "Instant Paypal", "slug": "instant_paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": "50.00" },
-            { "id": "3", "name": "Skrill", "slug": "skrill", "payment_method_id": "2", "logo": null, "min_amount": "5.00", "max_amount": null },
-            { "id": "4", "name": "Gift Card Pass", "slug": "gift_card_pass", "payment_method_id": "3", "logo": null, "min_amount": null, "max_amount": null },
-            { "id": "5", "name": "Venmo", "slug": "venmo", "payment_method_id": "3", "logo": null, "min_amount": "20.00", "max_amount": null }
-        ])
+    useEffect(() => {
+        getWithdrawalTypes();
+
+        // setWithdrawalTypes([
+        //     { "id": "1", "name": "Paypal", "slug": "paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": null },
+        //     { "id": "2", "name": "Instant Paypal", "slug": "instant_paypal", "payment_method_id": "1", "logo": null, "min_amount": "1.00", "max_amount": "50.00" },
+        //     { "id": "3", "name": "Skrill", "slug": "skrill", "payment_method_id": "2", "logo": null, "min_amount": "5.00", "max_amount": null },
+        //     { "id": "4", "name": "Gift Card Pass", "slug": "gift_card_pass", "payment_method_id": "3", "logo": null, "min_amount": null, "max_amount": null },
+        //     { "id": "5", "name": "Venmo", "slug": "venmo", "payment_method_id": "3", "logo": null, "min_amount": "20.00", "max_amount": null }
+        // ])
     }, []);
     useEffect(() => {
         !withdrawalTypeID ? '' : setListElem(<List module={module}
@@ -35,18 +35,19 @@ const Index = () => {
             actionable={true}
         />)
     }, [withdrawalTypeID]);
-    // const getWithdrawalTypes = () => {
-    //     axios.get(jwtServiceConfig.getWithdrawalRequests, {type:'withdrawal-types'}).then((response) => {
-    //         if (response.data.results.result.data.length > 0) {
-    //             console.log(response.data.results.result.data)
-    //         } else {
-    //             console.error('Failed to fetch Withdrawal Types');
-    //         }
-    //     });
-    // }
+
+    const getWithdrawalTypes = () => {
+        axios.get(jwtServiceConfig.getWithdrawalRequests, { params: { type: 'withdrawal-types' } }).then((response) => {
+            if (response.data.results.result.data.length > 0) {
+                setWithdrawalTypes(response.data.results.result.data)
+            } else {
+                console.error('Failed to fetch Withdrawal Types');
+            }
+        });
+    }
     const singleWithdrawalTypeID = (id) => {
-        setWithdrawalTypeID(id)
-        setListElem('')
+        setWithdrawalTypeID(id);
+        setListElem('');
     }
 
     return (

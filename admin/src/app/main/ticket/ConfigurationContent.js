@@ -126,7 +126,7 @@ function ConfigurationContent() {
             {/* {JSON.stringify(whereClause)} */}
             <List
                 module="tickets"
-                moduleHeading={ true }
+                moduleHeading={false}
                 where={whereClause}
                 key={listKey}
                 addable={false}
