@@ -215,7 +215,7 @@ class MemberAuthController {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: member_message };
+          req.session.flash = { message: member_message, success_status: true };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
@@ -436,7 +436,7 @@ class MemberAuthController {
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
 
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
@@ -593,7 +593,7 @@ class MemberAuthController {
       member_message = 'Error occured';
     } finally {
       if (member_status) {
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
