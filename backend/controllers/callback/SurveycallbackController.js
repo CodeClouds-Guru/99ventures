@@ -446,6 +446,16 @@ class SurveycallbackController {
     res.redirect('/survey-' + requestParam.status);
     return;
   }
+
+  /**
+   * Toluna Callback setup
+   */
+  async tolunaPostback(req, res){
+    const requestBody = req.body;
+    
+  }
+
+
 }
 
 module.exports = SurveycallbackController;

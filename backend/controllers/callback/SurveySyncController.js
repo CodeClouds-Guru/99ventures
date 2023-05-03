@@ -36,7 +36,7 @@ class SurveySyncController {
             this.syncSurveyQuestion(req, res);
         } else if(action === 'survey') {
             this.syncSurveyQualification(req, res);
-        }
+        } 
     }
 
     async getProvider(req, res){

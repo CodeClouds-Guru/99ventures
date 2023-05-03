@@ -27,6 +27,7 @@ class Toluna {
 		};
         this.panelSurviceAPI = `https://${process.env.IP_CORE_URL}/IntegratedPanelService/api`;
         this.utilitySurviceAPI = `https://${process.env.IP_REF_DATA_URL}/IPUtilityService/ReferenceData`;
+        this.externalSamplingServiceApi = `https://${process.env.IP_ES_URL}/IPExternalSamplingService/ExternalSample/${process.env.PANEL_GUID}`;
 
 		this.addMemebr = this.addMemebr.bind(this);
 		this.getQuestionsAnswer = this.getQuestionsAnswer.bind(this);
@@ -125,6 +126,22 @@ class Toluna {
         });
         const response = await instance.get();
         return response.data;
+    }
+
+    /**** ES API *****/
+
+    /**
+     * Get Surveys, Quotas
+     * 
+     */
+    async getQuotas(){
+        const instance = axios.create({
+            ...this.instance,
+            baseURL: this.externalSamplingServiceApi + '/Quotas'
+        });
+        const response = await instance.get();
+        return response.data;
+    
     }
 }
 
