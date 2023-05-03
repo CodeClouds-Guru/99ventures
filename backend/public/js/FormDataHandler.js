@@ -16,9 +16,12 @@ $(() => {
     });
   };
   var showSnackbar = (msg, success) => {
+    console.log('snackbar status', success);
     $('.snackbar .snack_msg').text(msg);
-    $('.snackbar').addClass('show');
+    $('element').removeClass('bg-success');
+    $('element').removeClass('bg-danger');
     $('.snackbar').addClass(success ? 'bg-success' : 'bg-danger');
+    $('.snackbar').addClass('show');
     setTimeout(function () {
       $('.snackbar').removeClass('show');
     }, 3000);
