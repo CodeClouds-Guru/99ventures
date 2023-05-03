@@ -35,7 +35,7 @@ $(() => {
   };
 
   let snackbar = `<div
-    class="snackbar alert d-flex align-items-center text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed translate-middle-x start-50 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
+    class="snackbar alert d-flex align-items-center text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed translate-middle-x start-50 m-0 shadow-sm">
     <p class="m-0 me-auto snack_msg"></p>
     <button class="btn-close btn-close-white"></button>
     </div>`;
@@ -86,9 +86,13 @@ $(() => {
     $(loginBtn).removeClass('active');
     $(formHeading).text('Sign Up');
   };
-  if ($(location).attr('hash') === '#signup') {
+  var getUrlHash = () => {
+    return ($(location).attr('href').includes('#') && $(location).attr('href').includes('?')) ? $(location).attr('href').split('#')[1].split('?')[0] : $(location).attr('href').includes('#') ? $(location).attr('href').split('#')[1] : '';
+  }
+  if (getUrlHash() === 'signup') {
     goToRegister();
   }
+
   $(loginBtn).click((e) => {
     e.preventDefault();
     goTologin();
