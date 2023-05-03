@@ -86,9 +86,13 @@ $(() => {
     $(loginBtn).removeClass('active');
     $(formHeading).text('Sign Up');
   };
-  if ($(location).attr('hash') === '#signup') {
+  var getUrlHash = () => {
+    return ($(location).attr('href').includes('#') && $(location).attr('href').includes('?')) ? $(location).attr('href').split('#')[1].split('?')[0] : $(location).attr('href').includes('#') ? $(location).attr('href').split('#')[1] : '';
+  }
+  if (getUrlHash() === 'signup') {
     goToRegister();
   }
+
   $(loginBtn).click((e) => {
     e.preventDefault();
     goTologin();
