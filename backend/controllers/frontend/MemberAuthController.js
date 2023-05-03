@@ -380,6 +380,7 @@ class MemberAuthController {
           // country_code: Joi.number().optional().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
+          state: Joi.string().allow('').optional().label('State'),
           // email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
