@@ -64,6 +64,7 @@ class WithdrawalRequestController extends Controller {
         {
           model: Member,
           attributes: ['first_name', 'last_name','username'],
+          where: {company_portal_id:company_portal_id}
         },
         {
           model: User,

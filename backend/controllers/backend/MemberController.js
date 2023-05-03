@@ -93,7 +93,7 @@ class MemberController extends Controller {
     let company_portal_id = req.headers.site_id;
     let member_id = req.params.id || null;
     let type = req.query.type || null;
-    console.log(type);
+    // console.log(type);
     // let type = req.body.type || null;
     if (member_id) {
       let country_list = [];
