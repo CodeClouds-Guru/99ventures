@@ -10,6 +10,7 @@ const {
   AutoResponder,
   sequelize,
   User,
+  MemberNotification,
 } = require('../../models/index');
 
 const { Op } = require('sequelize');
@@ -274,7 +275,21 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-
+      console.log(user_id);
+      if (user_id) {
+        let ticket = await Ticket.findOne({ where: { id: ticket_id } });
+        let notify_data = {
+          member_id: ticket.member_id,
+          verbose:
+            'You have a new response on your ticket, subject : ' +
+            ticket.subject,
+          action: 'ticket_reply',
+          is_read: '0',
+          read_on: new Date(),
+        };
+        console.log(notify_data);
+        await MemberNotification.create(notify_data);
+      }
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
