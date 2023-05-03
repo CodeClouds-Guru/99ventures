@@ -6,6 +6,7 @@ const {
   WithdrawalRequest,
   Member,
 } = require('../models');
+// const paypal = require('@paypal/payouts-sdk');
 class Paypal {
   constructor() {
     this.clientId =
@@ -153,6 +154,8 @@ class Paypal {
       accessToken
     );
     console.log('capturePayment', data);
+    //send notification to member
+
     return data;
   }
 
@@ -222,6 +225,121 @@ class Paypal {
     if (response.status === 200 || response.status === 201) {
       return response.data;
     }
+  }
+
+  //paypal payout
+  async paypalPayout(){
+    // let clientId = "AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6";
+    // let clientSecret = "EK-L43SaFqcrTtmRgABvcZHVUToVoHxMtOGeIBkk-TdWKDg4lirK-PZ7zcZq0F26LwiWDVPf4a4VLaBv";
+    // let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    // let client = new paypal.core.PayPalHttpClient(environment);
+
+    // let requestBody = {
+    //     "sender_batch_header": {
+    //       "recipient_type": "EMAIL",
+    //       "email_message": "SDK payouts test txn",
+    //       "note": "Enjoy your Payout!!",
+    //       "sender_batch_id": "Test_sdk_1",
+    //       "email_subject": "This is a test transaction from SDK"
+    //     },
+    //     "items": [{
+    //       "note": "Demo note",
+    //       "amount": {
+    //         "currency": "USD",
+    //         "value": "1.00"
+    //       },
+    //       "receiver": "sb-qk43ey25302643@personal.example.com",
+    //       "sender_item_id": "Test_txn_1"
+    //     }]
+    //   }
+
+    // // Construct a request object and set desired parameters
+    // try{
+    // // Here, PayoutsPostRequest() creates a POST request to /v1/payments/payouts
+    //   let request = new paypal.payouts.PayoutsPostRequest();
+    //   request.requestBody(requestBody);
+
+    //   // Call API with your client and get a response for your call
+    //   let response = await client.execute(request);
+    //   console.log(`Response: ${JSON.stringify(response)}`);
+    //   // If call returns body in response, you can get the deserialized version from the result attribute of the response.
+    //   console.log(`Payouts Create Response: ${JSON.stringify(response.result)}`);
+    //   return{
+    //     status: true,
+    //     result: response.result
+    //   }
+
+    // }catch(e){
+    //   return{
+    //     status: false,
+    //     error:e
+    //   }
+    // }
+
+
+    
+    // Create auth token with API
+    try{
+      const response = await axios.post(
+        `https://api-m.sandbox.paypal.com/v1/oauth2/token`,
+        {
+          grant_type: 'client_credentials',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          auth: {
+            username: "AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6",
+            password: "EK-L43SaFqcrTtmRgABvcZHVUToVoHxMtOGeIBkk-TdWKDg4lirK-PZ7zcZq0F26LwiWDVPf4a4VLaBv",
+          },
+        },
+      );
+      // make Paypal API calls with your access token here!!
+    const authToken = response.data.access_token;
+    //make bulk payout request 
+    const result = await axios.post(
+      `https://api-m.sandbox.paypal.com/v1/payments/payouts`,
+      {
+        sender_batch_header: {
+          recipient_type: 'EMAIL',
+          email_subject: 'You have a payout!',
+          email_message:
+            'You have received a payout! Thanks for using our service!',
+        },
+        items: [
+          {
+            receiver: 'sb-qk43ey25302643@personal.example.com',
+            amount: {
+              value: 0.8,
+              currency: 'USD',
+            },
+          },
+          // add more payout items here as you need
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+      },
+    );
+
+      return {
+        status:true,
+        result:result
+      }
+    }catch(e){
+      return {
+        status: false,
+        error: e
+      }
+    }
+    
+    
+
+    
   }
 }
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const PageParser = require('../helpers/PageParser');
 const SqsHelper = require('../helpers/SqsHelper');
 const { OfferWall } = require('../models');
-
+const Paypal = require('../helpers/Paypal');
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow: /');
@@ -51,6 +51,13 @@ router.put('/profile/update', MemberAuthController.profileUpdate);
 
 router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 
+router.get('/test-payment',async(req,res) => {
+    const paypal_class = new Paypal();
+    const create_resp = await paypal_class.paypalPayout(req);
+    res.send({
+      l:create_resp
+    })
+})
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
   var page_content = await pagePerser.preview(req);
