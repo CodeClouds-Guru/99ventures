@@ -96,7 +96,6 @@ class WithdrawalRequestController extends Controller {
 
   //save
   async save(req, res) {
-    console.log('paypal order-create');
     const paypal_class = new Paypal();
     const create_resp = await paypal_class.createOrder(req);
 
@@ -121,7 +120,6 @@ class WithdrawalRequestController extends Controller {
     var response_message = '';
     switch (action_type) {
       case 'capture':
-        console.log('paypal order-capture');
         response = await paypal_class.capturePayment(req, res);
         if (response.status) {
           response = response.report;
