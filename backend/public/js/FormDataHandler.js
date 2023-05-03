@@ -35,7 +35,7 @@ $(() => {
   };
 
   let snackbar = `<div
-    class="snackbar alert d-flex align-items-center text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed bottom-0 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
+    class="snackbar alert d-flex align-items-center text-white p-2 p-sm-3 lh-1 small rounded-2 position-fixed translate-middle-x start-50 mb-2 mb-md-3 me-2 me-md-3 shadow-sm">
     <p class="m-0 me-auto snack_msg"></p>
     <button class="btn-close btn-close-white"></button>
     </div>`;
