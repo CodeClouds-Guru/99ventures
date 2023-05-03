@@ -37,7 +37,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].searchable = true
       }else{
         fields['$Member.username$'].listing = false
-        fields['$Member.username$'].searchable = true
+        fields['$Member.username$'].searchable = false
       }
       if('created_at' in query_where){
         var and_query = {
