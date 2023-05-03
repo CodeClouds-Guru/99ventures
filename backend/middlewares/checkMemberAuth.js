@@ -4,11 +4,10 @@ const {
   EmailAlert,
   MemberTransaction,
   MemberBalance,
-  Page
+  Page,
 } = require('../models');
 const { sequelize } = require('../models/index');
 module.exports = async function (req, res, next) {
-  console.log('inside checkMemberAuth', req.session)
   const dev_mode = process.env.DEV_MODE || '1';
   if (dev_mode === '1') {
     var company_portal = await CompanyPortal.findByPk(1);
@@ -44,9 +43,9 @@ module.exports = async function (req, res, next) {
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({ where: { company_portal_id: req.session.company_portal.id, after_signin: 1 } })
     const redirect = auth_redirection_page ? auth_redirection_page.slug : '/404';
-    console.log('path', req.path);
+
     if (req.path === '/') {
-      res.status(302).redirect(redirect)
+      res.status(302).redirect(redirect);
       return;
     }
   }

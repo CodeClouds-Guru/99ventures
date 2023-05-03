@@ -164,6 +164,7 @@ function List(props) {
 	}, [moduleActioned]);
 
 	const debounceFn = useCallback(_.debounce((val) => {
+		setPage(0);
 		setSearchText(val);
 	}, 1000), []);
 
@@ -191,7 +192,6 @@ function List(props) {
 	function handleSelectAllClick(event) {
 		if (event.target.checked) {
 			setSelected(data.map((n) => {
-				console.log(n.status)
 				return (module === 'pages' && (n.slug === '500' || n.slug === '404') || (module === 'withdrawal-requests' && n.status !== 'pending')) ? null : n.id
 			}));
 			return;
@@ -208,7 +208,17 @@ function List(props) {
 		// 	params = { data: { model_ids: selectedIds, action_type: 'approved' } }
 		// }
 		try {
-			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } });
+			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to approve' }))
+			}) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
+			});
 			setSelected([]);
 			setModuleActioned(true);
 		} catch (error) {
@@ -218,7 +228,12 @@ function List(props) {
 
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
-			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note })
+			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
+				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			}).catch(e => {
+				console.error(e)
+				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to reject' }))
+			});
 			setSelected([]);
 			setModuleActioned(true);
 		} catch (error) {
@@ -467,8 +482,30 @@ function List(props) {
 							)
 						}
 						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
+							{/* {module === 'withdrawal-requests' && 
+							<>
+							{datepickerStatus ? (
+								<div className="date-range-wrapper member-txn-list">
+									<DateRangePicker
+										wrapperClassName="filter-daterange-picker"
+										open={datepickerStatus}
+										toggle={() => setDatepickerStatus(!datepickerStatus)}
+										onChange={dateRangeSelected}
+									/>
+								</div>
+							):
+							<div onClick={setDatepickerStatus(!datepickerStatus)}>
+								<TextField
+									label="Select a date range"
+									variant="outlined"
+									disabled
+									value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
+								/>
+							</div>}
+							</>
+							} */}
 							{
-								(module === 'member-transactions' && location.pathname.includes('history')) && (
+								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
 										{
 											datepickerStatus && (
@@ -486,13 +523,13 @@ function List(props) {
 											component={motion.div}
 											initial={{ y: -20, opacity: 0 }}
 											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center xl:w-1/5 sm:w-1/3  space-x-8 px-16 rounded-full border-1 shadow-0"
+											className="flex items-center xl:w-1/5 sm:w-1/3 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
 											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
 										>
-											<FuseSvgIcon className="text-48" size={24} color="disabled">feather:calendar</FuseSvgIcon>
+											<FuseSvgIcon className="text-48 cursor-pointer" size={24} color="disabled">feather:calendar</FuseSvgIcon>
 											<Input
-												label="Select a date range"
-												className="datepicker--input"
+												label="Select daterange"
+												className="datepicker--input cursor-pointer"
 												placeholder="Select daterange"
 												disabled
 												disableUnderline
@@ -506,7 +543,7 @@ function List(props) {
 											/>
 											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
 										</Paper>
-										<FormControl sx={{ minWidth: 120 }} size="small">
+										{(module === 'member-transactions' && location.pathname.includes('history')) && <FormControl sx={{ minWidth: 120 }} size="small">
 											<InputLabel id="demo-simple-select-label">Type</InputLabel>
 											<Select
 												labelId="demo-simple-select-label"
@@ -533,7 +570,7 @@ function List(props) {
 												<MenuItem value="withdraw">Withdraw</MenuItem>
 												<MenuItem value="reversal">Reversal</MenuItem>
 											</Select>
-										</FormControl>
+										</FormControl>}
 									</>
 								)
 							}

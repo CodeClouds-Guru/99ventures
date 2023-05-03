@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -9,164 +9,34 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import grapesjs from 'grapesjs'
-import 'grapesjs/dist/css/grapes.min.css'
-import 'grapesjs/dist/grapes.min.js'
-import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
-import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
-import '../ScriptStyle.css'
-import { customCodeEditor } from '../../../grapesjs/editorPlugins'
+import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
+import { EditorState, convertFromHTML, ContentState } from 'draft-js';
 
 const CreateUpdateForm = () => {
     const moduleId = useParams().id;
     const module = 'scripts';
-    const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-script-${moduleId}` : `gjs-script-new`;
     const [loading, setLoading] = useState(false);
-    const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [editor, setEditor] = useState({});
     const [errors, setErrors] = useState({});
-    const [changeCount, setChangeCount] = useState(0);
+    const wysiwygEditorRef = useRef();
     const [allData, setAllData] = useState({
         name: '',
         script_html: '',
-        script_json: '',
+        script_json: {},
         status: true
     });
+
+    useEffect(()=>{
+        if (moduleId !== 'create' && !isNaN(moduleId)) {
+            getSingleRecordById(moduleId);
+        }
+    }, []);
 
     const handleChange = (e) => {
         setAllData({ ...allData, status: e.target.checked });
     };
-
-    useEffect(() => {
-        const editor = grapesjs.init({
-            allowScripts: 1,
-            container: '#gjs',
-            protectedCss: '',   // disabled default CSS
-            height: '700px',
-            width: '100%',
-            style: '.txt-red{color: red}',
-            plugins: ["gjs-preset-webpage", customCodeEditor],
-            storageManager: {
-                id: 'gjs-',
-                type: 'local',
-                options: {
-                    local: { key: storageKey }
-                },
-                autosave: true,
-                storeComponents: true,
-                storeStyles: true,
-                storeHtml: true,
-                storeCss: true,
-            },
-            deviceManager: {
-                devices:
-                    [
-                        {
-                            id: 'desktop',
-                            name: 'Desktop',
-                            width: '',
-                        },
-                        {
-                            id: 'tablet',
-                            name: 'Tablet',
-                            width: '768px',
-                            widthMedia: '992px',
-                        },
-                        {
-                            id: 'mobilePortrait',
-                            name: 'Mobile portrait',
-                            width: '320px',
-                            widthMedia: '575px',
-                        },
-                    ]
-            },
-            pluginsOpts: {
-                'grapesjs-preset-webpage': {
-                    blocksBasicOpts: {
-                        blocks: ['column1', 'column2', 'column3', 'column3-7', 'text', 'link', 'image', 'video'],
-                        flexGrid: 1,
-                    },
-                    blocks: ['link-block', 'quote', 'text-basic'],
-                },
-            },
-        });
-        
-        setEditor(editor);
-
-        editor.onReady(() => {
-            // Collapsed all the blocks accordian by default
-            const categories = editor.BlockManager.getCategories();
-            categories.each(category => {
-                category.set('open', false).on('change:open', opened => {
-                    opened.get('open') && categories.each(category => {
-                        category !== opened && category.set('open', false)
-                    })
-                })
-            });
-            //------------ End ----------
-
-            // editor.on('change:changesCount', (model) => {
-            //     const changes = model.get('changesCount');
-            //     if (changes) {
-            //         setChangeCount(changeCount => changeCount + 1)
-            //     }
-            // });
-        });
-        
-    }, []);
-
-    useEffect(()=>{
-        if(Object.keys(editor).length){
-            loadEditorData(editor);                
-        }
-    }, [editor])
-
-
-    // useEffect(() => {
-    //     console.log(changeCount)
-    //     if(changeCount > 0)
-    //         window.addEventListener("beforeunload", handleUnload);
-    //     return () => {
-    //       window.removeEventListener("beforeunload", handleUnload);
-    //     };
-    //   }, [changeCount]);
-
-    //   const handleUnload = (e) => {
-    //     const message = "Hello";
-    //    (e || window.event).returnValue = message; //Gecko + IE
-    //     return message;
-    //   };
-
-
-    const loadEditorData = async (editor) => {
-        if (moduleId !== 'create' && !isNaN(moduleId)) {
-            getSingleRecordById(moduleId, editor);
-        } else {
-            const storageManager = editor.Storage;
-            const data = storageManager.load();
-            editor.loadProjectData(data);
-            setAllData({
-                ...allData,
-                script_json: editor.getProjectData(),
-                script_html: generatedHTMLValue(editor)
-            });
-        };
-    }
-
-    const generatedHTMLValue = (editor) => {
-        let generatedHTML = '';
-
-        if (editor.getHtml()) {
-            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
-            const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match(reg)[1];
-            generatedHTML +=`${css}\n${htmlData}`;
-        }
-        return generatedHTML;
-    }
-
+    
     const dynamicErrorMsg = (field, value) => {
         if (value) {
             delete errors[field];
@@ -185,19 +55,24 @@ const CreateUpdateForm = () => {
         dynamicErrorMsg('name', event.target.value);
     }
 
+    const handleScriptHtml = (event) => {
+        setAllData(allData => ({
+            ...allData, script_html: event
+        }));
+    }
+
+    const setEditorValue = (value) => {
+        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
+    }
+
     const onSubmit = () => {
-        const editorJsonBody = editor.getProjectData();
-        if (!editorJsonBody.pages[0].frames[0].component.components) {
+        if ( allData.script_html == "") {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
             return;
         }
-
         if (!Object.keys(errors).length) {
             const params = {
-                ...allData,
-                script_html: generatedHTMLValue(editor),
-                script_json: editorJsonBody,
-                status: allData.status
+                ...allData
             }
             const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.updateScriptsData + `/${moduleId}` : jwtServiceConfig.saveScriptsData;
 
@@ -206,11 +81,6 @@ const CreateUpdateForm = () => {
                 .then((response) => {
                     setLoading(false);
                     if (response.data.results.status) {
-                        // After successfully saved the changes, need to remove the local storage value and change state to 0.
-                        // New Localstorage value will be set after that.
-                        setChangeCount(0);
-                        localStorage.removeItem(storageKey);
-
                         setAllData({
                             ...allData,
                             ...params
@@ -219,8 +89,7 @@ const CreateUpdateForm = () => {
                         if (moduleId === 'create') {
                             navigate(`/app/scripts/${response.data.results.result.id}`);
                         }
-                        // else
-                        //     getSingleRecordById(moduleId, editor);
+                        
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }
@@ -232,7 +101,7 @@ const CreateUpdateForm = () => {
         }
     }
 
-    const getSingleRecordById = (id, editor) => {
+    const getSingleRecordById = (id) => {
         axios.get(jwtServiceConfig.getSingleScriptData + `/${id}`)
             .then((response) => {
                 if (response.data.results.result) {
@@ -244,55 +113,26 @@ const CreateUpdateForm = () => {
                         script_json: record.script_json,
                         status: Boolean(record.status)
                     }));
-                    editor.loadProjectData(record.script_json);
-
-                    //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
-                    // setChangeCount(changeCount => changeCount - 1);
+                    setEditorValue(record.script_html);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
             })
             .catch((error) => {
+                console.log(error);
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
 
-    /**
-     * Cancel and go back to list page
-     * If editor changes have been made then show the alert dialog.
-     * Else, clear the existing local storage value and rediect to list pagw.
-     */
     const handleCancel = () => {
-        if (changeCount > 0) {
-            setOpenAlertDialog(true);
-        } else {
-            navigate(`/app/${module}`);
-            localStorage.removeItem(storageKey);
-        }
-    }
-
-    const onCloseAlertDialogHandle = () => {
-        setOpenAlertDialog(false);
-    }
-
-    /**
-     * Confirm Alert Dialog.
-     * It will redirect user to list page.
-     * At the same time need to clear the auto save value from local storage.
-     * ChangeCount value set to 0.
-     */
-    const onConfirmAlertDialogHandle = () => {
-        localStorage.removeItem(storageKey);
-        setChangeCount(0);
-        setOpenAlertDialog(true);
-        navigate(`/app/${module}`)
+        navigate(`/app/${module}`);
     }
 
     return (
         <>
             <CreateEditHeader module={module} moduleId={moduleId} />
-            <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-                <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16  sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+            <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full page">
+                <Paper className="h-full sm:h-auto md:flex md:items-centerx md:justify-center w-full md:h-full md:w-full py-8 px-16  sm:p-28 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                     <div className="w-full mx-auto sm:mx-0 scripts-configuration">
                         <FormControl className="w-1/2 mb-24 pr-24">
                             <TextField
@@ -320,7 +160,12 @@ const CreateUpdateForm = () => {
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
-                            <div id="gjs" />
+                            <WYSIWYGEditor
+                                className="w-full h-auto border-1"
+                                value={allData.script_html}
+                                onChange={handleScriptHtml}
+                                ref={wysiwygEditorRef}
+                            />
                             <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
                         </FormControl>
 
@@ -352,12 +197,7 @@ const CreateUpdateForm = () => {
                     </div>
                 </Paper>
             </div>
-            <AlertDialog
-                content="Do you want to discard the changes?"
-                open={openAlertDialog}
-                onConfirm={onConfirmAlertDialogHandle}
-                onClose={onCloseAlertDialogHandle}
-            />
+            
         </>
     )
 }

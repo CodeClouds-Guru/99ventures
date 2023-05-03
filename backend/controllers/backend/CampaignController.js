@@ -49,9 +49,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    console.log(
-      util.inspect(options, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+    // );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -134,7 +134,7 @@ class CampaignController extends Controller {
           custom_where['is_postback_triggered'] = 0;
         }
       }
-      custom_where['campaign_id'] = req.params.id
+      custom_where['campaign_id'] = req.params.id;
       req.query.where = JSON.stringify(custom_where);
       fields = {
         id: {
@@ -314,7 +314,7 @@ class CampaignController extends Controller {
           order: [['created_at', 'DESC']],
         },
       };
-      
+
       const { docs, pages, total } = await CampaignMember.paginate(options);
 
       let report_details = [];
@@ -359,10 +359,10 @@ class CampaignController extends Controller {
           report_data,
           model
         );
-        console.log(
-          'fs.existsSync(path)',
-          fs.existsSync(csv_response_filename)
-        );
+        // console.log(
+        //   'fs.existsSync(path)',
+        //   fs.existsSync(csv_response_filename)
+        // );
 
         return {
           downloadable_file: {
@@ -399,7 +399,7 @@ class CampaignController extends Controller {
       .filter((attr) => extra_fields.indexOf(attr.db_name) == -1)
       .map((attr) => attr.db_name);
 
-    console.log('==============attributes', attributes);
+    // console.log('==============attributes', attributes);
 
     let searchable_fields = [];
     for (const key in fields) {

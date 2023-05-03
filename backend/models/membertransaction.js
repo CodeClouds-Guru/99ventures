@@ -18,12 +18,16 @@ module.exports = (sequelize, DataTypes) => {
       MemberTransaction.belongsTo(models.Member, {
         foreignKey: 'member_id',
       });
+      MemberTransaction.hasOne(models.WithdrawalRequest, {
+        foreignKey: 'member_transaction_id'
+      });
       MemberTransaction.belongsToMany(models.Survey, {
         through: 'member_surveys',
         timestamps: false,
         foreignKey: 'member_transaction_id',
         otherKey: 'survey_id',
       });
+
     }
   }
   MemberTransaction.init(
@@ -254,6 +258,8 @@ module.exports = (sequelize, DataTypes) => {
     let transaction = await MemberTransaction.create(transaction_data, {
       silent: true,
     });
+    transaction = JSON.parse(JSON.stringify(transaction));
+    // console.log(transaction.id);
     let balance = await MemberBalance.update(
       { amount: modified_total_earnings },
       {
@@ -261,7 +267,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
     if (transaction && balance) {
-      return true;
+      return { status: true, transaction_id: transaction.id };
     } else {
       return false;
     }
@@ -278,10 +284,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .startOf('day')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'today',
       ],
@@ -290,10 +296,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .subtract(6, 'days')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'week',
       ],
@@ -302,10 +308,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .subtract(30, 'days')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'month',
       ],

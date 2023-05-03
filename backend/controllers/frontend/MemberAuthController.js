@@ -215,7 +215,7 @@ class MemberAuthController {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: member_message };
+          req.session.flash = { message: member_message, success_status: true };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
@@ -380,6 +380,7 @@ class MemberAuthController {
           // country_code: Joi.number().optional().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
+          state: Joi.string().allow('').optional().label('State'),
           // email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
@@ -436,7 +437,7 @@ class MemberAuthController {
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
 
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
@@ -569,7 +570,7 @@ class MemberAuthController {
   }
 
   //Add Payment Credentials
-  async addPaymentCredentials(req, res) { }
+  async addPaymentCredentials(req, res) {}
 
   //Member Withdrawal
   async memberWithdrawal(req, res) {
@@ -593,7 +594,7 @@ class MemberAuthController {
       member_message = 'Error occured';
     } finally {
       if (member_status) {
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
@@ -609,6 +610,7 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
+    // console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
     //get member
     let member = await Member.findOne({
@@ -661,23 +663,30 @@ class MemberAuthController {
       amount_type: 'cash',
       currency: 'USD',
       status: 'pending',
+      requested_on: new Date(),
+      payment_email: request_data.email,
+      withdrawal_type_id: parseInt(request_data.withdrawal_type_id),
     };
-
-    if (request_data.payment_method === 'paypal_instant_payment') {
+    let transaction_resp = {};
+    if (request_data.withdrawal_type_id == 2) {
       withdrawal_req_data.note = 'Withdrawal request auto approved';
       withdrawal_req_data.transaction_made_by = request_data.member_id;
       withdrawal_req_data.status = 'approved';
 
       //Insert into member transaction and update balance
-      await MemberTransaction.updateMemberTransactionAndBalance({
-        member_id: request_data.member_id,
-        amount: -withdrawal_amount,
-        note: 'Withdrawal request for $' + withdrawal_amount,
-        type: 'withdraw',
-        amount_action: 'member_withdrawal',
-        created_by: request_data.member_id,
-      });
+      transaction_resp =
+        await MemberTransaction.updateMemberTransactionAndBalance({
+          member_id: request_data.member_id,
+          amount: -withdrawal_amount,
+          note: 'Withdrawal request for $' + withdrawal_amount,
+          type: 'withdraw',
+          amount_action: 'member_withdrawal',
+          created_by: request_data.member_id,
+        });
     }
+    if (transaction_resp)
+      withdrawal_req_data.member_transaction_id =
+        transaction_resp.transaction_id;
     // Insert in WxithdrawalRequest
     const res = await WithdrawalRequest.create(withdrawal_req_data);
 
@@ -692,13 +701,16 @@ class MemberAuthController {
       action: 'Withdraw Request Member',
       data: {
         email: member.email,
-        details: { members: member },
+        details: { members: member, withdraw_requests: withdrawal_req_data },
       },
       req: req,
     });
     return {
       member_status: true,
-      member_message: 'Withdrawal request processed',
+      member_message:
+        request_data.payment_method === 'paypal_instant_payment'
+          ? 'Withdrawal request processed'
+          : 'Withdrawal request processed. Pending approval from admin.',
     };
   }
 

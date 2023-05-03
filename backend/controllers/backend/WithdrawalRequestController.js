@@ -135,14 +135,14 @@ class WithdrawalRequestController extends Controller {
         break;
       case 'rejected':
         // response = await paypal_class.successPayment(req, res);
-        response = await this.changeStatus(model_ids,note,action_type)
+        response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request rejected';
         break;
-        case 'approved':
-          // response = await paypal_class.successPayment(req, res);
-          response = await this.changeStatus(model_ids,note,action_type)
-          response_message = 'Withdrawal request approved';
-          break;
+      case 'approved':
+        // response = await paypal_class.successPayment(req, res);
+        response = await this.changeStatus(model_ids, note, action_type);
+        response_message = 'Withdrawal request approved';
+        break;
       default:
         response_message = 'Payment processed';
     }
@@ -153,13 +153,13 @@ class WithdrawalRequestController extends Controller {
       response,
     };
   }
-  async changeStatus(model_ids,note,action_type){
-    let response = []
-    if(model_ids.length){
+  async changeStatus(model_ids, note, action_type) {
+    let response = [];
+    if (model_ids.length) {
       let update_data = {
         note: note,
-        status:action_type
-      }
+        status: action_type,
+      };
       response = await this.model.update(update_data, {
         where: {
           id: {
@@ -169,7 +169,7 @@ class WithdrawalRequestController extends Controller {
         return: true,
       });
     }
-    return response
+    return response;
   }
 }
 

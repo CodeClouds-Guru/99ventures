@@ -387,14 +387,14 @@ function GeneralConfiguration(props) {
                                 render={({ field }) => (
                                     <Tooltip title="Please select 'Published' page only" placement="top">
                                         <FormControl fullWidth>
-                                            <InputLabel id="redirect_page">Redirect Page</InputLabel>
+                                            <InputLabel id="redirect_page">Redirect after authentication</InputLabel>
                                             <Select
                                                 {...field}
                                                 labelId="redirect_page"
                                                 className="mb-24"
                                                 id="demo-simple-select"
                                                 value={defaultValues.redirect_page_id}
-                                                label="Redirect Page"
+                                                label="Redirect after authentication"
                                                 onChange={selectRedirectPage}
                                                 required
                                                 disabled={!permission}

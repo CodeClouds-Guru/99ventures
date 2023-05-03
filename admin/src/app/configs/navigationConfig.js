@@ -43,7 +43,7 @@ const navigationConfig = [
     translate: 'Members',
     type: 'collapse',
     icon: 'heroicons-outline:user-group',
-    depends_on: ['members', 'campaigns'],
+    depends_on: ['members', 'campaigns', 'offerwalls', 'withdrawalrequests'],
     children: [
       {
         id: 'members',
@@ -69,6 +69,14 @@ const navigationConfig = [
         type: 'item',
         icon: 'material-outline:attach_money',
         url: 'app/offer-walls',
+        end: true,
+      },
+      {
+        id: 'withdrawalrequests',
+        title: 'Withdrawal Requests',
+        type: 'item',
+        icon: 'heroicons-solid:cash',
+        url: 'app/withdrawal-requests',
         end: true,
       },
     ],

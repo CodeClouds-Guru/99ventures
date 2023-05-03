@@ -174,7 +174,7 @@ class Paypal {
     let result = await MemberTransaction.updateMemberTransactionAndBalance(
       transaction_obj
     );
-    if (result) {
+    if (result.status) {
       const withdrawal_req_obj = {};
 
       console.log('withdrawal_req_obj', withdrawal_req_obj);

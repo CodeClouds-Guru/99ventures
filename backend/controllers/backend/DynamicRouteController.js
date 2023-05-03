@@ -43,7 +43,7 @@ class DynamicRouteController {
           '/',
           response.downloadable_file.fileName
         );
-        console.log(filepath);
+        // console.log(filepath);
         var stat = fileSystem.statSync(filepath);
         res.writeHead(200, {
           'Content-Type': response.downloadable_file.contentType || 'text/csv',
