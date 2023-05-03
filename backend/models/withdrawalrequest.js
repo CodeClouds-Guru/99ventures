@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'withdrawal_requests',
     }
   );
-  WithdrawalRequest.extra_fields = ['Member.first_name', 'User.alias_name'];
+  WithdrawalRequest.extra_fields = ['Member.first_name', 'User.alias_name','Member.username'];
   WithdrawalRequest.fields = {
     id: {
       field_name: 'id',
@@ -84,6 +84,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    '$Member.username$': {
+      field_name: 'Member.username',
+      db_name: '`Member`.`username`',
+      type: 'text',
+      placeholder: 'Member Username',
+      listing: false,
+      show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
     },
     amount: {
       field_name: 'amount',

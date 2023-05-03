@@ -11,6 +11,7 @@ class WithdrawalRequestController extends Controller {
   //list
   async list(req, res) {
     var withdrawal_type = req.query.type
+   
     if(withdrawal_type === 'withdrawal-types'){
       let withdrawal_type_list = await WithdrawalType.findAll({attributes:['id','name','slug']})
       return {
@@ -20,19 +21,61 @@ class WithdrawalRequestController extends Controller {
       }
     }
     else{
+      let page = req.query.page || 1;
+      let limit = parseInt(req.query.show) || 10; // per page record
+      let offset = (page - 1) * limit;
       var options = super.getQueryOptions(req);
+      var option_where = options.where || {};
+      let company_portal_id = req.headers.site_id;
+      var query_where = req.query.where || '{}';
+      query_where = JSON.parse(query_where);
+      var new_option = {};
+      var and_query = {}
+      var  fields = this.model.fields
+      if('withdrawal_type_id' in query_where){
+        fields['$Member.username$'].listing = true
+        fields['$Member.username$'].searchable = true
+      }else{
+        fields['$Member.username$'].listing = false
+        fields['$Member.username$'].searchable = true
+      }
+      if('created_at' in query_where){
+        var and_query = {
+          created_at: {
+            [Op.between]: query_where.created_at,
+          },
+        };
+        if (Object.keys(query_where).length > 0) {
+          if (Op.and in option_where) {
+            new_option[Op.and] = {
+              ...option_where[Op.and],
+              ...and_query,
+            };
+          } else {
+            new_option[Op.and] = {
+              ...option_where,
+              ...and_query,
+            };
+          }
+        }
+        options.where = new_option;
+      }
       options.include = [
         {
           model: Member,
-          attributes: ['first_name', 'last_name'],
+          attributes: ['first_name', 'last_name','username'],
         },
         {
           model: User,
           attributes: ['alias_name'],
         },
       ];
-      const { docs, pages, total } = await this.model.paginate(options);
-      docs.forEach(function (record, key) {
+      options.limit = limit;
+      options.offset = offset;
+      options.subQuery = false;
+      let results = await this.model.findAndCountAll(options);
+      let pages = Math.ceil(results.count / limit);
+      results.rows.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
           record.dataValues['Member.first_name'] =
             record.dataValues.Member.dataValues.first_name +
@@ -45,7 +88,7 @@ class WithdrawalRequestController extends Controller {
         }
       });
       return {
-        result: { data: docs, pages, total },
+        result: { data: results.rows, pages, total:results.count },
         fields: this.model.fields,
       };
     }
