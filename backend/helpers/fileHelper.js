@@ -105,12 +105,12 @@ class FileHelper {
 
   //s3 bucket connection
   s3Connect() {
-    console.log({
-      accessKeyId: process.env.S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      region: process.env.AWS_DEFAULT_REGION,
-      signatureVersion: 'v4',
-    });
+    // console.log({
+    //   accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    //   secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    //   region: process.env.AWS_DEFAULT_REGION,
+    //   signatureVersion: 'v4',
+    // });
     let s3 = new AWS.S3({
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,

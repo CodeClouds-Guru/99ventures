@@ -215,7 +215,7 @@ class MemberAuthController {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: member_message };
+          req.session.flash = { message: member_message, success_status: true };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
@@ -380,6 +380,7 @@ class MemberAuthController {
           // country_code: Joi.number().optional().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
+          state: Joi.string().allow('').optional().label('State'),
           // email_alerts: Joi.array().allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
@@ -400,6 +401,7 @@ class MemberAuthController {
         req.body.zip_code = req.body.zipcode;
         request_data = req.body;
         request_data.updated_by = member_id;
+        request_data.username = member.username;
         // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
@@ -436,7 +438,7 @@ class MemberAuthController {
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
 
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
@@ -593,7 +595,7 @@ class MemberAuthController {
       member_message = 'Error occured';
     } finally {
       if (member_status) {
-        req.session.flash = { message: member_message };
+        req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }

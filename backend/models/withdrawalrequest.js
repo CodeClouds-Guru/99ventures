@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
       WithdrawalRequest.belongsTo(models.User, {
         foreignKey: 'transaction_made_by',
       });
+      WithdrawalRequest.hasOne(models.WithdrawalType, {
+        foreignKey: 'id',
+      });
     }
   }
   WithdrawalRequest.init(
@@ -45,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'withdrawal_requests',
     }
   );
-  WithdrawalRequest.extra_fields = ['Member.first_name', 'User.alias_name'];
+  WithdrawalRequest.extra_fields = ['Member.first_name', 'User.alias_name','Member.username'];
   WithdrawalRequest.fields = {
     id: {
       field_name: 'id',
@@ -72,19 +75,6 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
-    },
-    '$Member.first_name$': {
-      field_name: 'Member.first_name',
-      db_name: 'Member.first_name',
-      type: 'text',
-      placeholder: 'Member Name',
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: false,
     },
     amount: {
       field_name: 'amount',
@@ -151,19 +141,6 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    '$User.alias_name$': {
-      field_name: 'User.alias_name',
-      db_name: 'User.alias_name',
-      type: 'text',
-      placeholder: 'Transaction Made By',
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: false,
-    },
     note: {
       field_name: 'note',
       db_name: 'note',
@@ -190,6 +167,45 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
+    '$Member.username$': {
+      field_name: 'Member.username',
+      db_name: '`Member`.`username`',
+      type: 'text',
+      placeholder: 'Username',
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    '$Member.first_name$': {
+      field_name: 'Member.first_name',
+      db_name: 'Member.first_name',
+      type: 'text',
+      placeholder: 'Member Name',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    '$User.alias_name$': {
+      field_name: 'User.alias_name',
+      db_name: 'User.alias_name',
+      type: 'text',
+      placeholder: 'Transaction Made By',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    }
   };
   sequelizePaginate.paginate(WithdrawalRequest);
   return WithdrawalRequest;

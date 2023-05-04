@@ -434,10 +434,15 @@ class AuthController {
       let files = [];
       files[0] = req.files.avatar;
       const fileHelper = new FileHelper(files, "users", req);
-      const file_name = await fileHelper.upload();
+      let file_name = await fileHelper.upload();
+      console.log('file_name',file_name)
+      let avatar_name = ''
+      if(file_name.status == true){
+        avatar_name = file_name.files[0].filename
+      }
       await User.update(
         {
-          avatar: file_name.files[0].filename,
+          avatar: avatar_name
         },
         { where: { id: user.id } }
       );

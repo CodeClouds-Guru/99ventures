@@ -6,7 +6,7 @@ $(() => {
 
     function callAndReplaceScripts(element) {
         const dataAttrs = $(element).data();
-        console.log('data-attrs', dataAttrs);
+        // console.log('data-attrs', dataAttrs);
         let params = {
             pageno: 1,
             perpage: 10,

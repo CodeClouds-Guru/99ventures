@@ -18,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
       MemberTransaction.belongsTo(models.Member, {
         foreignKey: 'member_id',
       });
+      MemberTransaction.hasOne(models.WithdrawalRequest, {
+        foreignKey: 'member_transaction_id',
+      });
       MemberTransaction.belongsToMany(models.Survey, {
         through: 'member_surveys',
         timestamps: false,
@@ -320,7 +323,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
-    // console.log(response);
+    console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
   return MemberTransaction;

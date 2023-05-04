@@ -40,7 +40,11 @@ class TicketController {
       console.error(error);
       req.session.flash = { error: 'Unable to save data.' };
     } finally {
-      if (change) req.session.flash = { message: 'Record updated.' };
+      if (change)
+        req.session.flash = {
+          message: 'Record updated.',
+          success_status: true,
+        };
     }
   }
 
@@ -95,7 +99,10 @@ class TicketController {
 
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-      req.session.flash = { message: 'Ticket submitted successfully.' };
+      req.session.flash = {
+        message: 'Ticket submitted successfully.',
+        success_status: true,
+      };
     } catch (error) {
       req.session.flash = { error: 'Unable to submit ticket.' };
     } finally {

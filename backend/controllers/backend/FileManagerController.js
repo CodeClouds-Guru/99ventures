@@ -260,7 +260,7 @@ class FileManagerController {
       }
       if (flag) {
         archiver.finalize();
-        console.log(archiver.zip.pointer() + ' total bytes');
+        // console.log(archiver.zip.pointer() + ' total bytes');
         res.setHeader("Content-Type", "application/zip");
         res.setHeader("Content-Disposition", "attachment; filename=files.zip");
         archiver.zip.pipe(res);
