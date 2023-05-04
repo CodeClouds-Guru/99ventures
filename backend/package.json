@@ -11,6 +11,7 @@
   "author": "Sourabh Das (sourabh.das@codeclouds.in)",
   "license": "ISC",
   "dependencies": {
+    "@paypal/payouts-sdk": "^1.1.1",
     "archiver": "^5.3.1",
     "aws-sdk": "^2.1204.0",
     "axios": "^1.2.2",

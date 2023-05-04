@@ -53,13 +53,19 @@ router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 
 router.get('/test-payment', async (req, res) => {
   const paypal_class = new Paypal();
-  const create_resp = await paypal_class.paypalPayout(req);
+  const create_resp = await paypal_class.payout([
+    {
+      email: 'sb-vwa0c25891350@business.example.com',
+      withdraw_request_id: 0,
+      currency: 'USD',
+      amount: 1.00
+    }
+  ]);
   res.send({
-    l: create_resp,
-  });
+    l: create_resp
+  })
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
-
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
   var page_content = await pagePerser.preview(req);

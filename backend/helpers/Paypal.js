@@ -6,7 +6,7 @@ const {
   WithdrawalRequest,
   Member,
 } = require('../models');
-// const paypal = require('@paypal/payouts-sdk');
+const paypal = require('@paypal/payouts-sdk');
 class Paypal {
   constructor() {
     this.clientId =
@@ -16,20 +16,24 @@ class Paypal {
     this.auth = Buffer.from(this.clientId + ':' + this.clientSecret).toString(
       'base64'
     );
-    this.baseURL = {
-      sandbox: 'https://api-m.sandbox.paypal.com',
-      production: 'https://api-m.paypal.com',
-    };
-    this.instance = axios.create({
-      baseURL: this.baseURL.sandbox,
-      timeout: 10000,
-    });
-    this.postAndReturnData = this.postAndReturnData.bind(this);
-    this.paypalConfig = this.paypalConfig.bind(this);
-    this.generateAccessToken = this.generateAccessToken.bind(this);
-    this.createOrder = this.createOrder.bind(this);
+    // this.baseURL = {
+    //   sandbox: 'https://api-m.sandbox.paypal.com',
+    //   production: 'https://api-m.paypal.com',
+    // };
+    // this.instance = axios.create({
+    //   baseURL: this.baseURL.sandbox,
+    //   timeout: 10000,
+    // });
+    // this.postAndReturnData = this.postAndReturnData.bind(this);
+    // this.paypalConfig = this.paypalConfig.bind(this);
+    // this.generateAccessToken = this.generateAccessToken.bind(this);
+    // this.createOrder = this.createOrder.bind(this);
+    this.payout = this.payout.bind(this);
+    this.getPaypalClient = this.getPaypalClient.bind(this);
+    this.createPayouts = this.createPayouts.bind(this);
   }
 
+  /*
   async postAndReturnData(partUrl) {
     let resp = {
       status: false,
@@ -42,7 +46,7 @@ class Paypal {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json, text/plain, */*',
+          Accept: 'application/json, text/plain',
           Authorization: `Basic ${this.auth}`,
         },
       });
@@ -226,120 +230,90 @@ class Paypal {
       return response.data;
     }
   }
+  */
 
-  //paypal payout
-  async paypalPayout(){
-    // let clientId = "AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6";
-    // let clientSecret = "EK-L43SaFqcrTtmRgABvcZHVUToVoHxMtOGeIBkk-TdWKDg4lirK-PZ7zcZq0F26LwiWDVPf4a4VLaBv";
-    // let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
-    // let client = new paypal.core.PayPalHttpClient(environment);
-
-    // let requestBody = {
-    //     "sender_batch_header": {
-    //       "recipient_type": "EMAIL",
-    //       "email_message": "SDK payouts test txn",
-    //       "note": "Enjoy your Payout!!",
-    //       "sender_batch_id": "Test_sdk_1",
-    //       "email_subject": "This is a test transaction from SDK"
-    //     },
-    //     "items": [{
-    //       "note": "Demo note",
-    //       "amount": {
-    //         "currency": "USD",
-    //         "value": "1.00"
-    //       },
-    //       "receiver": "sb-qk43ey25302643@personal.example.com",
-    //       "sender_item_id": "Test_txn_1"
-    //     }]
-    //   }
-
-    // // Construct a request object and set desired parameters
-    // try{
-    // // Here, PayoutsPostRequest() creates a POST request to /v1/payments/payouts
-    //   let request = new paypal.payouts.PayoutsPostRequest();
-    //   request.requestBody(requestBody);
-
-    //   // Call API with your client and get a response for your call
-    //   let response = await client.execute(request);
-    //   console.log(`Response: ${JSON.stringify(response)}`);
-    //   // If call returns body in response, you can get the deserialized version from the result attribute of the response.
-    //   console.log(`Payouts Create Response: ${JSON.stringify(response.result)}`);
-    //   return{
-    //     status: true,
-    //     result: response.result
-    //   }
-
-    // }catch(e){
-    //   return{
-    //     status: false,
-    //     error:e
-    //   }
-    // }
+  /**
+   * Function to return paypal client
+   * @returns {paypal.core.PayPalHttpClient}
+   */
+  getPaypalClient() {
+    let clientId = this.clientId;
+    let clientSecret = this.clientSecret;
+    let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    return new paypal.core.PayPalHttpClient(environment);
+  }
 
 
-    
-    // Create auth token with API
-    try{
-      const response = await axios.post(
-        `https://api-m.sandbox.paypal.com/v1/oauth2/token`,
-        {
-          grant_type: 'client_credentials',
-        },
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          auth: {
-            username: "AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6",
-            password: "EK-L43SaFqcrTtmRgABvcZHVUToVoHxMtOGeIBkk-TdWKDg4lirK-PZ7zcZq0F26LwiWDVPf4a4VLaBv",
-          },
-        },
-      );
-      // make Paypal API calls with your access token here!!
-    const authToken = response.data.access_token;
-    //make bulk payout request 
-    const result = await axios.post(
-      `https://api-m.sandbox.paypal.com/v1/payments/payouts`,
-      {
-        sender_batch_header: {
-          recipient_type: 'EMAIL',
-          email_subject: 'You have a payout!',
-          email_message:
-            'You have received a payout! Thanks for using our service!',
-        },
-        items: [
-          {
-            receiver: 'sb-qk43ey25302643@personal.example.com',
-            amount: {
-              value: 0.8,
-              currency: 'USD',
-            },
-          },
-          // add more payout items here as you need
-        ],
+  /**
+   * Function to create Request Body
+   * @param {Array} items 
+   * @returns {Object}
+   */
+  createRequestBody(items) {
+    return {
+      "sender_batch_header": {
+        "recipient_type": "EMAIL",
+        "email_message": "Payments",
+        "note": "Payment from Moresurveys",
+        "sender_batch_id": `MS-Batch-TXN-${Date.now()}`,
+        "email_subject": "Congratulations! Payment credited to your paypal account"
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    );
-
-      return {
-        status:true,
-        result:result
-      }
-    }catch(e){
-      return {
-        status: false,
-        error: e
-      }
+      "items": items
     }
-    
-    
+  }
 
-    
+  /**
+   * Function to perform payout
+   * @returns {Boolean}
+   * @param {Array} payload
+   * [{ email: 'sb-vwa0c25891350@business.example.com', withdraw_request_id: 0, currency: 'USD',amount: 1.00}]
+   */
+  async payout(payload) {
+    let items = payload.map(item => {
+      return {
+        "note": `Payment for withdrawal request #${item.withdraw_request_id}`,
+        "amount": {
+          "currency": item.currency || 'USD',
+          "value": item.amount,
+        },
+        "receiver": item.email,
+        "sender_item_id": `MS-Payout-TXN-${Date.now()}-${item.withdraw_request_id}`,
+      }
+    });
+    const requestBody = this.createRequestBody(items);
+    let request = new paypal.payouts.PayoutsPostRequest();
+    request.requestBody(requestBody);
+    const resp = await this.createPayouts(request);
+    return resp;
+  }
+
+  /**
+   * Function to make the transaction
+   * @param {Object} request 
+   * @returns {Object}
+   */
+  async createPayouts(request) {
+    const client = this.getPaypalClient();
+    try {
+      let response = await client.execute(request);
+      return response;
+    }
+    catch (e) {
+      var err = {}
+      if (e.statusCode) {
+        const error = JSON.parse(e.message)
+        err = {
+          "status_code": e.statusCode,
+          "failure_response": error,
+          "headers": e.headers
+        }
+        console.log(err)
+      } else {
+        err.e = e
+        console.log(e)
+      }
+      return { status: false, error: err }
+    }
   }
 }
 
