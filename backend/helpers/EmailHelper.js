@@ -121,6 +121,8 @@ class EmailHelper {
   }
   //replace email variables
   async replaceVariables(details, replace_data, email_body) {
+    const safeEval = require('safe-eval');
+
     if (replace_data) {
       replace_data.forEach(function (value, key) {
         let new_value = value;
@@ -129,7 +131,9 @@ class EmailHelper {
         replace_data[key] = eval('details' + '.' + new_value);
         email_body = email_body.replaceAll(value, replace_data[key]);
       });
+      
     }
+    // email_body = safeEval('`' + email_body + '`', details);
     return email_body;
   }
   //send mail
@@ -141,6 +145,7 @@ class EmailHelper {
       let email_configurations = await EmailConfiguration.findAll({
         where: { company_portal_id: company_portal_id },
       });
+      console.log('email_configurations',email_configurations)
       if (email_configurations) {
         var transporter = nodemailer.createTransport({
           host: email_configurations[0].email_server_host, //"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",

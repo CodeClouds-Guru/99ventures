@@ -41,6 +41,7 @@ class MemberAuthController {
     this.memberWithdrawal = this.memberWithdrawal.bind(this);
     this.withdraw = this.withdraw.bind(this);
     this.sendMailEvent = this.sendMailEvent.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
   }
   //login
   async login(req, res) {
@@ -746,6 +747,76 @@ class MemberAuthController {
         data: e,
       });
     }
+  }
+  //meber forgot password
+  async forgotPassword(req, res) {
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+    });
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      let error_msg = error.details.map((err) => err.message);
+      req.session.flash = { error: error_msg.join(",") };
+      res.redirect('back');
+    }else{
+      //user details
+      const member = await Member.findOne({where: { email: value.email }});
+      if (!member) {
+        req.session.flash = { error: "Email is not registered" };
+        res.redirect('back');
+      }else{
+        req.headers.site_id = member.company_portal_id
+        let reset_obj = { id: member.id, email: member.email,date:new Date() };
+        reset_obj = JSON.stringify(reset_obj);
+        let base64data = Buffer.from(reset_obj, "utf8");
+        let base64String = base64data.toString("base64");
+        //send mail
+        let evntbus = eventBus.emit('send_email', {
+          action: 'Forgot Password',
+          data: {
+            'email': value.email,
+            'details':{'reset_password_link':process.env.CLIENT_API_PUBLIC_URL + "/reset-password?hash=" + base64String}
+          },
+          req:req
+        });
+        req.session.flash = { error: "Reset password mail has been sent to your email" };
+        res.redirect('back');
+      }
+    }
+  }
+  //reset password
+  async resetPassword(req, res) {
+    const schema = Joi.object({
+      hash: Joi.string().required(),
+      password: Joi.string()
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .required(),
+    });
+
+    const { error, value } = schema.validate(req.body);
+    let hash_obj = Buffer.from(value.hash, "base64");
+    hash_obj = hash_obj.toString("utf8");
+    hash_obj = JSON.parse(hash_obj);
+    console.log(hash_obj)
+    if (error) {
+      req.session.flash = { error: "Link expired."};
+      res.redirect('/');
+    }
+    //user details
+    const member = await Member.findOne({ where: { id: hash_obj.id } });
+    if (!member) {
+      req.session.flash = { error: "Member not found."};
+      res.redirect('/');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(value.password, salt);
+    let update_user = await Member.update(
+      { password: password },
+      { where: { id: hash_obj.id } }
+    );
+    req.session.flash = { error: "Password updated."};
+    res.redirect('/');
   }
 }
 module.exports = MemberAuthController;
