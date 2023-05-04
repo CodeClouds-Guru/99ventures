@@ -20,13 +20,12 @@ const handler = {
 class Purespectrum {
 	constructor() {
 		this.instance = axios.create({
-			// baseURL: (process.env.DEV_MODE === 0) ? 'http://staging.spectrumsurveys.com/suppliers/v2/' : 'https://api.spectrumsurveys.com/suppliers/v2/',
-			baseURL: 'http://staging.spectrumsurveys.com/suppliers/v2/',
+			baseURL: process.env.PURESPECTRUM_BASEURL,
 			timeout: 20000,
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
-				'access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYzZkZmYxY2ZlNWEzMGI4ZTI4NjNjYiIsInVzcl9pZCI6IjI0MDgiLCJpYXQiOjE2NzM5Nzc4NDF9.nSZ01i3FsezOsunZmTxql3_QtS_jnaFWm4ZXfYFTtw4'
+				'access-token': process.env.PURESPECTRUM_ACCESS_TOKEN
 			},
 		});
 		this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
@@ -48,23 +47,6 @@ class Purespectrum {
 		};
 
 		const response = await this.instance.post(partUrl);
-		return response.data;
-	}
-
-	async updateData(partUrl, payload) {
-		this.instance = {
-			...this.instance,
-			Accept: 'application/json, text/plain, */*',
-			'Content-Type': 'application/json',
-			data: payload,
-		};
-
-		const response = await this.instance.put(partUrl);
-		return response.data;
-	}
-
-	async deleteData(partUrl) {
-		const response = await this.instance.del(partUrl);
 		return response.data;
 	}
 
