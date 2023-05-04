@@ -24,6 +24,8 @@ const { genarateHash } = require('../../helpers/global');
 const { decodeHash } = require('../../helpers/global');
 const { response } = require('express');
 const { ResourceGroups } = require('aws-sdk');
+const db = require('../../models/index');
+const { QueryTypes } = require('sequelize');
 
 class MemberAuthController {
   constructor() {
@@ -718,6 +720,32 @@ class MemberAuthController {
   //send mail event call
   async sendMailEvent(mail_data) {
     return eventBus.emit('send_email', mail_data);
+  }
+
+  async getLoginStreak(req, res) {
+    try {
+      //login streak
+      let login_streak = await db.sequelize.query(
+        'SELECT MAX(streak) AS streak FROM ( SELECT member_id, `created_at`, DATEDIFF(NOW(), `created_at`), @streak := IF( DATEDIFF(NOW(), `created_at`) - @days_diff > 1, @streak, IF(@days_diff := DATEDIFF(NOW(), `created_at`), @streak+1, @streak+1)) AS streak FROM member_activity_logs CROSS JOIN (SELECT @streak := 0, @days_diff := -1) AS vars WHERE member_id = ? AND `created_at` <= NOW() ORDER BY `created_at` DESC) AS t;',
+        {
+          replacements: [req.session.member.id],
+          type: QueryTypes.SELECT,
+        }
+      );
+      res.json({
+        status: true,
+        data: {
+          streak: login_streak[0].streak,
+          member_firstname: req.session.member.first_name,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+      res.json({
+        status: false,
+        data: e,
+      });
+    }
   }
 }
 module.exports = MemberAuthController;

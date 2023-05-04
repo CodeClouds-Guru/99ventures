@@ -51,13 +51,15 @@ router.put('/profile/update', MemberAuthController.profileUpdate);
 
 router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 
-router.get('/test-payment',async(req,res) => {
-    const paypal_class = new Paypal();
-    const create_resp = await paypal_class.paypalPayout(req);
-    res.send({
-      l:create_resp
-    })
-})
+router.get('/test-payment', async (req, res) => {
+  const paypal_class = new Paypal();
+  const create_resp = await paypal_class.paypalPayout(req);
+  res.send({
+    l: create_resp,
+  });
+});
+router.get('/get-login-streak', MemberAuthController.getLoginStreak);
+
 router.get('/404', async (req, res) => {
   var pagePerser = new PageParser('404');
   var page_content = await pagePerser.preview(req);
