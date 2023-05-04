@@ -408,7 +408,7 @@ $(() => {
       dataType: 'json',
       url: '/get-login-streak',
       success: function (resp, status, xhr) {
-        console.log('resp ', resp);
+        // console.log('resp ', resp);
         str =
           '<p class="m-0">Congrats <strong>' +
           resp.data.member_firstname +
