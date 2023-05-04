@@ -401,6 +401,7 @@ class MemberAuthController {
         req.body.zip_code = req.body.zipcode;
         request_data = req.body;
         request_data.updated_by = member_id;
+        request_data.username = member.username;
         // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
