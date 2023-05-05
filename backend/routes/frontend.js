@@ -50,17 +50,41 @@ router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
 
 router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
+router.post('/member-forgot-password', MemberAuthController.forgotPassword);
+router.post('/save-password', MemberAuthController.resetPassword);
 
 router.get('/test-payment', async (req, res) => {
   const paypal_class = new Paypal();
   const create_resp = await paypal_class.payout([
     {
       email: 'sb-vwa0c25891350@business.example.com',
-      withdraw_request_id: 0,
+      member_transaction_id: 1,
       currency: 'USD',
-      amount: 1.00
+      amount: 1.00,
+    },
+    {
+      email: 'sb-vwa0c25891350@business.example.com',
+      member_transaction_id: 1,
+      currency: 'USD',
+      amount: 1.00,
     }
   ]);
+  res.send({
+    l: create_resp
+  })
+});
+router.get('/confirm-payment/:batchid', async (req, res) => {
+  let batch_id = req.params.batchid;
+  let requ = {
+    event_type:"PAYMENT.PAYOUTSBATCH.SUCCESS",
+    resource:{
+      batch_header:{
+        payout_batch_id:batch_id
+      }
+    }
+  }
+  const paypal_class = new Paypal();
+  const create_resp = await paypal_class.getPayouts(requ);
   res.send({
     l: create_resp
   })

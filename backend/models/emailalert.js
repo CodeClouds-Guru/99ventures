@@ -69,11 +69,24 @@ module.exports = (sequelize, DataTypes) => {
             type: QueryTypes.DELETE,
           }
         );
-        email_alerts = email_alerts.map((alert) => {
-          return { email_alert_id: alert, member_id: member_id };
-        });
-        //bulck create member email alert
-        await queryInterface.bulkInsert('email_alert_member', email_alerts);
+        if (
+          email_alerts &&
+          Array.isArray(email_alerts) &&
+          email_alerts.length > 0
+        ) {
+          email_alerts = email_alerts.map((alert) => {
+            return { email_alert_id: alert, member_id: member_id };
+          });
+          //bulck create member email alert
+          await queryInterface.bulkInsert('email_alert_member', email_alerts);
+        } else {
+          await queryInterface.bulkInsert('email_alert_member', [
+            {
+              email_alert_id: email_alerts,
+              member_id: member_id,
+            },
+          ]);
+        }
 
         resp = true;
       } catch (error) {

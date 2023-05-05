@@ -1,9 +1,7 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-const sequelizePaginate = require('sequelize-paginate')
-const Joi = require('joi')
+const { Model } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
 module.exports = (sequelize, DataTypes) => {
   class IpLog extends Model {
     /**
@@ -15,36 +13,59 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  IpLog.init({
-    member_id: DataTypes.BIGINT,
-    geo_location: DataTypes.STRING,
-    latitude: DataTypes.STRING,
-    longitude: DataTypes.STRING,
-    ip: DataTypes.STRING,
-    isp: DataTypes.STRING,
-    browser: DataTypes.STRING,
-    browser_language: DataTypes.STRING,
-    fraud_score: DataTypes.INTEGER,
-    proxy: DataTypes.TINYINT,
-    vpn: DataTypes.TINYINT,
-    tor: DataTypes.TINYINT,
-    bot_status: DataTypes.TINYINT,
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: "TIMESTAMP",
-    updated_at: "TIMESTAMP",
-    deleted_at: "TIMESTAMP",
-  }, {
-    sequelize,
-    modelName: 'IpLog',
-    timestamps: true,
-    paranoid: true,
-    createdAt: "created_at", // alias createdAt as created_date
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    tableName: "ip_logs",
-  });
+  IpLog.init(
+    {
+      member_id: DataTypes.BIGINT,
+      geo_location: DataTypes.STRING,
+      latitude: DataTypes.STRING,
+      longitude: DataTypes.STRING,
+      ip: DataTypes.STRING,
+      isp: DataTypes.STRING,
+      browser: DataTypes.STRING,
+      browser_language: DataTypes.STRING,
+      fraud_score: DataTypes.INTEGER,
+      proxy: {
+        type: DataTypes.TINYINT,
+        get() {
+          return this.getDataValue('proxy') == 1 ? 'Yes' : 'No';
+        },
+      },
+      vpn: {
+        type: DataTypes.TINYINT,
+        get() {
+          return this.getDataValue('vpn') == 1 ? 'Yes' : 'No';
+        },
+      },
+      tor: {
+        type: DataTypes.TINYINT,
+        get() {
+          return this.getDataValue('tor') == 1 ? 'Yes' : 'No';
+        },
+      },
+      bot_status: {
+        type: DataTypes.TINYINT,
+        get() {
+          return this.getDataValue('bot_status') == 1 ? 'Yes' : 'No';
+        },
+      },
+      created_by: DataTypes.BIGINT,
+      updated_by: DataTypes.BIGINT,
+      deleted_by: DataTypes.BIGINT,
+      created_at: 'TIMESTAMP',
+      updated_at: 'TIMESTAMP',
+      deleted_at: 'TIMESTAMP',
+    },
+    {
+      sequelize,
+      modelName: 'IpLog',
+      timestamps: true,
+      paranoid: true,
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'ip_logs',
+    }
+  );
 
   //fields
   IpLog.fields = {
@@ -255,8 +276,8 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
-    }
-  }
-  sequelizePaginate.paginate(IpLog)
+    },
+  };
+  sequelizePaginate.paginate(IpLog);
   return IpLog;
 };
