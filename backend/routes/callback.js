@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
-
+const Paypal = require('../helpers/Paypal');
 const OfferwallPostbackControllerClass = require('../controllers/callback/OfferwallPostbackController');
 const OfferwallPostbackController = new OfferwallPostbackControllerClass();
 const SurveycallbackControllerClass = require('../controllers/callback/SurveycallbackController');
@@ -80,6 +80,11 @@ router.get('/test-hbs', (req, res) => {
   const html = template({ PositionsTotal: 34 });
   res.send(html);
 })
+router.get('/confirm-payment/', async (req,res) => {
+  const paypal_class = new Paypal();
+  response = await paypal_class.getPayouts(req);
+  res.send(response)
+});
 module.exports = {
   prefix: '/callback',
   router,

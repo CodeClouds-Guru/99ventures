@@ -40,6 +40,8 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       status: DataTypes.TINYINT,
       note: DataTypes.STRING,
+      batch_id: DataTypes.STRING,
+      payment_gateway_json: DataTypes.JSON,
       amount_action: {
         type: DataTypes.ENUM(
           'admin_adjustment',
@@ -49,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
-          rawValue = rawValue.replaceAll('_', ' ');
+          rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
           return rawValue
             .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
               return index == 0 ? word.toUpperCase() : word.toLowerCase();

@@ -1,7 +1,7 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
 const { Op } = require('sequelize');
-const { Member, User,WithdrawalType } = require('../../models/index');
+const { Member, User,WithdrawalType,MemberTransaction,WithdrawalRequest } = require('../../models/index');
 class WithdrawalRequestController extends Controller {
   constructor() {
     super('WithdrawalRequest');
@@ -143,6 +143,62 @@ class WithdrawalRequestController extends Controller {
         // response = await paypal_class.successPayment(req, res);
         response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request approved';
+        let all_withdrawal_req = await this.model.findAll({where:{
+                                            id: {
+                                              [Op.in] : model_ids
+                                          }
+                                        },
+                                        attributes:['id','member_id','amount','currency','payment_email','member_transaction_id'],
+                                        include:{
+                                          model: Member,
+                                          attributes: ['first_name', 'last_name','username'],
+                                        }
+                                      })
+        var items = []  
+        var transaction_ids = []   
+        let transaction_id = ''      
+        for (let record of all_withdrawal_req) {
+          //insert in transaction table
+          console.log(record)
+          if(record.member_transaction_id){
+            transaction_ids.push(record.member_transaction_id)
+            transaction_id = record.member_transaction_id
+          }else{
+            let transaction = await MemberTransaction.create({
+              type:'withdraw',
+              amount: record.amount,
+              status: '1',
+              member_id: record.member_id,
+              amount_action: 'member_withdrawal',
+              currency: record.currency,
+              completed_at: new Date()
+            })
+            transaction_ids.push(transaction.id)
+            transaction_id = transaction.id
+            await WithdrawalRequest.update({member_transaction_id:transaction_id},{where:{id:record.id}})
+          }
+          //paypal payload
+          items.push({
+            amount: record.amount,
+            currency: record.currency.toUpperCase(),
+            member_id: record.member_id,
+            email:record.payment_email,
+            first_name: record.dataValues.Member.dataValues.first_name,
+            last_name: record.dataValues.Member.dataValues.last_name,
+            member_transaction_id:transaction_id
+          })
+          
+        }
+        let company_portal_id = req.headers.site_id
+        //do bulk payment
+        const paypal_class = new Paypal(company_portal_id);
+        const create_resp = await paypal_class.payout(items)
+        if(create_resp.status){
+            await MemberTransaction.update({batch_id:create_resp.batch_id},{where:{id: {
+              [Op.in]: transaction_ids,
+            },}
+          })
+        }
         break;
       default:
         response_message = 'Payment processed';
