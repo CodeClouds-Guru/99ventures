@@ -57,7 +57,7 @@ $(() => {
   const formHeading = $('#form_heading').get(0);
   const logoutButton = $('#scripteed_logout_btn').get(0);
   const ticketCreateForm = $('#scripteed_create_ticket_form').get(0);
-  // const showFilename = $("#file_show");
+
   // const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
   // const changePasswordForm = $("#scripteed_change_password_form").get(0);
 
@@ -87,13 +87,8 @@ $(() => {
     $(formHeading).text('Sign Up');
   };
   var getUrlHash = () => {
-    return $(location).attr('href').includes('#') &&
-      $(location).attr('href').includes('?')
-      ? $(location).attr('href').split('#')[1].split('?')[0]
-      : $(location).attr('href').includes('#')
-      ? $(location).attr('href').split('#')[1]
-      : '';
-  };
+    return ($(location).attr('href').includes('#') && $(location).attr('href').includes('?')) ? $(location).attr('href').split('#')[1].split('?')[0] : $(location).attr('href').includes('#') ? $(location).attr('href').split('#')[1] : '';
+  }
   if (getUrlHash() === 'signup') {
     goToRegister();
   }
@@ -397,31 +392,4 @@ $(() => {
       .attr('method', 'post');
     $('#scripteed_logout_form').submit();
   });
-
-  var pathname = window.location.pathname;
-  pathname = pathname.replace('/', '');
-
-  var str = '';
-  if (pathname === 'dashboard') {
-    $.ajax({
-      type: 'GET',
-      dataType: 'json',
-      url: '/get-login-streak',
-      success: function (resp, status, xhr) {
-        console.log('resp ', resp);
-        str =
-          '<p class="m-0">Congrats <strong>' +
-          resp.data.member_firstname +
-          '</strong>! You have been loggin in <strong>' +
-          resp.data.streak +
-          '</strong> days in a row! Excellent, keep up the good work!!</p>';
-        $('#header_streak_or_refresh').append(str);
-      },
-    });
-  }
-  if (pathname === 'paid-surveys') {
-    str =
-      '<p class="m-0">Please <a href="javascript:location.reload();" class="text-reset fw-medium">refresh your page</a> for the latest surveys matched for you</p>';
-    $('#header_streak_or_refresh').append(str);
-  }
 });
