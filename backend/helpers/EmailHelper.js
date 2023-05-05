@@ -145,7 +145,7 @@ class EmailHelper {
       let email_configurations = await EmailConfiguration.findAll({
         where: { company_portal_id: company_portal_id },
       });
-      console.log('email_configurations',email_configurations)
+      // console.log('email_configurations',email_configurations)
       if (email_configurations) {
         var transporter = nodemailer.createTransport({
           host: email_configurations[0].email_server_host, //"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
@@ -171,7 +171,7 @@ class EmailHelper {
           //text: 'That was easy!',
           html: body,
         };
-        console.log('Mail Data', mailData);
+        // console.log('Mail Data', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {

@@ -57,6 +57,8 @@ $(() => {
   const formHeading = $('#form_heading').get(0);
   const logoutButton = $('#scripteed_logout_btn').get(0);
   const ticketCreateForm = $('#scripteed_create_ticket_form').get(0);
+  const forgotPasswordForm = $('#scripteed_forgotpass_form').get(0);
+  const forgotPasswordBtn = $('#forgotpassword_button').get(0);
 
   // const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
   // const changePasswordForm = $("#scripteed_change_password_form").get(0);
@@ -78,6 +80,7 @@ $(() => {
     $(signupForm).addClass('d-none');
     $(signupBtn).removeClass('active');
     $(formHeading).text('Log In');
+    $(forgotPasswordForm).addClass('d-none');
   };
   var goToRegister = () => {
     $(signupForm).removeClass('d-none');
@@ -85,6 +88,15 @@ $(() => {
     $(loginForm).addClass('d-none');
     $(loginBtn).removeClass('active');
     $(formHeading).text('Sign Up');
+    $(forgotPasswordForm).addClass('d-none');
+  };
+  var goToForgotpassword = () => {
+    $(signupForm).addClass('d-none');
+    $(signupBtn).removeClass('active');
+    $(loginForm).addClass('d-none');
+    $(loginBtn).removeClass('active');
+    $(formHeading).text('Forgot Password');
+    $(forgotPasswordForm).removeClass('d-none');
   };
   var getUrlHash = () => {
     return ($(location).attr('href').includes('#') && $(location).attr('href').includes('?')) ? $(location).attr('href').split('#')[1].split('?')[0] : $(location).attr('href').includes('#') ? $(location).attr('href').split('#')[1] : '';
@@ -108,6 +120,10 @@ $(() => {
   $(signupLink).click(function (e) {
     e.preventDefault();
     goToRegister();
+  });
+  $(forgotPasswordBtn).click((e) => {
+    e.preventDefault();
+    goToForgotpassword();
   });
   var loginFormSanitisation = () => {
     if (
@@ -138,6 +154,19 @@ $(() => {
       $(signupForm).attr('method', 'POST');
     } else {
       console.log('OOPS!!! Signup action not set');
+    }
+  };
+  var forgotPasswordFormSanitisation = () => {
+    if (
+      forgotPasswordForm &&
+      ['email'].every(
+        (val) => Object.keys(forgotPasswordForm.elements).indexOf(val) > -1
+      )
+    ) {
+      $(forgotPasswordForm).attr('action', '/member-forgot-password');
+      $(forgotPasswordForm).attr('method', 'POST');
+    } else {
+      console.log('OOPS!!! Forgot password action not set');
     }
   };
   var ticketCreateFormSanitisation = () => {
@@ -246,6 +275,19 @@ $(() => {
       });
     }
   };
+  var forgotPasswordFomValidation = () => {
+    errorsArray = [];
+    $('span.alert-msg').remove();
+    const email = $(forgotPasswordForm).find('input[name="email"]').get(0);
+    if ($(email).val().trim().length === 0) {
+      errorsArray.push({ field: $(email), message: 'Please enter a email' });
+    } else if (!validateEmail($(email).val().trim())) {
+      errorsArray.push({
+        field: $(email),
+        message: 'Please enter a valid email',
+      });
+    }
+  };
   // var profileDetailsFormValidation = () => {
   //     errorsArray = [];
   //     $('span.alert-msg').remove();
@@ -321,6 +363,9 @@ $(() => {
   if (ticketCreateForm) {
     ticketCreateFormSanitisation();
   }
+  if(forgotPasswordForm){
+    forgotPasswordFormSanitisation();
+  }
   $(loginForm).submit((e) => {
     loginFomValidation();
     if (errorsArray.length === 0) {
@@ -341,6 +386,15 @@ $(() => {
   });
   $(ticketCreateForm).submit((e) => {
     ticketCreateFormValidation();
+    if (errorsArray.length === 0) {
+      $(this).trigger(e.type);
+    } else {
+      e.preventDefault();
+      displayErrors();
+    }
+  });
+  $(forgotPasswordForm).submit((e) => {
+    forgotPasswordFomValidation();
     if (errorsArray.length === 0) {
       $(this).trigger(e.type);
     } else {
