@@ -69,9 +69,10 @@ class MemberAuthController {
 
     let member_status = true;
     let member_message = 'Logged in successfully!';
+    var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
     const schema = Joi.object({
       password: Joi.string()
-        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+        //.pattern(new RegExp('^[a-zA-Z0-9]{8,15}$'))
         .required(),
       email: Joi.string().email().required(),
       remember_me: Joi.optional(),
@@ -80,6 +81,10 @@ class MemberAuthController {
     if (error) {
       member_status = false;
       member_message = error.details.map((err) => err.message);
+    }
+    if(!password_regex.test(value.password)){
+      member_status = false;
+      member_message = "Password does not match the pattern.";
     }
     if (!member) {
       member_status = false;
@@ -781,7 +786,7 @@ class MemberAuthController {
           },
           req:req
         });
-        req.session.flash = { error: "Reset password mail has been sent to your email" };
+        req.session.flash = { message: "Reset password mail has been sent to your email",success_status:true };
         res.redirect('back');
       }
     }
@@ -817,7 +822,7 @@ class MemberAuthController {
       { password: password },
       { where: { id: hash_obj.id } }
     );
-    req.session.flash = { error: "Password updated."};
+    req.session.flash = { message: "Password updated.",success_status:true};
     res.redirect('/');
   }
 }
