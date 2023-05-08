@@ -23,6 +23,7 @@ class Toluna {
 			timeout: 50000,
 			headers: {
 				'Content-Type': 'application/json',
+                Accept: 'application/json;version=2.0', // it's mandatory
 			},
 		};
         this.panelSurviceAPI = `https://${process.env.IP_CORE_URL}/IntegratedPanelService/api`;
