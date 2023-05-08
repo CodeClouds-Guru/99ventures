@@ -1,0 +1,746 @@
+[
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS US",
+        "programid": "54174",
+        "currency": "USD",
+        "type": "Gift Cards",
+        "country": "US",
+        "products": [
+            {
+                "name": "GiftCard Pass | 90 Day Link Expiration",
+                "sku": "GCP-V-090",
+                "currency": "USD",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 1.00,
+                            "max": 2000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    },
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS UAE ",
+        "programid": "54411",
+        "currency": "AED",
+        "type": "Gift Cards",
+        "country": "AE",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "AEP-V-A90",
+                "currency": "AED",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 50.00,
+                            "max": 5000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    },    
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS AUS",
+        "programid": "54413",
+        "currency": "AUD",
+        "type": "Gift Cards",
+        "country": "AU",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "ACP-V-090",
+                "currency": "AUD",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 1.00,
+                            "max": 2000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    },
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS CA",
+        "programid": "54414",
+        "currency": "CAD",
+        "type": "Gift Cards",
+        "country": "CA",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "CCP-V-090",
+                "currency": "CAD",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 1.00,
+                            "max": 2000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    },
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS UK",
+        "programid": "54415",
+        "currency": "GBP",
+        "type": "Gift Cards",
+        "country": "UK",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "BCP-V-090",
+                "currency": "GBP",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 5.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    },
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Germany",
+        "programid": "54417",
+        "currency": "EUR",
+        "type": "Gift Cards",
+        "country": "DE",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "ECP-V-090",
+                "currency": "EUR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 5.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Ireland",
+        "programid": "54418",
+        "currency": "EUR",
+        "type": "Gift Cards",
+        "country": "IE",
+        "products": [
+            {
+                "name": "GiftCard PASS Ireland (EUR) - 90 Day Link",
+                "sku": "RCP-V-I90",
+                "currency": "EUR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 1.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    },
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Italy",
+        "programid": "54419",
+        "currency": "EUR",
+        "type": "Gift Cards",
+        "country": "IT",
+        "products": [
+            {
+                "name": "GiftCard PASS (EUR) - 90 Day Link",
+                "sku": "ECP-V-E90",
+                "currency": "EUR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 5.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Spain",
+        "programid": "54420",
+        "currency": "EUR",
+        "type": "Gift Cards",
+        "country": "ES",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "ECP-V-S90",
+                "currency": "EUR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 5.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - eGiftCards Brazil",
+        "programid": "54421",
+        "currency": "BRL",
+        "type": "Gift Cards",
+        "country": "BR",
+        "products": [
+            {
+                "name": "Carrefour eGift Card",
+                "sku": "BZG-V-CRF",
+                "currency": "BRL",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 20.00
+                        },
+                        {
+                            "value": 30.00
+                        },
+                        {
+                            "value": 50.00
+                        },
+                        {
+                            "value": 100.00
+                        },
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 200.00
+                        },
+                        {
+                            "value": 300.00
+                        },
+                        {
+                            "value": 400.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 600.00
+                        },
+                        {
+                            "value": 800.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "https://www.carrefoursa.com/",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            },
+            {
+                "name": "Uber eGift Card",
+                "sku": "BZG-V-UBR",
+                "currency": "BRL",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 20.00
+                        },
+                        {
+                            "value": 30.00
+                        },
+                        {
+                            "value": 40.00
+                        },
+                        {
+                            "value": 50.00
+                        },
+                        {
+                            "value": 100.00
+                        },
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 200.00
+                        },
+                        {
+                            "value": 250.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            },
+            {
+                "name": "Americanas.com eGift Card",
+                "sku": "BZG-V-AME",
+                "currency": "BRL",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 20.00
+                        },
+                        {
+                            "value": 30.00
+                        },
+                        {
+                            "value": 50.00
+                        },
+                        {
+                            "value": 100.00
+                        },
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 200.00
+                        },
+                        {
+                            "value": 300.00
+                        },
+                        {
+                            "value": 400.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 600.00
+                        },
+                        {
+                            "value": 800.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            },
+            {
+                "name": "iFood eGift Card",
+                "sku": "BZG-V-IFD",
+                "currency": "BRL",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 20.00
+                        },
+                        {
+                            "value": 30.00
+                        },
+                        {
+                            "value": 40.00
+                        },
+                        {
+                            "value": 50.00
+                        },
+                        {
+                            "value": 100.00
+                        },
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 200.00
+                        },
+                        {
+                            "value": 500.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - eGiftCards India",
+        "programid": "54422",
+        "currency": "INR",
+        "type": "Gift Cards",
+        "country": "IN",
+        "products": [
+            {
+                "name": "Amazon.in Gift Card INR | 90-Day Link",
+                "sku": "ING-V-A90",
+                "currency": "INR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 10.00,
+                            "max": 10000.00
+                        }
+                    ]
+                },
+                "base-url": "https://www.amazon.in/gp/css/gc/payment",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            },
+            {
+                "name": "Big Bazaar eGift Card INR | 90-Day Link",
+                "sku": "IGC-V-BB9",
+                "currency": "INR",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            },
+            {
+                "name": "Cafe Coffee Day eGift Card INR | 90-Day Link",
+                "sku": "IGC-V-CCD",
+                "currency": "INR",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 250.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 750.00
+                        },
+                        {
+                            "value": 1000.00
+                        },
+                        {
+                            "value": 2000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - eGiftCards South Africa",
+        "programid": "54423",
+        "currency": "ZAR",
+        "type": "Gift Cards",
+        "country": "ZA",
+        "products": [
+            {
+                "name": "Woolworths eGift Card",
+                "sku": "SAC-V-WLW",
+                "currency": "ZAR",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 250.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            },
+            {
+                "name": "Take A lot eGift Card",
+                "sku": "SAC-V-TAL",
+                "currency": "ZAR",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 100.00
+                        },
+                        {
+                            "value": 250.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "In-store"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Mexico",
+        "programid": "54424",
+        "currency": "MXN",
+        "type": "Gift Cards",
+        "country": "MX",
+        "products": [
+            {
+                "name": "Xbox MX eGift Card | 90-Day Link | 12-Month Exp.",
+                "sku": "MGC-V-XBX",
+                "currency": "MXN",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 200.00
+                        },
+                        {
+                            "value": 300.00
+                        },
+                        {
+                            "value": 600.00
+                        },
+                        {
+                            "value": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": []
+            },
+            {
+                "name": "Uber MX eGift Card | 90-Day Link | 13-Month Exp.",
+                "sku": "MGC-V-UBR",
+                "currency": "MXN",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 250.00
+                        },
+                        {
+                            "value": 500.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": []
+            },
+            {
+                "name": "Amazon.com.mx eGift Card | 90-Day Link | 24-Month Exp.",
+                "sku": "MGC-V-AMZ",
+                "currency": "MXN",
+                "denomination": {
+                    "fixed": [
+                        {
+                            "value": 150.00
+                        },
+                        {
+                            "value": 300.00
+                        },
+                        {
+                            "value": 500.00
+                        },
+                        {
+                            "value": 1000.00
+                        },
+                        {
+                            "value": 1500.00
+                        },
+                        {
+                            "value": 2000.00
+                        }
+                    ]
+                },
+                "base-url": "www.amazon.com.mx/canjear",
+                "redemptions": []
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS France",
+        "programid": "54425",
+        "currency": "EUR",
+        "type": "Gift Cards",
+        "country": "FR",
+        "products": [
+            {
+                "name": "GiftCard PASS",
+                "sku": "ECP-V-F90",
+                "currency": "EUR",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 5.00,
+                            "max": 1000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "More Surveys -Virtual Incentives - GiftCard PASS Venmo",
+        "programid": "54426",
+        "currency": "USD",
+        "type": "Virtual Reward",
+        "country": "US",
+        "products": [
+            {
+                "name": "Venmo Payout (USD)",
+                "sku": "VMO-V-090",
+                "currency": "USD",
+                "denomination": {
+                    "fixed": [],
+                    "range": [
+                        {
+                            "min": 0.01,
+                            "max": 10000.00
+                        }
+                    ]
+                },
+                "base-url": "",
+                "redemptions": [
+                    {
+                        "name": "Online"
+                    }
+                ]
+            }
+        ]
+    }
+]
