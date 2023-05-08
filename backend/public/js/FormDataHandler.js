@@ -1,5 +1,6 @@
 $(() => {
   var errorsArray = [];
+  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
   var displayErrors = () => {
     $('span.alert-msg').remove();
     errorsArray.forEach((item) => {
@@ -201,6 +202,12 @@ $(() => {
         message: 'Password should be greater than 7 characters',
       });
     }
+    if (!password_regex.test($(password).val().trim())) {
+      errorsArray.push({
+        field: $(password),
+        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+      });
+    }
   };
   var signupFormValidation = () => {
     errorsArray = [];
@@ -238,6 +245,12 @@ $(() => {
         message: 'Password should be greater than 7 characters',
       });
     }
+    if (!password_regex.test($(password).val().trim())) {
+      errorsArray.push({
+        field: $(password),
+        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+      });
+    }
     if ($(password).val().trim() !== $(confirm_password).val().trim()) {
       errorsArray.push({
         field: $(confirm_password),
@@ -251,6 +264,7 @@ $(() => {
     const ticket_subject = $(ticketCreateForm)
       .find('input[name="ticket_subject"]')
       .get(0);
+    const ticket_file = $(ticketCreateForm).find('input[name="ticket_file"]').get(0);
     const ticket_file_name = $(ticketCreateForm)
       .find('input[name="ticket_file"]')
       .val()
@@ -266,6 +280,12 @@ $(() => {
       errorsArray.push({
         field: $(ticket_subject),
         message: 'Please enter ticket subject',
+      });
+    }
+    if (ticket_file_value[0].size > 2048000) {
+      errorsArray.push({
+        field: $(ticket_file),
+        message: 'Please select file within 2MB',
       });
     }
     if ($.trim(ticketContentField) === '') {
@@ -363,7 +383,7 @@ $(() => {
   if (ticketCreateForm) {
     ticketCreateFormSanitisation();
   }
-  if(forgotPasswordForm){
+  if (forgotPasswordForm) {
     forgotPasswordFormSanitisation();
   }
   $(loginForm).submit((e) => {
