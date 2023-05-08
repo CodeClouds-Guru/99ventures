@@ -76,11 +76,11 @@ class PageParser {
       }
       delete req.session.flash;
     }
-    const page_content = await this.generateHtml();
+    const page_content = await this.generateHtml(req);
     return page_content;
   }
 
-  async generateHtml() {
+  async generateHtml(req) {
     await this.getPageNLayout();
     let layout_html = this.pageLayout.html;
     const page_title = this.page.name;
@@ -132,10 +132,12 @@ class PageParser {
     });
     const template = Handlebars.compile(layout_html);
     const flash = this.getFlashObject();
+    const sc_request = { base_url: req.baseUrl, hostname: req.hostname, ip: req.ip, original_url: req.originalUrl, path: req.path, query: req.query, xhr: req.xhr };
     layout_html = template({
       user,
       error_message,
       flash,
+      sc_request
     });
     this.sessionMessage = '';
 
