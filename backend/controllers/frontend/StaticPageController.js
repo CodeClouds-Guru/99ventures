@@ -84,7 +84,7 @@ class StaticPageController {
         user,
         params
       );
-      console.log(util.inspect(parsed, false, null, true));
+      // console.log(util.inspect(parsed, false, null, true));
       const template = Handlebars.compile(parsed.script_html);
       var html = template({
         data: parsed.data,
@@ -95,7 +95,7 @@ class StaticPageController {
       resp = {
         ...resp,
         status: true,
-        html,
+        html
       };
     } catch (e) {
       console.error(e);

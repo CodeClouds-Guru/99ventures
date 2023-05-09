@@ -19,7 +19,7 @@ class PaymentConfigurationController extends Controller {
       const company_id = req.header("company_id") || 1;
       const mask_auth = req.query.auth || false;
       let payment_method_list = await PaymentMethod.findAll({
-        attributes: ["name", "slug", "logo", "status", "id"],
+        attributes: ["name", "slug", "status", "id"],
         include: {
           model: PaymentMethodCredential,
           required: false,
@@ -62,6 +62,7 @@ class PaymentConfigurationController extends Controller {
         };
       }
     } catch (err) {
+      console.error(err);
       this.throwCustomError('Unable to get data', 500);
     }
   }
