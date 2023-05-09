@@ -93,8 +93,16 @@ class SurveySyncController {
             
             if ('success' === allAttributes.apiStatus) {
                 const qualAttributes = allAttributes.qual_attributes;    
+                const existingQuestions = await SurveyQuestion.findAll({
+                    attributes: ['id', 'survey_provider_question_id'],
+                    where: {
+                        survey_provider_id: this.providerId
+                    }
+                });
+
                 const params = qualAttributes.map(attr => {
-                    return {
+                    let check = existingQuestions.find(row => row.survey_provider_question_id === attr.qualification_code)
+                    let params = {
                         question_text: attr.text,
                         name: attr.desc,
                         survey_provider_id: this.providerId,
@@ -102,8 +110,14 @@ class SurveySyncController {
                         question_type: psObj.getQuestionType(attr.type),
                         created_at: new Date()
                     }
+                    if(check) {
+                        params.id = check.id;
+                    }
+                    return params;
                 });
-                await SurveyQuestion.bulkCreate(params);
+                await SurveyQuestion.bulkCreate(params, {
+                    updateOnDuplicate: ["question_text", "question_type", "name"] 
+                });
                 res.json({ status: true, message: 'Question Updated' });
             } else {
                 res.json(allAttributes);
