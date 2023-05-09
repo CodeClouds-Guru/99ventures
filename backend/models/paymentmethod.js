@@ -27,18 +27,18 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       slug: DataTypes.STRING,
-      logo: {
-        type: DataTypes.STRING,
-        get() {
-          let rawValue = this.getDataValue('logo') || null;
-          const publicURL =
-            process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-          rawValue = rawValue
-            ? process.env.S3_BUCKET_OBJECT_URL + rawValue
-            : '';
-          return rawValue;
-        },
-      },
+      // logo: {
+      //   type: DataTypes.STRING,
+      //   get() {
+      //     let rawValue = this.getDataValue('logo') || null;
+      //     const publicURL =
+      //       process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+      //     rawValue = rawValue
+      //       ? process.env.S3_BUCKET_OBJECT_URL + rawValue
+      //       : '';
+      //     return rawValue;
+      //   },
+      // },
       status: DataTypes.ENUM('0', '1'),
     },
     {
