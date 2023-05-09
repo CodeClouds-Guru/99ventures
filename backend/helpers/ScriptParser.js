@@ -73,7 +73,7 @@ class ScriptParser {
             }
 
             //pagination
-            if ('pagination' in params && params.pagination === 'true') {
+            if ('pagination' in params && params.pagination === 'true' && page_count > 1) {
               script_html = await this.appendPagination(
                 script_html,
                 script_id,

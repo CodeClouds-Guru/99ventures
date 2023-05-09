@@ -245,7 +245,7 @@ module.exports = (sequelize, DataTypes) => {
     let transaction_data = {
       type: data.type,
       amount: parseFloat(data.amount),
-      status: 2,
+      status: data.status || 2,
       note: data.note,
       created_by: data.created_by,
       member_id: data.member_id,
@@ -254,6 +254,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_id: data.transaction_id || null,
       balance: modified_total_earnings,
       payload: data.payload || null,
+      currency: data.currency || 'USD'
     };
     // console.log(transaction_data);
     let transaction = await MemberTransaction.create(transaction_data, {
