@@ -15,6 +15,10 @@ const {
   MemberPaymentInformation,
   WithdrawalRequest,
   WithdrawalType,
+  CompanyPortal,
+  Company,
+  User,
+  Group,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -25,7 +29,7 @@ const { decodeHash } = require('../../helpers/global');
 const { response } = require('express');
 const { ResourceGroups } = require('aws-sdk');
 const db = require('../../models/index');
-const { QueryTypes } = require('sequelize');
+const { QueryTypes, Op } = require('sequelize');
 
 class MemberAuthController {
   constructor() {
@@ -69,7 +73,8 @@ class MemberAuthController {
 
     let member_status = true;
     let member_message = 'Logged in successfully!';
-    var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+    var password_regex =
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
     const schema = Joi.object({
       password: Joi.string()
         //.pattern(new RegExp('^[a-zA-Z0-9]{8,15}$'))
@@ -82,9 +87,9 @@ class MemberAuthController {
       member_status = false;
       member_message = error.details.map((err) => err.message);
     }
-    if(!password_regex.test(value.password)){
+    if (!password_regex.test(value.password)) {
       member_status = false;
-      member_message = "Password does not match the pattern.";
+      member_message = 'Password does not match the pattern.';
     }
     if (!member) {
       member_status = false;
@@ -525,22 +530,23 @@ class MemberAuthController {
     try {
       // const member_id = req.session.member.id;
       const member_id = member.id;
-      var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      var password_regex =
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
       const schema = Joi.object({
         old_password: Joi.string().required(),
         new_password: Joi.string().required(),
         confirm_password: Joi.string().required(),
       });
-      
+
       const { error, value } = schema.validate(req.body);
 
       if (error) {
         member_status = false;
         member_message = error.details.map((err) => err.message);
       }
-      if(!password_regex.test(value.new_password)){
+      if (!password_regex.test(value.new_password)) {
         member_status = false;
-        member_message = "Password does not match the pattern.";
+        member_message = 'Password does not match the pattern.';
       }
       //member details
       const isMatch = await bcrypt.compare(
@@ -583,9 +589,6 @@ class MemberAuthController {
     res.redirect('/');
   }
 
-  //Add Payment Credentials
-  async addPaymentCredentials(req, res) {}
-
   //Member Withdrawal
   async memberWithdrawal(req, res) {
     let member_status = false;
@@ -609,6 +612,7 @@ class MemberAuthController {
     } finally {
       if (member_status) {
         req.session.flash = { message: member_message, success_status: true };
+        // res.redirect('/');
       } else {
         req.session.flash = { error: member_message };
       }
@@ -624,20 +628,50 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
-    // console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
+
     //get member
     let member = await Member.findOne({
       where: { id: request_data.member_id },
-      include: {
-        model: MemberBalance,
-        as: 'member_amounts',
-        attributes: ['amount'],
-        where: { amount_type: 'cash' },
-      },
+      include: [
+        {
+          model: MemberBalance,
+          as: 'member_amounts',
+          attributes: ['amount'],
+          where: { amount_type: 'cash' },
+        },
+        {
+          model: CompanyPortal,
+          // attributes: ['compnay_id'],
+        },
+      ],
     });
     member = JSON.parse(JSON.stringify(member));
-    // console.log(member);
+
+    //get admin and super admin
+    const options = {};
+    options.include = [
+      {
+        model: Company,
+        where: {
+          id: member.CompanyPortal.company_id,
+        },
+        attributes: [],
+      },
+      {
+        model: Group,
+        attributes: [],
+        nested: false,
+        where: { name: 'Admin' },
+      },
+    ];
+    options.attributes = ['email'];
+    let result = await User.findAll(options);
+    result = JSON.parse(JSON.stringify(result));
+    // result = result.map((x) => x.email).join(',');
+    result = result.map((x) => x.email);
+
+    //get withdrawal type
     let withdrawal_type = await WithdrawalType.findOne({
       where: { id: request_data.withdrawal_type_id },
       attributes: [
@@ -650,6 +684,8 @@ class MemberAuthController {
       ],
     });
     withdrawal_type = JSON.parse(JSON.stringify(withdrawal_type));
+
+    //check all conditions
     if (withdrawal_amount < parseFloat(withdrawal_type.min_amount)) {
       return {
         member_status: false,
@@ -698,7 +734,7 @@ class MemberAuthController {
           created_by: request_data.member_id,
         });
     }
-    if (transaction_resp)
+    if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
         transaction_resp.transaction_id;
     // Insert in WxithdrawalRequest
@@ -710,15 +746,37 @@ class MemberAuthController {
       action: 'Member cash withdrawal request',
     });
 
-    // email body for member
-    let member_mail = await this.sendMailEvent({
-      action: 'Withdraw Request Member',
+    if (request_data.withdrawal_type_id == 2) {
+      // email body for member
+      let member_mail = await this.sendMailEvent({
+        action: 'Withdraw Request Member',
+        data: {
+          email: member.email,
+          details: { members: member, withdraw_requests: withdrawal_req_data },
+        },
+        req: req,
+      });
+    } else {
+      let member_mail = await this.sendMailEvent({
+        action: 'Member Cash Withdrawal',
+        data: {
+          email: member.email,
+          details: { members: member, withdraw_requests: withdrawal_req_data },
+        },
+        req: req,
+      });
+    }
+
+    // email body for admin
+    let admin_mail = await this.sendMailEvent({
+      action: 'Withdraw Request Admin',
       data: {
-        email: member.email,
+        email: result,
         details: { members: member, withdraw_requests: withdrawal_req_data },
       },
       req: req,
     });
+
     return {
       member_status: true,
       member_message:
@@ -766,30 +824,42 @@ class MemberAuthController {
     const { error, value } = schema.validate(req.body);
     if (error) {
       let error_msg = error.details.map((err) => err.message);
-      req.session.flash = { error: error_msg.join(",") };
+      req.session.flash = { error: error_msg.join(',') };
       res.redirect('back');
-    }else{
+    } else {
       //user details
-      const member = await Member.findOne({where: { email: value.email }});
+      const member = await Member.findOne({ where: { email: value.email } });
       if (!member) {
-        req.session.flash = { error: "Email is not registered" };
+        req.session.flash = { error: 'Email is not registered' };
         res.redirect('back');
-      }else{
-        req.headers.site_id = member.company_portal_id
-        let reset_obj = { id: member.id, email: member.email,date:new Date() };
+      } else {
+        req.headers.site_id = member.company_portal_id;
+        let reset_obj = {
+          id: member.id,
+          email: member.email,
+          date: new Date(),
+        };
         reset_obj = JSON.stringify(reset_obj);
-        let base64data = Buffer.from(reset_obj, "utf8");
-        let base64String = base64data.toString("base64");
+        let base64data = Buffer.from(reset_obj, 'utf8');
+        let base64String = base64data.toString('base64');
         //send mail
         let evntbus = eventBus.emit('send_email', {
           action: 'Forgot Password',
           data: {
-            'email': value.email,
-            'details':{'reset_password_link':process.env.CLIENT_API_PUBLIC_URL + "/reset-password?hash=" + base64String}
+            email: value.email,
+            details: {
+              reset_password_link:
+                process.env.CLIENT_API_PUBLIC_URL +
+                '/reset-password?hash=' +
+                base64String,
+            },
           },
-          req:req
+          req: req,
         });
-        req.session.flash = { message: "Reset password mail has been sent to your email",success_status:true };
+        req.session.flash = {
+          message: 'Reset password mail has been sent to your email',
+          success_status: true,
+        };
         res.redirect('back');
       }
     }
@@ -799,30 +869,31 @@ class MemberAuthController {
     const schema = Joi.object({
       hash: Joi.string().required(),
       password: Joi.string().required(),
-      c_password: Joi.optional().allow('')
+      c_password: Joi.optional().allow(''),
     });
-    try{
+    try {
       const { error, value } = schema.validate(req.body);
-      var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
-      let hash_obj = Buffer.from(value.hash, "base64");
-      hash_obj = hash_obj.toString("utf8");
+      var password_regex =
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      let hash_obj = Buffer.from(value.hash, 'base64');
+      hash_obj = hash_obj.toString('utf8');
       hash_obj = JSON.parse(hash_obj);
       if (error) {
-        req.session.flash = { error: "Link expired."};
+        req.session.flash = { error: 'Link expired.' };
         res.redirect('back');
-        return
+        return;
       }
-      if(!password_regex.test(value.password)){
-        req.session.flash = { error: "Password does not match the pattern."};
+      if (!password_regex.test(value.password)) {
+        req.session.flash = { error: 'Password does not match the pattern.' };
         res.redirect('back');
-        return
+        return;
       }
       //user details
       const member = await Member.findOne({ where: { id: hash_obj.id } });
       if (!member) {
-        req.session.flash = { error: "Member not found."};
+        req.session.flash = { error: 'Member not found.' };
         res.redirect('/');
-        return
+        return;
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -831,12 +902,15 @@ class MemberAuthController {
         { password: password },
         { where: { id: hash_obj.id } }
       );
-      req.session.flash = { message: "Password updated.",success_status:true};
+      req.session.flash = {
+        message: 'Password updated.',
+        success_status: true,
+      };
       res.redirect('/');
-    }catch(e){
-      console.log(e)
-      req.session.flash = { error: "Link expired."};
-        res.redirect('back');
+    } catch (e) {
+      console.log(e);
+      req.session.flash = { error: 'Link expired.' };
+      res.redirect('back');
     }
   }
 }

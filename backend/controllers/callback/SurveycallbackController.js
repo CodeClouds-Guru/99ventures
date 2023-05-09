@@ -39,8 +39,8 @@ class SurveycallbackController {
       await SurveycallbackController.prototype.schlesingerPostBack(req, res);
     } else if (provider === 'lucid') {
       return await SurveycallbackController.prototype.lucidPostback(req, res);
-    } else if(provider === 'toluna'){
-      await SurveycallbackController.prototype.tolunaPostback(req, res);
+    } else if(provider === 'toluna'){      
+      return await SurveycallbackController.prototype.tolunaPostback(req, res);
     }
     res.send(provider);
   }
@@ -458,6 +458,7 @@ class SurveycallbackController {
       const username = requestBody.UniqueCode;
       const surveyId = requestBody.SurveyId;
       const surveyRef = requestBody.SurveyRef;
+      const partnerAmount = requestBody.Revenue;
       try {
         let member = await Member.findOne({
           attributes: ['id', 'username'],
@@ -465,11 +466,23 @@ class SurveycallbackController {
             username: username,
           },
         });
-
+        
         if (member) {
+          const provider = await SurveyProvider.findOne({
+              attributes: ['currency_percent'],
+              where: {
+                  name: 'Toluna'
+              }
+          });
+          
+          let amount = 0;
+          if(partnerAmount !=0 && parseInt(provider.currency_percent) !=0) {
+            console.log('amount', (partnerAmount/100)/parseInt(provider.currency_percent))
+            amount = (partnerAmount/100)/parseInt(provider.currency_percent);
+          }
           const transaction_obj = {
             member_id: member.id,
-            amount: 0,
+            amount: amount,
             note: 'toluna survey (#' + surveyRef + ') completion',
             type: 'credited',
             amount_action: 'survey',
@@ -494,6 +507,7 @@ class SurveycallbackController {
       }
     }
     res.json({ message: 'success' });
+    return;
   }
 
 

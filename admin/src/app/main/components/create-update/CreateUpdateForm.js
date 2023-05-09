@@ -45,6 +45,7 @@ const CreateUpdate = (props) => {
     useEffect(() => {
         dispatch(setRevisionData([]));
         const editor = grapesjs.init({
+            selectorManager: { escapeName: name => name },
             allowScripts: 1,
             container: '#gjs',
             fromElement: false,
