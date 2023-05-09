@@ -27,7 +27,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "logo": "https://www.virtualrewardcenter.com/images/cards/PD689_giftcardpass_small.png"
             }
         ]
     },
@@ -56,7 +57,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "logo": "https://www.virtualrewardcenter.com/images/cards/PD4438_Gift-Card-Pass.png"
             }
         ]
     },    
@@ -88,7 +90,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "logo": "https://www.virtualrewardcenter.com/images/cards/PD2557_Gift-Card-Pass.png"
             }
         ]
     },
@@ -120,7 +123,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "logo": "https://www.virtualrewardcenter.com/images/cards/PD2731_Gift-Card-Pass.png"
             }
         ]
     },
@@ -152,7 +156,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/Gift-Card-Pass.png"
             }
         ]
     },
@@ -181,7 +186,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD2555_Gift-Card-Pass.png"
             }
         ]
     },
@@ -213,7 +219,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD3546_Gift-Card-Pass.png"
             }
         ]
     },
@@ -271,7 +278,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD2558_Gift-Card-Pass.png"
             }
         ]
     },
@@ -331,7 +339,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4119_Carrefour_GC BR.png"
             },
             {
                 "name": "Uber eGift Card",
@@ -370,7 +379,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4177_Uber_GC.png"
             },
             {
                 "name": "Americanas.com eGift Card",
@@ -421,7 +431,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4122_PD4122_Americanas.com_GC.png"
             },
             {
                 "name": "iFood eGift Card",
@@ -489,7 +500,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD3315_amazon_egc.jpg"
             },
             {
                 "name": "Big Bazaar eGift Card INR | 90-Day Link",
@@ -510,7 +522,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD3653_big-bazaar-gift-card-gift-voucher-500x500.jpg"
             },
             {
                 "name": "Cafe Coffee Day eGift Card INR | 90-Day Link",
@@ -540,7 +553,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4194_PD4194_36528_Cafe_Coffee_Day.jpg"
             }
         ]
     },
@@ -573,7 +587,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4495_woolworth-eGift-Card.png"
             },
             {
                 "name": "Take A lot eGift Card",
@@ -600,7 +615,8 @@
                     {
                         "name": "In-store"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4494_Takealot_GC.png"
             }
         ]
     },
@@ -632,7 +648,8 @@
                     ]
                 },
                 "base-url": "",
-                "redemptions": []
+                "redemptions": [],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4703_Microsoft-Xbox - Copy.png"
             },
             {
                 "name": "Uber MX eGift Card | 90-Day Link | 13-Month Exp.",
@@ -652,7 +669,8 @@
                     ]
                 },
                 "base-url": "",
-                "redemptions": []
+                "redemptions": [],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4702_Uber_product_card - Copy.png"
             },
             {
                 "name": "Amazon.com.mx eGift Card | 90-Day Link | 24-Month Exp.",
@@ -681,7 +699,8 @@
                     ]
                 },
                 "base-url": "www.amazon.com.mx/canjear",
-                "redemptions": []
+                "redemptions": [],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD4697_amazon.sg - Copy.jpg"
             }
         ]
     },
@@ -710,7 +729,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD2652_Gift-Card-Pass.png"
             }
         ]
     },
@@ -739,7 +759,8 @@
                     {
                         "name": "Online"
                     }
-                ]
+                ],
+                "url": "https://www.virtualrewardcenter.com/images/cards/PD5166_VenmoxVi-Card-Design 2 - Copy.png"
             }
         ]
     }

@@ -67,6 +67,20 @@ class VirtualIncentive {
         }
     }
 
+    async getProgramBalance(){
+        try{
+            const instance = axios.create({
+                ...this.instance
+            });
+            const response = await instance.get('/balances/programs');
+            return response.data
+        }
+        catch(error) {
+            console.error(error);
+            return error;
+        }
+    }
+
 }
 
 module.exports = VirtualIncentive
