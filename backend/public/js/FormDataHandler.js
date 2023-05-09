@@ -60,6 +60,7 @@ $(() => {
   const ticketCreateForm = $('#scripteed_create_ticket_form').get(0);
   const forgotPasswordForm = $('#scripteed_forgotpass_form').get(0);
   const forgotPasswordBtn = $('#forgotpassword_button').get(0);
+  const resetPasswordForm = $('#scripteed_resetpass_form').get(0);
 
   // const profileDetailsForm = $("#scripteed_profile_details_form").get(0);
   // const changePasswordForm = $("#scripteed_change_password_form").get(0);
@@ -105,7 +106,6 @@ $(() => {
   if (getUrlHash() === 'signup') {
     goToRegister();
   }
-
   $(loginBtn).click((e) => {
     e.preventDefault();
     goTologin();
@@ -168,6 +168,19 @@ $(() => {
       $(forgotPasswordForm).attr('method', 'POST');
     } else {
       console.log('OOPS!!! Forgot password action not set');
+    }
+  };
+  var resetPasswordFormSanitisation = () => {
+    if (
+      resetPasswordForm &&
+      ['password','c_password'].every(
+        (val) => Object.keys(resetPasswordForm.elements).indexOf(val) > -1
+      )
+    ) {
+      $(resetPasswordForm).attr('action', '/save-password');
+      $(resetPasswordForm).attr('method', 'POST');
+    } else {
+      console.log('OOPS!!! Reset password action not set');
     }
   };
   var ticketCreateFormSanitisation = () => {
@@ -308,6 +321,34 @@ $(() => {
       });
     }
   };
+  var resetPasswordFomValidation = () => {
+    errorsArray = [];
+    $('span.alert-msg').remove();
+    const password = $(resetPasswordForm).find('input[name="password"]').get(0);
+    const confirm_password = $(resetPasswordForm)
+      .find('input[name="c_password"]')
+      .get(0);
+    
+    if ($(password).val().trim().length < 8) {
+      errorsArray.push({
+        field: $(password),
+        message: 'Password should be greater than 7 characters',
+      });
+    }
+    if (!password_regex.test($(password).val().trim())) {
+      errorsArray.push({
+        field: $(password),
+        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+      });
+    }
+    if ($(password).val().trim() !== $(confirm_password).val().trim()) {
+      errorsArray.push({
+        field: $(confirm_password),
+        message: 'Password mismatched',
+      });
+    }
+    
+  };
   // var profileDetailsFormValidation = () => {
   //     errorsArray = [];
   //     $('span.alert-msg').remove();
@@ -386,6 +427,9 @@ $(() => {
   if (forgotPasswordForm) {
     forgotPasswordFormSanitisation();
   }
+  if(resetPasswordForm){
+    resetPasswordFormSanitisation();
+  }
   $(loginForm).submit((e) => {
     loginFomValidation();
     if (errorsArray.length === 0) {
@@ -415,6 +459,15 @@ $(() => {
   });
   $(forgotPasswordForm).submit((e) => {
     forgotPasswordFomValidation();
+    if (errorsArray.length === 0) {
+      $(this).trigger(e.type);
+    } else {
+      e.preventDefault();
+      displayErrors();
+    }
+  });
+  $(resetPasswordForm).submit((e) => {
+    resetPasswordFomValidation();
     if (errorsArray.length === 0) {
       $(this).trigger(e.type);
     } else {

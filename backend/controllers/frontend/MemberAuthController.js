@@ -525,19 +525,22 @@ class MemberAuthController {
     try {
       // const member_id = req.session.member.id;
       const member_id = member.id;
+      var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
       const schema = Joi.object({
         old_password: Joi.string().required(),
-        new_password: Joi.string()
-          .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-          .required(),
+        new_password: Joi.string().required(),
         confirm_password: Joi.string().required(),
       });
-
+      
       const { error, value } = schema.validate(req.body);
 
       if (error) {
         member_status = false;
         member_message = error.details.map((err) => err.message);
+      }
+      if(!password_regex.test(value.new_password)){
+        member_status = false;
+        member_message = "Password does not match the pattern.";
       }
       //member details
       const isMatch = await bcrypt.compare(
@@ -795,35 +798,46 @@ class MemberAuthController {
   async resetPassword(req, res) {
     const schema = Joi.object({
       hash: Joi.string().required(),
-      password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-        .required(),
+      password: Joi.string().required(),
+      c_password: Joi.optional().allow('')
     });
+    try{
+      const { error, value } = schema.validate(req.body);
+      var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      let hash_obj = Buffer.from(value.hash, "base64");
+      hash_obj = hash_obj.toString("utf8");
+      hash_obj = JSON.parse(hash_obj);
+      if (error) {
+        req.session.flash = { error: "Link expired."};
+        res.redirect('back');
+        return
+      }
+      if(!password_regex.test(value.password)){
+        req.session.flash = { error: "Password does not match the pattern."};
+        res.redirect('back');
+        return
+      }
+      //user details
+      const member = await Member.findOne({ where: { id: hash_obj.id } });
+      if (!member) {
+        req.session.flash = { error: "Member not found."};
+        res.redirect('/');
+        return
+      }
 
-    const { error, value } = schema.validate(req.body);
-    let hash_obj = Buffer.from(value.hash, "base64");
-    hash_obj = hash_obj.toString("utf8");
-    hash_obj = JSON.parse(hash_obj);
-    console.log(hash_obj)
-    if (error) {
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(value.password, salt);
+      let update_user = await Member.update(
+        { password: password },
+        { where: { id: hash_obj.id } }
+      );
+      req.session.flash = { message: "Password updated.",success_status:true};
+      res.redirect('/');
+    }catch(e){
+      console.log(e)
       req.session.flash = { error: "Link expired."};
-      res.redirect('/');
+        res.redirect('back');
     }
-    //user details
-    const member = await Member.findOne({ where: { id: hash_obj.id } });
-    if (!member) {
-      req.session.flash = { error: "Member not found."};
-      res.redirect('/');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(value.password, salt);
-    let update_user = await Member.update(
-      { password: password },
-      { where: { id: hash_obj.id } }
-    );
-    req.session.flash = { message: "Password updated.",success_status:true};
-    res.redirect('/');
   }
 }
 module.exports = MemberAuthController;
