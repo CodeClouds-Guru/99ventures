@@ -92,26 +92,19 @@ class SurveySyncController {
             const allAttributes = await psObj.fetchAndReturnData('/attributes?localization=en_US&format=true');
             
             if ('success' === allAttributes.apiStatus) {
-                const qualAttributes = allAttributes.qual_attributes;                
-                for(let attr of qualAttributes) {                    
-                    const checkExists = await SurveyQuestion.count({
-                        where: {
-                            survey_provider_id: this.providerId,
-                            survey_provider_question_id: attr.qualification_code,
-                        },
-                    });
-                    if(!checkExists) {
-                        await SurveyQuestion.create({
-                            question_text: attr.text,
-                            name: attr.desc,
-                            survey_provider_id: this.providerId,
-                            survey_provider_question_id: attr.qualification_code,
-                            question_type: psObj.getQuestionType(attr.type),
-                            created_at: new Date()
-                        })
+                const qualAttributes = allAttributes.qual_attributes;    
+                const params = qualAttributes.map(attr => {
+                    return {
+                        question_text: attr.text,
+                        name: attr.desc,
+                        survey_provider_id: this.providerId,
+                        survey_provider_question_id: attr.qualification_code,
+                        question_type: psObj.getQuestionType(attr.type),
+                        created_at: new Date()
                     }
-                }
-                res.json({ status: true, message: 'Updated' });
+                });
+                await SurveyQuestion.bulkCreate(params);
+                res.json({ status: true, message: 'Question Updated' });
             } else {
                 res.json(allAttributes);
             }
