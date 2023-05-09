@@ -39,6 +39,8 @@ class SurveycallbackController {
       await SurveycallbackController.prototype.schlesingerPostBack(req, res);
     } else if (provider === 'lucid') {
       return await SurveycallbackController.prototype.lucidPostback(req, res);
+    } else if(provider === 'toluna'){
+      await SurveycallbackController.prototype.tolunaPostback(req, res);
     }
     res.send(provider);
   }
@@ -451,8 +453,47 @@ class SurveycallbackController {
    * Toluna Callback setup
    */
   async tolunaPostback(req, res){
-    const requestBody = req.body;
-    
+    if(req.query.status === 'complete'){
+      const requestBody = req.body;
+      const username = requestBody.UniqueCode;
+      const surveyId = requestBody.SurveyId;
+      const surveyRef = requestBody.SurveyRef;
+      try {
+        let member = await Member.findOne({
+          attributes: ['id', 'username'],
+          where: {
+            username: username,
+          },
+        });
+
+        if (member) {
+          const transaction_obj = {
+            member_id: member.id,
+            amount: 0,
+            note: 'toluna survey (#' + surveyRef + ') completion',
+            type: 'credited',
+            amount_action: 'survey',
+            created_by: null,
+            payload: JSON.stringify(requestBody),
+          };
+          await MemberTransaction.updateMemberTransactionAndBalance(
+            transaction_obj
+          );
+        } else {
+          const tolunaLog = require('../../helpers/Logger')(
+            `schlesinger-postback-errror.log`
+          );
+          tolunaLog.error('Unable to find member!');
+        }
+      }
+      catch (error) {
+        const tolunaLog = require('../../helpers/Logger')(
+          `toluna-postback-errror.log`
+        );
+        tolunaLog.error(error);
+      }
+    }
+    res.json({ message: 'success' });
   }
 
 

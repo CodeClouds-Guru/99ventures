@@ -21,15 +21,39 @@ class TolunaController {
             const tObj = new TolunaHelper;
             const payload = {
                 "PartnerGUID": process.env.PARTNER_GUID,
-                "MemberCode": "ccusguru",
-                "Email": "guru@codeclouds.biz",
+                "MemberCode": "cc-dev-2",
+                "Email": "ccdev2@mailinator.com",
                 "BirthDate": "6/21/1992",
                 "PostalCode": "71751",
-                "AnsweredQuestions":
-                [
-                    {"QuestionID":1001007,"AnswerID":2000247},
-                    {"QuestionID":1001107,"AnswerID":2002330},
-                    {"QuestionID":1012395,"AnswerID":3056605}
+                "RegistrationAnswers": [
+                    {
+                        "QuestionID": 1001007,
+                        "Answers": [{"AnswerID":2000247}]
+                    },
+                    {
+                        "QuestionID": 1001101,
+                        "Answers": [{"AnswerID":2002275}]
+                    },
+                    {
+                        "QuestionID": 1001107,
+                        "Answers": [{"AnswerID": 2002330}]
+                    },
+                    {
+                        "QuestionID": 1001012,
+                        "Answers": [{"AnswerID": 2000270}]
+                    },
+                    {
+                        "QuestionID": 1005145,
+                        "Answers": [{"AnswerID": 2796316}]
+                    },
+                    {
+                        "QuestionID": 1001102,
+                        "Answers": [{"AnswerID": 2002280}]
+                    },
+                    {
+                        "QuestionID": 1012395,
+                        "Answers": [{"AnswerID": 3056609}]
+                    }
                 ]
             }
             await tObj.addMemebr(payload);
