@@ -480,6 +480,7 @@ class ScriptParser {
         });\
         function callPagination(element) {\
           var dataAttrs = $(element).data();\
+          if("where" in dataAttrs){ dataAttrs.where =  isJson(dataAttrs.where)}\
           var params = {pageno: 1,perpage: 10,orderby: null,order: null,script: "",member: null,...dataAttrs};\
           $.ajax({\
             url: '/get-scripts/',\
@@ -491,7 +492,15 @@ class ScriptParser {
               }\
             }
           })\
-        }
+        }\
+        function isJson(str) {\
+          try {\
+              JSON.parse(str);\
+          } catch (e) {\
+              return JSON.stringify(str);\
+          }\
+          return str;\
+        }\
       });\
   </script>`;
     return script_html;
