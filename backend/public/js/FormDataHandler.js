@@ -1,6 +1,6 @@
 $(() => {
   var errorsArray = [];
-  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   var displayErrors = () => {
     $('span.alert-msg').remove();
     errorsArray.forEach((item) => {
@@ -173,7 +173,7 @@ $(() => {
   var resetPasswordFormSanitisation = () => {
     if (
       resetPasswordForm &&
-      ['password','c_password'].every(
+      ['password', 'c_password'].every(
         (val) => Object.keys(resetPasswordForm.elements).indexOf(val) > -1
       )
     ) {
@@ -214,8 +214,7 @@ $(() => {
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
         message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
@@ -257,8 +256,7 @@ $(() => {
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
         message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
@@ -328,14 +326,13 @@ $(() => {
     const confirm_password = $(resetPasswordForm)
       .find('input[name="c_password"]')
       .get(0);
-    
+
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
         message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
@@ -347,7 +344,7 @@ $(() => {
         message: 'Password mismatched',
       });
     }
-    
+
   };
   // var profileDetailsFormValidation = () => {
   //     errorsArray = [];
@@ -427,7 +424,7 @@ $(() => {
   if (forgotPasswordForm) {
     forgotPasswordFormSanitisation();
   }
-  if(resetPasswordForm){
+  if (resetPasswordForm) {
     resetPasswordFormSanitisation();
   }
   $(loginForm).submit((e) => {
