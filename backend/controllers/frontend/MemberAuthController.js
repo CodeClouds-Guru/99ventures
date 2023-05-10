@@ -30,6 +30,7 @@ const { response } = require('express');
 const { ResourceGroups } = require('aws-sdk');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
+const Paypal = require('../../helpers/Paypal');
 
 class MemberAuthController {
   constructor() {
@@ -732,7 +733,29 @@ class MemberAuthController {
           type: 'withdraw',
           amount_action: 'member_withdrawal',
           created_by: request_data.member_id,
+          status: 1,
         });
+
+      //paypal payment section
+      const paypal_class = new Paypal();
+      const create_resp = await paypal_class.payout([
+        {
+          amount: withdrawal_amount,
+          currency: 'USD',
+          member_id: request_data.member_id,
+          email: request_data.email,
+          first_name: member.first_name,
+          last_name: member.last_name,
+          member_transaction_id: transaction_resp.transaction_id,
+        },
+      ]);
+      if (create_resp.status) {
+        await MemberTransaction.update(
+          { batch_id: create_resp.batch_id },
+          { where: { id: transaction_resp.transaction_id } }
+        );
+      }
+      console.log('create_resp', create_resp);
     }
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
