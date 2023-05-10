@@ -47,6 +47,7 @@ class MemberAuthController {
     this.withdraw = this.withdraw.bind(this);
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
+    this.password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
   }
   //login
   async login(req, res) {
@@ -74,8 +75,7 @@ class MemberAuthController {
 
     let member_status = true;
     let member_message = 'Logged in successfully!';
-    var password_regex =
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+    var password_regex = this.password_regex;
     const schema = Joi.object({
       password: Joi.string()
         //.pattern(new RegExp('^[a-zA-Z0-9]{8,15}$'))
@@ -531,8 +531,7 @@ class MemberAuthController {
     try {
       // const member_id = req.session.member.id;
       const member_id = member.id;
-      var password_regex =
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      var password_regex = this.password_regex;
       const schema = Joi.object({
         old_password: Joi.string().required(),
         new_password: Joi.string().required(),
@@ -896,8 +895,7 @@ class MemberAuthController {
     });
     try {
       const { error, value } = schema.validate(req.body);
-      var password_regex =
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      var password_regex = this.password_regex;
       let hash_obj = Buffer.from(value.hash, 'base64');
       hash_obj = hash_obj.toString('utf8');
       hash_obj = JSON.parse(hash_obj);
