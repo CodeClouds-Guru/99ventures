@@ -1,6 +1,6 @@
 $(() => {
   var errorsArray = [];
-  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   var displayErrors = () => {
     $('span.alert-msg').remove();
     errorsArray.forEach((item) => {
@@ -101,8 +101,13 @@ $(() => {
     $(forgotPasswordForm).removeClass('d-none');
   };
   var getUrlHash = () => {
-    return ($(location).attr('href').includes('#') && $(location).attr('href').includes('?')) ? $(location).attr('href').split('#')[1].split('?')[0] : $(location).attr('href').includes('#') ? $(location).attr('href').split('#')[1] : '';
-  }
+    return $(location).attr('href').includes('#') &&
+      $(location).attr('href').includes('?')
+      ? $(location).attr('href').split('#')[1].split('?')[0]
+      : $(location).attr('href').includes('#')
+        ? $(location).attr('href').split('#')[1]
+        : '';
+  };
   if (getUrlHash() === 'signup') {
     goToRegister();
   }
@@ -173,7 +178,7 @@ $(() => {
   var resetPasswordFormSanitisation = () => {
     if (
       resetPasswordForm &&
-      ['password','c_password'].every(
+      ['password', 'c_password'].every(
         (val) => Object.keys(resetPasswordForm.elements).indexOf(val) > -1
       )
     ) {
@@ -214,11 +219,11 @@ $(() => {
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+        message:
+          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
       });
     }
   };
@@ -257,11 +262,11 @@ $(() => {
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+        message:
+          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
       });
     }
     if ($(password).val().trim() !== $(confirm_password).val().trim()) {
@@ -277,7 +282,9 @@ $(() => {
     const ticket_subject = $(ticketCreateForm)
       .find('input[name="ticket_subject"]')
       .get(0);
-    const ticket_file = $(ticketCreateForm).find('input[name="ticket_file"]').get(0);
+    const ticket_file = $(ticketCreateForm)
+      .find('input[name="ticket_file"]')
+      .get(0);
     const ticket_file_name = $(ticketCreateForm)
       .find('input[name="ticket_file"]')
       .val()
@@ -328,17 +335,18 @@ $(() => {
     const confirm_password = $(resetPasswordForm)
       .find('input[name="c_password"]')
       .get(0);
-    
+
+
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
         field: $(password),
         message: 'Password should be greater than 7 characters',
       });
-    }
-    if (!password_regex.test($(password).val().trim())) {
+    } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+        message:
+          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
       });
     }
     if ($(password).val().trim() !== $(confirm_password).val().trim()) {
@@ -347,7 +355,7 @@ $(() => {
         message: 'Password mismatched',
       });
     }
-    
+
   };
   // var profileDetailsFormValidation = () => {
   //     errorsArray = [];
@@ -427,7 +435,7 @@ $(() => {
   if (forgotPasswordForm) {
     forgotPasswordFormSanitisation();
   }
-  if(resetPasswordForm){
+  if (resetPasswordForm) {
     resetPasswordFormSanitisation();
   }
   $(loginForm).submit((e) => {
@@ -523,7 +531,8 @@ $(() => {
   var pathname = window.location.pathname;
   pathname = pathname.replace('/', '');
 
-  var str = '';
+  let str =
+    '<div class="alert text-center text-white m-0 py-2 px-0 fw-light lh-base rounded-0"  id="header_streak_or_refresh"><div class="container">';
   if (pathname === 'dashboard') {
     $.ajax({
       type: 'GET',
@@ -531,24 +540,29 @@ $(() => {
       url: '/get-login-streak',
       success: function (resp, status, xhr) {
         // console.log('resp ', resp);
-        str =
-          '<p class="m-0">Congrats <strong>' +
-          resp.data.member_firstname +
-          '</strong>! You have been loggin in <strong>' +
-          resp.data.streak +
-          '</strong> days in a row! Excellent, keep up the good work!!</p>';
-        $('#header_streak_or_refresh').append(str);
+        if (resp.data.streak > 1) {
+          str +=
+            '<p class="m-0">Congrats <strong>' +
+            resp.data.member_firstname +
+            '</strong>! You have been loggin in <strong>' +
+            resp.data.streak +
+            '</strong> days in a row! Excellent, keep up the good work!!</p>';
+          str += '</div></div>';
+          $('#header_streak_or_refresh').append(str);
+        }
       },
     });
   }
   if (pathname === 'paid-surveys') {
-    str =
+    str +=
       '<p class="m-0">Please <a href="javascript:location.reload();" class="text-reset fw-medium">refresh your page</a> for the latest surveys matched for you</p>';
+    str += '</div></div>';
     $('#header_streak_or_refresh').append(str);
   }
   if (pathname === 'contest') {
-    str =
+    str +=
       '<div class="row"><div class="col-md-12 mb-3 mb-lg-4"><div class="cash-contest-sec bg-primary text-white rounded-4 px-3 px-md-4 px-lg-5 py-3 mb-2"><div class="row align-items-center"><div class="col-md-8"><h1 class="mb-2 heading">CASH CONTEST</h1><p class="m-0">The Top 20 members who earn the most by 31st June 2023 will win a prize.</p></div><div class="col-md-4"><div class="d-flex justify-content-end mt-3 mt-md-0"><figure class="m-0 text-center"><img src="images/cash-contest-img.svg" alt="Cash Contest Image" class="img-fluid"></figure></div></div></div></div><div class="cash-contest-info text-white d-flex align-items-center mt-2"><i class="fa-solid fa-circle-info"></i><p class="m-0 ms-2 lh-base">Moresurveys.com<strong>$1000</strong>Cash Contest Description. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p></div></div></div>';
+    str += '</div></div>';
     $('#header_streak_or_refresh').append(str);
   }
 });

@@ -62,6 +62,9 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'email_alert_id',
         timestamps: false,
       });
+      Member.hasMany(models.MemberNotification, {
+        foreignKey: 'member_id',
+      });
     }
   }
   Member.validate = function (req) {
@@ -370,8 +373,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],

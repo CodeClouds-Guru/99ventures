@@ -159,22 +159,31 @@ class WithdrawalRequestController extends Controller {
         let transaction_id = ''      
         for (let record of all_withdrawal_req) {
           //insert in transaction table
-          console.log(record)
           if(record.member_transaction_id){
             transaction_ids.push(record.member_transaction_id)
             transaction_id = record.member_transaction_id
           }else{
-            let transaction = await MemberTransaction.create({
-              type:'withdraw',
+            let transaction = await MemberTransaction.updateMemberTransactionAndBalance({
+              member_id:record.member_id,
               amount: record.amount,
+              note: '',
               status: '1',
-              member_id: record.member_id,
+              type: 'withdraw',
               amount_action: 'member_withdrawal',
               currency: record.currency,
-              completed_at: new Date()
-            })
-            transaction_ids.push(transaction.id)
-            transaction_id = transaction.id
+              created_by: req.user.id,
+            });
+            // let transaction = await MemberTransaction.create({
+            //   type:'withdraw',
+            //   amount: record.amount,
+            //   status: '1',
+            //   member_id: record.member_id,
+            //   amount_action: 'member_withdrawal',
+            //   currency: record.currency,
+            //   completed_at: new Date()
+            // })
+            transaction_ids.push(transaction.transaction_id)
+            transaction_id = transaction.transaction_id
             await WithdrawalRequest.update({member_transaction_id:transaction_id},{where:{id:record.id}})
           }
           //paypal payload
