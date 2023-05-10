@@ -26,7 +26,7 @@ module.exports = async function (req, res, next) {
       where: { id: req.session.member.id },
       include: {
         model: MemberNotification,
-        where: { is_read: 0 },
+        where: { is_read: '0' },
         required: false
       },
     });
