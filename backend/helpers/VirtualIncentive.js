@@ -28,6 +28,11 @@ class VirtualIncentive {
         return instance;
     }
 
+    /**
+     * To create orders
+     * @param {Object} params 
+     * @returns 
+     */
     async createOrder(params) {
         try{
             const groupData = params.reduce((acc, item )=> {
@@ -65,7 +70,7 @@ class VirtualIncentive {
 
                 // console.log(payload)
                 // return payload;
-                const data = this.getInstance();
+                const data = await this.getInstance();
                 const instance = axios.create({
                     ...data
                 });
@@ -96,6 +101,25 @@ class VirtualIncentive {
                 ...data
             });
             const response = await instance.get('/balances/programs');
+            return response.data
+        }
+        catch(error) {
+            console.error(error);
+            return error;
+        }
+    }
+
+    /**
+     * To get the orders
+     */
+    async getOrders(){
+        try{
+            const data = await this.getInstance();
+            const instance = axios.create({
+                ...data
+            });
+           
+            const response = await instance.get('/orders');
             return response.data
         }
         catch(error) {
