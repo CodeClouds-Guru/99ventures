@@ -254,7 +254,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_id: data.transaction_id || null,
       balance: modified_total_earnings,
       payload: data.payload || null,
-      currency: data.currency || 'USD'
+      currency: data.currency || 'USD',
     };
     // console.log(transaction_data);
     let transaction = await MemberTransaction.create(transaction_data, {
@@ -262,13 +262,17 @@ module.exports = (sequelize, DataTypes) => {
     });
     transaction = JSON.parse(JSON.stringify(transaction));
     // console.log(transaction.id);
-    let balance = await MemberBalance.update(
-      { amount: modified_total_earnings },
-      {
-        where: { id: total_earnings[0].id },
-      }
-    );
-    if (transaction && balance) {
+    let balance = true;
+    if (parseInt(transaction_data.status) == 2) {
+      balance = await MemberBalance.update(
+        { amount: modified_total_earnings },
+        {
+          where: { id: total_earnings[0].id },
+        }
+      );
+    }
+
+    if (transaction.status && balance) {
       return { status: true, transaction_id: transaction.id };
     } else {
       return false;

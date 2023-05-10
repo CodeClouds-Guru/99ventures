@@ -6,6 +6,7 @@ const {
   MemberBalance,
   Page,
   WithdrawalRequest,
+  MemberNotification,
 } = require('../models');
 const db = require('../models/index');
 const { sequelize } = require('../models/index');
@@ -23,8 +24,12 @@ module.exports = async function (req, res, next) {
   if ('member' in req.session && req.session.member) {
     const member = await Member.findOne({
       where: { id: req.session.member.id },
+      include: {
+        model: MemberNotification,
+        where: { is_read: 0 },
+        required: false
+      },
     });
-
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
@@ -40,7 +45,6 @@ module.exports = async function (req, res, next) {
       }
     );
 
-    // console.log('===================login_streak', login_streak);
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
