@@ -1,18 +1,32 @@
 const axios = require('axios');
+const { PaymentMethodCredential } = require('../models');
+
 class VirtualIncentive {
 
-    constructor() {
-		this.instance = {
+    constructor(company_portal_id) {
+        this.company_portal_id = company_portal_id;
+        this.getInstance = this.getInstance.bind(this);
+		this.createOrder = this.createOrder.bind(this);
+	}
+
+    async getInstance(){
+        const credentials = await PaymentMethodCredential.findOne({
+            attributes: ['slug', 'value'],
+            where: {
+                payment_method_id: 3,
+                company_portal_id: this.company_portal_id,
+            },
+        });
+        const instance = {
 			timeout: 50000,
 			headers: {
 				'Content-Type': 'application/json',
-                Authorization: 'Basic OTl2ZW50dXJlczgxNzY6MTh4dFNQR09wb28xQ0tsRlIyMXoxZG1BTnlSRVlmMjZQQXNhZDNhemNySk4zNkxWYW1DZkZqNU5NbVdUeTJxOQ=='
+                Authorization: 'Basic ' + credentials.value
 			},
             baseURL: 'https://rest.virtualincentives.com/v6/json'            
 		};
-        
-		this.createOrder = this.createOrder.bind(this);
-	}
+        return instance;
+    }
 
     async createOrder(params) {
         try{
@@ -26,7 +40,7 @@ class VirtualIncentive {
             }, {});
 
             if(Object.keys(groupData).length){
-                const payload = [];
+                var payload = [];
                 Object.keys(groupData).forEach(data =>{
                     const params = {
                         "order": {
@@ -45,32 +59,41 @@ class VirtualIncentive {
                             "amount": row.amount     
                         });
                     });
-                    payload.push(params)
-                })
+                    console.log(params)
+                    payload.push({[data]: params})
+                });
+
                 // console.log(payload)
                 // return payload;
-
+                const data = this.getInstance();
                 const instance = axios.create({
-                    ...this.instance
+                    ...data
                 });
-                const response = [];
-                payload.forEach(async row => {
-                    await instance.post('/orders', row);
-                    
-                });
+                const response = {};
+                for(const programid of payload) {
+                    try{
+                        var resp = await instance.post('/orders', payload[programid]);
+                        resp = {status: true, response: resp}
+                    }catch(e) {
+                        var resp = {status: false, error: e}
+                    }finally {
+                        response[programid] = resp;
+                    }
+                }
                 return response;
             }
             
         } catch(error) {
             console.error(error.response)
-            return error;
+            throw error;
         }
     }
 
     async getProgramBalance(){
         try{
+            const data = this.getInstance();
             const instance = axios.create({
-                ...this.instance
+                ...data
             });
             const response = await instance.get('/balances/programs');
             return response.data
