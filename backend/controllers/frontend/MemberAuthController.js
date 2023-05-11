@@ -897,7 +897,7 @@ class MemberAuthController {
     try {
       const { error, value } = schema.validate(req.body);
       var password_regex = this.password_regex;
-      let hash_obj = Buffer.from(value.hash, 'base64');
+      let hash_obj = Buffer.from(req.body.hash, 'base64');
       hash_obj = hash_obj.toString('utf8');
       hash_obj = JSON.parse(hash_obj);
       if (error) {
