@@ -3783,6 +3783,14 @@
     "path-type" "^4.0.0"
     "yaml" "^1.10.0"
 
+"create-react-class@^15.5.2":
+  "integrity" "sha512-QZv4sFWG9S5RUvkTYWbflxeZX+JG7Cz0Tn33rQBJ+WFQTqTfUTjMjiv9tnfXazjsO5r0KhPs+AqCjyrQX6h2ng=="
+  "resolved" "https://registry.npmjs.org/create-react-class/-/create-react-class-15.7.0.tgz"
+  "version" "15.7.0"
+  dependencies:
+    "loose-envify" "^1.3.1"
+    "object-assign" "^4.1.1"
+
 "cross-env@7.0.3":
   "integrity" "sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw=="
   "resolved" "https://registry.npmjs.org/cross-env/-/cross-env-7.0.3.tgz"
@@ -5322,6 +5330,11 @@
   "integrity" "sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q=="
   "resolved" "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz"
   "version" "0.5.2"
+
+"froala-editor@4.0.18":
+  "integrity" "sha512-FLTe9OrgFgEe1x+lOwl2tmJxPPyW6HgMLh5A0C/x6TQlziixjp6P8kMLjyG3wv4ve8hgWm+iCxfAbnd1KxvDZA=="
+  "resolved" "https://registry.npmjs.org/froala-editor/-/froala-editor-4.0.18.tgz"
+  "version" "4.0.18"
 
 "fs-extra@^10.0.0":
   "integrity" "sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ=="
@@ -7139,7 +7152,7 @@
   "resolved" "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
   "version" "4.17.21"
 
-"loose-envify@^1.0.0", "loose-envify@^1.1.0", "loose-envify@^1.4.0":
+"loose-envify@^1.0.0", "loose-envify@^1.1.0", "loose-envify@^1.3.1", "loose-envify@^1.4.0":
   "integrity" "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q=="
   "resolved" "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz"
   "version" "1.4.0"
@@ -8702,6 +8715,14 @@
   "integrity" "sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA=="
   "resolved" "https://registry.npmjs.org/react-fast-compare/-/react-fast-compare-3.2.0.tgz"
   "version" "3.2.0"
+
+"react-froala-wysiwyg@^4.0.18":
+  "integrity" "sha512-YRuXVo4uB9ygOLMtiotsKJNYSu1KEj8n3J7yjYjS5udWfQsecwaUe+6G3bLToVuYqfRhlMueQOu4/e/iy2XDDQ=="
+  "resolved" "https://registry.npmjs.org/react-froala-wysiwyg/-/react-froala-wysiwyg-4.0.18.tgz"
+  "version" "4.0.18"
+  dependencies:
+    "create-react-class" "^15.5.2"
+    "froala-editor" "4.0.18"
 
 "react-hook-form@7.31.1":
   "integrity" "sha512-QjtjZ8r8KtEBWWpcXLyQordCraTFxILtyQpaz5KLLxN2YzcC+FZ9LLtOnNGuOnzZo9gCoB+viK3ZHV9Mb2htmQ=="

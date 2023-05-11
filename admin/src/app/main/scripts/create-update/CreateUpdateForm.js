@@ -9,8 +9,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import AlertDialog from 'app/shared-components/AlertDialog';
-import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
-import { EditorState, convertFromHTML, ContentState } from 'draft-js';
+// Require Editor CSS files.
+import 'froala-editor/css/froala_style.min.css';
+import 'froala-editor/css/froala_editor.pkgd.min.css';
+import FroalaEditorComponent from 'react-froala-wysiwyg';
+// Import all Froala Editor plugins;
+import 'froala-editor/js/plugins.pkgd.min.js';
+
 
 const CreateUpdateForm = () => {
     const moduleId = useParams().id;
@@ -19,7 +24,6 @@ const CreateUpdateForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [errors, setErrors] = useState({});
-    const wysiwygEditorRef = useRef();
     const [allData, setAllData] = useState({
         name: '',
         script_html: '',
@@ -30,7 +34,7 @@ const CreateUpdateForm = () => {
     useEffect(()=>{
         if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId);
-        }
+        }        
     }, []);
 
     const handleChange = (e) => {
@@ -53,16 +57,6 @@ const CreateUpdateForm = () => {
             ...allData, name: event.target.value
         }));
         dynamicErrorMsg('name', event.target.value);
-    }
-
-    const handleScriptHtml = (event) => {
-        setAllData(allData => ({
-            ...allData, script_html: event
-        }));
-    }
-
-    const setEditorValue = (value) => {
-        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
     }
 
     const onSubmit = () => {
@@ -113,7 +107,6 @@ const CreateUpdateForm = () => {
                         script_json: record.script_json,
                         status: Boolean(record.status)
                     }));
-                    setEditorValue(record.script_html);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -128,6 +121,11 @@ const CreateUpdateForm = () => {
         navigate(`/app/${module}`);
     }
 
+    const handleModelChange = (e) =>{
+        setAllData(allData => ({
+            ...allData, script_html: e
+        }));
+    }
     return (
         <>
             <CreateEditHeader module={module} moduleId={moduleId} />
@@ -160,14 +158,10 @@ const CreateUpdateForm = () => {
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
-                            <WYSIWYGEditor
-                                className="w-full h-auto border-1"
-                                value={allData.script_html}
-                                onChange={handleScriptHtml}
-                                ref={wysiwygEditorRef}
-                            />
+                            <FroalaEditorComponent config={{attribution: false, heightMin: 300,}} tag='textarea' onModelChange={handleModelChange} model={ allData.script_html }/>
                             <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
                         </FormControl>
+
 
                         <motion.div
                             className="flex"
