@@ -63,7 +63,7 @@ module.exports = [
         return format
           ? moment(date).format(format)
           : moment(date).format('DD/MM/YYYY');
-      else return;
+      else return '';
     },
   },
   {
@@ -73,7 +73,13 @@ module.exports = [
         return format
           ? moment(date).format(format)
           : moment(date).format('hh:mm a');
-      else return;
+      else return '';
+    },
+  },
+  {
+    name: 'timeFromNow',
+    fn: function (date) {
+      return date ? moment(date).fromNow() : '';
     },
   },
   {
