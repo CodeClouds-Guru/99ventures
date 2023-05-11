@@ -16,20 +16,12 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       verbose: DataTypes.STRING,
       action: DataTypes.STRING,
-      is_read: {
-        type: DataTypes.ENUM(0, 1),
-        get() {
-          if (!isNaN(this.is_read)) {
-            return parseInt(this.is_read, 10);
-          }
-          return this.is_read;
-        },
-      },
+      is_read: DataTypes.ENUM(0, 1),
       read_on: 'TIMESTAMP',
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
-      header_text: {
+      header: {
         type: DataTypes.VIRTUAL,
         get() {
           return this.action.replaceAll('_', ' ').toUpperCase()
