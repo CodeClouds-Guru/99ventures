@@ -25,7 +25,11 @@ class ScriptParser {
   }
   async parseScript(script_id, user, params) {
     var data = [];
-    var other_details;
+    var other_details = {
+      transaction_count: 0,
+      total_withdrawal_amount: 0,
+      member_balance: 0,
+    };
     var page_count = 0;
     var script_html = '';
     let script = await Models.Script.findOne({ where: { code: script_id } });
@@ -69,11 +73,18 @@ class ScriptParser {
                 ],
                 where: { member_id: user.id },
               });
-              other_details = JSON.parse(JSON.stringify(total));
+              other_details = {
+                ...other_details,
+                ...JSON.parse(JSON.stringify(total)),
+              };
             }
 
             //pagination
-            if ('pagination' in params && params.pagination === 'true' && page_count > 1) {
+            if (
+              'pagination' in params &&
+              params.pagination === 'true' &&
+              page_count > 1
+            ) {
               script_html = await this.appendPagination(
                 script_html,
                 script_id,
@@ -100,24 +111,24 @@ class ScriptParser {
                 [
                   sequelize.literal(
                     `(SELECT count(id) FROM member_transactions WHERE member_id = ` +
-                    user.id +
-                    ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
                   ),
                   'transaction_count',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT sum(amount) FROM member_transactions WHERE member_id = ` +
-                    user.id +
-                    ` AND status= 2 AND amount_action='member_withdrawal')`
+                      user.id +
+                      ` AND status= 2 AND amount_action='member_withdrawal')`
                   ),
                   'total_withdrawal_amount',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT amount FROM member_balances WHERE member_id = ` +
-                    user.id +
-                    ` AND amount_type = 'cash')`
+                      user.id +
+                      ` AND amount_type = 'cash')`
                   ),
                   'member_balance',
                 ],
@@ -128,7 +139,10 @@ class ScriptParser {
                 amount_action: 'member_withdrawal',
               },
             });
-            other_details = JSON.parse(JSON.stringify(transaction_data));
+            other_details = {
+              ...other_details,
+              ...JSON.parse(JSON.stringify(transaction_data)),
+            };
             // console.log(other_details);
             const condition = this.getModuleWhere(script.module, user);
             if (other_details.transaction_count < 5) {
@@ -329,8 +343,9 @@ class ScriptParser {
         if (surveys && surveys.length) {
           var surveyHtml = '';
           surveys.forEach(function (survey, key) {
-            let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number
-              }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let link = `/pure-spectrum/entrylink?survey_number=${
+              survey.survey_number
+            }${generateQueryString ? '&' + generateQueryString : ''}`;
             surveys[key].setDataValue('link', link);
           });
           return {
@@ -373,8 +388,8 @@ class ScriptParser {
               model: Models.WithdrawalRequest,
               include: {
                 model: Models.WithdrawalType,
-              }
-            }
+              },
+            },
           ],
           attributes: [
             'created_at',
@@ -392,7 +407,6 @@ class ScriptParser {
       case 'Member':
         return {
           where: { id: user.id },
-
         };
       case 'Shoutbox':
         return {
