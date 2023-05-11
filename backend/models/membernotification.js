@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       is_read: {
         type: DataTypes.ENUM(0, 1),
         get() {
-          if (!isNan(this.is_read)) {
+          if (!isNaN(this.is_read)) {
             return parseInt(this.is_read, 10);
           }
           return this.is_read;
