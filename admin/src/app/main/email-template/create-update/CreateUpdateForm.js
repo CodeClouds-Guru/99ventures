@@ -16,7 +16,9 @@ import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 import '../EmailTemplate.css'
-
+import '../../scripts/ScriptStyle.css'
+import grapesjspresetnewsletter from 'grapesjs-preset-newsletter';
+import { newsletterEditor } from '../../../grapesjs/newsletterPlugin'
 
 const CreateUpdateForm = ({ input, meta }) => {
     const module = 'email-templates';
@@ -56,7 +58,7 @@ const CreateUpdateForm = ({ input, meta }) => {
             container: '#gjs',
             height: '700px',
             width: '100%',
-            plugins: ['gjs-preset-webpage'],
+            plugins: [grapesjspresetnewsletter, newsletterEditor],
             storageManager: {
                 options: {
                     local: { key: storageKey }
@@ -103,90 +105,7 @@ const CreateUpdateForm = ({ input, meta }) => {
         });
         setEditor(editor);
 
-        const pfx = editor.getConfig().stylePrefix
-        const modal = editor.Modal
-        const cmdm = editor.Commands
-        const htmlCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
-        const cssCodeViewer = editor.CodeManager.getViewer('CodeMirror').clone()
-        const pnm = editor.Panels
-        const rootContainer = document.createElement('div')
-        const btnEdit = document.createElement('button')
-        const codeViewerOpt = {
-            readOnly: 0,
-            theme: 'hopscotch',
-            autoBeautify: true,
-            autoCloseTags: true,
-            autoCloseBrackets: true,
-            lineWrapping: true,
-            styleActiveLine: true,
-            smartIndent: true,
-            indentWithTabs: true
-        }       
-
-        htmlCodeViewer.set({
-            codeName: 'htmlmixed',
-            ...codeViewerOpt
-        })
-
-        cssCodeViewer.set({
-            codeName: 'css',
-            ...codeViewerOpt
-        })
-
-        btnEdit.innerHTML = 'Save'
-        btnEdit.className = pfx + 'btn-prim ' + pfx + 'btn-import'
-        btnEdit.onclick = function () {
-            const html = htmlCodeViewer.editor.getValue()
-            const css = cssCodeViewer.editor.getValue()
-            editor.DomComponents.getWrapper().set('content', '')
-            // editor.CssComposer.clear();            
-            // const HTML_CSS = html.trim() + `<style>${css}</style>`
-            editor.setComponents(html.trim());
-            editor.setStyle(css)
-            modal.close()
-        }
         
-        cmdm.add('edit-code', {
-            run: function (editor, sender) {
-                sender && sender.set('active', 0)
-                var htmlViewer = htmlCodeViewer.editor
-                var cssViewer = cssCodeViewer.editor
-                modal.setTitle('Edit code')
-                var InnerHtml = editor.getHtml()                
-                var Css = editor.getCss();
-                if (!htmlViewer && !cssViewer) {
-                    const txtarea = editorTextAreaCreate(rootContainer, 'HTML')
-                    const cssarea = editorTextAreaCreate(rootContainer, 'CSS')
-                    rootContainer.append(btnEdit)
-                    htmlCodeViewer.init(txtarea)
-                    cssCodeViewer.init(cssarea)
-                    htmlViewer = htmlCodeViewer.editor
-                    cssViewer = cssCodeViewer.editor              
-                }
-                modal.setContent('')
-                modal.setContent(rootContainer)                
-                htmlCodeViewer.setContent(InnerHtml)                
-                cssCodeViewer.setContent(Css)
-                modal.open({attributes: { class: 'custom-code-editor' }})
-                htmlViewer.refresh()
-                cssViewer.refresh()
-            }
-        })
-
-        // Removed default read-only code editor btn from toolbar
-        pnm.removeButton("options", 'export-template');
-        
-        pnm.addButton('options',[
-            {
-                id: 'edit',
-                className: 'fa fa-code',
-                command: 'edit-code',
-                attributes: {
-                    title: 'Edit Code'
-                }
-            }
-        ]);
-
         editor.onReady(() => {
             loadEditorData(editor);
         });
@@ -240,24 +159,6 @@ const CreateUpdateForm = ({ input, meta }) => {
         }
     }, [variableOptions])
 
-    const editorTextAreaCreate = (rootContainer, title) => {
-        const container = document.createElement('div')
-        const childContainer = document.createElement('div')
-        const titleContainer = document.createElement('div')
-        const txtarea = document.createElement('textarea')
-        
-        container.setAttribute('class', 'gjs-cm-editor-c')
-        childContainer.setAttribute('id', 'gjs-cm-css')
-        childContainer.setAttribute('class', 'gjs-cm-editor')
-        titleContainer.setAttribute('id', 'gjs-cm-title')
-        titleContainer.textContent = title
-        childContainer.appendChild(titleContainer)
-        childContainer.appendChild(txtarea)
-        container.appendChild(childContainer)
-        rootContainer.appendChild(container)
-        return txtarea
-    }
-
     const loadEditorData = async(editor) => {        
         if (moduleId !== 'create' && !isNaN(moduleId)) { 
             getSingleEmailTemplate(moduleId, editor);
@@ -277,13 +178,12 @@ const CreateUpdateForm = ({ input, meta }) => {
         let generatedHTML = '';
 
         if(editor.getHtml()) {
-            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
+            // const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
             generatedHTML += 
             `<html>
                 <head>
                     <title>${allData.name}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    ${css}
                 </head>
                 ${editor.getHtml()}            
             </html>`;
