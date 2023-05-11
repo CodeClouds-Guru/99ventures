@@ -5558,6 +5558,11 @@
   "resolved" "https://registry.npmjs.org/grapesjs-plugin-forms/-/grapesjs-plugin-forms-0.3.6.tgz"
   "version" "0.3.6"
 
+"grapesjs-preset-newsletter@^1.0.1":
+  "integrity" "sha512-yIw3tJb72OvoTsBuJw9qnz2wF0ZRpt5RjDvCtSSkCIPl/1JPxy7+6QLcEIV2LPeiF94dbE00rmPe82n8eGQXMg=="
+  "resolved" "https://registry.npmjs.org/grapesjs-preset-newsletter/-/grapesjs-preset-newsletter-1.0.1.tgz"
+  "version" "1.0.1"
+
 "grapesjs-preset-webpage@^0.1.11":
   "integrity" "sha512-36SuSPwu3a09R6YR31Sklmowz/LvzxzGM74WcPd8KPwbs1mAQ4fFuqWKkX/wv8+GhY58Se9EO42yQVMwsZzELA=="
   "resolved" "https://registry.npmjs.org/grapesjs-preset-webpage/-/grapesjs-preset-webpage-0.1.11.tgz"
