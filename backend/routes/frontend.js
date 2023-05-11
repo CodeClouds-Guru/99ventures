@@ -56,7 +56,7 @@ router.post('/member-forgot-password', MemberAuthController.forgotPassword);
 router.post('/save-password', MemberAuthController.resetPassword);
 
 router.post('/update-notification', NotificationController.update);
-router.delete('/delete-notification', NotificationController.delete);
+router.delete('/update-notification', NotificationController.delete);
 
 router.get('/test-payment', async (req, res) => {
   const paypal_class = new Paypal();
