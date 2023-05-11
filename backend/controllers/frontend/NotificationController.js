@@ -1,4 +1,4 @@
-const { MemberNotification } = require("../../models/membernotification");
+const { MemberNotification } = require("../../models");
 class NotificationController {
     constructor() {
         this.update = this.update.bind(this);
