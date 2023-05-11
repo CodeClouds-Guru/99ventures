@@ -31,6 +31,8 @@ const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 const TolunaControllerClass = require('../controllers/frontend/TolunaController');
 const TolunaController = new TolunaControllerClass();
+const NotificationControllerClass = require("../controllers/frontend/NotificationController");
+const NotificationController = new NotificationControllerClass();
 
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
@@ -52,6 +54,9 @@ router.put('/profile/update', MemberAuthController.profileUpdate);
 router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 router.post('/member-forgot-password', MemberAuthController.forgotPassword);
 router.post('/save-password', MemberAuthController.resetPassword);
+
+router.post('/update-notification', NotificationController.update);
+router.delete('/update-notification', NotificationController.delete);
 
 router.get('/test-payment', async (req, res) => {
   const paypal_class = new Paypal();
@@ -76,10 +81,10 @@ router.get('/test-payment', async (req, res) => {
 router.get('/confirm-payment/:batchid', async (req, res) => {
   let batch_id = req.params.batchid;
   let requ = {
-    event_type:"PAYMENT.PAYOUTSBATCH.SUCCESS",
-    resource:{
-      batch_header:{
-        payout_batch_id:batch_id
+    event_type: "PAYMENT.PAYOUTSBATCH.SUCCESS",
+    resource: {
+      batch_header: {
+        payout_batch_id: batch_id
       }
     }
   }

@@ -30,6 +30,24 @@ module.exports = (sequelize, DataTypes) => {
           throw new Error('Do not try to set `header` value!');
         }
       },
+      redirect_url: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          switch (this.action) {
+            case 'survey_completed':
+              return '/earning-history';
+            case 'achievement_complete':
+              return '/earning-history';
+            case 'message_received':
+              return '/support-tickets';
+            default:
+              return '#';
+          }
+        },
+        set(value) {
+          throw new Error('Do not try to set `redirect_url` value!');
+        }
+      },
       logo: {
         type: DataTypes.VIRTUAL,
         get() {
