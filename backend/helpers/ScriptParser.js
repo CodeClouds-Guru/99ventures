@@ -57,7 +57,7 @@ class ScriptParser {
                 ...where.where,
                 ...param_where,
               };
-
+            // console.log(param_where);
             data = await Models[script.module].findAll({
               subQuery: false,
               order: [[Sequelize.literal(orderBy), order]],
@@ -65,6 +65,9 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
+
+            // console.log('data', JSON.parse(JSON.stringify(data)));
+
             var data_count = await Models[script.module].findAndCountAll({
               ...where,
             });
@@ -185,7 +188,7 @@ class ScriptParser {
         }
       }
     }
-    // console.log('script data', JSON.parse(JSON.stringify(data)));
+    console.log('script data', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -383,6 +386,7 @@ class ScriptParser {
     switch (module) {
       case 'Ticket':
         return { where: { member_id: user.id } };
+
       case 'MemberTransaction':
         return {
           where: user ? { member_id: user.id,type: 'credited' } : { type: 'credited' },
@@ -438,6 +442,25 @@ class ScriptParser {
             attributes: ['name'],
           },
         };
+      case 'TicketConversation':
+        return {
+          attributes: ['message', 'member_id', 'user_id', 'created_at'],
+          include: [
+            {
+              model: Models.TicketAttachment,
+              attributes: ['file_name', 'mime_type'],
+            },
+            {
+              model: Models.Member,
+              attributes: ['first_name', 'last_name', 'username', 'avatar'],
+            },
+            {
+              model: Models.User,
+              attributes: ['first_name', 'last_name', 'alias_name', 'avatar'],
+            },
+          ],
+        };
+
       default:
         return { where: {} };
     }
