@@ -460,7 +460,13 @@ class ScriptParser {
             },
           ],
         };
-
+      case 'WithdrawalRequest':
+        return{
+          include: {
+            model: Models.WithdrawalType,
+            attributes: ['logo','name'],
+          },
+        }
       default:
         return { where: {} };
     }
