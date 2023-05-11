@@ -47,7 +47,8 @@ class MemberAuthController {
     this.withdraw = this.withdraw.bind(this);
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
-    this.password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+    this.resetPassword = this.resetPassword(this)
+    this.password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   }
   //login
   async login(req, res) {

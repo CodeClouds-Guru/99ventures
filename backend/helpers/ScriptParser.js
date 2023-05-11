@@ -46,6 +46,10 @@ class ScriptParser {
             const param_where =
               'where' in params ? JSON.parse(params.where) : null;
 
+            // other_details = {
+            //     ...other_details,
+            //     conditions:param_where
+            // };
             let where = this.getModuleWhere(script.module, user);
 
             if (param_where)
@@ -75,7 +79,7 @@ class ScriptParser {
               });
               other_details = {
                 ...other_details,
-                ...JSON.parse(JSON.stringify(total)),
+                ...JSON.parse(JSON.stringify(total))
               };
             }
 
@@ -381,7 +385,7 @@ class ScriptParser {
         return { where: { member_id: user.id } };
       case 'MemberTransaction':
         return {
-          where: user ? { member_id: user.id } : null,
+          where: user ? { member_id: user.id,type: 'credited' } : { type: 'credited' },
           include: [
             { model: Models.Member },
             {
@@ -402,7 +406,6 @@ class ScriptParser {
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
           ],
-          where: { type: 'credited' },
         };
       case 'Member':
         return {
