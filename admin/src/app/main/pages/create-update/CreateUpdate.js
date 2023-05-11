@@ -159,11 +159,7 @@ const CreateUpdate = () => {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
             const htmlData = editor.getHtml().match(reg)[1];
-            generatedHTML +=
-                `<main>
-                    ${css}
-                    ${htmlData}            
-                </main>`;
+            generatedHTML +=`${css}\n${htmlData}`;
         }
         return generatedHTML;
     }
