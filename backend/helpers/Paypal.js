@@ -5,8 +5,11 @@ const {
   PaymentMethodCredential,
   WithdrawalRequest,
   Member,
+  MemberBalance
 } = require('../models');
 const paypal = require('@paypal/payouts-sdk');
+const db = require("../models/index");
+const { QueryTypes, Op } = require("sequelize");
 class Paypal {
   constructor(company_portal_id='') {
     this.company_portal_id = company_portal_id
@@ -100,13 +103,11 @@ class Paypal {
         "sender_item_id": `${item.member_transaction_id}`,
       }
     });
-    console.log('items',items)
     const requestBody = this.createRequestBody(items);
     let request = new paypal.payouts.PayoutsPostRequest();
     request.requestBody(requestBody);
     const resp = await this.createPayouts(request);
     let batch_id =''
-    console.log(resp)
     if(parseInt(resp.statusCode) == 201){
       batch_id = resp.result.batch_header.payout_batch_id
       return {
@@ -163,7 +164,7 @@ class Paypal {
     try{
       if(req.event_type){
         let batchId = req.resource.batch_header.payout_batch_id
-        const client = this.getPaypalClient();
+        const client = await this.getPaypalClient();
         let request = new paypal.payouts.PayoutsGetRequest(batchId);
         request.page(1);
         request.pageSize(10);
@@ -178,16 +179,40 @@ class Paypal {
           status = '2'
         }
         if(parseInt(response.statusCode) == 200){
+          
           let items = response.result.items
           for(let record of items){
             let member_transaction_id = record.payout_item.sender_item_id
-            let transaction_id = record.transaction_id;
-            await MemberTransaction.update({
-              transaction_id: transaction_id,
-              status:status,
-              completed_at: new Date(),
-              payment_gateway_json: req
-            },{where:{id:member_transaction_id}})
+            let transaction_record = await MemberTransaction.findOne({where:{id:member_transaction_id}})
+            if(transaction_record){
+                let transaction_id = record.transaction_id;
+                //member balance
+                let total_earnings = await db.sequelize.query(
+                "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
+                {
+                  replacements: [transaction_record.member_id],
+                  type: QueryTypes.SELECT,
+                }
+              );
+              console.log(record.payout_item.amount.value)
+              let modified_total_earnings =
+                parseFloat(total_earnings[0].total_amount) - parseFloat(record.payout_item.amount.value);
+
+                await MemberTransaction.update({
+                  transaction_id: transaction_id,
+                  status:status,
+                  completed_at: new Date(),
+                  payment_gateway_json: req,
+                  balance:modified_total_earnings
+                },{where:{id:member_transaction_id}})
+
+                await MemberBalance.update(
+                  { amount: modified_total_earnings },
+                  {
+                    where: { id: total_earnings[0].id },
+                  }
+                );
+            }
           }
         }
       }

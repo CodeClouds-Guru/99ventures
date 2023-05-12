@@ -173,10 +173,13 @@ class EmailHelper {
         };
         // console.log('Mail Data', mailData);
         await transporter.sendMail(mailData);
+        
       }
     } catch (error) {
       console.error('error sending email', error);
+      return 
     }
+    return true
   }
 }
 module.exports = EmailHelper;

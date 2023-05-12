@@ -9,7 +9,7 @@ const SurveycallbackController = new SurveycallbackControllerClass();
 
 const SurveyQuestionsControllerClass = require('../controllers/callback/SurveyQuestionsController');
 const SurveyQuestionsController = new SurveyQuestionsControllerClass();
-
+const { CompanyPortal } = require('../models/index');
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
   logger.info(JSON.stringify(req.query));
@@ -81,7 +81,11 @@ router.get('/test-hbs', (req, res) => {
   res.send(html);
 })
 router.get('/confirm-payment/', async (req,res) => {
-  const paypal_class = new Paypal();
+  var company_portal = await CompanyPortal.findOne({
+    where: { domain: req.hostname },
+  });
+  let company_portal_id = company_portal.id
+  const paypal_class = new Paypal(company_portal_id);
   response = await paypal_class.getPayouts(req);
   res.send(response)
 });
