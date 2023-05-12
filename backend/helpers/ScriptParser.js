@@ -450,7 +450,7 @@ class ScriptParser {
           include: [
             {
               model: Models.TicketAttachment,
-              attributes: ['file_name', 'mime_type'],
+              attributes: ['file_name', 'mime_type', 'created_at'],
             },
             {
               model: Models.Member,
@@ -463,12 +463,12 @@ class ScriptParser {
           ],
         };
       case 'WithdrawalRequest':
-        return{
+        return {
           include: {
             model: Models.WithdrawalType,
-            attributes: ['logo','name'],
+            attributes: ['logo', 'name'],
           },
-        }
+        };
       default:
         return { where: {} };
     }
