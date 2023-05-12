@@ -47,7 +47,8 @@ module.exports = (sequelize, DataTypes) => {
           'admin_adjustment',
           'survey',
           'referral',
-          'member_withdrawal'
+          'member_withdrawal',
+          'registration_bonus'
         ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
