@@ -7,13 +7,13 @@ class NotificationController {
         if (req.ids) {
             await MemberNotification.update({ is_read: 1 }, {
                 where: {
-                    id: req.ids
+                    id: req.body.ids
                 }
             });
         } else {
             await MemberNotification.update({ is_read: 1 }, {
                 where: {
-                    member_id: req.session.user.id
+                    member_id: req.body.member_id
                 }
             });
         }
@@ -25,7 +25,7 @@ class NotificationController {
     async delete(req, res) {
         await MemberNotification.destroy({
             where: {
-                id: req.ids
+                id: req.body.ids
             }
         });
         res.json({
