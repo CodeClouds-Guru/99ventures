@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     logo: DataTypes.STRING,
     status: DataTypes.STRING,
+    currency_percent: DataTypes.FLOAT,
     created_by: DataTypes.BIGINT,
     updated_by: DataTypes.BIGINT,
     deleted_by: DataTypes.BIGINT,

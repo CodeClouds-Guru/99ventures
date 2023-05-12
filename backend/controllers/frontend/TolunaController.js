@@ -1,5 +1,6 @@
 const {
     Member,
+    SurveyProvider,
     MemberEligibilities
 } = require('../../models');
 const TolunaHelper = require('../../helpers/Toluna');
@@ -93,11 +94,19 @@ class TolunaController {
         });
         
         if(member){
+            const provider = await SurveyProvider.findOne({
+                attributes: ['currency_percent'],
+                where: {
+                    name: 'Toluna'
+                }
+            });
+            const centAmt = provider.currency_percent ? provider.currency_percent : 0;
             const tObj = new TolunaHelper;
             const surveys = await tObj.getSurveys(member.username);
             if(surveys && surveys.length) {
                 var surveyHtml = '';
                 for (let survey of surveys) {
+                    let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? survey.PartnerAmount / centAmt : 0;
                     surveyHtml += `
                         <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                             <div class="bg-white card mb-2">
@@ -107,7 +116,7 @@ class TolunaController {
                                     </div>
                                     <div class="text-primary small">${survey.Duration} Minutes</div>
                                     <div class="d-grid mt-1">
-                                        <a href="${survey.URL}" class="btn btn-primary text-white rounded-1">Earn $${survey.MemberAmount}</a>
+                                        <a href="${survey.URL}" class="btn btn-primary text-white rounded-1">Earn $${memberAmount}</a>
                                     </div>
                                 </div>
                             </div>
