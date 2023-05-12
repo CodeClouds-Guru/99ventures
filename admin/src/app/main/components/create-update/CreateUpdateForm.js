@@ -101,13 +101,6 @@ const CreateUpdate = (props) => {
 
         setEditor(editor);
 
-        // editor.on('storage:start:store', o => {
-        //     console.log(o.html)
-        //     // o.html = o.html.replace('&amp', '&')
-        //     // o.html = o.html.replace('&lt', '<')
-        //     // o.html = o.html.replace('&gt', '>')
-        // })
-
         editor.onReady(() => {
             // Collapsed all the blocks accordian by default
             const categories = editor.BlockManager.getCategories();
@@ -182,12 +175,7 @@ const CreateUpdate = (props) => {
         if((moduleId !== 'create' && !isNaN(moduleId))){
             generatedHTML = generatedHTML.replace(/<\!--.*?-->/g, "");   // To remove HTML Comment tag
         }
-        generatedHTML = generatedHTML
-        .replace('&lt;', '<')
-        .replace('&gt;', '>')
-        // .replace('&quot;')
-        // .replace('&#039;')
-        // .replace('&#96;');
+        
         return generatedHTML;
     }
 
@@ -252,9 +240,6 @@ const CreateUpdate = (props) => {
                 editorJsonBody.pages[0].frames[0].component.components = addCommentWrapper(filterComponents, componentName);
             }
             //--------
-
-            console.log(generatedHTMLValue(editor));
-            return;
 
             const params = {
                 ...allData,
