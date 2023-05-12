@@ -242,9 +242,6 @@ const CreateUpdate = (props) => {
             }
             //--------
 
-            console.log(generatedHTMLValue(editor));
-            return;
-
             const params = {
                 ...allData,
                 html: `<!-- Start ${componentName} comment -->\n ${generatedHTMLValue(editor)}\n <!-- End ${componentName} comment -->`,
