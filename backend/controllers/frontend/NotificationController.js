@@ -4,7 +4,7 @@ class NotificationController {
         this.update = this.update.bind(this);
     }
     async update(req, res) {
-        if (req.ids) {
+        if (req.body.ids) {
             await MemberNotification.update({ is_read: 1 }, {
                 where: {
                     id: req.body.ids
