@@ -21,6 +21,16 @@ import { customComponents, scriptBlockManager, compoentBlockManager } from '../.
 import { customCheckboxTrait, memberTrait } from '../../../grapesjs/traitPlugins'
 import { customCodeEditor } from '../../../grapesjs/editorPlugins'
 
+const replaceSpecialCharacters = (string)=>{
+    return string
+        .replaceAll(/&gt;/g, '>')
+        .replaceAll(/&lt;/g, '<')
+        .replaceAll(/&quot;/g, '"')
+        .replaceAll(/&#039;/g, "'")
+        .replaceAll(/&#96;/g, '`');
+}
+
+
 const CreateUpdate = () => {
     const module = 'pages';
     const navigate = useNavigate();
@@ -158,9 +168,11 @@ const CreateUpdate = () => {
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match(reg)[1];
+            var htmlData = editor.getHtml().match(reg)[1];
+            htmlData = replaceSpecialCharacters(htmlData);
             generatedHTML +=`${css}\n${htmlData}`;
         }
+
         return generatedHTML;
     }
 
