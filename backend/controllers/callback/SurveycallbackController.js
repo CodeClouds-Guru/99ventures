@@ -455,18 +455,20 @@ class SurveycallbackController {
   async tolunaPostback(req, res){
     if(req.query.status === 'complete'){
       const requestBody = req.body;
+      console.log(requestBody);
       const username = requestBody.UniqueCode;
       const surveyId = requestBody.SurveyId;
       const surveyRef = requestBody.SurveyRef;
       const partnerAmount = requestBody.Revenue;
       try {
+        console.log('username', username);
         let member = await Member.findOne({
           attributes: ['id', 'username'],
           where: {
             username: username,
           },
         });
-        
+       
         if (member) {
           const provider = await SurveyProvider.findOne({
               attributes: ['currency_percent'],
