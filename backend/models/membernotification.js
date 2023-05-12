@@ -21,6 +21,51 @@ module.exports = (sequelize, DataTypes) => {
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
+      header: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.action.replaceAll('_', ' ').toUpperCase()
+        },
+        set(value) {
+          throw new Error('Do not try to set `header` value!');
+        }
+      },
+      redirect_url: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          switch (this.action) {
+            case 'survey_completed':
+              return '/earning-history';
+            case 'achievement_complete':
+              return '/earning-history';
+            case 'message_received':
+              return '/support-tickets';
+            default:
+              return '#';
+          }
+        },
+        set(value) {
+          throw new Error('Do not try to set `redirect_url` value!');
+        }
+      },
+      logo: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          switch (this.action) {
+            case 'survey_completed':
+              return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationprizeicon.png';
+            case 'achievement_complete':
+              return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationbadgeicon.png';
+            case 'message_received':
+              return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationfileicon.png';
+            default:
+              return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationfileicon.png';
+          }
+        },
+        set(value) {
+          throw new Error('Do not try to set `logo` value!');
+        }
+      }
     },
     {
       sequelize,

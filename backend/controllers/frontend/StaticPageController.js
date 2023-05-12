@@ -84,14 +84,12 @@ class StaticPageController {
         user,
         params
       );
-      // console.log(util.inspect(parsed, false, null, true));
       const template = Handlebars.compile(parsed.script_html);
       var html = template({
         data: parsed.data,
         page_count: parsed.page_count,
         other_details: parsed.other_details,
       });
-      // console.log('======', html);
       resp = {
         ...resp,
         status: true,

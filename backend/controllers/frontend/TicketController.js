@@ -33,6 +33,12 @@ class TicketController {
         case 'ticket_chat':
           change = await this.saveTicketConversations(req, res);
           break;
+        case 'ticket_status':
+          let field_name = req.body.field_name;
+          let value = req.body.value;
+          let ticket_id = req.body.ticket_id;
+          let update = await Ticket.changeStatus(field_name, value, ticket_id);
+          break;
         default:
           req.session.flash = { error: 'Request Failed.' };
       }
