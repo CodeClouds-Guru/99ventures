@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       currency: DataTypes.STRING,
+      parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
@@ -228,10 +229,9 @@ module.exports = (sequelize, DataTypes) => {
 
   MemberTransaction.updateMemberTransactionAndBalance = async (data) => {
     const db = require('../models/index');
-
     const { QueryTypes, Op } = require('sequelize');
     const { MemberBalance } = require('../models/index');
-    // console.log(data);
+
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
       {
@@ -239,40 +239,40 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
+    let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
+    data.status = data.status || 2;
 
-    let modified_total_earnings =
-      parseFloat(total_earnings[0].total_amount) + parseFloat(data.amount);
-    let transaction_data = {
-      type: data.type,
-      amount: parseFloat(data.amount),
-      status: data.status || 2,
-      note: data.note,
-      created_by: data.created_by,
-      member_id: data.member_id,
-      amount_action: data.amount_action,
-      completed_at: new Date(),
-      transaction_id: data.transaction_id || null,
-      balance: modified_total_earnings,
-      payload: data.payload || null,
-      currency: data.currency || 'USD',
-    };
-    // console.log(transaction_data);
-    let transaction = await MemberTransaction.create(transaction_data, {
-      silent: true,
-    });
-    transaction = JSON.parse(JSON.stringify(transaction));
-    // console.log(transaction.id);
+    if (parseInt(data.status) == 2) {
+      modified_total_earnings =
+        modified_total_earnings + parseFloat(data.amount);
+    }
+
+    data.modified_total_earnings = modified_total_earnings;
+
+    //this member insert transaction
+    let transaction = JSON.parse(
+      JSON.stringify(await MemberTransaction.insertTransaction(data))
+    );
+    // console.log(transaction);
     let balance = true;
-    if (parseInt(transaction_data.status) == 2) {
+    if (parseInt(data.status) == 2) {
       balance = await MemberBalance.update(
         { amount: modified_total_earnings },
         {
           where: { id: total_earnings[0].id },
         }
       );
+      //referral member section
+      if (data.type === 'credited') {
+        let referral_data = await MemberTransaction.referralAmountUpdate(
+          data.member_id,
+          data.amount,
+          transaction.id
+        );
+      }
     }
 
-    if (transaction.status && balance) {
+    if (transaction && balance) {
       return { status: true, transaction_id: transaction.id };
     } else {
       return false;
@@ -332,6 +332,110 @@ module.exports = (sequelize, DataTypes) => {
     let response = await MemberTransaction.findOne(option);
     console.log(response);
     return JSON.parse(JSON.stringify(response));
+  };
+
+  MemberTransaction.referralAmountUpdate = async (
+    member_id,
+    modified_total_earnings,
+    parent_transaction_id
+  ) => {
+    const { MemberBalance, Member, Setting } = require('../models/index');
+    let member = JSON.parse(
+      JSON.stringify(
+        await Member.findOne({
+          where: { id: member_id },
+          attributes: ['member_referral_id'],
+          include: {
+            model: MemberBalance,
+            as: 'member_amounts',
+            attributes: ['amount'],
+            where: { amount_type: 'cash' },
+          },
+        })
+      )
+    );
+    let referral_member = JSON.parse(
+      JSON.stringify(
+        await Member.findOne({
+          where: { id: member.member_referral_id },
+          attributes: ['member_referral_id'],
+          include: {
+            model: MemberBalance,
+            as: 'member_amounts',
+            attributes: ['amount'],
+            where: { amount_type: 'cash' },
+          },
+        })
+      )
+    );
+    console.log('-----------', referral_member.member_amounts[0].amount);
+    if (member.member_referral_id) {
+      let config_data = await Setting.findOne({
+        attributes: ['settings_value'],
+        where: { settings_key: 'referral_percentage' },
+      });
+      let referral_amount =
+        (modified_total_earnings *
+          parseFloat(config_data.dataValues.settings_value)) /
+        100;
+      console.log('========referral_amount', referral_amount);
+      let ref_modified_total_earnings =
+        parseFloat(referral_member.member_amounts[0].amount) +
+        parseFloat(referral_amount);
+      console.log(
+        '---------ref_modified_total_earnings',
+        ref_modified_total_earnings
+      );
+      JSON.parse(
+        JSON.stringify(
+          await MemberTransaction.insertTransaction({
+            type: 'credited',
+            amount: parseFloat(referral_amount),
+            note: 'Referral percentage',
+            member_id: member.member_referral_id,
+            amount_action: 'referral',
+            modified_total_earnings: ref_modified_total_earnings,
+            parent_transaction_id: parent_transaction_id,
+          })
+        )
+      );
+      await MemberBalance.update(
+        { amount: ref_modified_total_earnings },
+        {
+          where: {
+            member_id: member.member_referral_id,
+            amount_type: 'cash',
+          },
+        }
+      );
+    }
+    return {
+      status: true,
+      data: { ref_id: member.member_referral_id },
+    };
+  };
+
+  MemberTransaction.insertTransaction = async (data) => {
+    console.log(data);
+    let transaction_data = {
+      type: data.type,
+      amount: parseFloat(data.amount),
+      status: data.status || 2,
+      note: data.note,
+      created_by: data.created_by || null,
+      member_id: data.member_id,
+      amount_action: data.amount_action,
+      completed_at: new Date(),
+      transaction_id: data.transaction_id || null,
+      balance: data.modified_total_earnings,
+      payload: data.payload || null,
+      currency: data.currency || 'USD',
+      parent_transaction_id: data.parent_transaction_id || null,
+    };
+
+    return await MemberTransaction.create(transaction_data, {
+      silent: true,
+    });
   };
   return MemberTransaction;
 };
