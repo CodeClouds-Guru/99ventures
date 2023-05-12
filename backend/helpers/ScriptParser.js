@@ -82,7 +82,7 @@ class ScriptParser {
               });
               other_details = {
                 ...other_details,
-                ...JSON.parse(JSON.stringify(total))
+                ...JSON.parse(JSON.stringify(total)),
               };
             }
 
@@ -188,7 +188,7 @@ class ScriptParser {
         }
       }
     }
-    console.log('script data', JSON.parse(JSON.stringify(data)));
+    // console.log('script data', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -389,7 +389,9 @@ class ScriptParser {
 
       case 'MemberTransaction':
         return {
-          where: user ? { member_id: user.id,type: 'credited' } : { type: 'credited' },
+          where: user
+            ? { member_id: user.id, type: 'credited' }
+            : { type: 'credited' },
           include: [
             { model: Models.Member },
             {
