@@ -134,7 +134,7 @@ const CreateUpdate = (props) => {
             getSingleRecordById(moduleId, editor);
         } else {
             const storageManager = editor.Storage;
-            const data = storageManager.load();
+            const data = await storageManager.load();
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
@@ -175,6 +175,7 @@ const CreateUpdate = (props) => {
         if((moduleId !== 'create' && !isNaN(moduleId))){
             generatedHTML = generatedHTML.replace(/<\!--.*?-->/g, "");   // To remove HTML Comment tag
         }
+        
         return generatedHTML;
     }
 
