@@ -169,7 +169,8 @@ const CreateUpdate = (props) => {
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match(reg)[1];
+            var htmlData = editor.getHtml().match(reg)[1];
+            htmlData = Helper.replaceSpecialCharacters(htmlData);
             generatedHTML += `${css}\n${htmlData}`;
         }
         if((moduleId !== 'create' && !isNaN(moduleId))){
