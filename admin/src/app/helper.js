@@ -68,13 +68,6 @@ export default {
     }
   },
   replaceSpecialCharacters(string){
-    return string
-        .replaceAll(/&gt;/g, '>')
-        .replaceAll(/&lt;/g, '<')
-        .replaceAll(/&quot;/g, '"')
-        .replaceAll(/&#039;/g, "'")
-        .replaceAll(/&#96;/g, '`')
-        .replaceAll(/&amp;/g, '&')
-        .replaceAll(/&#039;/g, '|');
+    return new DOMParser().parseFromString(string, "text/html").documentElement.textContent;
   }
 }
