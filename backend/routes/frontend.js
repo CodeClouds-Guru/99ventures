@@ -59,7 +59,7 @@ router.post('/update-notification', NotificationController.update);
 router.delete('/update-notification', NotificationController.delete);
 
 router.get('/test-payment', async (req, res) => {
-  const paypal_class = new Paypal();
+  const paypal_class = new Paypal(1);
   const create_resp = await paypal_class.payout([
     {
       email: 'sb-vwa0c25891350@business.example.com',
@@ -88,7 +88,8 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
       }
     }
   }
-  const paypal_class = new Paypal();
+  let company_portal_id = req.session.company_portal.id;
+  const paypal_class = new Paypal(company_portal_id);
   const create_resp = await paypal_class.getPayouts(requ);
   res.send({
     l: create_resp

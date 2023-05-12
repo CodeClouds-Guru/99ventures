@@ -246,6 +246,7 @@ class MemberAuthController {
 
   //referral
   async referralDetails(req, res) {
+    let referrer = []
     if (req.body.referral_code) {
       referrer = await Member.findOne({
         where: { referral_code: req.body.referral_code },
@@ -253,9 +254,14 @@ class MemberAuthController {
       if (referrer) {
         referrer = referrer.id;
         //update member referral info
-        let ip = req.ip.split('::ffff:');
-        ip = ip[ip.length - 1];
-        var geo = geoip.lookup('122.163.102.160');
+        let ip = req.ip;
+        if (Array.isArray(ip)) {
+            ip = ip[0]
+        } else {
+            ip = ip.replace("::ffff:", "");
+        }
+        const reportObj = new IpQualityScoreClass();
+        var geo = await reportObj.getIpReport(ip);
 
         let referral_details = await MemberReferral.findOne({
           where: { referral_id: referrer, referral_email: req.body.email },
@@ -264,7 +270,7 @@ class MemberAuthController {
         if (referral_details) {
           await MemberReferral.update(
             {
-              geo_location: geo.region,
+              geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
               ip: ip,
               member_id: referrer,
               join_date: new Date(),
@@ -276,7 +282,7 @@ class MemberAuthController {
         } else {
           await MemberReferral.create({
             member_id: referrer,
-            referral_id: member_details.id,
+            referral_id: res.id,
             referral_email: req.body.email,
             geo_location: geo.region,
             ip: ip,
@@ -286,11 +292,11 @@ class MemberAuthController {
       }
       let model = await Member.update(
         {
-          referral_code: res.result.id + '0' + new Date().getTime(),
+          referral_code: res.id + '0' + new Date().getTime(),
           member_referral_id: referrer,
         },
         {
-          where: { id: res.result.id },
+          where: { id: res.id },
         }
       );
       //signed up with referral code
@@ -301,14 +307,16 @@ class MemberAuthController {
     let registration_bonus = await Setting.findOne({
       where: { settings_key: 'registration_bonus' },
     });
-    await MemberTransaction.create({
-      type: 'credited',
+    await MemberTransaction.updateMemberTransactionAndBalance({
+      member_id:member_details.id,
       amount: registration_bonus.settings_value,
-      status: 2,
-      member_id: member_details.id,
-      amount_action: 'admin_adjustment',
+      note: '',
+      status: '2',
+      type: 'credited',
+      amount_action: 'registration_bonus',
       balance: registration_bonus.settings_value,
-      completed_at: new Date(),
+      currency: 'USD',
+      created_by: 0,
     });
   }
   //geo track
@@ -755,7 +763,6 @@ class MemberAuthController {
           { where: { id: transaction_resp.transaction_id } }
         );
       }
-      console.log('create_resp', create_resp);
     }
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =

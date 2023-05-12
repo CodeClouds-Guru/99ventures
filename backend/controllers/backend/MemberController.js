@@ -230,10 +230,17 @@ class MemberController extends Controller {
           let membership_tier = await MembershipTier.findAll({
             attributes: ['id', 'name'],
           });
+          //get member referrer name
+          var member_referrer = ''
+          if(result.member_referral_id){
+            member_referrer = await this.model.findOne({where:{id:result.member_referral_id}})
+            member_referrer = member_referrer.first_name+' '+member_referrer.last_name
+          }
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
           result.setDataValue('membership_tier', membership_tier);
+          result.setDataValue('member_referrer', member_referrer);
         } else {
           //get all email alerts
           email_alerts = await EmailAlert.getEmailAlertList(member_id);
