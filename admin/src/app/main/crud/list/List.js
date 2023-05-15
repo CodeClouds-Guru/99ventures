@@ -19,7 +19,7 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
 import Helper from 'src/app/helper';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
-
+import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
 
 function List(props) {
 	const dispatch = useDispatch();
@@ -63,6 +63,8 @@ function List(props) {
 		endDate: '',
 	});
 	const [actionsMenu, setActionsMenu] = useState(null);
+	const [vimodal, setVimodal] = useState(false);
+	const [programsList, setProgramList] = useState([]);
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
@@ -112,6 +114,9 @@ function List(props) {
 			setLoading(false);
 			setFirstCall(false);
 			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
+			if(res.data.results.program) {
+				setProgramList(res.data.results.program)
+			}
 		}).catch(error => {
 			let message = 'Something went wrong!'
 			if (error && error.response.data && error.response.data.errors) {
@@ -461,6 +466,27 @@ function List(props) {
 		setWhere({ ...where });
 	}
 
+	/**
+	 * To show a icon by which admin can open a modal and see the balance of all Virtual Incentives program's price.
+	 */
+	const virtualIncentiveInfo = () => {
+		return (
+			<Tooltip title="Program List" placement="top-start" arrow>
+				<IconButton
+					aria-owns=""
+					aria-haspopup="true"
+					onClick={()=>setVimodal(true)}
+					size="small"
+					className="listingExtraMenu"
+					sx={{ zIndex: 999 }}
+					id=""
+				>
+					<FuseSvgIcon className="text-48" size={24} color="action">material-outline:info</FuseSvgIcon>
+				</IconButton>
+			</Tooltip>
+		)
+	}
+
 	return (
 		<div>
 			{/* // header */}
@@ -478,6 +504,7 @@ function List(props) {
 									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
+									{ (!_.isEmpty(where) && where.withdrawal_type_id && 4 === where.withdrawal_type_id) ? virtualIncentiveInfo() : ''}
 								</Typography>
 							)
 						}
@@ -699,6 +726,11 @@ function List(props) {
 
 				</FuseScrollbars>
 			</div>
+			
+			{/* To show the info modal for virtual incentive */}
+			{
+				vimodal && <VirtualIncentivesBalance programs={ programsList } status={vimodal} setVimodal={ (e)=>setVimodal(e) } />
+			}
 		</div>
 	);
 }

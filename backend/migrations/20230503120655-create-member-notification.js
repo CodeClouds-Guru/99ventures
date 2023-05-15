@@ -19,8 +19,8 @@ module.exports = {
         type: Sequelize.STRING,
       },
       is_read: {
-        type: Sequelize.ENUM('0', '1'),
-        defaultValue: '1',
+        type: Sequelize.TINYINT,
+        defaultValue: 1,
       },
       read_on: {
         type: 'TIMESTAMP',

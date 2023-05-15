@@ -2,6 +2,8 @@ const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
 const { Op } = require('sequelize');
 const { Member, User,WithdrawalType,MemberTransaction,WithdrawalRequest } = require('../../models/index');
+const VirtualIncentive = require('../../helpers/VirtualIncentive');
+
 class WithdrawalRequestController extends Controller {
   constructor() {
     super('WithdrawalRequest');
@@ -39,6 +41,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].listing = false
         fields['$Member.username$'].searchable = false
       }
+  
       if('created_at' in query_where){
         var and_query = {
           created_at: {
@@ -88,9 +91,15 @@ class WithdrawalRequestController extends Controller {
             record.dataValues.User.dataValues.alias_name;
         }
       });
+      var programsList = [];
+      if(+query_where.withdrawal_type_id === 4 ){   // 4 = Gift Card
+        const viObj = new VirtualIncentive(company_portal_id)
+        programsList = await viObj.getProgramBalance();
+      }
       return {
         result: { data: results.rows, pages, total:results.count },
         fields: this.model.fields,
+        ...programsList
       };
     }
   }

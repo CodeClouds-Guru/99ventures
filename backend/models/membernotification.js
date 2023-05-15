@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       verbose: DataTypes.STRING,
       action: DataTypes.STRING,
-      is_read: DataTypes.ENUM(0, 1),
+      is_read: DataTypes.TINYINT,
       read_on: 'TIMESTAMP',
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       header: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.action.replaceAll('_', ' ').toUpperCase()
+          return this.action ? this.action.replaceAll('_', ' ').toUpperCase() : ''
         },
         set(value) {
           throw new Error('Do not try to set `header` value!');

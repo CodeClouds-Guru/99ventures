@@ -96,7 +96,7 @@ class VirtualIncentive {
 
     async getProgramBalance(){
         try{
-            const data = this.getInstance();
+            const data = await this.getInstance();
             const instance = axios.create({
                 ...data
             });
