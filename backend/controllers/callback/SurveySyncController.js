@@ -601,8 +601,8 @@ class SurveySyncController {
                 });
                 
                 let params = {
-                    question_text: qs.TranslatedQuestion.InternalName,
-                    name: qs.TranslatedQuestion.DisplayNameTranslation,
+                    question_text: qs.TranslatedQuestion.DisplayNameTranslation,
+                    name: qs.InternalName,
                     survey_provider_id: this.providerId,
                     survey_provider_question_id: qs.TranslatedQuestion.QuestionID,
                     question_type: qs.AnswerType,
