@@ -29,6 +29,7 @@ class ScriptParser {
       transaction_count: 0,
       total_withdrawal_amount: 0,
       member_balance: 0,
+      user: user,
     };
     var page_count = 0;
     var script_html = '';
@@ -118,24 +119,24 @@ class ScriptParser {
                 [
                   sequelize.literal(
                     `(SELECT count(id) FROM member_transactions WHERE member_id = ` +
-                      user.id +
-                      ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
+                    user.id +
+                    ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
                   ),
                   'transaction_count',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT sum(amount) FROM member_transactions WHERE member_id = ` +
-                      user.id +
-                      ` AND status= 2 AND amount_action='member_withdrawal')`
+                    user.id +
+                    ` AND status= 2 AND amount_action='member_withdrawal')`
                   ),
                   'total_withdrawal_amount',
                 ],
                 [
                   sequelize.literal(
                     `(SELECT amount FROM member_balances WHERE member_id = ` +
-                      user.id +
-                      ` AND amount_type = 'cash')`
+                    user.id +
+                    ` AND amount_type = 'cash')`
                   ),
                   'member_balance',
                 ],
@@ -193,7 +194,7 @@ class ScriptParser {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
       page_count,
-      other_details,
+      other_details: JSON.parse(JSON.stringify(other_details)),
     };
   }
   //get survey
@@ -350,9 +351,8 @@ class ScriptParser {
         if (surveys && surveys.length) {
           var surveyHtml = '';
           surveys.forEach(function (survey, key) {
-            let link = `/pure-spectrum/entrylink?survey_number=${
-              survey.survey_number
-            }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number
+              }${generateQueryString ? '&' + generateQueryString : ''}`;
             surveys[key].setDataValue('link', link);
           });
           return {
