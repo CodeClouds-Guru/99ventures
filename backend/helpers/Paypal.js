@@ -5,11 +5,13 @@ const {
   PaymentMethodCredential,
   WithdrawalRequest,
   Member,
-  MemberBalance
+  MemberBalance,
+  MemberNotification
 } = require('../models');
 const paypal = require('@paypal/payouts-sdk');
 const db = require("../models/index");
 const { QueryTypes, Op } = require("sequelize");
+const eventBus = require('../eventBus');
 class Paypal {
   constructor(company_portal_id='') {
     this.company_portal_id = company_portal_id
@@ -212,6 +214,27 @@ class Paypal {
                     where: { id: total_earnings[0].id },
                   }
                 );
+
+                //send mail to member
+                let member_details = await Member.findOne({where:{id:transaction_record.member_id}})
+                let withdraw_requests = await WithdrawalRequest.findOne({where:{member_transaction_id:member_transaction_id}})
+                let evntbus = eventBus.emit('send_email', {
+                  action: 'Payment Confirmation',
+                  data: {
+                    email: member_details.email,
+                    details: { members: member_details,withdraw_requests:withdraw_requests },
+                  },
+                  req: req,
+                });
+                //send notification
+                let notify_data = {
+                  member_id: transaction_record.member_id,
+                  verbose:'Withdrawal request for '+withdraw_requests.amount+' has been completed.',
+                  action: 'payment_confirmation',
+                  is_read: '0',
+                  read_on: new Date(),
+                };
+                await MemberNotification.create(notify_data);
             }
           }
         }
