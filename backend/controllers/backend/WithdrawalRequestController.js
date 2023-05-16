@@ -41,7 +41,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].listing = false
         fields['$Member.username$'].searchable = false
       }
-  
+
       if('created_at' in query_where){
         var and_query = {
           created_at: {
@@ -91,15 +91,37 @@ class WithdrawalRequestController extends Controller {
             record.dataValues.User.dataValues.alias_name;
         }
       });
+      
       var programsList = [];
-      if(+query_where.withdrawal_type_id === 4 ){   // 4 = Gift Card
+      const withdrawlType = await WithdrawalType.findOne({attributes:['slug'], where: {id: query_where.withdrawal_type_id}});
+      if(withdrawlType.slug === 'gift_card_pass'){
         const viObj = new VirtualIncentive(company_portal_id)
-        programsList = await viObj.getProgramBalance();
+        const programs = await viObj.getProgramBalance();
+        if(Object.keys(programs).length && programs.program){
+          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Gift Cards').map(row => {
+              return {
+                  ...row,
+                  id: row.programid
+              }
+          });
+        }
+      } else if(withdrawlType.slug === 'venmo'){
+        const viObj = new VirtualIncentive(company_portal_id)
+        const programs = await viObj.getProgramBalance();
+        if(Object.keys(programs).length && programs.program){
+          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Virtual Reward').map(row => {
+              return {
+                  ...row,
+                  id: row.programid
+              }
+          });
+        }
       }
+
       return {
         result: { data: results.rows, pages, total:results.count },
         fields: this.model.fields,
-        ...programsList
+        programs: programsList
       };
     }
   }
