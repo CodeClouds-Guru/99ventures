@@ -99,7 +99,21 @@ class MemberTransactionController extends Controller {
 
   //       //current transaction
   //       let updated_balance =
+  //         parseFloat(member_balance.amount) - parseFloat(transaction.amount);
+  //         await MemberTransaction.insertTransaction({
+  //           type: 'withdraw',
+  //           amount: parseFloat(transaction.amount),
+  //           note: 'Reverse transaction',
+  //           member_id: member.member_referral_id,
+  //           amount_action: 'referral',
+  //           modified_total_earnings: ref_modified_total_earnings,
+  //           parent_transaction_id: parent_transaction_id,
+  //         })
 
+  //         await MemberTransaction.updateMemberBalance({
+  //           amount: ref_modified_total_earnings,
+  //           member_id: member.member_referral_id,
+  //         });
   //       //referral transaction
   //     } catch (e) {
   //       console.log(e);
