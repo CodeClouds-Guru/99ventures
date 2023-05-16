@@ -264,7 +264,7 @@ class TicketController extends Controller {
     const ticket_id = req.body.id || null;
     const member_id = req.body.member_id || null;
     const user_id = req.body.user_id || null;
-    const attachments = req.files ? req.files.ticket_file : null;
+    const attachments = req.files ? req.files.attachments : null;
 
     try {
       const data = {
