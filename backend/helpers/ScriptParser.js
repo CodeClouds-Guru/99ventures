@@ -464,6 +464,7 @@ class ScriptParser {
         };
       case 'WithdrawalRequest':
         return {
+          where: { member_id: user.id },
           include: {
             model: Models.WithdrawalType,
             attributes: ['logo', 'name'],
