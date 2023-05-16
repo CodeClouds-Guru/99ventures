@@ -53,6 +53,7 @@ class TicketController {
           message: 'Record updated.',
           success_status: true,
         };
+      res.send({status:true})
       //res.redirect('back');
     }
   }
