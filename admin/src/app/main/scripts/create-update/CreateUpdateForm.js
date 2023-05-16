@@ -9,12 +9,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import AlertDialog from 'app/shared-components/AlertDialog';
-// Require Editor CSS files.
-import 'froala-editor/css/froala_style.min.css';
-import 'froala-editor/css/froala_editor.pkgd.min.css';
-import FroalaEditorComponent from 'react-froala-wysiwyg';
-// Import all Froala Editor plugins;
-import 'froala-editor/js/plugins.pkgd.min.js';
 
 
 const CreateUpdateForm = () => {
@@ -24,7 +18,6 @@ const CreateUpdateForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [errors, setErrors] = useState({});
-    const [fullScreen, setFullScreen] = useState(false);
     const [allData, setAllData] = useState({
         name: '',
         script_html: '',
@@ -159,8 +152,6 @@ const CreateUpdateForm = () => {
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
-                            {/* <FroalaEditorComponent config={{attribution: false, heightMin: 300,}} tag='textarea' onModelChange={handleModelChange} model={ allData.script_html }/> */}
-
                             <pre>
                                 <code>
                                     <textarea
@@ -205,7 +196,6 @@ const CreateUpdateForm = () => {
                     </div>
                 </Paper>
             </div>
-            
         </>
     )
 }
