@@ -31,6 +31,8 @@ class TicketController {
     try {
       switch (type) {
         case 'ticket_chat':
+          console.log(req.body)
+          console.log(req.files)
           change = await this.saveTicketConversations(req, res);
           break;
         case 'ticket_status':
@@ -51,6 +53,7 @@ class TicketController {
           message: 'Record updated.',
           success_status: true,
         };
+      //res.redirect('back');
     }
   }
 
@@ -112,7 +115,7 @@ class TicketController {
     } catch (error) {
       req.session.flash = { error: 'Unable to submit ticket.' };
     } finally {
-      res.redirect('back');
+      
     }
   }
 }
