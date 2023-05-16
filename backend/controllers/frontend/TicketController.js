@@ -31,8 +31,6 @@ class TicketController {
     try {
       switch (type) {
         case 'ticket_chat':
-          console.log(req.body)
-          console.log(req.files)
           change = await this.saveTicketConversations(req, res);
           break;
         case 'ticket_status':
@@ -42,17 +40,17 @@ class TicketController {
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
           break;
         default:
-          req.session.flash = { error: 'Request Failed.' };
+          // req.session.flash = { error: 'Request Failed.' };
       }
     } catch (error) {
       console.error(error);
-      req.session.flash = { error: 'Unable to save data.' };
+      // req.session.flash = { error: 'Unable to save data.' };
     } finally {
-      if (change)
-        req.session.flash = {
-          message: 'Record updated.',
-          success_status: true,
-        };
+      // if (change)
+        // req.session.flash = {
+        //   message: 'Record updated.',
+        //   success_status: true,
+        // };
       res.send({status:true})
       //res.redirect('back');
     }
@@ -91,7 +89,7 @@ class TicketController {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
-        // console.log('files',files)
+        console.log('files',files)
         let fileHelper = new FileHelper(
           files,
           'tickets/' + savedTicketConversation.id,
