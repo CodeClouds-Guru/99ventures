@@ -790,11 +790,8 @@ class MemberAuthController {
         data: {
           email: member.email,
           details: {
-            members: {
-              ...member,
-              amount: withdrawal_amount,
-              requested_on: new Date(),
-            },
+            members: member,
+            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
           },
         },
         req: req,
@@ -805,11 +802,8 @@ class MemberAuthController {
         data: {
           email: member.email,
           details: {
-            members: {
-              ...member,
-              amount: withdrawal_amount,
-              date: new Date(),
-            },
+            members: member,
+            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
           },
         },
         req: req,
@@ -824,6 +818,10 @@ class MemberAuthController {
         details: {
           members: {
             ...member,
+            amount: withdrawal_amount,
+            requested_on: new Date(),
+          },
+          withdraw_requests: {
             amount: withdrawal_amount,
             requested_on: new Date(),
           },
