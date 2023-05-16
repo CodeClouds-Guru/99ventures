@@ -475,6 +475,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   MemberTransaction.updateMemberBalance = async (data) => {
+    const { MemberBalance } = require('../models/index');
     await MemberBalance.update(
       { amount: data.amount },
       {
