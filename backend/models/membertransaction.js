@@ -279,7 +279,7 @@ module.exports = (sequelize, DataTypes) => {
       data.amount_action === 'member_withdrawal'
     ) {
       await MemberNotification.addMemberNotification({
-        member_id: ticket.member_id,
+        member_id: data.member_id,
         verbose:
           'Withdrawal requested initiated for $' +
           parseFloat(data.amount) +
@@ -356,7 +356,12 @@ module.exports = (sequelize, DataTypes) => {
     modified_total_earnings,
     parent_transaction_id
   ) => {
-    const { MemberBalance, Member, Setting } = require('../models/index');
+    const {
+      MemberBalance,
+      Member,
+      Setting,
+      MemberNotification,
+    } = require('../models/index');
     let member = JSON.parse(
       JSON.stringify(
         await Member.findOne({

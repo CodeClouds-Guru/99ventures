@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button } from '@mui/material';
+import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, TextareaAutosize } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -9,12 +9,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import AlertDialog from 'app/shared-components/AlertDialog';
-// Require Editor CSS files.
-import 'froala-editor/css/froala_style.min.css';
-import 'froala-editor/css/froala_editor.pkgd.min.css';
-import FroalaEditorComponent from 'react-froala-wysiwyg';
-// Import all Froala Editor plugins;
-import 'froala-editor/js/plugins.pkgd.min.js';
 
 
 const CreateUpdateForm = () => {
@@ -123,7 +117,7 @@ const CreateUpdateForm = () => {
 
     const handleModelChange = (e) =>{
         setAllData(allData => ({
-            ...allData, script_html: e
+            ...allData, script_html: e.target.value
         }));
     }
     return (
@@ -158,7 +152,18 @@ const CreateUpdateForm = () => {
                             />
                         </FormControl>
                         <FormControl className="w-full mb-24">
-                            <FroalaEditorComponent config={{attribution: false, heightMin: 300,}} tag='textarea' onModelChange={handleModelChange} model={ allData.script_html }/>
+                            <pre>
+                                <code>
+                                    <textarea
+                                        maxRows={10}
+                                        aria-label="maximum height"
+                                        placeholder=""
+                                        value={ allData.script_html }
+                                        className="custom-code-editor scripts-editor"
+                                        onChange={handleModelChange}                                        
+                                    ></textarea>
+                                </code>
+                            </pre>
                             <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
                         </FormControl>
 
@@ -191,7 +196,6 @@ const CreateUpdateForm = () => {
                     </div>
                 </Paper>
             </div>
-            
         </>
     )
 }
