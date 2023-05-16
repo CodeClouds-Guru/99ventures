@@ -275,7 +275,7 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
-      console.log(user_id);
+      // console.log(user_id);
       if (user_id) {
         let ticket = await Ticket.findOne({ where: { id: ticket_id } });
 

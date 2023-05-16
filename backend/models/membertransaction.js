@@ -347,7 +347,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
-    console.log(response);
+    // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
 

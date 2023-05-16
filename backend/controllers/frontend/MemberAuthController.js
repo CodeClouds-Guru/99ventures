@@ -763,7 +763,7 @@ class MemberAuthController {
           member_transaction_id: transaction_resp.transaction_id,
         },
       ]);
-      console.log('create_resp', create_resp);
+      // console.log('create_resp', create_resp);
       if (create_resp.status) {
         await MemberTransaction.update(
           { batch_id: create_resp.batch_id },
