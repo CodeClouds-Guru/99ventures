@@ -68,6 +68,10 @@ export default {
     }
   },
   replaceSpecialCharacters(string){
-    return new DOMParser().parseFromString(string, "text/html").documentElement.textContent;
+    return string.replaceAll(/&gt;/g, '>')
+                .replaceAll(/&lt;/g, '<')
+                .replaceAll(/&#039;/g, "'")
+                .replaceAll(/&amp;/g, '&')
+                .replaceAll(/&quot;/g, '"')
   }
 }
