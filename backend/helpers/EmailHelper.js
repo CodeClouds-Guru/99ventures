@@ -131,7 +131,6 @@ class EmailHelper {
         replace_data[key] = eval('details' + '.' + new_value);
         email_body = email_body.replaceAll(value, replace_data[key]);
       });
-      
     }
     // email_body = safeEval('`' + email_body + '`', details);
     return email_body;
@@ -173,13 +172,12 @@ class EmailHelper {
         };
         // console.log('Mail Data', mailData);
         await transporter.sendMail(mailData);
-        
       }
     } catch (error) {
       console.error('error sending email', error);
-      return 
+      return;
     }
-    return true
+    return true;
   }
 }
 module.exports = EmailHelper;

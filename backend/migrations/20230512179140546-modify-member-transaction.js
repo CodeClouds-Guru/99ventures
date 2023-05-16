@@ -6,7 +6,7 @@ module.exports = {
       'member_transactions',
       'parent_transaction_id',
       {
-        type: Sequelize.FLOAT,
+        type: Sequelize.BIGINT,
       }
     );
   },

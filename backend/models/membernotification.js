@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   MemberNotification.addMemberNotification = async (data) => {
-    let notification = await MemberActivityLog.create({
+    let notification = await MemberNotification.create({
       member_id: data.member_id,
       verbose: data.verbose,
       action: data.action,

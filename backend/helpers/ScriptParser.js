@@ -113,47 +113,69 @@ class ScriptParser {
             data.setDataValue('country_list', country_list);
             break;
           case 'member_withdrawal':
-            let transaction_data = await Models.MemberTransaction.findOne({
-              attributes: [
-                'completed_at',
-                [
-                  sequelize.literal(
-                    `(SELECT count(id) FROM member_transactions WHERE member_id = ` +
-                      user.id +
-                      ` AND status= 2 AND amount_action='member_withdrawal' ORDER BY id ASC LIMIT 5)`
-                  ),
-                  'transaction_count',
-                ],
-                [
-                  sequelize.literal(
-                    `(SELECT sum(amount) FROM member_transactions WHERE member_id = ` +
-                      user.id +
-                      ` AND status= 2 AND amount_action='member_withdrawal')`
-                  ),
-                  'total_withdrawal_amount',
-                ],
-                [
-                  sequelize.literal(
-                    `(SELECT amount FROM member_balances WHERE member_id = ` +
-                      user.id +
-                      ` AND amount_type = 'cash')`
-                  ),
-                  'member_balance',
-                ],
-              ],
-              where: {
-                member_id: user.id,
-                status: 2,
-                amount_action: 'member_withdrawal',
-              },
-            });
+            let transaction_data = {};
+            let transaction_completed_at = JSON.parse(
+              JSON.stringify(
+                await Models.MemberTransaction.findOne({
+                  where: {
+                    member_id: user.id,
+                    status: 1,
+                    amount_action: 'member_withdrawal',
+                  },
+                  attributes: [['completed_at', 'completed_datetime']],
+                  order: [['id', 'DESC']],
+                })
+              )
+            );
+            let transactions = JSON.parse(
+              JSON.stringify(
+                await Models.MemberTransaction.findOne({
+                  where: {
+                    member_id: user.id,
+                    status: 1,
+                    amount_action: 'member_withdrawal',
+                  },
+                  attributes: [
+                    [
+                      sequelize.literal(`(SELECT COUNT(id))`),
+                      'transaction_count',
+                    ],
+                    [
+                      sequelize.literal(`(SELECT SUM(amount))`),
+                      'total_withdrawal_amount',
+                    ],
+                  ],
+                  order: [['id', 'ASC']],
+                })
+              )
+            );
+            let balances = JSON.parse(
+              JSON.stringify(
+                await Models.MemberBalance.findOne({
+                  where: {
+                    member_id: user.id,
+                    amount_type: 'cash',
+                  },
+                  attributes: [['amount', 'member_balance']],
+                })
+              )
+            );
+
+            transaction_data = {
+              completed_at: transaction_completed_at
+                ? transaction_completed_at.completed_at
+                : null,
+              transaction_count: transactions.transaction_count,
+              total_withdrawal_amount: transactions.total_withdrawal_amount,
+              member_balance: balances.member_balance,
+            };
             other_details = {
               ...other_details,
               ...JSON.parse(JSON.stringify(transaction_data)),
             };
-            // console.log(other_details);
+
             const condition = this.getModuleWhere(script.module, user);
-            if (other_details.transaction_count < 5) {
+            if (other_details.transaction_count < 1) {
               condition.where = {
                 ...condition.where,
                 slug: {
@@ -466,6 +488,7 @@ class ScriptParser {
         };
       case 'WithdrawalRequest':
         return {
+          where: { member_id: user.id },
           include: {
             model: Models.WithdrawalType,
             attributes: ['logo', 'name'],
