@@ -76,7 +76,7 @@ class TicketController {
         member_id: member_id,
       };
       let savedTicketConversation = await TicketConversation.create(data);
-
+      var all_files = []
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
@@ -95,11 +95,16 @@ class TicketController {
             mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
-
+        for(let uploaded_file of dataFiles){
+          all_files.push(process.env.CLIENT_API_PUBLIC_URL+'/'+uploaded_file.file_name)
+        }
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
       return {
-        status: true
+        status: true,
+        data:{
+          files:all_files
+        }
       }
     } catch (error) {
       return {
