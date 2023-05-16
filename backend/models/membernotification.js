@@ -24,11 +24,13 @@ module.exports = (sequelize, DataTypes) => {
       header: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.action ? this.action.replaceAll('_', ' ').toUpperCase() : ''
+          return this.action
+            ? this.action.replaceAll('_', ' ').toUpperCase()
+            : '';
         },
         set(value) {
           throw new Error('Do not try to set `header` value!');
-        }
+        },
       },
       redirect_url: {
         type: DataTypes.VIRTUAL,
@@ -46,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         set(value) {
           throw new Error('Do not try to set `redirect_url` value!');
-        }
+        },
       },
       logo: {
         type: DataTypes.VIRTUAL,
@@ -64,8 +66,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         set(value) {
           throw new Error('Do not try to set `logo` value!');
-        }
-      }
+        },
+      },
     },
     {
       sequelize,
@@ -78,5 +80,16 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'member_notifications',
     }
   );
+
+  MemberNotification.addMemberNotification = async (data) => {
+    let notification = await MemberActivityLog.create({
+      member_id: data.member_id,
+      verbose: data.verbose,
+      action: data.action,
+      is_read: 0,
+      read_on: new Date(),
+    });
+  };
+
   return MemberNotification;
 };
