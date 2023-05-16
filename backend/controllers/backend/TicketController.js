@@ -278,17 +278,14 @@ class TicketController extends Controller {
       console.log(user_id);
       if (user_id) {
         let ticket = await Ticket.findOne({ where: { id: ticket_id } });
-        let notify_data = {
+
+        await MemberNotification.addMemberNotification({
           member_id: ticket.member_id,
           verbose:
             'You have a new response on your ticket, subject : ' +
             ticket.subject,
           action: 'ticket_reply',
-          is_read: '0',
-          read_on: new Date(),
-        };
-        console.log(notify_data);
-        await MemberNotification.create(notify_data);
+        });
       }
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
