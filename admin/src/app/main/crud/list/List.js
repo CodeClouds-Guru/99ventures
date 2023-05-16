@@ -114,8 +114,8 @@ function List(props) {
 			setLoading(false);
 			setFirstCall(false);
 			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
-			if(res.data.results.program) {
-				setProgramList(res.data.results.program)
+			if(res.data.results.programs) {
+				setProgramList(res.data.results.programs)
 			}
 		}).catch(error => {
 			let message = 'Something went wrong!'
@@ -504,7 +504,7 @@ function List(props) {
 									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
-									{ (!_.isEmpty(where) && where.withdrawal_type_id && 4 === where.withdrawal_type_id) ? virtualIncentiveInfo() : ''}
+									{ (!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
 								</Typography>
 							)
 						}

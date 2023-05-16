@@ -30,13 +30,7 @@ const columns = [
 const VirtualIncentivesBalance = (props) => {
     const [programs, setPrograms] = React.useState([])
     React.useEffect(()=>{
-        const rows = props.programs.filter(row => row.name !== 'DO NOT USE').map(row => {
-            return {
-                ...row,
-                id: row.programid
-            }
-        });
-        setPrograms(rows);
+        setPrograms(props.programs);
     }, [props.programs])
         
     return (
