@@ -257,12 +257,16 @@ module.exports = (sequelize, DataTypes) => {
     // console.log(transaction);
     let balance = true;
     if (parseInt(data.status) === 0 || parseInt(data.status) === 1) {
-      balance = await MemberBalance.update(
-        { amount: modified_total_earnings },
-        {
-          where: { id: total_earnings[0].id },
-        }
-      );
+      balance = await MemberTransaction.updateMemberBalance({
+        amount: modified_total_earnings,
+        member_id: data.member_id,
+      });
+      // balance = await MemberBalance.update(
+      //   { amount: modified_total_earnings },
+      //   {
+      //     where: { id: total_earnings[0].id },
+      //   }
+      // );
       //referral member section
       if (data.type === 'credited') {
         let referral_data = await MemberTransaction.referralAmountUpdate(
@@ -390,7 +394,7 @@ module.exports = (sequelize, DataTypes) => {
         })
       )
     );
-    // console.log('-----------', referral_member.member_amounts[0].amount);
+
     if (member.member_referral_id) {
       let config_data = await Setting.findOne({
         attributes: ['settings_value'],
@@ -400,14 +404,11 @@ module.exports = (sequelize, DataTypes) => {
         (modified_total_earnings *
           parseFloat(config_data.dataValues.settings_value)) /
         100;
-      // console.log('========referral_amount', referral_amount);
+
       let ref_modified_total_earnings =
         parseFloat(referral_member.member_amounts[0].amount) +
         parseFloat(referral_amount);
-      // console.log(
-      //   '---------ref_modified_total_earnings',
-      //   ref_modified_total_earnings
-      // );
+
       JSON.parse(
         JSON.stringify(
           await MemberTransaction.insertTransaction({
@@ -421,17 +422,21 @@ module.exports = (sequelize, DataTypes) => {
           })
         )
       );
-      await MemberBalance.update(
-        { amount: ref_modified_total_earnings },
-        {
-          where: {
-            member_id: member.member_referral_id,
-            amount_type: 'cash',
-          },
-        }
-      );
+      await MemberTransaction.updateMemberBalance({
+        amount: ref_modified_total_earnings,
+        member_id: member.member_referral_id,
+      });
+      // await MemberBalance.update(
+      //   { amount: ref_modified_total_earnings },
+      //   {
+      //     where: {
+      //       member_id: member.member_referral_id,
+      //       amount_type: 'cash',
+      //     },
+      //   }
+      // );
       await MemberNotification.addMemberNotification({
-        member_id: ticket.member_id,
+        member_id: member_id,
         verbose:
           'Referral bonus received for $' +
           parseFloat(data.amount) +
@@ -467,6 +472,19 @@ module.exports = (sequelize, DataTypes) => {
     return await MemberTransaction.create(transaction_data, {
       silent: true,
     });
+  };
+
+  MemberTransaction.updateMemberBalance = async (data) => {
+    await MemberBalance.update(
+      { amount: data.amount },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
+    return true;
   };
   return MemberTransaction;
 };

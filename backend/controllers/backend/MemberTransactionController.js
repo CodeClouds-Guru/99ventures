@@ -6,7 +6,7 @@ class MemberTransactionController extends Controller {
   constructor() {
     super('MemberTransaction');
   }
-  // override save function
+  // override list function
   async list(req, res) {
     var options = super.getQueryOptions(req);
     let company_portal_id = req.headers.site_id;
@@ -85,5 +85,26 @@ class MemberTransactionController extends Controller {
       fields,
     };
   }
+
+  // override update function
+  // async update(req, res) {
+  //   let transaction_id = req.params.id || null;
+  //   let member_id = req.body.member_id || null;
+  //   if (transaction_id) {
+  //     try {
+  //       let transaction = await this.model.findByPk(req.params.id);
+  //       let member_balance = await MemberBalance.findOne({
+  //         where: { member_id: member_id, amount_type: 'cash' },
+  //       });
+
+  //       //current transaction
+  //       let updated_balance =
+
+  //       //referral transaction
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   }
+  // }
 }
 module.exports = MemberTransactionController;
