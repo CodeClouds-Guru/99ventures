@@ -96,7 +96,7 @@ class TicketController {
           };
         });
         for(let uploaded_file of dataFiles){
-          all_files.push(process.env.CLIENT_API_PUBLIC_URL+'/'+uploaded_file.file_name)
+          all_files.push(process.env.S3_BUCKET_OBJECT_URL+'/'+uploaded_file.file_name)
         }
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }

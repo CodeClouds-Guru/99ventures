@@ -243,7 +243,7 @@ module.exports = (sequelize, DataTypes) => {
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
 
-    if (parseInt(data.status) === 0 || parseInt(data.status) === 1) {
+    if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       modified_total_earnings =
         modified_total_earnings + parseFloat(data.amount);
     }
@@ -256,7 +256,7 @@ module.exports = (sequelize, DataTypes) => {
     );
     // console.log(transaction);
     let balance = true;
-    if (parseInt(data.status) === 0 || parseInt(data.status) === 1) {
+    if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       balance = await MemberTransaction.updateMemberBalance({
         amount: modified_total_earnings,
         member_id: data.member_id,
