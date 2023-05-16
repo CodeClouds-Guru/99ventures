@@ -84,6 +84,7 @@ router.get('/confirm-payment/', async (req,res) => {
   var company_portal = await CompanyPortal.findOne({
     where: { domain: req.hostname },
   });
+  console.log(req.body)
   let company_portal_id = company_portal.id
   const paypal_class = new Paypal(company_portal_id);
   response = await paypal_class.getPayouts(req);
