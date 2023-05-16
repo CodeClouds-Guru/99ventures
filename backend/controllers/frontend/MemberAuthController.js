@@ -47,8 +47,9 @@ class MemberAuthController {
     this.withdraw = this.withdraw.bind(this);
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
-    this.resetPassword = this.resetPassword.bind(this)
-    this.password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
+    this.resetPassword = this.resetPassword.bind(this);
+    this.password_regex =
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   }
   //login
   async login(req, res) {
@@ -246,7 +247,7 @@ class MemberAuthController {
 
   //referral
   async referralDetails(req, res) {
-    let referrer = []
+    let referrer = [];
     if (req.body.referral_code) {
       referrer = await Member.findOne({
         where: { referral_code: req.body.referral_code },
@@ -256,9 +257,9 @@ class MemberAuthController {
         //update member referral info
         let ip = req.ip;
         if (Array.isArray(ip)) {
-            ip = ip[0]
+          ip = ip[0];
         } else {
-            ip = ip.replace("::ffff:", "");
+          ip = ip.replace('::ffff:', '');
         }
         const reportObj = new IpQualityScoreClass();
         var geo = await reportObj.getIpReport(ip);
@@ -270,7 +271,12 @@ class MemberAuthController {
         if (referral_details) {
           await MemberReferral.update(
             {
-              geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
+              geo_location:
+                geo.report.country_code +
+                ',' +
+                geo.report.region +
+                ',' +
+                geo.report.city,
               ip: ip,
               member_id: referrer,
               join_date: new Date(),
@@ -308,7 +314,7 @@ class MemberAuthController {
       where: { settings_key: 'registration_bonus' },
     });
     await MemberTransaction.updateMemberTransactionAndBalance({
-      member_id:member_details.id,
+      member_id: member_details.id,
       amount: registration_bonus.settings_value,
       note: '',
       status: '2',
@@ -745,7 +751,7 @@ class MemberAuthController {
         });
 
       //paypal payment section
-      const paypal_class = new Paypal();
+      const paypal_class = new Paypal(req.session.company_portal.id);
       const create_resp = await paypal_class.payout([
         {
           amount: withdrawal_amount,
@@ -757,6 +763,7 @@ class MemberAuthController {
           member_transaction_id: transaction_resp.transaction_id,
         },
       ]);
+      console.log('create_resp', create_resp);
       if (create_resp.status) {
         await MemberTransaction.update(
           { batch_id: create_resp.batch_id },
@@ -782,7 +789,13 @@ class MemberAuthController {
         action: 'Withdraw Request Member',
         data: {
           email: member.email,
-          details: { members: member, withdraw_requests: withdrawal_req_data },
+          details: {
+            members: {
+              ...member,
+              amount: withdrawal_amount,
+              requested_on: new Date(),
+            },
+          },
         },
         req: req,
       });
@@ -791,7 +804,13 @@ class MemberAuthController {
         action: 'Member Cash Withdrawal',
         data: {
           email: member.email,
-          details: { members: member, withdraw_requests: withdrawal_req_data },
+          details: {
+            members: {
+              ...member,
+              amount: withdrawal_amount,
+              date: new Date(),
+            },
+          },
         },
         req: req,
       });
@@ -802,7 +821,13 @@ class MemberAuthController {
       action: 'Withdraw Request Admin',
       data: {
         email: result,
-        details: { members: member, withdraw_requests: withdrawal_req_data },
+        details: {
+          members: {
+            ...member,
+            amount: withdrawal_amount,
+            requested_on: new Date(),
+          },
+        },
       },
       req: req,
     });

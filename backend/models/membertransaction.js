@@ -279,7 +279,7 @@ module.exports = (sequelize, DataTypes) => {
       data.amount_action === 'member_withdrawal'
     ) {
       await MemberNotification.addMemberNotification({
-        member_id: ticket.member_id,
+        member_id: data.member_id,
         verbose:
           'Withdrawal requested initiated for $' +
           parseFloat(data.amount) +
