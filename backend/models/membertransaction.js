@@ -356,7 +356,12 @@ module.exports = (sequelize, DataTypes) => {
     modified_total_earnings,
     parent_transaction_id
   ) => {
-    const { MemberBalance, Member, Setting } = require('../models/index');
+    const {
+      MemberBalance,
+      Member,
+      Setting,
+      MemberNotification,
+    } = require('../models/index');
     let member = JSON.parse(
       JSON.stringify(
         await Member.findOne({

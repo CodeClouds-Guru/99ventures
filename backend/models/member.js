@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'member_id',
         as: 'member_amounts',
       });
-      Member.hasMany(models.MemberReferral, {
-        foreignKey: 'referral_id',
-      });
+      // Member.hasMany(models.MemberReferral, {
+      //   foreignKey: 'referral_id',
+      // });
       Member.belongsTo(models.CompanyPortal, {
         foreignKey: 'company_portal_id',
       });
@@ -373,8 +373,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
