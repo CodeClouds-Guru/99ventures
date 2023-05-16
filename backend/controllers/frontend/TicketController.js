@@ -27,11 +27,11 @@ class TicketController {
   async update(req, res) {
     const type = req.body.type || '';
     let change = false;
-    // console.log(req.files);
     try {
       switch (type) {
         case 'ticket_chat':
           change = await this.saveTicketConversations(req, res);
+          res.send(change)
           break;
         case 'ticket_status':
           let field_name = req.body.field_name;
@@ -40,19 +40,11 @@ class TicketController {
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
           break;
         default:
-          // req.session.flash = { error: 'Request Failed.' };
+          res.send({status:false,message:'Request Failed.'})
       }
     } catch (error) {
       console.error(error);
-      // req.session.flash = { error: 'Unable to save data.' };
-    } finally {
-      // if (change)
-        // req.session.flash = {
-        //   message: 'Record updated.',
-        //   success_status: true,
-        // };
-      res.send({status:true})
-      //res.redirect('back');
+      res.send({status:false,message:'Unable to save data.'})
     }
   }
 
@@ -89,7 +81,6 @@ class TicketController {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
-        console.log('files',files)
         let fileHelper = new FileHelper(
           files,
           'tickets/' + savedTicketConversation.id,
@@ -107,14 +98,14 @@ class TicketController {
 
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-      req.session.flash = {
-        message: 'Ticket submitted successfully.',
-        success_status: true,
-      };
+      return {
+        status: true
+      }
     } catch (error) {
-      req.session.flash = { error: 'Unable to submit ticket.' };
-    } finally {
-      
+      return {
+        status: false,
+        message: 'Unable to submit ticket.'
+      }
     }
   }
 }

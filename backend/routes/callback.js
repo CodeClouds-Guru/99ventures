@@ -80,7 +80,7 @@ router.get('/test-hbs', (req, res) => {
   const html = template({ PositionsTotal: 34 });
   res.send(html);
 })
-router.get('/confirm-payment/', async (req,res) => {
+router.all('/confirm-payment/', async (req,res) => {
   var company_portal = await CompanyPortal.findOne({
     where: { domain: req.hostname },
   });
