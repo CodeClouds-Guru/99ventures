@@ -786,7 +786,7 @@ class MemberAuthController {
     if (request_data.withdrawal_type_id == 2) {
       // email body for member
       let member_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Member',
+        action: 'Member Cash Withdrawal',
         data: {
           email: member.email,
           details: {
@@ -798,7 +798,7 @@ class MemberAuthController {
       });
     } else {
       let member_mail = await this.sendMailEvent({
-        action: 'Member Cash Withdrawal',
+        action: 'Withdraw Request Member',
         data: {
           email: member.email,
           details: {

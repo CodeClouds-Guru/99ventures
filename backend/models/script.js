@@ -46,7 +46,12 @@ module.exports = (sequelize, DataTypes) => {
         // },
       },
       script_json: DataTypes.JSON,
-      description: DataTypes.JSON,
+      description: {
+        type: DataTypes.STRING,
+        get() {
+          return this.getDataValue('description') || '';
+        }
+      },
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
@@ -187,7 +192,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'description',
       type: 'text',
       placeholder: 'Description',
-      listing: false,
+      listing: true,
       show_in_form: true,
       sort: true,
       required: true,
