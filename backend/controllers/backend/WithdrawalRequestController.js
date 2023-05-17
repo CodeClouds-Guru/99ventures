@@ -85,6 +85,8 @@ class WithdrawalRequestController extends Controller {
             record.dataValues.Member.dataValues.first_name +
             ' ' +
             record.dataValues.Member.dataValues.last_name;
+            record.dataValues['Member.username'] =
+            record.dataValues.Member.dataValues.username;
         }
         if (record.dataValues.User != null) {
           record.dataValues['User.alias_name'] =
