@@ -286,7 +286,7 @@ module.exports = (sequelize, DataTypes) => {
         member_id: data.member_id,
         verbose:
           'Withdrawal requested initiated for $' +
-          parseFloat(data.amount) +
+          parseFloat(Math.abs(data.amount)) +
           ' on ' +
           new Date(),
         action: 'member_withdrawal',

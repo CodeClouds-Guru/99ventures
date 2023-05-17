@@ -196,7 +196,7 @@ class WithdrawalRequestController extends Controller {
           }else{
             let transaction = await MemberTransaction.updateMemberTransactionAndBalance({
               member_id:record.member_id,
-              amount: record.amount,
+              amount: -record.amount,
               note: '',
               status: '1',
               type: 'withdraw',
