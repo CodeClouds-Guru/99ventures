@@ -38,7 +38,7 @@ class TicketController {
           let value = req.body.value;
           let ticket_id = req.body.ticket_id;
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
-          res.send({status:true})
+          res.send({status:true,data:{created_at:new Date()}})
           break;
         default:
           res.send({status:false,message:'Request Failed.'})
@@ -104,7 +104,8 @@ class TicketController {
       return {
         status: true,
         data:{
-          files:all_files
+          files:all_files,
+          created_at:new Date()
         }
       }
     } catch (error) {
