@@ -38,6 +38,7 @@ class TicketController {
           let value = req.body.value;
           let ticket_id = req.body.ticket_id;
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
+          res.send({status:true})
           break;
         default:
           res.send({status:false,message:'Request Failed.'})
