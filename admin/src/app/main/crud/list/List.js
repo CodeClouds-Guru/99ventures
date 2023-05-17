@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon, Popover } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -65,6 +65,18 @@ function List(props) {
 	const [actionsMenu, setActionsMenu] = useState(null);
 	const [vimodal, setVimodal] = useState(false);
 	const [programsList, setProgramList] = useState([]);
+	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
+	const handlePopoverOpen = (event) => {
+		setDescPopoverAnchorEl(event.currentTarget);
+	};
+
+	const descPopoverHandleClose = () => {
+		setDescPopoverAnchorEl(null);
+	};
+
+	const descPopoverOpen = Boolean(descPopoverAnchorEl);
+	const descPopoverId = open ? 'simple-popover' : undefined;
+
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
@@ -114,7 +126,7 @@ function List(props) {
 			setLoading(false);
 			setFirstCall(false);
 			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
-			if(res.data.results.programs) {
+			if (res.data.results.programs) {
 				setProgramList(res.data.results.programs)
 			}
 		}).catch(error => {
@@ -439,6 +451,27 @@ function List(props) {
 					</span>
 				</Tooltip>
 			)
+		} else if (module === 'scripts' && field.field_name === 'description') {
+			<>
+				<Popover
+					anchorOrigin={{ vertical: 'center', horizontal: 'right', }}
+					transformOrigin={{ vertical: 'center', horizontal: 'left', }}
+					id={descPopoverId}
+					open={descPopoverOpen}
+					anchorEl={descPopoverAnchorEl}
+					onClose={descPopoverHandleClose}
+				>
+					{[field.field_name]}
+				</Popover>
+				<Typography
+					aria-owns={open ? 'mouse-over-popover' : undefined}
+					aria-haspopup="true"
+					onClick={handlePopoverOpen}
+				// onMouseLeave={handlePopoverClose}
+				>
+					dbjsd
+				</Typography>
+			</>
 		} else {
 			return processFieldValue(n[field.field_name], field)
 		}
@@ -475,7 +508,7 @@ function List(props) {
 				<IconButton
 					aria-owns=""
 					aria-haspopup="true"
-					onClick={()=>setVimodal(true)}
+					onClick={() => setVimodal(true)}
 					size="small"
 					className="listingExtraMenu"
 					sx={{ zIndex: 999 }}
@@ -504,7 +537,7 @@ function List(props) {
 									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
-									{ (!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
+									{(!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
 								</Typography>
 							)
 						}
@@ -726,10 +759,10 @@ function List(props) {
 
 				</FuseScrollbars>
 			</div>
-			
+
 			{/* To show the info modal for virtual incentive */}
 			{
-				vimodal && <VirtualIncentivesBalance programs={ programsList } status={vimodal} setVimodal={ (e)=>setVimodal(e) } />
+				vimodal && <VirtualIncentivesBalance programs={programsList} status={vimodal} setVimodal={(e) => setVimodal(e)} />
 			}
 		</div>
 	);

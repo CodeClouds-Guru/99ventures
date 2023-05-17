@@ -93,16 +93,43 @@ class MemberTransactionController extends Controller {
     if (transaction_id) {
       try {
         let transaction = await this.model.findByPk(transaction_id);
-        let member_balance = await MemberBalance.findOne({
-          where: { member_id: member_id, amount_type: 'cash' },
-        });
 
+        let member = await Member.findOne({
+          where: { id: member_id },
+          include: {
+            model: MemberBalance,
+            where: { amount_type: 'cash' },
+          },
+        });
         //current transaction
         await this.reverseTransactionUpdate({
-          member_balance_amount: member_balance.amount,
+          member_balance_amount: member.MemberBalance.amount,
           transaction_amount: transaction.amount,
           member_id: member_id,
           transaction_id: transaction_id,
+        });
+
+        //Email for member
+        let member_mail = await this.sendMailEvent({
+          action: 'Transaction Reversed',
+          data: {
+            email: member.email,
+            details: {
+              members: member,
+              transaction,
+            },
+          },
+          req: req,
+        });
+
+        //Notification for member
+        await MemberNotification.addMemberNotification({
+          member_id: member_id,
+          verbose:
+            'Transaction amount of $' +
+            parseFloat(Math.abs(transaction.amount)) +
+            ' has been reversed by admin',
+          action: 'reversal_transaction',
         });
 
         //referral transaction
@@ -113,18 +140,43 @@ class MemberTransactionController extends Controller {
               amount_action: 'referral',
             },
           });
-          let referral_member_balance = await MemberBalance.findOne({
-            where: {
-              member_id: referral_transactions.member_id,
-              amount_type: 'cash',
+
+          let referral_member = await Member.findOne({
+            where: { id: referral_transactions.member_id },
+            include: {
+              model: MemberBalance,
+              where: { amount_type: 'cash' },
             },
           });
 
           await this.reverseTransactionUpdate({
-            member_balance_amount: referral_member_balance.amount,
+            member_balance_amount: referral_member.MemberBalance.amount,
             transaction_amount: referral_transactions.amount,
             member_id: referral_transactions.member_id,
             transaction_id: referral_transactions.id,
+          });
+
+          //Email for referral member
+          let member_mail = await this.sendMailEvent({
+            action: 'Transaction Reversed',
+            data: {
+              email: referral_member.email,
+              details: {
+                members: referral_member,
+                transaction: referral_transactions,
+              },
+            },
+            req: req,
+          });
+
+          //Notification for referral member
+          await MemberNotification.addMemberNotification({
+            member_id: member_id,
+            verbose:
+              'Referral transaction amount of $' +
+              parseFloat(Math.abs(referral_transactions.amount)) +
+              ' has been reversed by admin',
+            action: 'reversal_transaction',
           });
         }
       } catch (e) {

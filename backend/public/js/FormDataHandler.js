@@ -39,7 +39,33 @@ $(() => {
     <p class="m-0 me-auto snack_msg"></p>
     <button class="btn-close btn-close-white"></button>
     </div>`;
-  $('body').append(snackbar);
+  let closeTicketModal = `<div id="closeTicketModal" tabindex="-1" aria-hidden="true" aria-labelledby="exampleModalLabel"
+    class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content bg-white">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirmar</h4>
+        </div>
+        <div class="modal-body d-flex align-items-center text-default">
+          <div class="row">
+            <div class="col-12 mb-2">
+              <div class="row gx-2 gx-lg-3">
+                <div class="col-12 justify-center">
+                  Are you sure to close this ticket?
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" aria-label="Close" data-bs-dismiss="modal"
+            class="btn btn-outline-primary btn-sm">Cancel</button>
+          <button id="confirmCloseTicketBtn" type="button" class="btn btn-danger btn-sm mt-1">YES</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  $('body').append(snackbar).append(closeTicketModal);
   let errorMsg = $('#scripteed_error_message_div').text();
   if (errorMsg.trim().length > 0) {
     showSnackbar(
@@ -47,6 +73,31 @@ $(() => {
       $('#scripteed_error_message_div').hasClass('success-snack')
     );
   }
+  $(document).on('click', '.scripteed-close-ticket', (e) => { e.stopImmediatePropagation(); $('#closeTicketModal').modal('show').attr('data-tid', $(e.target).data('tid')); })
+
+  $('#confirmCloseTicketBtn').click((e) => {
+    e.preventDefault();
+    let tid = $('#closeTicketModal').data('tid');
+    $.ajax({
+      type: "POST",
+      url: '/ticket/update',
+      data: {
+        ticket_id: tid,
+        type: 'ticket_status',
+        field_name: 'status',
+        value: 'closed'
+      },
+      success: (response) => {
+        if (response.status) {
+          $(e.target).modal('hide').data('tid', '');
+          tid = '';
+          window.location.href = '/support-tickets';
+        } else {
+          showSnackbar(response.message);
+        }
+      },
+    });
+  })
 
   const loginForm = $('#scripteed_login_form').get(0);
   const loginBtn = $('#scripteed_login_btn').get(0);
