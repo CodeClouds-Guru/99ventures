@@ -285,10 +285,10 @@ module.exports = (sequelize, DataTypes) => {
       await MemberNotification.addMemberNotification({
         member_id: data.member_id,
         verbose:
-          'Withdrawal requested initiated for $' +
+          'Withdrawal request initiated for $' +
           parseFloat(Math.abs(data.amount)) +
           ' on ' +
-          new Date(),
+          new Date().toLocaleDateString(),
         action: 'member_withdrawal',
       });
     }
@@ -439,9 +439,9 @@ module.exports = (sequelize, DataTypes) => {
         member_id: member_id,
         verbose:
           'Referral bonus received for $' +
-          parseFloat(data.amount) +
+          parseFloat(Math.abs(data.amount)) +
           ' on ' +
-          new Date(),
+          new Date().toLocaleDateString(),
         action: 'referral_bonus',
       });
     }

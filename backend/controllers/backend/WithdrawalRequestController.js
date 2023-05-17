@@ -93,28 +93,30 @@ class WithdrawalRequestController extends Controller {
       });
       
       var programsList = [];
-      const withdrawlType = await WithdrawalType.findOne({attributes:['slug'], where: {id: query_where.withdrawal_type_id}});
-      if(withdrawlType.slug === 'gift_card_pass'){
-        const viObj = new VirtualIncentive(company_portal_id)
-        const programs = await viObj.getProgramBalance();
-        if(Object.keys(programs).length && programs.program){
-          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Gift Cards').map(row => {
-              return {
-                  ...row,
-                  id: row.programid
-              }
-          });
-        }
-      } else if(withdrawlType.slug === 'venmo'){
-        const viObj = new VirtualIncentive(company_portal_id)
-        const programs = await viObj.getProgramBalance();
-        if(Object.keys(programs).length && programs.program){
-          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Virtual Reward').map(row => {
-              return {
-                  ...row,
-                  id: row.programid
-              }
-          });
+      if('withdrawal_type_id' in query_where){
+        const withdrawlType = await WithdrawalType.findOne({attributes:['slug'], where: {id: query_where.withdrawal_type_id}});
+        if(withdrawlType.slug === 'gift_card_pass'){
+          const viObj = new VirtualIncentive(company_portal_id)
+          const programs = await viObj.getProgramBalance();
+          if(Object.keys(programs).length && programs.program){
+            programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Gift Cards').map(row => {
+                return {
+                    ...row,
+                    id: row.programid
+                }
+            });
+          }
+        } else if(withdrawlType.slug === 'venmo'){
+          const viObj = new VirtualIncentive(company_portal_id)
+          const programs = await viObj.getProgramBalance();
+          if(Object.keys(programs).length && programs.program){
+            programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Virtual Reward').map(row => {
+                return {
+                    ...row,
+                    id: row.programid
+                }
+            });
+          }
         }
       }
 

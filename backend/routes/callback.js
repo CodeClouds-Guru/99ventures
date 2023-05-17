@@ -89,11 +89,10 @@ router.all('/confirm-payment/', async (req,res) => {
   );
   logger1.info(JSON.stringify(req.body));
 
-  // let company_portal_id = company_portal.id
-  // const paypal_class = new Paypal(company_portal_id);
-  // response = await paypal_class.getPayouts(req);
-  // res.send(response)
-  res.send('ok')
+  let company_portal_id = company_portal.id
+  const paypal_class = new Paypal(company_portal_id);
+  response = await paypal_class.getPayouts(req);
+  res.send(response)
 });
 module.exports = {
   prefix: '/callback',
