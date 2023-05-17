@@ -25,6 +25,10 @@ module.exports = {
           id: 11,
           action: 'Withdrawal Approval',
         },
+        {
+          id: 12,
+          action: 'Transaction Reversed',
+        },
       ],
       {}
     );
