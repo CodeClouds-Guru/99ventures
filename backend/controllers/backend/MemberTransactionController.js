@@ -87,38 +87,71 @@ class MemberTransactionController extends Controller {
   }
 
   // override update function
-  // async update(req, res) {
-  //   let transaction_id = req.params.id || null;
-  //   let member_id = req.body.member_id || null;
-  //   if (transaction_id) {
-  //     try {
-  //       let transaction = await this.model.findByPk(req.params.id);
-  //       let member_balance = await MemberBalance.findOne({
-  //         where: { member_id: member_id, amount_type: 'cash' },
-  //       });
+  async update(req, res) {
+    let transaction_id = req.params.id || null;
+    let member_id = req.body.member_id || null;
+    if (transaction_id) {
+      try {
+        let transaction = await this.model.findByPk(transaction_id);
+        let member_balance = await MemberBalance.findOne({
+          where: { member_id: member_id, amount_type: 'cash' },
+        });
 
-  //       //current transaction
-  //       let updated_balance =
-  //         parseFloat(member_balance.amount) - parseFloat(transaction.amount);
-  //         await MemberTransaction.insertTransaction({
-  //           type: 'withdraw',
-  //           amount: parseFloat(transaction.amount),
-  //           note: 'Reverse transaction',
-  //           member_id: member.member_referral_id,
-  //           amount_action: 'referral',
-  //           modified_total_earnings: ref_modified_total_earnings,
-  //           parent_transaction_id: parent_transaction_id,
-  //         })
+        //current transaction
+        await this.reverseTransactionUpdate({
+          member_balance_amount: member_balance.amount,
+          transaction_amount: transaction.amount,
+          member_id: member_id,
+          transaction_id: transaction_id,
+        });
 
-  //         await MemberTransaction.updateMemberBalance({
-  //           amount: ref_modified_total_earnings,
-  //           member_id: member.member_referral_id,
-  //         });
-  //       //referral transaction
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   }
-  // }
+        //referral transaction
+        if (transaction.parent_transaction_id) {
+          let referral_transactions = await MemberTransaction.findOne({
+            where: {
+              parent_transaction_id: transaction_id,
+              amount_action: 'referral',
+            },
+          });
+          let referral_member_balance = await MemberBalance.findOne({
+            where: {
+              member_id: referral_transactions.member_id,
+              amount_type: 'cash',
+            },
+          });
+
+          await this.reverseTransactionUpdate({
+            member_balance_amount: referral_member_balance.amount,
+            transaction_amount: referral_transactions.amount,
+            member_id: referral_transactions.member_id,
+            transaction_id: referral_transactions.id,
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
+  async reverseTransactionUpdate(data) {
+    let updated_balance =
+      parseFloat(data.member_balance_amount) -
+      parseFloat(data.transaction_amount);
+    await MemberTransaction.insertTransaction({
+      type: 'withdraw',
+      amount: parseFloat(data.transaction_amount),
+      note: 'Reverse transaction',
+      member_id: data.member_id,
+      amount_action: 'reversal',
+      modified_total_earnings: updated_balance,
+      parent_transaction_id: data.transaction_id,
+    });
+
+    await MemberTransaction.updateMemberBalance({
+      amount: updated_balance,
+      member_id: data.member_id,
+    });
+    return true;
+  }
 }
 module.exports = MemberTransactionController;

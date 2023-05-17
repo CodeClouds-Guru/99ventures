@@ -175,7 +175,7 @@ class ScriptParser {
             };
 
             const condition = this.getModuleWhere(script.module, user);
-            if (other_details.transaction_count < 1) {
+            if (other_details.transaction_count < 5) {
               condition.where = {
                 ...condition.where,
                 slug: {
