@@ -95,7 +95,7 @@ async function logIP(req, ip, geo) {
             await IpLog.create({
                 member_id: member.id,
                 ip: ip,
-                browser: browser ? browser.name : 'Unable to Detect',
+                browser: req['user-agent'],
                 browser_language: req.headers["accept-language"],
                 geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
                 isp: geo.report.ISP,
