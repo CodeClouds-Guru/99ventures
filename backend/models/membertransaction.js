@@ -423,7 +423,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       await MemberNotification.addMemberNotification({
-        member_id: member_id,
+        member_id: member.member_referral_id,
         verbose:
           'Referral bonus received for $' +
           parseFloat(Math.abs(referral_amount)) +
