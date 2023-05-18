@@ -261,12 +261,7 @@ module.exports = (sequelize, DataTypes) => {
         amount: modified_total_earnings,
         member_id: data.member_id,
       });
-      // balance = await MemberBalance.update(
-      //   { amount: modified_total_earnings },
-      //   {
-      //     where: { id: total_earnings[0].id },
-      //   }
-      // );
+
       //referral member section
       if (data.type === 'credited') {
         let referral_data = await MemberTransaction.referralAmountUpdate(
@@ -426,15 +421,7 @@ module.exports = (sequelize, DataTypes) => {
         amount: ref_modified_total_earnings,
         member_id: member.member_referral_id,
       });
-      // await MemberBalance.update(
-      //   { amount: ref_modified_total_earnings },
-      //   {
-      //     where: {
-      //       member_id: member.member_referral_id,
-      //       amount_type: 'cash',
-      //     },
-      //   }
-      // );
+
       await MemberNotification.addMemberNotification({
         member_id: member_id,
         verbose:
