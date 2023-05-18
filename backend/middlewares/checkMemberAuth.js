@@ -38,13 +38,12 @@ module.exports = async function (req, res, next) {
 
     //total paid
     let total_paid = await db.sequelize.query(
-      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.transaction_id IS NOT NULL and withdrawal_requests.status = 'approved'",
+      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'approved'",
       {
         replacements: [req.session.member.id],
         type: QueryTypes.SELECT,
       }
     );
-    
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
