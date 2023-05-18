@@ -426,7 +426,7 @@ module.exports = (sequelize, DataTypes) => {
         member_id: member_id,
         verbose:
           'Referral bonus received for $' +
-          parseFloat(Math.abs(data.amount)) +
+          parseFloat(Math.abs(referral_amount)) +
           ' on ' +
           new Date().toLocaleDateString(),
         action: 'referral_bonus',
