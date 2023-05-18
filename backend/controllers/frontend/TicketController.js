@@ -38,14 +38,14 @@ class TicketController {
           let value = req.body.value;
           let ticket_id = req.body.ticket_id;
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
-          res.send({status:true,data:{created_at:new Date()}})
+          res.send({ status: true, data: { created_at: new Date() } })
           break;
         default:
-          res.send({status:false,message:'Request Failed.'})
+          res.send({ status: false, message: 'Request Failed.' })
       }
     } catch (error) {
       console.error(error);
-      res.send({status:false,message:'Unable to save data.'})
+      res.send({ status: false, message: 'Unable to save data.' })
     }
   }
 
@@ -96,19 +96,20 @@ class TicketController {
             mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
-        for(let uploaded_file of dataFiles){
-          all_files.push(process.env.S3_BUCKET_OBJECT_URL+uploaded_file.file_name)
+        for (let uploaded_file of dataFiles) {
+          all_files.push(process.env.S3_BUCKET_OBJECT_URL + uploaded_file.file_name)
         }
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
       return {
         status: true,
-        data:{
-          files:all_files,
-          created_at:new Date()
+        data: {
+          files: all_files,
+          created_at: new Date()
         }
       }
     } catch (error) {
+      console.error(error)
       return {
         status: false,
         message: 'Unable to submit ticket.'

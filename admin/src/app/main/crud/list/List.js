@@ -67,6 +67,7 @@ function List(props) {
 	const [programsList, setProgramList] = useState([]);
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
 	const handlePopoverOpen = (event) => {
+		event.stopPropagation();
 		setDescPopoverAnchorEl(event.currentTarget);
 	};
 
@@ -75,8 +76,7 @@ function List(props) {
 	};
 
 	const descPopoverOpen = Boolean(descPopoverAnchorEl);
-	const descPopoverId = open ? 'simple-popover' : undefined;
-
+	// const descPopoverId = descPopoverOpen ? `simple-popover-${n.id}` : undefined;
 
 	const resetModulesListConfig = () => {
 		setSearchText('');
@@ -451,28 +451,33 @@ function List(props) {
 					</span>
 				</Tooltip>
 			)
-		} else if (module === 'scripts' && field.field_name === 'description') {
-			<>
-				<Popover
-					anchorOrigin={{ vertical: 'center', horizontal: 'right', }}
-					transformOrigin={{ vertical: 'center', horizontal: 'left', }}
-					id={descPopoverId}
-					open={descPopoverOpen}
-					anchorEl={descPopoverAnchorEl}
-					onClose={descPopoverHandleClose}
-				>
-					{[field.field_name]}
-				</Popover>
-				<Typography
-					aria-owns={open ? 'mouse-over-popover' : undefined}
-					aria-haspopup="true"
-					onClick={handlePopoverOpen}
-				// onMouseLeave={handlePopoverClose}
-				>
-					dbjsd
-				</Typography>
-			</>
-		} else {
+		}
+		// else if (module === 'scripts' && field.field_name === 'description') {
+
+		// 	return (
+		// 		<div className="flex">
+		// 			<Popover
+		// 				anchorOrigin={{ vertical: 'center', horizontal: 'center', }}
+		// 				transformOrigin={{ vertical: 'center', horizontal: 'center', }}
+		// 				id={`simple-popover-${n.id}`}
+		// 				open={descPopoverOpen}
+		// 				anchorEl={descPopoverAnchorEl}
+		// 				onClose={descPopoverHandleClose}
+		// 			>
+		// 				{n[field.field_name]}
+		// 			</Popover>
+		// 			{n[field.field_name].substring(0, 50)}
+		// 			<Typography
+		// 				aria-owns={open ? `mouse-over-popover-${n.id}` : undefined}
+		// 				aria-haspopup="true"
+		// 				aria-describedby={`simple-popover-${n.id}`}
+		// 				onClick={(e) => { handlePopoverOpen(e) }}
+		// 			>
+		// 				<FuseSvgIcon className="text-48" size={24} color="action">heroicons-solid:information-circle</FuseSvgIcon>
+		// 			</Typography>
+		// 		</div>)
+		// } 
+		else {
 			return processFieldValue(n[field.field_name], field)
 		}
 	}

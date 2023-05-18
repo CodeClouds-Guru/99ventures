@@ -133,7 +133,7 @@ class ScriptParser {
                 await Models.MemberTransaction.findOne({
                   where: {
                     member_id: user.id,
-                    status: 1,
+                    status: 2,
                     amount_action: 'member_withdrawal',
                   },
                   attributes: [
