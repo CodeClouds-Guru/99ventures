@@ -17,6 +17,7 @@ function IpConfiguration(props) {
     let [browsers, setBrowsers] = useState([]);
     let [preSelectedBrowserValues, setPreSelectedBrowserValues] = useState([]);
     let [selectAllCountry, setSelectAllCountry] = useState(false);
+    let [selectAllBrowser, setSelectAllBrowser] = useState(false);
 
     const dispatch = useDispatch();
     const [permission, setPermission] = useState(false);
@@ -91,6 +92,7 @@ function IpConfiguration(props) {
                 }
             })
         })
+        browserOptions.length === browsers.length ? setSelectAllBrowser(true) : setSelectAllBrowser(false)
         setPreSelectedBrowserValues(browser_values)
     }
     const fetchData = () => {
@@ -118,6 +120,15 @@ function IpConfiguration(props) {
         }) : '';
         setCountryIsos(iso)
     }
+    const onSelectAllBrowser = (event) => {
+        let bro = [];
+        setSelectAllBrowser(event.target.checked);
+        event.target.checked ? browserOptions.map((obj) => {
+            bro.push(obj.value)
+        }) : '';
+        setBrowsers(bro)
+    }
+
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
@@ -185,8 +196,19 @@ function IpConfiguration(props) {
                         <Card variant="outlined">
                             <CardHeader title="Denied Browser List" />
                             <CardContent>
+                                <FormControl className="items-center">
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox checked={selectAllBrowser} onChange={(event) => onSelectAllBrowser(event)} />
+                                        }
+                                        label={<Typography variant="body2" >
+                                            <b>SELECT ALL</b>
+                                        </Typography>}
+                                    />
+                                </FormControl>
                                 <Autocomplete
                                     multiple
+                                    limitTags={1}
                                     id="tags-outlined"
                                     options={browserOptions}
                                     getOptionLabel={(option) => option.name}
