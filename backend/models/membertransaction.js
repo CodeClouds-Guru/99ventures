@@ -306,10 +306,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .startOf('day')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'today',
       ],
@@ -318,10 +318,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .subtract(6, 'days')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'week',
       ],
@@ -330,10 +330,10 @@ module.exports = (sequelize, DataTypes) => {
           `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .subtract(30, 'days')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'month',
       ],
@@ -342,7 +342,7 @@ module.exports = (sequelize, DataTypes) => {
     option.where = {
       member_id: member_id,
       type: 'credited',
-      status: 2,
+      // status: 2,
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
