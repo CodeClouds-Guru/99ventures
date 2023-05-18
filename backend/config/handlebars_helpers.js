@@ -115,4 +115,23 @@ module.exports = [
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
   },
+  {
+    name: 'cal',
+    fn: function (v1, operator, v2, options) {
+      v1 = Number(v1)
+      v2 = Number(v2)
+      switch (operator) {
+        case '+':
+          return v1 + v2;
+        case '-':
+          return v1 - v2;
+        case '/':
+          return v1 / v2;
+        case '*':
+          return v1 * v2;
+        default:
+          return 0;
+      }
+    },
+  }
 ];
