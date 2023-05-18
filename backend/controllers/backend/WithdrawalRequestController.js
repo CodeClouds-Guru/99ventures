@@ -212,14 +212,16 @@ class WithdrawalRequestController extends Controller {
             'member_transaction_id',
             'withdrawal_type_id',
           ],
-          include: {
-            model: Member,
-            attributes: ['first_name', 'last_name', 'username'],
-          },
-          include: {
-            model: WithdrawalType,
-            attributes: ['slug', 'payment_method_id'],
-          },
+          include: [
+            {
+              model: Member,
+              attributes: ['first_name', 'last_name', 'username'],
+            },
+            {
+              model: WithdrawalType,
+              attributes: ['slug', 'payment_method_id'],
+            },
+          ]
         });
         var items = [];
         var transaction_ids = [];

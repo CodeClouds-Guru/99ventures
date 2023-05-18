@@ -81,18 +81,24 @@ router.get('/test-hbs', (req, res) => {
   res.send(html);
 })
 router.all('/confirm-payment/', async (req,res) => {
-  var company_portal = await CompanyPortal.findOne({
-    where: { domain: req.hostname },
-  });
+  var response = {}
   const logger1 = require('../helpers/Logger')(
     `paypal_callback.log`
   );
   logger1.info(JSON.stringify(req.body));
-
-  let company_portal_id = company_portal.id
-  const paypal_class = new Paypal(company_portal_id);
-  response = await paypal_class.getPayouts(req);
-  res.send(response)
+  try {
+    let company_portal_id = 1
+    const paypal_class = new Paypal(company_portal_id);
+    response = await paypal_class.getPayouts(req);
+    // res.send(response)
+  }catch(e) {
+    logger1.error(JSON.stringify(req.body));
+    response = {
+      error: e
+    }
+  }finally {
+    res.json(response)
+  }
 });
 module.exports = {
   prefix: '/callback',

@@ -164,8 +164,8 @@ class Paypal {
   //get confirmation
   async getPayouts(req) {
     try{
-      if(req.event_type){
-        let batchId = req.resource.batch_header.payout_batch_id
+      if(req.body.event_type){
+        let batchId = req.body.resource.batch_header.payout_batch_id
         const client = await this.getPaypalClient();
         let request = new paypal.payouts.PayoutsGetRequest(batchId);
         request.page(1);
@@ -177,7 +177,7 @@ class Paypal {
         // If call returns body in response, you can get the deserialized version from the result attribute of the response.
         //console.log(`Payouts Batch: ${JSON.stringify(response.result)}`);
         var status = '4'
-        if(req.event_type === 'PAYMENT.PAYOUTSBATCH.SUCCESS'){
+        if(req.body.event_type === 'PAYMENT.PAYOUTSBATCH.SUCCESS'){
           status = '2'
         }
         if(parseInt(response.statusCode) == 200){
@@ -204,7 +204,7 @@ class Paypal {
                   transaction_id: transaction_id,
                   status:status,
                   completed_at: new Date(),
-                  payment_gateway_json: req,
+                  payment_gateway_json: req.body,
                   balance:modified_total_earnings
                 },{where:{id:member_transaction_id}})
 
