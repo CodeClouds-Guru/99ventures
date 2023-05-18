@@ -774,7 +774,8 @@ class MemberAuthController {
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
         transaction_resp.transaction_id;
-    // Insert in WxithdrawalRequest
+    // Insert in WithdrawalRequest
+    // console.log('====================', withdrawal_req_data);
     const res = await WithdrawalRequest.create(withdrawal_req_data);
 
     //member activity

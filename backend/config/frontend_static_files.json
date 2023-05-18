@@ -12,6 +12,22 @@
     "src": "/js/socket.js"
   },
   {
+    "type": "css",
+    "src": "/css/jquery.emojipicker.css"
+  },
+  {
+    "type": "script",
+    "src": "/js/jquery.emojipicker.js"
+  },
+  {
+    "type": "css",
+    "src": "/css/jquery.emojipicker.a.css"
+  },
+  {
+    "type": "script",
+    "src": "/js/jquery.emojis.js"
+  },
+  {
     "type": "script",
     "src": "/js/FormDataHandler.js"
   },
