@@ -77,6 +77,10 @@ class WithdrawalRequestController extends Controller {
           where: { company_portal_id: company_portal_id },
         },
         {
+          model: MemberTransaction,
+          attributes: ['transaction_id']
+        },
+        {
           model: User,
           attributes: ['alias_name'],
         },
@@ -98,6 +102,11 @@ class WithdrawalRequestController extends Controller {
         if (record.dataValues.User != null) {
           record.dataValues['User.alias_name'] =
             record.dataValues.User.dataValues.alias_name;
+        }
+        if (record.dataValues.MemberTransaction != null && record.dataValues.MemberTransaction.dataValues.transaction_id) {
+          record.dataValues['MemberTransaction.transaction_id'] = record.dataValues.MemberTransaction.dataValues.transaction_id
+        }else{
+          record.dataValues['MemberTransaction.transaction_id'] = 'NA'
         }
       });
 

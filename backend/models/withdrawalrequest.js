@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       WithdrawalRequest.belongsTo(models.WithdrawalType, {
         foreignKey: 'withdrawal_type_id',
       });
+      WithdrawalRequest.belongsTo(models.MemberTransaction, {
+        foreignKey: 'member_transaction_id',
+      });
     }
   }
   WithdrawalRequest.init(
@@ -110,13 +113,13 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'member_transaction_id',
       type: 'text',
       placeholder: 'Transaction ID',
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,
       value: '',
       width: '50',
-      searchable: true,
+      searchable: false,
     },
     requested_on: {
       field_name: 'requested_on',
@@ -170,6 +173,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
+    '$MemberTransaction.transaction_id$': {
+      field_name: 'MemberTransaction.transaction_id',
+      db_name: '`MemberTransaction`.`transaction_id`',
+      type: 'text',
+      placeholder: 'Transaction ID',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
     '$Member.username$': {
       field_name: 'Member.username',
       db_name: '`Member`.`username`',
@@ -184,7 +200,7 @@ module.exports = (sequelize, DataTypes) => {
       searchable: true,
     },
     '$Member.first_name$': {
-      field_name: 'Member.first_name',
+      field_name: 'Member. ',
       db_name: 'Member.first_name',
       type: 'text',
       placeholder: 'Member Name',
