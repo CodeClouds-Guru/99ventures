@@ -54,7 +54,7 @@ module.exports = async function (req, res, next) {
         type: QueryTypes.SELECT,
       }
     );
-
+    // console.log(total_referred[0].total);
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
@@ -68,10 +68,14 @@ module.exports = async function (req, res, next) {
       'total_referral_amount',
       transaction_stat.total_referral_amount || 0.0
     );
-    member.setDataValue('total_referred', total_referred.total || 0);
+    member.setDataValue(
+      'total_referred',
+      total_referred ? total_referred[0].total : 0
+    );
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
+    // console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {

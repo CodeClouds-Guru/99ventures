@@ -96,7 +96,7 @@ class WithdrawalRequestController extends Controller {
             record.dataValues.Member.dataValues.first_name +
             ' ' +
             record.dataValues.Member.dataValues.last_name;
-            record.dataValues['Member.username'] =
+          record.dataValues['Member.username'] =
             record.dataValues.Member.dataValues.username;
         }
         if (record.dataValues.User != null) {
@@ -230,7 +230,7 @@ class WithdrawalRequestController extends Controller {
               model: WithdrawalType,
               attributes: ['slug', 'payment_method_id'],
             },
-          ]
+          ],
         });
         var items = [];
         var transaction_ids = [];

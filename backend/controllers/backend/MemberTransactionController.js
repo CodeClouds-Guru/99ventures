@@ -122,16 +122,6 @@ class MemberTransactionController extends Controller {
           req: req,
         });
 
-        //Notification for member
-        await MemberNotification.addMemberNotification({
-          member_id: member_id,
-          verbose:
-            'Transaction amount of $' +
-            parseFloat(Math.abs(transaction.amount)) +
-            ' has been reversed by admin',
-          action: 'reversal_transaction',
-        });
-
         //referral transaction
         if (transaction.parent_transaction_id) {
           let referral_transactions = await MemberTransaction.findOne({
@@ -168,16 +158,6 @@ class MemberTransactionController extends Controller {
             },
             req: req,
           });
-
-          //Notification for referral member
-          await MemberNotification.addMemberNotification({
-            member_id: member_id,
-            verbose:
-              'Referral transaction amount of $' +
-              parseFloat(Math.abs(referral_transactions.amount)) +
-              ' has been reversed by admin',
-            action: 'reversal_transaction',
-          });
         }
       } catch (e) {
         console.log(e);
@@ -202,6 +182,7 @@ class MemberTransactionController extends Controller {
     await MemberTransaction.updateMemberBalance({
       amount: updated_balance,
       member_id: data.member_id,
+      action: 'reversed_transaction',
     });
     return true;
   }
