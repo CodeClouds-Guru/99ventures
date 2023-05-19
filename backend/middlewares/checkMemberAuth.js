@@ -27,7 +27,7 @@ module.exports = async function (req, res, next) {
       include: {
         model: MemberNotification,
         where: { is_read: 0 },
-        required: false
+        required: false,
       },
     });
     //get total earnings
@@ -44,16 +44,31 @@ module.exports = async function (req, res, next) {
         type: QueryTypes.SELECT,
       }
     );
+
+    //Referral Stat
+
+    let total_referred = await db.sequelize.query(
+      'SELECT COUNT(id) as total FROM `members` WHERE member_referral_id =? AND deleted_at IS NULL',
+      {
+        replacements: [req.session.member.id],
+        type: QueryTypes.SELECT,
+      }
+    );
+
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-
     member.setDataValue('total_withdraws', total_withdraws.amount);
     member.setDataValue('total_earnings', transaction_stat.total || 0.0);
     member.setDataValue('transaction_today', transaction_stat.today || 0.0);
     member.setDataValue('transaction_weekly', transaction_stat.week || 0.0);
     member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
+    member.setDataValue(
+      'total_referral_amount',
+      transaction_stat.total_referral_amount || 0.0
+    );
+    member.setDataValue('total_referred', total_referred.total || 0);
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 

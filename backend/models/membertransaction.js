@@ -337,12 +337,18 @@ module.exports = (sequelize, DataTypes) => {
         ),
         'month',
       ],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN MemberTransaction.amount_action = 'referral' AND MemberTransaction.status = 2 THEN MemberTransaction.amount ELSE 0.00 END)`
+        ),
+        'total_referral_amount',
+      ],
       [sequelize.fn('sum', sequelize.col('amount')), 'total'],
     ];
     option.where = {
       member_id: member_id,
       type: 'credited',
-      status: 2,
+      // status: 2,
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);

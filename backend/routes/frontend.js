@@ -10,8 +10,8 @@ router.get('/robots.txt', (req, res) => {
 });
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
-// frontendrRouter.router.use(checkIPMiddleware);
 router.use(checkMemberAuth);
+// router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
@@ -97,16 +97,6 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
   })
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
-router.get('/404', async (req, res) => {
-  var pagePerser = new PageParser('404');
-  var page_content = await pagePerser.preview(req);
-  res.render('page', { page_content });
-});
-router.get('/500', async (req, res) => {
-  var pagePerser = new PageParser('500');
-  var page_content = await pagePerser.preview(req);
-  res.render('page', { page_content });
-});
 
 router.get('/:slug?', async (req, res) => {
   //checkIPMiddleware
