@@ -1,5 +1,5 @@
 const IpQualityScoreClass = require("../helpers/IpQualityScore");
-const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member } = require("../models");
+const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member, BrowserConfiguration } = require("../models");
 const { Op } = require("sequelize");
 const { detect } = require('detect-browser');
 const messageBox = {
@@ -26,6 +26,10 @@ const messageBox = {
     COUNTRY_CHANGED: {
         error_code: 'ACCX006',
         error_message: 'Looks like you are trying to connect from a different location other than your usual location. Please get back to your home location and then try to access this site'
+    },
+    UNSUPPORTED_BROWSER: {
+        error_code: 'ACCX007',
+        error_message: 'Sorry! Your browser does not fulfill all the requirements of our application. Please try with another browser'
     }
 }
 
@@ -37,6 +41,10 @@ function getIp(req) {
         ip = ip.replace("::ffff:", "");
     }
     return ip;
+}
+
+function getBrowser(req) {
+    return req['user-agent'] || 'Unable to fetch user-agent';
 }
 
 function getMemberOfThisSession(req) {
@@ -76,6 +84,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
         );
         req.session.member = { ...member, status: 'suspended' }
     }
+    console.log({ access_error: msg });
     req.session.flash = { access_error: msg };
     res.redirect('/404');
 }
@@ -95,7 +104,7 @@ async function logIP(req, ip, geo) {
             await IpLog.create({
                 member_id: member.id,
                 ip: ip,
-                browser: req['user-agent'],
+                browser: getBrowser(req),
                 browser_language: req.headers["accept-language"],
                 geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
                 isp: geo.report.ISP,
@@ -123,7 +132,6 @@ async function checkIfCountryChanged(req, country_code) {
 
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
-    // const ip = '122.185.160.34'
     const company_portal_id = await getCompanyPortalId(req)
     const is_blacklisted_ip = await IpConfiguration.count({
         where: {
@@ -138,7 +146,6 @@ module.exports = async function (req, res, next) {
     }
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
-    console.log('ip', ip, 'geo', geo);
 
     const is_blacklisted_isp = await IspConfiguration.count({
         where: {
@@ -163,6 +170,19 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'UNAVAILABLE_COUNTRY')
         return;
     }
+
+    const is_blacklisted_browser = await BrowserConfiguration.count({
+        where: {
+            company_portal_id: company_portal_id,
+            status: 0,
+            browser: getBrowser(req),
+        }
+    });
+    if (is_blacklisted_browser > 0) {
+        await redirectWithErrorMessage(req, res, 'UNSUPPORTED_BROWSER')
+        return;
+    }
+
     if (geo.report.vpn) {
         await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
         return;
@@ -176,6 +196,7 @@ module.exports = async function (req, res, next) {
         await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
         return;
     }
+
     await logIP(req, ip, geo)
     next();
 
