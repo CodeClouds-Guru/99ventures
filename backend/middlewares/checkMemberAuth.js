@@ -72,6 +72,7 @@ module.exports = async function (req, res, next) {
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
+    console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {
