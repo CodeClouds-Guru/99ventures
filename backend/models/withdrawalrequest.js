@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_made_by: DataTypes.BIGINT,
       note: DataTypes.TEXT,
       payment_email: DataTypes.STRING,
+      ip: DataTypes.STRING,
     },
     {
       sequelize,
