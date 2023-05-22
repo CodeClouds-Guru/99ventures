@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Chip, Stack, TextField, FormHelperText, Typography } from '@mui/material';
+import { Chip, Stack, TextField, FormHelperText, Typography, Paper } from '@mui/material';
 import InputMask from 'react-input-mask';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import { styled } from '@mui/material/styles';
 
-
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+}));
 export default function AddMore(props) {
     let [dataset, setDataset] = useState(props.data);
     let [errorMsg, setErrorMsg] = useState('');
     const dispatch = useDispatch();
     const [permisson, setPermission] = useState(false);
     const [required, setRequired] = useState(false);
+    const bro_agent = props.bro_agent ?? false;
 
     useEffect(() => {
         setRequired(props.required || false);
@@ -57,7 +65,7 @@ export default function AddMore(props) {
     }
 
     const getTextField =
-        props.mask ? <InputMask {...props} mask="999.999.999.999" maskChar="_" onKeyDown={getText} /> :
+        props.mask && !bro_agent ? <InputMask {...props} mask={'999.999.999.999'} maskChar="_" onKeyDown={getText} /> :
             <div className="mb-24">
                 <TextField
                     label={props.placeholder}
@@ -74,13 +82,11 @@ export default function AddMore(props) {
                 {/* <Typography variant="body2" color="red">{errorMsg}</Typography> */}
             </div>;
 
-
-
     return (
         <div>
             {getTextField}
             <span>Selected Values: </span>
-            <Stack direction="row" spacing={1} className="mt-10">
+            <Stack justifyContent="flex-start" alignItems="flex-start" spacing={1} direction="row" useFlexGap flexWrap="wrap" className="mt-10">
                 {dataset.map((item, index) => <Chip key={item + index} label={item} variant="outlined" onDelete={() => { handleDelete(index) }} />)}
             </Stack>
         </div>

@@ -64,12 +64,8 @@ function IpConfiguration(props) {
         })
         setCountryIsos(iso)
     }
-    const handleBrowsers = (newValue) => {
-        let bro = [];
-        newValue.map((obj) => {
-            bro.push(obj.value)
-        })
-        setBrowsers(bro)
+    const onBrowserChangeFromChild = (val) => {
+        setBrowsers(val)
     }
     const preSelectedCountries = () => {
         let country_values = [];
@@ -196,7 +192,7 @@ function IpConfiguration(props) {
                         <Card variant="outlined">
                             <CardHeader title="Denied Browser List" />
                             <CardContent>
-                                <FormControl className="items-center">
+                                {/* <FormControl className="items-center">
                                     <FormControlLabel
                                         control={
                                             <Checkbox checked={selectAllBrowser} onChange={(event) => onSelectAllBrowser(event)} />
@@ -222,6 +218,14 @@ function IpConfiguration(props) {
                                             placeholder="Select Browser(s)"
                                         />
                                     )}
+                                /> */}
+                                <AddMore
+                                    permission={permission}
+                                    data={browsers}
+                                    placeholder="Enter User Agent"
+                                    onChange={onBrowserChangeFromChild}
+                                    validationRegex="([^\s])"
+                                    bro_agent={true}
                                 />
                             </CardContent>
                         </Card>
