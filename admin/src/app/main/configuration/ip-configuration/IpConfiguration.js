@@ -13,11 +13,8 @@ function IpConfiguration(props) {
     let [countryOptions, setCountryOptions] = useState([]);
     let [countryIsos, setCountryIsos] = useState([]);
     let [preSelectedCountryValues, setPreSelectedCountryValues] = useState([]);
-    let [browserOptions, setBrowserOptions] = useState([]);
     let [browsers, setBrowsers] = useState([]);
-    let [preSelectedBrowserValues, setPreSelectedBrowserValues] = useState([]);
     let [selectAllCountry, setSelectAllCountry] = useState(false);
-    let [selectAllBrowser, setSelectAllBrowser] = useState(false);
 
     const dispatch = useDispatch();
     const [permission, setPermission] = useState(false);
@@ -31,9 +28,6 @@ function IpConfiguration(props) {
     useEffect(() => {
         preSelectedCountries();
     }, [countryIsos])
-    useEffect(() => {
-        preSelectedBrowsers();
-    }, [browsers])
     const submit = (e) => {
         e.preventDefault();
         axios.post(jwtServiceConfig.saveIpConfiguration, {
@@ -79,18 +73,7 @@ function IpConfiguration(props) {
         countryOptions.length === countryIsos.length ? setSelectAllCountry(true) : setSelectAllCountry(false)
         setPreSelectedCountryValues(country_values)
     }
-    const preSelectedBrowsers = () => {
-        let browser_values = [];
-        browserOptions.map((b, index1) => {
-            browsers.map(bv => {
-                if (b.value === bv) {
-                    browser_values.push(browserOptions[index1])
-                }
-            })
-        })
-        browserOptions.length === browsers.length ? setSelectAllBrowser(true) : setSelectAllBrowser(false)
-        setPreSelectedBrowserValues(browser_values)
-    }
+
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
             if (res.data.results.status) {
@@ -98,7 +81,6 @@ function IpConfiguration(props) {
                 setIsps(res.data.results.data.isp_list)
                 setCountryOptions(res.data.results.all_country_list)
                 setCountryIsos(res.data.results.data.country_list)
-                setBrowserOptions(res.data.results.all_browser_list)
                 setBrowsers(res.data.results.data.browser_list)
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.errors }))
@@ -115,14 +97,6 @@ function IpConfiguration(props) {
             iso.push(obj.value)
         }) : '';
         setCountryIsos(iso)
-    }
-    const onSelectAllBrowser = (event) => {
-        let bro = [];
-        setSelectAllBrowser(event.target.checked);
-        event.target.checked ? browserOptions.map((obj) => {
-            bro.push(obj.value)
-        }) : '';
-        setBrowsers(bro)
     }
 
     return (
@@ -192,33 +166,6 @@ function IpConfiguration(props) {
                         <Card variant="outlined">
                             <CardHeader title="Denied Browser List" />
                             <CardContent>
-                                {/* <FormControl className="items-center">
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox checked={selectAllBrowser} onChange={(event) => onSelectAllBrowser(event)} />
-                                        }
-                                        label={<Typography variant="body2" >
-                                            <b>SELECT ALL</b>
-                                        </Typography>}
-                                    />
-                                </FormControl>
-                                <Autocomplete
-                                    multiple
-                                    limitTags={1}
-                                    id="tags-outlined"
-                                    options={browserOptions}
-                                    getOptionLabel={(option) => option.name}
-                                    onChange={(event, newValue) => handleBrowsers(newValue)}
-                                    value={preSelectedBrowserValues}
-                                    filterSelectedOptions
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Denied Browser(s)"
-                                            placeholder="Select Browser(s)"
-                                        />
-                                    )}
-                                /> */}
                                 <AddMore
                                     permission={permission}
                                     data={browsers}
