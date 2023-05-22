@@ -24,6 +24,11 @@ class WithdrawalRequestController extends Controller {
       let withdrawal_type_list = await WithdrawalType.findAll({
         attributes: ['id', 'name', 'slug'],
       });
+      for(let type_list = 0; type_list <withdrawal_type_list.length; type_list++ ){
+        let pending_req_count = await this.model.count({where: {withdrawal_type_id: withdrawal_type_list[type_list].id,status:'pending'
+        }})
+        withdrawal_type_list[type_list].setDataValue('total_pending', pending_req_count);
+      }
       return {
         result: {
           data: withdrawal_type_list,
@@ -89,6 +94,7 @@ class WithdrawalRequestController extends Controller {
       options.offset = offset;
       options.subQuery = false;
       let results = await this.model.findAndCountAll(options);
+      let pending_req_where = {}
       let pages = Math.ceil(results.count / limit);
       results.rows.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
