@@ -227,5 +227,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   sequelizePaginate.paginate(WithdrawalRequest);
+
+  WithdrawalRequest.getPendingRequest = async (withdrawal_type_id, company_portal_id,Member) => {
+    var where_cond = { status: 'pending' }
+    if(withdrawal_type_id !=''){
+      where_cond['withdrawal_type_id'] = withdrawal_type_id
+    }
+    let result = await WithdrawalRequest.findAndCountAll({
+      where: where_cond,
+      include:{
+        model: Member,
+        attributes: ['id'],
+        where: { company_portal_id: company_portal_id },
+      },
+      subQuery:false
+    });
+    return result.count;
+  };
   return WithdrawalRequest;
 };
