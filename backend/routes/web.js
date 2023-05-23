@@ -78,6 +78,17 @@ router.get('/sqs-receive-message', async (req, res) => {
   res.send(receive_message);
 });
 
+router.get('/404', async (req, res) => {
+  var pagePerser = new PageParser('404');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+router.get('/500', async (req, res) => {
+  var pagePerser = new PageParser('500');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+
 //ROUTES FOR FRONTEND
 router.use(frontendrRouter.router);
 

@@ -231,7 +231,7 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberTransactionAndBalance = async (data) => {
     const db = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
-    const { MemberBalance, MemberNotification } = require('../models/index');
+    const { MemberNotification } = require('../models/index');
 
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
@@ -243,7 +243,7 @@ module.exports = (sequelize, DataTypes) => {
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
 
-    if (parseInt(data.status) === 0 || parseInt(data.status) === 1) {
+    if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       modified_total_earnings =
         modified_total_earnings + parseFloat(data.amount);
     }
@@ -256,13 +256,14 @@ module.exports = (sequelize, DataTypes) => {
     );
     // console.log(transaction);
     let balance = true;
-    if (parseInt(data.status) === 0 || parseInt(data.status) === 1) {
-      balance = await MemberBalance.update(
-        { amount: modified_total_earnings },
-        {
-          where: { id: total_earnings[0].id },
-        }
-      );
+    if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
+      balance = await MemberTransaction.updateMemberBalance({
+        amount: modified_total_earnings,
+        member_id: data.member_id,
+        action: data.amount_action,
+        transaction_amount: data.amount,
+      });
+
       //referral member section
       if (data.type === 'credited') {
         let referral_data = await MemberTransaction.referralAmountUpdate(
@@ -273,21 +274,21 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
-    //Notify member
-    if (
-      parseInt(data.status) === 1 &&
-      data.amount_action === 'member_withdrawal'
-    ) {
-      await MemberNotification.addMemberNotification({
-        member_id: data.member_id,
-        verbose:
-          'Withdrawal requested initiated for $' +
-          parseFloat(data.amount) +
-          ' on ' +
-          new Date(),
-        action: 'member_withdrawal',
-      });
-    }
+    // //Notify member
+    // if (
+    //   parseInt(data.status) === 1 &&
+    //   data.amount_action === 'member_withdrawal'
+    // ) {
+    //   await MemberNotification.addMemberNotification({
+    //     member_id: data.member_id,
+    //     verbose:
+    //       'Withdrawal request initiated for $' +
+    //       parseFloat(Math.abs(data.amount)) +
+    //       ' on ' +
+    //       new Date().toLocaleDateString(),
+    //     action: 'member_withdrawal',
+    //   });
+    // }
 
     if (transaction && balance) {
       return { status: true, transaction_id: transaction.id };
@@ -338,16 +339,22 @@ module.exports = (sequelize, DataTypes) => {
         ),
         'month',
       ],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN MemberTransaction.amount_action = 'referral' AND MemberTransaction.status = 2 THEN MemberTransaction.amount ELSE 0.00 END)`
+        ),
+        'total_referral_amount',
+      ],
       [sequelize.fn('sum', sequelize.col('amount')), 'total'],
     ];
     option.where = {
       member_id: member_id,
       type: 'credited',
-      status: 2,
+      // status: 2,
     };
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
-    console.log(response);
+    // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
 
@@ -390,7 +397,7 @@ module.exports = (sequelize, DataTypes) => {
         })
       )
     );
-    // console.log('-----------', referral_member.member_amounts[0].amount);
+
     if (member.member_referral_id) {
       let config_data = await Setting.findOne({
         attributes: ['settings_value'],
@@ -400,14 +407,11 @@ module.exports = (sequelize, DataTypes) => {
         (modified_total_earnings *
           parseFloat(config_data.dataValues.settings_value)) /
         100;
-      // console.log('========referral_amount', referral_amount);
+
       let ref_modified_total_earnings =
         parseFloat(referral_member.member_amounts[0].amount) +
         parseFloat(referral_amount);
-      // console.log(
-      //   '---------ref_modified_total_earnings',
-      //   ref_modified_total_earnings
-      // );
+
       JSON.parse(
         JSON.stringify(
           await MemberTransaction.insertTransaction({
@@ -421,24 +425,22 @@ module.exports = (sequelize, DataTypes) => {
           })
         )
       );
-      await MemberBalance.update(
-        { amount: ref_modified_total_earnings },
-        {
-          where: {
-            member_id: member.member_referral_id,
-            amount_type: 'cash',
-          },
-        }
-      );
-      await MemberNotification.addMemberNotification({
-        member_id: ticket.member_id,
-        verbose:
-          'Referral bonus received for $' +
-          parseFloat(data.amount) +
-          ' on ' +
-          new Date(),
-        action: 'referral_bonus',
+      await MemberTransaction.updateMemberBalance({
+        amount: ref_modified_total_earnings,
+        member_id: member.member_referral_id,
+        action: 'referral',
+        transaction_amount: referral_amount,
       });
+
+      // await MemberNotification.addMemberNotification({
+      //   member_id: member.member_referral_id,
+      //   verbose:
+      //     'Referral bonus received for $' +
+      //     parseFloat(Math.abs(referral_amount)) +
+      //     ' on ' +
+      //     new Date().toLocaleDateString(),
+      //   action: 'referral_bonus',
+      // });
     }
     return {
       status: true,
@@ -467,6 +469,28 @@ module.exports = (sequelize, DataTypes) => {
     return await MemberTransaction.create(transaction_data, {
       silent: true,
     });
+  };
+
+  MemberTransaction.updateMemberBalance = async (data) => {
+    const { MemberBalance, MemberNotification } = require('../models/index');
+    await MemberBalance.update(
+      { amount: data.amount },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
+
+    //Notify member
+    await MemberNotification.addMemberNotification({
+      member_id: data.member_id,
+      action: data.action,
+      amount: data.transaction_amount,
+    });
+
+    return true;
   };
   return MemberTransaction;
 };

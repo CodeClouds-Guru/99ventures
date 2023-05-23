@@ -85,7 +85,7 @@ class StaticPageController {
         params
       );
       const template = Handlebars.compile(parsed.script_html);
-      console.log('other_details', parsed.other_details)
+      // console.log('other_details', parsed.other_details)
       var html = template({
         data: parsed.data,
         page_count: parsed.page_count,

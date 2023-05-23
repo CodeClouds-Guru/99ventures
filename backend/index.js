@@ -15,8 +15,8 @@ io.sockets.on('connection', (socket) => {
 
     socket.on('shoutbox_client', async function (data) {
         await Shoutbox.create({
-            company_id: 1,
-            company_portal_id: 1,
+            company_id: data.company_id,
+            company_portal_id: data.company_portal_id,
             member_id: data.member_id,
             survey_provider_id: data.survey_provider_id ?? null,
             verbose: data.message,

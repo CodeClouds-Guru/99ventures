@@ -13,9 +13,7 @@ function IpConfiguration(props) {
     let [countryOptions, setCountryOptions] = useState([]);
     let [countryIsos, setCountryIsos] = useState([]);
     let [preSelectedCountryValues, setPreSelectedCountryValues] = useState([]);
-    let [browserOptions, setBrowserOptions] = useState([]);
     let [browsers, setBrowsers] = useState([]);
-    let [preSelectedBrowserValues, setPreSelectedBrowserValues] = useState([]);
     let [selectAllCountry, setSelectAllCountry] = useState(false);
 
     const dispatch = useDispatch();
@@ -30,9 +28,6 @@ function IpConfiguration(props) {
     useEffect(() => {
         preSelectedCountries();
     }, [countryIsos])
-    useEffect(() => {
-        preSelectedBrowsers();
-    }, [browsers])
     const submit = (e) => {
         e.preventDefault();
         axios.post(jwtServiceConfig.saveIpConfiguration, {
@@ -63,12 +58,8 @@ function IpConfiguration(props) {
         })
         setCountryIsos(iso)
     }
-    const handleBrowsers = (newValue) => {
-        let bro = [];
-        newValue.map((obj) => {
-            bro.push(obj.value)
-        })
-        setBrowsers(bro)
+    const onBrowserChangeFromChild = (val) => {
+        setBrowsers(val)
     }
     const preSelectedCountries = () => {
         let country_values = [];
@@ -82,17 +73,7 @@ function IpConfiguration(props) {
         countryOptions.length === countryIsos.length ? setSelectAllCountry(true) : setSelectAllCountry(false)
         setPreSelectedCountryValues(country_values)
     }
-    const preSelectedBrowsers = () => {
-        let browser_values = [];
-        browserOptions.map((b, index1) => {
-            browsers.map(bv => {
-                if (b.value === bv) {
-                    browser_values.push(browserOptions[index1])
-                }
-            })
-        })
-        setPreSelectedBrowserValues(browser_values)
-    }
+
     const fetchData = () => {
         axios.get(jwtServiceConfig.getIpConfiguration).then(res => {
             if (res.data.results.status) {
@@ -100,7 +81,6 @@ function IpConfiguration(props) {
                 setIsps(res.data.results.data.isp_list)
                 setCountryOptions(res.data.results.all_country_list)
                 setCountryIsos(res.data.results.data.country_list)
-                setBrowserOptions(res.data.results.all_browser_list)
                 setBrowsers(res.data.results.data.browser_list)
             } else {
                 dispatch(showMessage({ variant: 'error', message: res.data.errors }))
@@ -118,6 +98,7 @@ function IpConfiguration(props) {
         }) : '';
         setCountryIsos(iso)
     }
+
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
             <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
@@ -185,21 +166,13 @@ function IpConfiguration(props) {
                         <Card variant="outlined">
                             <CardHeader title="Denied Browser List" />
                             <CardContent>
-                                <Autocomplete
-                                    multiple
-                                    id="tags-outlined"
-                                    options={browserOptions}
-                                    getOptionLabel={(option) => option.name}
-                                    onChange={(event, newValue) => handleBrowsers(newValue)}
-                                    value={preSelectedBrowserValues}
-                                    filterSelectedOptions
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Denied Browser(s)"
-                                            placeholder="Select Browser(s)"
-                                        />
-                                    )}
+                                <AddMore
+                                    permission={permission}
+                                    data={browsers}
+                                    placeholder="Enter User Agent"
+                                    onChange={onBrowserChangeFromChild}
+                                    validationRegex="([^\s])"
+                                    bro_agent={true}
                                 />
                             </CardContent>
                         </Card>

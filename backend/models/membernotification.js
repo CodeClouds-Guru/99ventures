@@ -82,12 +82,61 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   MemberNotification.addMemberNotification = async (data) => {
+    let notification_verbose = data.verbose || '';
+    let notification_action = '';
+    let amount = data.amount ? parseFloat(Math.abs(data.amount)) : null;
+    let updated_on = new Date().toLocaleDateString();
+
+    switch (data.action) {
+      case 'admin_adjustment':
+        notification_verbose =
+          'Admin has added $' + amount + ' to your wallet on ' + updated_on;
+        notification_action = 'admin_adjustment';
+        break;
+      case 'survey':
+        notification_verbose =
+          'Successful survey completion and $' +
+          amount +
+          ' has been added to your wallet on ' +
+          updated_on;
+        notification_action = 'survey';
+        break;
+      case 'referral':
+        notification_verbose =
+          'Referral Bonus of $' +
+          amount +
+          ' has been added to your wallet on ' +
+          updated_on;
+        notification_action = 'referral_bonus';
+        break;
+      case 'member_withdrawal':
+        notification_verbose =
+          'Withdrawal amount of $' +
+          amount +
+          ' has been added to your wallet on ' +
+          updated_on;
+        notification_action = 'member_withdrawal';
+        break;
+      case 'reversed_transaction':
+        notification_verbose =
+          'Admin has reversed $' +
+          amount +
+          ' from your wallet on ' +
+          updated_on;
+        notification_action = 'reversed_transaction';
+        break;
+      case 'ticket_reply':
+        notification_action = 'ticket_reply';
+        break;
+      default:
+      //
+    }
+
     let notification = await MemberNotification.create({
       member_id: data.member_id,
-      verbose: data.verbose,
-      action: data.action,
+      verbose: notification_verbose,
+      action: notification_action,
       is_read: 0,
-      read_on: new Date(),
     });
   };
 

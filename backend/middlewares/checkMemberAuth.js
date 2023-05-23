@@ -27,7 +27,7 @@ module.exports = async function (req, res, next) {
       include: {
         model: MemberNotification,
         where: { is_read: 0 },
-        required: false
+        required: false,
       },
     });
     //get total earnings
@@ -38,27 +38,44 @@ module.exports = async function (req, res, next) {
 
     //total paid
     let total_paid = await db.sequelize.query(
-      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and withdrawal_requests.status = 'approved'",
+      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'approved'",
       {
         replacements: [req.session.member.id],
         type: QueryTypes.SELECT,
       }
     );
 
+    //Referral Stat
+
+    let total_referred = await db.sequelize.query(
+      'SELECT COUNT(id) as total FROM `members` WHERE member_referral_id =? AND deleted_at IS NULL',
+      {
+        replacements: [req.session.member.id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    // console.log(total_referred[0].total);
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-
     member.setDataValue('total_withdraws', total_withdraws.amount);
     member.setDataValue('total_earnings', transaction_stat.total || 0.0);
     member.setDataValue('transaction_today', transaction_stat.today || 0.0);
     member.setDataValue('transaction_weekly', transaction_stat.week || 0.0);
     member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
+    member.setDataValue(
+      'total_referral_amount',
+      transaction_stat.total_referral_amount || 0.0
+    );
+    member.setDataValue(
+      'total_referred',
+      total_referred ? total_referred[0].total : 0
+    );
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
-
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
+    // console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {

@@ -1,12 +1,17 @@
 const Controller = require('./Controller');
 const { stringToSlug } = require('../../helpers/global');
-const { Script, sequelize } = require('../../models/index');
+const { Script } = require('../../models/index');
+const models = require('../../models/index');
+const fs = require("fs")
+const path = require('path')
+
 
 const { Op } = require('sequelize');
 
 class ScriptController extends Controller {
   constructor() {
     super('Script');
+    this.fetchAllModelsName = this.fetchAllModelsName.bind(this);
   }
 
   async list(req, res) {
@@ -95,6 +100,28 @@ class ScriptController extends Controller {
     } catch (error) {
       throw error;
     }
+  }
+
+  async add(req, res) {
+    return {
+      fields: this.model.fields,
+      modules: this.fetchAllModelsName()
+    };
+  }
+
+  async edit(req, res) {
+    try {
+      let model = await this.model.findByPk(req.params.id);
+      let fields = this.model.fields;
+      return { result: model, fields, modules: this.fetchAllModelsName() };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  fetchAllModelsName() {
+    const { sequelize, Sequelize, ...rest } = models
+    return Object.keys(rest);
   }
 }
 module.exports = ScriptController;

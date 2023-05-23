@@ -763,7 +763,7 @@ class MemberAuthController {
           member_transaction_id: transaction_resp.transaction_id,
         },
       ]);
-      console.log('create_resp', create_resp);
+      // console.log('create_resp', create_resp);
       if (create_resp.status) {
         await MemberTransaction.update(
           { batch_id: create_resp.batch_id },
@@ -774,7 +774,8 @@ class MemberAuthController {
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
         transaction_resp.transaction_id;
-    // Insert in WxithdrawalRequest
+    // Insert in WithdrawalRequest
+    // console.log('====================', withdrawal_req_data);
     const res = await WithdrawalRequest.create(withdrawal_req_data);
 
     //member activity
@@ -786,7 +787,7 @@ class MemberAuthController {
     if (request_data.withdrawal_type_id == 2) {
       // email body for member
       let member_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Member',
+        action: 'Member Cash Withdrawal',
         data: {
           email: member.email,
           details: {
@@ -798,7 +799,7 @@ class MemberAuthController {
       });
     } else {
       let member_mail = await this.sendMailEvent({
-        action: 'Member Cash Withdrawal',
+        action: 'Withdraw Request Member',
         data: {
           email: member.email,
           details: {

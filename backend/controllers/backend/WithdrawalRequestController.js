@@ -1,7 +1,13 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
 const { Op } = require('sequelize');
-const { Member, User,WithdrawalType,MemberTransaction,WithdrawalRequest } = require('../../models/index');
+const {
+  Member,
+  User,
+  WithdrawalType,
+  MemberTransaction,
+  WithdrawalRequest,
+} = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 
 class WithdrawalRequestController extends Controller {
@@ -12,17 +18,27 @@ class WithdrawalRequestController extends Controller {
 
   //list
   async list(req, res) {
-    var withdrawal_type = req.query.type
-   
-    if(withdrawal_type === 'withdrawal-types'){
-      let withdrawal_type_list = await WithdrawalType.findAll({attributes:['id','name','slug']})
-      return {
-        result:{
-          data: withdrawal_type_list
-        }
+    var withdrawal_type = req.query.type;
+
+    if (withdrawal_type === 'withdrawal-types') {
+      let withdrawal_type_list = await WithdrawalType.findAll({
+        attributes: ['id', 'name', 'slug'],
+      });
+      let company_portal_id = req.headers.site_id;
+      for(let type_list = 0; type_list < withdrawal_type_list.length; type_list++ ){
+        var pending_withdrawal_count = await this.model.getPendingRequest(
+          withdrawal_type_list[type_list].id,
+          company_portal_id,
+          Member
+        );
+        withdrawal_type_list[type_list].setDataValue('pending_withdrawal_count', pending_withdrawal_count);
       }
-    }
-    else{
+      return {
+        result: {
+          data: withdrawal_type_list,
+        },
+      };
+    } else {
       let page = req.query.page || 1;
       let limit = parseInt(req.query.show) || 10; // per page record
       let offset = (page - 1) * limit;
@@ -32,17 +48,17 @@ class WithdrawalRequestController extends Controller {
       var query_where = req.query.where || '{}';
       query_where = JSON.parse(query_where);
       var new_option = {};
-      var and_query = {}
-      var  fields = this.model.fields
-      if('withdrawal_type_id' in query_where){
-        fields['$Member.username$'].listing = true
-        fields['$Member.username$'].searchable = true
-      }else{
-        fields['$Member.username$'].listing = false
-        fields['$Member.username$'].searchable = false
+      var and_query = {};
+      var fields = this.model.fields;
+      if ('withdrawal_type_id' in query_where) {
+        fields['$Member.username$'].listing = true;
+        fields['$Member.username$'].searchable = true;
+      } else {
+        fields['$Member.username$'].listing = false;
+        fields['$Member.username$'].searchable = false;
       }
 
-      if('created_at' in query_where){
+      if ('created_at' in query_where) {
         var and_query = {
           created_at: {
             [Op.between]: query_where.created_at,
@@ -66,8 +82,12 @@ class WithdrawalRequestController extends Controller {
       options.include = [
         {
           model: Member,
-          attributes: ['first_name', 'last_name','username'],
-          where: {company_portal_id:company_portal_id}
+          attributes: ['first_name', 'last_name', 'username'],
+          where: { company_portal_id: company_portal_id },
+        },
+        {
+          model: MemberTransaction,
+          attributes: ['transaction_id']
         },
         {
           model: User,
@@ -78,6 +98,7 @@ class WithdrawalRequestController extends Controller {
       options.offset = offset;
       options.subQuery = false;
       let results = await this.model.findAndCountAll(options);
+      let pending_req_where = {}
       let pages = Math.ceil(results.count / limit);
       results.rows.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
@@ -85,43 +106,64 @@ class WithdrawalRequestController extends Controller {
             record.dataValues.Member.dataValues.first_name +
             ' ' +
             record.dataValues.Member.dataValues.last_name;
+          record.dataValues['Member.username'] =
+            record.dataValues.Member.dataValues.username;
         }
         if (record.dataValues.User != null) {
           record.dataValues['User.alias_name'] =
             record.dataValues.User.dataValues.alias_name;
         }
-      });
-      
-      var programsList = [];
-      const withdrawlType = await WithdrawalType.findOne({attributes:['slug'], where: {id: query_where.withdrawal_type_id}});
-      if(withdrawlType.slug === 'gift_card_pass'){
-        const viObj = new VirtualIncentive(company_portal_id)
-        const programs = await viObj.getProgramBalance();
-        if(Object.keys(programs).length && programs.program){
-          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Gift Cards').map(row => {
-              return {
-                  ...row,
-                  id: row.programid
-              }
-          });
+        if (record.dataValues.MemberTransaction != null && record.dataValues.MemberTransaction.dataValues.transaction_id) {
+          record.dataValues['MemberTransaction.transaction_id'] = record.dataValues.MemberTransaction.dataValues.transaction_id
+        }else{
+          record.dataValues['MemberTransaction.transaction_id'] = 'NA'
         }
-      } else if(withdrawlType.slug === 'venmo'){
-        const viObj = new VirtualIncentive(company_portal_id)
-        const programs = await viObj.getProgramBalance();
-        if(Object.keys(programs).length && programs.program){
-          programsList = programs.program.filter(row => row.name !== 'DO NOT USE' && row.type === 'Virtual Reward').map(row => {
-              return {
+      });
+
+      var programsList = [];
+      if ('withdrawal_type_id' in query_where) {
+        const withdrawlType = await WithdrawalType.findOne({
+          attributes: ['slug'],
+          where: { id: query_where.withdrawal_type_id },
+        });
+        if (withdrawlType.slug === 'gift_card_pass') {
+          const viObj = new VirtualIncentive(company_portal_id);
+          const programs = await viObj.getProgramBalance();
+          if (Object.keys(programs).length && programs.program) {
+            programsList = programs.program
+              .filter(
+                (row) => row.name !== 'DO NOT USE' && row.type === 'Gift Cards'
+              )
+              .map((row) => {
+                return {
                   ...row,
-                  id: row.programid
-              }
-          });
+                  id: row.programid,
+                };
+              });
+          }
+        } else if (withdrawlType.slug === 'venmo') {
+          const viObj = new VirtualIncentive(company_portal_id);
+          const programs = await viObj.getProgramBalance();
+          if (Object.keys(programs).length && programs.program) {
+            programsList = programs.program
+              .filter(
+                (row) =>
+                  row.name !== 'DO NOT USE' && row.type === 'Virtual Reward'
+              )
+              .map((row) => {
+                return {
+                  ...row,
+                  id: row.programid,
+                };
+              });
+          }
         }
       }
 
       return {
-        result: { data: results.rows, pages, total:results.count },
+        result: { data: results.rows, pages, total: results.count },
         fields: this.model.fields,
-        programs: programsList
+        programs: programsList,
       };
     }
   }
@@ -174,36 +216,58 @@ class WithdrawalRequestController extends Controller {
         // response = await paypal_class.successPayment(req, res);
         response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request approved';
-        let all_withdrawal_req = await this.model.findAll({where:{
-                                            id: {
-                                              [Op.in] : model_ids
-                                          }
-                                        },
-                                        attributes:['id','member_id','amount','currency','payment_email','member_transaction_id'],
-                                        include:{
-                                          model: Member,
-                                          attributes: ['first_name', 'last_name','username'],
-                                        }
-                                      })
-        var items = []  
-        var transaction_ids = []   
-        let transaction_id = ''      
+        let all_withdrawal_req = await this.model.findAll({
+          where: {
+            id: {
+              [Op.in]: model_ids,
+            },
+          },
+          attributes: [
+            'id',
+            'member_id',
+            'amount',
+            'currency',
+            'payment_email',
+            'member_transaction_id',
+            'withdrawal_type_id',
+          ],
+          include: [
+            {
+              model: Member,
+              attributes: ['first_name', 'last_name', 'username'],
+            },
+            {
+              model: WithdrawalType,
+              attributes: ['slug', 'payment_method_id'],
+            },
+          ],
+        });
+        var items = [];
+        var transaction_ids = [];
+        let transaction_id = '';
         for (let record of all_withdrawal_req) {
+          // console.log('-------------record', record);
           //insert in transaction table
-          if(record.member_transaction_id){
-            transaction_ids.push(record.member_transaction_id)
-            transaction_id = record.member_transaction_id
-          }else{
-            let transaction = await MemberTransaction.updateMemberTransactionAndBalance({
-              member_id:record.member_id,
-              amount: record.amount,
-              note: '',
-              status: '1',
-              type: 'withdraw',
-              amount_action: 'member_withdrawal',
-              currency: record.currency,
-              created_by: req.user.id,
-            });
+          if (record.member_transaction_id) {
+            transaction_ids.push(record.member_transaction_id);
+            transaction_id = record.member_transaction_id;
+          } else {
+            let transaction_status = 1;
+            if (record.WithdrawalType.slug === 'skrill') {
+              transaction_status = 2;
+            }
+
+            let transaction =
+              await MemberTransaction.updateMemberTransactionAndBalance({
+                member_id: record.member_id,
+                amount: -record.amount,
+                note: '',
+                status: transaction_status,
+                type: 'withdraw',
+                amount_action: 'member_withdrawal',
+                currency: record.currency,
+                created_by: req.user.id,
+              });
             // let transaction = await MemberTransaction.create({
             //   type:'withdraw',
             //   amount: record.amount,
@@ -213,32 +277,49 @@ class WithdrawalRequestController extends Controller {
             //   currency: record.currency,
             //   completed_at: new Date()
             // })
-            transaction_ids.push(transaction.transaction_id)
-            transaction_id = transaction.transaction_id
-            await WithdrawalRequest.update({member_transaction_id:transaction_id},{where:{id:record.id}})
+            transaction_ids.push(transaction.transaction_id);
+            transaction_id = transaction.transaction_id;
+            await WithdrawalRequest.update(
+              { member_transaction_id: transaction_id },
+              { where: { id: record.id } }
+            );
           }
-          //paypal payload
-          items.push({
-            amount: record.amount,
-            currency: record.currency.toUpperCase(),
-            member_id: record.member_id,
-            email:record.payment_email,
-            first_name: record.dataValues.Member.dataValues.first_name,
-            last_name: record.dataValues.Member.dataValues.last_name,
-            member_transaction_id:transaction_id
-          })
-          
+          if (
+            record.WithdrawalType.slug === 'paypal' ||
+            record.WithdrawalType.slug === 'instant_paypal'
+          ) {
+            //paypal payload
+            items.push({
+              amount: record.amount,
+              currency: record.currency.toUpperCase(),
+              member_id: record.member_id,
+              email: record.payment_email,
+              first_name: record.dataValues.Member.dataValues.first_name,
+              last_name: record.dataValues.Member.dataValues.last_name,
+              member_transaction_id: transaction_id,
+            });
+          }
         }
-        let company_portal_id = req.headers.site_id
-        //do bulk payment
-        const paypal_class = new Paypal(company_portal_id);
-        const create_resp = await paypal_class.payout(items)
-        if(create_resp.status){
-            await MemberTransaction.update({batch_id:create_resp.batch_id},{where:{id: {
-              [Op.in]: transaction_ids,
-            },}
-          })
+
+        if (items.length > 0) {
+          let company_portal_id = req.headers.site_id;
+          //do bulk payment
+          const paypal_class = new Paypal(company_portal_id);
+          const create_resp = await paypal_class.payout(items);
+          if (create_resp.status) {
+            await MemberTransaction.update(
+              { batch_id: create_resp.batch_id },
+              {
+                where: {
+                  id: {
+                    [Op.in]: transaction_ids,
+                  },
+                },
+              }
+            );
+          }
         }
+
         break;
       default:
         response_message = 'Payment processed';

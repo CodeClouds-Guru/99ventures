@@ -1,5 +1,8 @@
 'use strict';
 const { Model } = require('sequelize');
+const Sequelize = require('sequelize');
+const { Op } = Sequelize;
+const moment = require('moment');
 module.exports = (sequelize, DataTypes) => {
   class MemberActivityLog extends Model {
     /**
@@ -26,11 +29,24 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: 'MemberActivityLog',
       timestamps: true,
-      paranoid: true,
+      paranoid: false,
       createdAt: 'created_at', // alias createdAt as created_date
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
       tableName: 'member_activity_logs',
+      hooks: {
+        beforeCreate: async (member_activity_logs, options) => {
+          let check_activity = await MemberActivityLog.destroy({
+            where: {
+              created_at: {
+                [Op.like]:
+                  moment(member_activity_logs.created_at).format('YYYY-MM-DD') +
+                  '%',
+              },
+            },
+          });
+        },
+      },
     }
   );
   MemberActivityLog.addMemberActivity = async (data) => {

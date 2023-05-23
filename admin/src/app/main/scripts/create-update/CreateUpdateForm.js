@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, TextareaAutosize } from '@mui/material';
+import { FormControl, TextField, Paper, FormHelperText, Switch, InputLabel, Button, TextareaAutosize, Select, MenuItem } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -18,23 +18,42 @@ const CreateUpdateForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [errors, setErrors] = useState({});
+    const [modules, setModules] = useState([]);
     const [allData, setAllData] = useState({
         name: '',
         script_html: '',
         script_json: {},
-        status: true
+        status: true,
+        module: '',
+        description: '',
+        action_type: 'list',
     });
 
-    useEffect(()=>{
+    useEffect(() => {
         if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId);
-        }        
+        } else {
+            fetchData()
+        }
     }, []);
 
     const handleChange = (e) => {
         setAllData({ ...allData, status: e.target.checked });
     };
-    
+
+    const handleModuleChange = (e) => {
+        setAllData({ ...allData, module: e.target.value })
+    }
+
+    const handleDescriptionChange = (e) => {
+        setAllData({ ...allData, description: e.target.value })
+    }
+
+    const onActionTypeChange = (e) => {
+        console.log(e)
+        setAllData({ ...allData, action_type: e.target.value })
+    }
+
     const dynamicErrorMsg = (field, value) => {
         if (value) {
             delete errors[field];
@@ -54,7 +73,7 @@ const CreateUpdateForm = () => {
     }
 
     const onSubmit = () => {
-        if ( allData.script_html == "") {
+        if (allData.script_html == "") {
             dispatch(showMessage({ variant: 'error', message: 'Please add the value in script body' }));
             return;
         }
@@ -77,7 +96,7 @@ const CreateUpdateForm = () => {
                         if (moduleId === 'create') {
                             navigate(`/app/scripts/${response.data.results.result.id}`);
                         }
-                        
+
                     } else {
                         dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                     }
@@ -87,6 +106,16 @@ const CreateUpdateForm = () => {
                     dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
                 })
         }
+    }
+
+    const fetchData = () => {
+        axios.get(jwtServiceConfig.getScriptFieldData)
+            .then((response) => {
+                setModules([...response.data.results.modules])
+            })
+            .catch((error) => {
+                console.log(error);
+            })
     }
 
     const getSingleRecordById = (id) => {
@@ -99,8 +128,12 @@ const CreateUpdateForm = () => {
                         name: record.name,
                         script_html: record.script_html,
                         script_json: record.script_json,
-                        status: Boolean(record.status)
+                        status: Boolean(record.status),
+                        description: record.description,
+                        module: record.module,
+                        action_type: record.action_type
                     }));
+                    setModules([...response.data.results.modules])
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -115,7 +148,7 @@ const CreateUpdateForm = () => {
         navigate(`/app/${module}`);
     }
 
-    const handleModelChange = (e) =>{
+    const handleModelChange = (e) => {
         setAllData(allData => ({
             ...allData, script_html: e.target.value
         }));
@@ -151,16 +184,60 @@ const CreateUpdateForm = () => {
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />
                         </FormControl>
+                        <FormControl className="w-1/2 mb-24 pr-10">
+                            <InputLabel id="module-selector" >
+                                Module
+                            </InputLabel>
+                            <Select
+                                labelId="module-selector"
+                                id="module-selector"
+                                value={allData.module}
+                                label="Module"
+                                onChange={handleModuleChange}
+                            >
+                                {modules.map((item, key) => <MenuItem key={key} value={item}>{item}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl className="w-1/2 mb-24 pr-24">
+                            <TextField
+                                label="Action Type"
+                                type="text"
+                                error={!!errors.action_type}
+                                helperText={errors?.action_type?.message}
+                                variant="outlined"
+                                required
+                                value={allData.action_type}
+                                onChange={onActionTypeChange}
+                            />
+                            <FormHelperText error variant="standard">{errors.action_type}</FormHelperText>
+                        </FormControl>
+
                         <FormControl className="w-full mb-24">
                             <pre>
                                 <code>
                                     <textarea
-                                        maxRows={10}
                                         aria-label="maximum height"
-                                        placeholder=""
-                                        value={ allData.script_html }
+                                        placeholder="Enter Description"
+                                        value={allData.description}
+                                        className="w-full bg-black text-white h-full p-16 editor-textarea"
+                                        style={{ minHeight: '20rem', fontStyle: 'italic', fontSize: '10px' }}
+                                        onChange={handleDescriptionChange}
+                                    ></textarea>
+                                </code>
+                            </pre>
+                            <FormHelperText error variant="standard">{errors.script_html}</FormHelperText>
+                        </FormControl>
+
+                        <FormControl className="w-full mb-24">
+                            <pre>
+                                <code>
+                                    <textarea
+                                        aria-label="maximum height"
+                                        placeholder="Enter Script"
+                                        value={allData.script_html}
                                         className="custom-code-editor scripts-editor"
-                                        onChange={handleModelChange}                                        
+                                        onChange={handleModelChange}
                                     ></textarea>
                                 </code>
                             </pre>

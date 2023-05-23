@@ -27,32 +27,25 @@ class TicketController {
   async update(req, res) {
     const type = req.body.type || '';
     let change = false;
-    // console.log(req.files);
     try {
       switch (type) {
         case 'ticket_chat':
           change = await this.saveTicketConversations(req, res);
+          res.send(change)
           break;
         case 'ticket_status':
           let field_name = req.body.field_name;
           let value = req.body.value;
           let ticket_id = req.body.ticket_id;
           let update = await Ticket.changeStatus(field_name, value, ticket_id);
+          res.send({ status: true, data: { created_at: new Date() } })
           break;
         default:
-          // req.session.flash = { error: 'Request Failed.' };
+          res.send({ status: false, message: 'Request Failed.' })
       }
     } catch (error) {
       console.error(error);
-      // req.session.flash = { error: 'Unable to save data.' };
-    } finally {
-      // if (change)
-        // req.session.flash = {
-        //   message: 'Record updated.',
-        //   success_status: true,
-        // };
-      res.send({status:true})
-      //res.redirect('back');
+      res.send({ status: false, message: 'Unable to save data.' })
     }
   }
 
@@ -84,12 +77,11 @@ class TicketController {
         member_id: member_id,
       };
       let savedTicketConversation = await TicketConversation.create(data);
-
+      var all_files = []
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
         else files[0] = attachments;
-        console.log('files',files)
         let fileHelper = new FileHelper(
           files,
           'tickets/' + savedTicketConversation.id,
@@ -104,17 +96,24 @@ class TicketController {
             mime_type: mime.lookup(path.basename(values.filename)),
           };
         });
-
+        for (let uploaded_file of dataFiles) {
+          all_files.push(process.env.S3_BUCKET_OBJECT_URL + uploaded_file.file_name)
+        }
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-      req.session.flash = {
-        message: 'Ticket submitted successfully.',
-        success_status: true,
-      };
+      return {
+        status: true,
+        data: {
+          files: all_files,
+          created_at: new Date()
+        }
+      }
     } catch (error) {
-      req.session.flash = { error: 'Unable to submit ticket.' };
-    } finally {
-      
+      console.error(error)
+      return {
+        status: false,
+        message: 'Unable to submit ticket.'
+      }
     }
   }
 }
