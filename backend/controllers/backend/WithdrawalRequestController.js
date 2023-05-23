@@ -293,11 +293,11 @@ class WithdrawalRequestController extends Controller {
             if(record.currency === '$'){
               record_currency = 'USD'
             }else{
-              record_currency = record.currency
+              record_currency = record.currency.toUpperCase()
             }
             items.push({
               amount: record.amount,
-              currency: record.currency.toUpperCase(),
+              currency: record_currency,
               member_id: record.member_id,
               email: record.payment_email,
               first_name: record.dataValues.Member.dataValues.first_name,
