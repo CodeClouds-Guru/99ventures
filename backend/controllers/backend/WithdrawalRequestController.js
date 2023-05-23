@@ -292,7 +292,7 @@ class WithdrawalRequestController extends Controller {
             var record_currency = ''
             if(record.currency === '$'){
               record_currency = 'USD'
-            }else{
+            }else if(record.currency != ''){
               record_currency = record.currency.toUpperCase()
             }
             items.push({
