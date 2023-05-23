@@ -20,6 +20,7 @@ import { selectUser, setUser } from 'app/store/userSlice';
 import Helper from 'src/app/helper';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 function List(props) {
 	const dispatch = useDispatch();
@@ -66,6 +67,9 @@ function List(props) {
 	const [vimodal, setVimodal] = useState(false);
 	const [programsList, setProgramList] = useState([]);
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
+	const [openRevertAlertDialog, setOpenRevertAlertDialog] = useState(false);
+	const [tid, setTid] = useState(0)
+
 	const handlePopoverOpen = (event) => {
 		event.stopPropagation();
 		setDescPopoverAnchorEl(event.currentTarget);
@@ -107,7 +111,7 @@ function List(props) {
 
 		axios.get(`/${module}`, { params }).then(res => {
 			let fields_var = res.data.results.fields;
-			module === 'campaigns' ? fields_var.actions = {
+			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {
 				db_name: "actions",
 				field_name: "actions",
 				listing: true,
@@ -258,6 +262,19 @@ function List(props) {
 		}
 	}
 
+	function revertMemberTransaction() {
+		axios.post(`${module}/update`, { member_id: tid, type: 'revert' }).then((res) => {
+			setOpenRevertAlertDialog(false)
+			setTid(0)
+			closeActionsMenu()
+			fetchModules();
+			dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+		}).catch(e => {
+			console.error(e)
+			dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to revert' }))
+		});
+	}
+
 	function handleClick(item, e) {
 		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root'))) {
 			handelNavigate(item)
@@ -383,11 +400,11 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'expired')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'campaigns') {
-			if (field.field_name === 'status') {
+		} else if (module === 'campaigns' || module === 'member-transactions') {
+			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions') {
+			if (field.field_name === 'actions' && (n.status === 'initiated' || n.status === 'processing')) {
 				return (
 					<>
 						<IconButton
@@ -411,7 +428,7 @@ function List(props) {
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
-								<MenuItem
+								{module === 'campaigns' && <MenuItem
 									onClick={(event) => {
 										event.stopPropagation();
 										navigate(`/app/campaigns/${n.id}/report`)
@@ -421,18 +438,20 @@ function List(props) {
 										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
 									</ListItemIcon>
 									<ListItemText primary="Report" />
-								</MenuItem>
-								{/* <MenuItem
-									onClick={(event) => {
-										event.stopPropagation();
-										navigate(`/app/campaigns/${n.id}/offerwalls`)
-									}}
-								>
-									<ListItemIcon className="min-w-40">
-										<FuseSvgIcon>material-outline:attach_money</FuseSvgIcon>
-									</ListItemIcon>
-									<ListItemText primary="Offerwalls" />
-								</MenuItem> */}
+								</MenuItem>}
+								{module === 'member-transactions' &&
+									<MenuItem
+										onClick={(event) => {
+											event.stopPropagation();
+											setOpenRevertAlertDialog(true);
+											setTid(n.id)
+										}}
+									>
+										<ListItemIcon className="min-w-40">
+											<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
+										</ListItemIcon>
+										<ListItemText primary="Revert" />
+									</MenuItem>}
 							</MenuList>
 						</Menu>
 					</>
@@ -524,9 +543,14 @@ function List(props) {
 			</Tooltip>
 		)
 	}
-
 	return (
 		<div>
+			{openRevertAlertDialog &&
+				<AlertDialog
+					open={openRevertAlertDialog}
+					onConfirm={revertMemberTransaction}
+					onClose={() => setOpenRevertAlertDialog(false)}
+				/>}
 			{/* // header */}
 
 			{
