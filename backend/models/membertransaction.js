@@ -60,7 +60,16 @@ module.exports = (sequelize, DataTypes) => {
             .replace(/\s+/g, ' ');
         },
       },
-      currency: DataTypes.STRING,
+      currency: {
+        type: DataTypes.STRING,
+        get() {
+          if (this.getDataValue('currency') === 'usd' || this.getDataValue('currency') === 'USD') {
+            return '$'
+          }else{
+            return this.getDataValue('currency')
+          }
+        }
+      },
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
