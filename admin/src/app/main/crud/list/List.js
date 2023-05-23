@@ -57,6 +57,7 @@ function List(props) {
 	const [moduleActioned, setModuleActioned] = useState(false);
 	const [firstCall, setFirstCall] = useState(true);
 	const [txnType, setTxnType] = useState('');
+	const [withdrawalRequestStatus, setWithdrawalRequestStatus] = useState('');
 	const [where, setWhere] = useState(props.where);
 	const [datepickerStatus, setDatepickerStatus] = useState(false);
 	const [dateRange, setDateRange] = useState({
@@ -230,12 +231,12 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to approve' }))
 			}) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
@@ -250,7 +251,7 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to reject' }))
@@ -268,7 +269,7 @@ function List(props) {
 			setTid(0)
 			closeActionsMenu()
 			fetchModules();
-			dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 		}).catch(e => {
 			console.error(e)
 			dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to revert' }))
@@ -390,16 +391,22 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'withdrawal-requests' && field.field_name === 'status') {
-			const status = processFieldValue(n[field.field_name], field);
-			if (status === 'pending')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
-			else if (status === 'approved')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
-			else if (status === 'rejected')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
-			else if (status === 'expired')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+		} else if (module === 'withdrawal-requests') {
+			if (field.field_name === 'status') {
+				const status = processFieldValue(n[field.field_name], field);
+				if (status === 'pending')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
+				else if (status === 'approved')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				else if (status === 'rejected')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+				else if (status === 'expired')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+			}
+			if (field.field_name === 'Member.username') {
+				return <Link to={`/app/members/${n.member_id}`}>{n['Member.username']}</Link>
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'campaigns' || module === 'member-transactions') {
 			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
@@ -632,34 +639,61 @@ function List(props) {
 											/>
 											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
 										</Paper>
-										{(module === 'member-transactions' && location.pathname.includes('history')) && <FormControl sx={{ minWidth: 120 }} size="small">
-											<InputLabel id="demo-simple-select-label">Type</InputLabel>
-											<Select
-												labelId="demo-simple-select-label"
-												id="demo-simple-select"
-												value={txnType}
-												label="Type"
-												className="rounded-full"
-												sx={{ lineHeight: '17px' }}
-												onChange={
-													(e) => {
-														setTxnType(e.target.value);
-														if (e.target.value) {
-															setWhere({ ...where, type: e.target.value });
-														} else {
-															setWhere(props.where);
+										{(module === 'member-transactions' && location.pathname.includes('history')) &&
+											<FormControl sx={{ minWidth: 120 }} size="small">
+												<InputLabel id="demo-simple-select-label">Type</InputLabel>
+												<Select
+													labelId="demo-simple-select-label"
+													id="demo-simple-select"
+													value={txnType}
+													label="Type"
+													className="rounded-full"
+													sx={{ lineHeight: '17px' }}
+													onChange={
+														(e) => {
+															setTxnType(e.target.value);
+															if (e.target.value) {
+																setWhere({ ...where, type: e.target.value });
+															} else {
+																setWhere(props.where);
+															}
 														}
 													}
-												}
-											>
-												<MenuItem value="">
-													<em>--Select--</em>
-												</MenuItem>
-												<MenuItem value="credited">Credited</MenuItem>
-												<MenuItem value="withdraw">Withdraw</MenuItem>
-												<MenuItem value="reversal">Reversal</MenuItem>
-											</Select>
-										</FormControl>}
+												>
+													<MenuItem value=""><em>--Select--</em></MenuItem>
+													<MenuItem value="credited">Credited</MenuItem>
+													<MenuItem value="withdraw">Withdraw</MenuItem>
+													<MenuItem value="reversal">Reversal</MenuItem>
+												</Select>
+											</FormControl>}
+										{module === 'withdrawal-requests' &&
+											<FormControl sx={{ minWidth: 120 }} size="small">
+												<InputLabel id="demo-simple-select-label">Status</InputLabel>
+												<Select
+													labelId="demo-simple-select-label"
+													id="demo-simple-select"
+													value={withdrawalRequestStatus}
+													label="Status"
+													className="rounded-full"
+													sx={{ lineHeight: '17px' }}
+													onChange={
+														(e) => {
+															setWithdrawalRequestStatus(e.target.value);
+															if (e.target.value) {
+																setWhere({ ...where, status: e.target.value });
+															} else {
+																setWhere(props.where);
+															}
+														}
+													}
+												>
+													<MenuItem value=""><em>--Select--</em></MenuItem>
+													<MenuItem value="approved">Approved</MenuItem>
+													<MenuItem value="pending">Pending</MenuItem>
+													<MenuItem value="rejected">Rejected</MenuItem>
+													<MenuItem value="expired">Expired</MenuItem>
+												</Select>
+											</FormControl>}
 									</>
 								)
 							}

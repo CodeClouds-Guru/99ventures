@@ -2,7 +2,6 @@ import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { Box } from '@mui/material';
 import List from '../../crud/list/List';
-import { useParams } from 'react-router-dom';
 import WithdrawalRequestsHeader from './WithdrawalRequestsHeader';
 import axios from 'axios';
 import { useState, useEffect } from 'react';

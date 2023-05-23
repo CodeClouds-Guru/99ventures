@@ -141,7 +141,14 @@ function ListTableHead(props) {
                   onConfirm={onConfirmAlertDialogHandle}
                   onClose={onCloseAlertDialogHandle}
                 />
-                <Dialog open={noteDialog} onClose={(e) => { e.preventDefault(); setNoteDialog(false) }} fullWidth={true}>
+                {noteDialog &&
+                  <AlertDialog
+                    open={noteDialog}
+                    onConfirm={handleReject('skip')}
+                    onClose={() => setNoteDialog(false)}
+                  />
+                }
+                {/* <Dialog open={noteDialog} onClose={(e) => { e.preventDefault(); setNoteDialog(false) }} fullWidth={true}>
                   <DialogTitle>Add Note</DialogTitle>
                   <DialogContent className="p-32 mt-10">
                     <TextareaAutosize
@@ -158,7 +165,7 @@ function ListTableHead(props) {
                     <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); handleReject('skip'); setNote(''); }}>Skip</Button>
                     <Button color="primary" variant="contained" onClick={(e) => { e.preventDefault(); handleReject('save') }} disabled={note.trim() ? false : true}>Save</Button>
                   </DialogActions>
-                </Dialog>
+                </Dialog> */}
               </Box>
             )}
           </TableCell>}
