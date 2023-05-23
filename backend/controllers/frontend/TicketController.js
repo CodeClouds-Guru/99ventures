@@ -21,6 +21,7 @@ class TicketController {
   constructor() {
     this.update = this.update.bind(this);
     this.saveTicketConversations = this.saveTicketConversations.bind(this);
+    this.createTicket = this.createTicket.bind(this);
   }
 
   //update for all type of updation
@@ -48,7 +49,11 @@ class TicketController {
       res.send({ status: false, message: 'Unable to save data.' })
     }
   }
-
+  async createTicket(req,res){
+    let data = await this.saveTicketConversations(req, res);
+    req.session.flash = { message: "Ticket submitted.", success_status: true };
+    res.redirect('back');
+  }
   async saveTicketConversations(req, res) {
     let company_portal_id = req.session.company_portal.id;
     req.headers.site_id = company_portal_id;

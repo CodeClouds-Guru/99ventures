@@ -722,6 +722,12 @@ class MemberAuthController {
         member_message: 'Please check your balance',
       };
     }
+    var ip = req.ip;
+    if (Array.isArray(ip)) {
+        ip = ip[0]
+    } else {
+        ip = ip.replace("::ffff:", "");
+    }
     let withdrawal_req_data = {
       member_id: request_data.member_id,
       amount: withdrawal_amount,
@@ -731,6 +737,7 @@ class MemberAuthController {
       requested_on: new Date(),
       payment_email: request_data.email,
       withdrawal_type_id: parseInt(request_data.withdrawal_type_id),
+      ip:ip
     };
     let transaction_resp = {};
     if (request_data.withdrawal_type_id == 2) {
