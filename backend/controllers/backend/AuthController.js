@@ -14,7 +14,9 @@ const {
   Group,
   Company,
   Ticket,
-  CompanyPortal
+  CompanyPortal,
+  WithdrawalRequest,
+  Member
 } = require("../../models/index");
 const { QueryTypes, Op } = require("sequelize");
 const db = require("../../models/index");
@@ -208,9 +210,15 @@ class AuthController {
       0,
       header_company_portal_id
     );
+    var pending_withdrawal_count = await WithdrawalRequest.getPendingRequest(
+      '',
+      header_company_portal_id,
+      Member
+    );
     var company_portal = await CompanyPortal.findByPk(header_company_portal_id)
     userResourcesData.setDataValue("unread_tickets", unread_ticket_count);
     userResourcesData.setDataValue("loggedin_portal", company_portal);
+    userResourcesData.setDataValue("pending_withrawal_request", pending_withdrawal_count);
     return userResourcesData;
   }
   async logout(req, res) {
