@@ -289,6 +289,12 @@ class WithdrawalRequestController extends Controller {
             record.WithdrawalType.slug === 'instant_paypal'
           ) {
             //paypal payload
+            var record_currency = ''
+            if(record.currency === '$'){
+              record_currency = 'USD'
+            }else{
+              record_currency = record.currency
+            }
             items.push({
               amount: record.amount,
               currency: record.currency.toUpperCase(),
