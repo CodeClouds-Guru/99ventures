@@ -59,14 +59,6 @@ module.exports = async function (req, res, next) {
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-
-    //get payment email
-    let payment_email = await WithdrawalRequest.findOne({where:{member_id:req.session.member.id},order: [['id', 'desc']],})
-    if(payment_email){
-      payment_email = payment_email.payment_email
-    }else{
-      payment_email = ''
-    }
     member.setDataValue('total_withdraws', total_withdraws.amount);
     member.setDataValue('total_earnings', transaction_stat.total || 0.0);
     member.setDataValue('transaction_today', transaction_stat.today || 0.0);
@@ -81,7 +73,6 @@ module.exports = async function (req, res, next) {
       total_referred ? total_referred[0].total : 0
     );
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
-    member.setDataValue('payment_email',payment_email)
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
     // console.log(req.session.member);
