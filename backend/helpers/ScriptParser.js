@@ -1,6 +1,6 @@
 const Models = require('../models');
 const Sequelize = require('sequelize');
-const { Op } = require('sequelize');
+const { Op, Model } = require('sequelize');
 const safeEval = require('safe-eval');
 const util = require('util');
 const { ceil } = require('lodash');
@@ -190,6 +190,7 @@ class ScriptParser {
             data = await Models[script.module].findAll({
               ...condition,
             });
+
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -214,8 +215,7 @@ class ScriptParser {
         }
       }
     }
-    // console.log('script data', JSON.parse(JSON.stringify(data)));
-    // console.log('script data', JSON.parse(JSON.stringify(other_details)));
+
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -377,8 +377,9 @@ class ScriptParser {
         if (surveys && surveys.length) {
           var surveyHtml = '';
           surveys.forEach(function (survey, key) {
-            let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number
-              }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let link = `/pure-spectrum/entrylink?survey_number=${
+              survey.survey_number
+            }${generateQueryString ? '&' + generateQueryString : ''}`;
             surveys[key].setDataValue('link', link);
           });
           return {
@@ -468,6 +469,11 @@ class ScriptParser {
           include: {
             model: Models.PaymentMethod,
             attributes: ['name'],
+            include: {
+              model: Models.MemberPaymentInformation,
+              attributes: ['value'],
+              where: { name: 'email', status: 1, member_id: user.id },
+            },
           },
         };
       case 'TicketConversation':
@@ -511,8 +517,12 @@ class ScriptParser {
       `<div class="pagination-sec d-flex justify-content-center justify-content-md-end py-2 py-xl-4 px-3 px-lg-4 rounded-bottom">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
-      {{#ifCond '` + page_no + `' ">" '1'}}\
-        <li class="page-item" data-page="{{cal ` + page_no + ` '-' 1}}">\
+      {{#ifCond '` +
+      page_no +
+      `' ">" '1'}}\
+        <li class="page-item" data-page="{{cal ` +
+      page_no +
+      ` '-' 1}}">\
           <a href="javascript:void(0)" aria-label="Previous" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-left">\
           <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" fill-rule="evenodd">\
           </path>\
@@ -539,8 +549,14 @@ class ScriptParser {
           </li>\
         {{/ifCond}}\
       {{/for}}\
-      {{#ifCond '` + page_no + `' "!=" '` + total_page_count + `' }}\
-        <li class="page-item" data-page="{{cal ` + page_no + ` '+' 1}}">\
+      {{#ifCond '` +
+      page_no +
+      `' "!=" '` +
+      total_page_count +
+      `' }}\
+        <li class="page-item" data-page="{{cal ` +
+      page_no +
+      ` '+' 1}}">\
           <a href="javascript:void(0)" aria-label="Next" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-right">\
           <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" fill-rule="evenodd">\
           </path>\

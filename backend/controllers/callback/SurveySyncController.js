@@ -166,7 +166,7 @@ class SurveySyncController {
                                     where: {
                                         option: null,
                                         precode: attr.qualificationId,
-                                        survey_provider_id: this.providerId
+                                        // survey_provider_id: this.providerId
                                     }
                                 });
                             } if([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59){ // Age
@@ -175,7 +175,7 @@ class SurveySyncController {
                                         where: {
                                             option: i,
                                             precode: attr.qualificationId,
-                                            survey_provider_id: this.providerId
+                                            // survey_provider_id: this.providerId
                                         }
                                     });
                                 }
@@ -184,7 +184,7 @@ class SurveySyncController {
                                     where: {
                                         option: qa.answerId,
                                         precode: attr.qualificationId,
-                                        survey_provider_id: this.providerId
+                                        // survey_provider_id: this.providerId
                                     }
                                 });
                             }    
@@ -550,8 +550,10 @@ class SurveySyncController {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
+                const responses = [];
                 const sqsHelper = new SqsHelper();
-                surveyData.forEach(async (element) => {
+                
+                for(let element of surveyData){
                     let body = {
                         ...element,
                         survey_provider_id: this.providerId,
@@ -562,8 +564,12 @@ class SurveySyncController {
                     }
                     const send_message = await sqsHelper.sendData(body);
                     console.log('send_message', send_message);
-                });
-                res.send('Sending to SQS')
+                    responses.push(send_message);
+                };
+                res.send({
+                    message: 'Sending to SQS',
+                    data: responses
+                })
             } else {
                 res.send('No survey found!');
             }

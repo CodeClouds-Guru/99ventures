@@ -25,7 +25,7 @@ class WithdrawalRequestController extends Controller {
         attributes: ['id', 'name', 'slug'],
       });
       let company_portal_id = req.headers.site_id;
-      for(let type_list = 0; type_list < withdrawal_type_list.length; type_list++ ){
+      for (let type_list = 0; type_list < withdrawal_type_list.length; type_list++) {
         var pending_withdrawal_count = await this.model.getPendingRequest(
           withdrawal_type_list[type_list].id,
           company_portal_id,
@@ -115,7 +115,7 @@ class WithdrawalRequestController extends Controller {
         }
         if (record.dataValues.MemberTransaction != null && record.dataValues.MemberTransaction.dataValues.transaction_id) {
           record.dataValues['MemberTransaction.transaction_id'] = record.dataValues.MemberTransaction.dataValues.transaction_id
-        }else{
+        } else {
           record.dataValues['MemberTransaction.transaction_id'] = 'NA'
         }
       });
@@ -290,9 +290,9 @@ class WithdrawalRequestController extends Controller {
           ) {
             //paypal payload
             var record_currency = ''
-            if(record.currency === '$'){
+            if (record.currency === '$') {
               record_currency = 'USD'
-            }else if(record.currency != ''){
+            } else if (record.currency) {
               record_currency = record.currency.toUpperCase()
             }
             items.push({

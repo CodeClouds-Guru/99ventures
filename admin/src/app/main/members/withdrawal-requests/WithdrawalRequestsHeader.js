@@ -1,8 +1,4 @@
-import { useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Stack, Typography, Button } from '@mui/material';
+import { Stack, Button, Chip } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 const buttonStyle = {
@@ -33,8 +29,10 @@ function WithdrawalRequestsHeader(props) {
     const withdrawalTypes = props.withdrawalTypesProps;
     const [clickedBtn, setClickedBtn] = useState(null);
     const clickesWithdrawalTypes = (id) => {
-        setClickedBtn(id);
-        props.withdrawalTypeID(id);
+        if (clickedBtn !== id) {
+            setClickedBtn(id);
+            props.withdrawalTypeID(id);
+        }
     }
     useEffect(() => {
         withdrawalTypes.length > 0 ? clickesWithdrawalTypes(withdrawalTypes[0].id) : '';
@@ -46,8 +44,10 @@ function WithdrawalRequestsHeader(props) {
                 {
                     withdrawalTypes.map((row) => {
                         return (
-                            <Button key={row.id} variant={(clickedBtn === row.id) ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => { clickesWithdrawalTypes(row.id) }}>
+                            <Button className="flex justify-between" key={row.id} variant={(clickedBtn === row.id) ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => { clickesWithdrawalTypes(row.id) }}>
                                 {row.name}
+                                {row.pending_withdrawal_count > 0 &&
+                                    <Chip className="ml-10 px-2" color="error" size="small" label={row.pending_withdrawal_count} />}
                             </Button>
                         )
                     })
