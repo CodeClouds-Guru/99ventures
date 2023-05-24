@@ -66,7 +66,9 @@ class ScriptParser {
               offset: (pageNo - 1) * perPage,
               ...where,
             });
-
+            if (script.module == 'Shoutbox') {
+              data = data.reverse()
+            }
             // console.log('data', JSON.parse(JSON.stringify(data)));
 
             var data_count = await Models[script.module].findAndCountAll({

@@ -330,10 +330,15 @@ class WithdrawalRequestController extends Controller {
       default:
         response_message = 'Payment processed';
     }
-
+    var pending_withdrawal_count = await WithdrawalRequest.getPendingRequest(
+      '',
+      req.headers.site_id,
+      Member
+    );
     return {
       status: true,
       message: response_message,
+      pending_withdrawal_count:pending_withdrawal_count,
       response,
     };
   }
