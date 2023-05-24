@@ -70,6 +70,7 @@ function List(props) {
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
 	const [openRevertAlertDialog, setOpenRevertAlertDialog] = useState(false);
 	const [tid, setTid] = useState(0)
+	const stateUser = useSelector(state => state.user);
 
 	const handlePopoverOpen = (event) => {
 		event.stopPropagation();
@@ -180,6 +181,10 @@ function List(props) {
 	}, [modules])
 
 	useEffect(() => {
+		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('pending') }
+	}, [])
+
+	useEffect(() => {
 		if (moduleActioned) {
 			fetchModules();
 		}
@@ -231,6 +236,9 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
+				props.getWithdrawalTypes();
+				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
+				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
@@ -242,7 +250,7 @@ function List(props) {
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
 			});
 			setSelected([]);
-			setModuleActioned(true);
+			if (module !== 'withdrawal-requests') { setModuleActioned(true); }
 		} catch (error) {
 			console.log(error);
 		}
@@ -251,6 +259,9 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
+				props.getWithdrawalTypes();
+				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
+				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)

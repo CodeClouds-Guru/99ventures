@@ -28,14 +28,22 @@ const buttonStyle = {
 function WithdrawalRequestsHeader(props) {
     const withdrawalTypes = props.withdrawalTypesProps;
     const [clickedBtn, setClickedBtn] = useState(null);
+    const [lastClickedID, setLastClickedID] = useState(null);
+
     const clickesWithdrawalTypes = (id) => {
         if (clickedBtn !== id) {
-            setClickedBtn(id);
-            props.withdrawalTypeID(id);
+            setClickedBtn((prevState) => {
+                // setLastClickedID(prevState);
+                return id;
+            });
+            props.singleWithdrawalTypeID(id);
         }
     }
     useEffect(() => {
         withdrawalTypes.length > 0 ? clickesWithdrawalTypes(withdrawalTypes[0].id) : '';
+        // if (withdrawalTypes.length > 0) {
+        //     !clickedBtn ? clickesWithdrawalTypes(withdrawalTypes[0].id) : clickesWithdrawalTypes(clickedBtn);
+        // }
     }, [withdrawalTypes]);
 
     return (
@@ -44,7 +52,7 @@ function WithdrawalRequestsHeader(props) {
                 {
                     withdrawalTypes.map((row) => {
                         return (
-                            <Button className="flex justify-between" key={row.id} variant={(clickedBtn === row.id) ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => { clickesWithdrawalTypes(row.id) }}>
+                            <Button className={row.pending_withdrawal_count > 0 ? 'flex justify-between' : 'flex'} key={row.id} variant={(clickedBtn === row.id) ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => { clickesWithdrawalTypes(row.id); }}>
                                 {row.name}
                                 {row.pending_withdrawal_count > 0 &&
                                     <Chip className="ml-10 px-2" color="error" size="small" label={row.pending_withdrawal_count} />}

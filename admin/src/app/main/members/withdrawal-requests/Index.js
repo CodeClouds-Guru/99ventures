@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 
-const Index = () => {
+const Index = (props) => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const module = 'withdrawal-requests';
     const [withdrawalTypes, setWithdrawalTypes] = useState([]);
@@ -19,11 +19,12 @@ const Index = () => {
     }, []);
     useEffect(() => {
         !withdrawalTypeID ? '' : setListElem(<List module={module}
-            where={{ withdrawal_type_id: withdrawalTypeID }}
+            where={{ withdrawal_type_id: withdrawalTypeID, status: 'pending' }}
             editable={false}
             addable={false}
             deletable={false}
             actionable={true}
+            getWithdrawalTypes={getWithdrawalTypes}
         />)
     }, [withdrawalTypeID]);
 
@@ -37,16 +38,16 @@ const Index = () => {
         });
     }
     const singleWithdrawalTypeID = (id) => {
+        console.log(id, 'yyyyyyyyyyyyy')
         setWithdrawalTypeID(id);
         setListElem('');
     }
-
     return (
         <>
             <FusePageCarded
                 className="sm:px-20"
                 header={
-                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} withdrawalTypeID={singleWithdrawalTypeID} />
+                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} singleWithdrawalTypeID={singleWithdrawalTypeID} />
                 }
                 content={
                     <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >

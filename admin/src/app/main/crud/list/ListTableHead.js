@@ -144,7 +144,7 @@ function ListTableHead(props) {
                 {noteDialog &&
                   <AlertDialog
                     open={noteDialog}
-                    onConfirm={handleReject('skip')}
+                    onConfirm={() => handleReject('skip')}
                     onClose={() => setNoteDialog(false)}
                   />
                 }
