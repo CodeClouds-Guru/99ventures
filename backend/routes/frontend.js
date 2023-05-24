@@ -41,7 +41,7 @@ router.post('/logout', MemberAuthController.logout);
 router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
 router.get('/get-scripts', StaticPageController.getScripts);
-router.post('/ticket/create', TicketController.saveTicketConversations);
+router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
 router.get('/cint/surveys', CintController.survey);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);

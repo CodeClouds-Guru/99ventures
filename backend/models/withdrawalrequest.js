@@ -33,7 +33,16 @@ module.exports = (sequelize, DataTypes) => {
       member_transaction_id: DataTypes.BIGINT,
       amount: DataTypes.FLOAT,
       amount_type: DataTypes.ENUM('cash', 'point'),
-      currency: DataTypes.STRING,
+      currency: {
+        type: DataTypes.STRING,
+        get() {
+          if (this.getDataValue('currency') === 'usd' || this.getDataValue('currency') === 'USD') {
+            return '$'
+          }else{
+            return this.getDataValue('currency')
+          }
+        }
+      },
       withdrawal_type_id: DataTypes.BIGINT,
       requested_on: 'TIMESTAMP',
       status: DataTypes.ENUM('approved', 'pending', 'rejected', 'expired'),
@@ -173,6 +182,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    ip: {
+      field_name: 'ip',
+      db_name: 'ip',
+      type: 'text',
+      placeholder: 'IP',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
     },
     '$MemberTransaction.transaction_id$': {
       field_name: 'MemberTransaction.transaction_id',

@@ -48,6 +48,7 @@ class MemberAuthController {
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
+    this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   }
@@ -722,6 +723,32 @@ class MemberAuthController {
         member_message: 'Please check your balance',
       };
     }
+    var ip = req.ip;
+    if (Array.isArray(ip)) {
+      ip = ip[0];
+    } else {
+      ip = ip.replace('::ffff:', '');
+    }
+    if (request_data.email === '') {
+      return {
+        member_status: false,
+        member_message: 'Please enter payment email',
+      };
+    }
+    var email_regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+    if (!email_regex.test(request_data.email)) {
+      return {
+        member_status: false,
+        member_message: 'Please enter valid payment email',
+      };
+    }
+
+    await this.updatePaymentInformation({
+      member_id: request_data.member_id,
+      payment_method_id: withdrawal_type.payment_method_id,
+      payment_email: request_data.email,
+    });
     let withdrawal_req_data = {
       member_id: request_data.member_id,
       amount: withdrawal_amount,
@@ -731,6 +758,7 @@ class MemberAuthController {
       requested_on: new Date(),
       payment_email: request_data.email,
       withdrawal_type_id: parseInt(request_data.withdrawal_type_id),
+      ip: ip,
     };
     let transaction_resp = {};
     if (request_data.withdrawal_type_id == 2) {
@@ -833,10 +861,11 @@ class MemberAuthController {
 
     return {
       member_status: true,
-      member_message:
-        request_data.payment_method === 'paypal_instant_payment'
-          ? 'Withdrawal request processed'
-          : 'Withdrawal request processed. Pending approval from admin.',
+      // member_message:
+      //   request_data.payment_method === 'paypal_instant_payment'
+      //     ? 'Withdrawal request processed'
+      //     : 'Withdrawal request processed. Pending approval from admin.',
+      member_message: 'Action executed successfully',
     };
   }
 
@@ -965,6 +994,30 @@ class MemberAuthController {
       req.session.flash = { error: 'Link expired.' };
       res.redirect('back');
     }
+  }
+
+  //payment information update
+  async updatePaymentInformation(data) {
+    await MemberPaymentInformation.update(
+      {
+        status: 0,
+      },
+      {
+        where: {
+          member_id: data.member_id,
+          payment_method_id: data.payment_method_id,
+        },
+      }
+    );
+    await MemberPaymentInformation.create({
+      member_id: data.member_id,
+      payment_method_id: data.payment_method_id,
+      name: 'email',
+      value: data.payment_email,
+      created_by: data.member_id,
+      status: 1,
+    });
+    return true;
   }
 }
 module.exports = MemberAuthController;

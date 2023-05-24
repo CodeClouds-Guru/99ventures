@@ -20,6 +20,7 @@ import { selectUser, setUser } from 'app/store/userSlice';
 import Helper from 'src/app/helper';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 function List(props) {
 	const dispatch = useDispatch();
@@ -56,6 +57,7 @@ function List(props) {
 	const [moduleActioned, setModuleActioned] = useState(false);
 	const [firstCall, setFirstCall] = useState(true);
 	const [txnType, setTxnType] = useState('');
+	const [withdrawalRequestStatus, setWithdrawalRequestStatus] = useState('');
 	const [where, setWhere] = useState(props.where);
 	const [datepickerStatus, setDatepickerStatus] = useState(false);
 	const [dateRange, setDateRange] = useState({
@@ -66,6 +68,9 @@ function List(props) {
 	const [vimodal, setVimodal] = useState(false);
 	const [programsList, setProgramList] = useState([]);
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
+	const [openRevertAlertDialog, setOpenRevertAlertDialog] = useState(false);
+	const [tid, setTid] = useState(0)
+
 	const handlePopoverOpen = (event) => {
 		event.stopPropagation();
 		setDescPopoverAnchorEl(event.currentTarget);
@@ -107,7 +112,7 @@ function List(props) {
 
 		axios.get(`/${module}`, { params }).then(res => {
 			let fields_var = res.data.results.fields;
-			module === 'campaigns' ? fields_var.actions = {
+			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {
 				db_name: "actions",
 				field_name: "actions",
 				listing: true,
@@ -226,12 +231,12 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to approve' }))
 			}) : await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
@@ -246,7 +251,7 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
-				dispatch(showMessage({ variant: 'success', message: 'Action execute successfully' }))
+				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to reject' }))
@@ -256,6 +261,19 @@ function List(props) {
 		} catch (error) {
 			console.log(error);
 		}
+	}
+
+	function revertMemberTransaction() {
+		axios.post(`${module}/update`, { member_id: tid, type: 'revert' }).then((res) => {
+			setOpenRevertAlertDialog(false)
+			setTid(0)
+			closeActionsMenu()
+			fetchModules();
+			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
+		}).catch(e => {
+			console.error(e)
+			dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to revert' }))
+		});
 	}
 
 	function handleClick(item, e) {
@@ -373,21 +391,27 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'withdrawal-requests' && field.field_name === 'status') {
-			const status = processFieldValue(n[field.field_name], field);
-			if (status === 'pending')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
-			else if (status === 'approved')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
-			else if (status === 'rejected')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
-			else if (status === 'expired')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'campaigns') {
+		} else if (module === 'withdrawal-requests') {
 			if (field.field_name === 'status') {
+				const status = processFieldValue(n[field.field_name], field);
+				if (status === 'pending')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
+				else if (status === 'approved')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				else if (status === 'rejected')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+				else if (status === 'expired')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+			}
+			if (field.field_name === 'Member.username') {
+				return <Link to={`/app/members/${n.member_id}`}>{n['Member.username']}</Link>
+			}
+			return processFieldValue(n[field.field_name], field)
+		} else if (module === 'campaigns' || module === 'member-transactions') {
+			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions') {
+			if (field.field_name === 'actions' && (n.status === 'initiated' || n.status === 'processing')) {
 				return (
 					<>
 						<IconButton
@@ -411,7 +435,7 @@ function List(props) {
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
-								<MenuItem
+								{module === 'campaigns' && <MenuItem
 									onClick={(event) => {
 										event.stopPropagation();
 										navigate(`/app/campaigns/${n.id}/report`)
@@ -421,18 +445,20 @@ function List(props) {
 										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
 									</ListItemIcon>
 									<ListItemText primary="Report" />
-								</MenuItem>
-								{/* <MenuItem
-									onClick={(event) => {
-										event.stopPropagation();
-										navigate(`/app/campaigns/${n.id}/offerwalls`)
-									}}
-								>
-									<ListItemIcon className="min-w-40">
-										<FuseSvgIcon>material-outline:attach_money</FuseSvgIcon>
-									</ListItemIcon>
-									<ListItemText primary="Offerwalls" />
-								</MenuItem> */}
+								</MenuItem>}
+								{module === 'member-transactions' &&
+									<MenuItem
+										onClick={(event) => {
+											event.stopPropagation();
+											setOpenRevertAlertDialog(true);
+											setTid(n.id)
+										}}
+									>
+										<ListItemIcon className="min-w-40">
+											<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
+										</ListItemIcon>
+										<ListItemText primary="Revert" />
+									</MenuItem>}
 							</MenuList>
 						</Menu>
 					</>
@@ -524,9 +550,14 @@ function List(props) {
 			</Tooltip>
 		)
 	}
-
 	return (
 		<div>
+			{openRevertAlertDialog &&
+				<AlertDialog
+					open={openRevertAlertDialog}
+					onConfirm={revertMemberTransaction}
+					onClose={() => setOpenRevertAlertDialog(false)}
+				/>}
 			{/* // header */}
 
 			{
@@ -608,34 +639,61 @@ function List(props) {
 											/>
 											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
 										</Paper>
-										{(module === 'member-transactions' && location.pathname.includes('history')) && <FormControl sx={{ minWidth: 120 }} size="small">
-											<InputLabel id="demo-simple-select-label">Type</InputLabel>
-											<Select
-												labelId="demo-simple-select-label"
-												id="demo-simple-select"
-												value={txnType}
-												label="Type"
-												className="rounded-full"
-												sx={{ lineHeight: '17px' }}
-												onChange={
-													(e) => {
-														setTxnType(e.target.value);
-														if (e.target.value) {
-															setWhere({ ...where, type: e.target.value });
-														} else {
-															setWhere(props.where);
+										{(module === 'member-transactions' && location.pathname.includes('history')) &&
+											<FormControl sx={{ minWidth: 120 }} size="small">
+												<InputLabel id="demo-simple-select-label">Type</InputLabel>
+												<Select
+													labelId="demo-simple-select-label"
+													id="demo-simple-select"
+													value={txnType}
+													label="Type"
+													className="rounded-full"
+													sx={{ lineHeight: '17px' }}
+													onChange={
+														(e) => {
+															setTxnType(e.target.value);
+															if (e.target.value) {
+																setWhere({ ...where, type: e.target.value });
+															} else {
+																setWhere(props.where);
+															}
 														}
 													}
-												}
-											>
-												<MenuItem value="">
-													<em>--Select--</em>
-												</MenuItem>
-												<MenuItem value="credited">Credited</MenuItem>
-												<MenuItem value="withdraw">Withdraw</MenuItem>
-												<MenuItem value="reversal">Reversal</MenuItem>
-											</Select>
-										</FormControl>}
+												>
+													<MenuItem value=""><em>--Select--</em></MenuItem>
+													<MenuItem value="credited">Credited</MenuItem>
+													<MenuItem value="withdraw">Withdraw</MenuItem>
+													<MenuItem value="reversal">Reversal</MenuItem>
+												</Select>
+											</FormControl>}
+										{module === 'withdrawal-requests' &&
+											<FormControl sx={{ minWidth: 120 }} size="small">
+												<InputLabel id="demo-simple-select-label">Status</InputLabel>
+												<Select
+													labelId="demo-simple-select-label"
+													id="demo-simple-select"
+													value={withdrawalRequestStatus}
+													label="Status"
+													className="rounded-full"
+													sx={{ lineHeight: '17px' }}
+													onChange={
+														(e) => {
+															setWithdrawalRequestStatus(e.target.value);
+															if (e.target.value) {
+																setWhere({ ...where, status: e.target.value });
+															} else {
+																setWhere(props.where);
+															}
+														}
+													}
+												>
+													<MenuItem value=""><em>--Select--</em></MenuItem>
+													<MenuItem value="approved">Approved</MenuItem>
+													<MenuItem value="pending">Pending</MenuItem>
+													<MenuItem value="rejected">Rejected</MenuItem>
+													<MenuItem value="expired">Expired</MenuItem>
+												</Select>
+											</FormControl>}
 									</>
 								)
 							}

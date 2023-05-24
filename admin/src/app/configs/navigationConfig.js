@@ -43,7 +43,7 @@ const navigationConfig = [
     translate: 'Members',
     type: 'collapse',
     icon: 'heroicons-outline:user-group',
-    depends_on: ['members', 'campaigns', 'offerwalls', 'withdrawalrequests'],
+    depends_on: ['members', 'campaigns', 'offerwalls'],
     children: [
       {
         id: 'members',
@@ -71,17 +71,20 @@ const navigationConfig = [
         url: 'app/offer-walls',
         end: true,
       },
-      {
-        id: 'withdrawalrequests',
-        title: 'Withdrawal Requests',
-        type: 'item',
-        icon: 'heroicons-solid:cash',
-        url: 'app/withdrawal-requests',
-        end: true,
-      },
     ],
   },
-
+  {
+    id: 'withdrawalrequests',
+    title: 'Withdrawal Requests',
+    type: 'item',
+    icon: 'heroicons-solid:cash',
+    url: 'app/withdrawal-requests',
+    badge: {
+      title: 0,
+      classes: 'px-8 bg-pink-600 text-white rounded-full',
+    },
+    end: true,
+  },
   {
     id: 'administration',
     title: 'Administration',

@@ -54,21 +54,22 @@ export const { setNavigation, resetNavigation } = navigationSlice.actions;
 const getUserRole = (state) => state.user.role;
 const getUserPermissions = (state) => state.user.permissions;
 const unreadTicketCount = (state) => state.user.unread_tickets;
+const pendingWithdrawalRequestsCount = (state) => state.user.pending_withrawal_request;
 
 export const selectNavigation = createSelector(
-	[selectNavigationAll, ({ i18n }) => i18n.language, getUserRole, unreadTicketCount, getUserPermissions],
-	(navigation, language, userRole, unreadTicketCount, userPermissions) => {
+	[selectNavigationAll, ({ i18n }) => i18n.language, getUserRole, unreadTicketCount, pendingWithdrawalRequestsCount, getUserPermissions],
+	(navigation, language, userRole, unreadTicketCount, pendingWithdrawalRequestsCount, userPermissions) => {
 
 		/*** This area is related to permission checking ***/
-		const filterNav = [];		
-		navigation.map(el => {	
-			if(el.id === 'dashboard') {
+		const filterNav = [];
+		navigation.map(el => {
+			if (el.id === 'dashboard') {
 				filterNav.push(el);
 			}
-			else if(el.children) {
+			else if (el.children) {
 				const childNav = [];
 				el.children.map(ch => {
-					if(checkPermission(ch.id, userPermissions)) {
+					if (checkPermission(ch.id, userPermissions)) {
 						childNav.push(ch)
 					}
 				});
@@ -76,18 +77,18 @@ export const selectNavigation = createSelector(
 					filterNav.push({ ...el, children: childNav })
 				}
 			}
-			else if(el.depends_on){
+			else if (el.depends_on) {
 				const childNav = [];
 				el.depends_on.map(dp => {
-					if(checkPermission(dp, userPermissions)) {
+					if (checkPermission(dp, userPermissions)) {
 						childNav.push(dp)
 					}
 				});
 				if (childNav.length) {
-					filterNav.push({ ...el})
+					filterNav.push({ ...el })
 				}
 			}
-			else if(checkPermission(el.id, userPermissions)){
+			else if (checkPermission(el.id, userPermissions)) {
 				filterNav.push(el)
 			}
 		});
@@ -99,6 +100,13 @@ export const selectNavigation = createSelector(
 				if (item.id === 'tickets') {
 					if (unreadTicketCount > 0) {
 						item.badge.title = unreadTicketCount
+					} else {
+						delete item.badge
+					}
+				}
+				if (item.id === 'withdrawalrequests') {
+					if (pendingWithdrawalRequestsCount > 0) {
+						item.badge.title = pendingWithdrawalRequestsCount
 					} else {
 						delete item.badge
 					}
@@ -136,7 +144,7 @@ function filterRecursively(arr, predicate) {
 
 function checkPermission(module, permissions) {
 	let permission = `all-${module}-view`;
-    return permissions.includes(permission);
+	return permissions.includes(permission);
 }
 
 export const selectFlatNavigation = createSelector([selectNavigation], (navigation) =>
