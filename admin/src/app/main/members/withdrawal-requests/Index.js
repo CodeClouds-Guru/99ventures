@@ -38,7 +38,6 @@ const Index = (props) => {
         });
     }
     const singleWithdrawalTypeID = (id) => {
-        console.log(id, 'yyyyyyyyyyyyy')
         setWithdrawalTypeID(id);
         setListElem('');
     }
