@@ -338,7 +338,7 @@ class WithdrawalRequestController extends Controller {
     return {
       status: true,
       message: response_message,
-      pending_withdrawal_count:pending_withdrawal_count,
+      pending_withrawal_request:pending_withdrawal_count,
       response,
     };
   }
