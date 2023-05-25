@@ -70,6 +70,7 @@ function List(props) {
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
 	const [openRevertAlertDialog, setOpenRevertAlertDialog] = useState(false);
 	const [tid, setTid] = useState(0)
+	const [memberID, setMemberID] = useState(0)
 	const stateUser = useSelector(state => state.user);
 
 	const handlePopoverOpen = (event) => {
@@ -275,9 +276,10 @@ function List(props) {
 	}
 
 	function revertMemberTransaction() {
-		axios.post(`${module}/update`, { member_id: tid, type: 'revert' }).then((res) => {
+		axios.post(`${module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
 			setOpenRevertAlertDialog(false)
-			setTid(0)
+			setTid(0);
+			setMemberID(0)
 			closeActionsMenu()
 			fetchModules();
 			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -462,7 +464,7 @@ function List(props) {
 										onClick={(event) => {
 											event.stopPropagation();
 											setOpenRevertAlertDialog(true);
-											setTid(n.id)
+											setTid(n.id); setMemberID(n.Member.id);
 										}}
 									>
 										<ListItemIcon className="min-w-40">
@@ -703,6 +705,8 @@ function List(props) {
 													<MenuItem value="pending">Pending</MenuItem>
 													<MenuItem value="rejected">Rejected</MenuItem>
 													<MenuItem value="expired">Expired</MenuItem>
+													<MenuItem value="completed">Completed</MenuItem>
+													<MenuItem value="declined">Declined</MenuItem>
 												</Select>
 											</FormControl>}
 									</>

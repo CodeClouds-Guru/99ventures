@@ -28,7 +28,7 @@ const buttonStyle = {
 function WithdrawalRequestsHeader(props) {
     const withdrawalTypes = props.withdrawalTypesProps;
     const [clickedBtn, setClickedBtn] = useState(null);
-    const [lastClickedID, setLastClickedID] = useState(null);
+    // const [lastClickedID, setLastClickedID] = useState(null);
 
     const clickesWithdrawalTypes = (id) => {
         if (clickedBtn !== id) {
