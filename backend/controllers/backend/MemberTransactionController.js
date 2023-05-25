@@ -100,9 +100,11 @@ class MemberTransactionController extends Controller {
             where: { id: member_id },
             include: {
               model: MemberBalance,
+              as: 'member_amounts',
               where: { amount_type: 'cash' },
             },
           });
+          console.log(member);
           //current transaction
           await this.reverseTransactionUpdate({
             member_balance_amount: member.MemberBalance.amount,
