@@ -424,7 +424,7 @@ function List(props) {
 			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions' && (n.status === 'initiated' || n.status === 'processing')) {
+			if (field.field_name === 'actions' && n.type === 'credited' && (n.status === 'initiated' || n.status === 'processing')) {
 				return (
 					<>
 						<IconButton
