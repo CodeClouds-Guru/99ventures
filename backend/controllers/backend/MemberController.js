@@ -231,10 +231,13 @@ class MemberController extends Controller {
             attributes: ['id', 'name'],
           });
           //get member referrer name
-          var member_referrer = ''
-          if(result.member_referral_id){
-            member_referrer = await this.model.findOne({where:{id:result.member_referral_id}})
-            member_referrer = member_referrer.first_name+' '+member_referrer.last_name
+          var member_referrer = '';
+          if (result.member_referral_id) {
+            member_referrer = await this.model.findOne({
+              where: { id: result.member_referral_id },
+            });
+            member_referrer =
+              member_referrer.first_name + ' ' + member_referrer.last_name;
           }
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
@@ -471,6 +474,7 @@ class MemberController extends Controller {
         type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
         amount_action: 'admin_adjustment',
         created_by: req.user.id,
+        status: 0,
       });
       // let total_earnings = await db.sequelize.query(
       //   "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
