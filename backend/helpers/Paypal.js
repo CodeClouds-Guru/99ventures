@@ -188,69 +188,22 @@ class Paypal {
           let items = response.result.items
           for(let record of items){
             let member_transaction_id = record.payout_item.sender_item_id
-            let transaction_record = await MemberTransaction.findOne({where:{id:member_transaction_id}})
-            if(transaction_record){
-                let transaction_id = record.transaction_id;
-                //member balance
-                let total_earnings = await db.sequelize.query(
-                "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
-                {
-                  replacements: [transaction_record.member_id],
-                  type: QueryTypes.SELECT,
-                }
-              );
-              console.log(record.payout_item.amount.value)
-              var withdraw_requests = await WithdrawalRequest.findOne({where:{member_transaction_id:member_transaction_id}})
-              if(status == 2){
-                  let modified_total_earnings =
-                  parseFloat(total_earnings[0].total_amount) - parseFloat(record.payout_item.amount.value);
-
-                  await MemberTransaction.update({
-                    transaction_id: transaction_id,
-                    status:status,
-                    completed_at: new Date(),
-                    payment_gateway_json: req.body,
-                    balance:modified_total_earnings
-                  },{where:{id:member_transaction_id}})
-
-                  await MemberBalance.update(
-                    { amount: modified_total_earnings },
-                    {
-                      where: { id: total_earnings[0].id },
-                    }
-                  );
-
-                  //send mail to member
-                  let member_details = await Member.findOne({where:{id:transaction_record.member_id}})
-                  let withdraw_requests = await WithdrawalRequest.findOne({where:{member_transaction_id:member_transaction_id}})
-                  let evntbus = eventBus.emit('send_email', {
-                    action: 'Payment Confirmation',
-                    data: {
-                      email: member_details.email,
-                      details: { members: member_details,withdraw_requests:withdraw_requests },
-                    },
-                    req: req,
-                  });
-                  //send notification
-                  let notify_data = {
-                    member_id: transaction_record.member_id,
-                    verbose:'Withdrawal request for '+withdraw_requests.amount+' has been completed.',
-                    action: 'payment_confirmation',
-                    is_read: '0',
-                    read_on: new Date(),
-                  };
-                  await MemberNotification.create(notify_data);
-              }else if(status == 4){
-                let notify_data = {
-                  member_id: transaction_record.member_id,
-                  verbose:'Withdrawal request for '+withdraw_requests.amount+' has been declined.',
-                  action: 'payment_declined',
-                  is_read: '0',
-                  read_on: new Date(),
-                };
-                await MemberNotification.create(notify_data); 
-              }
-            }
+            console.log({
+              member_transaction_id:member_transaction_id,
+              transaction_id: record.transaction_id,
+              status:status,
+              amount: record.payout_item.amount.value,
+              body: req.body,
+              company_portal_id:this.company_portal_id
+            })
+            await MemberTransaction.updateMemberWithdrawalRequest({
+              member_transaction_id:member_transaction_id,
+              transaction_id: record.transaction_id,
+              status:status,
+              amount: record.payout_item.amount.value,
+              body: req.body,
+              company_portal_id:this.company_portal_id
+            });
           }
         }
       }
