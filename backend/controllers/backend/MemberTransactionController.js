@@ -90,77 +90,80 @@ class MemberTransactionController extends Controller {
   async update(req, res) {
     let transaction_id = req.params.id || null;
     let member_id = req.body.member_id || null;
+    let type = req.body.type || null;
     if (transaction_id) {
-      try {
-        let transaction = await this.model.findByPk(transaction_id);
+      if (type === 'revert') {
+        try {
+          let transaction = await this.model.findByPk(transaction_id);
 
-        let member = await Member.findOne({
-          where: { id: member_id },
-          include: {
-            model: MemberBalance,
-            where: { amount_type: 'cash' },
-          },
-        });
-        //current transaction
-        await this.reverseTransactionUpdate({
-          member_balance_amount: member.MemberBalance.amount,
-          transaction_amount: transaction.amount,
-          member_id: member_id,
-          transaction_id: transaction_id,
-        });
-
-        //Email for member
-        let member_mail = await this.sendMailEvent({
-          action: 'Transaction Reversed',
-          data: {
-            email: member.email,
-            details: {
-              members: member,
-              transaction,
-            },
-          },
-          req: req,
-        });
-
-        //referral transaction
-        if (transaction.parent_transaction_id) {
-          let referral_transactions = await MemberTransaction.findOne({
-            where: {
-              parent_transaction_id: transaction_id,
-              amount_action: 'referral',
-            },
-          });
-
-          let referral_member = await Member.findOne({
-            where: { id: referral_transactions.member_id },
+          let member = await Member.findOne({
+            where: { id: member_id },
             include: {
               model: MemberBalance,
               where: { amount_type: 'cash' },
             },
           });
-
+          //current transaction
           await this.reverseTransactionUpdate({
-            member_balance_amount: referral_member.MemberBalance.amount,
-            transaction_amount: referral_transactions.amount,
-            member_id: referral_transactions.member_id,
-            transaction_id: referral_transactions.id,
+            member_balance_amount: member.MemberBalance.amount,
+            transaction_amount: transaction.amount,
+            member_id: member_id,
+            transaction_id: transaction_id,
           });
 
-          //Email for referral member
+          //Email for member
           let member_mail = await this.sendMailEvent({
             action: 'Transaction Reversed',
             data: {
-              email: referral_member.email,
+              email: member.email,
               details: {
-                members: referral_member,
-                transaction: referral_transactions,
+                members: member,
+                transaction,
               },
             },
             req: req,
           });
+
+          //referral transaction
+          if (transaction.parent_transaction_id) {
+            let referral_transactions = await MemberTransaction.findOne({
+              where: {
+                parent_transaction_id: transaction_id,
+                amount_action: 'referral',
+              },
+            });
+
+            let referral_member = await Member.findOne({
+              where: { id: referral_transactions.member_id },
+              include: {
+                model: MemberBalance,
+                where: { amount_type: 'cash' },
+              },
+            });
+
+            await this.reverseTransactionUpdate({
+              member_balance_amount: referral_member.MemberBalance.amount,
+              transaction_amount: referral_transactions.amount,
+              member_id: referral_transactions.member_id,
+              transaction_id: referral_transactions.id,
+            });
+
+            //Email for referral member
+            let member_mail = await this.sendMailEvent({
+              action: 'Transaction Reversed',
+              data: {
+                email: referral_member.email,
+                details: {
+                  members: referral_member,
+                  transaction: referral_transactions,
+                },
+              },
+              req: req,
+            });
+          }
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
       }
     }
   }
@@ -169,6 +172,9 @@ class MemberTransactionController extends Controller {
     let updated_balance =
       parseFloat(data.member_balance_amount) -
       parseFloat(data.transaction_amount);
+
+    await MemberTransaction.update({ status: 5 }, { id: data.transaction_id });
+
     await MemberTransaction.insertTransaction({
       type: 'withdraw',
       amount: parseFloat(data.transaction_amount),
