@@ -1,6 +1,6 @@
 const Models = require('../models');
 const Sequelize = require('sequelize');
-const { Op, Model, Model } = require('sequelize');
+const { Op, Model } = require('sequelize');
 const safeEval = require('safe-eval');
 const util = require('util');
 const { ceil } = require('lodash');
@@ -67,7 +67,7 @@ class ScriptParser {
               ...where,
             });
             if (script.module == 'Shoutbox') {
-              data = data.reverse()
+              data = data.reverse();
             }
             // console.log('data', JSON.parse(JSON.stringify(data)));
 
