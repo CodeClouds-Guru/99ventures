@@ -139,35 +139,36 @@ class MemberTransactionController extends Controller {
               amount_action: 'referral',
             },
           });
-
-          let referral_member = await Member.findOne({
-            where: { id: referral_transactions.member_id },
-            include: {
-              model: MemberBalance,
-              as: 'member_amounts',
-              where: { amount_type: 'cash' },
-            },
-          });
-
-          await this.reverseTransactionUpdate({
-            member_balance_amount: referral_member.member_amounts[0].amount,
-            transaction_amount: referral_transactions.amount,
-            member_id: referral_transactions.member_id,
-            transaction_id: referral_transactions.id,
-          });
-
-          //Email for referral member
-          let referral_member_mail = await this.sendMailEvent({
-            action: 'Transaction Reversed',
-            data: {
-              email: referral_member.email,
-              details: {
-                members: referral_member,
-                transaction: referral_transactions,
+          if (referral_transactions) {
+            let referral_member = await Member.findOne({
+              where: { id: referral_transactions.member_id },
+              include: {
+                model: MemberBalance,
+                as: 'member_amounts',
+                where: { amount_type: 'cash' },
               },
-            },
-            req: req,
-          });
+            });
+
+            await this.reverseTransactionUpdate({
+              member_balance_amount: referral_member.member_amounts[0].amount,
+              transaction_amount: referral_transactions.amount,
+              member_id: referral_transactions.member_id,
+              transaction_id: referral_transactions.id,
+            });
+
+            //Email for referral member
+            let referral_member_mail = await this.sendMailEvent({
+              action: 'Transaction Reversed',
+              data: {
+                email: referral_member.email,
+                details: {
+                  members: referral_member,
+                  transaction: referral_transactions,
+                },
+              },
+              req: req,
+            });
+          }
 
           return {
             status: true,
