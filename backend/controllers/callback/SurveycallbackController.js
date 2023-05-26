@@ -58,10 +58,6 @@ class SurveycallbackController {
 					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
 				});
 
-				const logger1 = require('../../helpers/Logger')(`lucid-survey.log`);
-				logger1.info('-----------------');
-				logger1.info(JSON.stringify(survey));
-
 				// console.log(survey_provider.id);
 				survey.forEach(async (element) => {
 					let lucid_data = {
@@ -71,8 +67,8 @@ class SurveycallbackController {
 					};
 					// element['survey_provider_id'] = survey_provider.id;
 					const send_message = await sqsHelper.sendData(lucid_data);
-					console.log('lucid survey')
-					console.log(send_message);
+					// console.log('lucid survey')
+					// console.log(send_message);
 				});
 			}
 			//SQS
