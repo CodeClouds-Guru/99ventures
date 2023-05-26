@@ -211,6 +211,7 @@ class MemberTransactionController extends Controller {
       amount: updated_balance,
       member_id: data.member_id,
       action: 'reversed_transaction',
+      transaction_amount: parseFloat(data.transaction_amount),
     });
     return true;
   }
