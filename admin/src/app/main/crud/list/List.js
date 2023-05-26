@@ -403,6 +403,8 @@ function List(props) {
 			else if (status === 'failed')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'withdrawal-requests') {
 			if (field.field_name === 'status') {
@@ -415,6 +417,10 @@ function List(props) {
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 				else if (status === 'expired')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				else if (status === 'completed')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				else if (status === 'declined')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			}
 			if (field.field_name === 'Member.username') {
 				return <Link to={`/app/members/${n.member_id}`}>{n['Member.username']}</Link>
@@ -695,7 +701,8 @@ function List(props) {
 															if (e.target.value) {
 																setWhere({ ...where, status: e.target.value });
 															} else {
-																setWhere(props.where);
+																let { status, ...rest } = where
+																setWhere({ ...rest });
 															}
 														}
 													}
