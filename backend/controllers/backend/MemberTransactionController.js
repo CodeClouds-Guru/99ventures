@@ -168,6 +168,11 @@ class MemberTransactionController extends Controller {
             },
             req: req,
           });
+
+          return {
+            status: true,
+            message: 'Record Updated',
+          };
           // }
         } catch (e) {
           console.log(e);
