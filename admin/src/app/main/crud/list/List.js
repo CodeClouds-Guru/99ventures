@@ -383,7 +383,7 @@ function List(props) {
 				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
 			}
 			if (field.field_name === 'username') {
-				return <Link sx={{ zIndex: 999999 }} to={`/app/members/${n.member_id}`}>{n['username']}</Link>
+				return <span style={{ color: '#4f46e5', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); window.location.href = `/app/members/${n.member_id}` }}>{n['username']}</span>
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
