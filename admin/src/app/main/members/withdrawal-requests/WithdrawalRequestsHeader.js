@@ -32,18 +32,12 @@ function WithdrawalRequestsHeader(props) {
 
     const clickesWithdrawalTypes = (id) => {
         if (clickedBtn !== id) {
-            setClickedBtn((prevState) => {
-                // setLastClickedID(prevState);
-                return id;
-            });
+            setClickedBtn(id);
             props.singleWithdrawalTypeID(id);
         }
     }
     useEffect(() => {
         withdrawalTypes.length > 0 ? clickesWithdrawalTypes(withdrawalTypes[0].id) : '';
-        // if (withdrawalTypes.length > 0) {
-        //     !clickedBtn ? clickesWithdrawalTypes(withdrawalTypes[0].id) : clickesWithdrawalTypes(clickedBtn);
-        // }
     }, [withdrawalTypes]);
 
     return (
@@ -54,7 +48,7 @@ function WithdrawalRequestsHeader(props) {
                         return (
                             <Button className={row.pending_withdrawal_count > 0 ? 'flex justify-between' : 'flex'} key={row.id} variant={(clickedBtn === row.id) ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => { clickesWithdrawalTypes(row.id); }}>
                                 {row.name}
-                                {row.pending_withdrawal_count > 0 &&
+                                {props.withdrawalCounts[row.slug] > 0 &&
                                     <Chip className="ml-10 px-2" color="error" size="small" label={row.pending_withdrawal_count} />}
                             </Button>
                         )

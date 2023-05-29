@@ -11,6 +11,7 @@ const Index = (props) => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const module = 'withdrawal-requests';
     const [withdrawalTypes, setWithdrawalTypes] = useState([]);
+    const [withdrawalCounts, setWithdrawalCounts] = useState({});
     const [withdrawalTypeID, setWithdrawalTypeID] = useState(null);
     const [listElem, setListElem] = useState('');
 
@@ -24,16 +25,26 @@ const Index = (props) => {
             addable={false}
             deletable={false}
             actionable={true}
-            getWithdrawalTypes={getWithdrawalTypes}
+            getWithdrawalCount={getWithdrawalCount}
         />)
     }, [withdrawalTypeID]);
 
     const getWithdrawalTypes = () => {
         axios.get(jwtServiceConfig.getWithdrawalRequests, { params: { type: 'withdrawal-types' } }).then((response) => {
-            if (response.data.results.result.data.length > 0) {
+            if (response.data.results.result.data) {
                 setWithdrawalTypes(response.data.results.result.data)
+                getWithdrawalCount();
             } else {
                 console.error('Failed to fetch Withdrawal Types');
+            }
+        });
+    }
+    const getWithdrawalCount = () => {
+        axios.get(jwtServiceConfig.getWithdrawalRequests, { params: { type: 'withdrawal-count' } }).then((response) => {
+            if (response.data.results.result.data) {
+                setWithdrawalCounts(response.data.results.result.data)
+            } else {
+                console.error('Failed to fetch Withdrawal Count');
             }
         });
     }
@@ -46,7 +57,7 @@ const Index = (props) => {
             <FusePageCarded
                 className="sm:px-20"
                 header={
-                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} singleWithdrawalTypeID={singleWithdrawalTypeID} />
+                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} singleWithdrawalTypeID={singleWithdrawalTypeID} withdrawalCounts={withdrawalCounts} />
                 }
                 content={
                     <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
