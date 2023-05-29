@@ -806,14 +806,14 @@ function List(props) {
 												key={n.id}
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
-											>{module === 'tickets' ? '' :
+											>
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
 														checked={isSelected}
 														onClick={(event) => event.stopPropagation()}
 														onChange={(event) => handleCheck(event, n.id)}
 													/>}
-												</TableCell>}
+												</TableCell>
 												{Object.values(fields)
 													.filter(field => field.listing === true)
 													.map((field, i) => {
