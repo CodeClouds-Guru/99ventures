@@ -386,14 +386,24 @@ class MemberAuthController {
           where: { id: member_details.id },
         }
       );
+      req.session.member = member_details;
       //set member eligibility
       await this.setMemberEligibility(member_details.id);
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
       });
+      let loginActivityEventbus = eventBus.emit('member_activity', {
+        member_id: member_details.id,
+        action: 'Member Logged In',
+      });
+      req.session.flash = {
+        message:
+          'Welcome to Moresurveys! Your email has been verified successfully.',
+        success_status: true,
+      };
     }
-    res.redirect('/');
+    res.redirect('/dashboard');
     return;
   }
 

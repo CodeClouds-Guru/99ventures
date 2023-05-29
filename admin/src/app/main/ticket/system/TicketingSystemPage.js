@@ -293,7 +293,10 @@ function TicketingSystemPage(props) {
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {Object.keys(val).length > 0 &&
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                            <Link to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
+                                                                <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                            </Link>
+
                                                         </span>
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>

@@ -20,7 +20,7 @@ const UserDetails = () => {
             content={
                 <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
                     <List module="withdrawal-requests"
-                        where={{ member_id: moduleId }}
+                        where={{ member_id: moduleId, status: 'pending' }}
                         editable={false}
                         addable={false}
                         deletable={false}

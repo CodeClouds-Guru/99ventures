@@ -67,7 +67,7 @@ class ScriptParser {
               ...where,
             });
             if (script.module == 'Shoutbox') {
-              data = data.reverse()
+              data = data.reverse();
             }
             // console.log('data', JSON.parse(JSON.stringify(data)));
 

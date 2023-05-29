@@ -63,12 +63,15 @@ module.exports = (sequelize, DataTypes) => {
       currency: {
         type: DataTypes.STRING,
         get() {
-          if (this.getDataValue('currency') === 'usd' || this.getDataValue('currency') === 'USD') {
-            return '$'
-          }else{
-            return this.getDataValue('currency')
+          if (
+            this.getDataValue('currency') === 'usd' ||
+            this.getDataValue('currency') === 'USD'
+          ) {
+            return '$';
+          } else {
+            return this.getDataValue('currency');
           }
-        }
+        },
       },
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
@@ -283,22 +286,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
-    // //Notify member
-    // if (
-    //   parseInt(data.status) === 1 &&
-    //   data.amount_action === 'member_withdrawal'
-    // ) {
-    //   await MemberNotification.addMemberNotification({
-    //     member_id: data.member_id,
-    //     verbose:
-    //       'Withdrawal request initiated for $' +
-    //       parseFloat(Math.abs(data.amount)) +
-    //       ' on ' +
-    //       new Date().toLocaleDateString(),
-    //     action: 'member_withdrawal',
-    //   });
-    // }
-
     if (transaction && balance) {
       return { status: true, transaction_id: transaction.id };
     } else {
@@ -505,77 +492,107 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberWithdrawalRequest = async (data) => {
     const db = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
-    const { MemberBalance, MemberNotification,WithdrawalRequest,Member } = require('../models/index');
+    const {
+      MemberBalance,
+      MemberNotification,
+      WithdrawalRequest,
+      Member,
+    } = require('../models/index');
     const eventBus = require('../eventBus');
 
-    let transaction_record = await MemberTransaction.findOne({where:{id:data.member_transaction_id}})
-    if(transaction_record){
-        let transaction_id = data.transaction_id;
-        //member balance
-        let total_earnings = await db.sequelize.query(
+    let transaction_record = await MemberTransaction.findOne({
+      where: { id: data.member_transaction_id },
+    });
+    if (transaction_record) {
+      let transaction_id = data.transaction_id;
+      //member balance
+      let total_earnings = await db.sequelize.query(
         "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
         {
           replacements: [transaction_record.member_id],
           type: QueryTypes.SELECT,
         }
       );
-      var withdraw_requests = await WithdrawalRequest.findOne({where:{member_transaction_id:data.member_transaction_id}})
-      if(data.status == 2){
-          let modified_total_earnings =
+      var withdraw_requests = await WithdrawalRequest.findOne({
+        where: { member_transaction_id: data.member_transaction_id },
+      });
+      if (data.status == 2) {
+        let modified_total_earnings =
           parseFloat(total_earnings[0].total_amount) - parseFloat(data.amount);
 
-          await MemberTransaction.update({
+        await MemberTransaction.update(
+          {
             transaction_id: transaction_id,
-            status:data.status,
+            status: data.status,
             completed_at: new Date(),
             payment_gateway_json: data.body,
-            balance:modified_total_earnings
-          },{where:{id:data.member_transaction_id}})
+            balance: modified_total_earnings,
+          },
+          { where: { id: data.member_transaction_id } }
+        );
 
-          await MemberBalance.update(
-            { amount: modified_total_earnings },
-            {
-              where: { id: total_earnings[0].id },
-            }
-          );
-          //update withdrawal req status
-          await WithdrawalRequest.update({status:'completed'},{where:{member_transaction_id:data.member_transaction_id}})
-          //send mail to member
-          let member_details = await Member.findOne({where:{id:transaction_record.member_id}})
-          let req = {headers:
-            {
-              site_id:data.company_portal_id
-          }}
-          let evntbus = eventBus.emit('send_email', {
-            action: 'Payment Confirmation',
-            data: {
-              email: member_details.email,
-              details: { members: member_details,withdraw_requests:withdraw_requests },
+        await MemberBalance.update(
+          { amount: modified_total_earnings },
+          {
+            where: { id: total_earnings[0].id },
+          }
+        );
+        //update withdrawal req status
+        await WithdrawalRequest.update(
+          { status: 'completed' },
+          { where: { member_transaction_id: data.member_transaction_id } }
+        );
+        //send mail to member
+        let member_details = await Member.findOne({
+          where: { id: transaction_record.member_id },
+        });
+        let req = {
+          headers: {
+            site_id: data.company_portal_id,
+          },
+        };
+        let evntbus = eventBus.emit('send_email', {
+          action: 'Payment Confirmation',
+          data: {
+            email: member_details.email,
+            details: {
+              members: member_details,
+              withdraw_requests: withdraw_requests,
             },
-            req: req,
-          });
-          //send notification
-          let notify_data = {
-            member_id: transaction_record.member_id,
-            verbose:'Withdrawal request for '+withdraw_requests.amount+' has been completed.',
-            action: 'payment_confirmation',
-            is_read: '0',
-            read_on: new Date(),
-          };
-          await MemberNotification.create(notify_data);
-      }else if(data.status == 4){
-        await WithdrawalRequest.update({status:'declined'},{where:{member_transaction_id:member_transaction_id}})
+          },
+          req: req,
+        });
+        //send notification
         let notify_data = {
           member_id: transaction_record.member_id,
-          verbose:'Withdrawal request for '+withdraw_requests.amount+' has been declined.',
+          verbose:
+            'Withdrawal request for ' +
+            withdraw_requests.amount +
+            ' has been completed.',
+          action: 'payment_confirmation',
+          is_read: '0',
+          read_on: new Date(),
+        };
+        await MemberNotification.create(notify_data);
+      } else if (data.status == 4) {
+        await WithdrawalRequest.update(
+          { status: 'declined' },
+          { where: { member_transaction_id: member_transaction_id } }
+        );
+        let notify_data = {
+          member_id: transaction_record.member_id,
+          verbose:
+            'Withdrawal request for ' +
+            withdraw_requests.amount +
+            ' has been declined.',
           action: 'payment_declined',
           is_read: '0',
           read_on: new Date(),
         };
-        await MemberNotification.create(notify_data); 
+        await MemberNotification.create(notify_data);
       }
     }
-    return true
-  }
+    return true;
+  };
   return MemberTransaction;
 };

@@ -70,6 +70,8 @@ function List(props) {
 	const [descPopoverAnchorEl, setDescPopoverAnchorEl] = useState(null);
 	const [openRevertAlertDialog, setOpenRevertAlertDialog] = useState(false);
 	const [tid, setTid] = useState(0)
+	const [memberID, setMemberID] = useState(0)
+	const stateUser = useSelector(state => state.user);
 
 	const handlePopoverOpen = (event) => {
 		event.stopPropagation();
@@ -180,6 +182,10 @@ function List(props) {
 	}, [modules])
 
 	useEffect(() => {
+		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('pending') }
+	}, [])
+
+	useEffect(() => {
 		if (moduleActioned) {
 			fetchModules();
 		}
@@ -231,6 +237,9 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
+				props.getWithdrawalTypes();
+				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
+				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
@@ -242,7 +251,7 @@ function List(props) {
 				dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to delete' }))
 			});
 			setSelected([]);
-			setModuleActioned(true);
+			if (module !== 'withdrawal-requests') { setModuleActioned(true); }
 		} catch (error) {
 			console.log(error);
 		}
@@ -251,6 +260,9 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
+				props.getWithdrawalTypes();
+				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
+				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
 			}).catch(e => {
 				console.error(e)
@@ -264,9 +276,10 @@ function List(props) {
 	}
 
 	function revertMemberTransaction() {
-		axios.post(`${module}/update`, { member_id: tid, type: 'revert' }).then((res) => {
+		axios.post(`${module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
 			setOpenRevertAlertDialog(false)
-			setTid(0)
+			setTid(0);
+			setMemberID(0)
 			closeActionsMenu()
 			fetchModules();
 			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -365,8 +378,14 @@ function List(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (module, n, field) => {
-		if (module === 'tickets' && field.field_name === 'status') {
-			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+		if (module === 'tickets') {
+			if (field.field_name === 'status') {
+				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+			}
+			if (field.field_name === 'username') {
+				return <span style={{ color: '#4f46e5', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); window.location.href = `/app/members/${n.member_id}` }}>{n['username']}</span>
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
@@ -390,6 +409,8 @@ function List(props) {
 			else if (status === 'failed')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'withdrawal-requests') {
 			if (field.field_name === 'status') {
@@ -402,6 +423,10 @@ function List(props) {
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 				else if (status === 'expired')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				else if (status === 'completed')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				else if (status === 'declined')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			}
 			if (field.field_name === 'Member.username') {
 				return <Link to={`/app/members/${n.member_id}`}>{n['Member.username']}</Link>
@@ -411,7 +436,7 @@ function List(props) {
 			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions' && (n.status === 'initiated' || n.status === 'processing')) {
+			if (field.field_name === 'actions' && n.type === 'credited' && (n.status === 'initiated' || n.status === 'processing')) {
 				return (
 					<>
 						<IconButton
@@ -451,7 +476,7 @@ function List(props) {
 										onClick={(event) => {
 											event.stopPropagation();
 											setOpenRevertAlertDialog(true);
-											setTid(n.id)
+											setTid(n.id); setMemberID(n.Member.id);
 										}}
 									>
 										<ListItemIcon className="min-w-40">
@@ -682,7 +707,8 @@ function List(props) {
 															if (e.target.value) {
 																setWhere({ ...where, status: e.target.value });
 															} else {
-																setWhere(props.where);
+																let { status, ...rest } = where
+																setWhere({ ...rest });
 															}
 														}
 													}
@@ -692,6 +718,8 @@ function List(props) {
 													<MenuItem value="pending">Pending</MenuItem>
 													<MenuItem value="rejected">Rejected</MenuItem>
 													<MenuItem value="expired">Expired</MenuItem>
+													<MenuItem value="completed">Completed</MenuItem>
+													<MenuItem value="declined">Declined</MenuItem>
 												</Select>
 											</FormControl>}
 									</>
@@ -778,14 +806,14 @@ function List(props) {
 												key={n.id}
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
-											>{module === 'tickets' ? '' :
+											>
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
 														checked={isSelected}
 														onClick={(event) => event.stopPropagation()}
 														onChange={(event) => handleCheck(event, n.id)}
 													/>}
-												</TableCell>}
+												</TableCell>
 												{Object.values(fields)
 													.filter(field => field.listing === true)
 													.map((field, i) => {

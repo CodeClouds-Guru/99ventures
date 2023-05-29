@@ -29,7 +29,7 @@ class SurveycallbackController {
 
 		const provider = req.params.provider;
 		if (provider === 'cint') {
-			await SurveycallbackController.prototype.cintPostBack(req, res);
+			return await SurveycallbackController.prototype.cintPostBack(req, res);
 		} else if (provider === 'purespectrum') {
 			return await SurveycallbackController.prototype.pureSpectrumPostBack(
 				req,
@@ -57,6 +57,7 @@ class SurveycallbackController {
 					attributes: ['id'],
 					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
 				});
+
 				// console.log(survey_provider.id);
 				survey.forEach(async (element) => {
 					let lucid_data = {
@@ -66,6 +67,7 @@ class SurveycallbackController {
 					};
 					// element['survey_provider_id'] = survey_provider.id;
 					const send_message = await sqsHelper.sendData(lucid_data);
+					// console.log('lucid survey')
 					// console.log(send_message);
 				});
 			}
@@ -200,6 +202,7 @@ class SurveycallbackController {
 	async cintPostBack(req, res) {
 		const username = req.params.ssi;
 		const reward = req.params.reward;
+		const txnId = req.params.txn_id;
 
 		let member = await Member.findOne({
 			attributes: ['id', 'username'],
@@ -222,6 +225,7 @@ class SurveycallbackController {
 
 			const note = provider;
 			const transaction_obj = {
+				transaction_id: 'Cint #'+txnId,
 				member_id: member ? member.id : null,
 				amount: amount,
 				note: note + ' ' + req.params.status,
@@ -316,6 +320,7 @@ class SurveycallbackController {
 							amount = (partnerAmount * 100) / parseInt(provider.currency_percent);
 						}
 						const transaction_obj = {
+							transaction_id: 'Purespectrum #'+surveyNumber,
 							member_id: member.id,
 							amount: amount,
 							note: 'Pure Spectrum survey (#' + surveyNumber + ') completion',
@@ -397,6 +402,7 @@ class SurveycallbackController {
 							amount = (partnerAmount * 100) / parseInt(provider.currency_percent);
 						}
 						const transaction_obj = {
+							transaction_id: 'Schlesinger #'+surveyNumber,
 							member_id: member.id,
 							amount: amount,
 							note: 'Schlesinger survey (#' + surveyNumber + ') completion',
@@ -461,6 +467,7 @@ class SurveycallbackController {
 						}
 
 						const transaction_obj = {
+							transaction_id: 'Lucid #'+surveyNumber,							
 							member_id: member.id,
 							amount: amount,
 							note: 'Lucid survey (#' + surveyNumber + ') completion',
@@ -526,6 +533,7 @@ class SurveycallbackController {
 						amount = (partnerAmount / 100) / parseInt(provider.currency_percent);
 					}
 					const transaction_obj = {
+						transaction_id: 'Toluna #'+surveyRef,
 						member_id: member.id,
 						amount: amount,
 						note: 'toluna survey (#' + surveyRef + ') completion',
