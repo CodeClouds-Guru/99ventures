@@ -134,8 +134,6 @@ class MemberAuthController {
   }
   //signup
   async signup(req, res) {
-    res.json(req.body)
-    return
     try {
       let company_portal_id = req.session.company_portal.id;
       req.headers.site_id = company_portal_id;
