@@ -38,6 +38,26 @@ class WithdrawalRequestController extends Controller {
           data: withdrawal_type_list,
         },
       };
+    }else if (withdrawal_type === 'withdrawal-count') {
+      let withdrawal_type_list = await WithdrawalType.findAll({
+        attributes: ['id', 'name', 'slug'],
+      });
+      var all_counts = []
+      let company_portal_id = req.headers.site_id;
+      for (let type_list = 0; type_list < withdrawal_type_list.length; type_list++) {
+        var pending_withdrawal_count = await this.model.getPendingRequest(
+          withdrawal_type_list[type_list].id,
+          company_portal_id,
+          Member
+        );
+        all_counts[withdrawal_type_list[type_list].slug] = pending_withdrawal_count
+        console.log(all_counts)
+      }
+      return {
+        result: {
+          data: all_counts,
+        },
+      };
     } else {
       let page = req.query.page || 1;
       let limit = parseInt(req.query.show) || 10; // per page record
