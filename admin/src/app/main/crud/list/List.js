@@ -378,8 +378,14 @@ function List(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (module, n, field) => {
-		if (module === 'tickets' && field.field_name === 'status') {
-			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+		if (module === 'tickets') {
+			if (field.field_name === 'status') {
+				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+			}
+			if (field.field_name === 'username') {
+				return <Link sx={{ zIndex: 999999 }} to={`/app/members/${n.member_id}`}>{n['username']}</Link>
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
