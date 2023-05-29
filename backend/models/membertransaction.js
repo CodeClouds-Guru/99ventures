@@ -286,22 +286,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
-    // //Notify member
-    // if (
-    //   parseInt(data.status) === 1 &&
-    //   data.amount_action === 'member_withdrawal'
-    // ) {
-    //   await MemberNotification.addMemberNotification({
-    //     member_id: data.member_id,
-    //     verbose:
-    //       'Withdrawal request initiated for $' +
-    //       parseFloat(Math.abs(data.amount)) +
-    //       ' on ' +
-    //       new Date().toLocaleDateString(),
-    //     action: 'member_withdrawal',
-    //   });
-    // }
-
     if (transaction && balance) {
       return { status: true, transaction_id: transaction.id };
     } else {

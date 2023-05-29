@@ -125,6 +125,13 @@ module.exports = (sequelize, DataTypes) => {
           updated_on;
         notification_action = 'reversed_transaction';
         break;
+      case 'registration_bonus':
+        notification_verbose =
+          'Registration bonus of $' +
+          amount +
+          ' has been added to your wallet on ' +
+          updated_on;
+        notification_action = 'registration_bonus';
       case 'ticket_reply':
         notification_action = 'ticket_reply';
         break;
