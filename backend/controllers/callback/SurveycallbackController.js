@@ -29,7 +29,7 @@ class SurveycallbackController {
 
 		const provider = req.params.provider;
 		if (provider === 'cint') {
-			await SurveycallbackController.prototype.cintPostBack(req, res);
+			return await SurveycallbackController.prototype.cintPostBack(req, res);
 		} else if (provider === 'purespectrum') {
 			return await SurveycallbackController.prototype.pureSpectrumPostBack(
 				req,
@@ -57,6 +57,7 @@ class SurveycallbackController {
 					attributes: ['id'],
 					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
 				});
+
 				// console.log(survey_provider.id);
 				survey.forEach(async (element) => {
 					let lucid_data = {
@@ -66,6 +67,7 @@ class SurveycallbackController {
 					};
 					// element['survey_provider_id'] = survey_provider.id;
 					const send_message = await sqsHelper.sendData(lucid_data);
+					// console.log('lucid survey')
 					// console.log(send_message);
 				});
 			}

@@ -140,61 +140,54 @@ class SurveySyncController {
                         
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications; 
-                const ansPrecode = [];               
-                for(let attr of qualificationData) {
-                    var question = await SurveyQuestion.findOne({
-                        where: {
-                            survey_provider_id: this.providerId,
-                            survey_provider_question_id: attr.qualificationId,
-                        },
-                    });
-                    if(question === null) {
-                        var question = await SurveyQuestion.create({
-                            question_text: attr.text,
-                            name: attr.name,
-                            survey_provider_id: this.providerId,
-                            survey_provider_question_id: attr.qualificationId,
-                            question_type: schObj.getQuestionType(attr.qualificationTypeId),
-                            created_at: new Date()
-                        })
+                
+                const params = qualificationData.map(attr => {
+                    return {
+                        question_text: attr.text,
+                        name: attr.name,
+                        survey_provider_id: this.providerId,
+                        survey_provider_question_id: attr.qualificationId,
+                        question_type: schObj.getQuestionType(attr.qualificationTypeId),
+                        created_at: new Date()
                     }
-                    if(question && question.survey_provider_question_id) {
-                        const qualificationAnswers = attr.qualificationAnswers;
-                        for(let qa of qualificationAnswers){
-                            if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
-                                await SurveyAnswerPrecodes.findOrCreate({
-                                    where: {
-                                        option: null,
-                                        precode: attr.qualificationId,
-                                        // survey_provider_id: this.providerId
-                                    }
+                });
+
+                await SurveyQuestion.bulkCreate(params, {
+                    updateOnDuplicate: ["question_text", "question_type", "name"] 
+                });
+
+                const ansPrecode = [];
+                for(let attr of qualificationData) {
+                    const qualificationAnswers = attr.qualificationAnswers;
+                    for(let qa of qualificationAnswers){
+                        /*if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
+                            ansPrecode.push({
+                                option: null,
+                                precode: attr.qualificationId,
+                            });
+                        } else */
+                        if([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59){ // Age
+                            for(let i = 15; i<=99; i++){
+                                ansPrecode.push({
+                                    option: i,
+                                    precode: attr.qualificationId,
                                 });
-                            } if([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59){ // Age
-                                for(let i = 15; i<=99; i++){
-                                    await SurveyAnswerPrecodes.findOrCreate({
-                                        where: {
-                                            option: i,
-                                            precode: attr.qualificationId,
-                                            // survey_provider_id: this.providerId
-                                        }
-                                    });
-                                }
-                            } else {
-                                await SurveyAnswerPrecodes.findOrCreate({
-                                    where: {
-                                        option: qa.answerId,
-                                        precode: attr.qualificationId,
-                                        // survey_provider_id: this.providerId
-                                    }
-                                });
-                            }    
-                                   
-                        }
+                            }
+                        } else {
+                            ansPrecode.push({
+                                option: qa.answerId,
+                                precode: attr.qualificationId,
+                            });
+                        }    
+                                
                     }
                 }
                 if(ansPrecode.length) {
-                    await SurveyAnswerPrecodes.bulkCreate(ansPrecode);
+                    await SurveyAnswerPrecodes.bulkCreate(ansPrecode, {
+                        updateOnDuplicate: ['option']
+                    });
                 }
+                
                 res.json({ status: true, message: 'Updated' });
             } else {
                 res.json(qualifications);
@@ -587,7 +580,7 @@ class SurveySyncController {
     async tolunaSurveyQuestions(req, res){
         try{
             const payload = {
-                "CultureIDs": [1, 3],   //1&3 = "en-us"
+                "CultureIDs": [1],   //1 = "en-us"
                 "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
                 "LastUpdateDate": "",
                 "IncludeComputed" : "true",
