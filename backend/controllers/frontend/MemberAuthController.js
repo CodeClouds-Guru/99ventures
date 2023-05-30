@@ -31,7 +31,7 @@ const { ResourceGroups } = require('aws-sdk');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
-
+const moment = require('moment');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -200,18 +200,18 @@ class MemberAuthController {
           };
           const res = await Member.create(data);
           //check for newsletter
-        var newsletter = req.body.newsletter
-        console.log('newsletter',newsletter)
-        if(newsletter === 'true' || newsletter === true){
-          //save email alert
-          await db.sequelize.query(
-            'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
-            {
-              type: QueryTypes.INSERT,
-              replacements: [5, res.id],
-            }
-          );
-        }
+          var newsletter = req.body.newsletter;
+          console.log('newsletter', newsletter);
+          if (newsletter === 'true' || newsletter == true) {
+            //save email alert
+            await db.sequelize.query(
+              'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
+              {
+                type: QueryTypes.INSERT,
+                replacements: [5, res.id],
+              }
+            );
+          }
           //send mail
           const eventBus = require('../../eventBus');
           member_details = await Member.findOne({
@@ -240,13 +240,17 @@ class MemberAuthController {
           //registration bonus
           await this.saveRegistrationBonus(member_details);
         }
-        
+
         if (member_status) {
           let activityEventbus = eventBus.emit('member_activity', {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: member_message, success_status: true };
+          req.session.flash = {
+            message: 'Registered successfully!',
+            success_status: true,
+            notice: member_message,
+          };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
@@ -708,7 +712,6 @@ class MemberAuthController {
     options.attributes = ['email'];
     let result = await User.findAll(options);
     result = JSON.parse(JSON.stringify(result));
-    // result = result.map((x) => x.email).join(',');
     result = result.map((x) => x.email);
 
     //get withdrawal type
@@ -836,7 +839,10 @@ class MemberAuthController {
       action: 'Member cash withdrawal request',
     });
 
-    if (request_data.withdrawal_type_id == 2) {
+    if (
+      withdrawal_type.slug == 'instant_paypal' ||
+      withdrawal_type.slug == 'skrill'
+    ) {
       // email body for member
       let member_mail = await this.sendMailEvent({
         action: 'Member Cash Withdrawal',
@@ -844,7 +850,10 @@ class MemberAuthController {
           email: member.email,
           details: {
             members: member,
-            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
+            withdraw_requests: {
+              amount: withdrawal_amount,
+              date: moment(new Date()).format('llll'),
+            },
           },
         },
         req: req,
@@ -856,7 +865,10 @@ class MemberAuthController {
           email: member.email,
           details: {
             members: member,
-            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
+            withdraw_requests: {
+              amount: withdrawal_amount,
+              date: moment(new Date()).format('llll'),
+            },
           },
         },
         req: req,
@@ -872,11 +884,11 @@ class MemberAuthController {
           members: {
             ...member,
             amount: withdrawal_amount,
-            requested_on: new Date(),
+            requested_on: moment(new Date()).format('llll'),
           },
           withdraw_requests: {
             amount: withdrawal_amount,
-            requested_on: new Date(),
+            requested_on: moment(new Date()).format('llll'),
           },
         },
       },
@@ -885,10 +897,6 @@ class MemberAuthController {
 
     return {
       member_status: true,
-      // member_message:
-      //   request_data.payment_method === 'paypal_instant_payment'
-      //     ? 'Withdrawal request processed'
-      //     : 'Withdrawal request processed. Pending approval from admin.',
       member_message: 'Action executed successfully',
     };
   }
@@ -1029,18 +1037,29 @@ class MemberAuthController {
       {
         where: {
           member_id: data.member_id,
-          payment_method_id: data.payment_method_id,
         },
       }
     );
-    await MemberPaymentInformation.create({
-      member_id: data.member_id,
-      payment_method_id: data.payment_method_id,
-      name: 'email',
-      value: data.payment_email,
-      created_by: data.member_id,
-      status: 1,
+    let payment_methods = await PaymentMethod.findAll({
+      where: { status: 1 },
+      attributes: ['id'],
     });
+    // console.log(payment_methods);
+    if (payment_methods) {
+      payment_methods = payment_methods.map((methods) => {
+        return {
+          member_id: data.member_id,
+          payment_method_id: methods.id,
+          name: 'email',
+          value: data.payment_email,
+          created_by: data.member_id,
+          status: 1,
+        };
+      });
+
+      //bulck create isp list
+      await MemberPaymentInformation.bulkCreate(payment_methods);
+    }
     return true;
   }
 }

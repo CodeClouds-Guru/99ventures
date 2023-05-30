@@ -454,7 +454,7 @@ module.exports = (sequelize, DataTypes) => {
         status: 2,
         note: bonus_key,
         member_id: member.id,
-        amount_action: 'admin_adjustment',
+        amount_action: 'profile_completion_bonus',
         balance: parseFloat(bonus.settings_value),
       };
       let resp = await MemberTransaction.updateMemberTransactionAndBalance(
@@ -470,7 +470,7 @@ module.exports = (sequelize, DataTypes) => {
                 'Congratulation! You got a bonus of $' +
                 parseFloat(bonus.settings_value) +
                 ' on sucessfully completing your profile on ' +
-                new Date(),
+                moment(new Date()).format('llll'),
               members: JSON.parse(JSON.stringify(member)),
             },
           },

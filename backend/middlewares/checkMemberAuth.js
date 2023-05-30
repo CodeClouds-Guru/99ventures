@@ -87,7 +87,7 @@ module.exports = async function (req, res, next) {
       ? auth_redirection_page.slug
       : '/404';
 
-    if (req.path === '/') {
+    if (['/', '/login'].indexOf(req.path) >= 0) {
       res.status(302).redirect(redirect);
       return;
     }
