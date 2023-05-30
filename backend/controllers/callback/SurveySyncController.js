@@ -38,7 +38,9 @@ class SurveySyncController {
             this.syncSurveyQuestion(req, res);
         } else if(action === 'survey') {
             this.syncSurveyQualification(req, res);
-        } 
+        }  else {
+            res.send('Invalid action argument!')
+        }
     }
 
     async getProvider(req, res){
@@ -79,11 +81,10 @@ class SurveySyncController {
             this.pureSpectrumQualification(req, res);
         }
         else if(provider === 'schlesinger') {
-            // this.schlesingerQualification(req, res);
-            this.schlesingerSurveySaveToSQS(req, res)
+            this.schlesingerQualification(req, res);
         }
         else {
-            res.send(provider);
+            res.send('Invalid provider');
         }
     }
 
@@ -134,7 +135,7 @@ class SurveySyncController {
             throw error;
         }
     }
-
+ 
     /**
      * Schlesinger To create all the questions
      */
@@ -452,6 +453,9 @@ class SurveySyncController {
      * [Schlesinger] To Save Survey, Qualifications, Qualification Answer
      */
     async schlesingerQualification(req, res) {
+        if(req.query.mode && req.query.mode === 'sqs') {
+            return this.schlesingerSurveySaveToSQS(req, res);
+        }
         try{
             const allSurveys = await this.schlesingerSurvey(req, res);  
             if(allSurveys.length) {
@@ -534,7 +538,7 @@ class SurveySyncController {
     }
 
     /** 
-     * SQS
+     * Schlesiner Survey Sync through SQS
      */
     async schlesingerSurveySaveToSQS(req, res) {
         try{
