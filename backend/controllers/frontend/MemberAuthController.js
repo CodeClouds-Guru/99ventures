@@ -547,25 +547,26 @@ class MemberAuthController {
             case 'AGE':
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
-                var month_diff = Date.now() - dob.getTime();
-                var age_dt = new Date(month_diff);
-                var year = age_dt.getUTCFullYear();
-                precode = Math.abs(year - 1970);
+                // var month_diff = Date.now() - dob.getTime();
+                // var age_dt = new Date(month_diff);
+                // var year = age_dt.getUTCFullYear();
+                // precode = Math.abs(year - 1970);
+                precode = new Date(new Date() - dob).getFullYear() - 1970;
               }
               break;
           }
-          member_eligibility.push({
-            member_id: member_id,
-            survey_question_id: record.id,
-            precode_id: precode,
-          });
+          if(precode){
+            member_eligibility.push({
+              member_id: member_id,
+              survey_question_id: record.id,
+              precode_id: precode,
+            });
+          }
         }
       });
     }
-    await MemberEligibilities.bulkCreate(member_eligibility, {
-      updateOnDuplicate: ['precode_id'],
-      ignoreDuplicates: true,
-    });
+    await MemberEligibilities.destroy({where: { member_id: member_id },force:true})
+    await MemberEligibilities.bulkCreate(member_eligibility);
     return;
   }
   //change password
