@@ -31,7 +31,7 @@ const { ResourceGroups } = require('aws-sdk');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
-
+const moment = require('moment');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -850,7 +850,10 @@ class MemberAuthController {
           email: member.email,
           details: {
             members: member,
-            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
+            withdraw_requests: {
+              amount: withdrawal_amount,
+              date: moment(new Date()).format('llll'),
+            },
           },
         },
         req: req,
@@ -862,7 +865,10 @@ class MemberAuthController {
           email: member.email,
           details: {
             members: member,
-            withdraw_requests: { amount: withdrawal_amount, date: new Date() },
+            withdraw_requests: {
+              amount: withdrawal_amount,
+              date: moment(new Date()).format('llll'),
+            },
           },
         },
         req: req,
@@ -878,11 +884,11 @@ class MemberAuthController {
           members: {
             ...member,
             amount: withdrawal_amount,
-            requested_on: new Date(),
+            requested_on: moment(new Date()).format('llll'),
           },
           withdraw_requests: {
             amount: withdrawal_amount,
-            requested_on: new Date(),
+            requested_on: moment(new Date()).format('llll'),
           },
         },
       },
@@ -1038,7 +1044,7 @@ class MemberAuthController {
       where: { status: 1 },
       attributes: ['id'],
     });
-    console.log(payment_methods);
+    // console.log(payment_methods);
     if (payment_methods) {
       payment_methods = payment_methods.map((methods) => {
         return {

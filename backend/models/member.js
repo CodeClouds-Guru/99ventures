@@ -470,7 +470,7 @@ module.exports = (sequelize, DataTypes) => {
                 'Congratulation! You got a bonus of $' +
                 parseFloat(bonus.settings_value) +
                 ' on sucessfully completing your profile on ' +
-                new Date(),
+                moment(new Date()).format('llll'),
               members: JSON.parse(JSON.stringify(member)),
             },
           },
