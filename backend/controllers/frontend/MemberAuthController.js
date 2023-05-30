@@ -708,7 +708,6 @@ class MemberAuthController {
     options.attributes = ['email'];
     let result = await User.findAll(options);
     result = JSON.parse(JSON.stringify(result));
-    // result = result.map((x) => x.email).join(',');
     result = result.map((x) => x.email);
 
     //get withdrawal type
@@ -885,10 +884,6 @@ class MemberAuthController {
 
     return {
       member_status: true,
-      // member_message:
-      //   request_data.payment_method === 'paypal_instant_payment'
-      //     ? 'Withdrawal request processed'
-      //     : 'Withdrawal request processed. Pending approval from admin.',
       member_message: 'Action executed successfully',
     };
   }
@@ -1033,14 +1028,26 @@ class MemberAuthController {
         },
       }
     );
-    await MemberPaymentInformation.create({
-      member_id: data.member_id,
-      payment_method_id: data.payment_method_id,
-      name: 'email',
-      value: data.payment_email,
-      created_by: data.member_id,
-      status: 1,
+    let payment_methods = await PaymentMethod.findAll({
+      where: { status: 1 },
+      attributes: ['id'],
     });
+    console.log(payment_methods);
+    if (payment_methods) {
+      payment_methods = payment_methods.map((methods) => {
+        return {
+          member_id: data.member_id,
+          payment_method_id: methods.id,
+          name: 'email',
+          value: data.payment_email,
+          created_by: data.member_id,
+          status: 1,
+        };
+      });
+
+      //bulck create isp list
+      await MemberPaymentInformation.bulkCreate(payment_methods);
+    }
     return true;
   }
 }
