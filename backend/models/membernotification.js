@@ -132,6 +132,15 @@ module.exports = (sequelize, DataTypes) => {
           ' has been added to your wallet on ' +
           updated_on;
         notification_action = 'registration_bonus';
+        break;
+      case 'profile_completion_bonus':
+        notification_verbose =
+          'Profile Completion bonus of $' +
+          amount +
+          ' has been added to your wallet on ' +
+          updated_on;
+        notification_action = 'profile_completion_bonus';
+        break;
       case 'ticket_reply':
         notification_action = 'ticket_reply';
         break;
