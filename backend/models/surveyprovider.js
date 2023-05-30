@@ -97,30 +97,17 @@ module.exports = (sequelize, DataTypes) => {
       type: 'text',
       placeholder: 'Status',
       listing: false,
-      show_in_form: true,
+      show_in_form: false,
       sort: true,
       required: true,
       value: '',
       width: '50',
       searchable: false,
     },
-    created_at: {
-      field_name: 'created_at',
-      db_name: 'created_at',
-      type: 'text',
-      placeholder: 'Created At',
-      listing: true,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: true,
-    },
     currency_percent: {
       field_name: 'currency_percent',
       db_name: 'currency_percent',
-      type: 'text',
+      type: 'number',
       placeholder: 'Currency Percent',
       listing: true,
       show_in_form: true,
@@ -129,8 +116,28 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
+    },
+    created_at: {
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created At',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
     }
   };
+  SurveyProvider.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required().label('Name'),
+      currency_percent: Joi.required().label('Currency percent')
+    })
+    return schema.validate(req.body)
+  }
   sequelizePaginate.paginate(SurveyProvider);
   return SurveyProvider;
 };
