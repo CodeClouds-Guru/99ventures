@@ -199,6 +199,19 @@ class MemberAuthController {
             created_at: new Date(),
           };
           const res = await Member.create(data);
+          //check for newsletter
+        var newsletter = req.body.newsletter
+        console.log('newsletter',newsletter)
+        if(newsletter === 'true' || newsletter === true){
+          //save email alert
+          await db.sequelize.query(
+            'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
+            {
+              type: QueryTypes.INSERT,
+              replacements: [5, res.id],
+            }
+          );
+        }
           //send mail
           const eventBus = require('../../eventBus');
           member_details = await Member.findOne({
@@ -227,6 +240,7 @@ class MemberAuthController {
           //registration bonus
           await this.saveRegistrationBonus(member_details);
         }
+        
         if (member_status) {
           let activityEventbus = eventBus.emit('member_activity', {
             member_id: member_details.id,
@@ -372,14 +386,24 @@ class MemberAuthController {
           where: { id: member_details.id },
         }
       );
+      req.session.member = member_details;
       //set member eligibility
       await this.setMemberEligibility(member_details.id);
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
       });
+      let loginActivityEventbus = eventBus.emit('member_activity', {
+        member_id: member_details.id,
+        action: 'Member Logged In',
+      });
+      req.session.flash = {
+        message:
+          'Welcome to Moresurveys! Your email has been verified successfully.',
+        success_status: true,
+      };
     }
-    res.redirect('/');
+    res.redirect('/dashboard');
     return;
   }
 

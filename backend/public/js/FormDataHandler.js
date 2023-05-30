@@ -161,6 +161,13 @@ $(() => {
   if (getUrlHash() === 'signup') {
     goToRegister();
   }
+  $('input[name="newsletter"]').on('change', () => {
+    if ($('input[name="newsletter"]').is(":checked")) {
+      $('input[name="newsletter"]').attr('value', true)
+    } else {
+      $('input[name="newsletter"]').attr('value', false)
+    }
+  })
   $(loginBtn).click((e) => {
     e.preventDefault();
     goTologin();

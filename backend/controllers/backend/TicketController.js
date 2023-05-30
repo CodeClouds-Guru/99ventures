@@ -116,7 +116,7 @@ class TicketController extends Controller {
               },
               {
                 model: Member,
-                attributes: ['first_name', 'last_name', 'username'],
+                attributes: ['first_name', 'last_name', 'username', 'id'],
               },
               {
                 model: User,

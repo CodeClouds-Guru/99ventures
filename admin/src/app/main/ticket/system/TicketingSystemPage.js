@@ -293,7 +293,10 @@ function TicketingSystemPage(props) {
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {Object.keys(val).length > 0 &&
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                            <Link to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
+                                                                <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                            </Link>
+
                                                         </span>
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
@@ -467,13 +470,13 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '40rem' }}>
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '30rem' }}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }} className="px-4">
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '30rem' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
@@ -505,7 +508,7 @@ function TicketingSystemPage(props) {
                                         <b>Other Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '150px' }} className="px-4">
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '34rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>

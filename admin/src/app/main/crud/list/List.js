@@ -237,7 +237,7 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
-				props.getWithdrawalTypes();
+				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -260,7 +260,7 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
-				props.getWithdrawalTypes();
+				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -378,8 +378,14 @@ function List(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (module, n, field) => {
-		if (module === 'tickets' && field.field_name === 'status') {
-			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+		if (module === 'tickets') {
+			if (field.field_name === 'status') {
+				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+			}
+			if (field.field_name === 'username') {
+				return <span style={{ color: '#4f46e5', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); window.location.href = `/app/members/${n.member_id}` }}>{n['username']}</span>
+			}
+			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
 			return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field) == 1 ? 'Yes' : 'No'} color={processFieldValue(n[field.field_name], field) == 1 ? 'success' : 'primary'} />
 		} else if (module === 'member-transactions' && field.field_name === 'type') {
@@ -800,14 +806,14 @@ function List(props) {
 												key={n.id}
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
-											>{module === 'tickets' ? '' :
+											>
 												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
 														checked={isSelected}
 														onClick={(event) => event.stopPropagation()}
 														onChange={(event) => handleCheck(event, n.id)}
 													/>}
-												</TableCell>}
+												</TableCell>
 												{Object.values(fields)
 													.filter(field => field.listing === true)
 													.map((field, i) => {
