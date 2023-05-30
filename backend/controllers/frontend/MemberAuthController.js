@@ -1031,7 +1031,6 @@ class MemberAuthController {
       {
         where: {
           member_id: data.member_id,
-          payment_method_id: data.payment_method_id,
         },
       }
     );
