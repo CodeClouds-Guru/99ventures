@@ -5,6 +5,7 @@ const TolunaHelper = require('../../helpers/Toluna');
 const { Op } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
 const SqsHelper = require('../../helpers/SqsHelper');
+const LucidHelper = require('../../helpers/Lucid');
 
 class SurveySyncController {
 
@@ -18,6 +19,7 @@ class SurveySyncController {
         this.syncSurveyQuestion = this.syncSurveyQuestion.bind(this);
         this.syncSurveyQualification = this.syncSurveyQualification.bind(this);
         this.tolunaSurveyQuestions = this.tolunaSurveyQuestions.bind(this);
+        this.lucidSurveyQuestions = this.lucidSurveyQuestions.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
@@ -36,7 +38,9 @@ class SurveySyncController {
             this.syncSurveyQuestion(req, res);
         } else if(action === 'survey') {
             this.syncSurveyQualification(req, res);
-        } 
+        }  else {
+            res.send('Invalid action argument!')
+        }
     }
 
     async getProvider(req, res){
@@ -63,8 +67,11 @@ class SurveySyncController {
         else if(provider === 'toluna') {
             this.tolunaSurveyQuestions(req, res);
         }
+        else if(provider === 'lucid') {
+            this.lucidSurveyQuestions(req, res);
+        }
         else {
-            res.send(provider);
+            res.send('Invalid provider');
         }
     }
 
@@ -74,11 +81,10 @@ class SurveySyncController {
             this.pureSpectrumQualification(req, res);
         }
         else if(provider === 'schlesinger') {
-            // this.schlesingerQualification(req, res);
-            this.schlesingerSurveySaveToSQS(req, res)
+            this.schlesingerQualification(req, res);
         }
         else {
-            res.send(provider);
+            res.send('Invalid provider');
         }
     }
 
@@ -129,7 +135,7 @@ class SurveySyncController {
             throw error;
         }
     }
-
+ 
     /**
      * Schlesinger To create all the questions
      */
@@ -447,6 +453,9 @@ class SurveySyncController {
      * [Schlesinger] To Save Survey, Qualifications, Qualification Answer
      */
     async schlesingerQualification(req, res) {
+        if(req.query.mode && req.query.mode === 'sqs') {
+            return this.schlesingerSurveySaveToSQS(req, res);
+        }
         try{
             const allSurveys = await this.schlesingerSurvey(req, res);  
             if(allSurveys.length) {
@@ -529,7 +538,7 @@ class SurveySyncController {
     }
 
     /** 
-     * SQS
+     * Schlesiner Survey Sync through SQS
      */
     async schlesingerSurveySaveToSQS(req, res) {
         try{
@@ -627,6 +636,104 @@ class SurveySyncController {
         }
     }
 
+    /**
+     * Lucid Question & Answer Sync
+     */
+    async lucidSurveyQuestions(req, res){
+        try{
+            const lucidHelper = new LucidHelper();
+            if(req.query.type === 'question'){
+                const questions = await lucidHelper.fetchAndReturnData(
+                    'https://api.samplicio.us/Lookup/v1/QuestionLibrary/AllQuestions/9'
+                );
+                let questionsArry = [];
+                
+                if (questions && questions.ResultCount && questions.ResultCount > 0) {
+                    let allQues = questions.Questions;
+                    for(let element of allQues){
+                        questionsArry.push({
+                            question_text: element.QuestionText,
+                            name: element.Name,
+                            survey_provider_id: 1,
+                            survey_provider_question_id: element.QuestionID,
+                            question_type: element.QuestionType,
+                            created_at: new Date(),
+                        });
+                    };
+                    const questionData = await SurveyQuestion.bulkCreate(questionsArry, {
+                        updateOnDuplicate: ['survey_provider_question_id'],
+                        ignoreDuplicates: true,
+                    });
+                    res.send({message: 'Data Updated!', total_record:questionData.length, data: questionData});
+                    return;
+                }
+            } else if(req.query.type === 'options') {
+                let page = req.query.page ? req.query.page : 1;
+                let limit = 40;
+                let offset = (page-1) * limit;
+
+                let surveyQuestions = await SurveyQuestion.findAll({
+                    attributes: ['survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: 1
+                    },
+                    offset: offset,
+                    limit: limit,
+                });
+                
+                let optionsArry = [];
+                if (surveyQuestions.length > 0) {
+                    const lucidHelper = new LucidHelper();
+                    for(let question of surveyQuestions) {
+                        const quesOptions = await lucidHelper.questionOptions(
+                            9,
+                            question.survey_provider_question_id
+                        );
+                        
+                        if (quesOptions.ResultCount > 0 && quesOptions.QuestionOptions) {
+                            let options = quesOptions.QuestionOptions;
+                            if(question.question_type == 'Numeric - Open-end' && question.survey_provider_question_id == 42){
+                                for(let i = 15; i<=99; i++){
+                                    optionsArry.push({
+                                        option: i,
+                                        precode: question.survey_provider_question_id
+                                    })
+                                }
+                            } else if(question.question_type == 'Numeric - Open-end'){
+                                optionsArry.push({
+                                    option: null,
+                                    precode: question.survey_provider_question_id
+                                })
+                            } else {
+                                for(let opt of options){
+                                    optionsArry.push({
+                                        option: opt.Precode,
+                                        precode: opt.QuestionID
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    
+                    const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
+                        updateOnDuplicate: ['option']
+                    });
+
+                    res.send({message: 'Data Updated!', data: optionsData});
+                    return;
+                } else {
+                    res.send('No more question available!')
+                    return;
+                }
+            }
+            res.send('Please add type!')
+            return;
+        } catch (error) {
+            const logger = require('../../helpers/Logger')(`lucid-qna-errror.log`);
+			logger.error(error);
+            throw error;
+        }
+    }
 }
 
 module.exports = SurveySyncController

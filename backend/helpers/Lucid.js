@@ -20,7 +20,7 @@ class Lucid {
   constructor() {
     this.instance = axios.create({
       baseURL: 'https://api.samplicio.us',
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         Authorization: process.env.LUCID_API_KEY,
         Accept: 'application/json, text/plain, */*',
