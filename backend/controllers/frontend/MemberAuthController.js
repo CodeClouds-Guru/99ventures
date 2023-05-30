@@ -200,18 +200,18 @@ class MemberAuthController {
           };
           const res = await Member.create(data);
           //check for newsletter
-        var newsletter = req.body.newsletter
-        console.log('newsletter',newsletter)
-        if(newsletter === 'true' || newsletter == true){
-          //save email alert
-          await db.sequelize.query(
-            'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
-            {
-              type: QueryTypes.INSERT,
-              replacements: [5, res.id],
-            }
-          );
-        }
+          var newsletter = req.body.newsletter;
+          console.log('newsletter', newsletter);
+          if (newsletter === 'true' || newsletter == true) {
+            //save email alert
+            await db.sequelize.query(
+              'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
+              {
+                type: QueryTypes.INSERT,
+                replacements: [5, res.id],
+              }
+            );
+          }
           //send mail
           const eventBus = require('../../eventBus');
           member_details = await Member.findOne({
@@ -240,13 +240,17 @@ class MemberAuthController {
           //registration bonus
           await this.saveRegistrationBonus(member_details);
         }
-        
+
         if (member_status) {
           let activityEventbus = eventBus.emit('member_activity', {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: "Registered successfully!", success_status: true,notice:member_message };
+          req.session.flash = {
+            message: 'Registered successfully!',
+            success_status: true,
+            notice: member_message,
+          };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
@@ -835,7 +839,10 @@ class MemberAuthController {
       action: 'Member cash withdrawal request',
     });
 
-    if (request_data.withdrawal_type_id == 2) {
+    if (
+      withdrawal_type.slug == 'instant_paypal' ||
+      withdrawal_type.slug == 'skrill'
+    ) {
       // email body for member
       let member_mail = await this.sendMailEvent({
         action: 'Member Cash Withdrawal',
