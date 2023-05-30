@@ -14,11 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       });
       TicketConversation.belongsTo(models.Member, {
         foreignKey: "member_id",
-        // as: "username",
       });
       TicketConversation.belongsTo(models.User, {
         foreignKey: "user_id",
-        // as: "username",
+      });
+      TicketConversation.belongsTo(models.Ticket, {
+        foreignKey: "ticket_id",
       });
     }
   }

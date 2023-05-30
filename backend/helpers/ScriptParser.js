@@ -383,9 +383,8 @@ class ScriptParser {
         if (surveys && surveys.length) {
           var surveyHtml = '';
           surveys.forEach(function (survey, key) {
-            let link = `/pure-spectrum/entrylink?survey_number=${
-              survey.survey_number
-            }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number
+              }${generateQueryString ? '&' + generateQueryString : ''}`;
             surveys[key].setDataValue('link', link);
           });
           return {
@@ -497,6 +496,10 @@ class ScriptParser {
             {
               model: Models.User,
               attributes: ['first_name', 'last_name', 'alias_name', 'avatar'],
+            },
+            {
+              model: Models.Ticket,
+              attributes: ['status', 'id', 'subject'],
             },
           ],
         };
