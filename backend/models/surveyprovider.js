@@ -136,7 +136,8 @@ module.exports = (sequelize, DataTypes) => {
   SurveyProvider.validate = function (req) {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
-      currency_percent: Joi.required().label('Currency percent')
+      currency_percent: Joi.optional().label('Currency percent'),
+      logo: Joi.optional().allow('').label('Logo')
     })
     return schema.validate(req.body)
   }
