@@ -43,64 +43,70 @@ class ScriptParser {
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
-
-            const param_where =
-              'where' in params ? JSON.parse(params.where) : null;
-
-            // other_details = {
-            //     ...other_details,
-            //     conditions:param_where
-            // };
-            let where = this.getModuleWhere(script.module, user);
-
-            if (param_where)
-              where.where = {
-                ...where.where,
-                ...param_where,
-              };
-            // console.log(param_where);
-            data = await Models[script.module].findAll({
-              subQuery: false,
-              order: [[Sequelize.literal(orderBy), order]],
-              limit: perPage,
-              offset: (pageNo - 1) * perPage,
-              ...where,
-            });
-            if (script.module == 'Shoutbox') {
-              data = data.reverse();
+            let onprofilecomplete = 'onprofilecomplete' in params ? params.onprofilecomplete : false;
+            var profile_completed = true
+            if(onprofilecomplete === 'true' && !user.profile_completed_on){
+              profile_completed = false
             }
-            // console.log('data', JSON.parse(JSON.stringify(data)));
+            if(profile_completed){
+              const param_where =
+                'where' in params ? JSON.parse(params.where) : null;
 
-            var data_count = await Models[script.module].findAndCountAll({
-              ...where,
-            });
-            page_count = Math.ceil(data_count.count / perPage);
+              // other_details = {
+              //     ...other_details,
+              //     conditions:param_where
+              // };
+              let where = this.getModuleWhere(script.module, user);
 
-            if (script.module == 'MemberReferral') {
-              let total = await Models[script.module].findOne({
-                attributes: [
-                  [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
-                ],
-                where: { member_id: user.id },
+              if (param_where)
+                where.where = {
+                  ...where.where,
+                  ...param_where,
+                };
+              // console.log(param_where);
+              data = await Models[script.module].findAll({
+                subQuery: false,
+                order: [[Sequelize.literal(orderBy), order]],
+                limit: perPage,
+                offset: (pageNo - 1) * perPage,
+                ...where,
               });
-              other_details = {
-                ...other_details,
-                ...JSON.parse(JSON.stringify(total)),
-              };
-            }
+              if (script.module == 'Shoutbox') {
+                data = data.reverse();
+              }
+              // console.log('data', JSON.parse(JSON.stringify(data)));
 
-            //pagination
-            if (
-              'pagination' in params &&
-              params.pagination === 'true' &&
-              page_count > 1
-            ) {
-              script_html = await this.appendPagination(
-                script_html,
-                script_id,
-                pageNo,
-                page_count
-              );
+              var data_count = await Models[script.module].findAndCountAll({
+                ...where,
+              });
+              page_count = Math.ceil(data_count.count / perPage);
+
+              if (script.module == 'MemberReferral') {
+                let total = await Models[script.module].findOne({
+                  attributes: [
+                    [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+                  ],
+                  where: { member_id: user.id },
+                });
+                other_details = {
+                  ...other_details,
+                  ...JSON.parse(JSON.stringify(total)),
+                };
+              }
+
+              //pagination
+              if (
+                'pagination' in params &&
+                params.pagination === 'true' &&
+                page_count > 1
+              ) {
+                script_html = await this.appendPagination(
+                  script_html,
+                  script_id,
+                  pageNo,
+                  page_count
+                );
+              }
             }
             break;
           case 'profile_update':

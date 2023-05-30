@@ -202,7 +202,7 @@ class MemberAuthController {
           //check for newsletter
         var newsletter = req.body.newsletter
         console.log('newsletter',newsletter)
-        if(newsletter === 'true' || newsletter === true){
+        if(newsletter === 'true' || newsletter == true){
           //save email alert
           await db.sequelize.query(
             'INSERT INTO email_alert_member (email_alert_id, member_id) VALUES (?, ?)',
@@ -246,7 +246,7 @@ class MemberAuthController {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
-          req.session.flash = { message: member_message, success_status: true };
+          req.session.flash = { message: "Registered successfully!", success_status: true,notice:member_message };
           res.redirect('/notice');
         } else {
           req.session.flash = { error: member_message };
