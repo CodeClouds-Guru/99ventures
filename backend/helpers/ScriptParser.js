@@ -506,10 +506,14 @@ class ScriptParser {
       case 'WithdrawalRequest':
         return {
           where: { member_id: user.id },
-          include: {
+          include: [{
             model: Models.WithdrawalType,
             attributes: ['logo', 'name'],
           },
+          {
+            model: Models.MemberTransaction,
+            attributes: ['transaction_id']
+          }],
         };
       case 'MemberNotification':
         return {

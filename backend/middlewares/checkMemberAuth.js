@@ -22,6 +22,13 @@ module.exports = async function (req, res, next) {
   }
   req.session.company_portal = company_portal;
   if ('member' in req.session && req.session.member) {
+    let ip = req.ip;
+    if (Array.isArray(ip)) {
+      ip = ip[0];
+    } else {
+      ip = ip.replace('::ffff:', '');
+    }
+
     const member = await Member.findOne({
       where: { id: req.session.member.id },
       include: {
@@ -73,6 +80,7 @@ module.exports = async function (req, res, next) {
       total_referred ? total_referred[0].total : 0
     );
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
+    member.setDataValue('login_ip', ip || '');
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
     // console.log(req.session.member);
@@ -88,6 +96,8 @@ module.exports = async function (req, res, next) {
       : '/404';
 
     if (['/', '/login'].indexOf(req.path) >= 0) {
+      // console.log(req);
+
       res.status(302).redirect(redirect);
       return;
     }
