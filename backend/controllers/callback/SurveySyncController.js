@@ -23,7 +23,8 @@ class SurveySyncController {
         this.getProvider = this.getProvider.bind(this);
         this.index = this.index.bind(this);
 
-        this.schlesingerSurveySaveToSQS = this.schlesingerSurveySaveToSQS.bind(this)
+        this.schlesingerSurveySaveToSQS = this.schlesingerSurveySaveToSQS.bind(this);
+        this.pureSpectrumSurveySaveToSQS = this.pureSpectrumSurveySaveToSQS.bind(this);
         /**
          * "English - United States"
          * language 3
@@ -97,17 +98,11 @@ class SurveySyncController {
             const psObj = new PurespectrumHelper;
             const allAttributes = await psObj.fetchAndReturnData('/attributes?localization=en_US&format=true');
             
-            if ('success' === allAttributes.apiStatus) {
+            if ('success' === allAttributes.apiStatus) {    
                 const qualAttributes = allAttributes.qual_attributes;    
-                const existingQuestions = await SurveyQuestion.findAll({
-                    attributes: ['id', 'survey_provider_question_id'],
-                    where: {
-                        survey_provider_id: this.providerId
-                    }
-                });
-
-                const params = qualAttributes.map(attr => {
-                    let check = existingQuestions.find(row => row.survey_provider_question_id === attr.qualification_code)
+               
+                const questions = [];           
+                for(let attr of qualAttributes){
                     let params = {
                         question_text: attr.text,
                         name: attr.desc,
@@ -116,23 +111,50 @@ class SurveySyncController {
                         question_type: psObj.getQuestionType(attr.type),
                         created_at: new Date()
                     }
-                    if(check) {
-                        params.id = check.id;
+                    const precodes = []; 
+                    if(attr.condition_codes.length) {
+                        for(let op of attr.condition_codes){
+                            precodes.push({
+                                option: op.id,
+                                precode: attr.qualification_code
+                            })
+                        }
+                    } else if(attr.condition_codes.length < 1) {
+                        const format = attr.format;
+                        if(format.min && format.max) {
+                            for(let op = format.min; op<=format.max; op++){
+                                precodes.push({
+                                    option: op,
+                                    precode: attr.qualification_code
+                                })
+                            }
+                        } else {
+                            precodes.push({
+                                option: '',
+                                precode: attr.qualification_code
+                            })
+                        }
                     }
-                    return params;
+
+                    questions.push({...params, SurveyAnswerPrecodes: precodes});
+                };
+
+                const result = await SurveyQuestion.bulkCreate(questions, {
+                    updateOnDuplicate: ["question_text", "question_type", "name"],
+                    include: [{
+                        model: SurveyAnswerPrecodes,
+                        ignoreDuplicates: true
+                    }]
                 });
-                await SurveyQuestion.bulkCreate(params, {
-                    updateOnDuplicate: ["question_text", "question_type", "name"] 
-                });
-                res.json({ status: true, message: 'Question Updated' });
+                res.json({ status: true, message: 'Question Updated', total:result.length, result });
             } else {
-                res.json(allAttributes);
+                res.json({ status: false, message: 'No record found!' });
             }
             return;
         }
         catch (error) {
             console.error(error);
-            throw error;
+            res.json({ status: false, message: 'Something went wrong!' });
         }
     }
  
@@ -212,7 +234,7 @@ class SurveySyncController {
     async pureSpectrumSurvey(req, res) {
         try{
             const psObj = new PurespectrumHelper;
-            const allSurveys = await psObj.fetchAndReturnData('/surveys');            
+            const allSurveys = await psObj.fetchAndReturnData('/surveys');         
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
                 const surveyData = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5);
                
@@ -366,7 +388,9 @@ class SurveySyncController {
      * [Pure Spectrum] To Save Survey, Qualifications, Qualification Answer
      */
     async pureSpectrumQualification(req, res) {
-        try{
+        return this.pureSpectrumSurveySaveToSQS(req, res);
+
+        /*try{
             //Save Surveys
             const allSurveys = await this.pureSpectrumSurvey(req, res);
             if(allSurveys.length) {
@@ -404,14 +428,17 @@ class SurveySyncController {
                                     // Survey Precode Check and survey_answer_precode_survey_qualifications save
                                     if(surveyQualification && surveyQualification.id) {
                                         if(qualification.condition_codes){
-                                            const precodeData = await SurveyAnswerPrecodes.findOne({
+                                            const precodeData = await SurveyAnswerPrecodes.findAll({
                                                 where: {
                                                     precode: qualification.qualification_code,
-                                                    survey_provider_id: this.providerId,
-                                                    option: qualification.condition_codes
+                                                    // survey_provider_id: this.providerId,
+                                                    // option: qualification.condition_codes
+                                                    option: {
+                                                        [Op.in]: qualification.condition_codes
+                                                    }
                                                 }
                                             });
-                                            if(precodeData && precodeData.id) {
+                                            if(precodeData && precodeData.length) {
                                                 await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                             }
                                         }
@@ -419,7 +446,7 @@ class SurveySyncController {
                                             const precodeData = await SurveyAnswerPrecodes.findAll({
                                                 where: {
                                                     precode: qualification.qualification_code,
-                                                    survey_provider_id: this.providerId,
+                                                    // survey_provider_id: this.providerId,
                                                     option: {
                                                         [Op.between]: [qualification.range_sets[0].from, qualification.range_sets[0].to]
                                                     }
@@ -446,7 +473,7 @@ class SurveySyncController {
         catch (error) {
             console.error(error);
             throw error;
-        }
+        }*/
     }
 
     /** 
@@ -733,6 +760,48 @@ class SurveySyncController {
             const logger = require('../../helpers/Logger')(`lucid-qna-errror.log`);
 			logger.error(error);
             throw error;
+        }
+    }
+
+    /** 
+     * Pure Spectrum Survey Sync through SQS
+     */
+    async pureSpectrumSurveySaveToSQS(req, res) {
+        try{
+            const psObj = new PurespectrumHelper;
+            const allSurveys = await psObj.fetchAndReturnData('/surveys');
+            if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
+                const surveyIds = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5).map(sr => sr.survey_id);
+                const responses = [];
+                const sqsHelper = new SqsHelper();
+                for(let survey_id of surveyIds) {
+                    const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey_id);
+                    if ('success' === surveyData.apiStatus) {
+                        let body = {
+                            ...surveyData.survey,
+                            survey_provider_id: this.providerId,
+                        };
+                        
+                        // const send_message = await sqsHelper.sendData(body);
+                        // console.log('send_message', send_message);
+                        // responses.push(send_message);
+                        responses.push(body);                        
+                    }
+                }
+                res.send({
+                    message: 'Sending to SQS',
+                    data: responses
+                });
+            }
+            else {
+                res.send('No survey found!');
+            }
+
+        }
+        catch(error) {
+            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+			logger.error(error);
+            res.send(error)
         }
     }
 }
