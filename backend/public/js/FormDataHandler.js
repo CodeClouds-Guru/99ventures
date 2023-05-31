@@ -335,6 +335,7 @@ $(() => {
   };
   var ticketCreateFormValidation = () => {
     errorsArray = [];
+    var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
     $('span.alert-msg').remove();
     let ticket_subject = $(ticketCreateForm)
       .find('input[name="ticket_subject"]')
@@ -359,11 +360,19 @@ $(() => {
         message: 'Please enter ticket subject',
       });
     }
-    if (ticket_file_value.length > 0 && ticket_file_value[0].size > 2048000) {
-      errorsArray.push({
-        field: $(ticket_file),
-        message: 'Please select file within 2MB',
-      });
+    if (ticket_file_value.length > 0) {
+      if (!allowedExtensions.exec(ticket_file_name)) {
+        errorsArray.push({
+          field: $(ticket_file),
+          message: 'Please select image type only',
+        });
+      }
+      if (ticket_file_value[0].size > 2048000) {
+        errorsArray.push({
+          field: $(ticket_file),
+          message: 'Please select file within 2MB',
+        });
+      }
     }
     if ($.trim(ticketContentFieldValue).length === 0) {
       errorsArray.push({
@@ -521,4 +530,21 @@ $(() => {
     str += '</div></div>';
     $('#header_streak_or_refresh').append(str);
   }
+
+  $(".copy-text").click((e) => {
+    e.preventDefault();
+    var reference = e.currentTarget.dataset?.reference;
+    var tempInput = document.createElement("input");
+    tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+    tempInput.value = $(`#${reference}`).val();
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    $(".copy-text").find("i").removeClass('fa-regular fa-copy').addClass('fa-solid fa-check');
+    setTimeout(() => {
+      $(".copy-text").find("i").removeClass('fa-solid fa-check').addClass('fa-regular fa-copy');
+    }, 3000);
+  })
+
 });
