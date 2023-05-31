@@ -453,87 +453,88 @@ class SurveySyncController {
      * [Schlesinger] To Save Survey, Qualifications, Qualification Answer
      */
     async schlesingerQualification(req, res) {
-        if(req.query.mode && req.query.mode === 'sqs') {
-            return this.schlesingerSurveySaveToSQS(req, res);
-        }
-        try{
-            const allSurveys = await this.schlesingerSurvey(req, res);  
-            if(allSurveys.length) {
-                const psObj = new SchlesingerHelper;                
-                for(let survey of allSurveys) {                    
-                    const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
-
-                    if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
-                        const surveyQualifications = surveyData.SurveyQualifications;
-                        for(let ql of surveyQualifications){
-                            const questionData = await SurveyQuestion.findOne({
-                                attributes:['id', 'question_type', 'survey_provider_question_id'],
-                                where: {
-                                    survey_provider_question_id: ql.QualificationId,
-                                    survey_provider_id: this.providerId
-                                }
-                            });
-
-                            if(questionData && questionData.id) {
-                                var surveyQualification = await SurveyQualification.findOne({
+        if(req.query.mode && req.query.mode === 'db') {
+            try{
+                const allSurveys = await this.schlesingerSurvey(req, res);  
+                if(allSurveys.length) {
+                    const psObj = new SchlesingerHelper;                
+                    for(let survey of allSurveys) {                    
+                        const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
+    
+                        if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
+                            const surveyQualifications = surveyData.SurveyQualifications;
+                            for(let ql of surveyQualifications){
+                                const questionData = await SurveyQuestion.findOne({
+                                    attributes:['id', 'question_type', 'survey_provider_question_id'],
                                     where: {
-                                        survey_id: survey.id,
-                                        survey_question_id: questionData.id,
-                                    },
-                                });
-                                if (surveyQualification == null) {
-                                    var surveyQualification = await SurveyQualification.create({
-                                        survey_id: survey.id,
-                                        survey_question_id: questionData.id,
-                                        logical_operator: 'OR',
-                                        created_at: new Date()
-                                    }, { silent: true });
-                                }
-
-
-                                if(surveyQualification && surveyQualification.id) {
-                                    if(questionData.question_type == 'range' && questionData.survey_provider_question_id == 59){
-                                        const start = ql.AnswerIds[0].split('-')[0];
-                                        const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
-                                        
-                                        const precodeData = await SurveyAnswerPrecodes.findAll({
-                                            where: {
-                                                precode: ql.QualificationId,
-                                                survey_provider_id: this.providerId,
-                                                option: {
-                                                    [Op.between]: [start, end]
-                                                }
-                                            }
-                                        });
-                                        if(precodeData && precodeData.length) {
-                                            await surveyQualification.addSurveyAnswerPrecodes(precodeData);
-                                        }
-                                    } else {
-                                        const precodeData = await SurveyAnswerPrecodes.findOne({
-                                            where: {
-                                                precode: ql.QualificationId,
-                                                survey_provider_id: this.providerId,
-                                                option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
-                                            }
-                                        });
-                                        if(precodeData && precodeData.id) {
-                                            await surveyQualification.addSurveyAnswerPrecodes(precodeData);
-                                        }
+                                        survey_provider_question_id: ql.QualificationId,
+                                        survey_provider_id: this.providerId
                                     }
-                                    
+                                });
+    
+                                if(questionData && questionData.id) {
+                                    var surveyQualification = await SurveyQualification.findOne({
+                                        where: {
+                                            survey_id: survey.id,
+                                            survey_question_id: questionData.id,
+                                        },
+                                    });
+                                    if (surveyQualification == null) {
+                                        var surveyQualification = await SurveyQualification.create({
+                                            survey_id: survey.id,
+                                            survey_question_id: questionData.id,
+                                            logical_operator: 'OR',
+                                            created_at: new Date()
+                                        }, { silent: true });
+                                    }
+    
+    
+                                    if(surveyQualification && surveyQualification.id) {
+                                        if(questionData.question_type == 'range' && questionData.survey_provider_question_id == 59){
+                                            const start = ql.AnswerIds[0].split('-')[0];
+                                            const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
+                                            
+                                            const precodeData = await SurveyAnswerPrecodes.findAll({
+                                                where: {
+                                                    precode: ql.QualificationId,
+                                                    survey_provider_id: this.providerId,
+                                                    option: {
+                                                        [Op.between]: [start, end]
+                                                    }
+                                                }
+                                            });
+                                            if(precodeData && precodeData.length) {
+                                                await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                            }
+                                        } else {
+                                            const precodeData = await SurveyAnswerPrecodes.findOne({
+                                                where: {
+                                                    precode: ql.QualificationId,
+                                                    survey_provider_id: this.providerId,
+                                                    option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
+                                                }
+                                            });
+                                            if(precodeData && precodeData.id) {
+                                                await surveyQualification.addSurveyAnswerPrecodes(precodeData);
+                                            }
+                                        }
+                                        
+                                    }
                                 }
                             }
                         }
                     }
+                    res.json({ status: true, message: 'Data updated'});
+                } else {
+                    res.json({ status: true, message: 'No survey found!' });
                 }
-                res.json({ status: true, message: 'Data updated'});
-            } else {
-                res.json({ status: true, message: 'No survey found!' });
             }
-        }
-        catch (error) {
-            console.error(error);
-            throw error;
+            catch (error) {
+                console.error(error);
+                throw error;
+            }
+        } else {
+            return this.schlesingerSurveySaveToSQS(req, res);
         }
     }
 

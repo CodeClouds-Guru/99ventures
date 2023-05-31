@@ -87,16 +87,19 @@ class Lucid {
             WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ?`;
             const qlData = await db.query(joinSql, [surveyId]);
             
-            console.log(qlData);
+            // console.log(qlData);
 
             const ansPrecodeParams = []
             for(const item of this.record.survey_qualifications){
-                qlData.filter(row => row.survey_provider_question_id === item.question_id).forEach(el => {                
-                    ansPrecodeParams.push([
-                        el.qualification_id,
-                        el.answer_precode_id
-                    ]);
-                });
+                qlData
+                    .filter(row => row.survey_provider_question_id === item.question_id)
+                    .filter(opt => item.precodes.includes(opt.option))
+                    .forEach(el => {
+                        ansPrecodeParams.push([
+                            el.qualification_id,
+                            el.answer_precode_id
+                        ]);
+                    });
             }
 
             console.log(ansPrecodeParams);

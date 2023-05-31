@@ -80,6 +80,7 @@ class Schlesinger {
                     let data = qlData.filter(r => +row.QualificationId === +r.survey_provider_question_id);                   
                     if(!row.AnswerIds[0].includes('-')){
                         data.filter(r=> row.AnswerIds.includes(r.option) && r.question_type !== 'range')
+                        .filter(opt => row.AnswerIds.includes(opt.option))
                         .forEach(row => {
                             ansPrecodeParams.push([
                                 row.qualification_id,
