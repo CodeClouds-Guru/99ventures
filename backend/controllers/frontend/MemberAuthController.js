@@ -122,6 +122,7 @@ class MemberAuthController {
     }
     if (member_status) {
       req.session.member = member;
+
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member.id,
         action: 'Member Logged In',
