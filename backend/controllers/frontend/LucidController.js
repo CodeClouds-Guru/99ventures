@@ -174,6 +174,7 @@ class LucidController {
             const lcObj = new LucidHelper;
             const surveyNumber = req.query.survey_number;    
             const quota = await lcObj.showQuota(surveyNumber);
+            
             const queryParams = req.query;
             const params = {
                 MID: Date.now(),
@@ -193,7 +194,7 @@ class LucidController {
                 });
                 if(survey && survey.url){
                     entrylink = survey.url;
-                } else {
+                } else {                    
                     const result = await lcObj.createEntryLink(surveyNumber);
                     if(result.data && result.data.SupplierLink) {
                         const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
@@ -207,7 +208,9 @@ class LucidController {
                         entrylink = url;
                     }
                 }
+                
                 const URL = this.rebuildEntryLink(entrylink, params);
+                // res.send(URL)
                 res.redirect(URL);
             } else {
                 await Survey.update({
@@ -237,12 +240,12 @@ class LucidController {
         if(process.env.DEV_MODE == 1) {
             delete queryParams.PID;
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&MID='+queryParams.MID+'&'+params+'&';
-            const hash = generateHashForLucid(urlTobeHashed);
+            const urlTobeHashed = url+'&'+params+'&';
+            const hash = generateHashForLucid(urlTobeHashed);            
             return url +'&'+params+'&hash='+hash;
         } else {
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID+'&'+params+'&';
+            const urlTobeHashed = url+'&PID='+queryParams.PID+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);
             return url +'&'+params+'&hash='+hash;
         }
