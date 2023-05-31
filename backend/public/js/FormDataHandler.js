@@ -361,7 +361,7 @@ $(() => {
       });
     }
     if (ticket_file_value.length > 0) {
-      if (!allowedExtensions.exec(ticket_file_value.name)) {
+      if (!allowedExtensions.exec(ticket_file_name)) {
         errorsArray.push({
           field: $(ticket_file),
           message: 'Please select image type only',
