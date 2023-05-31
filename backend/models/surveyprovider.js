@@ -2,6 +2,9 @@
 const {
   Model
 } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi')
+
 module.exports = (sequelize, DataTypes) => {
   class SurveyProvider extends Model {
     /**
@@ -50,5 +53,94 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deleted_at',
     tableName: 'survey_providers',
   });
+  SurveyProvider.fields = {
+    id: {
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    name: {
+      field_name: 'name',
+      db_name: 'name',
+      type: 'text',
+      placeholder: 'Name',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    logo: {
+      field_name: 'logo',
+      db_name: 'logo',
+      type: 'text',
+      placeholder: 'Logo URL',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    status: {
+      field_name: 'status',
+      db_name: 'status',
+      type: 'text',
+      placeholder: 'Status',
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    currency_percent: {
+      field_name: 'currency_percent',
+      db_name: 'currency_percent',
+      type: 'number',
+      placeholder: 'Currency Percent',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    created_at: {
+      field_name: 'created_at',
+      db_name: 'created_at',
+      type: 'text',
+      placeholder: 'Created At',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    }
+  };
+  SurveyProvider.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required().label('Name'),
+      currency_percent: Joi.optional().label('Currency percent'),
+      logo: Joi.optional().allow('').label('Logo')
+    })
+    return schema.validate(req.body)
+  }
+  sequelizePaginate.paginate(SurveyProvider);
   return SurveyProvider;
 };

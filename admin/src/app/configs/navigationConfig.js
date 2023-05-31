@@ -75,6 +75,14 @@ const navigationConfig = [
     end: true,
   },
   {
+    id: 'surveyproviders',
+    title: 'Survey Providers',
+    type: 'item',
+    icon: 'heroicons-outline:color-swatch',
+    url: 'app/survey-providers',
+    end: true,
+  },
+  {
     id: 'withdrawalrequests',
     title: 'Withdrawal Requests',
     type: 'item',

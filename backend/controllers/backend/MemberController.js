@@ -272,13 +272,20 @@ class MemberController extends Controller {
       if (req.body.type == 'basic_details') {
         delete req.body.type;
         let member = await this.model.findOne({ where: { id: req.params.id } });
-        req.body.username = member.username;
+        if(!req.body.username){
+          req.body.username = member.username;
+        }
         const { error, value } = this.model.validate(req);
         if (error) {
           const errorObj = new Error('Validation failed.');
           errorObj.statusCode = 422;
           errorObj.data = error.details.map((err) => err.message);
           throw errorObj;
+        }
+        //check member username
+        let member_username = await this.model.findOne({ where: { username: req.body.username,id: { [Op.ne]: req.params.id } } });
+        if(member_username){
+          this.throwCustomError('Username already exists.', 422);
         }
         result = this.updateBasicDetails(req, member);
       } else if (req.body.type == 'member_status') {
@@ -306,7 +313,11 @@ class MemberController extends Controller {
       }
     } catch (error) {
       console.error(error);
-      this.throwCustomError('Unable to save data', 500);
+      if(error.data && Array.isArray(error.data)){
+        this.throwCustomError(error.data[0], 500);
+      }else{
+        this.throwCustomError(error.data, 500);
+      }
     }
   }
 
@@ -426,8 +437,12 @@ class MemberController extends Controller {
       });
       return true;
     } catch (error) {
-      console.error(error);
-      this.throwCustomError('Unable to get data', 500);
+      console.log(error)
+      if(error.data && Array.isArray(error.data)){
+        this.throwCustomError(error.data[0], 500);
+      }else{
+        this.throwCustomError(error.data, 500);
+      }
     }
   }
 
