@@ -43,12 +43,13 @@ class ScriptParser {
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
-            let onprofilecomplete = 'onprofilecomplete' in params ? params.onprofilecomplete : false;
-            var profile_completed = true
-            if(onprofilecomplete === 'true' && !user.profile_completed_on){
-              profile_completed = false
+            let onprofilecomplete =
+              'onprofilecomplete' in params ? params.onprofilecomplete : false;
+            var profile_completed = true;
+            if (onprofilecomplete === 'true' && !user.profile_completed_on) {
+              profile_completed = false;
             }
-            if(profile_completed){
+            if (profile_completed) {
               const param_where =
                 'where' in params ? JSON.parse(params.where) : null;
 
@@ -383,8 +384,9 @@ class ScriptParser {
         if (surveys && surveys.length) {
           var surveyHtml = '';
           surveys.forEach(function (survey, key) {
-            let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number
-              }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let link = `/pure-spectrum/entrylink?survey_number=${
+              survey.survey_number
+            }${generateQueryString ? '&' + generateQueryString : ''}`;
             surveys[key].setDataValue('link', link);
           });
           return {
@@ -458,6 +460,7 @@ class ScriptParser {
         return {
           include: {
             model: Models.Member,
+            as: 'member_referrer',
           },
         };
       case 'WithdrawalType':
@@ -506,14 +509,16 @@ class ScriptParser {
       case 'WithdrawalRequest':
         return {
           where: { member_id: user.id },
-          include: [{
-            model: Models.WithdrawalType,
-            attributes: ['logo', 'name'],
-          },
-          {
-            model: Models.MemberTransaction,
-            attributes: ['transaction_id']
-          }],
+          include: [
+            {
+              model: Models.WithdrawalType,
+              attributes: ['logo', 'name'],
+            },
+            {
+              model: Models.MemberTransaction,
+              attributes: ['transaction_id'],
+            },
+          ],
         };
       case 'MemberNotification':
         return {
