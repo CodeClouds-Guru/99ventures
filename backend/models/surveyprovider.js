@@ -137,7 +137,8 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
       currency_percent: Joi.optional().label('Currency percent'),
-      logo: Joi.optional().allow('').label('Logo')
+      logo: Joi.optional().allow('').label('Logo'),
+      status: Joi.required().label('Status')
     })
     return schema.validate(req.body)
   }
