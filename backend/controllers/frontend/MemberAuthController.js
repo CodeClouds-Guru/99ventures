@@ -556,7 +556,7 @@ class MemberAuthController {
               }
               break;
           }
-          if(precode){
+          if (precode) {
             member_eligibility.push({
               member_id: member_id,
               survey_question_id: record.id,
@@ -566,7 +566,10 @@ class MemberAuthController {
         }
       });
     }
-    await MemberEligibilities.destroy({where: { member_id: member_id },force:true})
+    await MemberEligibilities.destroy({
+      where: { member_id: member_id },
+      force: true,
+    });
     await MemberEligibilities.bulkCreate(member_eligibility);
     return;
   }
@@ -840,7 +843,7 @@ class MemberAuthController {
       member_id: request_data.member_id,
       action: 'Member cash withdrawal request',
     });
-
+    console.log(withdrawal_type, member);
     if (
       withdrawal_type.slug == 'instant_paypal' ||
       withdrawal_type.slug == 'skrill'
