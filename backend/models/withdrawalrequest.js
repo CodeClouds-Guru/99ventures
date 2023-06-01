@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       member_id: DataTypes.BIGINT,
       member_transaction_id: DataTypes.BIGINT,
-      amount: DataTypes.FLOAT,
+      amount: DataTypes.DECIMAL(10, 2),
       amount_type: DataTypes.ENUM('cash', 'point'),
       currency: {
         type: DataTypes.STRING,
