@@ -461,7 +461,16 @@ class ScriptParser {
           include: {
             model: Models.Member,
             as: 'member_referrer',
+            include:{
+              model: Models.MemberActivityLog,
+              attributes:['created_at'],
+              limit: 1,
+              order: [['created_at', 'DESC']],
+            }
           },
+          where:{
+            member_id:user.id
+          }
         };
       case 'WithdrawalType':
         return {

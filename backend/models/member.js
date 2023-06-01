@@ -65,6 +65,9 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberNotification, {
         foreignKey: 'member_id',
       });
+      Member.hasMany(models.MemberActivityLog, {
+        foreignKey: 'member_id',
+      });
     }
   }
   Member.validate = function (req) {
