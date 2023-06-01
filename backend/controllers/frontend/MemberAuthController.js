@@ -442,7 +442,7 @@ class MemberAuthController {
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
-          // email_alerts: Joi.array().optional().label('Email Alerts'),
+          email_alerts: Joi.optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
 
