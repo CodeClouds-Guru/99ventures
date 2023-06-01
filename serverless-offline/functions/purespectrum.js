@@ -25,15 +25,16 @@ class Purespectrum {
         ];
         var sql;
 
-        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? LIMIT 1`;
-        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId]);
-        if(surveyData.length) {   
+        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL`;
+        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.survey_id]);
+        if(surveyData.length) {
+            const surveyIds = surveyData.map(sr => sr.id);
             let surveyId = surveyData[0].id;
-            let dlSql = `DELETE FROM surveys WHERE id = ?`;
-            await this.db.query(dlSql, [surveyId]);
+            let dlSql = `DELETE FROM surveys WHERE id IN (?)`;
+            await this.db.query(dlSql, [surveyIds]);
 
-            let qlSql = `DELETE FROM survey_qualifications WHERE survey_id = ?`
-            await this.db.query(qlSql, [surveyId]);
+            let qlSql = `DELETE FROM survey_qualifications WHERE survey_id IN (?)`;
+            await this.db.query(qlSql, [surveyIds]);
 
             params = [surveyId, ...params];
             sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -67,21 +68,19 @@ class Purespectrum {
                 });
                 let qlSql = `INSERT INTO survey_qualifications (survey_id, survey_question_id, logical_operator, created_at, updated_at)  VALUES ?`;
                 const qlRows = await db.query(qlSql, [params]);
-                console.log(qlRows)
+                // console.log(qlRows)
 
                 let sqlQry = `SELECT sq.id as qualification_id, sq.survey_question_id, qs.survey_provider_question_id, qs.question_type, ap.option, ap.id as answer_precode_id
                 FROM survey_qualifications AS sq JOIN survey_questions AS qs ON (sq.survey_question_id = qs.id)
                 JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
                 WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ?`;
                 const qlData = await db.query(sqlQry, [surveyId]);
-                console.log(qlData)
                 
                 const ansPrecodeParams = [];                
                 for(const row of qualifications){
                     let data = qlData.filter(r => +row.qualification_code === +r.survey_provider_question_id);                   
                     if(row.condition_codes){
                         data.filter(r=> row.condition_codes.includes(r.option) && r.question_type !== 'range')
-                        //.filter(opt => row.AnswerIds.includes(opt.option))
                         .forEach(row => {
                             ansPrecodeParams.push([
                                 row.qualification_id,
@@ -89,7 +88,7 @@ class Purespectrum {
                             ]);
                         });
                     } else {
-                        let range = row.range_sets;                            
+                        let range = row.range_sets[0];
                         data.filter(r=> r.question_type === 'open-ended' && (+range.from <= +r.option && +range.to >= +r.option))
                         .forEach(row => {
                             ansPrecodeParams.push([
@@ -99,10 +98,10 @@ class Purespectrum {
                         });
                     }
                 };
-                
+                console.log('======================')
+                console.log(ansPrecodeParams)
                 let sapSql = `INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES ?`;
-                const result = await db.query(sapSql, [ansPrecodeParams]);
-                console.log(result)
+                await db.query(sapSql, [ansPrecodeParams]);
             }
         }
         return true;

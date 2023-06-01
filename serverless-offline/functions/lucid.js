@@ -22,16 +22,20 @@ class Lucid {
             null
         ];
         var sql;
-        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL LIMIT 1`;
-
+        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL`;
         const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.survey_id]);
+
         if(surveyData.length) {
             let surveyId = surveyData[0].id;
-            let dlSql = `DELETE FROM surveys WHERE id = ?`;
-            await this.db.query(dlSql, [surveyId]);
+            const surveyIds = surveyData.map(sr => sr.id);
+            // let dlSql = `DELETE FROM surveys WHERE id = ?`;
+            // await this.db.query(dlSql, [surveyId]);
 
-            let qlSql = `DELETE FROM survey_qualifications WHERE survey_id = ?`
-            await this.db.query(qlSql, [surveyId]);
+            let dlSql = `DELETE FROM surveys WHERE id IN (?)`;
+            await this.db.query(dlSql, [surveyIds]);
+
+            let qlSql = `DELETE FROM survey_qualifications WHERE survey_id IN (?)`;
+            await this.db.query(qlSql, [surveyIds]);
 
             params = [surveyId, ...params];
             sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
