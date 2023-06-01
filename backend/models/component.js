@@ -67,7 +67,7 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
         beforeBulkUpdate: (component, options) => {
-          if (component.attributes.code.indexOf('-rev-') < 0) {
+          if (component.attributes?.code?.indexOf('-rev-') < 0) {
             const { start, end } = createCommentSignature(component.attributes.code);
             if (component.attributes.html.indexOf(start) < 0) {
               component.attributes.html = `${start} \n ${component.attributes.html}`;
