@@ -793,7 +793,10 @@ class MemberAuthController {
       ip: ip,
     };
     let transaction_resp = {};
-    if (request_data.withdrawal_type_id == 2) {
+    if (
+      withdrawal_type.slug == 'instant_paypal' ||
+      withdrawal_type.slug == 'skrill'
+    ) {
       withdrawal_req_data.note = 'Withdrawal request auto approved';
       withdrawal_req_data.transaction_made_by = request_data.member_id;
       withdrawal_req_data.status = 'approved';
@@ -807,29 +810,31 @@ class MemberAuthController {
           type: 'withdraw',
           amount_action: 'member_withdrawal',
           created_by: request_data.member_id,
-          status: 1,
+          status: withdrawal_type.slug == 'instant_paypal' ? 1 : 2,
         });
 
-      //paypal payment section
-      const paypal_class = new Paypal(req.session.company_portal.id);
-      const create_resp = await paypal_class.payout([
-        {
-          amount: withdrawal_amount,
-          currency: 'USD',
-          member_id: request_data.member_id,
-          email: request_data.email,
-          first_name: member.first_name,
-          last_name: member.last_name,
-          member_transaction_id: transaction_resp.transaction_id,
-        },
-      ]);
-      // console.log('create_resp', create_resp);
-      if (create_resp.status) {
-        await MemberTransaction.update(
-          { batch_id: create_resp.batch_id },
-          { where: { id: transaction_resp.transaction_id } }
-        );
+      if (withdrawal_type.slug == 'instant_paypal') {
+        const paypal_class = new Paypal(req.session.company_portal.id);
+        const create_resp = await paypal_class.payout([
+          {
+            amount: withdrawal_amount,
+            currency: 'USD',
+            member_id: request_data.member_id,
+            email: request_data.email,
+            first_name: member.first_name,
+            last_name: member.last_name,
+            member_transaction_id: transaction_resp.transaction_id,
+          },
+        ]);
+        // console.log('create_resp', create_resp);
+        if (create_resp.status) {
+          await MemberTransaction.update(
+            { batch_id: create_resp.batch_id, status: 2 },
+            { where: { id: transaction_resp.transaction_id } }
+          );
+        }
       }
+      //paypal payment section
     }
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
