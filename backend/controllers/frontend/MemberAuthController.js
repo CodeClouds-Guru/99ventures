@@ -427,7 +427,7 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        // console.log('----------------', req.body);
+        console.log('----------------', req.body);
 
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
@@ -442,7 +442,7 @@ class MemberAuthController {
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
-          // email_alerts: Joi.array().optional().label('Email Alerts'),
+          email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
 
@@ -475,10 +475,13 @@ class MemberAuthController {
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
-        member_status = await EmailAlert.saveEmailAlerts(
-          member_id,
-          email_alerts
-        );
+        if (email_alerts.length > 0) {
+          member_status = await EmailAlert.saveEmailAlerts(
+            member_id,
+            email_alerts
+          );
+        }
+
         // }
       }
       if (method === 'PUT') {
