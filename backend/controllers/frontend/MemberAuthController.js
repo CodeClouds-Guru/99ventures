@@ -202,7 +202,7 @@ class MemberAuthController {
           const res = await Member.create(data);
           //check for newsletter
           var newsletter = req.body.newsletter;
-          console.log('newsletter', newsletter);
+          // console.log('newsletter', newsletter);
           if (newsletter === 'true' || newsletter == true) {
             //save email alert
             await db.sequelize.query(
@@ -843,7 +843,7 @@ class MemberAuthController {
       member_id: request_data.member_id,
       action: 'Member cash withdrawal request',
     });
-    console.log(withdrawal_type, member);
+    // console.log(withdrawal_type, member);
     if (
       withdrawal_type.slug == 'instant_paypal' ||
       withdrawal_type.slug == 'skrill'
