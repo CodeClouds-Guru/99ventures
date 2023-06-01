@@ -42,6 +42,7 @@ function TicketingSystemPage(props) {
     const [previousTickets, setPreviousTIckets] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [memberNote, setMemberNote] = useState('');
+    const [ticketSubject, setTicketSubject] = useState('');
 
     const stateUser = useSelector(state => state.user);
     const navigate = useNavigate();
@@ -71,12 +72,13 @@ function TicketingSystemPage(props) {
                         variant: 'error', message: `File size allowed upto 2MB`
                     }))
                 }
+                e.target.value = '';
             })
-            // setInputFiles(allowed_files);
             setInputFiles(allowed_files.map(file => Object.assign(file, {
                 preview: URL.createObjectURL(file)
             })));
         } else {
+            e.target.value = '';
             dispatch(showMessage({ variant: 'error', message: 'Allowed upto 4 files at a time.' }));
         }
     };
@@ -164,6 +166,7 @@ function TicketingSystemPage(props) {
                     setMemberStatus(response.data.results.data.Member.status);
                     setPreviousTIckets(response.data.results.data.previous_tickets);
                     setQuickResponseOptions(response.data.results.data.auto_responders);
+                    setTicketSubject(response.data.results.data.subject)
                     if (response.data.results.data.is_read === 0) {
                         updateTicket({
                             value: 1,
@@ -266,6 +269,7 @@ function TicketingSystemPage(props) {
                                                 : 'heroicons-outline:arrow-sm-right'}
                                         </FuseSvgIcon>
                                         <span className="flex mx-4 font-medium capitalize">Tickets</span>
+                                        (Sub:&nbsp; <b>{ticketSubject}</b> )
                                     </Typography>
                                 </div>
                                 <div className="flex flex-col justify-center sm:justify-end p-0 m-0 pt-5">

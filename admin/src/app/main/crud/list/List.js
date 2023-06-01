@@ -537,12 +537,12 @@ function List(props) {
 		setDatepickerStatus(!datepickerStatus)
 		setDateRange({
 			startDate: moment(val.startDate),
-			endDate: moment(val.endDate)
+			endDate: moment(val.endDate).add(1, 'day')
 		});
 		const param = module === 'member-transactions' ? {
-			completed_at: [moment(val.startDate), moment(val.endDate)]
+			completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
 		} : {
-			created_at: [moment(val.startDate), moment(val.endDate)]
+			created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
 		}
 		setWhere({ ...where, ...param });
 	}
@@ -603,28 +603,6 @@ function List(props) {
 							)
 						}
 						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
-							{/* {module === 'withdrawal-requests' && 
-							<>
-							{datepickerStatus ? (
-								<div className="date-range-wrapper member-txn-list">
-									<DateRangePicker
-										wrapperClassName="filter-daterange-picker"
-										open={datepickerStatus}
-										toggle={() => setDatepickerStatus(!datepickerStatus)}
-										onChange={dateRangeSelected}
-									/>
-								</div>
-							):
-							<div onClick={setDatepickerStatus(!datepickerStatus)}>
-								<TextField
-									label="Select a date range"
-									variant="outlined"
-									disabled
-									value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
-								/>
-							</div>}
-							</>
-							} */}
 							{
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
@@ -644,8 +622,9 @@ function List(props) {
 											component={motion.div}
 											initial={{ y: -20, opacity: 0 }}
 											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center xl:w-1/5 sm:w-1/3 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
+											className="flex items-center xl:w-2/5 sm:w-1/3 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
 											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
+											onClick={() => setDatepickerStatus(!datepickerStatus)}
 										>
 											<FuseSvgIcon className="text-48 cursor-pointer" size={24} color="disabled">feather:calendar</FuseSvgIcon>
 											<Input
@@ -655,7 +634,6 @@ function List(props) {
 												disabled
 												disableUnderline
 												size="small"
-												onClick={() => setDatepickerStatus(!datepickerStatus)}
 												value={
 													dateRange && dateRange.startDate
 														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
