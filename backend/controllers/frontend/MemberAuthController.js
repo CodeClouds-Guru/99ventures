@@ -427,7 +427,7 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        // console.log('----------------', req.body);
+        console.log('----------------', req.body);
 
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
