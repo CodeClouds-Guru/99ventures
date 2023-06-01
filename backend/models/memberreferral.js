@@ -1,8 +1,6 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-const sequelizePaginate = require('sequelize-paginate')
+const { Model } = require('sequelize');
+const sequelizePaginate = require('sequelize-paginate');
 module.exports = (sequelize, DataTypes) => {
   class MemberReferral extends Model {
     /**
@@ -14,34 +12,41 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       MemberReferral.belongsTo(models.Member, {
         foreignKey: 'referral_id',
-      })
+      });
+      MemberReferral.belongsTo(models.Member, {
+        foreignKey: 'member_id',
+        as: 'member_referrer',
+      });
     }
   }
-  MemberReferral.init({
-    member_id: DataTypes.BIGINT,
-    referral_id: DataTypes.BIGINT,
-    referral_email:DataTypes.STRING,
-    geo_location: DataTypes.STRING,
-    ip: DataTypes.STRING,
-    join_date: "TIMESTAMP",
-    activity_date: "TIMESTAMP",
-    amount: DataTypes.DECIMAL(10, 2),
-    created_by: DataTypes.BIGINT,
-    updated_by: DataTypes.BIGINT,
-    deleted_by: DataTypes.BIGINT,
-    created_at: "TIMESTAMP",
-    updated_at: "TIMESTAMP",
-    deleted_at: "TIMESTAMP",
-  }, {
-    sequelize,
-    modelName: 'MemberReferral',
-    timestamps: true,
-    paranoid: true,
-    createdAt: "created_at", // alias createdAt as created_date
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    tableName: "member_referrals",
-  });
+  MemberReferral.init(
+    {
+      member_id: DataTypes.BIGINT,
+      referral_id: DataTypes.BIGINT,
+      referral_email: DataTypes.STRING,
+      geo_location: DataTypes.STRING,
+      ip: DataTypes.STRING,
+      join_date: 'TIMESTAMP',
+      activity_date: 'TIMESTAMP',
+      amount: DataTypes.DECIMAL(10, 2),
+      created_by: DataTypes.BIGINT,
+      updated_by: DataTypes.BIGINT,
+      deleted_by: DataTypes.BIGINT,
+      created_at: 'TIMESTAMP',
+      updated_at: 'TIMESTAMP',
+      deleted_at: 'TIMESTAMP',
+    },
+    {
+      sequelize,
+      modelName: 'MemberReferral',
+      timestamps: true,
+      paranoid: true,
+      createdAt: 'created_at', // alias createdAt as created_date
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
+      tableName: 'member_referrals',
+    }
+  );
   MemberReferral.fields = {
     id: {
       field_name: 'id',
@@ -173,7 +178,7 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-  }
-  sequelizePaginate.paginate(MemberReferral)
+  };
+  sequelizePaginate.paginate(MemberReferral);
   return MemberReferral;
 };
