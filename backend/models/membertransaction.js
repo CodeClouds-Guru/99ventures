@@ -382,7 +382,7 @@ module.exports = (sequelize, DataTypes) => {
     let referral_member = JSON.parse(
       JSON.stringify(
         await Member.findOne({
-          where: { id: member.member_referral_id },
+          where: { id: member.member_referral_id, status: 'member' },
           attributes: ['member_referral_id'],
           include: {
             model: MemberBalance,
@@ -393,8 +393,8 @@ module.exports = (sequelize, DataTypes) => {
         })
       )
     );
-
-    if (member.member_referral_id) {
+    // console.log('..................', referral_member);
+    if (member.member_referral_id && referral_member) {
       let config_data = await Setting.findOne({
         attributes: ['settings_value'],
         where: { settings_key: 'referral_percentage' },
@@ -427,16 +427,6 @@ module.exports = (sequelize, DataTypes) => {
         action: 'referral',
         transaction_amount: referral_amount,
       });
-
-      // await MemberNotification.addMemberNotification({
-      //   member_id: member.member_referral_id,
-      //   verbose:
-      //     'Referral bonus received for $' +
-      //     parseFloat(Math.abs(referral_amount)) +
-      //     ' on ' +
-      //     new Date().toLocaleDateString(),
-      //   action: 'referral_bonus',
-      // });
     }
     return {
       status: true,

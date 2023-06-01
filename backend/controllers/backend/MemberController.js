@@ -186,6 +186,7 @@ class MemberController extends Controller {
               attributes: ['referral_email', 'ip', 'member_id'],
               include: {
                 model: Member,
+                as: 'member_referrer',
                 attributes: [
                   'referral_code',
                   'first_name',
@@ -232,12 +233,15 @@ class MemberController extends Controller {
           });
           //get member referrer name
           var member_referrer = '';
+          var referrer_name = '';
           if (result.member_referral_id) {
             member_referrer = await this.model.findOne({
               where: { id: result.member_referral_id },
             });
+            // console.log(member_referrer);
             member_referrer =
               member_referrer.first_name + ' ' + member_referrer.last_name;
+            // console.log(referrer_name);
           }
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
@@ -272,7 +276,7 @@ class MemberController extends Controller {
       if (req.body.type == 'basic_details') {
         delete req.body.type;
         let member = await this.model.findOne({ where: { id: req.params.id } });
-        if(!req.body.username){
+        if (!req.body.username) {
           req.body.username = member.username;
         }
         const { error, value } = this.model.validate(req);
@@ -283,8 +287,13 @@ class MemberController extends Controller {
           throw errorObj;
         }
         //check member username
-        let member_username = await this.model.findOne({ where: { username: req.body.username,id: { [Op.ne]: req.params.id } } });
-        if(member_username){
+        let member_username = await this.model.findOne({
+          where: {
+            username: req.body.username,
+            id: { [Op.ne]: req.params.id },
+          },
+        });
+        if (member_username) {
           this.throwCustomError('Username already exists.', 422);
         }
         result = this.updateBasicDetails(req, member);
@@ -313,9 +322,9 @@ class MemberController extends Controller {
       }
     } catch (error) {
       console.error(error);
-      if(error.data && Array.isArray(error.data)){
+      if (error.data && Array.isArray(error.data)) {
         this.throwCustomError(error.data[0], 500);
-      }else{
+      } else {
         this.throwCustomError(error.data, 500);
       }
     }
@@ -437,10 +446,10 @@ class MemberController extends Controller {
       });
       return true;
     } catch (error) {
-      console.log(error)
-      if(error.data && Array.isArray(error.data)){
+      console.log(error);
+      if (error.data && Array.isArray(error.data)) {
         this.throwCustomError(error.data[0], 500);
-      }else{
+      } else {
         this.throwCustomError(error.data, 500);
       }
     }

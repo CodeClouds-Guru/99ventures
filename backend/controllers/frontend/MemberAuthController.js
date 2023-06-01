@@ -202,7 +202,7 @@ class MemberAuthController {
           const res = await Member.create(data);
           //check for newsletter
           var newsletter = req.body.newsletter;
-          console.log('newsletter', newsletter);
+          // console.log('newsletter', newsletter);
           if (newsletter === 'true' || newsletter == true) {
             //save email alert
             await db.sequelize.query(
@@ -427,7 +427,7 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        // console.log('----------------', req.body);
+        console.log('----------------', req.body);
 
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
@@ -442,7 +442,7 @@ class MemberAuthController {
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
-          // email_alerts: Joi.array().optional().label('Email Alerts'),
+          email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
 
@@ -475,10 +475,13 @@ class MemberAuthController {
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
-        member_status = await EmailAlert.saveEmailAlerts(
-          member_id,
-          email_alerts
-        );
+        if (email_alerts.length > 0) {
+          member_status = await EmailAlert.saveEmailAlerts(
+            member_id,
+            email_alerts
+          );
+        }
+
         // }
       }
       if (method === 'PUT') {
@@ -556,7 +559,7 @@ class MemberAuthController {
               }
               break;
           }
-          if(precode){
+          if (precode) {
             member_eligibility.push({
               member_id: member_id,
               survey_question_id: record.id,
@@ -566,7 +569,10 @@ class MemberAuthController {
         }
       });
     }
-    await MemberEligibilities.destroy({where: { member_id: member_id },force:true})
+    await MemberEligibilities.destroy({
+      where: { member_id: member_id },
+      force: true,
+    });
     await MemberEligibilities.bulkCreate(member_eligibility);
     return;
   }
@@ -790,7 +796,10 @@ class MemberAuthController {
       ip: ip,
     };
     let transaction_resp = {};
-    if (request_data.withdrawal_type_id == 2) {
+    if (
+      withdrawal_type.slug == 'instant_paypal' ||
+      withdrawal_type.slug == 'skrill'
+    ) {
       withdrawal_req_data.note = 'Withdrawal request auto approved';
       withdrawal_req_data.transaction_made_by = request_data.member_id;
       withdrawal_req_data.status = 'approved';
@@ -804,29 +813,31 @@ class MemberAuthController {
           type: 'withdraw',
           amount_action: 'member_withdrawal',
           created_by: request_data.member_id,
-          status: 1,
+          status: withdrawal_type.slug == 'instant_paypal' ? 1 : 2,
         });
 
-      //paypal payment section
-      const paypal_class = new Paypal(req.session.company_portal.id);
-      const create_resp = await paypal_class.payout([
-        {
-          amount: withdrawal_amount,
-          currency: 'USD',
-          member_id: request_data.member_id,
-          email: request_data.email,
-          first_name: member.first_name,
-          last_name: member.last_name,
-          member_transaction_id: transaction_resp.transaction_id,
-        },
-      ]);
-      // console.log('create_resp', create_resp);
-      if (create_resp.status) {
-        await MemberTransaction.update(
-          { batch_id: create_resp.batch_id },
-          { where: { id: transaction_resp.transaction_id } }
-        );
+      if (withdrawal_type.slug == 'instant_paypal') {
+        const paypal_class = new Paypal(req.session.company_portal.id);
+        const create_resp = await paypal_class.payout([
+          {
+            amount: withdrawal_amount,
+            currency: 'USD',
+            member_id: request_data.member_id,
+            email: request_data.email,
+            first_name: member.first_name,
+            last_name: member.last_name,
+            member_transaction_id: transaction_resp.transaction_id,
+          },
+        ]);
+        // console.log('create_resp', create_resp);
+        if (create_resp.status) {
+          await MemberTransaction.update(
+            { batch_id: create_resp.batch_id, status: 2 },
+            { where: { id: transaction_resp.transaction_id } }
+          );
+        }
       }
+      //paypal payment section
     }
     if (transaction_resp.status)
       withdrawal_req_data.member_transaction_id =
@@ -840,7 +851,7 @@ class MemberAuthController {
       member_id: request_data.member_id,
       action: 'Member cash withdrawal request',
     });
-
+    // console.log(withdrawal_type, member);
     if (
       withdrawal_type.slug == 'instant_paypal' ||
       withdrawal_type.slug == 'skrill'
