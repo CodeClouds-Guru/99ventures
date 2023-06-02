@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'
-import { Paper, Input, IconButton} from '@mui/material';
+import { Paper, Input, IconButton } from '@mui/material';
 import Chart from 'react-apexcharts';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import axios from 'axios';
@@ -25,14 +25,14 @@ const PieChart = () => {
     const { campaignId } = useParams();
     const [where, setWhere] = useState({});
     const [chartState, setChartState] = useState({
-        series : [0, 0, 0, 0],
+        series: [0, 0, 0, 0],
         options: {
             labels: Object.values(labels),
             chart: {
                 width: 500,
                 type: 'pie',
             },
-            colors:['#2e7d32', '#ed6c02', '#1e293b', '#f44336'],
+            colors: ['#2e7d32', '#ed6c02', '#1e293b', '#f44336'],
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -47,11 +47,11 @@ const PieChart = () => {
         }
     });
     const [campaignDetails, setCampaignDetails] = useState({});
-	const [datepickerStatus, setDatepickerStatus] = useState(false);
+    const [datepickerStatus, setDatepickerStatus] = useState(false);
     const [dateRange, setDateRange] = useState({
-		startDate: '',
-		endDate: '',
-	});
+        startDate: '',
+        endDate: '',
+    });
     const [showMsg, setShowMsg] = useState(true);
     const seriesData = {
         a: 0,
@@ -60,7 +60,7 @@ const PieChart = () => {
         d: 0
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         getDetails();
     }, [where]);
 
@@ -73,67 +73,67 @@ const PieChart = () => {
         };
 
         axios.get(jwtServiceConfig.getSingleCampaign + '/' + campaignId, { params })
-        .then(res => {
-            if(res.data.results.status && res.data.results.result.data.length){
-                const response = res.data.results.result;
-                setCampaignDetails(response.campaign_details);
-                response.data.map(data => {
-                    switch(data.campaign_status){
-                        case 0:
-                            seriesData.a += 1;
-                            break;
-                        case 1: 
-                            seriesData.b += 1;
-                            break;
-                        case 2: 
-                            seriesData.c += 1;
-                            break;
-                        case 3: 
-                            seriesData.d += 1;
-                            break;
-                        default:
-                        
-                    }
-                });
+            .then(res => {
+                if (res.data.results.status && res.data.results.result.data.length) {
+                    const response = res.data.results.result;
+                    setCampaignDetails(response.campaign_details);
+                    response.data.map(data => {
+                        switch (data.campaign_status) {
+                            case 0:
+                                seriesData.a += 1;
+                                break;
+                            case 1:
+                                seriesData.b += 1;
+                                break;
+                            case 2:
+                                seriesData.c += 1;
+                                break;
+                            case 3:
+                                seriesData.d += 1;
+                                break;
+                            default:
 
-                setChartState({
-                    ...chartState,
-                    series: Object.values(seriesData)
-                });
-                setShowMsg(false);
-            }
-        })
-        .catch(errors => {
-            dispatch(showMessage({ variant: 'error', message: errors.message}));
-            navigate('/app/campaigns');
-        });
+                        }
+                    });
+
+                    setChartState({
+                        ...chartState,
+                        series: Object.values(seriesData)
+                    });
+                    setShowMsg(false);
+                }
+            })
+            .catch(errors => {
+                dispatch(showMessage({ variant: 'error', message: errors.message }));
+                navigate('/app/campaigns');
+            });
     }
 
     const dateRangeSelected = (val) => {
-		setDatepickerStatus(!datepickerStatus)
-		setDateRange({
-			startDate: moment(val.startDate),
-			endDate: moment(val.endDate)
-		});
+        setDatepickerStatus(!datepickerStatus)
+        setDateRange({
+            startDate: moment(val.startDate),
+            endDate: moment(val.endDate).add(1, 'day')
+        });
         setWhere({
-			created_at: [moment(val.startDate), moment(val.endDate)]
-		});
-	}
+            created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+        });
+    }
 
     const handleClearDateRange = () => {
-		setDateRange({
-			startDate: null,
-			endDate: null
-		});
-		setWhere({});
-	}
+        setDateRange({
+            startDate: null,
+            endDate: null
+        });
+        setWhere({});
+    }
 
     return (
-        <div>            
+        <div>
             {
                 showMsg ? (
                     <div className="flex justify-center items-center flex-col py-200">
-                        <IconButton color="primary" aria-label="Warning" component="span" sx={{backgroundColor: 'rgba(30, 41, 59, 0.04)', width: '150px', height: '150px'}}>
+                        <IconButton color="primary" aria-label="Warning" component="span" sx={{ backgroundColor: 'rgba(30, 41, 59, 0.04)', width: '150px', height: '150px' }}>
                             <FuseSvgIcon className="text-48" size={80} color="action">material-outline:warning_amber</FuseSvgIcon>
                         </IconButton>
                         <p>No records there.</p>
@@ -141,7 +141,7 @@ const PieChart = () => {
                 ) : (
                     <>
                         <div className='flex mb-16 w-full justify-between items-center w-full'>
-                            <CampaignDetails campaign={ campaignDetails } />                
+                            <CampaignDetails campaign={campaignDetails} />
                             <Paper
                                 component={motion.div}
                                 initial={{ y: -20, opacity: 0 }}
@@ -176,14 +176,14 @@ const PieChart = () => {
                             />
                         </div>
                         <div className="donut w-full flex justify-center">
-                            <Chart options={chartState.options} series={chartState.series} type="pie" width={600}/>
-                        </div> 
+                            <Chart options={chartState.options} series={chartState.series} type="pie" width={600} />
+                        </div>
                     </>
                 )
             }
-            
 
-            
+
+
         </div>
     );
 }

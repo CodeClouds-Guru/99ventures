@@ -195,6 +195,11 @@ class MemberController extends Controller {
                 ],
               },
             },
+            {
+              model: MemberPaymentInformation,
+              attributes: ['name', 'value'],
+              limit: 1,
+            },
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
@@ -233,7 +238,6 @@ class MemberController extends Controller {
           });
           //get member referrer name
           var member_referrer = '';
-          var referrer_name = '';
           if (result.member_referral_id) {
             member_referrer = await this.model.findOne({
               where: { id: result.member_referral_id },
@@ -243,11 +247,18 @@ class MemberController extends Controller {
               member_referrer.first_name + ' ' + member_referrer.last_name;
             // console.log(referrer_name);
           }
+          // console.log(req.headers);
+          var referral_link =
+            req.headers.host +
+            '/login?referral_code=' +
+            result.referral_code +
+            '#signup';
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
           result.setDataValue('membership_tier', membership_tier);
           result.setDataValue('member_referrer', member_referrer);
+          result.setDataValue('referral_link', referral_link);
         } else {
           //get all email alerts
           email_alerts = await EmailAlert.getEmailAlertList(member_id);
@@ -307,6 +318,12 @@ class MemberController extends Controller {
         let member_id = req.params.id;
         let email_alerts = req.body.email_alerts;
         result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
+        delete req.body.type;
+      } else if (req.body.type == 'payment_email') {
+        await MemberPaymentInformation.updatePaymentInformation({
+          member_id: req.params.id,
+          payment_email: req.body.email,
+        });
         delete req.body.type;
       } else {
         // console.error(error);

@@ -96,13 +96,13 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       field_name: 'status',
       db_name: 'status',
-      type: 'text',
+      type: 'switch',
       placeholder: 'Status',
       listing: false,
-      show_in_form: false,
+      show_in_form: true,
       sort: true,
-      required: true,
-      value: '',
+      required: false,
+      value: false,
       width: '50',
       searchable: false,
     },
@@ -137,7 +137,8 @@ module.exports = (sequelize, DataTypes) => {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
       currency_percent: Joi.optional().label('Currency percent'),
-      logo: Joi.optional().allow('').label('Logo')
+      logo: Joi.optional().allow('').label('Logo'),
+      status: Joi.required().label('Status')
     })
     return schema.validate(req.body)
   }

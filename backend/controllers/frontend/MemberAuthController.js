@@ -48,7 +48,7 @@ class MemberAuthController {
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
-    this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
+    // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   }
@@ -434,7 +434,7 @@ class MemberAuthController {
           last_name: Joi.string().required().label('Last Name'),
           username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
-          zipcode: Joi.number().required().label('Zipcode'),
+          zipcode: Joi.required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
@@ -442,7 +442,7 @@ class MemberAuthController {
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
-          // email_alerts: Joi.array().optional().label('Email Alerts'),
+          email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
         const { error, value } = schema.validate(req.body);
 
@@ -475,10 +475,13 @@ class MemberAuthController {
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
-        member_status = await EmailAlert.saveEmailAlerts(
-          member_id,
-          email_alerts
-        );
+        if (email_alerts.length > 0) {
+          member_status = await EmailAlert.saveEmailAlerts(
+            member_id,
+            email_alerts
+          );
+        }
+
         // }
       }
       if (method === 'PUT') {
@@ -776,9 +779,8 @@ class MemberAuthController {
       };
     }
 
-    await this.updatePaymentInformation({
+    await MemberPaymentInformation.updatePaymentInformation({
       member_id: request_data.member_id,
-      payment_method_id: withdrawal_type.payment_method_id,
       payment_email: request_data.email,
     });
     let withdrawal_req_data = {
@@ -1039,38 +1041,38 @@ class MemberAuthController {
   }
 
   //payment information update
-  async updatePaymentInformation(data) {
-    await MemberPaymentInformation.update(
-      {
-        status: 0,
-      },
-      {
-        where: {
-          member_id: data.member_id,
-        },
-      }
-    );
-    let payment_methods = await PaymentMethod.findAll({
-      where: { status: 1 },
-      attributes: ['id'],
-    });
-    // console.log(payment_methods);
-    if (payment_methods) {
-      payment_methods = payment_methods.map((methods) => {
-        return {
-          member_id: data.member_id,
-          payment_method_id: methods.id,
-          name: 'email',
-          value: data.payment_email,
-          created_by: data.member_id,
-          status: 1,
-        };
-      });
+  // async updatePaymentInformation(data) {
+  //   await MemberPaymentInformation.update(
+  //     {
+  //       status: 0,
+  //     },
+  //     {
+  //       where: {
+  //         member_id: data.member_id,
+  //       },
+  //     }
+  //   );
+  //   let payment_methods = await PaymentMethod.findAll({
+  //     where: { status: 1 },
+  //     attributes: ['id'],
+  //   });
+  //   // console.log(payment_methods);
+  //   if (payment_methods) {
+  //     payment_methods = payment_methods.map((methods) => {
+  //       return {
+  //         member_id: data.member_id,
+  //         payment_method_id: methods.id,
+  //         name: 'email',
+  //         value: data.payment_email,
+  //         created_by: data.member_id,
+  //         status: 1,
+  //       };
+  //     });
 
-      //bulck create isp list
-      await MemberPaymentInformation.bulkCreate(payment_methods);
-    }
-    return true;
-  }
+  //     //bulck create isp list
+  //     await MemberPaymentInformation.bulkCreate(payment_methods);
+  //   }
+  //   return true;
+  // }
 }
 module.exports = MemberAuthController;
