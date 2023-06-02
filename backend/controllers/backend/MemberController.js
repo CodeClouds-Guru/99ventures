@@ -247,9 +247,12 @@ class MemberController extends Controller {
               member_referrer.first_name + ' ' + member_referrer.last_name;
             // console.log(referrer_name);
           }
-
+          // console.log(req.headers);
           var referral_link =
-            '/login?referral_code=' + result.referral_code + '#signup';
+            req.headers.host +
+            '/login?referral_code=' +
+            result.referral_code +
+            '#signup';
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
