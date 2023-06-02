@@ -27,7 +27,7 @@ class CintController {
                 });
                 if(member){
                     // const queryString = new URLSearchParams(req.query).toString();
-                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=&ssi=${member.username}`
+                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${sc_request.ip}&ssi=${member.username}`
                     const cintObj = new Cint();
                     const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
                     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
