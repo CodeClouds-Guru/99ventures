@@ -50,7 +50,7 @@ class SettingController extends Controller {
         company_portal_id: site_id,
       };
       if (type == 'member') {
-        where['settings_key'] = ['referral_percentage', 'registration_bonus'];
+        where['settings_key'] = ['referral_percentage', 'registration_bonus','referral_status'];
       } else {
         where['settings_key'] = [
           'file_manager_configuration',
