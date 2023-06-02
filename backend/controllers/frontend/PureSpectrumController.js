@@ -8,8 +8,7 @@ const {
     MemberEligibilities
 } = require('../../models');
 const PurespectrumHelper = require('../../helpers/Purespectrum')
-const {Op} = require('sequelize');
-
+const { Op } = require('sequelize')
 class PureSpectrumController {
 
     constructor(){
@@ -19,13 +18,13 @@ class PureSpectrumController {
     }
 
     index = (req, res) => {
-        // if(!req.session.member) {
-        //     res.status(401).json({
-        //         status: false,
-        //         message: 'Unauthorized!'
-        //     });
-        //     return;
-        // }
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -61,35 +60,73 @@ class PureSpectrumController {
          * check and get member's eligibility
          */
         const eligibilities = await MemberEligibilities.findAll({
-            attributes: ['survey_question_id', 'precode_id', 'text'],
+            attributes: ['survey_question_id', 'precode_id', 'text', 'id'],
             where: {
                 member_id: memberId
             },
-            include: [{
-                model: SurveyQuestion,
-                attributes: ['id', 'survey_provider_question_id', 'question_type'],
-                where: {
-                    survey_provider_id: provider.id
+            include: [
+                {
+                    model: SurveyQuestion,
+                    attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                },
+                {
+                    model: Member,
+                    attributes: ['username']
+                },
+                {
+                    model: SurveyAnswerPrecodes,
+                    attributes: ['id', 'option', 'precode'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
                 }
-            }, {
-                model: Member,
-                attributes: ['username']
-            }]
+            ]
         });
 
         if (eligibilities) {
-            const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerCodes = eligibilities.map(eg => eg.precode_id);
+            /** Get Open Ended QnA Start */
+            const eligibilityIds = eligibilities.map(eg => eg.id);
+            const openEndedData =  await MemberEligibilities.findAll({
+                attributes: ['survey_question_id', 'precode_id', 'open_ended_value'],
+                where: {
+                    member_id: memberId,
+                    id: {
+                        [Op.notIn]: eligibilityIds
+                    }
+                },
+                include: {
+                    model: SurveyQuestion,
+                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                }
+            });
+            /** end */
             
-
-            if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
+            const matchingQuestionIds = eligibilities.map(eg => eg.survey_question_id);            
+            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
+            
+            if (matchingAnswerIds.length && matchingQuestionIds.length) {
+                /** Query String Formation Start */
                 const queryString = {
                     ps_supplier_respondent_id: eligibilities[0].Member.username,
                     ps_supplier_sid: Date.now()
                 };
                 eligibilities.forEach(eg => {
-                    queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
+                    queryString[eg.SurveyAnswerPrecode.precode] = eg.SurveyAnswerPrecode.option
                 });
+                if(openEndedData && openEndedData.length) {
+                    openEndedData.forEach(eg => {
+                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
+                        matchingQuestionIds.push(eg.SurveyQuestion.id);
+                    });
+                }
+
+                /** End */
                 const generateQueryString = new URLSearchParams(queryString).toString();
 
                 const surveys = await Survey.findAll({
@@ -106,9 +143,7 @@ class PureSpectrumController {
                             model: SurveyAnswerPrecodes,
                             attributes: ['id', 'option', 'precode'],
                             where: {
-                                option: {
-                                    [Op.in]: matchingAnswerCodes // [111, 30]
-                                }
+                                id: matchingAnswerIds
                             },
                             required: true,
                             include: [
@@ -116,16 +151,14 @@ class PureSpectrumController {
                                     model: SurveyQuestion,
                                     attributes: ['id'],
                                     where: {
-                                        id: {
-                                            [Op.in]: [8683, 8682, 8677]
-                                        }
+                                        id: matchingQuestionIds
                                     }
                                 }
                             ],
                         }
                     }
                 });
-
+                
                 if(surveys && surveys.length){
                     var surveyHtml = '';
                     for (let survey of surveys) {
@@ -202,7 +235,7 @@ class PureSpectrumController {
                     survey_number: queryString.survey_number
                 }
             });
-            req.session.flash = { error: 'Sorry! this survey has been closed.', redirect_url: '/purespectrum' };
+            req.session.flash = { error: 'Sorry! this survey has been closed.', redirect_url: '/pure-spectrum' };
             res.redirect('/notice');
         }
     }
