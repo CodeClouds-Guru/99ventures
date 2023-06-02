@@ -137,6 +137,8 @@ const MemberDetails = () => {
     const [surveyDetails, setSurveyDetails] = useState([]);
     const [loader, setLoader] = useState(true);
     const [statuslessNote, setStatuslessNote] = useState(false);
+    const [editPaymentEmail, setEditPaymentEmail] = useState(false);
+    const [paymentEmail, setPaymentEmail] = useState('');
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -251,6 +253,7 @@ const MemberDetails = () => {
                         setStatusNote('');
                     } else {
                         setEditMode(false);
+                        setEditPaymentEmail(false);
                     }
                     getMemberData(false);
                 }
@@ -540,11 +543,34 @@ const MemberDetails = () => {
                             </ListItem>
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
-                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Payment Emails:</Typography>
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Payment Email:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
-                                        {memberData.payment_email ? memberData.MemberTransactions[0].MemberPaymentInformation.value : '--'}
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={editPaymentEmail ?
+                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
+                                        <TextField
+                                            value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
+                                            onChange={(e) => { setPaymentEmail(e.target.value); }}
+                                            variant="standard"
+                                        />
+                                        <Tooltip title="Cancel" placement="top-start" >
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(false)}>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Save payment email" placement="top-start" >
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Typography>
+                                    :
+                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
+                                        {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
+                                        <Tooltip title="Change Payment Email" placement="top-start">
+                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
+                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                            </IconButton>
+                                        </Tooltip>
                                     </Typography>
                                 } />
                             </ListItem>
@@ -571,15 +597,36 @@ const MemberDetails = () => {
                             </ListItem>
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    <div className="items-center">
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            {memberData.referral_link ?? '--'}
+                                        </Typography>
+                                        {
+                                            (memberData.referral_link) && (
+                                                <Tooltip title="Click to copy" placement="right">
+                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
+                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )
+                                        }
+                                    </div>
+                                } />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referrer:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    (memberData.MemberReferral && memberData.MemberReferral.Member) ? (
+                                    (memberData.MemberReferral && memberData.member_referral_id && memberData.member_referrer) ? (
                                         <div className='flex items-center'>
                                             <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
-                                                {memberData.MemberReferral.Member.first_name} {memberData.MemberReferral.Member.last_name} ({memberData.MemberReferral.ip})
+                                                {memberData.member_referrer} ({memberData.MemberReferral.ip})
                                             </Typography>
-                                            <Link to={`/app/members/${memberData.MemberReferral.member_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
+                                            <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
                                                 <IconButton color="primary" aria-label="Filter" component="span">
                                                     <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:external-link</FuseSvgIcon>
                                                 </IconButton>
