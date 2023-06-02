@@ -24,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
       settings_value: {
         type: DataTypes.TEXT,
         get() {
-          return JSON.parse(this.getDataValue("settings_value")) || "";
+          if(this.getDataValue("settings_value") === '0' || this.getDataValue("settings_value") == 0){
+            return this.getDataValue("settings_value")
+          }else{
+            return JSON.parse(this.getDataValue("settings_value")) || "";
+          }
+          
         },
         set(value) {
           if (typeof value !== "string")
