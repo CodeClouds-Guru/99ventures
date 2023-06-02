@@ -36,5 +36,39 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'member_payment_informations',
     }
   );
+  MemberPaymentInformation.updatePaymentInformation = async (data) => {
+    const { PaymentMethod } = require('../models/index');
+    await MemberPaymentInformation.update(
+      {
+        status: 0,
+      },
+      {
+        where: {
+          member_id: data.member_id,
+        },
+      }
+    );
+    let payment_methods = await PaymentMethod.findAll({
+      where: { status: 1 },
+      attributes: ['id'],
+    });
+    // console.log(payment_methods);
+    if (payment_methods) {
+      payment_methods = payment_methods.map((methods) => {
+        return {
+          member_id: data.member_id,
+          payment_method_id: methods.id,
+          name: 'email',
+          value: data.payment_email,
+          created_by: data.member_id,
+          status: 1,
+        };
+      });
+
+      //bulck create isp list
+      await MemberPaymentInformation.bulkCreate(payment_methods);
+    }
+    return true;
+  };
   return MemberPaymentInformation;
 };

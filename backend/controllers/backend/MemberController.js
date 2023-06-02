@@ -195,6 +195,11 @@ class MemberController extends Controller {
                 ],
               },
             },
+            {
+              model: MemberPaymentInformation,
+              attributes: ['name', 'value'],
+              limit: 1,
+            },
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
@@ -307,6 +312,12 @@ class MemberController extends Controller {
         let member_id = req.params.id;
         let email_alerts = req.body.email_alerts;
         result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
+        delete req.body.type;
+      } else if (req.body.type == 'payment_email') {
+        await MemberPaymentInformation.updatePaymentInformation({
+          member_id: req.params.id,
+          payment_email: req.body.email,
+        });
         delete req.body.type;
       } else {
         // console.error(error);
