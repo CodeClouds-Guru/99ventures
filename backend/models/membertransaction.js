@@ -243,8 +243,9 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberTransactionAndBalance = async (data) => {
     const db = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
-    const { MemberNotification } = require('../models/index');
+    const { MemberNotification,Member,Setting } = require('../models/index');
 
+    let member = await Member.findOne({where:{id:data.member_id}})
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
       {
@@ -278,11 +279,17 @@ module.exports = (sequelize, DataTypes) => {
 
       //referral member section
       if (data.type === 'credited') {
-        let referral_data = await MemberTransaction.referralAmountUpdate(
-          data.member_id,
-          data.amount,
-          transaction.id
-        );
+        let config_data = await Setting.findOne({
+          attributes: ['settings_value'],
+          where: { settings_key: 'referral_status',company_portal_id:member.company_portal_id },
+        });
+        if(parseInt(config_data.dataValues.settings_value) == 1){
+          let referral_data = await MemberTransaction.referralAmountUpdate(
+              data.member_id,
+              data.amount,
+              transaction.id
+            );
+        }
       }
     }
 
@@ -397,7 +404,7 @@ module.exports = (sequelize, DataTypes) => {
     if (member.member_referral_id && referral_member) {
       let config_data = await Setting.findOne({
         attributes: ['settings_value'],
-        where: { settings_key: 'referral_percentage' },
+        where: { settings_key: 'referral_percentage',company_portal_id:member.company_portal_id },
       });
       let referral_amount =
         (modified_total_earnings *
