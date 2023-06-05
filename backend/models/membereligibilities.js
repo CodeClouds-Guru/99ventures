@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      MemberEligibilities.belongsTo(models.SurveyAnswerPrecodes, {
+        foreignKey: 'precode_id'
+      });
+
       MemberEligibilities.belongsTo(models.SurveyQuestion, {
         foreignKey: 'survey_question_id'
       });
@@ -23,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       member_id: DataTypes.BIGINT,
       survey_question_id: DataTypes.BIGINT,
       precode_id: DataTypes.BIGINT,
+      open_ended_value: DataTypes.STRING,
       text: DataTypes.TEXT,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',

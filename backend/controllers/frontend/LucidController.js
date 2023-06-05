@@ -21,6 +21,13 @@ class LucidController {
     }
 
     index = (req, res) => {
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -58,29 +65,71 @@ class LucidController {
          * check and get member's eligibility
          */
         const eligibilities = await MemberEligibilities.findAll({
-            attributes: ['survey_question_id', 'precode_id', 'text'],
+            attributes: ['survey_question_id', 'precode_id', 'open_ended_value', 'id'],
             where: {
                 member_id: memberId
             },
-            include: [{
-                model: SurveyQuestion,
-                attributes: ['id', 'survey_provider_question_id', 'question_type'],
-                where: {
-                    survey_provider_id: provider.id
+            include: [
+                {
+                    model: SurveyQuestion,
+                    attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                },
+                {
+                    model: Member,
+                    attributes: ['username']
+                },
+                {
+                    model: SurveyAnswerPrecodes,
+                    attributes: ['id', 'option', 'precode'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
                 }
-            }, {
-                model: Member,
-                attributes: ['username']
-            }]
+            ]
         });
 
         if(eligibilities) {
-            const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerCodes = eligibilities
-                .filter(eg => eg.SurveyQuestion.question_type !== 'Numeric - Open-end') // Removed open ended question. We will not get the value from survey_answer_precodes
-                .map(eg => eg.precode_id);
+            /** Get Open Ended QnA Start */
+            const eligibilityIds = eligibilities.map(eg => eg.id);
+            const openEndedData =  await MemberEligibilities.findAll({
+                attributes: ['survey_question_id', 'open_ended_value'],
+                where: {
+                    member_id: memberId,
+                    id: {
+                        [Op.notIn]: eligibilityIds
+                    }
+                },
+                include: [{
+                    model: SurveyQuestion,
+                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                }]
+            });
+            /** end */
 
-            if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
+            
+            const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
+
+            if (matchingAnswerIds.length && matchingQuestionIds.length) {
+                const queryString = {};
+                eligibilities.forEach(eg => {
+                    queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option
+                });
+                if(openEndedData && openEndedData.length) {
+                    openEndedData.forEach(eg => {
+                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
+                        matchingQuestionIds.push(eg.SurveyQuestion.id);
+
+                    });
+                }
+                const generateQueryString = new URLSearchParams(queryString).toString();
+                
                 const surveys = await Survey.findAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
@@ -95,7 +144,7 @@ class LucidController {
                             model: SurveyAnswerPrecodes,
                             attributes: ['id', 'option', 'precode'],
                             where: {
-                                option: matchingAnswerCodes // [111, 30]
+                                id: matchingAnswerIds
                             },
                             required: true,
                             include: [
@@ -103,8 +152,7 @@ class LucidController {
                                     model: SurveyQuestion,
                                     attributes: ['id', 'survey_provider_question_id'],
                                     where: {
-                                        id: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                        // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
+                                        id: matchingQuestionIds
                                     }
                                 }
                             ],
@@ -113,12 +161,6 @@ class LucidController {
                 });
                 
                 if(surveys.length){
-                    const queryString = {};
-                    eligibilities.map(eg => {
-                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
-                    });
-                    const generateQueryString = new URLSearchParams(queryString).toString();
-                    
                     var surveyHtml = '';
                     for (let survey of surveys) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;

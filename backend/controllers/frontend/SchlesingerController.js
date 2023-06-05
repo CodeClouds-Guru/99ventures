@@ -8,7 +8,7 @@ const {
     MemberEligibilities
 } = require('../../models');
 const SchlesingerHelper = require('../../helpers/Schlesinger');
-
+const { Op } = require('sequelize')
 class SchlesingerController {
 
     constructor() {
@@ -62,20 +62,30 @@ class SchlesingerController {
              * check and get member's eligibility
              */
             const eligibilities = await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'precode_id', 'text'],
+                attributes: ['survey_question_id', 'precode_id', 'text', 'id'],
                 where: {
                     member_id: memberId
                 },
-                include: [{
-                    model: SurveyQuestion,
-                    attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
-                    where: {
-                        survey_provider_id: provider.id
+                include: [
+                    {
+                        model: SurveyQuestion,
+                        attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                        where: {
+                            survey_provider_id: provider.id
+                        }
+                    },
+                    {
+                        model: Member,
+                        attributes: ['username']
+                    },
+                    {
+                        model: SurveyAnswerPrecodes,
+                        attributes: ['id', 'option', 'precode'],
+                        where: {
+                            survey_provider_id: provider.id
+                        }
                     }
-                }, {
-                    model: Member,
-                    attributes: ['username']
-                }]
+                ]
             });
             if (!eligibilities) {
                 res.json({
@@ -85,12 +95,46 @@ class SchlesingerController {
                 return;
             }
 
-            const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerCodes = eligibilities
-                .filter(eg => eg.SurveyQuestion.question_type !== "open ended") // Removed open ended question. We will not get the value from survey_answer_precodes
-                .map(eg => eg.precode_id);
+            const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
 
-            if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
+            /** Get Open Ended QnA Start */
+            const eligibilityIds = eligibilities.map(eg => eg.id);
+            const openEndedData =  await MemberEligibilities.findAll({
+                attributes: ['survey_question_id', 'open_ended_value'],
+                where: {
+                    member_id: memberId,
+                    id: {
+                        [Op.notIn]: eligibilityIds
+                    }
+                },
+                include: {
+                    model: SurveyQuestion,
+                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                }
+            });
+            /** end */
+
+            /** Query String Formation Start */
+            const queryString = {
+                uid: eligibilities[0].Member.username
+            };
+            eligibilities.forEach(eg => {
+                queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id;
+            });
+            if(openEndedData && openEndedData.length) {
+                openEndedData.forEach(eg => {
+                    queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
+                    matchingQuestionIds.push(eg.SurveyQuestion.id);
+                });
+            }
+            /** End */
+            const generateQueryString = new URLSearchParams(queryString).toString();
+
+            if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 const surveys = await Survey.findAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
@@ -100,27 +144,27 @@ class SchlesingerController {
                     include: {
                         model: SurveyQualification,
                         attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,
+                        required: true,                        
                         include: {
                             model: SurveyAnswerPrecodes,
                             attributes: ['id', 'option', 'precode'],
                             where: {
-                                option: matchingAnswerCodes // [genderCode, age]
+                                id: matchingAnswerIds
                             },
                             required: true,
                             include: [
                                 {
                                     model: SurveyQuestion,
-                                    attributes: ['id', 'name', 'survey_provider_question_id'],
+                                    attributes: ['id'],
                                     where: {
-                                        id: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                        // id: [17365, 59, 60] // ['Age', 'Gender', 'Zipcode']
+                                        id: matchingQuestionIds 
                                     }
                                 }
                             ],
                         }
                     }
                 });
+
                 if (!surveys.length) {
                     res.json({
                         status: false,
@@ -128,14 +172,7 @@ class SchlesingerController {
                     });
                     return;
                 }
-                const queryString = {
-                    uid: eligibilities[0].Member.username
-                };
-                eligibilities.map(eg => {
-                    queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
-                });
-                const generateQueryString = new URLSearchParams(queryString).toString();
-
+                
                 var surveyHtml = '';
                 for (let survey of surveys) {
                     let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
@@ -146,7 +183,7 @@ class SchlesingerController {
                                     <div class="d-flex justify-content-between">
                                         <h6 class="text-primary m-0">Exciting New Survey #${survey.survey_number}</h6>
                                     </div>
-                                    <div class="text-primary small">5 Minutes</div>
+                                    <div class="text-primary small">${survey.loi} Minutes</div>
                                     <div class="d-grid mt-1">
                                         <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
                                     </div>
