@@ -14,6 +14,9 @@ import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
 import CustomerLoader from '../../shared-components/customLoader/Index'
 
+const wordWrap = {
+    wordBreak: 'break-all'
+}
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
         fontSize: '1.2rem'
@@ -600,7 +603,7 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <div className="items-center">
+                                    <div className="flex items-center" style={wordWrap}>
                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                             {memberData.referral_link ?? '--'}
                                         </Typography>
