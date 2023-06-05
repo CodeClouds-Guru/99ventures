@@ -18,13 +18,13 @@ class SchlesingerController {
     }
 
     index = (req, res) => {
-        if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
-            return;
-        }
+        // if(!req.session.member) {
+        //     res.status(401).json({
+        //         status: false,
+        //         message: 'Unauthorized!'
+        //     });
+        //     return;
+        // }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -123,7 +123,7 @@ class SchlesingerController {
                 uid: eligibilities[0].Member.username
             };
             eligibilities.forEach(eg => {
-                queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id;
+                queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option;
             });
             if(openEndedData && openEndedData.length) {
                 openEndedData.forEach(eg => {
@@ -225,7 +225,7 @@ class SchlesingerController {
                     survey_number: surveyNumber
                 }
             });
-
+            
             if (data && data.original_json) {
                 const schObj = new SchlesingerHelper;
                 const result = await schObj.fetchSellerAPI('api/v2/survey/survey-quotas/' + surveyNumber);

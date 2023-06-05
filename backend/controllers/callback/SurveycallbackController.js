@@ -1,4 +1,5 @@
 const {
+	MemberSurvey,
 	MemberTransaction,
 	Member,
 	SurveyProvider,
@@ -17,6 +18,7 @@ class SurveycallbackController {
 	constructor() {
 		this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this);
 		this.syncSurvey = this.syncSurvey.bind(this);
+		this.memberTransaction = this.memberTransaction.bind(this)
 	}
 
 	async save(req, res) {
@@ -42,7 +44,7 @@ class SurveycallbackController {
 		} else if (provider === 'toluna') {
 			return await SurveycallbackController.prototype.tolunaPostback(req, res);
 		}
-		res.send(provider);
+		res.send('Provider not found!');
 	}
 
 	async syncSurvey(req, res) {
@@ -208,11 +210,16 @@ class SurveycallbackController {
 			attributes: ['id', 'username'],
 			where: {
 				username: username,
-			},
+			}
 		});
 		if (member) {
-			const provider = await SurveyProvider.findOne({
-				attributes: ['currency_percent'],
+			const survey = {
+				cpi: reward
+			}
+			await this.memberTransaction( survey, 'Cint', txnId, member, req.params );
+
+			/*const provider = await SurveyProvider.findOne({
+				attributes: ['currency_percent', 'id'],
 				where: {
 					name: 'Cint'
 				}
@@ -234,10 +241,18 @@ class SurveycallbackController {
 				created_by: null,
 				payload: JSON.stringify(req.query),
 			};
+
+			await MemberSurvey.create({
+				survey_provider_id: provider.id,
+				survey_number: txnId,
+				original_json: req.query,
+				completed_on: new Date()
+			}, { silent: true });
+
 			//   console.log('transaction_obj', transaction_obj);
 			let result = await MemberTransaction.updateMemberTransactionAndBalance(
 				transaction_obj
-			);
+			);*/
 			//event for shoutbox
 			let evntbus = eventBus.emit('happening_now', {
 				action: 'survey-and-offer-completions',
@@ -308,8 +323,9 @@ class SurveycallbackController {
 						},
 					});
 					if (member) {
-						const provider = await SurveyProvider.findOne({
-							attributes: ['currency_percent'],
+						await this.memberTransaction( survey, 'Purespectrum', surveyNumber, member, requestParam );
+						/*const provider = await SurveyProvider.findOne({
+							attributes: ['currency_percent', 'id'],
 							where: {
 								name: 'Purespectrum'
 							}
@@ -327,11 +343,16 @@ class SurveycallbackController {
 							type: 'credited',
 							amount_action: 'survey',
 							created_by: null,
-							payload: JSON.stringify(req.body),
-						};
-						await MemberTransaction.updateMemberTransactionAndBalance(
-							transaction_obj
-						);
+							payload: JSON.stringify(req.query),
+							survey_provider_id: provider.id,
+							survey_number: surveyNumber
+						};*/
+						// await MemberTransaction.updateMemberTransactionAndBalance(
+						// 	transaction_obj
+						// );
+
+						await SurveycallbackController.prototype.addMemberTransacrion(transaction_obj);
+
 						//event for shoutbox
 						let evntbus = eventBus.emit('happening_now', {
 							action: 'survey-and-offer-completions',
@@ -370,7 +391,7 @@ class SurveycallbackController {
 	 * Schlesinger Callback details integration
 	 */
 	async schlesingerPostBack(req, res) {
-		const queryData = req.query;
+		const queryData = req.query;		
 		const tmpVar = queryData.pid.split('-');
 		const surveyNumber = tmpVar[1];
 		if (queryData.status === 'complete') {
@@ -379,41 +400,17 @@ class SurveycallbackController {
 					attributes: ['cpi'],
 					where: {
 						survey_number: surveyNumber,
-					},
+					}
 				});
 				if (survey) {
 					let member = await Member.findOne({
 						attributes: ['id', 'username'],
 						where: {
 							username: queryData.uid,
-						},
-					});
-
-					if (member) {
-						const provider = await SurveyProvider.findOne({
-							attributes: ['currency_percent'],
-							where: {
-								name: 'Schlesinger'
-							}
-						});
-						const partnerAmount = survey.cpi;
-						let amount = survey.cpi;
-						if (partnerAmount != 0 && parseInt(provider.currency_percent) != 0) {
-							amount = (partnerAmount * 100) / parseInt(provider.currency_percent);
 						}
-						const transaction_obj = {
-							transaction_id: 'Schlesinger #'+surveyNumber,
-							member_id: member.id,
-							amount: amount,
-							note: 'Schlesinger survey (#' + surveyNumber + ') completion',
-							type: 'credited',
-							amount_action: 'survey',
-							created_by: null,
-							payload: JSON.stringify(req.query),
-						};
-						await MemberTransaction.updateMemberTransactionAndBalance(
-							transaction_obj
-						);
+					});
+					if (member) {
+						await this.memberTransaction( survey, 'Schlesinger', surveyNumber, member, queryData );
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`schlesinger-postback-errror.log`
@@ -427,8 +424,8 @@ class SurveycallbackController {
 				);
 				logger1.error(error);
 			}
+			res.json({ message: 'success' });
 		}
-		res.json({ message: 'success' });
 	}
 
 	/**
@@ -443,7 +440,7 @@ class SurveycallbackController {
 					attributes: ['cpi'],
 					where: {
 						survey_number: surveyNumber,
-					},
+					}
 				});
 				if (survey) {
 					const username = requestParam.pid;
@@ -451,10 +448,11 @@ class SurveycallbackController {
 						attributes: ['id', 'username'],
 						where: {
 							username: username,
-						},
+						}
 					});
 					if (member) {
-						const provider = await SurveyProvider.findOne({
+						await this.memberTransaction( survey, 'Lucid', surveyNumber, member, requestParam );
+						/*const provider = await SurveyProvider.findOne({
 							attributes: ['currency_percent'],
 							where: {
 								name: 'Lucid'
@@ -478,7 +476,7 @@ class SurveycallbackController {
 						};
 						await MemberTransaction.updateMemberTransactionAndBalance(
 							transaction_obj
-						);
+						);*/
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`lucid-postback-errror.log`
@@ -521,7 +519,12 @@ class SurveycallbackController {
 				});
 
 				if (member) {
-					const provider = await SurveyProvider.findOne({
+					const survey = {
+						cpi: (partnerAmount / 100)
+					}
+					await this.memberTransaction( survey, 'Toluna', surveyRef, member, requestBody );
+
+					/*const provider = await SurveyProvider.findOne({
 						attributes: ['currency_percent'],
 						where: {
 							name: 'Toluna'
@@ -544,7 +547,7 @@ class SurveycallbackController {
 					};
 					await MemberTransaction.updateMemberTransactionAndBalance(
 						transaction_obj
-					);
+					);*/
 				} else {
 					const tolunaLog = require('../../helpers/Logger')(
 						`schlesinger-postback-errror.log`
@@ -563,7 +566,52 @@ class SurveycallbackController {
 		return;
 	}
 
+	/**
+	 * Sync Member Transaction & Member Survey
+	 */
+	async memberTransaction( survey, providerName, surveyNumber, member, payload ) {
+		try{
+			const provider = await SurveyProvider.findOne({
+				attributes: ['currency_percent', 'id'],
+				where: {
+					name: providerName
+				}
+			});
+			
+			const partnerAmount = survey.cpi;
+			let amount = survey.cpi;			
+			if (partnerAmount != 0 && provider.currency_percent && parseInt(provider.currency_percent) != 0) {
+				amount = (partnerAmount * parseInt(provider.currency_percent)) / 100;
+			}
+			const params = {
+				transaction_id: providerName + ' #'+surveyNumber,
+				member_id: member.id,
+				amount: amount,
+				note: providerName + 'survey (#' + surveyNumber + ') completion',
+				type: 'credited',
+				amount_action: 'survey',
+				created_by: null,
+				payload: JSON.stringify(payload),
+				survey_provider_id: provider.id,
+				survey_number: surveyNumber
+			};
 
+			await MemberSurvey.create({
+				survey_provider_id: params.survey_provider_id,
+				survey_number: params.survey_number,
+				original_json: payload,
+				completed_on: new Date()
+			}, { silent: true });
+
+			await MemberTransaction.updateMemberTransactionAndBalance(
+				params
+			);
+		} catch (error) {
+			console.error(error)
+		} finally {
+			return true;
+		}
+	}
 }
 
 module.exports = SurveycallbackController;
