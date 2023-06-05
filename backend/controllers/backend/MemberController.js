@@ -489,7 +489,15 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
+    let total_earnings_credited = await db.sequelize.query(
+      "SELECT SUM(amount) as total FROM `member_transactions` WHERE type='credited' AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
     result.earnings = total_earnings;
+    result.total = total_earnings_credited[0].total;
 
     // result.total_adjustment = total_adjustment
     result.total_adjustment =

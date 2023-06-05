@@ -98,11 +98,11 @@ module.exports = (sequelize, DataTypes) => {
     let updated_on = new Date().toLocaleDateString();
 
     switch (data.action) {
-      case 'admin_adjustment':
-        notification_verbose =
-          'Admin has added $' + amount + ' to your wallet on ' + updated_on;
-        notification_action = 'admin_adjustment';
-        break;
+      // case 'admin_adjustment':
+      //   notification_verbose =
+      //     'Admin has added $' + amount + ' to your wallet on ' + updated_on;
+      //   notification_action = 'admin_adjustment';
+      //   break;
       case 'survey':
         notification_verbose =
           'Successful survey completion and $' +
@@ -111,14 +111,14 @@ module.exports = (sequelize, DataTypes) => {
           updated_on;
         notification_action = 'survey';
         break;
-      case 'referral':
-        notification_verbose =
-          'Referral Bonus of $' +
-          amount +
-          ' has been added to your wallet on ' +
-          updated_on;
-        notification_action = 'referral_bonus';
-        break;
+      // case 'referral':
+      //   notification_verbose =
+      //     'Referral Bonus of $' +
+      //     amount +
+      //     ' has been added to your wallet on ' +
+      //     updated_on;
+      //   notification_action = 'referral_bonus';
+      //   break;
       case 'member_withdrawal':
         notification_verbose =
           'Withdrawal amount of $' +
@@ -127,14 +127,14 @@ module.exports = (sequelize, DataTypes) => {
           updated_on;
         notification_action = 'member_withdrawal';
         break;
-      case 'reversed_transaction':
-        notification_verbose =
-          'Admin has reversed $' +
-          amount +
-          ' from your wallet on ' +
-          updated_on;
-        notification_action = 'reversed_transaction';
-        break;
+      // case 'reversed_transaction':
+      //   notification_verbose =
+      //     'Admin has reversed $' +
+      //     amount +
+      //     ' from your wallet on ' +
+      //     updated_on;
+      //   notification_action = 'reversed_transaction';
+      //   break;
       case 'registration_bonus':
         notification_verbose =
           'Registration bonus of $' +

@@ -345,12 +345,19 @@ const MemberDetails = () => {
             });
     }
 
-    const showBalance = () => {
-        if (memberData.total_earnings && memberData.total_earnings.earnings) {
-            const result = memberData.total_earnings.earnings.filter(item => item.amount_type === 'cash');
-            return result.length ? result[0].total_amount : 0
+    const showBalance = (type) => {
+        if (type === 'balance') {
+            if (memberData.total_earnings && memberData.total_earnings.earnings) {
+                const result = memberData.total_earnings.earnings.filter(item => item.amount_type === 'cash');
+                return result.length ? result[0].total_amount : 0
+            }
+        } else {
+            if (memberData.total_earnings && memberData.total_earnings.total) {
+                return memberData.total_earnings.total
+            }
         }
         return 0;
+
     }
 
     const getCountryName = (country_id) => {
@@ -807,11 +814,11 @@ const MemberDetails = () => {
                         }}
                     >
                         <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
-                            Balance: ${showBalance()} (Total Earnings)
+                            Balance: ${showBalance('balance')} (Total Earnings: ${showBalance('total')})
                         </Typography>
-                        <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
+                        {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
-                        </Typography>
+                        </Typography> */}
                         <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
                     </Box>
 
