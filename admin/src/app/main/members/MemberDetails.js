@@ -195,7 +195,7 @@ const MemberDetails = () => {
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status);
                     setSurveyDetails(result.survey);
-
+                    result.MemberPaymentInformations.length > 0 ? setPaymentEmail(result.MemberPaymentInformations[0].value) : '';
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
@@ -269,7 +269,13 @@ const MemberDetails = () => {
                 dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
             });
     }
-
+    const handleUpdatePaymentEmail = () => {
+        if (paymentEmail && Helper.validateEmail(paymentEmail)) {
+            updateMemberData({ type: 'payment_email', email: paymentEmail }, 'payment_email');
+        } else {
+            dispatch(showMessage({ variant: 'error', message: 'Enter valid payment email' }));
+        }
+    }
     const countryProps = {
         options: countryData,
         getOptionLabel: (option) => option.name,
@@ -575,7 +581,7 @@ const MemberDetails = () => {
                                     editPaymentEmail ? (
                                         <div className="flex items-center">
                                             <TextField
-                                                value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
+                                                value={paymentEmail}
                                                 onChange={(e) => { setPaymentEmail(e.target.value); }}
                                                 variant="standard"
                                             />
@@ -585,7 +591,7 @@ const MemberDetails = () => {
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Save payment email" placement="top-start" >
-                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => { handleUpdatePaymentEmail() }} >
                                                     <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
