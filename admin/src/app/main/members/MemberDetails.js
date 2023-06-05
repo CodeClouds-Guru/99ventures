@@ -14,6 +14,9 @@ import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
 import CustomerLoader from '../../shared-components/customLoader/Index'
 
+const wordWrap = {
+    wordBreak: 'break-all'
+}
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
         fontSize: '1.2rem'
@@ -192,7 +195,7 @@ const MemberDetails = () => {
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status);
                     setSurveyDetails(result.survey);
-
+                    result.MemberPaymentInformations.length > 0 ? setPaymentEmail(result.MemberPaymentInformations[0].value) : '';
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
@@ -210,7 +213,7 @@ const MemberDetails = () => {
     useEffect(() => {
         getMemberData();
     }, [location]);
-     
+
     /**
      * Phone no. Validation
      */
@@ -266,7 +269,13 @@ const MemberDetails = () => {
                 dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
             });
     }
-
+    const handleUpdatePaymentEmail = () => {
+        if (paymentEmail && Helper.validateEmail(paymentEmail)) {
+            updateMemberData({ type: 'payment_email', email: paymentEmail }, 'payment_email');
+        } else {
+            dispatch(showMessage({ variant: 'error', message: 'Enter valid payment email' }));
+        }
+    }
     const countryProps = {
         options: countryData,
         getOptionLabel: (option) => option.name,
@@ -336,12 +345,19 @@ const MemberDetails = () => {
             });
     }
 
-    const showBalance = () => {
-        if (memberData.total_earnings && memberData.total_earnings.earnings) {
-            const result = memberData.total_earnings.earnings.filter(item => item.amount_type === 'cash');
-            return result.length ? result[0].total_amount : 0
+    const showBalance = (type) => {
+        if (type === 'balance') {
+            if (memberData.total_earnings && memberData.total_earnings.earnings) {
+                const result = memberData.total_earnings.earnings.filter(item => item.amount_type === 'cash');
+                return result.length ? result[0].total_amount : 0
+            }
+        } else {
+            if (memberData.total_earnings && memberData.total_earnings.total) {
+                return memberData.total_earnings.total
+            }
         }
         return 0;
+
     }
 
     const getCountryName = (country_id) => {
@@ -370,7 +386,7 @@ const MemberDetails = () => {
             <div className="lg:w-1/3 xl:w-2/5">
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center justify-between'>
-                        
+
                         {
                             editMode ? (
                                 <TextField
@@ -399,8 +415,8 @@ const MemberDetails = () => {
                                 ><strong>{memberData.username}</strong> </Typography>
                             )
                         }
-                        
-                        <sub className={ editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
+
+                        <sub className={editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
                             {
                                 !editMode ? (
                                     <Tooltip title="Click to edit" placement="top-start">
@@ -572,7 +588,7 @@ const MemberDetails = () => {
                                     editPaymentEmail ? (
                                         <div className="flex items-center">
                                             <TextField
-                                                value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
+                                                value={paymentEmail}
                                                 onChange={(e) => { setPaymentEmail(e.target.value); }}
                                                 variant="standard"
                                             />
@@ -582,7 +598,7 @@ const MemberDetails = () => {
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Save payment email" placement="top-start" >
-                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => { handleUpdatePaymentEmail() }} >
                                                     <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
                                                 </IconButton>
                                             </Tooltip>
@@ -591,7 +607,7 @@ const MemberDetails = () => {
                                         <div className='flex items-center'>
                                             <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
                                                 {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
-                                                
+
                                             </Typography>
                                             <Tooltip title="Change Payment Email" placement="top-start">
                                                 <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
@@ -600,7 +616,7 @@ const MemberDetails = () => {
                                             </Tooltip>
                                         </div>
                                     )
-                                }/>
+                                } />
                             </ListItem>
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
@@ -628,20 +644,20 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <div className="items-center">                                        
+                                    <div className="items-center" style={wordWrap}>
                                         {
                                             (memberData.referral_link) ? (
                                                 <>
                                                     {
                                                         reflinkMode && (
                                                             <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                                                {memberData.referral_link }
+                                                                {memberData.referral_link}
                                                             </Typography>
                                                         )
-                                                    }    
-                                                    <Tooltip title={ memberData.referral_link } placement="top">
-                                                        <Button variant="contained" size="small" onClick={()=> setReflinkMode(!reflinkMode)}>{ !reflinkMode ? 'Show' : 'Hide' }</Button>
-                                                    </Tooltip>                                                    
+                                                    }
+                                                    <Tooltip title={memberData.referral_link} placement="top">
+                                                        <Button variant="contained" size="small" onClick={() => setReflinkMode(!reflinkMode)}>{!reflinkMode ? 'Show' : 'Hide'}</Button>
+                                                    </Tooltip>
                                                     <Tooltip title="Click to copy" placement="right">
                                                         <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
                                                             <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
@@ -691,13 +707,13 @@ const MemberDetails = () => {
                                                 onChange={
                                                     (e) => {
                                                         setMemberData({
-                                                        ...memberData,
-                                                        'MembershipTier': {
-                                                            name: e.target.value
-                                                        },
-                                                        'membership_tier_id': e.target.value
-                                                    })
-                                                }
+                                                            ...memberData,
+                                                            'MembershipTier': {
+                                                                name: e.target.value
+                                                            },
+                                                            'membership_tier_id': e.target.value
+                                                        })
+                                                    }
                                                 }
                                             >
                                                 <option value="">--Select--</option>
@@ -798,11 +814,11 @@ const MemberDetails = () => {
                         }}
                     >
                         <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
-                            Balance: ${showBalance()} (Total Earnings)
+                            Balance: ${showBalance('balance')} (Total Earnings: ${showBalance('total')})
                         </Typography>
-                        <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
+                        {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
-                        </Typography>
+                        </Typography> */}
                         <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
                     </Box>
 
