@@ -631,7 +631,11 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+<<<<<<< HEAD
                                     <div className="items-center" style={wordWrap}>
+=======
+                                    <div className="items-center">
+>>>>>>> be20b2c0 (Admin adjustment fixes)
                                         {
                                             (memberData.referral_link) ? (
                                                 <>
@@ -803,9 +807,9 @@ const MemberDetails = () => {
                         <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Balance: ${showBalance()} (Total Earnings)
                         </Typography>
-                        <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
+                        {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
-                        </Typography>
+                        </Typography> */}
                         <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
                     </Box>
 
