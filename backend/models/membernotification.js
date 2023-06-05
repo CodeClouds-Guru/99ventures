@@ -37,10 +37,15 @@ module.exports = (sequelize, DataTypes) => {
         get() {
           switch (this.action) {
             case 'survey_completed':
-              return '/earning-history';
+            case 'referral_bonus':
+            case 'admin_adjustment':
             case 'achievement_complete':
               return '/earning-history';
+            case 'payment_confirmation':
+            case 'member_withdrawal':
+              return '/withdrawal-history';
             case 'message_received':
+            case 'ticket_reply':
               return '/support-tickets';
             default:
               return '#';
@@ -55,10 +60,15 @@ module.exports = (sequelize, DataTypes) => {
         get() {
           switch (this.action) {
             case 'survey_completed':
+            case 'member_withdrawal':
+            case 'referral_bonus':
+            case 'payment_confirmation':
+            case 'admin_adjustment':
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationprizeicon.png';
             case 'achievement_complete':
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationbadgeicon.png';
             case 'message_received':
+            case 'ticket_reply':
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationfileicon.png';
             default:
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationfileicon.png';

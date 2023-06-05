@@ -18,6 +18,7 @@ module.exports = {
       message: {
         type: Sequelize.TEXT,
         allowNull: false,
+        charset: 'utf8mb4',
       },
       user_id: {
         type: Sequelize.BIGINT,
@@ -32,6 +33,9 @@ module.exports = {
       deleted_at: {
         type: 'TIMESTAMP'
       }
+    },{
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
   },
   async down(queryInterface, Sequelize) {

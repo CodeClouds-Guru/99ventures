@@ -142,6 +142,8 @@ const MemberDetails = () => {
     const [statuslessNote, setStatuslessNote] = useState(false);
     const [editPaymentEmail, setEditPaymentEmail] = useState(false);
     const [paymentEmail, setPaymentEmail] = useState('');
+    const [memberinfo, setMemberinfo] = useState({});
+    const [reflinkMode, setReflinkMode] = useState(false);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -197,8 +199,9 @@ const MemberDetails = () => {
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
-
-                    setMemberData({ ...result, membership_tier_id: result.MembershipTier.name, avatar: avatarUrl });
+                    setMemberData({ ...result, membership_tier_id: result.MembershipTier.id, avatar: avatarUrl });
+                    // We set the result info to the state. When user click on cancel edit btn then we will set the value on every input fields from this memberinfo state.
+                    setMemberinfo(result);
                 }
             })
             .catch(errors => {
@@ -234,7 +237,7 @@ const MemberDetails = () => {
      * Member's Data Update
      */
     const handleFormSubmit = () => {
-        const fields = ["first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "city", "country_id", "membership_tier_id", "phone_no", "gender"];
+        const fields = ["username", "first_name", "last_name", "country_code", "zip_code", "address_1", "address_2", "city", "country_id", "membership_tier_id", "phone_no", "gender"];
         const formdata = new FormData();
         formdata.append("avatar", avatarFile);
         formdata.append("type", 'basic_details');
@@ -351,11 +354,13 @@ const MemberDetails = () => {
 
     const handleCancelEdit = () => {
         setEditMode(false);
+
         /**
          * setAvatar setting initial avatar value. 
          * we set this because user may have edit the avatar after clicking the edit button.
          */
         setAvatar(memberData.avatar);
+        setMemberData({ ...memberinfo, membership_tier_id: memberinfo.MembershipTier.id, avatar: memberData.avatarUrl });
     }
 
     if (loader) {
@@ -368,19 +373,37 @@ const MemberDetails = () => {
             <div className="lg:w-1/3 xl:w-2/5">
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center justify-between'>
-                        <Typography
-                            variant="h5"
-                            sx={{
-                                marginRight: '10px',
-                                '@media screen and (max-width: 1400px)': {
-                                    fontSize: '2rem'
-                                },
-                                '@media screen and (max-width: 768px)': {
-                                    fontSize: '3rem'
-                                }
-                            }}
-                        ><strong>{memberData.username}</strong> </Typography>
-                        <sub>
+
+                        {
+                            editMode ? (
+                                <TextField
+                                    id="standard-helperText"
+                                    defaultValue={memberData.username}
+                                    variant="standard"
+                                    className="xl:w-full md:w-full lg:w-full"
+                                    placeholder="Last Name"
+                                    sx={textFieldStyle}
+                                    onChange={
+                                        (e) => setMemberData({ ...memberData, username: e.target.value })
+                                    }
+                                />
+                            ) : (
+                                <Typography
+                                    variant="h5"
+                                    sx={{
+                                        marginRight: '10px',
+                                        '@media screen and (max-width: 1400px)': {
+                                            fontSize: '2rem'
+                                        },
+                                        '@media screen and (max-width: 768px)': {
+                                            fontSize: '3rem'
+                                        }
+                                    }}
+                                ><strong>{memberData.username}</strong> </Typography>
+                            )
+                        }
+
+                        <sub className={editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
                             {
                                 !editMode ? (
                                     <Tooltip title="Click to edit" placement="top-start">
@@ -548,33 +571,38 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Payment Email:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={editPaymentEmail ?
-                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
-                                        <TextField
-                                            value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
-                                            onChange={(e) => { setPaymentEmail(e.target.value); }}
-                                            variant="standard"
-                                        />
-                                        <Tooltip title="Cancel" placement="top-start" >
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(false)}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Save payment email" placement="top-start" >
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Typography>
-                                    :
-                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
-                                        {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
-                                        <Tooltip title="Change Payment Email" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Typography>
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    editPaymentEmail ? (
+                                        <div className="flex items-center">
+                                            <TextField
+                                                value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
+                                                onChange={(e) => { setPaymentEmail(e.target.value); }}
+                                                variant="standard"
+                                            />
+                                            <Tooltip title="Cancel" placement="top-start" >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(false)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Save payment email" placement="top-start" >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    ) : (
+                                        <div className='flex items-center'>
+                                            <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
+                                                {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
+
+                                            </Typography>
+                                            <Tooltip title="Change Payment Email" placement="top-start">
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    )
                                 } />
                             </ListItem>
                             <ListItem disablePadding>
@@ -603,18 +631,27 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <div className="flex items-center" style={wordWrap}>
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                            {memberData.referral_link ?? '--'}
-                                        </Typography>
+                                    <div className="items-center" style={wordWrap}>
                                         {
-                                            (memberData.referral_link) && (
-                                                <Tooltip title="Click to copy" placement="right">
-                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
-                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
-                                                    </IconButton>
-                                                </Tooltip>
-                                            )
+                                            (memberData.referral_link) ? (
+                                                <>
+                                                    {
+                                                        reflinkMode && (
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                                {memberData.referral_link}
+                                                            </Typography>
+                                                        )
+                                                    }
+                                                    <Tooltip title={memberData.referral_link} placement="top">
+                                                        <Button variant="contained" size="small" onClick={() => setReflinkMode(!reflinkMode)}>{!reflinkMode ? 'Show' : 'Hide'}</Button>
+                                                    </Tooltip>
+                                                    <Tooltip title="Click to copy" placement="right">
+                                                        <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
+                                                            <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                            ) : '--'
                                         }
                                     </div>
                                 } />
@@ -649,29 +686,31 @@ const MemberDetails = () => {
                                                 sx={{ ...selectStyle, ...textFieldStyle }}
                                                 id="standard-select-currency-native"
                                                 select
-                                                value={memberData.MembershipTier ? memberData.MembershipTier.name : ''}
+                                                value={memberData.MembershipTier ? memberData.MembershipTier.id : ''}
                                                 SelectProps={{
                                                     native: true,
                                                 }}
                                                 variant="standard"
                                                 onChange={
-                                                    (e) => setMemberData({
-                                                        ...memberData,
-                                                        'MembershipTier': {
-                                                            name: e.target.value
-                                                        },
-                                                        'membership_tier_id': e.target.value
-                                                    })
+                                                    (e) => {
+                                                        setMemberData({
+                                                            ...memberData,
+                                                            'MembershipTier': {
+                                                                name: e.target.value
+                                                            },
+                                                            'membership_tier_id': e.target.value
+                                                        })
+                                                    }
                                                 }
                                             >
                                                 <option value="">--Select--</option>
                                                 {memberData.membership_tier.map(val => (
-                                                    <option value={val.id}>{val.name}</option>
+                                                    <option value={val.id} key={val.id}>{val.name}</option>
                                                 ))}
                                             </TextField>
                                         </div>
                                     ) : (
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.MembershipTier ? `Level ${memberData.MembershipTier.name}` : ''}</Typography>
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.MembershipTier ? memberData.MembershipTier.name : ''}</Typography>
                                     )
 
                                 } />
