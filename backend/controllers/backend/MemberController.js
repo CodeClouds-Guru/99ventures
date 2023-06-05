@@ -130,7 +130,7 @@ class MemberController extends Controller {
           options.include = [
             {
               model: MembershipTier,
-              attributes: ['name'],
+              attributes: ['id','name'],
             },
             {
               model: Country,
