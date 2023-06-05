@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       Survey.belongsToMany(models.MemberTransaction, {
         through: 'member_surveys',
         timestamps: false,
-        foreignKey: 'survey_id',
+        foreignKey: 'survey_number',
         otherKey: 'member_transaction_id',
       }),
       Survey.hasMany(models.SurveyQualification, {
