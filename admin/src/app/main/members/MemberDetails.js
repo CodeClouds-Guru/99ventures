@@ -140,6 +140,7 @@ const MemberDetails = () => {
     const [editPaymentEmail, setEditPaymentEmail] = useState(false);
     const [paymentEmail, setPaymentEmail] = useState('');
     const [memberinfo, setMemberinfo] = useState({});
+    const [reflinkMode, setReflinkMode] = useState(false);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -399,7 +400,7 @@ const MemberDetails = () => {
                             )
                         }
                         
-                        <sub className="xl:w-2/5 sm:w-2/5">
+                        <sub className={ editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
                             {
                                 !editMode ? (
                                     <Tooltip title="Click to edit" placement="top-start">
@@ -567,34 +568,39 @@ const MemberDetails = () => {
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Payment Email:</Typography>
                                 } />
-                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={editPaymentEmail ?
-                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
-                                        <TextField
-                                            value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
-                                            onChange={(e) => { setPaymentEmail(e.target.value); }}
-                                            variant="standard"
-                                        />
-                                        <Tooltip title="Cancel" placement="top-start" >
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(false)}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Save payment email" placement="top-start" >
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Typography>
-                                    :
-                                    <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
-                                        {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
-                                        <Tooltip title="Change Payment Email" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Typography>
-                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    editPaymentEmail ? (
+                                        <div className="flex items-center">
+                                            <TextField
+                                                value={memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : ''}
+                                                onChange={(e) => { setPaymentEmail(e.target.value); }}
+                                                variant="standard"
+                                            />
+                                            <Tooltip title="Cancel" placement="top-start" >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(false)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Save payment email" placement="top-start" >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} >
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    ) : (
+                                        <div className='flex items-center'>
+                                            <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
+                                                {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
+                                                
+                                            </Typography>
+                                            <Tooltip title="Change Payment Email" placement="top-start">
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        </div>
+                                    )
+                                }/>
                             </ListItem>
                             <ListItem disablePadding>
                                 <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
@@ -622,18 +628,27 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <div className="items-center">
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                            {memberData.referral_link ?? '--'}
-                                        </Typography>
+                                    <div className="items-center">                                        
                                         {
-                                            (memberData.referral_link) && (
-                                                <Tooltip title="Click to copy" placement="right">
-                                                    <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
-                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
-                                                    </IconButton>
-                                                </Tooltip>
-                                            )
+                                            (memberData.referral_link) ? (
+                                                <>
+                                                    {
+                                                        reflinkMode && (
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                                {memberData.referral_link }
+                                                            </Typography>
+                                                        )
+                                                    }    
+                                                    <Tooltip title={ memberData.referral_link } placement="top">
+                                                        <Button variant="contained" size="small" onClick={()=> setReflinkMode(!reflinkMode)}>{ !reflinkMode ? 'Show' : 'Hide' }</Button>
+                                                    </Tooltip>                                                    
+                                                    <Tooltip title="Click to copy" placement="right">
+                                                        <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
+                                                            <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:content_copy</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                            ) : '--'
                                         }
                                     </div>
                                 } />
