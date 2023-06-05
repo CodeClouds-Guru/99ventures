@@ -38,7 +38,7 @@ function ConfigurationContent() {
         toggle();
         setDateRange({
             startDate: moment(val.startDate),
-            endDate: moment(val.endDate)
+            endDate: moment(val.endDate).add(1, 'day')
         });
     }
 
