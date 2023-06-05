@@ -631,11 +631,7 @@ const MemberDetails = () => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-<<<<<<< HEAD
                                     <div className="items-center" style={wordWrap}>
-=======
-                                    <div className="items-center">
->>>>>>> be20b2c0 (Admin adjustment fixes)
                                         {
                                             (memberData.referral_link) ? (
                                                 <>
