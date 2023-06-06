@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes) => {
       show_in_form: true,
       sort: true,
       required: false,
-      value: false,
+      value: 0,
       width: '50',
       searchable: false,
     },
