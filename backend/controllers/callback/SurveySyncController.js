@@ -817,11 +817,17 @@ class SurveySyncController {
      */
     async pureSpectrumSurveyUpdate(req, res) {
         try{
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Purespectrum'
+                }
+            });
             const psObj = new PurespectrumHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number'],
                 where: {
-                    survey_provider_id: 3,
+                    survey_provider_id: provider.id,
                     status: psObj.getSurveyStatus(22)
                 }
             });
@@ -871,11 +877,17 @@ class SurveySyncController {
      */
     async schlesingerSurveyUpdate(req, res){
         try{
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Schlesinger'
+                }
+            });
             const psObj = new SchlesingerHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number'],
                 where: {
-                    survey_provider_id: 4,
+                    survey_provider_id: provider.id,
                     status: 'live'
                 }
             });
