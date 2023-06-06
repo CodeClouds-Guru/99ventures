@@ -74,6 +74,15 @@ router.post(
 );
 router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
 
+/**
+ * CRON PATH
+ */
+const SurveySyncControllerClass = require('../controllers/callback/SurveySyncController');
+const SurveySyncController = new SurveySyncControllerClass();
+router.post('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
+
+
+
 //paypal integration
 // router.post('/order-create', async (req, res) => {
 //   console.log('paypal order-create');

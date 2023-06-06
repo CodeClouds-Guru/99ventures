@@ -6,6 +6,7 @@ const { Op } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
 const SqsHelper = require('../../helpers/SqsHelper');
 const LucidHelper = require('../../helpers/Lucid');
+const { isBuffer } = require('lodash');
 
 class SurveySyncController {
 
@@ -801,10 +802,66 @@ class SurveySyncController {
 
         }
         catch(error) {
-            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+            const logger = require('../../helpers/Logger')(`purespectrum-sync-errror.log`);
 			logger.error(error);
             res.send(error)
         }
+    }
+
+    /**
+     * CRON
+     * Pure Spectrum - Old Survey disabled 
+     */
+    async pureSpectrumSurveyUpdate(req, res) {
+        try{
+            const psObj = new PurespectrumHelper;
+            const surveys = await Survey.findAll({
+                attributes: ['survey_number'],
+                where: {
+                    survey_provider_id: 3,
+                    status: psObj.getSurveyStatus(22)
+                }
+            });
+            var count = 0;
+            const interval = 10;
+            // const limit = 10;
+            const limit = surveys.length > interval ? surveys.length : interval;
+            const surveyNumber = [];
+            var loopSurveys = surveys.slice(0, limit)
+            
+            while(count < limit){
+                for(let survey of loopSurveys){
+                    try{
+                        const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
+                        if(surveyData.apiStatus === "success" && surveyData.survey.survey_status !== 22 ) {
+                            surveyNumber.push(survey.survey_number)
+                        }
+                    } catch (error) {
+                        surveyNumber.push(survey.survey_number)
+                    }
+                }
+                count = count+interval
+                loopSurveys = surveys.slice(count, interval+count)
+            }
+
+            if(surveyNumber.length) {
+                await Survey.update({
+                    status: psObj.getSurveyStatus(44),
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+            }
+            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+        }
+        catch(error) {
+            const logger = require('../../helpers/Logger')(`cron.log`);
+			logger.error(error);
+            res.send(error);
+        }
+
     }
 }
 
