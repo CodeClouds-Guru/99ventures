@@ -25,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'MemberSurvey',
     timestamps: false,
-    paranoid: false
+    paranoid: false,
+    tableName: 'member_surveys'
   });
   MemberSurvey.fields = {
     id: {
