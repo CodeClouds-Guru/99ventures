@@ -98,7 +98,7 @@ class WithdrawalRequestController extends Controller {
       options.include = [
         {
           model: Member,
-          attributes: ['first_name', 'last_name', 'username'],
+          attributes: ['first_name', 'last_name', 'username','admin_status'],
           where: { company_portal_id: company_portal_id },
         },
         {

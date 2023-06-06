@@ -185,15 +185,15 @@ module.exports = (sequelize, DataTypes) => {
           'verified',
           'pending'
         ),
-        get() {
-          let rawValue = this.getDataValue('admin_status') || null;
-          rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
-          return rawValue
-            .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-              return index == 0 ? word.toUpperCase() : word.toLowerCase();
-            })
-            .replace(/\s+/g, ' ');
-        },
+        // get() {
+        //   let rawValue = this.getDataValue('admin_status') || null;
+        //   rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
+        //   return rawValue
+        //     .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        //       return index == 0 ? word.toUpperCase() : word.toLowerCase();
+        //     })
+        //     .replace(/\s+/g, ' ');
+        // },
       },
     },
     {
@@ -443,6 +443,39 @@ module.exports = (sequelize, DataTypes) => {
         });
         if (data.length > 0) await MemberNote.bulkCreate(data);
       }
+      return result[0];
+    } catch (error) {
+      console.error(error);
+      // this.throwCustomError("Unable to save data", 500);
+    }
+  };
+
+  Member.changeAdminStatus = async (req) => {
+    const { MemberNote } = require('../models/index');
+
+    const value = req.body.value || '';
+    const field_name = req.body.field_name || '';
+    const id = req.params.id || null;
+    const member_ids = id
+      ? [id]
+      : Array.isArray(req.body.member_id)
+      ? req.body.member_id
+      : [req.body.member_id];
+    try {
+      
+      let result = await Member.update(
+        {
+          [field_name]: value,
+        },
+        {
+          where: {
+            id: {
+              [Op.in]: member_ids,
+            },
+          },
+          return: true,
+        }
+      );
       return result[0];
     } catch (error) {
       console.error(error);

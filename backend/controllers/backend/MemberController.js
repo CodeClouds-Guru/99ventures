@@ -112,6 +112,7 @@ class MemberController extends Controller {
             'country_code',
             'username',
             'status',
+            'admin_status',
             'zip_code',
             'phone_no',
             'avatar',
@@ -204,7 +205,8 @@ class MemberController extends Controller {
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
-
+          let admin_status = result.admin_status.replaceAll(' ', '_')
+          
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
 
@@ -260,6 +262,7 @@ class MemberController extends Controller {
           result.setDataValue('membership_tier', membership_tier);
           result.setDataValue('member_referrer', member_referrer);
           result.setDataValue('referral_link', referral_link);
+          // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
           email_alerts = await EmailAlert.getEmailAlertList(member_id);
@@ -311,6 +314,10 @@ class MemberController extends Controller {
         result = this.updateBasicDetails(req, member);
       } else if (req.body.type == 'member_status') {
         result = await this.model.changeStatus(req);
+        delete req.body.type;
+      }
+      else if (req.body.type == 'admin_status') {
+        result = await this.model.changeAdminStatus(req);
         delete req.body.type;
       } else if (req.body.type == 'admin_adjustment') {
         result = await this.adminAdjustment(req);
