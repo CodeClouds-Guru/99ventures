@@ -181,6 +181,10 @@ const MemberDetails = () => {
         }
     }
 
+    const memberNoteDeleted = () => {
+        getMemberData();
+    }
+
     /**
      * Get Member Details
      */
@@ -1026,7 +1030,7 @@ const MemberDetails = () => {
                         </Typography>
                         {
                             (accountNotes.length != 0) ? (
-                                <AccountNotes accountNotes={accountNotes} />
+                                <AccountNotes accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} />
                             ) : (
                                 <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
                             )

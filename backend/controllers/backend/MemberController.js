@@ -31,6 +31,8 @@ class MemberController extends Controller {
     super('Member');
     this.view = this.view.bind(this);
     this.update = this.update.bind(this);
+    this.delete = this.delete.bind(this);
+    this.deleteMemberNotes = this.deleteMemberNotes.bind(this);
   }
   async save(req, res) {
     try {
@@ -624,6 +626,36 @@ class MemberController extends Controller {
   //     this.throwCustomError('Unable to save data', 500);
   //   }
   // }
+
+  async delete(req, res) {
+    var resp = {
+      status: true,
+      message: 'Action executed successfully'
+    }
+    try {
+      switch (req.body.module) {
+        case 'member_notes':
+          await this.deleteMemberNotes(req);
+          break;
+        default:
+          break;
+      }
+    } catch (e) {
+      console.error(e)
+      resp = {
+        status: false,
+        message: 'Oops! Something went wrong',
+        error: e
+      }
+    } finally {
+      return resp;
+    }
+  }
+
+  async deleteMemberNotes(req) {
+    await MemberNote.destroy({ where: { id: req.body.ids } });
+    return true;
+  }
 }
 
 module.exports = MemberController;
