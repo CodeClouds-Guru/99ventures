@@ -22,6 +22,6 @@ io.sockets.on('connection', (socket) => {
             verbose: data.message,
             created_at: new Date()
         })
-        io.emit("shoutbox", { name: 'Tez', place: 'USA', message: data.message });
+        io.emit("shoutbox", data);
     })
 });
