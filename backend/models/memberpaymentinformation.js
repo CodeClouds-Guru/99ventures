@@ -49,23 +49,21 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
     let payment_methods = await PaymentMethod.findAll({
-      where: { status: 1 },
+      where: { status: [1, '1'] },
       attributes: ['id'],
     });
-    // console.log(payment_methods);
-    if (payment_methods) {
-      payment_methods = payment_methods.map((methods) => {
-        return {
-          member_id: data.member_id,
-          payment_method_id: methods.id,
-          name: 'email',
-          value: data.payment_email,
-          created_by: data.member_id,
-          status: 1,
-        };
-      });
-
-      //bulck create isp list
+    payment_methods = payment_methods.map((methods) => {
+      return {
+        member_id: data.member_id,
+        payment_method_id: methods.id,
+        name: 'email',
+        value: data.payment_email,
+        created_by: data.member_id,
+        status: 1,
+      };
+    });
+    console.log(payment_methods)
+    if (payment_methods.length > 0) {
       await MemberPaymentInformation.bulkCreate(payment_methods);
     }
     return true;
