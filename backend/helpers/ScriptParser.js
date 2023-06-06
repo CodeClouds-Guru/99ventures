@@ -460,7 +460,7 @@ class ScriptParser {
         return {
           include: {
             model: Models.Member,
-            as: 'member_referrer',
+            // as: 'member_referrer',
             include:{
               model: Models.MemberActivityLog,
               attributes:['created_at'],
