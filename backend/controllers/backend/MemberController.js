@@ -130,7 +130,7 @@ class MemberController extends Controller {
           options.include = [
             {
               model: MembershipTier,
-              attributes: ['id','name'],
+              attributes: ['id', 'name'],
             },
             {
               model: Country,
@@ -198,6 +198,7 @@ class MemberController extends Controller {
             {
               model: MemberPaymentInformation,
               attributes: ['name', 'value'],
+              where: { status: [1, '1'] },
               limit: 1,
             },
           ];
@@ -320,7 +321,7 @@ class MemberController extends Controller {
         result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
         delete req.body.type;
       } else if (req.body.type == 'payment_email') {
-        await MemberPaymentInformation.updatePaymentInformation({
+        result = await MemberPaymentInformation.updatePaymentInformation({
           member_id: req.params.id,
           payment_email: req.body.email,
         });
@@ -378,8 +379,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
@@ -502,7 +503,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
