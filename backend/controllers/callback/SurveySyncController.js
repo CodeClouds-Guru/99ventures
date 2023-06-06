@@ -808,8 +808,11 @@ class SurveySyncController {
         }
     }
 
+    /****************************************************
+     ************* CRON Functions ***********************
+     ****************************************************/
+
     /**
-     * CRON
      * Pure Spectrum - Old Survey disabled 
      */
     async pureSpectrumSurveyUpdate(req, res) {
@@ -861,7 +864,49 @@ class SurveySyncController {
 			logger.error(error);
             res.send(error);
         }
+    }
 
+    /**
+     * Schlesinger - Old Survey disabled
+     */
+    async schlesingerSurveyUpdate(req, res){
+        try{
+            const psObj = new SchlesingerHelper;
+            const surveys = await Survey.findAll({
+                attributes: ['survey_number'],
+                where: {
+                    survey_provider_id: 4,
+                    status: 'live'
+                }
+            });
+            const surveyNumber = [];
+            for(let survey of surveys){
+                try{
+                    const surveyData = await psObj.fetchSellerAPI('/survey/survey-quotas/' + survey.survey_number);
+                    if(surveyData.SurveyQuotas && surveyData.SurveyQuotas.length < 1 ) {
+                        surveyNumber.push(survey.survey_number);
+                    }
+                } catch (error) {
+                    surveyNumber.push(survey.survey_number);
+                }
+            }
+            if(surveyNumber.length) {
+                await Survey.update({
+                    status: 'closed',
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+            }
+            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+        }
+        catch(error) {
+            const logger = require('../../helpers/Logger')(`cron.log`);
+			logger.error(error);
+            res.send(error);
+        }
     }
 }
 

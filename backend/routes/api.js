@@ -79,7 +79,8 @@ router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
  */
 const SurveySyncControllerClass = require('../controllers/callback/SurveySyncController');
 const SurveySyncController = new SurveySyncControllerClass();
-router.post('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
+router.all('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
+router.all('/schlesinger-update', SurveySyncController.schlesingerSurveyUpdate);
 
 
 
