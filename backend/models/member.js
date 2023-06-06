@@ -92,6 +92,7 @@ module.exports = (sequelize, DataTypes) => {
       avatar: Joi.optional().label('Avatar'),
       country_code: Joi.optional().label('Country Code'),
       state: Joi.string().allow('').optional().label('State'),
+      admin_status: Joi.string().allow('').optional().label('Admin Status'),
     });
     return schema.validate(req.body);
   };
@@ -178,6 +179,22 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       state: DataTypes.STRING,
+      admin_status: {
+        type: DataTypes.ENUM(
+          'not_verified',
+          'verified',
+          'pending'
+        ),
+        get() {
+          let rawValue = this.getDataValue('admin_status') || null;
+          rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
+          return rawValue
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+              return index == 0 ? word.toUpperCase() : word.toLowerCase();
+            })
+            .replace(/\s+/g, ' ');
+        },
+      },
     },
     {
       sequelize,
@@ -252,6 +269,19 @@ module.exports = (sequelize, DataTypes) => {
       placeholder: 'Status',
       listing: true,
       show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    admin_status: {
+      field_name: 'admin_status',
+      db_name: 'admin_status',
+      type: 'text',
+      placeholder: 'Admin Status',
+      listing: true,
+      show_in_form: true,
       sort: false,
       required: false,
       value: '',
