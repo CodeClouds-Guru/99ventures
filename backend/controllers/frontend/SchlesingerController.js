@@ -18,13 +18,13 @@ class SchlesingerController {
     }
 
     index = (req, res) => {
-        // if(!req.session.member) {
-        //     res.status(401).json({
-        //         status: false,
-        //         message: 'Unauthorized!'
-        //     });
-        //     return;
-        // }
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
