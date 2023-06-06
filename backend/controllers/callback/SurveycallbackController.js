@@ -506,15 +506,15 @@ class SurveycallbackController {
 	async tolunaPostback(req, res) {
 		if (req.query.status === 'complete') {
 			const requestBody = req.body;
-			const username = requestBody.UniqueCode;
+			const userId = requestBody.UniqueCode;
 			const surveyId = requestBody.SurveyId;
 			const surveyRef = requestBody.SurveyRef;
-			const partnerAmount = requestBody.Revenue;  // the amount already converted
+			const partnerAmount = requestBody.Revenue;  // the amount already converted to cent
 			try {
 				let member = await Member.findOne({
-					attributes: ['id', 'username'],
+					attributes: ['id'],
 					where: {
-						username: username,
+						id: userId,
 					},
 				});
 
@@ -522,35 +522,10 @@ class SurveycallbackController {
 					const survey = {
 						cpi: (partnerAmount / 100)
 					}
-					await this.memberTransaction( survey, 'Toluna', surveyRef, member, requestBody );
-
-					/*const provider = await SurveyProvider.findOne({
-						attributes: ['currency_percent'],
-						where: {
-							name: 'Toluna'
-						}
-					});
-
-					let amount = 0;
-					if (partnerAmount != 0 && parseInt(provider.currency_percent) != 0) {
-						amount = (partnerAmount / 100) / parseInt(provider.currency_percent);
-					}
-					const transaction_obj = {
-						transaction_id: 'Toluna #'+surveyRef,
-						member_id: member.id,
-						amount: amount,
-						note: 'toluna survey (#' + surveyRef + ') completion',
-						type: 'credited',
-						amount_action: 'survey',
-						created_by: null,
-						payload: JSON.stringify(requestBody),
-					};
-					await MemberTransaction.updateMemberTransactionAndBalance(
-						transaction_obj
-					);*/
+					await this.memberTransaction( survey, 'Toluna', surveyId, member, requestBody );
 				} else {
 					const tolunaLog = require('../../helpers/Logger')(
-						`schlesinger-postback-errror.log`
+						`toluna-postback-errror.log`
 					);
 					tolunaLog.error('Unable to find member!');
 				}
