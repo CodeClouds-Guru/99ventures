@@ -135,8 +135,10 @@ const MemberDetails = () => {
     const [accountNotes, setAccountNotes] = useState([]);
     const [dialogStatus, setDialogStatus] = useState(false);
     const [editStatus, setEditStatus] = useState(false);
+    const [editAdminStatus, setEditAdminStatus] = useState(false);
     const [statusNote, setStatusNote] = useState('');
     const [status, setStatus] = useState('');
+    const [adminStatus, setAdminStatus] = useState('');
     const [surveyDetails, setSurveyDetails] = useState([]);
     const [loader, setLoader] = useState(true);
     const [statuslessNote, setStatuslessNote] = useState(false);
@@ -181,6 +183,10 @@ const MemberDetails = () => {
         }
     }
 
+    const memberNoteDeleted = () => {
+        getMemberData();
+    }
+
     /**
      * Get Member Details
      */
@@ -194,6 +200,7 @@ const MemberDetails = () => {
                     setCountryData(result.country_list);
                     setAccountNotes(result.MemberNotes);
                     setStatus(result.status);
+                    setAdminStatus(result.admin_status);
                     setSurveyDetails(result.survey);
                     result.MemberPaymentInformations.length > 0 ? setPaymentEmail(result.MemberPaymentInformations[0].value) : '';
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
@@ -260,6 +267,7 @@ const MemberDetails = () => {
                     } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
+                        setEditAdminStatus(false);
                     }
                     getMemberData(false);
                 }
@@ -295,6 +303,15 @@ const MemberDetails = () => {
             return <Chip component="span" label={status} className="capitalize" color="warning" sx={chipStyle} />
         else if (status === 'deleted')
             return <Chip component="span" label={status} className="capitalize" color="error" sx={chipStyle} />
+    }
+
+    const showAdminStatus = (status) => {
+        if (status === 'verified')
+            return <Chip component="span" label={status} className="capitalize" color="success" sx={chipStyle} />
+        else if (status === 'pending')
+            return <Chip component="span" label={status} className="capitalize" color="warning" sx={chipStyle} />
+        else if (status === 'not_verified')
+            return <Chip component="span" label={status.split('_').join(' ')} className="capitalize" color="error" sx={chipStyle} />
     }
 
     const handleSetAvatar = (response) => {
@@ -531,6 +548,65 @@ const MemberDetails = () => {
                                                 </div>
                                             )
                                         }
+                                    </>
+                                } />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                    <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Admin Status:</Typography>
+                                } />
+                                <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                    <>
+                                        {
+                                            editAdminStatus ? (
+                                                <div className='flex items-center'>
+                                                    <TextField
+                                                        sx={{
+                                                            ...selectStyle,
+                                                            ...textFieldStyle
+                                                        }}
+                                                        id="standard-select-currency-native"
+                                                        select
+                                                        value={adminStatus}
+                                                        SelectProps={{
+                                                            native: true,
+                                                        }}
+                                                        onChange={
+                                                            (e) => {
+                                                                if (e.target.value) {
+                                                                    setAdminStatus(e.target.value);
+                                                                }
+                                                            }
+                                                        }
+                                                        variant="standard"
+                                                    >
+                                                        <option value="">--Select--</option>
+                                                        <option value="not_verified">Not Verified</option>
+                                                        <option value="pending">Pending</option>
+                                                        <option value="verified">Verified</option>
+                                                    </TextField>
+                                                    <Tooltip title="Cancel" placement="top-start" >
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditAdminStatus(false)}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Save admin status" placement="top-start" >
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => { updateMemberData({ field_name: 'admin_status', type: 'admin_status', value: adminStatus }, 'admin_status'); }} >
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </div>
+                                            ) : (
+                                                <div className='flex'>
+                                                    {showAdminStatus(memberData.admin_status)}
+                                                    <Tooltip title="Change Status" placement="top-start">
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditAdminStatus(true)}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </div>
+                                            )
+                                        }
 
                                     </>
                                 } />
@@ -607,7 +683,6 @@ const MemberDetails = () => {
                                         <div className='flex items-center'>
                                             <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
                                                 {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
-
                                             </Typography>
                                             <Tooltip title="Change Payment Email" placement="top-start">
                                                 <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
@@ -1026,7 +1101,7 @@ const MemberDetails = () => {
                         </Typography>
                         {
                             (accountNotes.length != 0) ? (
-                                <AccountNotes accountNotes={accountNotes} />
+                                <AccountNotes accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} />
                             ) : (
                                 <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
                             )
