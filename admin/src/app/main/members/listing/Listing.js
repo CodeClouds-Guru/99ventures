@@ -262,8 +262,8 @@ function Listing(props) {
     }
 
     const customizedRowValue = (n, field) => {
+        const status = processFieldValue(n[field.field_name], field);
         if (field.field_name === 'status') {
-            const status = processFieldValue(n[field.field_name], field);
             if (status === 'member')
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
             else if (status === 'suspended')
@@ -272,8 +272,15 @@ function Listing(props) {
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
             else if (status === 'deleted')
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+        } else if (field.field_name === 'admin_status') {
+            if (status === 'verified')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="success" size="small" />
+            else if (status === 'pending')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
+            else if (status === 'not_verified')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="error" size="small" />
         } else {
-            return processFieldValue(n[field.field_name], field)
+            return status
         }
     }
 
