@@ -23,7 +23,7 @@ class Schlesinger {
         ];
         var sql;
 
-        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? LIMIT 1`;
+        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL LIMIT 1`;
         const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId]);
         if(surveyData.length) {   
             let surveyId = surveyData[0].id;
