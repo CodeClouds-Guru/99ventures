@@ -591,7 +591,7 @@ const MemberDetails = () => {
                                                         </IconButton>
                                                     </Tooltip>
                                                     <Tooltip title="Save admin status" placement="top-start" >
-                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => { updateMemberData({ type: 'admin_status', admin_status: adminStatus }, 'admin_status'); }} >
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => { updateMemberData({ field_name: 'admin_status', type: 'admin_status', value: adminStatus }, 'admin_status'); }} >
                                                             <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:check</FuseSvgIcon>
                                                         </IconButton>
                                                     </Tooltip>
