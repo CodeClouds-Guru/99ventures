@@ -9,6 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Country.belongsToMany(models.PaymentMethod, {
+        as: 'allowed_countries',
+        through: 'allowed_country_payment_method',
+        foreignKey: 'country_id',
+        otherKey: 'payment_method_id',
+        timestamps: false,
+      });
     }
   }
   Country.init(
