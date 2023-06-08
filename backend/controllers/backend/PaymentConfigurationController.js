@@ -1,137 +1,69 @@
-const Controller = require('./Controller');
+const Controller = require("./Controller");
 const {
-  PaymentMethodAllowedCountry,
-  PaymentMethodExcludedMember,
-  Country,
-  Member,
-} = require('../../models/index');
-const { sequelize } = require('../../models/index');
+  CompanyPortal,
+  PaymentMethodCredential,
+  PaymentMethod,
+} = require("../../models/index");
+const bcrypt = require("bcryptjs");
+const FileHelper = require('../../helpers/fileHelper');
 class PaymentConfigurationController extends Controller {
   constructor() {
-    super('PaymentMethod');
+    super("PaymentMethod");
     this.list = this.list.bind(this);
-    this.add = this.add.bind(this);
-    // this.update = this.update.bind(this);
+    this.update = this.update.bind(this);
   }
 
-  //override list function
   async list(req, res) {
-    req.query.where = JSON.stringify({
-      company_portal_id: req.headers.site_id,
-    });
-    return await super.list(req);
-  }
-
-  //override add function
-  async add(req, res) {
-    let response = await super.add(req);
-    let fields = response.fields;
-    let country_list = await Country.getAllCountryList();
-
-    let member_list = await Member.findAll({
-      attributes: [
-        'id',
-        [
-          sequelize.fn(
-            'concat',
-            sequelize.col('first_name'),
-            ' ',
-            sequelize.col('last_name')
-          ),
-          'member_name',
-        ],
-        'username',
-      ],
-      where: { company_portal_id: req.headers.site_id, status: 'member' },
-    });
-    return {
-      status: true,
-      fields,
-      data: {
-        country_list,
-        member_list,
-      },
-    };
-  }
-
-  //override edit function
-  async edit(req, res) {
-    const site_id = req.header('site_id');
-    let response = await super.edit(req);
-    let fields = { ...response.fields };
-    let country_list = await Country.getAllCountryList();
-
-    let member_list = await Member.findAll({
-      attributes: [
-        'id',
-        [
-          sequelize.fn(
-            'concat',
-            sequelize.col('first_name'),
-            ' ',
-            sequelize.col('last_name')
-          ),
-          'member_name',
-        ],
-        'username',
-      ],
-      where: { company_portal_id: site_id, status: 'member' },
-    });
-
-    response.fields = fields;
-    response.country_list = country_list;
-    response.member_list = member_list;
-    return response;
-  }
-
-  //override save function
-  async save(req, res) {
     try {
-      req.body.company_portal_id = req.headers.site_id;
-      const updated_country_list = req.body.updated_country_list;
-      const updated_member_list = req.body.updated_country_list;
-      const { error, value } = this.model.validate(req);
-
-      if (error) {
-        let message = error.details.map((err) => err.message).join(', ');
-        this.throwCustomError(message, 401);
+      const site_id = req.header("site_id") || 1;
+      const company_id = req.header("company_id") || 1;
+      const mask_auth = req.query.auth || false;
+      let payment_method_list = await PaymentMethod.findAll({
+        attributes: ["name", "slug", "status", "id"],
+        include: {
+          model: PaymentMethodCredential,
+          required: false,
+          as: "credentials",
+          attributes: ["id", "name", "slug", "value"],
+          where: {
+            company_portal_id: site_id,
+          },
+        },
+      });
+      for (let k = 0; k < payment_method_list.length; k++) {
+        payment_method_list[k].status = parseInt(payment_method_list[k].status)
       }
-      let response = await super.save(req);
-      if (response.result.id) {
-        if (updated_country_list.length > 0) {
-          let country_data = [];
-          country_data = updated_country_list.map((country) => {
-            return {
-              payment_method_id: response.result.id,
-              country_id: country,
-            };
-          });
+      // console.log('==================',typeof mask_auth, mask_auth)
+      if (mask_auth === true || mask_auth === "true") {
+        return {
+          status: true,
+          data: { payment_method_list: Object.values(payment_method_list) },
+        };
+      } else {
+        // if (mask_auth === "false" || mask_auth === false) {
+        for (let i = 0; i < payment_method_list.length; i++) {
+          for (let j = 0; j < payment_method_list[i].credentials.length; j++) {
+            let cred = payment_method_list[i].credentials[j].value;
 
-          const insert_country = await PaymentMethodAllowedCountry.bulkCreate(
-            country_data
-          );
+            let count = cred.length - (cred.length - 4);
+            let count1 = cred.length - 4;
+            let str = "";
+            while (count1 >= 0) {
+              str += "X";
+              count1--;
+            }
+            payment_method_list[i].credentials[j].value =
+              cred.substring(0, count) + str;
+          }
         }
-        if (updated_member_list.length > 0) {
-          let member_data = [];
-          member_data = updated_member_list.map((member) => {
-            return {
-              payment_method_id: response.result.id,
-              member_id: member,
-            };
-          });
-
-          const insert_member = await PaymentMethodExcludedMember.bulkCreate(
-            member_data
-          );
-        }
+        return {
+          status: true,
+          data: { payment_method_list: Object.values(payment_method_list) },
+        };
       }
-      return {
-        status: true,
-        message: 'Payment method added.',
-        id: response.result.id,
-      };
     } catch (err) {
-      this.throwCustomError('Unable to save data', 500);
+      console.error(err);
+      this.throwCustomError('Unable to get data', 500);
     }
   }
   async update(req, res) {
@@ -147,29 +79,27 @@ class PaymentConfigurationController extends Controller {
         };
       });
       const insertNewData = await PaymentMethodCredential.bulkCreate(data, {
-        updateOnDuplicate: ['id', 'value'],
+        updateOnDuplicate: ["id", "value"],
         ignoreDuplicates: true,
       });
-      let logo = '';
-      //update payment method
+      let logo = ''
+      //update payment method 
       let payment_method_data = {
-        status: req.body.status.toString() ?? '0',
-      };
+        status: req.body.status.toString() ?? '0'
+      }
       if (req.files) {
         files[0] = req.files.logo;
         const fileHelper = new FileHelper(files, 'payment-methods', req);
         const file_name = await fileHelper.upload();
         logo = file_name.files[0].filename;
-        payment_method_data.logo = logo;
+        payment_method_data.logo = logo
       }
-      await PaymentMethod.update(payment_method_data, {
-        where: { id: req.body.id },
-      });
+      await PaymentMethod.update(payment_method_data, { where: { id: req.body.id } })
       if (insertNewData) {
         return {
           status: true,
-          message: 'Data Saved',
-        };
+          message: "Data Saved",
+        }
       } else {
         this.throwCustomError('Unable to save data', 500);
       }
