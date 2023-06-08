@@ -74,7 +74,7 @@ const DashboardContent = () => {
     }
     const getCompletedSurveys = () => {
         axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=completed_surveys&from=${param.from}&to=${param.to}`).then((res) => {
-            console.log(res)
+            setCompletedSurveys(res.data);
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
@@ -111,10 +111,10 @@ const DashboardContent = () => {
                     </IconButton>
                 </Tooltip>
             </div>
-            <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={88} />
+            <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={completedSurveys.hasOwnProperty('total_completed_surveys') ? completedSurveys.total_completed_surveys : 0} />
             <div className="flex w-full justify-between">
                 <LoginPerDay />
-                <CompletedSurveyChart />
+                <CompletedSurveyChart completedSurveys={completedSurveys} />
             </div>
             <div className="flex w-full justify-between">
                 <MembersChart />

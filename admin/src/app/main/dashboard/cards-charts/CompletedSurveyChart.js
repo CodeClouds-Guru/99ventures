@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card, CardContent, Typography } from '@mui/material';
 
 function CompletedSurveyChart(props) {
     const [state, setState] = useState({
         options: {
-            labels: ['Signed Up', 'Profile Completed', 'Verified', 'Suspended', 'Deleted']
+            labels: []
         },
-        series: [44, 55, 41, 17, 15]
-
+        series: []
     });
+    useEffect(() => {
+        // setState({
+        //     options: {
+        //         labels: props.completedSurveys.survey_names,
+        //     },
+        //     series: props.completedSurveys.survey_count
+        // })
+    }, [props.completedSurveys])
+
     return (
         <div className="w-1/2 m-5">
             <Card className="w-full" sx={{ color: '#283593' }}>

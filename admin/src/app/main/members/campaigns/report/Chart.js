@@ -113,7 +113,7 @@ const PieChart = () => {
         setDatepickerStatus(!datepickerStatus)
         setDateRange({
             startDate: moment(val.startDate),
-            endDate: moment(val.endDate).add(1, 'day')
+            endDate: moment(val.endDate)
         });
         setWhere({
             created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
