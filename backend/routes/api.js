@@ -17,6 +17,9 @@ const FileManagerController = new FileManagerControllerClass();
 const PageControllerClass = require('../controllers/backend/PageController');
 const PageController = new PageControllerClass();
 
+const ReportControllerClass = require('../controllers/backend/ReportController');
+const ReportController = new ReportControllerClass();
+
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController');
 
 const Paypal = require('../helpers/Paypal');
@@ -53,7 +56,7 @@ router.post('/invitation-details', InvitationController.invitationDetails);
 
 //check password
 router.post('/check-auth', [AuthMiddleware], AuthController.checkAuth);
-
+router.get('/report',ReportController.getReport);
 //change ticket read status
 // router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
 
