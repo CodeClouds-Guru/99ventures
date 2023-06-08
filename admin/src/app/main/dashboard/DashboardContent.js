@@ -16,6 +16,7 @@ import BestPerformingSurveys from './cards-charts/BestPerformingSurveys';
 import BestPerformers from './cards-charts/BestPerformers';
 
 const DashboardContent = () => {
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
     const toggle = () => setOpen(!open);
     const [daterangeLessData, setDaterangeLessData] = useState({});

@@ -64,7 +64,8 @@ const jwtServiceConfig = {
   shoutboxConfigurations: 'shoutbox-configurations',
   shoutboxConfigurationUpdate: 'shoutbox-configurations/update',
   getWithdrawalRequests: 'withdrawal-requests',
-  deleteMemberNotes: 'members/delete'
+  deleteMemberNotes: 'members/delete',
+  dashboardDaterangeLessReport: 'report',
 };
 
 export default jwtServiceConfig;

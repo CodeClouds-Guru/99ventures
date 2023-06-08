@@ -274,7 +274,7 @@ $(() => {
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be greater than 7 characters',
+        message: 'Minimum 8 characters are required',
       });
     } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
@@ -317,7 +317,7 @@ $(() => {
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be greater than 7 characters',
+        message: 'Minimum 8 characters are required',
       });
     } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
@@ -407,7 +407,7 @@ $(() => {
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
         field: $(password),
-        message: 'Password should be greater than 7 characters',
+        message: 'Minimum 8 characters are required',
       });
     } else if (!password_regex.test($(password).val().trim())) {
       errorsArray.push({
