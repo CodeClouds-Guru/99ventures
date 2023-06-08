@@ -1,6 +1,6 @@
-const Models = require("../../models");
+const Models = require('../../models');
 const { Op } = Models.Sequelize;
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 class Controller {
   constructor(modelName) {
     // this.list = this.list.bind(this);
@@ -26,19 +26,19 @@ class Controller {
   getQueryOptions(req) {
     let page = req.query.page || 1;
     let show = parseInt(req.query.show) || 10; // per page record
-    var search = req.query.search || "";
-    let sort_field = req.query.sort || "id";
-    let sort_order = req.query.sort_order || "desc";
+    var search = req.query.search || '';
+    let sort_field = req.query.sort || 'id';
+    let sort_order = req.query.sort_order || 'desc';
 
     let fields = this.model.fields;
     let extra_fields = this.model.extra_fields || [];
-    let attributes = Object.values(fields).filter(
-      (attr) => extra_fields.indexOf(attr.db_name) == -1
-    ).map(attr => attr.db_name);
+    let attributes = Object.values(fields)
+      .filter((attr) => extra_fields.indexOf(attr.db_name) == -1)
+      .map((attr) => attr.db_name);
     let searchable_fields = [];
     for (const key in fields) {
-      if (('searchable' in fields[key]) && (fields[key].searchable)) {
-        searchable_fields.push(key)
+      if ('searchable' in fields[key] && fields[key].searchable) {
+        searchable_fields.push(key);
       }
     }
     let options = {
@@ -47,8 +47,8 @@ class Controller {
       paginate: show,
       order: [[Sequelize.literal(sort_field), sort_order]],
     };
-    if (search != "") {
-      options["where"] = {
+    if (search != '') {
+      options['where'] = {
         [Op.or]: searchable_fields.map((key) => {
           let obj = {};
           obj[key] = { [Op.like]: `%${search}%` };
@@ -58,17 +58,17 @@ class Controller {
     }
     var query_where = req.query.where ? JSON.parse(req.query.where) : null;
 
-    if ("where" in options && query_where) {
+    if ('where' in options && query_where) {
       options['where'] = {
         [Op.and]: {
           ...query_where,
-          ...options['where']
-        }
-      }
+          ...options['where'],
+        },
+      };
     } else if (query_where != null) {
       options['where'] = {
-        ...query_where
-      }
+        ...query_where,
+      };
     }
 
     return options;
@@ -78,7 +78,7 @@ class Controller {
     let request_data = req.body;
     const { error, value } = this.model.validate(req);
     if (error) {
-      const errorObj = new Error("Validation failed.");
+      const errorObj = new Error('Validation failed.');
       errorObj.statusCode = 422;
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
@@ -87,7 +87,7 @@ class Controller {
       request_data.created_by = req.user.id;
       let model = await this.model.create(request_data, { silent: true });
       return {
-        message: "Record has been created successfully",
+        message: 'Record has been created successfully',
         result: model,
       };
     } catch (error) {
@@ -110,7 +110,7 @@ class Controller {
     let request_data = req.body;
     const { error, value } = this.model.validate(req);
     if (error) {
-      const errorObj = new Error("Validation failed.");
+      const errorObj = new Error('Validation failed.');
       errorObj.statusCode = 422;
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
@@ -119,7 +119,7 @@ class Controller {
       request_data.updated_by = req.user.id;
       let model = await this.model.update(request_data, { where: { id } });
       return {
-        message: "Record has been updated successfully",
+        message: 'Record has been updated successfully',
       };
     } catch (error) {
       throw error;
@@ -131,11 +131,14 @@ class Controller {
       let modelIds = req.body.model_ids ?? [];
       let columns = Object.keys(this.model.rawAttributes);
       if (columns.indexOf('deleted_by') >= 0) {
-        await this.model.update({ deleted_by: req.user.id }, { where: { id: modelIds } })
+        await this.model.update(
+          { deleted_by: req.user.id },
+          { where: { id: modelIds } }
+        );
       }
       let resp = await this.model.destroy({ where: { id: modelIds } });
       return {
-        message: "Record(s) has been deleted successfully",
+        message: 'Record(s) has been deleted successfully',
       };
     } catch (error) {
       throw error;
@@ -154,7 +157,7 @@ class Controller {
         });
       }
       return {
-        message: "Record has been restored successfully",
+        message: 'Record has been restored successfully',
       };
     } catch (error) {
       throw error;
@@ -162,7 +165,7 @@ class Controller {
   }
 
   throwCustomError(message, status = 422) {
-    const errorObj = new Error("Request failed.");
+    const errorObj = new Error('Request failed.');
     errorObj.statusCode = status;
     errorObj.data = message;
     throw errorObj;
