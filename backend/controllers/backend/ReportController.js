@@ -8,6 +8,7 @@ const {
 const { Op,QueryTypes } = require("sequelize");
 const queryInterface = sequelize.getQueryInterface();
 const db = require("../../models/index");
+const moment = require('moment');
 class ReportController{
   constructor() {
     this.getReport = this.getReport.bind(this);
@@ -27,12 +28,6 @@ class ReportController{
     }else{
       end_date = moment().toISOString()
     }
-    // completed_at: {
-    //   [Op.between]: query_where.completed_at ?? [
-    //     moment().subtract(30, 'days').toISOString(),
-    //     moment().toISOString(),
-    //   ],
-    // },
     if(type == 'count_report'){
         //get total active surveys
         let survey_list = await Survey.findAndCountAll({where:{status:1}})
