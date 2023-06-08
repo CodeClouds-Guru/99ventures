@@ -84,6 +84,7 @@ const SurveySyncControllerClass = require('../controllers/callback/SurveySyncCon
 const SurveySyncController = new SurveySyncControllerClass();
 router.all('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
 router.all('/schlesinger-update', SurveySyncController.schlesingerSurveyUpdate);
+router.all('/lucid-update', SurveySyncController.lucidSurveyUpdate);
 
 
 

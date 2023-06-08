@@ -920,6 +920,55 @@ class SurveySyncController {
             res.send(error);
         }
     }
+
+    /**
+     * Lucid - Old Survey disabled
+     */
+    async lucidSurveyUpdate(req, res){
+        try{
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Lucid'
+                }
+            });     
+            const psObj = new LucidHelper;
+            const surveys = await Survey.findAll({
+                attributes: ['survey_number'],
+                where: {
+                    survey_provider_id: provider.id,
+                    status: 'live'
+                }
+            });
+            for(let survey of surveys){
+                try{
+                    const quota = await psObj.showQuota(survey.survey_number);
+                    if(quota.SurveyStillLive == false) {
+                        surveyNumber.push(survey.survey_number);
+                    }
+                } catch (error) {
+                    surveyNumber.push(survey.survey_number);
+                }
+            }
+            if(surveyNumber.length) {
+                await Survey.update({
+                    status: 'closed',
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_number: surveyNumber
+                    }
+                });
+            }
+            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+
+        } catch(error) {
+            const logger = require('../../helpers/Logger')(`cron.log`);
+			logger.error(error);
+            res.send(error);
+        }
+    }
+
 }
 
 module.exports = SurveySyncController
