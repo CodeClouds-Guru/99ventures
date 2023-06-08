@@ -4,6 +4,7 @@ const {
   PaymentMethodExcludedMember,
   Country,
   Member,
+  PaymentMethod,
 } = require('../../models/index');
 const { sequelize } = require('../../models/index');
 class PaymentConfigurationController extends Controller {
@@ -57,7 +58,18 @@ class PaymentConfigurationController extends Controller {
     const site_id = req.header('site_id');
     let response = await super.edit(req);
     let fields = { ...response.fields };
-    let country_list = await Country.getAllCountryList();
+    // let country_list = await Country.getAllCountryList();
+
+    let country_list = await Country.findAll({
+      attributes: ['id', ['nicename', 'name'], 'phonecode'],
+      include: {
+        model: PaymentMethod,
+        as: 'allowed_countries',
+        where: { id: req.params.id },
+        required: false,
+        attributes: ['id'],
+      },
+    });
 
     let member_list = await Member.findAll({
       attributes: [
@@ -74,6 +86,13 @@ class PaymentConfigurationController extends Controller {
         'username',
       ],
       where: { company_portal_id: site_id, status: 'member' },
+      include: {
+        model: PaymentMethod,
+        as: 'excluded_members',
+        where: { id: req.params.id },
+        required: false,
+        attributes: ['id'],
+      },
     });
 
     response.fields = fields;

@@ -11,13 +11,23 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      PaymentMethod.hasMany(models.MemberPaymentInformation, {
+      PaymentMethod.belongsToMany(models.Country, {
+        as: 'allowed_countries',
+        through: 'allowed_country_payment_method',
         foreignKey: 'payment_method_id',
-        // as: "credentials",
+        otherKey: 'country_id',
+        timestamps: false,
       });
       PaymentMethod.hasMany(models.WithdrawalType, {
         foreignKey: 'payment_method_id',
         as: 'withdrawal_types',
+      });
+      PaymentMethod.belongsToMany(models.Member, {
+        as: 'excluded_members',
+        through: 'excluded_member_payment_method',
+        foreignKey: 'payment_method_id',
+        otherKey: 'member_id',
+        timestamps: false,
       });
     }
   }
