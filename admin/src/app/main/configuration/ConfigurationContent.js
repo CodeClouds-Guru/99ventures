@@ -8,7 +8,8 @@ import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
 import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
-import PaymentGateway from './payment-gateway/PaymentGateway';
+// import PaymentGateway from './payment-gateway/PaymentGateway';
+import PaymentGateway from './payment-gateway/GatewayList';
 import MetatagConfiguration from './metatags-configuration/MetatagConfiguration';
 import { usePermission } from '@fuse/hooks';
 
@@ -90,7 +91,7 @@ const tabs = [
     }
 ];
 
-
+ 
 
 function ConfigurationContent() {
     const [value, setValue] = useState(0);

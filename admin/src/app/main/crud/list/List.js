@@ -302,6 +302,8 @@ function List(props) {
 		if (module === 'users' && item.id == user.id) {
 			dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
 			return '';
+		// } else if(module === 'pages') {
+		// 	props.navigate(`/app/paymentconfigurations/${item.id}`);
 		} else {
 			props.navigate(`/app/${module}/${item.id}`);
 		}
@@ -314,7 +316,7 @@ function List(props) {
 			return true;
 		}
 	}
-
+ 
 	function handleCheck(event, id) {
 		const selectedIndex = selected.indexOf(id);
 		let newSelected = [];
