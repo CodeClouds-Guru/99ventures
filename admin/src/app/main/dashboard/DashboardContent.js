@@ -74,7 +74,9 @@ const DashboardContent = () => {
     }
     const getCompletedSurveys = () => {
         axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=completed_surveys&from=${param.from}&to=${param.to}`).then((res) => {
-            setCompletedSurveys(res.data);
+            if ((res.data).hasOwnProperty('total_completed_surveys') && (res.data).hasOwnProperty('survey_names') && (res.data).hasOwnProperty('survey_count')) {
+                setCompletedSurveys(res.data);
+            }
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
