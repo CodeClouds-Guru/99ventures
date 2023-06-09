@@ -81,6 +81,13 @@ class ReportController{
         }
         if(survey_numbers.length){
           let survey = await Survey.findAll({where:{survey_number:survey_numbers},attributes:['survey_number','name']})
+        //    let survey = await db.sequelize.query(
+        //   'SELECT survey_number, COUNT(*) as count FROM surveys WHERE survey_number BETWEEN ? AND ? GROUP BY survey_number',
+        //   {
+        //     replacements: [start_date,end_date],
+        //     type: QueryTypes.SELECT,
+        //   }
+        // );
           if(survey){
             for(let i of survey){
               let sur_num = i.survey_number
@@ -133,7 +140,7 @@ class ReportController{
       var count_arr = []
       if(member_activity_logs.length){
         for(let i of member_activity_logs){
-          days_arr.push(i.day)
+          days_arr.push(i.day.toString())
           count_arr.push(i.count)
         }
       }
