@@ -21,13 +21,13 @@ class LucidController {
     }
 
     index = (req, res) => {
-        if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
-            return;
-        }
+        // if(!req.session.member) {
+        //     res.status(401).json({
+        //         status: false,
+        //         message: 'Unauthorized!'
+        //     });
+        //     return;
+        // }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -157,8 +157,12 @@ class LucidController {
                                 }
                             ],
                         }
-                    }
+                    },
+                    limit: 200
                 });
+
+                // res.send(surveys);
+                // return;
                 
                 if(surveys.length){
                     var surveyHtml = '';
@@ -252,8 +256,8 @@ class LucidController {
                 }
                 
                 const URL = this.rebuildEntryLink(entrylink, params);
-                // res.send(URL)
-                res.redirect(URL);
+                res.send(URL)
+                // res.redirect(URL);
             } else {
                 await Survey.update({
                     status: 'draft',
