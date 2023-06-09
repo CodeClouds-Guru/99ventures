@@ -9,7 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      company_portal_id: {
+      comapny_portal_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
@@ -32,10 +32,10 @@ module.exports = {
         comment: 'If true, force the user to type their info twice.',
       },
       payment_field_options: {
-        type: Sequelize.ENUM(0, 1),
+        type: Sequelize.STRING,
         allowNull: false,
-        comment: '0 => PayPal Email, 1 => PayPal Username',
-        defaultValue: 0,
+        comment: 'Setup custom fields',
+        defaultValue: 'PayPal Email',
       },
       minimum_amount: {
         type: Sequelize.FLOAT,

@@ -537,7 +537,7 @@ function List(props) {
 		setDatepickerStatus(!datepickerStatus)
 		setDateRange({
 			startDate: moment(val.startDate),
-			endDate: moment(val.endDate).add(1, 'day')
+			endDate: moment(val.endDate)
 		});
 		const param = module === 'member-transactions' ? {
 			completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]

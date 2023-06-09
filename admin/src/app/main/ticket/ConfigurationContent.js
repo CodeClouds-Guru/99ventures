@@ -38,13 +38,13 @@ function ConfigurationContent() {
         toggle();
         setDateRange({
             startDate: moment(val.startDate),
-            endDate: moment(val.endDate).add(1, 'day')
+            endDate: moment(val.endDate)
         });
     }
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
+            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).add(1, 'day')]
         }
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus

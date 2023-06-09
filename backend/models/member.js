@@ -68,6 +68,13 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.MemberActivityLog, {
         foreignKey: 'member_id',
       });
+      Member.belongsToMany(models.PaymentMethod, {
+        as: 'excluded_members',
+        through: 'excluded_member_payment_method',
+        foreignKey: 'member_id',
+        otherKey: 'payment_method_id',
+        timestamps: false,
+      });
     }
   }
   Member.validate = function (req) {
@@ -180,11 +187,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       state: DataTypes.STRING,
       admin_status: {
-        type: DataTypes.ENUM(
-          'not_verified',
-          'verified',
-          'pending'
-        ),
+        type: DataTypes.ENUM('not_verified', 'verified', 'pending'),
         // get() {
         //   let rawValue = this.getDataValue('admin_status') || null;
         //   rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
@@ -462,7 +465,6 @@ module.exports = (sequelize, DataTypes) => {
       ? req.body.member_id
       : [req.body.member_id];
     try {
-      
       let result = await Member.update(
         {
           [field_name]: value,
