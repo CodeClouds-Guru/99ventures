@@ -278,7 +278,7 @@ function Listing(props) {
             else if (status === 'pending')
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
             else if (status === 'not_verified')
-                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="error" size="small" />
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
         } else {
             return status
         }

@@ -521,9 +521,9 @@ const MemberDetails = () => {
                                                         variant="standard"
                                                     >
                                                         <option value="">--Select--</option>
+                                                        <option value="validating">Validating</option>
                                                         <option value="member">Member</option>
                                                         <option value="suspended">Suspended</option>
-                                                        <option value="validating">Validating</option>
                                                         <option value="deleted">Deleted</option>
                                                     </TextField>
                                                     {/* <Tooltip title="Change Status" placement="top-start" onClick={ ()=>setEditStatus(true) }>
