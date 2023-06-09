@@ -23,14 +23,16 @@ function CompletedSurveyChart(props) {
             <Card className="w-full" sx={{ color: '#283593' }}>
                 <CardContent>
                     <Typography variant="h6" component="div">Completed Surveys</Typography>
-                    <div className="donut pt-15" style={{ minHeight: '315px' }}>
-                        {state.options.labels.length > 0 && state.series.length > 0 ?
-                            <Chart className="pt-10" options={state.options} series={state.series} type="donut" width="100%" height="300" /> :
+                    {state.options.labels.length > 0 && state.series.length > 0 ?
+                        <div className="donut pt-15" style={{ minHeight: '315px' }}>
+                            <Chart className="pt-10" options={state.options} series={state.series} type="donut" width="100%" height="300" />
+                        </div> :
+                        <div className="donut pt-15 flex items-center justify-center" style={{ minHeight: '315px' }}>
                             <div className="flex justify-center text-center" >
                                 <Typography variant="h7" component="div">No data available</Typography>
                             </div>
-                        }
-                    </div>
+                        </div>
+                    }
                 </CardContent>
             </Card>
         </div>
