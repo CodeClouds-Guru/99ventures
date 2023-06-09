@@ -57,9 +57,6 @@ class PaymentConfigurationController extends Controller {
   async edit(req, res) {
     const site_id = req.header('site_id');
     let response = await super.edit(req);
-    let fields = { ...response.fields };
-    // let country_list = await Country.getAllCountryList();
-
     let country_list = await Country.findAll({
       attributes: ['id', ['nicename', 'name'], 'phonecode'],
       include: {
@@ -95,14 +92,21 @@ class PaymentConfigurationController extends Controller {
       },
     });
 
-    response.fields = fields;
-    response.country_list = country_list;
-    response.member_list = member_list;
+    return {
+      status: true,
+      result: response.result,
+      fields: response.fields,
+      data: {
+        country_list,
+        member_list,
+      },
+    };
     return response;
   }
   //override save function
   async save(req, res) {
     try {
+      console.log(req);
       req.body.company_portal_id = req.headers.site_id;
       const updated_country_list = req.body.updated_country_list;
       const updated_member_list = req.body.updated_country_list;
