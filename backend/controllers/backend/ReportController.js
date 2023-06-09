@@ -3,6 +3,7 @@ const {
   Survey,
   Member,
   MemberSurvey,
+  MemberActivityLog,
   sequelize,
 } = require("../../models/index");
 const { Op,QueryTypes } = require("sequelize");
@@ -104,11 +105,39 @@ class ReportController{
       res.json(tickets)
     }
     else if(type == 'members'){
-      let total_members = Member.count()
-      let profile_complted_members = Member.count({where:
+      let member_by_status = await Member.findAll({
+        attributes:['status',[sequelize.fn('COUNT', '*'), 'count']],
+        group:'status',
+        where:{
+          created_at: {
+            [Op.between]: [start_date,end_date]
+          }
+        }
+      })
+      let profile_complted_members = await Member.findAll({
+                                                  attributes:[[sequelize.fn('COUNT', '*'), 'count']],
+                                                  where:
                                                     {profile_completed_on:{[Op.ne]: null },
                                                     }})
-      res.json({total_members,profile_complted_members})
+      res.json({profile_complted_members,member_by_status})
+    }
+    else if(type == 'login_per_day'){
+      let member_activity_logs = await db.sequelize.query(
+                                        'SELECT DAY(created_at) as day, COUNT(*) as count FROM member_activity_logs Where action = "Member Logged In" AND created_at BETWEEN ? AND ? GROUP BY day',
+                                        {
+                                          replacements: [start_date,end_date],
+                                          type: QueryTypes.SELECT,
+                                        }
+                                      );
+      var days_arr = []
+      var count_arr = []
+      if(member_activity_logs.length){
+        for(let i of member_activity_logs){
+          days_arr.push(i.day)
+          count_arr.push(i.count)
+        }
+      }
+      res.json({names:days_arr,values:count_arr})
     }
   }
 }
