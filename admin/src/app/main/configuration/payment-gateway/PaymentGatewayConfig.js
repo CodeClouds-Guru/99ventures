@@ -26,7 +26,7 @@ const PaymentGatewayConfig = {
   },
   routes: [
     {
-      path: 'app/paymentconfigurations/:moduleId',
+      path: 'app/payment-configurations/:moduleId',
       element: <CreateEdit />,
       auth: settingsConfig.defaultAuth
     },

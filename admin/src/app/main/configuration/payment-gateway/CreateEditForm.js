@@ -7,31 +7,59 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Controller, useForm, FormProvider } from 'react-hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { useDispatch } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import { TextField, MenuItem, Link, Autocomplete, Accordion, AccordionDetails, AccordionSummary, InputLabel, FormControl, ListItemText, Select, Checkbox, Button, Typography, FormControlLabel, FormGroup, Switch } from '@mui/material';
 
- 
 
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-const top100Films = [
-    { title: 'The Shawshank Redemption', year: 1994 },
-    { title: 'The Godfather', year: 1972 },
-    { title: 'The Godfather: Part II', year: 1974 },
-    { title: 'The Dark Knight', year: 2008 },
-    { title: '12 Angry Men', year: 1957 },
-    { title: "Schindler's List", year: 1993 },
-    { title: 'Pulp Fiction', year: 1994 },
-]
-
 const accordianStyle = {
     backgroundColor: '#eee',
     minHeight: '50px !important',
     '& .muiltr-o4b71y-MuiAccordionSummary-content.Mui-expanded': {margin: '13px 0'}
 }
+const defaultValues = {
+    name: '',
+    description: '',
+    image_url: '',
+    type_user_info_again: '',
+    payment_field_options: '',
+    minimum_amount: '',
+    maximum_amount: '',
+    fixed_amount: '',
+    withdraw_redo_interval: '',
+    same_account_options: '',
+    past_withdrawal_options: '',
+    past_withdrawal_count: '',
+    verified_options: '',
+    upgrade_options: '',
+    fee_percent: '',
+    api_username: '',
+    api_password: '',
+    api_signature: '',
+    api_memo: '',
+    payment_type: ''
+};
+
+const validationSchema = yup.object().shape({
+    name: yup.string().required(`Please enter name!`),
+    payment_field_options: yup.string().required(`Please select payment_field_options!`),
+    api_username: yup.string().required(`Please enter name!`),
+    api_password: yup.string().required(`Please enter name!`),
+    api_signature: yup.string().required(`Please enter name!`),
+    api_memo: yup.string().required(`Please enter name!`),
+});
+
 
 const CreateEditForm = () => {
     const [expanded, setExpanded] = useState(true);
     const [countryList, setCountryList] = useState([]);
-    const [userList, setUserList] = useState([]);
+    const [memberList, setMemberList] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const handleSelectAllCountry = (e) => {
@@ -40,8 +68,7 @@ const CreateEditForm = () => {
         }
     }
 
-    const validationFields = {};
-    const validationSchema = yup.object().shape({ ...validationFields });
+    
     const {
         control,
         formState: { isValid, dirtyFields, errors },
@@ -49,22 +76,30 @@ const CreateEditForm = () => {
         setValue
     } = useForm({
         mode: 'onChange',
-        defaultValues: {
-            password: ''
-        },
+        defaultValues,
         resolver: yupResolver(validationSchema),
     });
 
-    const handleFormSubmit = () => {
-
+    const handleFormSubmit = (data) => {
+        console.log(data)
     }
 
     useEffect(() => {
         getPaymentData();
     }, []);
 
-    const getPaymentData = () => {
-        
+    const getPaymentData = async () => {
+        axios.get(jwtServiceConfig.addPaymentMethodConfiguration)
+			.then(response => {
+                if(response.data.results.status && response.data.results.data) {
+                    const results = response.data.results.data;
+                    if(results.country_list) {
+                        setCountryList(results.country_list);
+                        setMemberList(results.member_list);
+                    }
+                }
+			})
+			.catch(error => console.log(error))
     }
 
     return (
@@ -128,7 +163,7 @@ const CreateEditForm = () => {
                             />
 
                             <Controller
-                                name="payment_field"
+                                name="payment_field_options"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
@@ -153,7 +188,7 @@ const CreateEditForm = () => {
                                 )}
                             />
                              <Controller
-                                name="redo_wait"
+                                name="withdraw_redo_interval"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
@@ -206,12 +241,53 @@ const CreateEditForm = () => {
                                 <small className='mt-5 text-gray-600'>If you wish the user to entet how much cash they wish to receuve then please select the "Minimum". Fixed means the user has to receive the amount specified.</small>
                             </FormGroup>
 
-                            <FormGroup aria-label="position" row className="mt-20">                           
-                                <FormControlLabel control={<Switch defaultChecked />} label="Yes, force the user to type info twice" />
+                            <FormGroup aria-label="position" row className="mt-20">   
+                                <Controller
+                                    name="type_user_info_again"
+                                    control={control}
+                                    render={({ field }) => (          
+                                        <FormControlLabel 
+                                            control={<Switch {...field} defaultChecked />} 
+                                            label="Yes, force the user to type info twice" 
+                                        />
+                                    )}
+                                    />
                             </FormGroup>
                             <FormGroup aria-label="position" row className="">
                                 <FormControlLabel control={<Switch defaultChecked />} label="Enabled" />
                             </FormGroup>
+                        </div>
+                    </AccordionDetails>
+                </Accordion>
+                <Accordion>
+                    <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                    sx={accordianStyle}
+                    >
+                        <Typography>Security</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <div className='flex flex-col justify-center p-16 w-1/2 mx-auto'>
+                            <Controller
+                                name="same_account_options"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        id="same_account_options"
+                                        select
+                                        label="Same Account"
+                                        helperText=""
+                                        className="w-full mt-20"
+                                        >
+                                        <MenuItem value="mark_as_cheater">
+                                            Mark as cheater
+                                        </MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </div>
                     </AccordionDetails>
                 </Accordion>
@@ -319,16 +395,28 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <Autocomplete
                                         multiple
-                                        id="tags-outlined"
-                                        options={top100Films}
-                                        getOptionLabel={(option) => option.title}
-                                        defaultValue={[top100Films[1], top100Films[2]]}                            
                                         className="w-full"
+                                        id="checkboxes-tags-demo"
+                                        options={ countryList } 
+                                        disableCloseOnSelect
+                                        getOptionLabel={(option) => option.name}
+                                        defaultValue={[]}  
+                                        renderOption={(props, option, { selected }) => (
+                                            <li {...props} key={option.id}>
+                                                <Checkbox
+                                                    icon={icon}
+                                                    checkedIcon={checkedIcon}
+                                                    style={{ marginRight: 8 }}
+                                                    checked={selected}
+                                                />
+                                                {option.name} { selected }
+                                            </li>
+                                        )}
                                         renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Countries"
-                                                placeholder="Country"
+                                            <TextField 
+                                                {...params} 
+                                                label="Country" 
+                                                placeholder="Country" 
                                                 helperText={
                                                     <FormControlLabel
                                                         value="start"
@@ -340,10 +428,33 @@ const CreateEditForm = () => {
                                             />
                                         )}
                                     />
+                                    // <Autocomplete
+                                    //     multiple
+                                    //     id="tags-outlined"
+                                    //     options={top100Films}
+                                    //     getOptionLabel={(option) => option.title}
+                                    //     defaultValue={[top100Films[1], top100Films[2]]}                            
+                                    //     className="w-full"
+                                    //     renderInput={(params) => (
+                                    //         <TextField
+                                    //             {...params}
+                                    //             label="Countries"
+                                    //             placeholder="Country"
+                                    //             helperText={
+                                    //                 <FormControlLabel
+                                    //                     value="start"
+                                    //                     control={<Checkbox {...label} size="small" checked={true} onChange={ handleSelectAllCountry }/>}
+                                    //                     label={<small>Select All</small>}
+                                    //                     labelPlacement="end"
+                                    //                 />
+                                    //             }
+                                    //         />
+                                    //     )}
+                                    // />
                                 )}
                             />
                             <Controller
-                                name="api_username"
+                                name="verified_options"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
@@ -351,10 +462,15 @@ const CreateEditForm = () => {
                                         id="outlined-select-currency"
                                         select
                                         label="Verified"
-                                        defaultValue="EUR"
                                         helperText="Please select your currency"
                                         className="w-full mt-20"
                                         >
+                                        <MenuItem value="Verified members">
+                                            Verified members
+                                        </MenuItem>
+                                        <MenuItem value="Unverified members">
+                                            Unverified members
+                                        </MenuItem>
                                         <MenuItem value="Name">
                                             Both
                                         </MenuItem>
@@ -362,7 +478,7 @@ const CreateEditForm = () => {
                                 )}
                             />
                             <Controller
-                                name="api_username"
+                                name="upgrade_options"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
@@ -370,11 +486,10 @@ const CreateEditForm = () => {
                                         id="outlined-select-currency"
                                         select
                                         label="Upgrade"
-                                        defaultValue="EUR"
                                         helperText=""
                                         className="w-full mt-20"
                                         >
-                                        <MenuItem value="Name">
+                                        <MenuItem value="Allow all members">
                                             Allow all members
                                         </MenuItem>
                                     </TextField>
@@ -382,29 +497,46 @@ const CreateEditForm = () => {
                             />
 
                             <FormGroup aria-label="position" row className="w-full mt-20">
-                                <TextField
-                                    id="outlined-select-currency"
-                                    select
-                                    label="Past Withdraws"
-                                    defaultValue=""
-                                    helperText=''
-                                    className="w-1/2 pr-24"
-                                    >
-                                    <MenuItem value="At least">
-                                        At least
-                                    </MenuItem>
-                                    <MenuItem value="At most">
-                                        At most
-                                    </MenuItem>
-                                </TextField>
-                                <TextField
-                                    type="tel"
-                                    required
-                                    id="outlined-required"
-                                    label="Amount"
-                                    defaultValue=""
-                                    helperText='Past withdraw(s)'
-                                    className="w-1/2"
+                                <Controller
+                                    name="past_withdrawal_options"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            id="outlined-select-currency"
+                                            select
+                                            label="Past Withdraws"
+                                            defaultValue=""
+                                            helperText=''
+                                            className="w-1/2 pr-24"
+                                            >
+                                            <MenuItem value="At least">
+                                                At least
+                                            </MenuItem>
+                                            <MenuItem value="At most">
+                                                At most
+                                            </MenuItem>
+                                            <MenuItem value="Exact">
+                                                Exact
+                                            </MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                                <Controller
+                                    name="past_withdrawal_count"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            type="tel"
+                                            required
+                                            id="outlined-required"
+                                            label="Amount"
+                                            defaultValue=""
+                                            helperText='Past withdraw(s)'
+                                            className="w-1/2"
+                                        />
+                                    )}
                                 />
                             </FormGroup>
                         </div>
@@ -420,20 +552,42 @@ const CreateEditForm = () => {
                         <Typography>Extras</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <div className='flex flex-col justify-center p-16'>
-                            <Autocomplete
+                        <div className='flex flex-col mx-auto w-1/2 justify-center p-16'>
+                            {/* <Autocomplete
                                 multiple
                                 id="tags-outlined"
-                                options={top100Films}
-                                getOptionLabel={(option) => option.title}
-                                defaultValue={[top100Films[1]]}
+                                options={ memberList }
+                                getOptionLabel={(option) => option.member_name}
+                                defaultValue={[]}
                                 className="w-1/2 mx-auto"
                                 renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Users"
-                                    placeholder="User"
-                                />
+                                    <TextField
+                                        {...params}
+                                        label="Users"
+                                        placeholder="User"
+                                    />
+                                )}
+                            /> */}
+                            <Autocomplete
+                                multiple
+                                className="w-full"
+                                id="checkboxes-tags-demo"
+                                options={ memberList }
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => option.member_name}
+                                renderOption={(props, option, { selected }) => (
+                                    <li {...props} key={option.id}>
+                                        <Checkbox
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
+                                        />
+                                        {option.member_name}
+                                    </li>
+                                )}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Checkboxes" placeholder="Favorites" />
                                 )}
                             />
                             <TextField
@@ -441,9 +595,29 @@ const CreateEditForm = () => {
                                 id="outlined-required"
                                 label="Fees"
                                 defaultValue=""
-                                className="w-1/2 mx-auto mt-20"
+                                className="w-full mt-20"
                             />
-                            
+                            <Controller
+                                name="payment_type"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        id="payment_type"
+                                        select
+                                        label="Payment Tyoe"
+                                        helperText=""
+                                        className="w-full mt-20"
+                                        >
+                                        <MenuItem value="Auto">
+                                            Auto
+                                        </MenuItem>
+                                        <MenuItem value="Manual">
+                                            Manual
+                                        </MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </div>
                     </AccordionDetails>
                 </Accordion>
@@ -460,6 +634,7 @@ const CreateEditForm = () => {
                         loading={loading}
                         type="submit"
                         size="medium"
+                        disabled={!Object.keys(dirtyFields).length || !isValid}
                     >
                         Save
                     </LoadingButton>

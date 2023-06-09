@@ -4,7 +4,7 @@ import { usePermission } from '@fuse/hooks';
 import List from "../../crud/list/List";
  
 const GatewayList = () => {
-    const module = 'pages';
+    const module = 'payment-configurations';
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const { hasPermission } = usePermission(module);
     
