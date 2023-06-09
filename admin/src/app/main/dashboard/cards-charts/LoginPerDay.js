@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card, CardContent, Typography } from '@mui/material';
 
@@ -9,18 +9,38 @@ function LoginPerDay(props) {
                 curve: 'smooth'
             },
             markers: {
-                size: 0
+                size: 5
             },
             xaxis: {
-                categories: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                categories: [],
             }
         },
         series: [
             {
-                data: [30, 40, 25, 50, 49, 21, 70, 51]
+                data: [],
             }
         ],
     });
+    useEffect(() => {
+        setState({
+            options: {
+                stroke: {
+                    curve: 'smooth'
+                },
+                markers: {
+                    size: 3,
+                },
+                xaxis: {
+                    categories: (props.loginPerDay).hasOwnProperty('names') ? props.loginPerDay.names : [],
+                }
+            },
+            series: [
+                {
+                    data: (props.loginPerDay).hasOwnProperty('values') ? props.loginPerDay.values : [],
+                }
+            ],
+        });
+    }, [props.loginPerDay.names, props.loginPerDay.values]);
 
     return (
         <div className="w-1/2 m-5">
