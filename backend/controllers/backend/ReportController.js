@@ -101,7 +101,7 @@ class ReportController{
           survey_count.push(survey_details.dataValues.count)
           total_completed_surveys = total_completed_surveys + survey_details.dataValues.count
         }
-        res.json({survey_names,survey_count,total_completed_surveys})
+        res.json({results:{survey_names,survey_count,total_completed_surveys}})
     }else if(type == 'open_vs_closed_tickets'){
       let tickets = await db.sequelize.query(
         'SELECT status, COUNT(*) as count FROM tickets GROUP BY status',
@@ -126,7 +126,7 @@ class ReportController{
                                                   where:
                                                     {profile_completed_on:{[Op.ne]: null },
                                                     }})
-      res.json({profile_complted_members,member_by_status})
+      res.json({results:{profile_complted_members,member_by_status}})
     }
     else if(type == 'login_per_day'){
       let member_activity_logs = await db.sequelize.query(
@@ -144,7 +144,7 @@ class ReportController{
           count_arr.push(i.count)
         }
       }
-      res.json({names:days_arr,values:count_arr})
+      res.json({results:{names:days_arr,values:count_arr}})
     }
   }
 }
