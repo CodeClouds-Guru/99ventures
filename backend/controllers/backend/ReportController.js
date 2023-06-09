@@ -20,12 +20,12 @@ class ReportController{
     var start_date = req.query.from
     var end_date = req.query.to
     if(start_date){
-      start_date = start_date+' 00:00:00'
+      start_date = new Date(start_date+' 00:00:00')
     }else{
       start_date = moment().subtract(30, 'days').toISOString()
     }
     if(end_date){
-      end_date = end_date+' 23:59:59'
+      end_date = new Date(end_date+' 23:59:59')
     }else{
       end_date = moment().toISOString()
     }
@@ -130,21 +130,50 @@ class ReportController{
     }
     else if(type == 'login_per_day'){
       let member_activity_logs = await db.sequelize.query(
-                                        'SELECT DAY(created_at) as day, COUNT(*) as count FROM member_activity_logs Where action = "Member Logged In" AND created_at BETWEEN ? AND ? GROUP BY day',
+                                        'SELECT DATE(created_at) as day, COUNT(*) as count FROM member_activity_logs Where action = "Member Logged In" AND created_at BETWEEN ? AND ? GROUP BY day',
                                         {
                                           replacements: [start_date,end_date],
                                           type: QueryTypes.SELECT,
                                         }
                                       );
-      var days_arr = []
-      var count_arr = []
+      let name_values = await this.getNameValues(start_date,end_date);
+      var days_arr = name_values.names
+      var count_arr = name_values.values
       if(member_activity_logs.length){
         for(let i of member_activity_logs){
-          days_arr.push(i.day.toString())
-          count_arr.push(i.count)
+          let created_at = new Date(i.day)
+          let diff_time = Math.abs(created_at - start_date);
+          let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24)); 
+          count_arr[diff_days] = i.count
         }
       }
       res.json({results:{names:days_arr,values:count_arr}})
+    }
+  }
+  //get name values structure
+  async getNameValues(start_date,end_date){
+    var names = []
+    var values = []
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+    var dt = start_date;
+    console.log(dt,end_date)
+    while (dt <= end_date) {
+      let date = dt.getDate()
+      switch (date % 10) {
+        case 1: date = date+"st "+monthNames[dt.getMonth()]; break;
+        case 2: date = date+"nd "+monthNames[dt.getMonth()]; break;
+        case 3: date = date+"rd "+monthNames[dt.getMonth()]; break;
+        default: date = date+"th "+monthNames[dt.getMonth()]; break;
+      }
+      names.push(date)
+      values.push(0)
+      dt.setDate(dt.getDate() + 1);
+    }
+    return {
+      names:names,
+      values:values
     }
   }
 }
