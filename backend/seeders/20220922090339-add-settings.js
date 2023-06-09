@@ -49,6 +49,13 @@ module.exports = {
         },
         {
           company_portal_id: 1,
+          settings_key: 'referral_status',
+          settings_value: 1,
+          created_by: 1,
+          created_at: new Date(),
+        },
+        {
+          company_portal_id: 1,
           settings_key: 'referral_percentage',
           settings_value: 10,
           created_by: 1,
@@ -65,13 +72,6 @@ module.exports = {
           company_portal_id: 1,
           settings_key: 'complete_profile_bonus',
           settings_value: 0.25,
-          created_by: 1,
-          created_at: new Date(),
-        },
-        {
-          company_portal_id: 1,
-          settings_key: 'referral_status',
-          settings_value: 1,
           created_by: 1,
           created_at: new Date(),
         },
@@ -96,6 +96,14 @@ module.exports = {
           created_by: 1,
           created_at: new Date(),
         },
+        
+        {
+          company_portal_id: 2,
+          settings_key: 'referral_status',
+          settings_value: 1,
+          created_by: 1,
+          created_at: new Date(),
+        },
         {
           company_portal_id: 2,
           settings_key: 'referral_percentage',
@@ -114,13 +122,6 @@ module.exports = {
           company_portal_id: 2,
           settings_key: 'complete_profile_bonus',
           settings_value: 0.25,
-          created_by: 1,
-          created_at: new Date(),
-        },
-        {
-          company_portal_id: 2,
-          settings_key: 'referral_status',
-          settings_value: 1,
           created_by: 1,
           created_at: new Date(),
         }
