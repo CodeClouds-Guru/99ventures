@@ -2,21 +2,19 @@ import axios from 'axios';
 import * as yup from 'yup';
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { yupResolver } from '@hookform/resolvers/yup';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Controller, useForm, FormProvider } from 'react-hook-form';
-import LoadingButton from '@mui/lab/LoadingButton';
-import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { useDispatch } from 'react-redux';
+import { useState, useEffect } from 'react';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useForm } from 'react-hook-form';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { TextField, MenuItem, Link, Autocomplete, Accordion, AccordionDetails, AccordionSummary, InputLabel, FormControl, ListItemText, Select, Checkbox, Button, Typography, FormControlLabel, FormGroup, Switch } from '@mui/material';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import {Visibility, VisibilityOff, ExpandMore, CheckBox, CheckBoxOutlineBlank} from '@mui/icons-material';
+import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment } from '@mui/material';
 
-
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+const icon = <CheckBoxOutlineBlank fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 const accordianStyle = {
     backgroundColor: '#eee',
@@ -27,48 +25,59 @@ const defaultValues = {
     name: '',
     description: '',
     image_url: '',
-    type_user_info_again: '',
-    payment_field_options: '',
-    minimum_amount: '',
-    maximum_amount: '',
-    fixed_amount: '',
+    type_user_info_again: false,
+    status: true,
+    payment_field_options: 'Email',
+    // minimum_amount: 0,
+    // fixed_amount: 0,
+    maximum_amount: 0,
     withdraw_redo_interval: '',
-    same_account_options: '',
-    past_withdrawal_options: '',
+    same_account_options: 'Mark as cheater',
+    past_withdrawal_options: 'At least',
     past_withdrawal_count: '',
-    verified_options: '',
+    verified_options: 'Both',
     upgrade_options: '',
     fee_percent: '',
     api_username: '',
     api_password: '',
     api_signature: '',
     api_memo: '',
-    payment_type: ''
+    payment_type: 'Auto',
+    amount_type: 'Minimum',
+    amount: 0,
+    member_list: [],
+    country_list: [],
 };
 
 const validationSchema = yup.object().shape({
     name: yup.string().required(`Please enter name!`),
     payment_field_options: yup.string().required(`Please select payment_field_options!`),
-    api_username: yup.string().required(`Please enter name!`),
-    api_password: yup.string().required(`Please enter name!`),
-    api_signature: yup.string().required(`Please enter name!`),
-    api_memo: yup.string().required(`Please enter name!`),
+    // api_username: yup.string().required(`Please enter name!`),
+    // api_password: yup.string().required(`Please enter name!`),
+    // api_signature: yup.string().required(`Please enter name!`),
+    // api_memo: yup.string().required(`Please enter name!`),
 });
 
 
 const CreateEditForm = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { moduleId } = useParams();
     const [expanded, setExpanded] = useState(true);
     const [countryList, setCountryList] = useState([]);
     const [memberList, setMemberList] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectedCountry, setSelectedCountry] = useState([]);
+    const [selectedMember, setSelectedMember] = useState([]);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showSignature, setShowSignature] = useState(false);
 
-    const handleSelectAllCountry = (e) => {
-        if(e.target.checked) {
+    /**
+     * Toggle type of Password & Signature fields
+     */
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickSignature = () => setShowSignature((show) => !show);
 
-        }
-    }
-
-    
     const {
         control,
         formState: { isValid, dirtyFields, errors },
@@ -80,8 +89,43 @@ const CreateEditForm = () => {
         resolver: yupResolver(validationSchema),
     });
 
+    /**
+     * Save Payment Details
+     */
     const handleFormSubmit = (data) => {
         console.log(data)
+        if(data.amount_type === 'Minimum') {
+            data.minimum_amount = data.amount;
+        } else {
+            data.fixed_amount = data.amount;
+        }
+        
+        delete data.amount;
+        delete data.amount_type;
+        data.country_list = (selectedCountry.length ? selectedCountry.map(r=> r.id) : []);
+        data.member_list = (selectedMember.length ? selectedMember.map(r=> r.id) : []);
+        data.type_user_info_again = (data.type_user_info_again === true) ? 1 : 0;
+        data.status = (data.status === true) ? 1 : 0;
+
+        const url = isNaN(moduleId) ? jwtServiceConfig.savePaymentMethodConfiguration : jwtServiceConfig.updatePaymentMethodConfiguration +'/'+moduleId;
+        setLoading(true);
+        axios.post(url, data)
+        .then((response) => {
+            setLoading(false)
+            console.log(response)
+        })
+        .catch(error => {
+            setLoading(false);
+            dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+        });
+    }
+
+    const handleSelectAllCountry = (e) => {
+        if(e.target.checked) {
+            setSelectedCountry(countryList);
+        } else {
+            setSelectedCountry([]);
+        }
     }
 
     useEffect(() => {
@@ -89,17 +133,31 @@ const CreateEditForm = () => {
     }, []);
 
     const getPaymentData = async () => {
-        axios.get(jwtServiceConfig.addPaymentMethodConfiguration)
-			.then(response => {
-                if(response.data.results.status && response.data.results.data) {
-                    const results = response.data.results.data;
-                    if(results.country_list) {
-                        setCountryList(results.country_list);
-                        setMemberList(results.member_list);
-                    }
+        const url = isNaN(moduleId) ? jwtServiceConfig.addPaymentMethodConfiguration : jwtServiceConfig.editPaymentMethodConfiguration + '/' + moduleId
+        axios.get(url)
+        .then(response => {
+            if(response.data.results.status && response.data.results.data) {
+                const results = response.data.results.data;
+                if(results.country_list) {
+                    setCountryList(results.country_list);
+                    setMemberList(results.member_list);
                 }
-			})
-			.catch(error => console.log(error))
+            }
+            if(response.data.results.result) {
+                const result = response.data.results.result;                
+                Object.keys(defaultValues).forEach((key, indx) => {
+                    setValue(key, (result[key] ? result[key] : ''), { shouldDirty: false, shouldValidate: true });
+                });
+                if(result.minimum_amount > 0){
+                    setValue('amount_type', 'Minimum', { shouldDirty: false, shouldValidate: true });
+                    setValue('amount', result.minimum_amount, { shouldDirty: false, shouldValidate: true });
+                } else if(result.fixed_amount > 0){
+                    setValue('amount_type', 'Fixed', { shouldDirty: false, shouldValidate: true });
+                    setValue('amount', result.fixed_amount, { shouldDirty: false, shouldValidate: true });
+                }
+            }
+        })
+        .catch(error => console.log(error))
     }
 
     return (
@@ -112,7 +170,7 @@ const CreateEditForm = () => {
             >
                 <Accordion expanded={ expanded } onChange={()=>setExpanded(!expanded)}>
                     <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
+                        expandIcon={<ExpandMore />}
                         aria-controls="panel1a-content"
                         id="panel1a-header"
                         sx={accordianStyle}
@@ -128,7 +186,7 @@ const CreateEditForm = () => {
                                     <TextField
                                         {...field}
                                         required
-                                        id="outlined-required"
+                                        id="outlined-required-name"
                                         label="Name"
                                         className="w-full"
                                     />
@@ -140,8 +198,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        required
-                                        id="outlined-required"
+                                        id="outlined-required-description"
                                         label="Description"
                                         className="w-full mt-20"
                                     />
@@ -154,8 +211,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        required
-                                        id="outlined-required"
+                                        id="outlined-required-img-url"
                                         label="Image URL"
                                         className="w-full mt-20"
                                     />
@@ -171,7 +227,6 @@ const CreateEditForm = () => {
                                         id="outlined-select-currency"
                                         select
                                         label="Payment Field"
-                                        defaultValue="EUR"
                                         helperText=""
                                         className="w-full mt-20"
                                         >
@@ -193,25 +248,23 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        required
-                                        id="outlined-required"
+                                        type="tel"
+                                        id="outlined-required-redo-wait"
                                         label="Redo Wait"
-                                        defaultValue=""
                                         className="w-full mt-20"
                                     />
                                 )}
                             />
                             <FormGroup aria-label="position" row className="w-full mt-20">
                                 <Controller
-                                    name="amount"
+                                    name="amount_type"
                                     control={control}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
                                             id="outlined-select-currency"
                                             select
-                                            label="Amount"
-                                            defaultValue="Minimum"
+                                            label="Amount Type"
                                             helperText=''
                                             className="w-1/2 pr-24"
                                             >
@@ -247,21 +300,30 @@ const CreateEditForm = () => {
                                     control={control}
                                     render={({ field }) => (          
                                         <FormControlLabel 
-                                            control={<Switch {...field} defaultChecked />} 
+                                            control={<Switch {...field} />} 
                                             label="Yes, force the user to type info twice" 
                                         />
                                     )}
                                     />
                             </FormGroup>
-                            <FormGroup aria-label="position" row className="">
-                                <FormControlLabel control={<Switch defaultChecked />} label="Enabled" />
+                            <FormGroup aria-label="position" row>
+                                <Controller
+                                    name="status"
+                                    control={control}
+                                    render={({ field }) => (   
+                                        <FormControlLabel 
+                                            control={<Switch {...field} checked={field.value}/>} 
+                                            label="Enabled" 
+                                        />
+                                    )}
+                                />
                             </FormGroup>
                         </div>
                     </AccordionDetails>
                 </Accordion>
                 <Accordion>
                     <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
+                    expandIcon={<ExpandMore />}
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                     sx={accordianStyle}
@@ -282,7 +344,7 @@ const CreateEditForm = () => {
                                         helperText=""
                                         className="w-full mt-20"
                                         >
-                                        <MenuItem value="mark_as_cheater">
+                                        <MenuItem value="Mark as cheater">
                                             Mark as cheater
                                         </MenuItem>
                                     </TextField>
@@ -293,10 +355,10 @@ const CreateEditForm = () => {
                 </Accordion>
                 <Accordion>
                     <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
-                    sx={accordianStyle}
+                        expandIcon={<ExpandMore />}
+                        aria-controls="panel2a-content"
+                        id="panel2a-header"
+                        sx={accordianStyle}
                     >
                         <Typography>Instant Payouts</Typography>
                     </AccordionSummary>
@@ -308,10 +370,8 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        required
-                                        id="outlined-required"
+                                        id="outlined-required-api-username"
                                         label="API Username"
-                                        defaultValue=""
                                         className="w-full"
                                     />
                                 )}
@@ -320,28 +380,53 @@ const CreateEditForm = () => {
                                 name="api_password"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        required
-                                        id="outlined-required"
-                                        label="API Password"
-                                        defaultValue=""
-                                        className="w-full mt-20"
-                                    />
+                                    <FormControl sx={{ marginTop: 2, width: '100%' }} variant="outlined">
+                                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                                        <OutlinedInput
+                                            {...field}
+                                            autoComplete="off"
+                                            id="outlined-adornment-password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            endAdornment={
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        aria-label="toggle password visibility"
+                                                        onClick={handleClickShowPassword}
+                                                        edge="end"
+                                                    >
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            }
+                                            label="Password"
+                                        />
+                                    </FormControl>
                                 )}
                             />
                             <Controller
                                 name="api_signature"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        required
-                                        id="outlined-required"
-                                        label="API Signature"
-                                        defaultValue=""
-                                        className="w-full mt-20"
-                                    />
+                                    <FormControl sx={{ marginTop: 2, width: '100%' }} variant="outlined">
+                                        <InputLabel htmlFor="outlined-adornment-signature">API Signature</InputLabel>
+                                        <OutlinedInput
+                                            {...field}
+                                            id="outlined-adornment-signature"
+                                            type={showSignature ? 'text' : 'password'}
+                                            endAdornment={
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        aria-label="toggle signature visibility"
+                                                        onClick={handleClickSignature}
+                                                        edge="end"
+                                                    >
+                                                        {showSignature ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            }
+                                            label="Password"
+                                        />
+                                    </FormControl>
                                 )}
                             />
                             <Controller
@@ -350,8 +435,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        required
-                                        id="outlined-required"
+                                        id="outlined-required-api-memo"
                                         label="API Memo"
                                         className="w-full mt-20"
                                     />
@@ -364,23 +448,21 @@ const CreateEditForm = () => {
                                     <TextField
                                         {...field}
                                         type="tel"
-                                        required
-                                        id="outlined-required"
+                                        id="outlined-required-maximum-amount"
                                         label="Maximum Amount"
                                         className="w-full mt-20"
                                     />
                                 )}
                             />
-                            <FormGroup aria-label="position" row className="">
-                                <FormControlLabel control={<Switch defaultChecked />} label="Enabled" />
-                            </FormGroup>
-                            
+                            {/* <FormGroup aria-label="position" row className="">
+                                <FormControlLabel control={<Switch  />} label="Enabled" />
+                            </FormGroup> */}
                         </div>
                     </AccordionDetails>
                 </Accordion>
                 <Accordion>
                     <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
+                    expandIcon={<ExpandMore />}
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                     sx={accordianStyle}
@@ -390,28 +472,34 @@ const CreateEditForm = () => {
                     <AccordionDetails>
                         <div className='flex flex-col w-1/2 mx-auto justify-center p-16'>
                             <Controller
-                                name="api_username"
+                                name="country_list"
                                 control={control}
                                 render={({ field }) => (
                                     <Autocomplete
+                                        {...field}
                                         multiple
                                         className="w-full"
-                                        id="checkboxes-tags-demo"
+                                        id="checkboxes-country"
                                         options={ countryList } 
                                         disableCloseOnSelect
                                         getOptionLabel={(option) => option.name}
-                                        defaultValue={[]}  
-                                        renderOption={(props, option, { selected }) => (
-                                            <li {...props} key={option.id}>
-                                                <Checkbox
-                                                    icon={icon}
-                                                    checkedIcon={checkedIcon}
-                                                    style={{ marginRight: 8 }}
-                                                    checked={selected}
-                                                />
-                                                {option.name} { selected }
-                                            </li>
-                                        )}
+                                        value={selectedCountry}
+                                        onChange={(e, val)=>{
+                                            setSelectedCountry(val)
+                                        }}
+                                        renderOption={(props, option, { selected }) => {
+                                            return (
+                                                <li {...props} key={option.id}>
+                                                    <Checkbox
+                                                        icon={icon}
+                                                        checkedIcon={checkedIcon}
+                                                        style={{ marginRight: 8 }}
+                                                        checked={selected}
+                                                    />
+                                                    {option.name}
+                                                </li>
+                                            )
+                                        }}
                                         renderInput={(params) => (
                                             <TextField 
                                                 {...params} 
@@ -420,7 +508,7 @@ const CreateEditForm = () => {
                                                 helperText={
                                                     <FormControlLabel
                                                         value="start"
-                                                        control={<Checkbox {...label} size="small" checked={true} onChange={ handleSelectAllCountry }/>}
+                                                        control={<Checkbox {...label} size="small" onChange={ handleSelectAllCountry }/>}
                                                         label={<small>Select All</small>}
                                                         labelPlacement="end"
                                                     />
@@ -428,31 +516,9 @@ const CreateEditForm = () => {
                                             />
                                         )}
                                     />
-                                    // <Autocomplete
-                                    //     multiple
-                                    //     id="tags-outlined"
-                                    //     options={top100Films}
-                                    //     getOptionLabel={(option) => option.title}
-                                    //     defaultValue={[top100Films[1], top100Films[2]]}                            
-                                    //     className="w-full"
-                                    //     renderInput={(params) => (
-                                    //         <TextField
-                                    //             {...params}
-                                    //             label="Countries"
-                                    //             placeholder="Country"
-                                    //             helperText={
-                                    //                 <FormControlLabel
-                                    //                     value="start"
-                                    //                     control={<Checkbox {...label} size="small" checked={true} onChange={ handleSelectAllCountry }/>}
-                                    //                     label={<small>Select All</small>}
-                                    //                     labelPlacement="end"
-                                    //                 />
-                                    //             }
-                                    //         />
-                                    //     )}
-                                    // />
                                 )}
                             />
+                            
                             <Controller
                                 name="verified_options"
                                 control={control}
@@ -471,7 +537,7 @@ const CreateEditForm = () => {
                                         <MenuItem value="Unverified members">
                                             Unverified members
                                         </MenuItem>
-                                        <MenuItem value="Name">
+                                        <MenuItem value="Both">
                                             Both
                                         </MenuItem>
                                     </TextField>
@@ -529,10 +595,8 @@ const CreateEditForm = () => {
                                         <TextField
                                             {...field}
                                             type="tel"
-                                            required
-                                            id="outlined-required"
+                                            id="outlined-required-past-withdrawl"
                                             label="Amount"
-                                            defaultValue=""
                                             helperText='Past withdraw(s)'
                                             className="w-1/2"
                                         />
@@ -544,7 +608,7 @@ const CreateEditForm = () => {
                 </Accordion>
                 <Accordion>
                     <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
+                        expandIcon={<ExpandMore />}
                         aria-controls="panel2a-content"
                         id="panel2a-header"
                         sx={accordianStyle}
@@ -553,49 +617,52 @@ const CreateEditForm = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                         <div className='flex flex-col mx-auto w-1/2 justify-center p-16'>
-                            {/* <Autocomplete
-                                multiple
-                                id="tags-outlined"
-                                options={ memberList }
-                                getOptionLabel={(option) => option.member_name}
-                                defaultValue={[]}
-                                className="w-1/2 mx-auto"
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Users"
-                                        placeholder="User"
+                            <Controller
+                                name="member_list"
+                                control={control}
+                                render={({ field }) => (
+                                    <Autocomplete
+                                        {...field}
+                                        value={ selectedMember }
+                                        multiple
+                                        className="w-full"
+                                        id="checkboxes-users"
+                                        options={ memberList }
+                                        disableCloseOnSelect
+                                        getOptionLabel={(option) => option.member_name}
+                                        onChange={(e, val)=>{
+                                            setSelectedMember(val);
+                                        }}
+                                        renderOption={(props, option, { selected }) => (
+                                            <li {...props} key={option.id}>
+                                                <Checkbox
+                                                    icon={icon}
+                                                    checkedIcon={checkedIcon}
+                                                    style={{ marginRight: 8 }}
+                                                    checked={selected}
+                                                />
+                                                {option.member_name}
+                                            </li>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField {...params} label="Excluded Users" placeholder="Excluded Users" />
+                                        )}
                                     />
                                 )}
-                            /> */}
-                            <Autocomplete
-                                multiple
-                                className="w-full"
-                                id="checkboxes-tags-demo"
-                                options={ memberList }
-                                disableCloseOnSelect
-                                getOptionLabel={(option) => option.member_name}
-                                renderOption={(props, option, { selected }) => (
-                                    <li {...props} key={option.id}>
-                                        <Checkbox
-                                            icon={icon}
-                                            checkedIcon={checkedIcon}
-                                            style={{ marginRight: 8 }}
-                                            checked={selected}
-                                        />
-                                        {option.member_name}
-                                    </li>
-                                )}
-                                renderInput={(params) => (
-                                    <TextField {...params} label="Checkboxes" placeholder="Favorites" />
-                                )}
                             />
-                            <TextField
-                                required
-                                id="outlined-required"
-                                label="Fees"
-                                defaultValue=""
-                                className="w-full mt-20"
+                            
+                            <Controller
+                                name="fee_percent"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        id="outlined-required-fee"
+                                        label="Fees"
+                                        className="w-full mt-20"
+                                        helperText="In cent format"
+                                    />
+                                )}
                             />
                             <Controller
                                 name="payment_type"
@@ -634,7 +701,7 @@ const CreateEditForm = () => {
                         loading={loading}
                         type="submit"
                         size="medium"
-                        disabled={!Object.keys(dirtyFields).length || !isValid}
+                        // disabled={!Object.keys(dirtyFields).length || !isValid}
                     >
                         Save
                     </LoadingButton>
@@ -642,7 +709,7 @@ const CreateEditForm = () => {
                         className="whitespace-nowrap mx-4"
                         variant="contained"
                         color="error"
-                        onClick={() => navigate(`/app/${module}`)}
+                        onClick={() => navigate(`/configuration`)}
                     >
                         Cancel
                     </Button>
