@@ -137,7 +137,7 @@ class ReportController{
             closed_count_arr[diff_days] = i.count
         }
       }
-      res.json({
+      res.json({results:{
         names:days_arr,
         values:[{
           name:'Total',
@@ -155,7 +155,7 @@ class ReportController{
           name:'Closed',
           values: closed_count_arr,
         }]
-      })
+      }})
     }
     else if(type == 'members'){
       
@@ -211,6 +211,20 @@ class ReportController{
         }
       }
       res.json({results:{names:days_arr,values:count_arr}})
+    }else if(type == 'top_surveys'){
+      let top_surveys = await MemberSurvey.findAll({
+        attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
+        limit:5,
+        offset:0,
+        order: [[sequelize.fn('COUNT', '*'), 'DESC']],
+        group:'survey_number',
+        where:{
+          completed_on: {
+            [Op.between]: [start_date,end_date]
+          }
+        }
+      })
+      res.json(top_surveys)
     }
   }
   //get name values structure
