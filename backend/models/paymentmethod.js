@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
       company_portal_id: Joi.required().label('Company portal'),
       name: Joi.string().required().label('Name'),
       slug: Joi.string().required().label('Slug'),
-      descriptions: Joi.optional().allow('').label('Descriptions'),
+      description: Joi.optional().allow('').label('Description'),
       image_url: Joi.optional().allow('').label('Image Url'),
       type_user_info_again: Joi.optional()
         .allow('')
@@ -91,22 +91,25 @@ module.exports = (sequelize, DataTypes) => {
       maximum_amount: Joi.optional().allow('').label('Maximum Amount'),
       fixed_amount: Joi.optional().allow('').label('Fixed Amount'),
       withdraw_redo_interval: Joi.optional()
-        .allow('')
+        .allow(null)
         .label('Withdraw Redo Interval'),
-      status: Joi.string().required().label('status'),
+      status: Joi.number().required().label('status'),
       same_account_options: Joi.optional()
         .allow('')
         .label('Same Account Options'),
       past_withdrawal_options: Joi.optional()
         .allow('')
         .label('Past Withdrawal Options'),
+      past_withdrawal_count: Joi.optional()
+        .allow('')
+        .label('Past Withdrawal Count'),
       verified_options: Joi.optional().allow('').label('Verified Options'),
       upgrade_options: Joi.optional().allow('').label('Upgrade Options'),
       fee_percent: Joi.optional().allow('').label('Fee Percentage'),
-      api_username: Joi.string().required().label('Api Username'),
-      api_password: Joi.string().required().label('Api Password'),
-      api_signature: Joi.string().required().label('Api Signature'),
-      api_memo: Joi.string().required().label('Api Memo'),
+      api_username: Joi.optional().allow('').label('Api Username'),
+      api_password: Joi.optional().allow('').label('Api Password'),
+      api_signature: Joi.optional().allow('').label('Api Signature'),
+      api_memo: Joi.optional().allow('').label('Api Memo'),
       payment_type: Joi.string().required().label('Payment Type'),
       updated_at: Joi.optional().allow('').label('Updated At'),
     });
@@ -114,6 +117,19 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   PaymentMethod.fields = {
+    id: {
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
     name: {
       field_name: 'name',
       db_name: 'name',
