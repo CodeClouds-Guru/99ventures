@@ -1,8 +1,9 @@
 const Controller = require('./Controller');
 const { Country, Member, PaymentMethod } = require('../../models/index');
-
+const db = require('../../models/index');
 const { sequelize } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
+const { QueryTypes } = require('sequelize');
 class PaymentConfigurationController extends Controller {
   constructor() {
     super('PaymentMethod');
@@ -105,7 +106,6 @@ class PaymentConfigurationController extends Controller {
   //override save function
   async save(req, res) {
     try {
-      console.log('==================================================');
       req.body.company_portal_id = req.headers.site_id;
       const updated_country_list = req.body.country_list;
       const updated_member_list = req.body.member_list;
@@ -165,8 +165,22 @@ class PaymentConfigurationController extends Controller {
   //override update function
   async update(req, res) {
     try {
+      console.log('==================================================');
+      req.body.company_portal_id = req.headers.site_id;
+      const updated_country_list = req.body.country_list;
+      const updated_member_list = req.body.member_list;
+      req.body.withdraw_redo_interval =
+        req.body.withdraw_redo_interval === ''
+          ? null
+          : req.body.withdraw_redo_interval;
+      delete req.body.country_list;
+      delete req.body.member_list;
+      let payment_method = await this.model.findOne({
+        where: { id: req.params.id },
+      });
+      req.body.name = payment_method.name;
+      req.body.slug = payment_method.slug;
       const { error, value } = this.model.validate(req);
-
       if (error) {
         let message = error.details.map((err) => err.message).join(', ');
         this.throwCustomError(message, 401);
@@ -184,7 +198,10 @@ class PaymentConfigurationController extends Controller {
               type: QueryTypes.DELETE,
             }
           );
-          await this.insertAllowedCountries(updated_country_list);
+          await this.insertAllowedCountries(
+            updated_country_list,
+            req.params.id
+          );
         }
         if (updated_member_list.length > 0) {
           let country_del = await db.sequelize.query(
@@ -194,15 +211,15 @@ class PaymentConfigurationController extends Controller {
               type: QueryTypes.DELETE,
             }
           );
-          await this.insertExcludedMembers(updated_member_list);
+          await this.insertExcludedMembers(updated_member_list, req.params.id);
         }
       }
       return {
         status: true,
-        message: 'Payment method added.',
-        id: response.result.id,
+        message: 'Payment method updated.',
       };
     } catch (err) {
+      console.log(err);
       this.throwCustomError('Unable to save data', 500);
     }
   }
@@ -212,7 +229,7 @@ class PaymentConfigurationController extends Controller {
     country_data = updated_country_list.map((country) => {
       return {
         payment_method_id: payment_method_id,
-        country_id: country.id,
+        country_id: country,
       };
     });
     console.log('country_data', country_data);
@@ -227,7 +244,7 @@ class PaymentConfigurationController extends Controller {
     member_data = updated_member_list.map((member) => {
       return {
         payment_method_id: payment_method_id,
-        member_id: member.id,
+        member_id: member,
       };
     });
     console.log('member_data', member_data);
