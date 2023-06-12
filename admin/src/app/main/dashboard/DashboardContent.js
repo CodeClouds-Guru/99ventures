@@ -57,6 +57,7 @@ const DashboardContent = () => {
     useEffect(() => {
         getCompletedSurveys();
         getLoginPerDay();
+        getMembersChart();
     }, [param])
     const clearFilter = () => {
         setDateRange({
@@ -87,6 +88,16 @@ const DashboardContent = () => {
         axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=login_per_day&from=${param.from}&to=${param.to}`).then((res) => {
             if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
                 setLoginPerDay(res.data.results);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+    const getMembersChart = () => {
+        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=members&from=${param.from}&to=${param.to}`).then((res) => {
+            if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
+                setMembersChart(res.data.results);
             }
         }).catch(e => {
             console.error(e)
@@ -130,7 +141,7 @@ const DashboardContent = () => {
                 <CompletedSurveyChart completedSurveys={completedSurveys} />
             </div>
             <div className="flex w-full justify-between">
-                <MembersChart />
+                <MembersChart membersChart={membersChart} />
                 <OpenVsClosedTickets />
             </div>
             <div className="flex w-full justify-between">
