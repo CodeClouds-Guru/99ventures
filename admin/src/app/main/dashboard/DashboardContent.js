@@ -56,6 +56,7 @@ const DashboardContent = () => {
     }, [dateRange])
     useEffect(() => {
         getCompletedSurveys();
+        getLoginPerDay();
     }, [param])
     const clearFilter = () => {
         setDateRange({
@@ -74,8 +75,18 @@ const DashboardContent = () => {
     }
     const getCompletedSurveys = () => {
         axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=completed_surveys&from=${param.from}&to=${param.to}`).then((res) => {
-            if ((res.data).hasOwnProperty('total_completed_surveys') && (res.data).hasOwnProperty('survey_names') && (res.data).hasOwnProperty('survey_count')) {
-                setCompletedSurveys(res.data);
+            if ((res.data.results).hasOwnProperty('total_completed_surveys') && (res.data.results).hasOwnProperty('survey_names') && (res.data.results).hasOwnProperty('survey_count')) {
+                setCompletedSurveys(res.data.results);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+    const getLoginPerDay = () => {
+        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=login_per_day&from=${param.from}&to=${param.to}`).then((res) => {
+            if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
+                setLoginPerDay(res.data.results);
             }
         }).catch(e => {
             console.error(e)
@@ -115,7 +126,7 @@ const DashboardContent = () => {
             </div>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={completedSurveys.hasOwnProperty('total_completed_surveys') ? completedSurveys.total_completed_surveys : 0} />
             <div className="flex w-full justify-between">
-                <LoginPerDay />
+                <LoginPerDay loginPerDay={loginPerDay} />
                 <CompletedSurveyChart completedSurveys={completedSurveys} />
             </div>
             <div className="flex w-full justify-between">
