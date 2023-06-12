@@ -10,7 +10,9 @@ router.get('/robots.txt', (req, res) => {
 });
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
+const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
 router.use(checkMemberAuth);
+router.use(validateCaptchaMiddleware);
 // router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');

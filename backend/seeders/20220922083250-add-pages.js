@@ -10,7 +10,7 @@ module.exports = {
         {
           company_portal_id: "1",
           html: '<main id="home">\n<h1>Home</h1>\n</main>',
-          status: "draft",
+          status: "published",
           permalink: "/",
           is_homepage: "1",
           slug: "/",
@@ -26,7 +26,7 @@ module.exports = {
         {
           company_portal_id: "2",
           html: '<main id="home">\n<h1>Home</h1>\n</main>',
-          status: "draft",
+          status: "published",
           permalink: "/",
           is_homepage: "1",
           slug: "/",
@@ -42,7 +42,7 @@ module.exports = {
         {
           company_portal_id: "1",
           html: '<main id="i36k">\n<style>.not-found-sec a,.not-found-sec a:focus,.not-found-sec a:hover{background-image:initial;background-position-x:initial;background-position-y:initial;background-size:initial;background-repeat-x:initial;background-repeat-y:initial;background-attachment:initial;background-origin:initial;background-clip:initial}*,::after,::before{box-sizing:border-box}.h-full{height:100vh}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.not-found-sec{font-size:15px;font-family:"Inter var",Roboto,Helvetica,Arial,sans-serif}.not-found-sec h1{color:red;font-size:35px}.not-found-sec .opps{font-size:22px}.not-found-sec a{padding:8px 20px;margin-top:0;border-radius:50px;border-width:1px;border-style:solid;border-top:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-color:#000;border-image-source:initial;border-image-slice:initial;border-image-width:initial;border-image-outset:initial;border-image-repeat:initial;background-color:#fff;color:#000;transition:.3s ease-in-out;text-decoration-line:none;text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;display:inline-block}.not-found-sec a:focus,.not-found-sec a:hover{background-color:#000;color:#fff}</style>\n<div class="not-found h-full flex items-center justify-center">\n      <div class="not-found-sec text-center">\n        <h1>500!\n        </h1>\n        <p class="opps">\n          <strong>Server Error!!..</strong>\n        </p>\n        <a href="/">Back to Home Page</a>\n      </div>\n    </div>\n</main>',
-          status: "pending",
+          status: "published",
           permalink: "500",
           is_homepage: "0",
           slug: "500",
@@ -59,7 +59,7 @@ module.exports = {
         {
           company_portal_id: "2",
           html: '<main id="i36k">\n<style>.not-found-sec a,.not-found-sec a:focus,.not-found-sec a:hover{background-image:initial;background-position-x:initial;background-position-y:initial;background-size:initial;background-repeat-x:initial;background-repeat-y:initial;background-attachment:initial;background-origin:initial;background-clip:initial}*,::after,::before{box-sizing:border-box}.h-full{height:100vh}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.not-found-sec{font-size:15px;font-family:"Inter var",Roboto,Helvetica,Arial,sans-serif}.not-found-sec h1{color:red;font-size:35px}.not-found-sec .opps{font-size:22px}.not-found-sec a{padding:8px 20px;margin-top:0;border-radius:50px;border-width:1px;border-style:solid;border-top:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-color:#000;border-image-source:initial;border-image-slice:initial;border-image-width:initial;border-image-outset:initial;border-image-repeat:initial;background-color:#fff;color:#000;transition:.3s ease-in-out;text-decoration-line:none;text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;display:inline-block}.not-found-sec a:focus,.not-found-sec a:hover{background-color:#000;color:#fff}</style>\n<div class="not-found h-full flex items-center justify-center">\n      <div class="not-found-sec text-center">\n        <h1>500!\n        </h1>\n        <p class="opps">\n          <strong>Server Error!!..</strong>\n        </p>\n        <a href="/">Back to Home Page</a>\n      </div>\n    </div>\n</main>',
-          status: "pending",
+          status: "published",
           permalink: "500",
           is_homepage: "0",
           slug: "500",
@@ -76,7 +76,7 @@ module.exports = {
         {
           company_portal_id: "1",
           html: '<main id="not-found">\n<style>.not-found-sec a,.not-found-sec a:focus,.not-found-sec a:hover{background-image:initial;background-position-x:initial;background-position-y:initial;background-size:initial;background-repeat-x:initial;background-repeat-y:initial;background-attachment:initial;background-origin:initial;background-clip:initial}*,::after,::before{box-sizing:border-box}.h-full{height:100vh}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.not-found-sec{font-size:15px;font-family:"Inter var",Roboto,Helvetica,Arial,sans-serif}.not-found-sec h1{color:red;font-size:35px}.not-found-sec .opps{font-size:22px}.not-found-sec a{padding:8px 20px;margin-top:0;border-radius:50px;border-width:1px;border-style:solid;border-top:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-color:#000;border-image-source:initial;border-image-slice:initial;border-image-width:initial;border-image-outset:initial;border-image-repeat:initial;background-color:#fff;color:#000;transition:.3s ease-in-out;text-decoration-line:none;text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;display:inline-block}.not-found-sec a:focus,.not-found-sec a:hover{background-color:#000;color:#fff}</style>\n  <div class="not-found h-full flex items-center justify-center">\n\t<div class="not-found-sec text-center">\n\t  <h1>404!\n\t  </h1>\n\t  <p class="opps">\n\t\t<strong>Opps!!..</strong>\n\t  </p>\n\t  <a href="/">Back to Home Page</a>\n\t</div>\n  </div>\n</main>',
-          status: "pending",
+          status: "published",
           permalink: "404",
           is_homepage: "0",
           slug: "404",
@@ -94,7 +94,7 @@ module.exports = {
           id: "6",
           company_portal_id: "2",
           html: '<main id="not-found">\n<style>.not-found-sec a,.not-found-sec a:focus,.not-found-sec a:hover{background-image:initial;background-position-x:initial;background-position-y:initial;background-size:initial;background-repeat-x:initial;background-repeat-y:initial;background-attachment:initial;background-origin:initial;background-clip:initial}*,::after,::before{box-sizing:border-box}.h-full{height:100vh}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.not-found-sec{font-size:15px;font-family:"Inter var",Roboto,Helvetica,Arial,sans-serif}.not-found-sec h1{color:red;font-size:35px}.not-found-sec .opps{font-size:22px}.not-found-sec a{padding:8px 20px;margin-top:0;border-radius:50px;border-width:1px;border-style:solid;border-top:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-color:#000;border-image-source:initial;border-image-slice:initial;border-image-width:initial;border-image-outset:initial;border-image-repeat:initial;background-color:#fff;color:#000;transition:.3s ease-in-out;text-decoration-line:none;text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;display:inline-block}.not-found-sec a:focus,.not-found-sec a:hover{background-color:#000;color:#fff}</style>\n  <div class="not-found h-full flex items-center justify-center">\n\t<div class="not-found-sec text-center">\n\t  <h1>404!\n\t  </h1>\n\t  <p class="opps">\n\t\t<strong>Opps!!..</strong>\n\t  </p>\n\t  <a href="/">Back to Home Page</a>\n\t</div>\n  </div>\n</main>',
-          status: "pending",
+          status: "published",
           permalink: "404",
           is_homepage: "0",
           slug: "404",
@@ -108,11 +108,43 @@ module.exports = {
           descriptions: "",
           meta_code: "",
         },
+        {
+          id: "6",
+          company_portal_id: "2",
+          html: '<main id="not-found">\n<style>.not-found-sec a,.not-found-sec a:focus,.not-found-sec a:hover{background-image:initial;background-position-x:initial;background-position-y:initial;background-size:initial;background-repeat-x:initial;background-repeat-y:initial;background-attachment:initial;background-origin:initial;background-clip:initial}*,::after,::before{box-sizing:border-box}.h-full{height:100vh}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.not-found-sec{font-size:15px;font-family:"Inter var",Roboto,Helvetica,Arial,sans-serif}.not-found-sec h1{color:red;font-size:35px}.not-found-sec .opps{font-size:22px}.not-found-sec a{padding:8px 20px;margin-top:0;border-radius:50px;border-width:1px;border-style:solid;border-top:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-color:#000;border-image-source:initial;border-image-slice:initial;border-image-width:initial;border-image-outset:initial;border-image-repeat:initial;background-color:#fff;color:#000;transition:.3s ease-in-out;text-decoration-line:none;text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;display:inline-block}.not-found-sec a:focus,.not-found-sec a:hover{background-color:#000;color:#fff}</style>\n  <div class="not-found h-full flex items-center justify-center">\n\t<div class="not-found-sec text-center">\n\t  <h1>404!\n\t  </h1>\n\t  <p class="opps">\n\t\t<strong>Opps!!..</strong>\n\t  </p>\n\t  <a href="/">Back to Home Page</a>\n\t</div>\n  </div>\n</main>',
+          status: "published",
+          permalink: "404",
+          is_homepage: "0",
+          slug: "404",
+          name: "404",
+          created_by: "8",
+          created_at: "2022-11-14 14:43:55",
+          page_json:
+            '{"pages": [{"id": "wZoiZ2y8ThSdTxut", "type": "main", "frames": [{"component": {"type": "wrapper", "stylable": ["background", "background-color", "background-image", "background-repeat", "background-attachment", "background-position", "background-size"]}}]}], "assets": [], "styles": [{"style": {"color": "red"}, "selectors": ["txt-red"]}]}',
+          layout_id: "2",
+          keywords: "",
+          descriptions: "",
+          meta_code: "",
+        }, {
+          company_portal_id: "1",
+          html: `<style>*, ::after, ::before{box-sizing:border-box;}body{font-size:16px;overflow-x:hidden;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;}.under-maintainence{height:100vh;display:flex;margin-top:30px;text-align:center;align-items:center;margin-left:0px;margin-right:0px;margin-bottom:30px;justify-content:center;}.under-maintainence > div{width:90%;max-width:800px;margin-top:0px;margin-left:auto;margin-right:auto;margin-bottom:0px;}.under-maintainence figure{width:75%;max-width:300px;margin-top:0px;margin-left:auto;margin-right:auto;margin-bottom:20px;}.under-maintainence figure img{max-width:100%;}.under-maintainence-cntnt h1{color:rgb(52, 56, 95);font-size:1.6rem;margin-top:0px;font-family:"Arkibal Stencil";font-weight:bold;line-height:1.2;margin-bottom:20px;text-transform:capitalize;}.under-maintainence-cntnt h1 span{font-size:2.3rem;}.under-maintainence-cntnt h3{color:rgb(52, 56, 95);font-size:1.4rem;margin-top:0px;font-family:Poppins, sans-serif;line-height:1.2;margin-bottom:15px;text-transform:capitalize;}.under-maintainence-cntnt p{color:rgb(0, 0, 0);font-size:1rem;margin-top:0px;font-family:Poppins, sans-serif;line-height:1.3;margin-left:0px;margin-right:0px;margin-bottom:12px;}@font-face{src:url("https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.woff2") format("woff2"), url("https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.woff") format("woff"), url("https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.ttf") format("truetype");font-style:normal;font-family:"Arkibal Stencil";font-weight:normal;}@media only screen and (max-width: 767px){.under-maintainence-cntnt h1{font-size:1.2rem;margin-bottom:14px;}.under-maintainence-cntnt h1 span{font-size:1.75rem;}.under-maintainence-cntnt h3{font-size:1.1rem;margin-bottom:10px;}}@media only screen and (max-width: 575px){.under-maintainence{min-height:500px;margin-bottom:50px;}}</style><div class="under-maintainence"><div><figure class="under-maintainence-img"><img alt="Under Maintainence Image" src="https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/undermaintainence.png"/></figure><div class="under-maintainence-cntnt"><h1><span>Oops!</span> Under Construction</h1><h3>Our Site is getting a little tune up</h3><p>We appologize for the inconvenience, but we're performing some maintainence at the moment.</p><p>We will be available soon.</p></div></div></div>`,
+          status: "published",
+          permalink: "under-maintainence",
+          is_homepage: "0",
+          slug: "under-maintainence",
+          name: "Under Maintainence",
+          created_by: "8",
+          created_at: "2022-11-14 14:43:55",
+          page_json: `{"pages": [{"id": "S5RdSmd13J3QJI4K", "type": "main", "frames": [{"component": {"type": "wrapper", "stylable": ["background", "background-color", "background-image", "background-repeat", "background-attachment", "background-position", "background-size"], "attributes": {"id": "it55"}, "components": [{"classes": ["under-maintainence"], "components": [{"components": [{"classes": ["under-maintainence-img"], "tagName": "figure", "components": [{"type": "image", "attributes": {"alt": "Under Maintainence Image", "src": "https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/undermaintainence.png"}}]}, {"classes": ["under-maintainence-cntnt"], "components": [{"type": "text", "tagName": "h1", "components": [{"type": "text", "tagName": "span", "components": [{"type": "textnode", "content": "Oops!"}]}, {"type": "textnode", "content": " Under Construction\n\t\t"}]}, {"type": "text", "tagName": "h3", "components": [{"type": "textnode", "content": "Our Site is getting a little tune up\n\t\t"}]}, {"type": "text", "tagName": "p", "components": [{"type": "textnode", "content": "We appologize for the inconvenience, but we're performing some maintainence at the moment.\n\t\t"}]}, {"type": "text", "tagName": "p", "components": [{"type": "textnode", "content": "We will be available soon.\n\t\t"}]}]}]}]}]}}]}], "assets": [], "styles": [{"style": {"box-sizing": "border-box"}, "selectors": [], "selectorsAdd": "*, ::after, ::before"}, {"style": {"font-size": "16px", "margin-top": "0px", "overflow-x": "hidden", "margin-left": "0px", "margin-right": "0px", "margin-bottom": "0px"}, "selectors": [], "selectorsAdd": "body"}, {"style": {"height": "100vh", "display": "flex", "margin-top": "30px", "text-align": "center", "align-items": "center", "margin-left": "0px", "margin-right": "0px", "margin-bottom": "30px", "justify-content": "center"}, "selectors": ["under-maintainence"]}, {"style": {"width": "90%", "max-width": "800px", "margin-top": "0px", "margin-left": "auto", "margin-right": "auto", "margin-bottom": "0px"}, "selectors": [], "selectorsAdd": ".under-maintainence > div"}, {"style": {"width": "75%", "max-width": "300px", "margin-top": "0px", "margin-left": "auto", "margin-right": "auto", "margin-bottom": "20px"}, "selectors": [], "selectorsAdd": ".under-maintainence figure"}, {"style": {"max-width": "100%"}, "selectors": [], "selectorsAdd": ".under-maintainence figure img"}, {"style": {"color": "rgb(52, 56, 95)", "font-size": "1.6rem", "margin-top": "0px", "font-family": "\"Arkibal Stencil\"", "font-weight": "bold", "line-height": "1.2", "margin-bottom": "20px", "text-transform": "capitalize"}, "selectors": [], "selectorsAdd": ".under-maintainence-cntnt h1"}, {"style": {"font-size": "2.3rem"}, "selectors": [], "selectorsAdd": ".under-maintainence-cntnt h1 span"}, {"style": {"color": "rgb(52, 56, 95)", "font-size": "1.4rem", "margin-top": "0px", "font-family": "Poppins, sans-serif", "line-height": "1.2", "margin-bottom": "15px", "text-transform": "capitalize"}, "selectors": [], "selectorsAdd": ".under-maintainence-cntnt h3"}, {"style": {"color": "rgb(0, 0, 0)", "font-size": "1rem", "margin-top": "0px", "font-family": "Poppins, sans-serif", "line-height": "1.3", "margin-left": "0px", "margin-right": "0px", "margin-bottom": "12px"}, "selectors": [], "selectorsAdd": ".under-maintainence-cntnt p"}, {"style": {"src": "url(\"https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.woff2\") format(\"woff2\"), url(\"https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.woff\") format(\"woff\"), url(\"https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/fonts/arkibal_stencil_regular-webfont.ttf\") format(\"truetype\")", "font-style": "normal", "font-family": "\"Arkibal Stencil\"", "font-weight": "normal"}, "selectors": [], "atRuleType": "font-face", "singleAtRule": 1}, {"style": {"font-size": "1.2rem", "margin-bottom": "14px"}, "mediaText": "only screen and (max-width: 767px)", "selectors": [], "atRuleType": "media", "selectorsAdd": ".under-maintainence-cntnt h1"}, {"style": {"font-size": "1.75rem"}, "mediaText": "only screen and (max-width: 767px)", "selectors": [], "atRuleType": "media", "selectorsAdd": ".under-maintainence-cntnt h1 span"}, {"style": {"font-size": "1.1rem", "margin-bottom": "10px"}, "mediaText": "only screen and (max-width: 767px)", "selectors": [], "atRuleType": "media", "selectorsAdd": ".under-maintainence-cntnt h3"}, {"style": {"min-height": "500px", "margin-bottom": "50px"}, "mediaText": "only screen and (max-width: 575px)", "selectors": ["under-maintainence"], "atRuleType": "media"}]}`,
+          layout_id: "2",
+          keywords: "",
+          descriptions: "",
+          meta_code: "",
+        },
       ],
       {}
     );
   },
-
   async down(queryInterface, Sequelize) {
     // Add commands to revert seed here.
 

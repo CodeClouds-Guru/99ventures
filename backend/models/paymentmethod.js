@@ -141,7 +141,7 @@ module.exports = (sequelize, DataTypes) => {
       required: true,
       value: '',
       width: '50',
-      searchable: false,
+      searchable: true,
     },
     status: {
       field_name: 'status',
