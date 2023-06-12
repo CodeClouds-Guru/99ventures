@@ -7,6 +7,7 @@ const {
   Page,
   WithdrawalRequest,
   MemberNotification,
+  GoogleCaptchaConfiguration
 } = require('../models');
 const db = require('../models/index');
 const { sequelize } = require('../models/index');
@@ -21,6 +22,8 @@ module.exports = async function (req, res, next) {
     });
   }
   req.session.company_portal = company_portal;
+  let google_captcha_settings = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: company_portal.id } });
+  req.session.google_captcha_settings = google_captcha_settings;
   if ('member' in req.session && req.session.member) {
     let ip = req.ip;
     if (Array.isArray(ip)) {

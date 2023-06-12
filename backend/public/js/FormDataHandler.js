@@ -21,9 +21,9 @@ $(() => {
     $('element').removeClass('bg-success');
     $('element').removeClass('bg-danger');
     $('.snackbar').addClass(success ? 'bg-success' : 'bg-danger');
-    $('.snackbar').addClass('show');
+    $('.snackbar').addClass('show').css('display', 'block');
     setTimeout(function () {
-      $('.snackbar').removeClass('show');
+      $('.snackbar').removeClass('show').css('display', 'none');;
     }, 3000);
   };
   var hideSnackbar = () => {
@@ -39,7 +39,7 @@ $(() => {
     <p class="m-0 me-auto snack_msg"></p>
     <button class="btn-close btn-close-white"></button>
     </div>`;
-  let closeTicketModal = `<div id="closeTicketModal" tabindex="-1" aria-hidden="true" aria-labelledby="exampleModalLabel"
+  let closeTicketModal = `<div id="closeTicketModal" style="display: none;" tabindex="-1" aria-hidden="true" aria-labelledby="exampleModalLabel"
     class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content bg-white">
@@ -65,15 +65,20 @@ $(() => {
       </div>
     </div>
   </div>`;
-  $('body').append(snackbar).append(closeTicketModal);
+  // $('body').append(snackbar).append(closeTicketModal);
+  $('body').append(closeTicketModal);
   let errorMsg = $('#scripteed_error_message_div').text();
   if (errorMsg.trim().length > 0) {
+    $('body').append(snackbar)
     showSnackbar(
       errorMsg,
       $('#scripteed_error_message_div').hasClass('success-snack')
     );
   }
-  $(document).on('click', '.scripteed-close-ticket', (e) => { e.stopImmediatePropagation(); $('#closeTicketModal').modal('show').attr('data-tid', $(e.target).data('tid')); })
+  $(document).on('click', '.scripteed-close-ticket', (e) => {
+    e.stopImmediatePropagation();
+    $('#closeTicketModal').modal('show').attr('data-tid', $(e.target).data('tid'));
+  })
 
   $('#confirmCloseTicketBtn').click((e) => {
     e.preventDefault();
