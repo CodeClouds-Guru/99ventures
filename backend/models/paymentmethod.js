@@ -117,6 +117,19 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   PaymentMethod.fields = {
+    id: {
+      field_name: 'id',
+      db_name: 'id',
+      type: 'text',
+      placeholder: 'Id',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
     name: {
       field_name: 'name',
       db_name: 'name',
