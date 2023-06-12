@@ -10,6 +10,7 @@ const { Op,QueryTypes } = require("sequelize");
 const queryInterface = sequelize.getQueryInterface();
 const db = require("../../models/index");
 const moment = require('moment');
+const { includes } = require("lodash");
 class ReportController{
   constructor() {
     this.getReport = this.getReport.bind(this);
@@ -141,19 +142,19 @@ class ReportController{
         names:days_arr,
         values:[{
           name:'Total',
-          values: total_count_arr,
+          data: total_count_arr,
         },
         {
           name:'Pending',
-          values: pending_count_arr,
+          data: pending_count_arr,
         },
         {
           name:'Open',
-          values: open_count_arr,
+          data: open_count_arr,
         },
         {
           name:'Closed',
-          values: closed_count_arr,
+          data: closed_count_arr,
         }]
       }})
     }
@@ -224,6 +225,12 @@ class ReportController{
           }
         }
       })
+      let names = []
+      if(top_surveys.length){
+        for(let i of top_surveys){
+         
+        }
+      }
       res.json(top_surveys)
     }
   }
