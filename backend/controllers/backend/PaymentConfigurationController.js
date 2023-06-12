@@ -92,14 +92,17 @@ class PaymentConfigurationController extends Controller {
       },
     });
 
+    let result = response.result;
+    result.setDataValue('country_list', country_list);
+    result.setDataValue('member_list', member_list);
+
+    // resp.result.country_list = country_list;
+    // resp.result.member_list = member_list;
+    console.log(result);
     return {
       status: true,
-      result: response.result,
+      result,
       fields: response.fields,
-      data: {
-        country_list,
-        member_list,
-      },
     };
     return response;
   }
