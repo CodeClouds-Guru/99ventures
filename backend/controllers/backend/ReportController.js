@@ -136,14 +136,15 @@ class ReportController{
       if(member_by_status.length){
         for(let member of member_by_status){
           member_status_value.push(member.dataValues.count)
-          member_status.push(member.dataValues.status)
+          let status = member.dataValues.status
+          member_status.push(status.charAt(0).toUpperCase() + status.slice(1))
           
         }
       }
-      member_status.push('verified')
+      member_status.push('Verified')
       member_status_value.push(profile_verified_members[0].dataValues.count)
       
-      member_status.push('profile_completed')
+      member_status.push('Profile completed')
       member_status_value.push(profile_complted_members[0].dataValues.count)
 
       res.json({results:{names:member_status,values:member_status_value}})
