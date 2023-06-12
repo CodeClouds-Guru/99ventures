@@ -92,19 +92,17 @@ class PaymentConfigurationController extends Controller {
       },
     });
 
-    let result = response.result;
-    result.setDataValue('country_list', country_list);
-    result.setDataValue('member_list', member_list);
-
-    // resp.result.country_list = country_list;
-    // resp.result.member_list = member_list;
-    console.log(result);
+    // console.log(resul/t);
     return {
       status: true,
-      result,
+      result: response.result,
       fields: response.fields,
+      data: {
+        country_list,
+        member_list,
+      },
     };
-    return response;
+    // return response;
   }
   //override save function
   async save(req, res) {
@@ -168,7 +166,7 @@ class PaymentConfigurationController extends Controller {
   //override update function
   async update(req, res) {
     try {
-      console.log('==================================================');
+      // console.log('==================================================');
       req.body.company_portal_id = req.headers.site_id;
       const updated_country_list = req.body.country_list;
       const updated_member_list = req.body.member_list;
@@ -235,7 +233,7 @@ class PaymentConfigurationController extends Controller {
         country_id: country,
       };
     });
-    console.log('country_data', country_data);
+    // console.log('country_data', country_data);
     await queryInterface.bulkInsert(
       'allowed_country_payment_method',
       country_data
@@ -250,7 +248,7 @@ class PaymentConfigurationController extends Controller {
         member_id: member,
       };
     });
-    console.log('member_data', member_data);
+    // console.log('member_data', member_data);
     await queryInterface.bulkInsert(
       'excluded_member_payment_method',
       member_data
