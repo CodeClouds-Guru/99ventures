@@ -112,8 +112,7 @@ class ReportController{
       res.json(tickets)
     }
     else if(type == 'members'){
-      var member_status = []
-      var member_status_value = []
+      
       let member_by_status = await Member.findAll({
         attributes:['status',[sequelize.fn('COUNT', '*'), 'count']],
         group:'status',
@@ -133,20 +132,17 @@ class ReportController{
                                                       where:
                                                         {profile_completed_on:{[Op.ne]: null },
                                                         }})
+      var member_status = ['Member','Validating','Suspended','Deleted','Verified','Profile completed']
+      var member_status_value = [0,0,0,0,profile_verified_members[0].dataValues.count,profile_complted_members[0].dataValues.count]
+
       if(member_by_status.length){
         for(let member of member_by_status){
-          member_status_value.push(member.dataValues.count)
           let status = member.dataValues.status
-          member_status.push(status.charAt(0).toUpperCase() + status.slice(1))
-          
+          status = status.charAt(0).toUpperCase() + status.slice(1)
+          let status_index = member_status.indexOf(status);
+          member_status_value[status_index] = member.dataValues.count
         }
       }
-      member_status.push('Verified')
-      member_status_value.push(profile_verified_members[0].dataValues.count)
-      
-      member_status.push('Profile completed')
-      member_status_value.push(profile_complted_members[0].dataValues.count)
-
       res.json({results:{names:member_status,values:member_status_value}})
     }
     else if(type == 'login_per_day'){
@@ -179,7 +175,6 @@ class ReportController{
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
     var dt = start_date;
-    console.log(dt,end_date)
     while (dt <= end_date) {
       let date = dt.getDate()
       switch (date % 10) {
