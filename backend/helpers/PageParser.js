@@ -4,6 +4,7 @@ const {
   Page,
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
+  GoogleCaptchaConfiguration,
 } = require('../models');
 const util = require('util');
 const { QueryTypes, Op } = require('sequelize');
@@ -47,6 +48,11 @@ class PageParser {
       this.pageLayout = await Layout.findByPk(portal.site_layout_id);
     }
     if (!this.page || !this.pageLayout) {
+      const errorObj = new Error('Sorry! Page not found');
+      errorObj.statusCode = 404;
+      throw errorObj;
+    }
+    if (this.page && this.page.status !== 'published') {
       const errorObj = new Error('Sorry! Page not found');
       errorObj.statusCode = 404;
       throw errorObj;
@@ -113,6 +119,25 @@ class PageParser {
       ? layout_descriptions.tag_content
       : '';
 
+    let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
+    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js?render=${google_captcha.site_key}"></script>` : '';
+    const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
+    <script>
+      grecaptcha.ready(function() {
+        grecaptcha.execute('${google_captcha.site_key}')
+            .then(function(token) {
+              var items = document.getElementsByClassName("g-recaptcha")
+              const hidden = document.createElement("input");
+              hidden.setAttribute("type", "hidden");
+              hidden.setAttribute("name", "g-captcha");
+              hidden.setAttribute("value", token);
+              for (let item of items) {
+                  item.appendChild(hidden)
+              }
+            });
+      });
+    </script>` : '';
+
     const default_scripted_codes = this.addDefaultAddOns();
     layout_html = layout_html.replaceAll('{{content}}', content);
     layout_html = layout_html.replaceAll(
@@ -129,6 +154,7 @@ class PageParser {
       layout_keywords,
       layout_descriptions,
       default_scripted_codes,
+      google_captcha_header,
     });
     const template = Handlebars.compile(layout_html);
     const flash = this.getFlashObject();
@@ -137,7 +163,8 @@ class PageParser {
       user,
       error_message,
       flash,
-      sc_request
+      sc_request,
+      scripted_captcha_field,
     });
     this.sessionMessage = '';
 
