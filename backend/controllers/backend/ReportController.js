@@ -112,6 +112,8 @@ class ReportController{
       res.json(tickets)
     }
     else if(type == 'members'){
+      var member_status = []
+      var member_status_value = []
       let member_by_status = await Member.findAll({
         attributes:['status',[sequelize.fn('COUNT', '*'), 'count']],
         group:'status',
@@ -121,12 +123,31 @@ class ReportController{
           }
         }
       })
-      let profile_complted_members = await Member.findAll({
+      let profile_verified_members = await Member.findAll({
                                                   attributes:[[sequelize.fn('COUNT', '*'), 'count']],
                                                   where:
-                                                    {profile_completed_on:{[Op.ne]: null },
+                                                    {admin_status:'verified',
                                                     }})
-      res.json({results:{profile_complted_members,member_by_status}})
+      let profile_complted_members = await Member.findAll({
+                                                      attributes:[[sequelize.fn('COUNT', '*'), 'count']],
+                                                      where:
+                                                        {profile_completed_on:{[Op.ne]: null },
+                                                        }})
+      if(member_by_status.length){
+        for(let member of member_by_status){
+          member_status_value.push(member.dataValues.count)
+          let status = member.dataValues.status
+          member_status.push(status.charAt(0).toUpperCase() + status.slice(1))
+          
+        }
+      }
+      member_status.push('Verified')
+      member_status_value.push(profile_verified_members[0].dataValues.count)
+      
+      member_status.push('Profile completed')
+      member_status_value.push(profile_complted_members[0].dataValues.count)
+
+      res.json({results:{names:member_status,values:member_status_value}})
     }
     else if(type == 'login_per_day'){
       let member_activity_logs = await db.sequelize.query(
@@ -162,10 +183,10 @@ class ReportController{
     while (dt <= end_date) {
       let date = dt.getDate()
       switch (date % 10) {
-        case 1: date = date+"st "+monthNames[dt.getMonth()]; break;
-        case 2: date = date+"nd "+monthNames[dt.getMonth()]; break;
-        case 3: date = date+"rd "+monthNames[dt.getMonth()]; break;
-        default: date = date+"th "+monthNames[dt.getMonth()]; break;
+        case 1: date = date+"st "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+        case 2: date = date+"nd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+        case 3: date = date+"rd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+        default: date = date+"th "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
       }
       names.push(date)
       values.push(0)
