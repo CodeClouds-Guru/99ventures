@@ -29,6 +29,9 @@ class ReportController{
     }else{
       end_date = moment().toISOString()
     }
+    let from = start_date
+    let to = end_date
+    console.log(from,to)
     if(type == 'count_report'){
         //get total active surveys
         let survey_list = await Survey.findAndCountAll({where:{status:1}})
@@ -104,12 +107,55 @@ class ReportController{
         res.json({results:{survey_names,survey_count,total_completed_surveys}})
     }else if(type == 'open_vs_closed_tickets'){
       let tickets = await db.sequelize.query(
-        'SELECT status, COUNT(*) as count FROM tickets GROUP BY status',
+        'SELECT DATE(created_at) as day,status, COUNT(*) as count FROM tickets WHERE created_at BETWEEN ? AND ? GROUP BY status,day',
         {
+          replacements: [start_date,end_date],
           type: QueryTypes.SELECT,
         }
       );
-      res.json(tickets)
+
+      let name_values = await this.getNameValues(start_date,end_date);
+      var days_arr = name_values.names
+      var total_count_arr = [...name_values.values]
+      var open_count_arr = [...name_values.values]
+      var pending_count_arr = [...name_values.values]
+      var closed_count_arr = [...name_values.values]
+      
+      if(tickets.length){
+        for(let i of tickets){
+          let created_at = new Date(i.day)
+          let diff_time = Math.abs(created_at - start_date);
+          let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24)); 
+
+          total_count_arr[diff_days] = total_count_arr[diff_days] + i.count
+         console.log(days_arr[diff_days])
+          if(i.status === 'open')
+            open_count_arr[diff_days] = i.count
+          else if(i.status === 'pending')
+            pending_count_arr[diff_days] = i.count
+          else if(i.status === 'closed')
+            closed_count_arr[diff_days] = i.count
+        }
+      }
+      res.json({
+        names:days_arr,
+        values:[{
+          name:'Total',
+          values: total_count_arr,
+        },
+        {
+          name:'Pending',
+          values: pending_count_arr,
+        },
+        {
+          name:'Open',
+          values: open_count_arr,
+        },
+        {
+          name:'Closed',
+          values: closed_count_arr,
+        }]
+      })
     }
     else if(type == 'members'){
       
@@ -174,7 +220,7 @@ class ReportController{
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
-    var dt = start_date;
+    var dt = new Date(start_date);
     while (dt <= end_date) {
       let date = dt.getDate()
       switch (date % 10) {
