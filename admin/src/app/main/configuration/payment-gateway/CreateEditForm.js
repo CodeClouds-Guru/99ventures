@@ -12,6 +12,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import {Visibility, VisibilityOff, ExpandMore, CheckBox, CheckBoxOutlineBlank} from '@mui/icons-material';
 import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment } from '@mui/material';
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
@@ -48,8 +49,8 @@ const defaultValues = {
 };
 
 const validationSchema = yup.object().shape({
-    name: yup.string().required(`Please enter name!`),
-    payment_field_options: yup.string().required(`Please select payment_field_options!`),
+    name: yup.string().required(`Please enter payment gateway name!`),
+    payment_field_options: yup.string().required(`Please select payment field options!`),
     // api_username: yup.string().required(`Please enter API Username!`),
     // api_password: yup.string().required(`Please enter name!`),
     // api_signature: yup.string().required(`Please enter name!`),
@@ -69,6 +70,9 @@ const CreateEditForm = () => {
     const [selectedMember, setSelectedMember] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [showSignature, setShowSignature] = useState(false);
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [paymentData, setPaymentData] = useState([]);
+    const [payload, setPayload] = useState([]);
 
     /**
      * Toggle type of Password & Signature fields
@@ -97,10 +101,27 @@ const CreateEditForm = () => {
     }, [errors]);
 
     /**
-     * Save Payment Details
+     * Confirm Box before update
      */
     const handleFormSubmit = (data) => {
-        console.log(data)
+        setPayload(data);
+        if(
+            !isNaN(moduleId) && (
+                data.api_username !== paymentData.api_username || 
+                data.api_password !== paymentData.api_password || 
+                data.api_signature !== paymentData.api_signature
+            )
+        ) {
+            setOpenAlertDialog(true)
+        } else {
+            savePaymentDataToDB(data);
+        }
+    }
+
+    /**
+     * Save|Update Payment Details
+     */
+    const savePaymentDataToDB = (data) => {
         if(data.amount_type === 'Minimum') {
             data.minimum_amount = data.amount;
             data.fixed_amount = 0;
@@ -118,7 +139,7 @@ const CreateEditForm = () => {
 
         const url = isNaN(moduleId) ? jwtServiceConfig.savePaymentMethodConfiguration : jwtServiceConfig.updatePaymentMethodConfiguration +'/'+moduleId;
         setLoading(true);
-        axios.post(url, formData)
+        axios.post(url, data)
         .then((response) => {
             setLoading(false);
             const result = response.data.results;
@@ -126,6 +147,12 @@ const CreateEditForm = () => {
                 dispatch(showMessage({ variant: 'success', message: result.message }));
                 if(result.id && isNaN(moduleId)){
                     navigate('/app/payment-configurations/' + result.id);
+                }
+                if(openAlertDialog){
+                    setOpenAlertDialog(false);
+                }
+                if(!isNaN(moduleId)) {
+                    getPaymentData();
                 }
             }
         })
@@ -166,10 +193,13 @@ const CreateEditForm = () => {
                 setSelectedMember(excludedMember);
             }
             if(response.data.results.result) {
-                const result = response.data.results.result;                
+                const result = response.data.results.result;    
+                setPaymentData(result);            
                 Object.keys(defaultValues).forEach((key, indx) => {
-                    console.log(key, (typeof result[key] === 'undefined' ? '' : result[key]))
-                    setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: false, shouldValidate: true });
+                    if(key == 'name' || key == 'payment_field_options')     // This two fields added in the validation rule. That's why shouldDirty should be false
+                        setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: false, shouldValidate: true });
+                    else 
+                        setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: !false, shouldValidate: true });
                 });
                 
                 if(result.minimum_amount > 0){
@@ -185,6 +215,17 @@ const CreateEditForm = () => {
             }
         })
         .catch(error => console.log(error))
+    }
+
+    const onCloseAlertDialogHandle = () => {
+        setOpenAlertDialog(false);
+        setValue('api_username', paymentData.api_username, { shouldDirty: false, shouldValidate: true });
+        setValue('api_password', paymentData.api_password, { shouldDirty: false, shouldValidate: true });
+        setValue('api_signature', paymentData.api_signature, { shouldDirty: false, shouldValidate: true });
+    }
+
+    const onConfirmAlertDialogHandle = () => {
+        savePaymentDataToDB(payload);
     }
 
     return (
@@ -728,7 +769,7 @@ const CreateEditForm = () => {
                         loading={loading}
                         type="submit"
                         size="medium"
-                        // disabled={!Object.keys(dirtyFields).length || !isValid}
+                        disabled={!Object.keys(dirtyFields).length || !isValid}
                     >
                         Save
                     </LoadingButton>
@@ -742,6 +783,16 @@ const CreateEditForm = () => {
                     </Button>
                 </motion.div>
             </form>
+            {
+                openAlertDialog && (
+                    <AlertDialog
+                        content="You have changed the payment credentials. Do you want to update it?"
+                        open={openAlertDialog}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
         </div>
     )
 }
