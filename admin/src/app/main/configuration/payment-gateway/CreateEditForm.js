@@ -28,16 +28,14 @@ const defaultValues = {
     type_user_info_again: false,
     status: true,
     payment_field_options: 'Email',
-    // minimum_amount: 0,
-    // fixed_amount: 0,
     maximum_amount: 0,
-    withdraw_redo_interval: '',
+    withdraw_redo_interval: 0,
     same_account_options: 'Mark as cheater',
     past_withdrawal_options: 'At least',
-    past_withdrawal_count: '',
+    past_withdrawal_count: 0,
     verified_options: 'Both',
     upgrade_options: '',
-    fee_percent: '',
+    fee_percent: 0,
     api_username: '',
     api_password: '',
     api_signature: '',
@@ -52,7 +50,7 @@ const defaultValues = {
 const validationSchema = yup.object().shape({
     name: yup.string().required(`Please enter name!`),
     payment_field_options: yup.string().required(`Please select payment_field_options!`),
-    // api_username: yup.string().required(`Please enter name!`),
+    // api_username: yup.string().required(`Please enter API Username!`),
     // api_password: yup.string().required(`Please enter name!`),
     // api_signature: yup.string().required(`Please enter name!`),
     // api_memo: yup.string().required(`Please enter name!`),
@@ -89,6 +87,15 @@ const CreateEditForm = () => {
         resolver: yupResolver(validationSchema),
     });
 
+    useEffect(() => {
+        if(Object.keys(errors).length) {
+            Object.keys(errors).forEach((key, indx) => {
+                dispatch(showMessage({ variant: 'error', message: errors[key].message }));
+                return;
+            })
+        }
+    }, [errors]);
+
     /**
      * Save Payment Details
      */
@@ -96,23 +103,31 @@ const CreateEditForm = () => {
         console.log(data)
         if(data.amount_type === 'Minimum') {
             data.minimum_amount = data.amount;
+            data.fixed_amount = 0;
         } else {
             data.fixed_amount = data.amount;
+            data.minimum_amount = 0;
         }
         
         delete data.amount;
         delete data.amount_type;
         data.country_list = (selectedCountry.length ? selectedCountry.map(r=> r.id) : []);
         data.member_list = (selectedMember.length ? selectedMember.map(r=> r.id) : []);
-        data.type_user_info_again = (data.type_user_info_again === true) ? 1 : 0;
-        data.status = (data.status === true) ? 1 : 0;
+        data.type_user_info_again = (Boolean(data.type_user_info_again) === true) ? 1 : 0;
+        data.status = (Boolean(data.status) === true) ? 1 : 0;
 
         const url = isNaN(moduleId) ? jwtServiceConfig.savePaymentMethodConfiguration : jwtServiceConfig.updatePaymentMethodConfiguration +'/'+moduleId;
         setLoading(true);
-        axios.post(url, data)
+        axios.post(url, formData)
         .then((response) => {
-            setLoading(false)
-            console.log(response)
+            setLoading(false);
+            const result = response.data.results;
+            if(result.status == true) {
+                dispatch(showMessage({ variant: 'success', message: result.message }));
+                if(result.id && isNaN(moduleId)){
+                    navigate('/app/payment-configurations/' + result.id);
+                }
+            }
         })
         .catch(error => {
             setLoading(false);
@@ -140,20 +155,32 @@ const CreateEditForm = () => {
                 const results = response.data.results.data;
                 if(results.country_list) {
                     setCountryList(results.country_list);
+                }
+                if(results.member_list){
                     setMemberList(results.member_list);
                 }
+                const allowedCountry = results.country_list.filter(row => row.allowed_countries && row.allowed_countries.length !=0);
+                setSelectedCountry(allowedCountry);
+
+                const excludedMember = results.member_list.filter(row => row.excluded_members && row.excluded_members.length !=0);
+                setSelectedMember(excludedMember);
             }
             if(response.data.results.result) {
                 const result = response.data.results.result;                
                 Object.keys(defaultValues).forEach((key, indx) => {
-                    setValue(key, (result[key] ? result[key] : ''), { shouldDirty: false, shouldValidate: true });
+                    console.log(key, (typeof result[key] === 'undefined' ? '' : result[key]))
+                    setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: false, shouldValidate: true });
                 });
+                
                 if(result.minimum_amount > 0){
                     setValue('amount_type', 'Minimum', { shouldDirty: false, shouldValidate: true });
                     setValue('amount', result.minimum_amount, { shouldDirty: false, shouldValidate: true });
                 } else if(result.fixed_amount > 0){
                     setValue('amount_type', 'Fixed', { shouldDirty: false, shouldValidate: true });
                     setValue('amount', result.fixed_amount, { shouldDirty: false, shouldValidate: true });
+                } else {
+                    setValue('amount_type', defaultValues.amount_type, { shouldDirty: false, shouldValidate: true });
+                    setValue('amount', defaultValues.amount, { shouldDirty: false, shouldValidate: true });
                 }
             }
         })
@@ -300,7 +327,7 @@ const CreateEditForm = () => {
                                     control={control}
                                     render={({ field }) => (          
                                         <FormControlLabel 
-                                            control={<Switch {...field} />} 
+                                            control={<Switch {...field} checked={Boolean(field.value)} />} 
                                             label="Yes, force the user to type info twice" 
                                         />
                                     )}
@@ -312,7 +339,7 @@ const CreateEditForm = () => {
                                     control={control}
                                     render={({ field }) => (   
                                         <FormControlLabel 
-                                            control={<Switch {...field} checked={field.value}/>} 
+                                            control={<Switch {...field} checked={Boolean(field.value)}/>} 
                                             label="Enabled" 
                                         />
                                     )}
@@ -381,11 +408,11 @@ const CreateEditForm = () => {
                                 control={control}
                                 render={({ field }) => (
                                     <FormControl sx={{ marginTop: 2, width: '100%' }} variant="outlined">
-                                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                                        <InputLabel htmlFor="outlined-adornment-api-password">Password</InputLabel>
                                         <OutlinedInput
                                             {...field}
-                                            autoComplete="off"
-                                            id="outlined-adornment-password"
+                                            autoComplete="new-password"
+                                            id="outlined-adornment-api-password"
                                             type={showPassword ? 'text' : 'password'}
                                             endAdornment={
                                                 <InputAdornment position="end">
@@ -462,10 +489,10 @@ const CreateEditForm = () => {
                 </Accordion>
                 <Accordion>
                     <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
-                    sx={accordianStyle}
+                        expandIcon={<ExpandMore />}
+                        aria-controls="panel2a-content"
+                        id="panel2a-header"
+                        sx={accordianStyle}
                     >
                         <Typography>Filters</Typography>
                     </AccordionSummary>
@@ -508,7 +535,7 @@ const CreateEditForm = () => {
                                                 helperText={
                                                     <FormControlLabel
                                                         value="start"
-                                                        control={<Checkbox {...label} size="small" onChange={ handleSelectAllCountry }/>}
+                                                        control={<Checkbox {...label} size="small" checked={ countryList.length === selectedCountry.length } onChange={ handleSelectAllCountry }/>}
                                                         label={<small>Select All</small>}
                                                         labelPlacement="end"
                                                     />
@@ -596,7 +623,7 @@ const CreateEditForm = () => {
                                             {...field}
                                             type="tel"
                                             id="outlined-required-past-withdrawl"
-                                            label="Amount"
+                                            label=""
                                             helperText='Past withdraw(s)'
                                             className="w-1/2"
                                         />
