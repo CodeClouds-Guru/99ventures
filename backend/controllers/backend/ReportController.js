@@ -1,6 +1,7 @@
 const Controller = require("./Controller");
 const {
   Survey,
+  SurveyProvider,
   Member,
   MemberSurvey,
   MemberActivityLog,
@@ -213,33 +214,33 @@ class ReportController{
       }
       res.json({results:{names:days_arr,values:count_arr}})
     }else if(type == 'top_surveys'){
-      // let top_surveys = await MemberSurvey.findAll({
-      //   attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
-      //   limit:5,
-      //   offset:0,
-      //   order: [[sequelize.fn('COUNT', '*'), 'DESC']],
-      //   group:'survey_number',
-      //   where:{
-      //     completed_on: {
-      //       [Op.between]: [start_date,end_date]
-      //     }
-      //   }
-      // })
-      // let names = []
-      // if(top_surveys.length){
-      //   for(let i of top_surveys){
-         
-      //   }
-      // }
+      let top_surveys = await MemberSurvey.findAll({
+        attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
+        limit:5,
+        offset:0,
+        order: [[sequelize.fn('COUNT', '*'), 'DESC']],
+        group:'survey_number',
+        where:{
+          completed_on: {
+            [Op.between]: [start_date,end_date]
+          }
+        }
+      })
+      let names = []
+      if(top_surveys.length){
+        for(let i of top_surveys){
+          let survey = await Survey.findOne({where:{survey_number:i.survey_number},
+                                              include:{
+                                              model: SurveyProvider,
+                                              attributes: ['name'],
+                                            }
+                                          })
+          names.push(survey.dataValues.name+" ("+ survey.dataValues.SurveyProvider.dataValues.name+")")
+        }
+      }
       res.json({
         results:{
-          names:[
-            'Survey 1',
-            'Survey 2',
-            'Survey 3',
-            'Survey 4',
-            'Survey 5',
-          ]
+          names:names
         }
       })
     }
