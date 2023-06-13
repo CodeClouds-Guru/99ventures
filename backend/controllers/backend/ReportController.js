@@ -15,6 +15,7 @@ const { includes } = require("lodash");
 class ReportController{
   constructor() {
     this.getReport = this.getReport.bind(this);
+    this.getNamesIndex = this.getNamesIndex.bind(this);
   }
   //override the edit function
   async getReport(req, res) {
@@ -32,6 +33,16 @@ class ReportController{
     }else{
       end_date = moment().toISOString()
     }
+    let d_time = Math.abs(end_date - start_date);
+    let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24)); 
+    var query_string = "DATE"
+    if(total_days > 15 && total_days <= 31){
+      query_string = "DATE"
+    }else if(total_days > 31 && total_days <= 365){
+      query_string = "MONTH"
+    }else if(total_days > 365){
+      query_string = "YEAR"
+    }
     try {
       var report = {}
       switch (type) {
@@ -42,19 +53,19 @@ class ReportController{
           report = await this.completedSurveys(start_date,end_date);
           break;
         case 'open_vs_closed_tickets':
-          report = await this.openVsClosedTickets(start_date,end_date,company_portal_id);
+          report = await this.openVsClosedTickets(start_date,end_date,company_portal_id,query_string,total_days);
           break;
         case 'members':
-          report = await this.membersReport(start_date,end_date,company_portal_id);
+          report = await this.membersReport(start_date,end_date,company_portal_id,query_string,total_days);
           break;
         case 'login_per_day':
-          report = await this.loginPerDay(start_date,end_date,company_portal_id);
+          report = await this.loginPerDay(start_date,end_date,company_portal_id,query_string,total_days);
           break;
         case 'top_surveys':
-          report = await this.topSurveys(start_date,end_date);
+          report = await this.topSurveys(start_date,end_date,query_string,total_days);
           break;
         case 'top_members':
-          report = await this.topMembers(start_date,end_date,company_portal_id);
+          report = await this.topMembers(start_date,end_date,company_portal_id,query_string,total_days);
           break;
         default:
           report = {message:"Invalid report type."}
@@ -107,16 +118,18 @@ class ReportController{
     return {results:{survey_names,survey_count,total_completed_surveys}}
   }
 
-  async openVsClosedTickets(start_date,end_date,company_portal_id){
-    let tickets = await db.sequelize.query(
-      'SELECT DATE(created_at) as day,status, COUNT(*) as count FROM tickets WHERE company_portal_id = ? AND created_at BETWEEN ? AND ? GROUP BY status,day',
+  async openVsClosedTickets(start_date,end_date,company_portal_id,query_string,total_days){
+    
+    let query = 'SELECT '+query_string+'(created_at) as day, YEAR(created_at) as year,status, COUNT(*) as count FROM tickets WHERE company_portal_id = ? AND created_at BETWEEN ? AND ? GROUP BY status,day,year ORDER BY day,year'
+
+    let tickets = await db.sequelize.query(query,
       {
         replacements: [company_portal_id,start_date,end_date],
         type: QueryTypes.SELECT,
       }
     );
 
-    let name_values = await this.getNameValues(start_date,end_date);
+    let name_values = await this.getNameValues(start_date,end_date,query_string,total_days);
     var days_arr = name_values.names
     var total_count_arr = [...name_values.values]
     var open_count_arr = [...name_values.values]
@@ -125,18 +138,15 @@ class ReportController{
     
     if(tickets.length){
       for(let i of tickets){
-        let created_at = new Date(i.day)
-        let diff_time = Math.abs(created_at - start_date);
-        let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24)); 
+        var arr_index = await this.getNamesIndex(query_string,i,start_date,days_arr)
 
-        total_count_arr[diff_days] = total_count_arr[diff_days] + i.count
-       console.log(days_arr[diff_days])
+        total_count_arr[arr_index] = total_count_arr[arr_index] + i.count
         if(i.status === 'open')
-          open_count_arr[diff_days] = i.count
+          open_count_arr[arr_index] = i.count
         else if(i.status === 'pending')
-          pending_count_arr[diff_days] = i.count
+          pending_count_arr[arr_index] = i.count
         else if(i.status === 'closed')
-          closed_count_arr[diff_days] = i.count
+          closed_count_arr[arr_index] = i.count
       }
     }
     return {results:{
@@ -160,7 +170,7 @@ class ReportController{
     }}
   }
 
-  async membersReport(start_date,end_date,company_portal_id){
+  async membersReport(start_date,end_date,company_portal_id,query_string){
     
     let member_by_status = await Member.findAll({
       attributes:['status',[sequelize.fn('COUNT', '*'), 'count']],
@@ -198,29 +208,29 @@ class ReportController{
     return {results:{names:member_status,values:member_status_value}}
   }
 
-  async loginPerDay(start_date,end_date,company_portal_id){
+  async loginPerDay(start_date,end_date,company_portal_id,query_string,total_days){
+    let query = 'SELECT '+query_string+'(member_activity_logs.created_at) as day,YEAR(member_activity_logs.created_at) as year, COUNT(*) as count FROM member_activity_logs JOIN members on member_activity_logs.member_id = members.id WHERE members.company_portal_id = ? AND action = "Member Logged In" AND member_activity_logs.created_at BETWEEN ? AND ? GROUP BY day,year ORDER BY day ASC, year ASC'
+
     let member_activity_logs = await db.sequelize.query(
-      'SELECT DATE(member_activity_logs.created_at) as day, COUNT(*) as count FROM member_activity_logs JOIN members on member_activity_logs.member_id = members.id WHERE members.company_portal_id = ? AND action = "Member Logged In" AND member_activity_logs.created_at BETWEEN ? AND ? GROUP BY day',
+      query,
       {
         replacements: [company_portal_id,start_date,end_date],
         type: QueryTypes.SELECT,
       }
     );
-    let name_values = await this.getNameValues(start_date,end_date);
+    let name_values = await this.getNameValues(start_date,end_date,query_string,total_days);
     var days_arr = name_values.names
     var count_arr = name_values.values
     if(member_activity_logs.length){
       for(let i of member_activity_logs){
-        let created_at = new Date(i.day)
-        let diff_time = Math.abs(created_at - start_date);
-        let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24)); 
-        count_arr[diff_days] = i.count
+        var arr_index = await this.getNamesIndex(query_string,i,start_date,days_arr)
+        count_arr[arr_index] = i.count
       }
     }
     return {results:{names:days_arr,values:count_arr}}
   }
 
-  async topSurveys(start_date, end_date){
+  async topSurveys(start_date, end_date,query_string){
     let top_surveys = await MemberSurvey.findAll({
       attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
       limit:5,
@@ -252,7 +262,7 @@ class ReportController{
     }
   }
 
-  async topMembers(start_date,end_date,company_portal_id){
+  async topMembers(start_date,end_date,company_portal_id,query_string){
     let top_members = await MemberTransaction.findAll({
       attributes:['member_id',[sequelize.fn('COUNT', '*'), 'count']],
       limit:5,
@@ -284,25 +294,70 @@ class ReportController{
         }
     }
   }
+  async getNamesIndex(query_string,i,start_date,days_arr){
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var arr_index = 0
+    if(query_string === 'DATE'){
+      let created_at = new Date(i.day)
+      let diff_time = Math.abs(created_at - start_date);
+      let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24)); 
+      arr_index = diff_days
+    }else if(query_string === 'MONTH'){
+      let month_str = monthNames[i.day - 1]+','+(''+i.year).substr(2)
+      arr_index = days_arr.indexOf(month_str);
+    }
+    else if(query_string === 'YEAR'){
+      arr_index = days_arr.indexOf(i.day);
+    }
+    return arr_index
+  }
   //get name values structure
-  async getNameValues(start_date,end_date){
+  async getNameValues(start_date,end_date,query_string,total_days){
     var names = []
     var values = []
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
+    console.log(query_string,total_days)
     var dt = new Date(start_date);
-    while (dt <= end_date) {
-      let date = dt.getDate()
-      switch (date % 10) {
-        case 1: date = date+"st "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
-        case 2: date = date+"nd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
-        case 3: date = date+"rd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
-        default: date = date+"th "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+    if(query_string === "DATE"){
+      while (dt <= end_date) {
+        let date = dt.getDate()
+        switch (date % 10) {
+          case 1: date = date+"st "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+          case 2: date = date+"nd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+          case 3: date = date+"rd "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+          default: date = date+"th "+monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2); break;
+        }
+        names.push(date)
+        values.push(0)
+        dt.setDate(dt.getDate() + 1);
       }
-      names.push(date)
-      values.push(0)
-      dt.setDate(dt.getDate() + 1);
+    }else if(query_string === 'WEEK'){
+      let total_weeks = ceil(total_days/7)
+      for(let i = 1; i <= total_weeks; i++){
+        names.push('Week '+i)
+        values.push(0)
+      }
+    }else if(query_string ==='MONTH'){
+      while (dt <= end_date) {
+        let month_str = monthNames[dt.getMonth()]+","+(''+dt.getFullYear()).substr(2)
+        names.push(month_str)
+        values.push(0)
+        // Get next month's index(0 based)
+        let next_month = dt.getMonth() + 1;
+        // Get year
+        let  next_date = dt.getFullYear() + (next_month === 12 ? 1: 0);
+        // Get first day of the next month
+        dt = new Date(next_date, next_month%12, 1);
+      }
+    }else{
+      let start_year = start_date.getFullYear()
+      while(start_year <= end_date.getFullYear()){
+        names.push(start_year)
+        values.push(0)
+        start_year = start_year + 1
+      }
     }
     return {
       names:names,
