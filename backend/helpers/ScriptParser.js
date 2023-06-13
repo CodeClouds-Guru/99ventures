@@ -443,6 +443,7 @@ class ScriptParser {
             'amount_action',
             'currency',
             'balance',
+            'transaction_id',
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
           ],
