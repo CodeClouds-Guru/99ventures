@@ -57,6 +57,7 @@ class ReportController{
           report = await this.topMembers(start_date,end_date,company_portal_id);
           break;
         default:
+          report = {message:"Invalid report type."}
       }
     }catch (error) {
       console.error(error);
