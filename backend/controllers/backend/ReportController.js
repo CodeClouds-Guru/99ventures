@@ -213,25 +213,48 @@ class ReportController{
       }
       res.json({results:{names:days_arr,values:count_arr}})
     }else if(type == 'top_surveys'){
-      let top_surveys = await MemberSurvey.findAll({
-        attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
-        limit:5,
-        offset:0,
-        order: [[sequelize.fn('COUNT', '*'), 'DESC']],
-        group:'survey_number',
-        where:{
-          completed_on: {
-            [Op.between]: [start_date,end_date]
-          }
+      // let top_surveys = await MemberSurvey.findAll({
+      //   attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
+      //   limit:5,
+      //   offset:0,
+      //   order: [[sequelize.fn('COUNT', '*'), 'DESC']],
+      //   group:'survey_number',
+      //   where:{
+      //     completed_on: {
+      //       [Op.between]: [start_date,end_date]
+      //     }
+      //   }
+      // })
+      // let names = []
+      // if(top_surveys.length){
+      //   for(let i of top_surveys){
+         
+      //   }
+      // }
+      res.json({
+        results:{
+          names:[
+            'Survey 1',
+            'Survey 2',
+            'Survey 3',
+            'Survey 4',
+            'Survey 5',
+          ]
         }
       })
-      let names = []
-      if(top_surveys.length){
-        for(let i of top_surveys){
-         
+    }
+    else if(type =='top_members'){
+      res.json({
+        results:{
+          names:[
+            'Member 1',
+            'Member 2',
+            'Member 3',
+            'Member 4',
+            'Member 5',
+          ]
         }
-      }
-      res.json(top_surveys)
+      })
     }
   }
   //get name values structure
