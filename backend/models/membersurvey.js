@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       MemberSurvey.belongsTo(models.Survey, {
         foreignKey: 'survey_number'
+      }),
+      MemberSurvey.belongsTo(models.SurveyProvider, {
+        foreignKey: 'survey_provider_id',
       })
     }
   }
