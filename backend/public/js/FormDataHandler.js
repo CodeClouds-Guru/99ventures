@@ -44,7 +44,7 @@ $(() => {
     <div class="modal-dialog">
       <div class="modal-content bg-white">
         <div class="modal-header">
-          <h4 class="modal-title">Confirmar</h4>
+          <h4 class="modal-title">Please Confirm</h4>
         </div>
         <div class="modal-body d-flex align-items-center text-default">
           <div class="row">

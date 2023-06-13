@@ -5,6 +5,7 @@ const {
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
   GoogleCaptchaConfiguration,
+  IpConfiguration
 } = require('../models');
 const util = require('util');
 const { QueryTypes, Op } = require('sequelize');
@@ -37,14 +38,14 @@ class PageParser {
   }
 
   async getPageNLayout() {
+    const portal = this.getCompanyPortal();
     const page = await Page.findOne({
-      where: { slug: this.slug },
+      where: { slug: this.slug, company_portal_id: portal.id },
       include: 'Layout',
     });
     this.pageLayout = page ? page.Layout : null;
     this.page = page;
     if (!this.pageLayout) {
-      const portal = this.getCompanyPortal();
       this.pageLayout = await Layout.findByPk(portal.site_layout_id);
     }
     if (!this.page || !this.pageLayout) {
@@ -67,6 +68,21 @@ class PageParser {
   async preview(req) {
     if ('company_portal' in req.session) {
       this.companyPortal = req.session.company_portal;
+      if (this.companyPortal.status === 2) {
+        const whitelisted_ip = await IpConfiguration.findOne({
+          where: {
+            company_portal_id: this.companyPortal.id,
+            ip: req.ip,
+            status: 1
+          }
+        });
+        if (!whitelisted_ip && req.path !== '/503') {
+          req.session.flash = { error: this.companyPortal.downtime_message };
+          const errorObj = new Error('Temporarily Unavailable');
+          errorObj.statusCode = 503;
+          throw errorObj;
+        }
+      }
     }
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
