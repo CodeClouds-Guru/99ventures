@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, TextField, IconButton, Tooltip } from '@mui/material';
+import { TextField, IconButton, Tooltip } from '@mui/material';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from 'moment';
 import { useState, useEffect } from 'react';
@@ -8,7 +8,7 @@ import axios from "axios"
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CardPanel from './cards-charts/CardPanel';
-import OpenVsClosedTickets from './cards-charts/OpenVsClosedTickets';
+import TicketsChart from './cards-charts/TicketsChart';
 import LoginPerDay from './cards-charts/LoginPerDay';
 import CompletedSurveyChart from './cards-charts/CompletedSurveyChart';
 import MembersChart from './cards-charts/MembersChart';
@@ -21,7 +21,7 @@ const DashboardContent = () => {
     const toggle = () => setOpen(!open);
     const [daterangeLessData, setDaterangeLessData] = useState({});
     const [completedSurveys, setCompletedSurveys] = useState({});
-    const [openVsClosedTickets, setOpenVsClosedTickets] = useState({});
+    const [ticketsChart, setTicketsChart] = useState({});
     const [loginPerDay, setLoginPerDay] = useState({});
     const [membersChart, setMembersChart] = useState({});
     const [bestPerformingSurveys, setBestPerformingSurveys] = useState({});
@@ -58,8 +58,12 @@ const DashboardContent = () => {
         getCompletedSurveys();
         getLoginPerDay();
         getMembersChart();
+        getOpenVsCloseTickets();
+        getBestPerformingSurveys();
+        getBestPerformers();
     }, [param])
     const clearFilter = () => {
+        setOpen(false)
         setDateRange({
             startDate: moment().subtract(7, 'd').startOf('day'),
             endDate: moment(),
@@ -67,7 +71,7 @@ const DashboardContent = () => {
     }
 
     const getDaterangeLessReport = () => {
-        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + '?type=count_report').then((res) => {
+        axios.get(jwtServiceConfig.dashboardReport + '?type=count_report').then((res) => {
             setDaterangeLessData(res.data.results)
         }).catch(e => {
             console.error(e)
@@ -75,7 +79,7 @@ const DashboardContent = () => {
         });
     }
     const getCompletedSurveys = () => {
-        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=completed_surveys&from=${param.from}&to=${param.to}`).then((res) => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=completed_surveys&from=${param.from}&to=${param.to}`).then((res) => {
             if ((res.data.results).hasOwnProperty('total_completed_surveys') && (res.data.results).hasOwnProperty('survey_names') && (res.data.results).hasOwnProperty('survey_count')) {
                 setCompletedSurveys(res.data.results);
             }
@@ -85,7 +89,7 @@ const DashboardContent = () => {
         });
     }
     const getLoginPerDay = () => {
-        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=login_per_day&from=${param.from}&to=${param.to}`).then((res) => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=login_per_day&from=${param.from}&to=${param.to}`).then((res) => {
             if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
                 setLoginPerDay(res.data.results);
             }
@@ -95,9 +99,39 @@ const DashboardContent = () => {
         });
     }
     const getMembersChart = () => {
-        axios.get(jwtServiceConfig.dashboardDaterangeLessReport + `?type=members&from=${param.from}&to=${param.to}`).then((res) => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=members&from=${param.from}&to=${param.to}`).then((res) => {
             if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
                 setMembersChart(res.data.results);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+    const getOpenVsCloseTickets = () => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=open_vs_closed_tickets&from=${param.from}&to=${param.to}`).then((res) => {
+            if ((res.data.results).hasOwnProperty('names') && (res.data.results).hasOwnProperty('values')) {
+                setTicketsChart(res.data.results);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+    const getBestPerformingSurveys = () => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=top_surveys&from=${param.from}&to=${param.to}`).then((res) => {
+            if ((res.data.results).hasOwnProperty('names')) {
+                setBestPerformingSurveys(res.data.results);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+    const getBestPerformers = () => {
+        axios.get(jwtServiceConfig.dashboardReport + `?type=top_members&from=${param.from}&to=${param.to}`).then((res) => {
+            if ((res.data.results).hasOwnProperty('names')) {
+                setBestPerformers(res.data.results);
             }
         }).catch(e => {
             console.error(e)
@@ -114,6 +148,13 @@ const DashboardContent = () => {
                     onChange={dateRangeSelected}
                     className="daterangepicker-filter"
                     closeOnClickOutside={true}
+                    // slotProps={{
+                    //     actionBar: {
+                    //         actions: ['clear'],
+                    //     }
+                    // }}
+                    clearable={true}
+                    clearText="Clear"
                 />
                 <div className="w-1/2 cursor-pointer" onClick={toggle}>
                     <TextField
@@ -136,17 +177,13 @@ const DashboardContent = () => {
                 </Tooltip>
             </div>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={completedSurveys.hasOwnProperty('total_completed_surveys') ? completedSurveys.total_completed_surveys : 0} />
-            <div className="flex w-full justify-between">
+            <div className="flex flex-wrap w-full justify-between">
                 <LoginPerDay loginPerDay={loginPerDay} />
                 <CompletedSurveyChart completedSurveys={completedSurveys} />
-            </div>
-            <div className="flex w-full justify-between">
+                <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
                 <MembersChart membersChart={membersChart} />
-                <OpenVsClosedTickets />
-            </div>
-            <div className="flex w-full justify-between">
-                <BestPerformingSurveys bestPerformingSurveys={['CINT', 'CINT', 'CINT', 'CINT', 'CINT']} />
-                <BestPerformers bestPerformers={['Johny Bro', 'Johny Bro', 'Johny Bro', 'Johny Bro', 'Johny Bro']} />
+                <TicketsChart ticketsChart={ticketsChart} />
+                <BestPerformers bestPerformers={bestPerformers} />
             </div>
         </div>
     )

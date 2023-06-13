@@ -43,10 +43,10 @@ function LoginPerDay(props) {
     }, [props.loginPerDay.names, props.loginPerDay.values]);
 
     return (
-        <div className="w-1/2 m-5">
+        <div className="w-1/2 lg:w-1/3 p-5">
             <Card className="w-full" sx={{ color: '#283593' }}>
                 <CardContent>
-                    <Typography variant="h6" component="div">Login Per day</Typography>
+                    <Typography variant="h6" component="div">Login Analytics</Typography>
                     <div className="line">
                         <Chart options={state.options} series={state.series} type="line" width="100%" height="300" />
                     </div>

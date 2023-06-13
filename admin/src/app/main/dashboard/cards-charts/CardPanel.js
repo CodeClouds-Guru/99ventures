@@ -12,13 +12,13 @@ const CardPanel = (props) => {
             <Card className="w-1/4 m-5" sx={{ backgroundColor: '#E8EAF6', color: '#283593' }}>
                 <CardContent>
                     <Typography variant="h3" component="div">{props.users}</Typography>
-                    <Typography variant="h6" component="div">Users</Typography>
+                    <Typography variant="h6" component="div">Members</Typography>
                 </CardContent>
             </Card>
             <Card className="w-1/4 m-5" sx={{ backgroundColor: '#E8F5E9', color: '#2E7D32' }}>
                 <CardContent>
                     <Typography variant="h3" component="div">{props.verifiedUsers}</Typography>
-                    <Typography variant="h6" component="div">Verified Users</Typography>
+                    <Typography variant="h6" component="div">Verified Members</Typography>
                 </CardContent>
             </Card>
             <Card className="w-1/4 m-5" sx={{ backgroundColor: '#edb2ff', color: '#77298e' }}>
