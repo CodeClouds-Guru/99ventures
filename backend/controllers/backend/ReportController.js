@@ -4,7 +4,7 @@ const {
   SurveyProvider,
   Member,
   MemberSurvey,
-  MemberActivityLog,
+  MemberTransaction,
   sequelize,
 } = require("../../models/index");
 const { Op,QueryTypes } = require("sequelize");
@@ -245,15 +245,34 @@ class ReportController{
       })
     }
     else if(type =='top_members'){
+      let top_members = await MemberTransaction.findAll({
+                                                      attributes:['member_id',[sequelize.fn('COUNT', '*'), 'count']],
+                                                      limit:5,
+                                                      offset:0,
+                                                      order: [[sequelize.fn('COUNT', '*'), 'DESC']],
+                                                      group:'member_id',
+                                                      where:{
+                                                        type:'credited',
+                                                        amount_action:'survey',
+                                                        created_at: {
+                                                          [Op.between]: [start_date,end_date]
+                                                        }
+                                                      },
+                                                      include:{
+                                                        model: Member,
+                                                        attributes: ['first_name','last_name'],
+                                                        where:{company_portal_id: req.headers.site_id}
+                                                      }
+                                                    })
+      let names = []
+      if(top_members.length){
+        for(let i of top_members){
+          names.push(i.dataValues.Member.first_name+" "+ i.dataValues.Member.last_name)
+        }
+      }                          
       res.json({
         results:{
-          names:[
-            'Member 1',
-            'Member 2',
-            'Member 3',
-            'Member 4',
-            'Member 5',
-          ]
+          names:names
         }
       })
     }
