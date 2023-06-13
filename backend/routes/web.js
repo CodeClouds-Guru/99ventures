@@ -88,6 +88,11 @@ router.get('/500', async (req, res) => {
   var page_content = await pagePerser.preview(req);
   res.render('page', { page_content });
 });
+router.get('/503', async (req, res) => {
+  var pagePerser = new PageParser('503');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
 
 //ROUTES FOR FRONTEND
 router.use(frontendrRouter.router);

@@ -113,6 +113,9 @@ router.get('/:slug?', async (req, res) => {
       case 401:
         res.redirect('/');
         return;
+      case 503:
+        res.redirect('503');
+        return;
       default:
         res.redirect('/500');
         console.error(e);
