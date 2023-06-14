@@ -454,7 +454,7 @@ class Lucid {
   async createEntryLink(surveyNumber) {
     const payload = {
       "SupplierLinkTypeCode": "OWS",
-      "TrackingTypeCode": "S2S"
+      "TrackingTypeCode": "NONE"
     };
     
     const instance = {
