@@ -126,7 +126,7 @@ function Listing(props) {
             ids: [],
             all: 1
         }
-        axios.post(`/${module}/export`, { params }).then(res => {
+        axios.get(`/${module}/export`, { params }).then(res => {
 
         }).catch(error => {
             let message = 'Something went wrong!'
@@ -205,9 +205,11 @@ function Listing(props) {
     }
     async function exportSelected(selectedIds) {
         try {
-            await axios.post(`${module}/export`, {
-                ids: selectedIds,
-                all: 0
+            await axios.get(`${module}/export`, {
+                params: {
+                    ids: selectedIds,
+                    all: 0
+                }
             }).then(res => {
                 if (res.data.results.message) {
                     setSelected([]);

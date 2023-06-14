@@ -19,11 +19,11 @@ function checkPermission(permissions, module, action) {
     ) {
       return true
     } else if (
-      ['fetchDropdownOptions','download'].indexOf(action) > -1 &&
+      ['fetchDropdownOptions', 'download'].indexOf(action) > -1 &&
       checkCombination(module, 'list', permission)
     ) {
       return true
-    }else if (checkCombination(module, action, permission)) {
+    } else if (checkCombination(module, action, permission)) {
       return true
     }
   }
@@ -43,7 +43,7 @@ module.exports = async function (req, res, next) {
   const company_id = req.headers.company_id ?? 1
   let partial_path = req.originalUrl.replace('api/', '').split('?').shift()
   var [, module, action] = partial_path.split('/')
-  if (typeof action === 'undefined' || action.trim().length === 0) {
+  if (typeof action === 'undefined' || action.trim().length === 0 || action === 'export') {
     action = 'list'
   }
   // console.log('-------------------',module,action)
