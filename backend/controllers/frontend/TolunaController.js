@@ -87,7 +87,7 @@ class TolunaController {
             return;
         }
         const member = await Member.findOne({
-            attributes: ['username'],
+            attributes: ['username', 'id'],
             where: {
                 id: memberId
             }
@@ -102,7 +102,7 @@ class TolunaController {
             });
             const centAmt = provider.currency_percent ? provider.currency_percent : 0;
             const tObj = new TolunaHelper;
-            const surveys = await tObj.getSurveys(member.username);
+            const surveys = await tObj.getSurveys(member.id);
             if(surveys && surveys.length) {
                 var surveyHtml = '';
                 for (let survey of surveys) {
