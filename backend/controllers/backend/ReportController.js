@@ -35,6 +35,7 @@ class ReportController{
     }
     let d_time = Math.abs(end_date - start_date);
     let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24)); 
+    console.log(total_days)
     var query_string = "DATE"
     if(total_days > 15 && total_days <= 31){
       query_string = "DATE"

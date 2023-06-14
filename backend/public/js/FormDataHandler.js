@@ -269,7 +269,7 @@ $(() => {
     const email = $(loginForm).find('input[name="email"]').get(0);
     const password = $(loginForm).find('input[name="password"]').get(0);
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a email' });
+      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -312,7 +312,7 @@ $(() => {
       });
     }
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a email' });
+      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -392,7 +392,7 @@ $(() => {
     $('span.alert-msg').remove();
     const email = $(forgotPasswordForm).find('input[name="email"]').get(0);
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a email' });
+      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -418,7 +418,7 @@ $(() => {
       errorsArray.push({
         field: $(password),
         message:
-          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+          'Password should contain at least one lowercase, one uppercase, one numeric digit and one special character',
       });
     }
     if ($(password).val().trim() !== $(confirm_password).val().trim()) {
