@@ -33,6 +33,7 @@ class MemberController extends Controller {
     this.update = this.update.bind(this);
     this.delete = this.delete.bind(this);
     this.deleteMemberNotes = this.deleteMemberNotes.bind(this);
+    this.export = this.export.bind(this);
   }
   async save(req, res) {
     try {
@@ -208,7 +209,7 @@ class MemberController extends Controller {
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
           let admin_status = result.admin_status.replaceAll(' ', '_')
-          
+
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
 
@@ -362,14 +363,6 @@ class MemberController extends Controller {
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
-    // req.query.where = JSON.stringify({
-    //   filters: [
-    //     { column: "username", match: "substring", search: "Debosmita" },
-    //     // { column: "email", match: "substring", search: "codeclouds" },
-    //   ],
-    //   // status: ["validating", "suspended"],
-    // });
-    // let search_options = {};
     var query_where = JSON.parse(req.query.where);
     var temp = {};
     var status_filter = {};
@@ -448,6 +441,13 @@ class MemberController extends Controller {
       fields: fields,
     };
   }
+
+
+  async export(req, res) {
+    let data = await this.list(req);
+    return data;
+  }
+
   //update member details and avatar
   async updateBasicDetails(req, member) {
     let request_data = req.body;
@@ -535,36 +535,6 @@ class MemberController extends Controller {
         created_by: req.user.id,
         status: 0,
       });
-      // let total_earnings = await db.sequelize.query(
-      //   "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
-      //   {
-      //     replacements: [member_id],
-      //     type: QueryTypes.SELECT,
-      //   }
-      // );
-
-      // let modified_total_earnings =
-      //   parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
-      // let transaction_data = {
-      //   type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
-      //   amount: parseFloat(admin_amount),
-      //   status: 2,
-      //   note: admin_note,
-      //   created_by: req.user.id,
-      //   member_id: member_id,
-      //   amount_action: 'admin_adjustment',
-      //   completed_at: new Date(),
-      // };
-
-      // let transaction = await MemberTransaction.create(transaction_data, {
-      //   silent: true,
-      // });
-      // let balance = await MemberBalance.update(
-      //   { amount: modified_total_earnings },
-      //   {
-      //     where: { id: total_earnings[0].id },
-      //   }
-      // );
       if (result.status) {
         return true;
       } else {
@@ -598,34 +568,6 @@ class MemberController extends Controller {
     };
   }
 
-  // async saveEmailAlerts(req) {
-  //   try {
-  //     let member_id = req.params.id;
-  //     let email_alerts = req.body.email_alerts;
-  //     if (email_alerts) {
-  //       //remove existing data
-  //       let alert_del = await db.sequelize.query(
-  //         `DELETE FROM email_alert_member WHERE member_id=?`,
-  //         {
-  //           replacements: [member_id],
-  //           type: QueryTypes.DELETE,
-  //         }
-  //       );
-  //       console.log('email_alerts', email_alerts);
-  //       email_alerts = email_alerts.map((alert) => {
-  //         return { email_alert_id: alert, member_id: member_id };
-  //       });
-  //       console.log('email_alerts after', email_alerts);
-  //       //bulck create member email alert
-
-  //       await queryInterface.bulkInsert('email_alert_member', email_alerts);
-  //     }
-  //     return true;
-  //   } catch (error) {
-  //     console.error(error);
-  //     this.throwCustomError('Unable to save data', 500);
-  //   }
-  // }
 
   async delete(req, res) {
     var resp = {

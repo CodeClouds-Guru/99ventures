@@ -568,19 +568,21 @@ class SurveycallbackController {
 				created_by: null,
 				payload: JSON.stringify(payload),
 				survey_provider_id: provider.id,
-				survey_number: surveyNumber
-			};
+			};			
 
-			await MemberSurvey.create({
-				survey_provider_id: params.survey_provider_id,
-				survey_number: params.survey_number,
-				original_json: payload,
-				completed_on: new Date()
-			}, { silent: true });
-
-			await MemberTransaction.updateMemberTransactionAndBalance(
+			const txn = await MemberTransaction.updateMemberTransactionAndBalance(
 				params
 			);
+			
+			if(txn.status && txn.transaction_id){
+				await MemberSurvey.create({
+					member_transaction_id: txn.transaction_id,
+					survey_provider_id: params.survey_provider_id,
+					survey_number: surveyNumber,
+					original_json: payload,
+					completed_on: new Date()
+				}, { silent: true });
+			}
 		} catch (error) {
 			console.error(error)
 		} finally {

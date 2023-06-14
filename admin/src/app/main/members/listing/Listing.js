@@ -2,7 +2,7 @@ import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
 import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Box, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
@@ -113,7 +113,27 @@ function Listing(props) {
                 message = error.response.data.errors
             }
             dispatch(showMessage({ variant: 'error', message }));
-            navigate('/dashboard');
+        })
+    }
+
+    const exportAll = () => {
+        let params = {
+            search: searchText,
+            page: page + 1,
+            show: rowsPerPage,
+            module: module,
+            where,
+            ids: [],
+            all: 1
+        }
+        axios.get(`/${module}/export`, { params }).then(res => {
+
+        }).catch(error => {
+            let message = 'Something went wrong!'
+            if (error && error.response.data && error.response.data.errors) {
+                message = error.response.data.errors
+            }
+            dispatch(showMessage({ variant: 'error', message }));
         })
     }
 
@@ -179,6 +199,23 @@ function Listing(props) {
             await axios.delete(`${module}/delete`, { data: { modelIds: selectedIds } });
             setSelected([]);
             setModuleDeleted(true);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async function exportSelected(selectedIds) {
+        try {
+            await axios.get(`${module}/export`, {
+                params: {
+                    ids: selectedIds,
+                    all: 0
+                }
+            }).then(res => {
+                if (res.data.results.message) {
+                    setSelected([]);
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                }
+            })
         } catch (error) {
             console.log(error);
         }
@@ -338,6 +375,15 @@ function Listing(props) {
                 </Typography>
 
                 <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
+                    <Button
+                        className=""
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<FuseSvgIcon>heroicons-outline:upload</FuseSvgIcon>}
+                        onClick={(e) => { e.preventDefault(); exportAll(); }}
+                    >
+                        Export all
+                    </Button>
                     <Button variant="outlined" startIcon={<SearchIcon />} onClick={() => setOpenAlertDialog(true)}>
                         Search
                     </Button>
@@ -487,6 +533,7 @@ function Listing(props) {
                             rowCount={data.length}
                             onMenuItemClick={handleDeselect}
                             onChangeMultirowStatus={handleMultirowStatus}
+                            exportSelected={exportSelected}
                             {...props}
                             fields={fields}
                         />
