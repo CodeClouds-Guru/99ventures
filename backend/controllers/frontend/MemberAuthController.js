@@ -7,6 +7,7 @@ const {
   Page,
   Setting,
   SurveyQuestion,
+  SurveyAnswerPrecodes,
   MemberEligibilities,
   MembershipTier,
   MemberTransaction,
@@ -438,7 +439,7 @@ class MemberAuthController {
           city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
-          country_code: Joi.required().label('Phone code'),
+          // country_code: Joi.required().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
@@ -516,20 +517,23 @@ class MemberAuthController {
   //set member eligibility
   async setMemberEligibility(member_id) {
     //gender
+
     let member_details = await Member.findOne({ where: { id: member_id } });
-    let member_eligibility = [];
+    var member_eligibility = [];
 
     //eligibility entry for gender
     let nmae_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
     let questions = await SurveyQuestion.findAll({
       where: { name: nmae_list },
     });
-
+    
     if (questions.length) {
-      questions.forEach(function (record, key) {
+      // questions.forEach(async function (record, key) {
+      for(let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
           switch (record.name) {
+            //get precodes
             case 'GENDER':
               if (record.survey_provider_id == 1) {
                 if (member_details.gender == 'male') {
@@ -538,42 +542,65 @@ class MemberAuthController {
                   precode = 2;
                 }
               }
+              else if (record.survey_provider_id == 3) {
+                if (member_details.gender == 'male') {
+                  precode = 111;
+                } else if (member_details.gender == 'female') {
+                  precode = 112;
+                }
+              }
+              else if (record.survey_provider_id == 4) {
+                if (member_details.gender == 'male') {
+                  precode = 58;
+                } else if (member_details.gender == 'female') {
+                  precode = 59;
+                }
+              }
               break;
             case 'ZIP':
               precode = member_details.zip_code;
               break;
-            // case 'STATE':
-            //   precode = member_details.zip_code
-            //   break;
             case 'REGION':
               precode = member_details.city;
               break;
             case 'AGE':
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
-                // var month_diff = Date.now() - dob.getTime();
-                // var age_dt = new Date(month_diff);
-                // var year = age_dt.getUTCFullYear();
-                // precode = Math.abs(year - 1970);
                 precode = new Date(new Date() - dob).getFullYear() - 1970;
               }
               break;
+              case 'STATE':
+                if(member_details.state)
+                  precode = member_details.state
+                break;
+              
           }
           if (precode) {
+            let precode_id = ''
+            let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({where:{
+              precode:record.survey_provider_question_id,
+              survey_provider_id: record.survey_provider_id,
+              option:precode
+            }})
+            if(survey_answer_precodes){
+              precode_id = survey_answer_precodes.id
+              precode = ''
+            }
             member_eligibility.push({
               member_id: member_id,
               survey_question_id: record.id,
-              precode_id: precode,
+              survey_answer_precode_id: precode_id,
+              open_ended_value: precode
             });
           }
         }
+      }//
+      await MemberEligibilities.destroy({
+        where: { member_id: member_id },
+        force: true,
       });
+      await MemberEligibilities.bulkCreate(member_eligibility);
     }
-    await MemberEligibilities.destroy({
-      where: { member_id: member_id },
-      force: true,
-    });
-    await MemberEligibilities.bulkCreate(member_eligibility);
     return;
   }
   //change password
