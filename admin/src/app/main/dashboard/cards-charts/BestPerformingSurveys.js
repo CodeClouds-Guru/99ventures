@@ -11,7 +11,7 @@ const BestPerformingSurveys = (props) => {
             <Card className="w-full flex justify-center" sx={{ color: '#283593' }}>
                 <CardContent className="w-full">
                     <Typography className="w-full text-left" variant="h6" component="div">Top Performing Surveys</Typography>
-                    <div className={data.length > 0 ? `w-full flex items-center justify-center` : `w-full flex items-center justify-center h-full`} style={{ minHeight: '315px' }}>
+                    <div className={data.length > 0 ? `w-full items-center justify-center` : `w-full items-center justify-center flex h-full`} style={{ minHeight: '315px' }}>
                         <div className="w-full">
                             {data.length > 0 ?
                                 data.map((val, index) => {
