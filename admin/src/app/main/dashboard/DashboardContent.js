@@ -1,10 +1,10 @@
 import { TextField, IconButton, Tooltip } from '@mui/material';
-import { DateRangePicker } from "mui-daterange-picker";
 import moment from 'moment';
 import { useState, useEffect } from 'react';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from "axios"
+import { useDispatch } from 'react-redux';
+import { DateRangePicker } from "mui-daterange-picker";
+import axios from "axios";
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CardPanel from './cards-charts/CardPanel';
@@ -18,7 +18,7 @@ import BestPerformers from './cards-charts/BestPerformers';
 const DashboardContent = () => {
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
-    const toggle = () => setOpen(!open);
+    const [reRenderPicker, setReRenderPicker] = useState(true);
     const [daterangeLessData, setDaterangeLessData] = useState({});
     const [completedSurveys, setCompletedSurveys] = useState({});
     const [ticketsChart, setTicketsChart] = useState({});
@@ -27,25 +27,27 @@ const DashboardContent = () => {
     const [bestPerformingSurveys, setBestPerformingSurveys] = useState({});
     const [bestPerformers, setBestPerformers] = useState({});
     const [dateRange, setDateRange] = useState({
-        startDate: moment().subtract(7, 'd').startOf('day'),
-        endDate: moment(),
+        startDate: moment().subtract(7, 'd').startOf('day').toDate(),
+        endDate: moment().toDate(),
     });
     const [param, setParam] = useState({
-        from: moment(dateRange.startDate).format('YYYY-MM-DD'),
-        to: moment(dateRange.endDate).add(1, 'day').format('YYYY-MM-DD')
+        from: moment(dateRange.startDate),
+        to: moment(dateRange.endDate)
     })
+
+    const toggle = () => setOpen(!open);
 
     const dateRangeSelected = (val) => {
         toggle();
         setDateRange({
-            startDate: moment(val.startDate),
-            endDate: moment(val.endDate)
+            startDate: moment(val.startDate).toDate(),
+            endDate: moment(val.endDate).toDate()
         });
     }
     const constructParam = () => {
         setParam({
-            from: moment(dateRange.startDate).format('YYYY-MM-DD'),
-            to: moment(dateRange.endDate).add(1, 'day').format('YYYY-MM-DD')
+            from: moment(dateRange.startDate),
+            to: moment(dateRange.endDate)
         })
     }
     useEffect(() => {
@@ -63,10 +65,11 @@ const DashboardContent = () => {
         getBestPerformers();
     }, [param])
     const clearFilter = () => {
+        setReRenderPicker(false)
         setOpen(false)
         setDateRange({
-            startDate: moment().subtract(7, 'd').startOf('day'),
-            endDate: moment(),
+            startDate: moment().subtract(7, 'd').startOf('day').toDate(),
+            endDate: moment().toDate(),
         });
     }
 
@@ -142,21 +145,18 @@ const DashboardContent = () => {
     return (
         <div>
             <div className="flex w-full ml-5 my-10 justify-start text-center">
-                <DateRangePicker
-                    open={open}
-                    toggle={toggle}
-                    onChange={dateRangeSelected}
-                    className="daterangepicker-filter"
-                    closeOnClickOutside={true}
-                    // slotProps={{
-                    //     actionBar: {
-                    //         actions: ['clear'],
-                    //     }
-                    // }}
-                    clearable={true}
-                    clearText="Clear"
-                />
-                <div className="w-1/2 cursor-pointer" onClick={toggle}>
+                {reRenderPicker ?
+                    <DateRangePicker
+                        open={open}
+                        toggle={toggle}
+                        onChange={dateRangeSelected}
+                        className="daterangepicker-filter"
+                        closeOnClickOutside={true}
+                        maxDate={moment().toDate()}
+                        initialDateRange={dateRange}
+                    /> : ''
+                }
+                <div className="w-1/2 cursor-pointer" onClick={() => { setReRenderPicker(true); toggle(); }}>
                     <TextField
                         className="w-full ml-0"
                         label="Select a date range"
@@ -178,12 +178,16 @@ const DashboardContent = () => {
             </div>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={completedSurveys.hasOwnProperty('total_completed_surveys') ? completedSurveys.total_completed_surveys : 0} />
             <div className="flex flex-wrap w-full justify-between">
-                <LoginPerDay loginPerDay={loginPerDay} />
-                <CompletedSurveyChart completedSurveys={completedSurveys} />
-                <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
-                <MembersChart membersChart={membersChart} />
-                <TicketsChart ticketsChart={ticketsChart} />
-                <BestPerformers bestPerformers={bestPerformers} />
+                <div className="flex flex-wrap w-full lg:w-2/3 justify-between">
+                    <LoginPerDay loginPerDay={loginPerDay} />
+                    <CompletedSurveyChart completedSurveys={completedSurveys} />
+                    <MembersChart membersChart={membersChart} />
+                    <TicketsChart ticketsChart={ticketsChart} />
+                </div>
+                <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
+                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
+                    <BestPerformers bestPerformers={bestPerformers} />
+                </div>
             </div>
         </div>
     )

@@ -7,6 +7,7 @@ const {
   Page,
   Setting,
   SurveyQuestion,
+  SurveyAnswerPrecodes,
   MemberEligibilities,
   MembershipTier,
   MemberTransaction,
@@ -438,7 +439,7 @@ class MemberAuthController {
           city: Joi.string().optional().label('City'),
           gender: Joi.string().required().label('Gender'),
           phone_no: Joi.string().required().label('Phone number'),
-          country_code: Joi.required().label('Phone code'),
+          // country_code: Joi.required().label('Phone code'),
           address_1: Joi.string().allow('').required().label('Address 1'),
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
@@ -516,20 +517,23 @@ class MemberAuthController {
   //set member eligibility
   async setMemberEligibility(member_id) {
     //gender
+
     let member_details = await Member.findOne({ where: { id: member_id } });
-    let member_eligibility = [];
+    var member_eligibility = [];
 
     //eligibility entry for gender
     let nmae_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
     let questions = await SurveyQuestion.findAll({
       where: { name: nmae_list },
     });
-
+    
     if (questions.length) {
-      questions.forEach(function (record, key) {
+      // questions.forEach(async function (record, key) {
+      for(let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
           switch (record.name) {
+            //get precodes
             case 'GENDER':
               if (record.survey_provider_id == 1) {
                 if (member_details.gender == 'male') {
@@ -538,42 +542,65 @@ class MemberAuthController {
                   precode = 2;
                 }
               }
+              else if (record.survey_provider_id == 3) {
+                if (member_details.gender == 'male') {
+                  precode = 111;
+                } else if (member_details.gender == 'female') {
+                  precode = 112;
+                }
+              }
+              else if (record.survey_provider_id == 4) {
+                if (member_details.gender == 'male') {
+                  precode = 58;
+                } else if (member_details.gender == 'female') {
+                  precode = 59;
+                }
+              }
               break;
             case 'ZIP':
               precode = member_details.zip_code;
               break;
-            // case 'STATE':
-            //   precode = member_details.zip_code
-            //   break;
             case 'REGION':
               precode = member_details.city;
               break;
             case 'AGE':
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
-                // var month_diff = Date.now() - dob.getTime();
-                // var age_dt = new Date(month_diff);
-                // var year = age_dt.getUTCFullYear();
-                // precode = Math.abs(year - 1970);
                 precode = new Date(new Date() - dob).getFullYear() - 1970;
               }
               break;
+              case 'STATE':
+                if(member_details.state)
+                  precode = member_details.state
+                break;
+              
           }
           if (precode) {
+            let precode_id = ''
+            let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({where:{
+              precode:record.survey_provider_question_id,
+              survey_provider_id: record.survey_provider_id,
+              option:precode
+            }})
+            if(survey_answer_precodes){
+              precode_id = survey_answer_precodes.id
+              precode = ''
+            }
             member_eligibility.push({
               member_id: member_id,
               survey_question_id: record.id,
-              precode_id: precode,
+              survey_answer_precode_id: precode_id,
+              open_ended_value: precode
             });
           }
         }
+      }//
+      await MemberEligibilities.destroy({
+        where: { member_id: member_id },
+        force: true,
       });
+      await MemberEligibilities.bulkCreate(member_eligibility);
     }
-    await MemberEligibilities.destroy({
-      where: { member_id: member_id },
-      force: true,
-    });
-    await MemberEligibilities.bulkCreate(member_eligibility);
     return;
   }
   //change password
@@ -680,6 +707,7 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
+    // console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
 
     //get member
@@ -723,32 +751,53 @@ class MemberAuthController {
     result = result.map((x) => x.email);
 
     //get withdrawal type
-    let withdrawal_type = await WithdrawalType.findOne({
-      where: { id: request_data.withdrawal_type_id },
+    let payment_method_details = await PaymentMethod.findOne({
+      where: { id: request_data.payment_method_id },
       attributes: [
         'name',
         'slug',
-        'payment_method_id',
-        'logo',
-        'min_amount',
-        'max_amount',
+        'type_user_info_again',
+        'payment_field_options',
+        'minimum_amount',
+        'maximum_amount',
+        'fixed_amount',
+        'withdraw_redo_interval',
+        'past_withdrawal_options',
+        'past_withdrawal_count',
+        'payment_type',
       ],
     });
-    withdrawal_type = JSON.parse(JSON.stringify(withdrawal_type));
+    payment_method_details = JSON.parse(JSON.stringify(payment_method_details));
 
     //check all conditions
-    if (withdrawal_amount < parseFloat(withdrawal_type.min_amount)) {
+    if (
+      parseFloat(payment_method_details.minimum_amount) > 0 &&
+      withdrawal_amount < parseFloat(payment_method_details.minimum_amount)
+    ) {
       return {
         member_status: false,
         member_message:
-          'Amount must be more than $' + withdrawal_type.min_amount,
+          'Amount must be more than $' + payment_method_details.min_amount,
       };
     }
-    if (withdrawal_amount >= parseFloat(withdrawal_type.max_amount)) {
+    if (
+      parseFloat(payment_method_details.maximum_amount) > 0 &&
+      withdrawal_amount >= parseFloat(payment_method_details.maximum_amount)
+    ) {
       return {
         member_status: false,
         member_message:
-          'Amount must be less than $' + withdrawal_type.max_amount,
+          'Amount must be less than $' + payment_method_details.max_amount,
+      };
+    }
+    if (
+      parseFloat(payment_method_details.fixed_amount) > 0 &&
+      withdrawal_amount == parseFloat(payment_method_details.fixed_amount)
+    ) {
+      return {
+        member_status: false,
+        member_message:
+          'Amount must be fixed to $' + payment_method_details.max_amount,
       };
     }
     // console.log(JSON.parse(JSON.stringify(member)));
@@ -764,24 +813,34 @@ class MemberAuthController {
     } else {
       ip = ip.replace('::ffff:', '');
     }
-    if (request_data.email === '') {
+    if (request_data.payment_field === '') {
       return {
         member_status: false,
-        member_message: 'Please enter payment email',
+        member_message:
+          'Please enter payment ' +
+          payment_method_details.payment_field_options.toLowerCase(),
       };
     }
-    var email_regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    var regex = '';
+    if (payment_method_details.payment_field_options == 'Email')
+      regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (payment_method_details.payment_field_options == 'Phone')
+      regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
-    if (!email_regex.test(request_data.email)) {
+    if (!regex.test(request_data.payment_field)) {
       return {
         member_status: false,
-        member_message: 'Please enter valid payment email',
+        member_message:
+          'Please enter valid payment ' +
+          payment_method_details.payment_field_options.toLowerCase(),
       };
     }
 
     await MemberPaymentInformation.updatePaymentInformation({
       member_id: request_data.member_id,
-      payment_email: request_data.email,
+      payment_email: request_data.payment_field,
+      payment_field_option:
+        payment_method_details.payment_field_options.toLowerCase(),
     });
     let withdrawal_req_data = {
       member_id: request_data.member_id,
@@ -790,14 +849,14 @@ class MemberAuthController {
       currency: 'USD',
       status: 'pending',
       requested_on: new Date(),
-      payment_email: request_data.email,
-      withdrawal_type_id: parseInt(request_data.withdrawal_type_id),
+      payment_email: request_data.payment_field,
+      withdrawal_type_id: parseInt(request_data.payment_method_id),
       ip: ip,
     };
     let transaction_resp = {};
     if (
-      withdrawal_type.slug == 'instant_paypal' ||
-      withdrawal_type.slug == 'skrill'
+      payment_method_details.slug == 'instant_paypal' ||
+      payment_method_details.slug == 'skrill'
     ) {
       withdrawal_req_data.note = 'Withdrawal request auto approved';
       withdrawal_req_data.transaction_made_by = request_data.member_id;
@@ -812,17 +871,20 @@ class MemberAuthController {
           type: 'withdraw',
           amount_action: 'member_withdrawal',
           created_by: request_data.member_id,
-          status: withdrawal_type.slug == 'instant_paypal' ? 1 : 2,
+          status: payment_method_details.slug == 'instant_paypal' ? 1 : 2,
         });
-
-      if (withdrawal_type.slug == 'instant_paypal') {
-        const paypal_class = new Paypal(req.session.company_portal.id);
+      // console.log(withdrawal_req_data);
+      if (payment_method_details.slug == 'instant_paypal') {
+        const paypal_class = new Paypal(
+          req.session.company_portal.id,
+          'instant_paypal'
+        );
         const create_resp = await paypal_class.payout([
           {
             amount: withdrawal_amount,
             currency: 'USD',
             member_id: request_data.member_id,
-            email: request_data.email,
+            email: request_data.payment_field,
             first_name: member.first_name,
             last_name: member.last_name,
             member_transaction_id: transaction_resp.transaction_id,
@@ -831,9 +893,23 @@ class MemberAuthController {
         // console.log('create_resp', create_resp);
         if (create_resp.status) {
           await MemberTransaction.update(
-            { batch_id: create_resp.batch_id, status: 2 },
+            {
+              batch_id: create_resp.batch_id,
+              status: 2,
+              balance:
+                parseFloat(member.member_amounts[0].amount) -
+                parseFloat(withdrawal_amount),
+            },
             { where: { id: transaction_resp.transaction_id } }
           );
+          await MemberTransaction.updateMemberBalance({
+            amount:
+              parseFloat(member.member_amounts[0].amount) -
+              parseFloat(withdrawal_amount),
+            transaction_amount: withdrawal_amount,
+            action: 'member_withdrawal',
+            member_id: request_data.member_id,
+          });
         }
       }
       //paypal payment section
@@ -852,8 +928,8 @@ class MemberAuthController {
     });
     // console.log(withdrawal_type, member);
     if (
-      withdrawal_type.slug == 'instant_paypal' ||
-      withdrawal_type.slug == 'skrill'
+      payment_method_details.slug == 'instant_paypal' ||
+      payment_method_details.slug == 'skrill'
     ) {
       // email body for member
       let member_mail = await this.sendMailEvent({

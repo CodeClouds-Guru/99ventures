@@ -37,6 +37,13 @@ module.exports = [
           } else {
             return options.inverse(this);
           }
+        case 'inString':
+          var v2_arr = v2.split(',');
+          if (v2_arr.indexOf(v1) >= 0) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
         default:
           return options.inverse(this);
       }
@@ -118,8 +125,8 @@ module.exports = [
   {
     name: 'cal',
     fn: function (v1, operator, v2, options) {
-      v1 = Number(v1)
-      v2 = Number(v2)
+      v1 = Number(v1);
+      v2 = Number(v2);
       switch (operator) {
         case '+':
           return v1 + v2;
@@ -133,5 +140,14 @@ module.exports = [
           return 0;
       }
     },
-  }
+  },
+  {
+    name: 'getObjectValueIfMatched',
+    fn: function (arr, finder) {
+      const index = arr.findIndex((object) => {
+        return object.name === finder.toLowerCase();
+      });
+      if (index >= 0) return arr[index].value;
+    },
+  },
 ];

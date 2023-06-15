@@ -2,7 +2,7 @@ const axios = require('axios');
 const { Console } = require('winston/lib/winston/transports');
 const {
   MemberTransaction,
-  PaymentMethodCredential,
+  PaymentMethod,
   WithdrawalRequest,
   Member,
   MemberBalance,
@@ -13,8 +13,9 @@ const db = require('../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const eventBus = require('../eventBus');
 class Paypal {
-  constructor(company_portal_id = '') {
+  constructor(company_portal_id = '', slug = '') {
     this.company_portal_id = company_portal_id;
+    this.slug = slug || 'paypal';
     this.clientId =
       'AS34VNOhe5wGedg3E8MkZsWWIb7VoHE54CoLYrGbib8FeNFmAlrMUwgsIDPbYNIC48YPXN6Vl-9FMR7H';
     this.clientSecret =
@@ -44,28 +45,32 @@ class Paypal {
    * @returns {paypal.core.PayPalHttpClient}
    */
   async getPaypalClient() {
-    let paypal_credentials = await PaymentMethodCredential.findAll({
-      attributes: ['slug', 'value'],
+    let paypal_credentials = await PaymentMethod.findOne({
+      attributes: ['api_username', 'api_password'],
       where: {
-        payment_method_id: 1,
+        slug: this.slug,
         company_portal_id: this.company_portal_id,
       },
     });
     let clientId = '';
     let clientSecret = '';
-    for (let record of paypal_credentials) {
-      if (record.slug == 'client_id') {
-        clientId = record.value;
-      } else if (record.slug == 'secret') {
-        clientSecret = record.value;
-      }
-    }
+    // for (let record of paypal_credentials) {
+    //   if (record.slug == 'client_id') {
+    //     clientId = record.value;
+    //   } else if (record.slug == 'secret') {
+    //     clientSecret = record.value;
+    //   }
+    // }
+    clientId = paypal_credentials.api_username;
+    clientSecret = paypal_credentials.api_password;
+
     // let clientId = this.clientId;
     // let clientSecret = this.clientSecret;
     let environment = new paypal.core.SandboxEnvironment(
       clientId,
       clientSecret
     );
+    console.log(environment);
     return new paypal.core.PayPalHttpClient(environment);
   }
 
