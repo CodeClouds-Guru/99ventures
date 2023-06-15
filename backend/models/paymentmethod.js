@@ -116,20 +116,20 @@ module.exports = (sequelize, DataTypes) => {
       maximum_amount: Joi.optional().allow('').label('Maximum Amount'),
       fixed_amount: Joi.optional().allow('').label('Fixed Amount'),
       withdraw_redo_interval: Joi.optional()
-        .allow(null)
+        .allow('')
         .label('Withdraw Redo Interval'),
       status: Joi.number().required().label('status'),
-      same_account_options: Joi.optional()
-        .allow('')
-        .label('Same Account Options'),
+      // same_account_options: Joi.optional()
+      //   .allow('')
+      //   .label('Same Account Options'),
       past_withdrawal_options: Joi.optional()
         .allow('')
         .label('Past Withdrawal Options'),
       past_withdrawal_count: Joi.optional()
         .allow('')
         .label('Past Withdrawal Count'),
-      verified_options: Joi.optional().allow('').label('Verified Options'),
-      upgrade_options: Joi.optional().allow('').label('Upgrade Options'),
+      // verified_options: Joi.optional().allow('').label('Verified Options'),
+      // upgrade_options: Joi.optional().allow('').label('Upgrade Options'),
       fee_percent: Joi.optional().allow('').label('Fee Percentage'),
       api_username: Joi.optional().allow('').label('Api Username'),
       api_password: Joi.optional().allow('').label('Api Password'),

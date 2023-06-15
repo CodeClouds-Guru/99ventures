@@ -199,7 +199,7 @@ class ScriptParser {
 
               data[key].setDataValue('redo_diff', hours);
             });
-            console.log(JSON.parse(JSON.stringify(data)));
+            // console.log(JSON.parse(JSON.stringify(data)));
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
