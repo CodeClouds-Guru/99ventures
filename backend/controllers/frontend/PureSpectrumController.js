@@ -60,7 +60,7 @@ class PureSpectrumController {
          * check and get member's eligibility
          */
         const eligibilities = await MemberEligibilities.findAll({
-            attributes: ['survey_question_id', 'precode_id', 'text', 'id'],
+            attributes: ['survey_question_id', 'survey_answer_precode_id', 'text', 'id'],
             where: {
                 member_id: memberId
             },
@@ -90,7 +90,7 @@ class PureSpectrumController {
             /** Get Open Ended QnA Start */
             const eligibilityIds = eligibilities.map(eg => eg.id);
             const openEndedData =  await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'precode_id', 'open_ended_value'],
+                attributes: ['survey_question_id', 'open_ended_value'],
                 where: {
                     member_id: memberId,
                     id: {
@@ -108,7 +108,7 @@ class PureSpectrumController {
             /** end */
             
             const matchingQuestionIds = eligibilities.map(eg => eg.survey_question_id);            
-            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
             
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 /** Query String Formation Start */

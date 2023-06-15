@@ -62,7 +62,7 @@ class SchlesingerController {
              * check and get member's eligibility
              */
             const eligibilities = await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'precode_id', 'text', 'id'],
+                attributes: ['survey_question_id', 'survey_answer_precode_id', 'text', 'id'],
                 where: {
                     member_id: memberId
                 },
@@ -96,7 +96,7 @@ class SchlesingerController {
             }
 
             const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
 
             /** Get Open Ended QnA Start */
             const eligibilityIds = eligibilities.map(eg => eg.id);
