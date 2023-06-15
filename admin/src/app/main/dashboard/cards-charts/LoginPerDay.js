@@ -43,7 +43,7 @@ function LoginPerDay(props) {
     }, [props.loginPerDay.names, props.loginPerDay.values]);
 
     return (
-        <div className="w-1/2 lg:w-1/3 p-5">
+        <div className="w-1/2 p-5">
             <Card className="w-full" sx={{ color: '#283593' }}>
                 <CardContent>
                     <Typography variant="h6" component="div">Login Analytics</Typography>

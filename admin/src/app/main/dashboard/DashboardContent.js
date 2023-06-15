@@ -31,8 +31,8 @@ const DashboardContent = () => {
         endDate: moment(),
     });
     const [param, setParam] = useState({
-        from: moment(dateRange.startDate).format('YYYY-MM-DD'),
-        to: moment(dateRange.endDate).add(1, 'day').format('YYYY-MM-DD')
+        from: moment(dateRange.startDate),
+        to: moment(dateRange.endDate)
     })
 
     const dateRangeSelected = (val) => {
@@ -44,8 +44,8 @@ const DashboardContent = () => {
     }
     const constructParam = () => {
         setParam({
-            from: moment(dateRange.startDate).format('YYYY-MM-DD'),
-            to: moment(dateRange.endDate).add(1, 'day').format('YYYY-MM-DD')
+            from: moment(dateRange.startDate),
+            to: moment(dateRange.endDate)
         })
     }
     useEffect(() => {
@@ -178,12 +178,16 @@ const DashboardContent = () => {
             </div>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={completedSurveys.hasOwnProperty('total_completed_surveys') ? completedSurveys.total_completed_surveys : 0} />
             <div className="flex flex-wrap w-full justify-between">
-                <LoginPerDay loginPerDay={loginPerDay} />
-                <CompletedSurveyChart completedSurveys={completedSurveys} />
-                <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
-                <MembersChart membersChart={membersChart} />
-                <TicketsChart ticketsChart={ticketsChart} />
-                <BestPerformers bestPerformers={bestPerformers} />
+                <div className="flex flex-wrap w-full lg:w-2/3 justify-between">
+                    <LoginPerDay loginPerDay={loginPerDay} />
+                    <CompletedSurveyChart completedSurveys={completedSurveys} />
+                    <MembersChart membersChart={membersChart} />
+                    <TicketsChart ticketsChart={ticketsChart} />
+                </div>
+                <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
+                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
+                    <BestPerformers bestPerformers={bestPerformers} />
+                </div>
             </div>
         </div>
     )
