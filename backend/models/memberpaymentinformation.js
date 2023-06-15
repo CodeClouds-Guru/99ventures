@@ -45,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         where: {
           member_id: data.member_id,
+          name: data.payment_field_option,
         },
       }
     );
@@ -62,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
         status: 1,
       };
     });
-    console.log(payment_methods);
+    // console.log(payment_methods);
     if (payment_methods.length > 0) {
       await MemberPaymentInformation.bulkCreate(payment_methods);
     }

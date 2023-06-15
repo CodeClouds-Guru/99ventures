@@ -18,9 +18,8 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'country_id',
         timestamps: false,
       });
-      PaymentMethod.hasMany(models.WithdrawalType, {
-        foreignKey: 'payment_method_id',
-        as: 'withdrawal_types',
+      PaymentMethod.hasMany(models.WithdrawalRequest, {
+        foreignKey: 'withdrawal_type_id',
       });
       PaymentMethod.belongsToMany(models.Member, {
         as: 'excluded_members',

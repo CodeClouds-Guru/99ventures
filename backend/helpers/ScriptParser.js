@@ -185,16 +185,20 @@ class ScriptParser {
             };
 
             const condition = this.getModuleWhere(script.module, user);
-            // if (other_details.transaction_count < 5) {
-            //   condition.where = {
-            //     ...condition.where,
-            //     slug: {
-            //       [Op.notLike]: 'instant_paypal',
-            //     },
-            //   };
-            // }
 
             data = await Models[script.module].findAll(condition);
+
+            data.forEach(function (payment, key) {
+              var date1 = new Date();
+              var hours = payment.withdraw_redo_interval;
+              if (payment.WithdrawalRequests.length > 0) {
+                var date2 =
+                  payment.WithdrawalRequests[0].MemberTransaction.completed_at;
+                var hours = (Math.abs(date1 - date2) / 36e5).toFixed(2);
+              }
+
+              data[key].setDataValue('redo_diff', hours);
+            });
             console.log(JSON.parse(JSON.stringify(data)));
             break;
           case 'survey':
@@ -220,7 +224,6 @@ class ScriptParser {
         }
       }
     }
-
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -493,6 +496,9 @@ class ScriptParser {
             'past_withdrawal_count',
             'payment_type',
           ],
+          order: [
+            [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
+          ],
           include: [
             {
               model: Models.Member,
@@ -513,6 +519,17 @@ class ScriptParser {
               attributes: ['name', 'value'],
               required: false,
               where: { status: 1, member_id: user.id },
+            },
+            {
+              model: Models.WithdrawalRequest,
+              attributes: ['member_transaction_id'],
+              required: false,
+              where: { member_id: user.id },
+              include: {
+                model: Models.MemberTransaction,
+                attributes: ['completed_at'],
+                required: false,
+              },
             },
           ],
         };
