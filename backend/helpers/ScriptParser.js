@@ -487,6 +487,7 @@ class ScriptParser {
             'minimum_amount',
             'maximum_amount',
             'fixed_amount',
+            'type_user_info_again',
             'withdraw_redo_interval',
             'past_withdrawal_options',
             'past_withdrawal_count',

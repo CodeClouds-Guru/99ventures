@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      MemberNotification.belongsTo(models.Member, {
+        foreignKey: 'member_id',
+      });
     }
   }
   MemberNotification.init(
@@ -164,5 +167,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
-  return true;
+  return MemberNotification;
 };
