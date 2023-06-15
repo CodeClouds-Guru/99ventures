@@ -302,8 +302,8 @@ function List(props) {
 		if (module === 'users' && item.id == user.id) {
 			dispatch(showMessage({ variant: 'warning', message: 'You are not allowed to edit this user' }));
 			return '';
-		// } else if(module === 'pages') {
-		// 	props.navigate(`/app/paymentconfigurations/${item.id}`);
+			// } else if(module === 'pages') {
+			// 	props.navigate(`/app/paymentconfigurations/${item.id}`);
 		} else {
 			props.navigate(`/app/${module}/${item.id}`);
 		}
@@ -316,7 +316,7 @@ function List(props) {
 			return true;
 		}
 	}
- 
+
 	function handleCheck(event, id) {
 		const selectedIndex = selected.indexOf(id);
 		let newSelected = [];
@@ -385,7 +385,7 @@ function List(props) {
 				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
 			}
 			if (field.field_name === 'username') {
-				return <span style={{ color: '#4f46e5', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); window.location.href = `/app/members/${n.member_id}` }}>{n['username']}</span>
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['username']}</a>
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'pages' && field.field_name === 'auth_required') {
@@ -431,7 +431,7 @@ function List(props) {
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			}
 			if (field.field_name === 'Member.username') {
-				return <Link to={`/app/members/${n.member_id}`}>{n['Member.username']}</Link>
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['Member.username']}</a>
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'campaigns' || module === 'member-transactions') {
