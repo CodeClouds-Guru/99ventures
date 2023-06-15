@@ -3,7 +3,7 @@ import * as yup from 'yup';
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
@@ -13,6 +13,9 @@ import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig'
 import {Visibility, VisibilityOff, ExpandMore, CheckBox, CheckBoxOutlineBlank} from '@mui/icons-material';
 import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment } from '@mui/material';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import CircularProgress from '@mui/material/CircularProgress';
+import _ from '@lodash';
+
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
@@ -73,6 +76,12 @@ const CreateEditForm = () => {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [paymentData, setPaymentData] = useState([]);
     const [payload, setPayload] = useState([]);
+    const [memberSearchTxt, setMemberSearchTxt] = useState('');
+
+    const [open, setOpen] = useState(false);
+    const [autoCompleteLoading, setAutoCompleteLoading] = useState(false)
+    // const [options, setOptions] = useState([]);
+    // const autoCompleteLoading = open ;
 
     /**
      * Toggle type of Password & Signature fields
@@ -172,6 +181,7 @@ const CreateEditForm = () => {
 
     useEffect(() => {
         getPaymentData();
+        getMemberList({})
     }, []);
 
     const getPaymentData = async () => {
@@ -183,9 +193,9 @@ const CreateEditForm = () => {
                 if(results.country_list) {
                     setCountryList(results.country_list);
                 }
-                if(results.member_list){
+                /*if(results.member_list){
                     setMemberList(results.member_list);
-                }
+                }*/
                 const allowedCountry = results.country_list.filter(row => row.allowed_countries && row.allowed_countries.length !=0);
                 setSelectedCountry(allowedCountry);
 
@@ -226,6 +236,79 @@ const CreateEditForm = () => {
 
     const onConfirmAlertDialogHandle = () => {
         savePaymentDataToDB(payload);
+    }
+
+
+    const handleMemberSearch = (e) => {
+        debounceFn(e.target.value);
+    }
+
+    // useEffect(()=>{
+    //     console.log(memberSearchTxt)
+    //     if(memberSearchTxt != ''){
+    //         let extraParams = {
+    //             where: {
+    //                 "status":[],
+    //                 "filters":[
+    //                     // {"column":"first_name","match":"substring","search":memberSearchTxt},
+    //                     // {"column":"last_name","match":"substring","search":memberSearchTxt},
+    //                     {"column":"username","match":"substring","search":memberSearchTxt}
+    //                 ]
+    //             }
+    //         }
+    //         getMemberList(extraParams)
+    //     }
+    //     return () => {
+    //         debounceFn.cancel()
+    //     }
+    // }, [memberSearchTxt])
+
+    const debounceFn = useCallback(_.debounce((val) => {        
+        const check = memberList.some(row => (row.member_name.toLowerCase()).includes(val.toLowerCase()));
+        
+        if(!check){
+            setAutoCompleteLoading(true)
+		    // setMemberSearchTxt(val);
+            let extraParams = {
+                where: {
+                    "status":[],
+                    "filters":[
+                        // {"column":"first_name","match":"substring","search":memberSearchTxt},
+                        // {"column":"last_name","match":"substring","search":memberSearchTxt},
+                        {"column":"username","match":"substring","search":val}
+                    ]
+                }
+            }
+            getMemberList(extraParams)
+        }
+	}, 1000), [memberList]);
+
+    const getMemberList = (extraParams) => {
+        let params = {
+            search: '',
+            page: 1,
+            show: 10,
+            module: 'members',
+            where: {},
+            ...extraParams
+        };
+
+        axios.get(`/members`, {params})
+        .then(response => {
+            // console.log(response)
+            if(response.data.results.result) {
+                setAutoCompleteLoading(false);
+                const result = response.data.results.result.data;
+                const newList = _.uniqBy([...memberList, ...result], 'id').map(row => {
+                    return {
+                        ...row,
+                        member_name: row.first_name+' '+row.last_name
+                    }
+                });    
+                setMemberList(newList)
+            }
+        })
+        .catch(error => console.log(error))
     }
 
     return (
@@ -685,7 +768,7 @@ const CreateEditForm = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                         <div className='flex flex-col mx-auto w-1/2 justify-center p-16'>
-                            <Controller
+                            {/*<Controller
                                 name="member_list"
                                 control={control}
                                 render={({ field }) => (
@@ -714,6 +797,63 @@ const CreateEditForm = () => {
                                         )}
                                         renderInput={(params) => (
                                             <TextField {...params} label="Excluded Users" placeholder="Excluded Users" />
+                                        )}
+                                    />
+                                )}
+                            /> */}
+
+                            <Controller
+                                name="member_list"
+                                control={control}
+                                render={({ field }) => (
+                                    <Autocomplete
+                                        {...field}
+                                        value={ selectedMember }
+                                        id="asynchronous-demo"
+                                        multiple
+                                        disableCloseOnSelect
+                                        className="w-full mt-20"
+                                        open={open}
+                                        onOpen={() => {
+                                            setOpen(true);
+                                        }}
+                                        onClose={() => {
+                                            setOpen(false);
+                                        }}
+                                        options={memberList}
+                                        isOptionEqualToValue={(option, value) => option.member_name === value.member_name}
+                                        getOptionLabel={(option) => option.member_name}
+                                        loading={autoCompleteLoading}
+                                        onChange={(e, val)=>{
+                                            setSelectedMember(val);
+                                        }}
+                                        renderOption={(props, option, { selected }) => (
+                                            <li {...props} key={option.id}>
+                                                <Checkbox
+                                                    icon={icon}
+                                                    checkedIcon={checkedIcon}
+                                                    style={{ marginRight: 8 }}
+                                                    checked={selected}
+                                                />
+                                                {option.member_name} 
+                                            </li>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                onChange={ handleMemberSearch }
+                                                label="Excluded Users" 
+                                                placeholder="Type user's name"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                    <>
+                                                        {autoCompleteLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                        {params.InputProps.endAdornment}
+                                                    </>
+                                                    ),
+                                                }}
+                                            />
                                         )}
                                     />
                                 )}
