@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       member_id: DataTypes.BIGINT,
       survey_question_id: DataTypes.BIGINT,
-      precode_id: DataTypes.BIGINT,
+      survey_answer_precode_id: DataTypes.BIGINT,
       open_ended_value: DataTypes.STRING,
       text: DataTypes.TEXT,
       created_at: 'TIMESTAMP',
