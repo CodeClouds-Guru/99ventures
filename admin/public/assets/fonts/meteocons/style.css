@@ -32,3 +32,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+a.link,
+a:not([role=button])[target=_blank] {
+  color: #4f46e5 !important;
+  text-decoration: underline !important;
+  border-bottom: 0 !important;
+  background: transparent !important;
+}
