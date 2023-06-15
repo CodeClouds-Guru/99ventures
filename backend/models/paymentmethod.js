@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'member_id',
         timestamps: false,
       });
+      PaymentMethod.hasMany(models.MemberPaymentInformation, {
+        foreignKey: 'payment_method_id',
+        // as: "credentials",
+      });
     }
   }
   PaymentMethod.init(
@@ -46,7 +50,29 @@ module.exports = (sequelize, DataTypes) => {
       withdraw_redo_interval: DataTypes.FLOAT,
       status: DataTypes.TINYINT,
       same_account_options: DataTypes.STRING,
-      past_withdrawal_options: DataTypes.STRING,
+      past_withdrawal_options: {
+        type: DataTypes.STRING,
+        get() {
+          let options = this.getDataValue('past_withdrawal_options') || '';
+          if (options !== '') {
+            switch (options) {
+              case 'At least':
+                options = '>=';
+                break;
+              case 'At most':
+                options = '<=';
+                break;
+              case 'Exact':
+                options = '==';
+                break;
+              default:
+            }
+            return options;
+          } else return options;
+
+          // return this.getDataValue('description') || '';
+        },
+      },
       past_withdrawal_count: DataTypes.INTEGER,
       verified_options: DataTypes.STRING,
       upgrade_options: DataTypes.STRING,

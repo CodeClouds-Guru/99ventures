@@ -56,13 +56,13 @@ module.exports = (sequelize, DataTypes) => {
       return {
         member_id: data.member_id,
         payment_method_id: methods.id,
-        name: 'email',
+        name: data.payment_field_option,
         value: data.payment_email,
         created_by: data.member_id,
         status: 1,
       };
     });
-    console.log(payment_methods)
+    console.log(payment_methods);
     if (payment_methods.length > 0) {
       await MemberPaymentInformation.bulkCreate(payment_methods);
     }
