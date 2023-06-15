@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      MemberNotification.belongsTo(models.Member, {
+        foreignKey: 'member_id',
+      });
     }
   }
   MemberNotification.init(
@@ -121,10 +124,7 @@ module.exports = (sequelize, DataTypes) => {
       //   break;
       case 'member_withdrawal':
         notification_verbose =
-          'Withdrawal amount of $' +
-          amount +
-          ' has been added to your wallet on ' +
-          updated_on;
+          'Successful withdrawal of $' + amount + ' on ' + updated_on;
         notification_action = 'member_withdrawal';
         break;
       // case 'reversed_transaction':
@@ -157,13 +157,14 @@ module.exports = (sequelize, DataTypes) => {
       default:
       //
     }
-
-    let notification = await MemberNotification.create({
-      member_id: data.member_id,
-      verbose: notification_verbose,
-      action: notification_action,
-      is_read: 0,
-    });
+    if (notification_action !== '') {
+      let notification = await MemberNotification.create({
+        member_id: data.member_id,
+        verbose: notification_verbose,
+        action: notification_action,
+        is_read: 0,
+      });
+    }
   };
 
   return MemberNotification;

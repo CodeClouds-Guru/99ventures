@@ -1,6 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Box, Tooltip } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Tooltip, FormGroup, FormControlLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,14 +10,13 @@ import ListHead from './ListHead';
 import moment from 'moment';
 import axios from "axios"
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
-import { column, match } from 'stylis';
-import { object } from 'prop-types';
+import { downloadFile } from '../../filemanager/helper';
 
 function Listing(props) {
     const dispatch = useDispatch();
@@ -50,7 +49,35 @@ function Listing(props) {
     // const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
     const [applyBtnSts, setApplyBtnSts] = useState(true);
     const [addBtnSts, setAddBtnSts] = useState(true);
+    const [listConfigDialog, setListConfigDialog] = useState(false);
+    const [displayColumnArray, setDisplayColumnArray] = useState(['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at']);
 
+    const display_column_object = {
+        "id": "ID",
+        "username": "Username",
+        "first_name": "First name",
+        "last_name": "Last Name",
+        "created_at": "Join date",
+        "last_active_on": "Last active date",
+        "member_referral_id": "Referral ",
+        "email": "Registration email ",
+        "MemberPaymentInformation.email": "Payment emails",
+        "IpLogs.ip": "Current IP",
+        "IpLogs.geo_location": "Geo location",
+        "IpLogs.isp": "Geo ISP",
+        "IpLogs.browser": "Browser",
+        "IpLogs.browser_language": "Browser Language",
+        "status": "Status",
+        "MembershipTiers.name": "Membership level",
+        "address": "Address",
+        "phone_no": "Telephone",
+        "a": "Email marketing opt in",
+        "MemberTransactions.amount": "Current Balance",
+        "b": "Total Earnings",
+        "c": "Withdrawal - total paid ",
+        "d": "Withdrawal - last cash out (date)",
+        "admin_status": "Verified/unverified",
+    }
     const column_object = {
         'address_1': 'Billing Street Address',
         '$IpLogs.browser$': 'Browser',
@@ -93,7 +120,8 @@ function Listing(props) {
             page: page + 1,
             show: rowsPerPage,
             module: module,
-            where
+            where,
+            fields: displayColumnArray
         }
         /* order is added if it's not the very first call os API listing */
         if (!firstCall) {
@@ -114,6 +142,10 @@ function Listing(props) {
             }
             dispatch(showMessage({ variant: 'error', message }));
         })
+    }
+
+    const handleConfigurColumn = (e) => {
+        e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
     }
 
     const exportAll = () => {
@@ -358,7 +390,10 @@ function Listing(props) {
         setFilterActive(true);
         setOpenAlertDialog(false);
     }
-
+    const modifyList = () => {
+        fetchModules();
+        setListConfigDialog(false);
+    }
 
     return (
         <div>
@@ -379,14 +414,39 @@ function Listing(props) {
                         className=""
                         variant="contained"
                         color="secondary"
-                        startIcon={<FuseSvgIcon>heroicons-outline:upload</FuseSvgIcon>}
-                        onClick={(e) => { e.preventDefault(); exportAll(); }}
+                        startIcon={<FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>}
+                        onClick={(e) => { e.preventDefault(); setListConfigDialog(true) }}
                     >
-                        Export all
+                        Configure
                     </Button>
                     <Button variant="outlined" startIcon={<SearchIcon />} onClick={() => setOpenAlertDialog(true)}>
                         Search
                     </Button>
+                    <Dialog
+                        open={listConfigDialog}
+                        onClose={() => { setListConfigDialog(false) }}
+                        disableEscapeKeyDown
+                        aria-labelledby="scroll-dialog-title"
+                        aria-describedby="scroll-dialog-description"
+                        fullWidth
+                        maxWidth="md"
+                    >
+                        <DialogTitle id="scroll-dialog-title">Select Fields</DialogTitle>
+                        <DialogContent>
+                            <div className="flex flex-wrap w-full justify-between my-10">
+                                {Object.keys(display_column_object).map((val, index) => {
+                                    return (
+                                        <FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
+                                    )
+                                })
+                                }
+                            </div>
+                        </DialogContent>
+                        <DialogActions className="mx-16 mb-16">
+                            <Button variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</Button>
+                            <Button variant="contained" color="primary" disabled={applyBtnSts} onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</Button>
+                        </DialogActions>
+                    </Dialog>
                     <Dialog
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}

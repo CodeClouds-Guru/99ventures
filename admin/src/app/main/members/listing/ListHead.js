@@ -168,14 +168,14 @@ function ListHead(props) {
                                             </ListItemIcon>
                                             <ListItemText primary="Change Status" />
                                         </MenuItem>
-                                        <MenuItem
+                                        {/* <MenuItem
                                             onClick={(e) => { e.preventDefault(); props.exportSelected(selectedOrderIds); }}
                                         >
                                             <ListItemIcon className="min-w-40">
                                                 <FuseSvgIcon>heroicons-outline:upload</FuseSvgIcon>
                                             </ListItemIcon>
                                             <ListItemText primary="Export" />
-                                        </MenuItem>
+                                        </MenuItem> */}
                                     </MenuList>
                                 </Menu>
                                 <AlertDialog
