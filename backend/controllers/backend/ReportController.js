@@ -20,25 +20,26 @@ class ReportController{
   //override the edit function
   async getReport(req, res) {
     let type = req.query.type
-    var start_date = req.query.from
-    var end_date = req.query.to
+    var start_date = new Date(req.query.from)
+    var end_date = new Date(req.query.to)
     let company_portal_id = req.headers.site_id
-    if(start_date){
-      start_date = new Date(start_date+' 00:00:00')
-    }else{
-      start_date = moment().subtract(30, 'days').toISOString()
-    }
-    if(end_date){
-      end_date = new Date(end_date+' 23:59:59')
-    }else{
-      end_date = moment().toISOString()
-    }
+    // if(start_date){
+    //   start_date = new Date(start_date+' 00:00:00')
+    // }else{
+    //   start_date = moment().subtract(30, 'days').toISOString()
+    // }
+    // if(end_date){
+    //   end_date = new Date(end_date+' 23:59:59')
+    // }else{
+    //   end_date = moment().toISOString()
+    // }
     let d_time = Math.abs(end_date - start_date);
     let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24)); 
     console.log(total_days)
     var query_string = "DATE"
     if(total_days > 15 && total_days <= 31){
-      query_string = "DATE"
+      query_string = "WEEK"
+      
     }else if(total_days > 31 && total_days <= 365){
       query_string = "MONTH"
     }else if(total_days > 365){
@@ -122,7 +123,6 @@ class ReportController{
   async openVsClosedTickets(start_date,end_date,company_portal_id,query_string,total_days){
     
     let query = 'SELECT '+query_string+'(created_at) as day, YEAR(created_at) as year,status, COUNT(*) as count FROM tickets WHERE company_portal_id = ? AND created_at BETWEEN ? AND ? GROUP BY status,day,year ORDER BY day,year'
-
     let tickets = await db.sequelize.query(query,
       {
         replacements: [company_portal_id,start_date,end_date],
@@ -306,6 +306,9 @@ class ReportController{
     }else if(query_string === 'MONTH'){
       let month_str = monthNames[i.day - 1]+','+(''+i.year).substr(2)
       arr_index = days_arr.indexOf(month_str);
+    }else if(query_string === 'WEEK'){
+      let start_week = moment(start_date).week();
+      arr_index = i.day - start_week
     }
     else if(query_string === 'YEAR'){
       arr_index = days_arr.indexOf(i.day);
@@ -335,7 +338,7 @@ class ReportController{
         dt.setDate(dt.getDate() + 1);
       }
     }else if(query_string === 'WEEK'){
-      let total_weeks = ceil(total_days/7)
+      let total_weeks = Math.ceil(total_days/7)
       for(let i = 1; i <= total_weeks; i++){
         names.push('Week '+i)
         values.push(0)

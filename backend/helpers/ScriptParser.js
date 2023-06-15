@@ -185,19 +185,17 @@ class ScriptParser {
             };
 
             const condition = this.getModuleWhere(script.module, user);
-            if (other_details.transaction_count < 5) {
-              condition.where = {
-                ...condition.where,
-                slug: {
-                  [Op.notLike]: 'instant_paypal',
-                },
-              };
-            }
+            // if (other_details.transaction_count < 5) {
+            //   condition.where = {
+            //     ...condition.where,
+            //     slug: {
+            //       [Op.notLike]: 'instant_paypal',
+            //     },
+            //   };
+            // }
 
-            data = await Models[script.module].findAll({
-              ...condition,
-            });
-
+            data = await Models[script.module].findAll(condition);
+            console.log(JSON.parse(JSON.stringify(data)));
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -451,6 +449,10 @@ class ScriptParser {
       case 'Member':
         return {
           where: { id: user.id },
+          include: {
+            model: Models.MembershipTier,
+            attributes: ['name'],
+          },
         };
       case 'Shoutbox':
         return {
@@ -462,37 +464,57 @@ class ScriptParser {
           include: {
             model: Models.Member,
             // as: 'member_referrer',
-            include:{
+            include: {
               model: Models.MemberActivityLog,
-              attributes:['created_at'],
+              attributes: ['created_at'],
               limit: 1,
               order: [['created_at', 'DESC']],
-            }
+            },
           },
-          where:{
-            member_id:user.id
-          }
+          where: {
+            member_id: user.id,
+          },
         };
-      case 'WithdrawalType':
+      case 'PaymentMethod':
         return {
           attributes: [
             'name',
             'slug',
-            'payment_method_id',
-            'logo',
-            'min_amount',
-            'max_amount',
             'id',
+            'image_url',
+            'type_user_info_again',
+            'payment_field_options',
+            'minimum_amount',
+            'maximum_amount',
+            'fixed_amount',
+            'type_user_info_again',
+            'withdraw_redo_interval',
+            'past_withdrawal_options',
+            'past_withdrawal_count',
+            'payment_type',
           ],
-          include: {
-            model: Models.PaymentMethod,
-            attributes: ['name'],
-            include: {
-              model: Models.MemberPaymentInformation,
-              attributes: ['value'],
-              where: { name: 'email', status: 1, member_id: user.id },
+          include: [
+            {
+              model: Models.Member,
+              as: 'excluded_members',
+              attributes: ['id'],
+              required: false,
+              where: { id: user.id },
             },
-          },
+            {
+              model: Models.Country,
+              as: 'allowed_countries',
+              where: { id: user.country_id },
+              required: false,
+              attributes: ['id'],
+            },
+            {
+              model: Models.MemberPaymentInformation,
+              attributes: ['name', 'value'],
+              required: false,
+              where: { status: 1, member_id: user.id },
+            },
+          ],
         };
       case 'TicketConversation':
         return {
