@@ -15,7 +15,6 @@ const {
   PaymentMethod,
   MemberPaymentInformation,
   WithdrawalRequest,
-  WithdrawalType,
   CompanyPortal,
   Company,
   User,
