@@ -56,7 +56,17 @@ class PaymentConfigurationController extends Controller {
   //override edit function
   async edit(req, res) {
     const site_id = req.header('site_id');
-    let response = await super.edit(req);
+    let response = {};
+    response.result = await this.model.findOne({
+      where: { id: req.params.id },
+      include: {
+        model: Member,
+        as: 'excluded_members',
+        required: false,
+        attributes: ['id', 'username'],
+      },
+    });
+    response.fields = this.model.fields;
     let country_list = await Country.findAll({
       attributes: ['id', ['nicename', 'name'], 'phonecode'],
       include: {
@@ -68,29 +78,29 @@ class PaymentConfigurationController extends Controller {
       },
     });
 
-    let member_list = await Member.findAll({
-      attributes: [
-        'id',
-        [
-          sequelize.fn(
-            'concat',
-            sequelize.col('first_name'),
-            ' ',
-            sequelize.col('last_name')
-          ),
-          'member_name',
-        ],
-        'username',
-      ],
-      where: { company_portal_id: site_id, status: 'member' },
-      include: {
-        model: PaymentMethod,
-        as: 'excluded_members',
-        where: { id: req.params.id },
-        required: false,
-        attributes: ['id'],
-      },
-    });
+    // let member_list = await Member.findAll({
+    //   attributes: [
+    //     'id',
+    //     [
+    //       sequelize.fn(
+    //         'concat',
+    //         sequelize.col('first_name'),
+    //         ' ',
+    //         sequelize.col('last_name')
+    //       ),
+    //       'member_name',
+    //     ],
+    //     'username',
+    //   ],
+    //   where: { company_portal_id: site_id, status: 'member' },
+    //   include: {
+    //     model: PaymentMethod,
+    //     as: 'excluded_members',
+    //     where: { id: req.params.id },
+    //     required: false,
+    //     attributes: ['id'],
+    //   },
+    // });
 
     // console.log(resul/t);
     return {
@@ -99,7 +109,7 @@ class PaymentConfigurationController extends Controller {
       fields: response.fields,
       data: {
         country_list,
-        member_list,
+        // member_list,
       },
     };
     // return response;

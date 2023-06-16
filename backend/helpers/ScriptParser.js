@@ -64,7 +64,7 @@ class ScriptParser {
                   ...where.where,
                   ...param_where,
                 };
-              // console.log(param_where);
+              // console.log(where);
               data = await Models[script.module].findAll({
                 subQuery: false,
                 order: [[Sequelize.literal(orderBy), order]],
@@ -199,7 +199,7 @@ class ScriptParser {
 
               data[key].setDataValue('redo_diff', hours);
             });
-            // console.log(JSON.parse(JSON.stringify(data)));
+
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -224,6 +224,7 @@ class ScriptParser {
         }
       }
     }
+    // console.log('===================', JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -432,7 +433,7 @@ class ScriptParser {
             {
               model: Models.WithdrawalRequest,
               include: {
-                model: Models.WithdrawalType,
+                model: Models.PaymentMethod,
               },
             },
           ],
@@ -495,25 +496,41 @@ class ScriptParser {
             'past_withdrawal_options',
             'past_withdrawal_count',
             'payment_type',
+            [
+              sequelize.literal(
+                `(select count(*) from excluded_member_payment_method where payment_method_id = PaymentMethod.id and member_id = ` +
+                  user.id +
+                  `)`
+              ),
+              'disallowed',
+            ],
+            [
+              sequelize.literal(
+                `(select count(*) from allowed_country_payment_method where payment_method_id = PaymentMethod.id and country_id = ` +
+                  user.country_id +
+                  `)`
+              ),
+              'allowed_country',
+            ],
           ],
           order: [
             [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
           ],
           include: [
-            {
-              model: Models.Member,
-              as: 'excluded_members',
-              attributes: ['id'],
-              required: false,
-              where: { id: user.id },
-            },
-            {
-              model: Models.Country,
-              as: 'allowed_countries',
-              where: { id: user.country_id },
-              required: false,
-              attributes: ['id'],
-            },
+            // {
+            //   model: Models.Member,
+            //   as: 'excluded_members',
+            //   attributes: ['id'],
+            //   required: false,
+            //   where: { id: user.id },
+            // },
+            // {
+            //   model: Models.Country,
+            //   as: 'allowed_countries',
+            //   where: { id: user.country_id },
+            //   required: false,
+            //   attributes: ['id'],
+            // },
             {
               model: Models.MemberPaymentInformation,
               attributes: ['name', 'value'],
@@ -560,8 +577,8 @@ class ScriptParser {
           where: { member_id: user.id },
           include: [
             {
-              model: Models.WithdrawalType,
-              attributes: ['logo', 'name'],
+              model: Models.PaymentMethod,
+              attributes: ['image_url', 'name'],
             },
             {
               model: Models.MemberTransaction,

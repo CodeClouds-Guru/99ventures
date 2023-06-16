@@ -382,9 +382,6 @@ class MemberController extends Controller {
         query_where.status.length > 0 && {
           status: { [Op.in]: query_where.status },
         }),
-      ...(req.query.search !== '' && {
-        username: { [Op.substring]: req.query.search },
-      }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
