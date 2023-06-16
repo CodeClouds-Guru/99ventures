@@ -264,6 +264,7 @@ const MemberDetails = () => {
                         setEditStatus(false);
                         setDialogStatus(false);
                         setStatusNote('');
+                        setStatuslessNote(false);
                     } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
@@ -326,7 +327,6 @@ const MemberDetails = () => {
      * Change member's status
      */
     const handleChangeStatus = (type) => {
-        setStatuslessNote(false);
         const params = {
             value: status,
             field_name: "status",
