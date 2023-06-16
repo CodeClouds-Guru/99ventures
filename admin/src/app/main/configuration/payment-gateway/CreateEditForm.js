@@ -1,20 +1,19 @@
+import _ from '@lodash';
 import axios from 'axios';
 import * as yup from 'yup';
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
-import { useState, useEffect, useCallback, useMemo } from 'react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
+import { useState, useEffect, useCallback } from 'react';
 import { showMessage } from 'app/store/fuse/messageSlice';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import AlertDialog from 'app/shared-components/AlertDialog';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import {Visibility, VisibilityOff, ExpandMore, CheckBox, CheckBoxOutlineBlank} from '@mui/icons-material';
-import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment } from '@mui/material';
-import AlertDialog from 'app/shared-components/AlertDialog';
-import CircularProgress from '@mui/material/CircularProgress';
-import _ from '@lodash';
+import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment, CircularProgress } from '@mui/material';
 
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
@@ -34,11 +33,11 @@ const defaultValues = {
     payment_field_options: 'Email',
     maximum_amount: 0,
     withdraw_redo_interval: 0,
-    same_account_options: 'Mark as cheater',
+    // same_account_options: 'Mark as cheater',
     past_withdrawal_options: 'At least',
     past_withdrawal_count: 0,
-    verified_options: 'Both',
-    upgrade_options: '',
+    // verified_options: 'Both',
+    // upgrade_options: '',
     fee_percent: 0,
     api_username: '',
     api_password: '',
@@ -65,23 +64,21 @@ const CreateEditForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { moduleId } = useParams();
-    const [expanded, setExpanded] = useState(true);
-    const [countryList, setCountryList] = useState([]);
-    const [memberList, setMemberList] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedCountry, setSelectedCountry] = useState([]);
-    const [selectedMember, setSelectedMember] = useState([]);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showSignature, setShowSignature] = useState(false);
-    const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const [paymentData, setPaymentData] = useState([]);
-    const [payload, setPayload] = useState([]);
-    const [memberSearchTxt, setMemberSearchTxt] = useState('');
-
+    
     const [open, setOpen] = useState(false);
-    const [autoCompleteLoading, setAutoCompleteLoading] = useState(false)
-    // const [options, setOptions] = useState([]);
-    // const autoCompleteLoading = open ;
+    const [payload, setPayload] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [expanded, setExpanded] = useState(true);
+    const [memberList, setMemberList] = useState([]);
+    const [countryList, setCountryList] = useState([]);
+    const [paymentData, setPaymentData] = useState([]);
+    const [showPassword, setShowPassword] = useState(false);
+    const [selectedMember, setSelectedMember] = useState([]);
+    const [showSignature, setShowSignature] = useState(false);
+    const [memberSearchTxt, setMemberSearchTxt] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState([]);
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
 
     /**
      * Toggle type of Password & Signature fields
@@ -181,7 +178,6 @@ const CreateEditForm = () => {
 
     useEffect(() => {
         getPaymentData();
-        getMemberList({})
     }, []);
 
     const getPaymentData = async () => {
@@ -189,27 +185,24 @@ const CreateEditForm = () => {
         axios.get(url)
         .then(response => {
             if(response.data.results.status && response.data.results.data) {
-                const results = response.data.results.data;
+                const results = response.data.results.data;                
                 if(results.country_list) {
                     setCountryList(results.country_list);
-                }
-                /*if(results.member_list){
-                    setMemberList(results.member_list);
-                }*/
-                const allowedCountry = results.country_list.filter(row => row.allowed_countries && row.allowed_countries.length !=0);
-                setSelectedCountry(allowedCountry);
-
-                const excludedMember = results.member_list.filter(row => row.excluded_members && row.excluded_members.length !=0);
-                setSelectedMember(excludedMember);
+                }                
             }
             if(response.data.results.result) {
                 const result = response.data.results.result;    
-                setPaymentData(result);            
+                setPaymentData(result);
+                setSelectedMember(result.excluded_members);
+                setSelectedCountry(result.allowed_countries);
+
                 Object.keys(defaultValues).forEach((key, indx) => {
-                    if(key == 'name' || key == 'payment_field_options')     // This two fields added in the validation rule. That's why shouldDirty should be false
+                    if(key == 'name' || key == 'payment_field_options') {    // This two fields added in the validation rule. That's why shouldDirty should be false
                         setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: false, shouldValidate: true });
-                    else 
+                    }
+                    else if(!['member_list', 'country_list'].includes(key)) {
                         setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: !false, shouldValidate: true });
+                    }
                 });
                 
                 if(result.minimum_amount > 0){
@@ -243,70 +236,79 @@ const CreateEditForm = () => {
         debounceFn(e.target.value);
     }
 
-    // useEffect(()=>{
-    //     console.log(memberSearchTxt)
-    //     if(memberSearchTxt != ''){
-    //         let extraParams = {
-    //             where: {
-    //                 "status":[],
-    //                 "filters":[
-    //                     // {"column":"first_name","match":"substring","search":memberSearchTxt},
-    //                     // {"column":"last_name","match":"substring","search":memberSearchTxt},
-    //                     {"column":"username","match":"substring","search":memberSearchTxt}
-    //                 ]
-    //             }
-    //         }
-    //         getMemberList(extraParams)
-    //     }
-    //     return () => {
-    //         debounceFn.cancel()
-    //     }
-    // }, [memberSearchTxt])
+    useEffect(()=>{
+        var clause = {};
+        if(  // This block would work only on EDIT mode & initial Click on member list dropdown
+            memberList.length === 0 && 
+            !isNaN(moduleId) && 
+            ('excluded_members' in paymentData) && 
+            paymentData.excluded_members.length
+        ){
+            const selectedIds = paymentData.excluded_members.map(r => r.id);
+            clause = {
+                "filters":[
+                    {"column": "id","match": "notIn","search": selectedIds}
+                ]
+            }
+            setAutoCompleteLoading(true);
+            getMemberList(clause);
+        }
+        else if(  // This block would work only on ADD mode & initial Click on member list dropdown
+            memberSearchTxt === '' && 
+            open &&
+            memberList.length === 0 
+        ){
+            setAutoCompleteLoading(true);
+            getMemberList(clause);
+        }
+        // This block would work when SEARCH get active in both ADD | EDIT mode
+        else if(memberSearchTxt != ''){
+            clause = {
+                "filters":[
+                    {"column": "username","match": "substring","search": memberSearchTxt}
+                ]
+            }
+            setAutoCompleteLoading(true);
+            getMemberList(clause);
+        }
+        
+        return () => {
+            setMemberSearchTxt('');
+        }
+    }, [memberSearchTxt, open])
 
     const debounceFn = useCallback(_.debounce((val) => {        
-        const check = memberList.some(row => (row.member_name.toLowerCase()).includes(val.toLowerCase()));
-        
+        const check = memberList.some(row => (row.username.toLowerCase()).includes(val.toLowerCase()));
+        // If the search item not listed in the dropdown then Server Side Search get active
         if(!check){
-            setAutoCompleteLoading(true)
-		    // setMemberSearchTxt(val);
-            let extraParams = {
-                where: {
-                    "status":[],
-                    "filters":[
-                        // {"column":"first_name","match":"substring","search":memberSearchTxt},
-                        // {"column":"last_name","match":"substring","search":memberSearchTxt},
-                        {"column":"username","match":"substring","search":val}
-                    ]
-                }
-            }
-            getMemberList(extraParams)
+		    setMemberSearchTxt(val);
         }
 	}, 1000), [memberList]);
 
-    const getMemberList = (extraParams) => {
+    const getMemberList = (clause) => {
         let params = {
             search: '',
             page: 1,
-            show: 10,
+            show: 5,
             module: 'members',
-            where: {},
-            ...extraParams
+            where: {
+                "status":[],
+                ...clause
+            }
         };
 
         axios.get(`/members`, {params})
         .then(response => {
-            // console.log(response)
             if(response.data.results.result) {
-                setAutoCompleteLoading(false);
                 const result = response.data.results.result.data;
-                const newList = _.uniqBy([...memberList, ...result], 'id').map(row => {
+                const newList = _.uniqBy([...memberList, ...selectedMember, ...result], 'id').map(row => {
                     return {
-                        ...row,
-                        member_name: row.first_name+' '+row.last_name
-                    }
-                });    
-                setMemberList(newList)
+                        ...row
+                    };
+                });
+                setMemberList(newList);
             }
+            setAutoCompleteLoading(false);
         })
         .catch(error => console.log(error))
     }
@@ -472,7 +474,8 @@ const CreateEditForm = () => {
                         </div>
                     </AccordionDetails>
                 </Accordion>
-                <Accordion>
+
+                {/* <Accordion>
                     <AccordionSummary
                     expandIcon={<ExpandMore />}
                     aria-controls="panel2a-content"
@@ -503,7 +506,8 @@ const CreateEditForm = () => {
                             />
                         </div>
                     </AccordionDetails>
-                </Accordion>
+                </Accordion> */}
+
                 <Accordion>
                     <AccordionSummary
                         expandIcon={<ExpandMore />}
@@ -633,6 +637,7 @@ const CreateEditForm = () => {
                                         id="checkboxes-country"
                                         options={ countryList } 
                                         disableCloseOnSelect
+                                        isOptionEqualToValue={(option, value) => option.name === value.name}
                                         getOptionLabel={(option) => option.name}
                                         value={selectedCountry}
                                         onChange={(e, val)=>{
@@ -670,7 +675,7 @@ const CreateEditForm = () => {
                                 )}
                             />
                             
-                            <Controller
+                            {/* <Controller
                                 name="verified_options"
                                 control={control}
                                 render={({ field }) => (
@@ -693,7 +698,7 @@ const CreateEditForm = () => {
                                         </MenuItem>
                                     </TextField>
                                 )}
-                            />
+                            /> 
                             <Controller
                                 name="upgrade_options"
                                 control={control}
@@ -711,7 +716,7 @@ const CreateEditForm = () => {
                                         </MenuItem>
                                     </TextField>
                                 )}
-                            />
+                            />*/}
 
                             <FormGroup aria-label="position" row className="w-full mt-20">
                                 <Controller
@@ -821,8 +826,8 @@ const CreateEditForm = () => {
                                             setOpen(false);
                                         }}
                                         options={memberList}
-                                        isOptionEqualToValue={(option, value) => option.member_name === value.member_name}
-                                        getOptionLabel={(option) => option.member_name}
+                                        isOptionEqualToValue={(option, value) => option.username === value.username}
+                                        getOptionLabel={(option) => option.username}
                                         loading={autoCompleteLoading}
                                         onChange={(e, val)=>{
                                             setSelectedMember(val);
@@ -835,7 +840,7 @@ const CreateEditForm = () => {
                                                     style={{ marginRight: 8 }}
                                                     checked={selected}
                                                 />
-                                                {option.member_name} 
+                                                {option.username} - {option.email}
                                             </li>
                                         )}
                                         renderInput={(params) => (
@@ -847,12 +852,13 @@ const CreateEditForm = () => {
                                                 InputProps={{
                                                     ...params.InputProps,
                                                     endAdornment: (
-                                                    <>
-                                                        {autoCompleteLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                        {params.InputProps.endAdornment}
-                                                    </>
+                                                        <>
+                                                            {autoCompleteLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                            {params.InputProps.endAdornment}
+                                                        </>
                                                     ),
                                                 }}
+                                                helperText={`Total no. of excluded users is ${selectedMember.length}`}
                                             />
                                         )}
                                     />
