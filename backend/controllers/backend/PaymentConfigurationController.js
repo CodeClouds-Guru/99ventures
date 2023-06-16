@@ -26,30 +26,16 @@ class PaymentConfigurationController extends Controller {
   async add(req, res) {
     let response = await super.add(req);
     let fields = response.fields;
-    let country_list = await Country.getAllCountryList();
-
-    let member_list = await Member.findAll({
-      attributes: [
-        'id',
-        [
-          sequelize.fn(
-            'concat',
-            sequelize.col('first_name'),
-            ' ',
-            sequelize.col('last_name')
-          ),
-          'member_name',
-        ],
-        'username',
-      ],
-      where: { company_portal_id: req.headers.site_id, status: 'member' },
+    let country_list = await Country.findAll({
+      attributes: ['id', ['nicename', 'name'], 'phonecode', 'iso3'],
     });
+
     return {
       status: true,
       fields,
       data: {
         country_list,
-        member_list,
+        // member_list,
       },
     };
   }
@@ -59,50 +45,26 @@ class PaymentConfigurationController extends Controller {
     let response = {};
     response.result = await this.model.findOne({
       where: { id: req.params.id },
-      include: {
-        model: Member,
-        as: 'excluded_members',
-        required: false,
-        attributes: ['id', 'username'],
-      },
+      include: [
+        {
+          model: Member,
+          as: 'excluded_members',
+          required: false,
+          attributes: ['id', 'username'],
+        },
+        {
+          model: Country,
+          as: 'allowed_countries',
+          required: false,
+          attributes: ['id', ['nicename', 'name'], 'phonecode', 'iso3'],
+        },
+      ],
     });
     response.fields = this.model.fields;
     let country_list = await Country.findAll({
-      attributes: ['id', ['nicename', 'name'], 'phonecode'],
-      include: {
-        model: PaymentMethod,
-        as: 'allowed_countries',
-        where: { id: req.params.id },
-        required: false,
-        attributes: ['id'],
-      },
+      attributes: ['id', ['nicename', 'name'], 'phonecode', 'iso3'],
     });
 
-    // let member_list = await Member.findAll({
-    //   attributes: [
-    //     'id',
-    //     [
-    //       sequelize.fn(
-    //         'concat',
-    //         sequelize.col('first_name'),
-    //         ' ',
-    //         sequelize.col('last_name')
-    //       ),
-    //       'member_name',
-    //     ],
-    //     'username',
-    //   ],
-    //   where: { company_portal_id: site_id, status: 'member' },
-    //   include: {
-    //     model: PaymentMethod,
-    //     as: 'excluded_members',
-    //     where: { id: req.params.id },
-    //     required: false,
-    //     attributes: ['id'],
-    //   },
-    // });
-
-    // console.log(resul/t);
     return {
       status: true,
       result: response.result,
