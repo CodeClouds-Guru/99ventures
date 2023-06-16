@@ -15,7 +15,6 @@ const {
   PaymentMethod,
   MemberPaymentInformation,
   WithdrawalRequest,
-  WithdrawalType,
   CompanyPortal,
   Company,
   User,
@@ -526,10 +525,10 @@ class MemberAuthController {
     let questions = await SurveyQuestion.findAll({
       where: { name: nmae_list },
     });
-    
+
     if (questions.length) {
       // questions.forEach(async function (record, key) {
-      for(let record of questions) {
+      for (let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
           switch (record.name) {
@@ -541,15 +540,13 @@ class MemberAuthController {
                 } else if (member_details.gender == 'female') {
                   precode = 2;
                 }
-              }
-              else if (record.survey_provider_id == 3) {
+              } else if (record.survey_provider_id == 3) {
                 if (member_details.gender == 'male') {
                   precode = 111;
                 } else if (member_details.gender == 'female') {
                   precode = 112;
                 }
-              }
-              else if (record.survey_provider_id == 4) {
+              } else if (record.survey_provider_id == 4) {
                 if (member_details.gender == 'male') {
                   precode = 58;
                 } else if (member_details.gender == 'female') {
@@ -569,32 +566,32 @@ class MemberAuthController {
                 precode = new Date(new Date() - dob).getFullYear() - 1970;
               }
               break;
-              case 'STATE':
-                if(member_details.state)
-                  precode = member_details.state
-                break;
-              
+            case 'STATE':
+              if (member_details.state) precode = member_details.state;
+              break;
           }
           if (precode) {
-            let precode_id = ''
-            let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({where:{
-              precode:record.survey_provider_question_id,
-              survey_provider_id: record.survey_provider_id,
-              option:precode
-            }})
-            if(survey_answer_precodes){
-              precode_id = survey_answer_precodes.id
-              precode = ''
+            let precode_id = '';
+            let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
+              where: {
+                precode: record.survey_provider_question_id,
+                survey_provider_id: record.survey_provider_id,
+                option: precode,
+              },
+            });
+            if (survey_answer_precodes) {
+              precode_id = survey_answer_precodes.id;
+              precode = '';
             }
             member_eligibility.push({
               member_id: member_id,
               survey_question_id: record.id,
               survey_answer_precode_id: precode_id,
-              open_ended_value: precode
+              open_ended_value: precode,
             });
           }
         }
-      }//
+      } //
       await MemberEligibilities.destroy({
         where: { member_id: member_id },
         force: true,
@@ -807,12 +804,7 @@ class MemberAuthController {
         member_message: 'Please check your balance',
       };
     }
-    var ip = req.ip;
-    if (Array.isArray(ip)) {
-      ip = ip[0];
-    } else {
-      ip = ip.replace('::ffff:', '');
-    }
+
     if (request_data.payment_field === '') {
       return {
         member_status: false,
@@ -836,12 +828,37 @@ class MemberAuthController {
       };
     }
 
+    let check_same_acc = await WithdrawalRequest.findOne({
+      where: {
+        payment_email: request_data.payment_field,
+        member_id: { [Op.ne]: request_data.member_id },
+      },
+    });
+
+    if (check_same_acc) {
+      return {
+        member_status: false,
+        member_message:
+          'This payment ' +
+          payment_method_details.payment_field_options.toLowerCase() +
+          ' has already been used, please reach out to admin',
+      };
+    }
+
     await MemberPaymentInformation.updatePaymentInformation({
       member_id: request_data.member_id,
       payment_email: request_data.payment_field,
       payment_field_option:
         payment_method_details.payment_field_options.toLowerCase(),
     });
+
+    var ip = req.ip;
+    if (Array.isArray(ip)) {
+      ip = ip[0];
+    } else {
+      ip = ip.replace('::ffff:', '');
+    }
+
     let withdrawal_req_data = {
       member_id: request_data.member_id,
       amount: withdrawal_amount,

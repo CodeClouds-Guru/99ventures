@@ -208,7 +208,7 @@ class MemberController extends Controller {
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
-          let admin_status = result.admin_status.replaceAll(' ', '_')
+          let admin_status = result.admin_status.replaceAll(' ', '_');
 
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
@@ -318,8 +318,7 @@ class MemberController extends Controller {
       } else if (req.body.type == 'member_status') {
         result = await this.model.changeStatus(req);
         delete req.body.type;
-      }
-      else if (req.body.type == 'admin_status') {
+      } else if (req.body.type == 'admin_status') {
         result = await this.model.changeAdminStatus(req);
         delete req.body.type;
       } else if (req.body.type == 'admin_adjustment') {
@@ -381,8 +380,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
     let roles = req.user.roles.map((role) => {
       if (role.id == 1) return role.id;
@@ -441,7 +440,6 @@ class MemberController extends Controller {
       fields: fields,
     };
   }
-
 
   async export(req, res) {
     let data = await this.list(req);
@@ -512,7 +510,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -568,12 +566,11 @@ class MemberController extends Controller {
     };
   }
 
-
   async delete(req, res) {
     var resp = {
       status: true,
-      message: 'Action executed successfully'
-    }
+      message: 'Action executed successfully',
+    };
     try {
       switch (req.body.module) {
         case 'member_notes':
@@ -583,12 +580,12 @@ class MemberController extends Controller {
           break;
       }
     } catch (e) {
-      console.error(e)
+      console.error(e);
       resp = {
         status: false,
         message: 'Oops! Something went wrong',
-        error: e
-      }
+        error: e,
+      };
     } finally {
       return resp;
     }

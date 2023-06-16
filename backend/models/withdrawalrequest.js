@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       // WithdrawalRequest.hasOne(models.WithdrawalType, {
       //   foreignKey: 'id',
       // });
-      WithdrawalRequest.belongsTo(models.WithdrawalType, {
+      WithdrawalRequest.belongsTo(models.PaymentMethod, {
         foreignKey: 'withdrawal_type_id',
       });
       WithdrawalRequest.belongsTo(models.MemberTransaction, {
@@ -36,12 +36,15 @@ module.exports = (sequelize, DataTypes) => {
       currency: {
         type: DataTypes.STRING,
         get() {
-          if (this.getDataValue('currency') === 'usd' || this.getDataValue('currency') === 'USD') {
-            return '$'
-          }else{
-            return this.getDataValue('currency')
+          if (
+            this.getDataValue('currency') === 'usd' ||
+            this.getDataValue('currency') === 'USD'
+          ) {
+            return '$';
+          } else {
+            return this.getDataValue('currency');
           }
-        }
+        },
       },
       withdrawal_type_id: DataTypes.BIGINT,
       requested_on: 'TIMESTAMP',
@@ -64,7 +67,11 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'withdrawal_requests',
     }
   );
-  WithdrawalRequest.extra_fields = ['Member.first_name', 'User.alias_name','Member.username'];
+  WithdrawalRequest.extra_fields = [
+    'Member.first_name',
+    'User.alias_name',
+    'Member.username',
+  ];
   WithdrawalRequest.fields = {
     id: {
       field_name: 'id',
@@ -260,23 +267,27 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
-    }
+    },
   };
   sequelizePaginate.paginate(WithdrawalRequest);
 
-  WithdrawalRequest.getPendingRequest = async (withdrawal_type_id, company_portal_id,Member) => {
-    var where_cond = { status: 'pending' }
-    if(withdrawal_type_id !=''){
-      where_cond['withdrawal_type_id'] = withdrawal_type_id
+  WithdrawalRequest.getPendingRequest = async (
+    withdrawal_type_id,
+    company_portal_id,
+    Member
+  ) => {
+    var where_cond = { status: 'pending' };
+    if (withdrawal_type_id != '') {
+      where_cond['withdrawal_type_id'] = withdrawal_type_id;
     }
     let result = await WithdrawalRequest.findAndCountAll({
       where: where_cond,
-      include:{
+      include: {
         model: Member,
         attributes: ['id'],
         where: { company_portal_id: company_portal_id },
       },
-      subQuery:false
+      subQuery: false,
     });
     return result.count;
   };

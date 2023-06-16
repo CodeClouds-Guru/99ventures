@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const {
   Member,
   User,
-  WithdrawalType,
+  PaymentMethod,
   MemberTransaction,
   WithdrawalRequest,
 } = require('../../models/index');
@@ -21,17 +21,24 @@ class WithdrawalRequestController extends Controller {
     var withdrawal_type = req.query.type;
 
     if (withdrawal_type === 'withdrawal-types') {
-      let withdrawal_type_list = await WithdrawalType.findAll({
+      let withdrawal_type_list = await PaymentMethod.findAll({
         attributes: ['id', 'name', 'slug'],
       });
       let company_portal_id = req.headers.site_id;
-      for (let type_list = 0; type_list < withdrawal_type_list.length; type_list++) {
+      for (
+        let type_list = 0;
+        type_list < withdrawal_type_list.length;
+        type_list++
+      ) {
         var pending_withdrawal_count = await this.model.getPendingRequest(
           withdrawal_type_list[type_list].id,
           company_portal_id,
           Member
         );
-        withdrawal_type_list[type_list].setDataValue('pending_withdrawal_count', pending_withdrawal_count);
+        withdrawal_type_list[type_list].setDataValue(
+          'pending_withdrawal_count',
+          pending_withdrawal_count
+        );
       }
       return {
         result: {
@@ -39,20 +46,24 @@ class WithdrawalRequestController extends Controller {
         },
       };
     } else if (withdrawal_type === 'withdrawal-count') {
-      let withdrawal_type_list = await WithdrawalType.findAll({
+      let withdrawal_type_list = await PaymentMethod.findAll({
         attributes: ['id', 'name', 'slug'],
       });
-      var all_counts = {}
+      var all_counts = {};
       var pending_withdrawal_count = 0;
       let company_portal_id = req.headers.site_id;
       for (var type_list of withdrawal_type_list) {
-        var pending_withdrawal_count = await this.model.getPendingRequest(type_list.id, company_portal_id, Member);
-        all_counts[type_list.slug] = pending_withdrawal_count
+        var pending_withdrawal_count = await this.model.getPendingRequest(
+          type_list.id,
+          company_portal_id,
+          Member
+        );
+        all_counts[type_list.slug] = pending_withdrawal_count;
       }
       return {
         result: {
           data: all_counts,
-        }
+        },
       };
     } else {
       let page = req.query.page || 1;
@@ -98,12 +109,12 @@ class WithdrawalRequestController extends Controller {
       options.include = [
         {
           model: Member,
-          attributes: ['first_name', 'last_name', 'username','admin_status'],
+          attributes: ['first_name', 'last_name', 'username', 'admin_status'],
           where: { company_portal_id: company_portal_id },
         },
         {
           model: MemberTransaction,
-          attributes: ['transaction_id']
+          attributes: ['transaction_id'],
         },
         {
           model: User,
@@ -114,7 +125,7 @@ class WithdrawalRequestController extends Controller {
       options.offset = offset;
       options.subQuery = false;
       let results = await this.model.findAndCountAll(options);
-      let pending_req_where = {}
+      let pending_req_where = {};
       let pages = Math.ceil(results.count / limit);
       results.rows.forEach(function (record, key) {
         if (record.dataValues.Member != null) {
@@ -131,16 +142,20 @@ class WithdrawalRequestController extends Controller {
           record.dataValues['User.alias_name'] =
             record.dataValues.User.dataValues.alias_name;
         }
-        if (record.dataValues.MemberTransaction != null && record.dataValues.MemberTransaction.dataValues.transaction_id) {
-          record.dataValues['MemberTransaction.transaction_id'] = record.dataValues.MemberTransaction.dataValues.transaction_id
+        if (
+          record.dataValues.MemberTransaction != null &&
+          record.dataValues.MemberTransaction.dataValues.transaction_id
+        ) {
+          record.dataValues['MemberTransaction.transaction_id'] =
+            record.dataValues.MemberTransaction.dataValues.transaction_id;
         } else {
-          record.dataValues['MemberTransaction.transaction_id'] = 'NA'
+          record.dataValues['MemberTransaction.transaction_id'] = 'NA';
         }
       });
 
       var programsList = [];
       if ('withdrawal_type_id' in query_where) {
-        const withdrawlType = await WithdrawalType.findOne({
+        const withdrawlType = await PaymentMethod.findOne({
           attributes: ['slug'],
           where: { id: query_where.withdrawal_type_id },
         });
@@ -255,8 +270,8 @@ class WithdrawalRequestController extends Controller {
               attributes: ['first_name', 'last_name', 'username'],
             },
             {
-              model: WithdrawalType,
-              attributes: ['slug', 'payment_method_id'],
+              model: PaymentMethod,
+              attributes: ['slug', 'id'],
             },
           ],
         });
@@ -271,7 +286,7 @@ class WithdrawalRequestController extends Controller {
             transaction_id = record.member_transaction_id;
           } else {
             let transaction_status = 1;
-            if (record.WithdrawalType.slug === 'skrill') {
+            if (record.PaymentMethod.slug === 'skrill') {
               transaction_status = 2;
             }
 
@@ -303,15 +318,15 @@ class WithdrawalRequestController extends Controller {
             );
           }
           if (
-            record.WithdrawalType.slug === 'paypal' ||
-            record.WithdrawalType.slug === 'instant_paypal'
+            record.PaymentMethod.slug === 'paypal' ||
+            record.PaymentMethod.slug === 'instant_paypal'
           ) {
             //paypal payload
-            var record_currency = ''
+            var record_currency = '';
             if (record.currency === '$') {
-              record_currency = 'USD'
+              record_currency = 'USD';
             } else if (record.currency) {
-              record_currency = record.currency.toUpperCase()
+              record_currency = record.currency.toUpperCase();
             }
             items.push({
               amount: record.amount,

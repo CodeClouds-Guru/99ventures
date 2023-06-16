@@ -18,9 +18,8 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'country_id',
         timestamps: false,
       });
-      PaymentMethod.hasMany(models.WithdrawalType, {
-        foreignKey: 'payment_method_id',
-        as: 'withdrawal_types',
+      PaymentMethod.hasMany(models.WithdrawalRequest, {
+        foreignKey: 'withdrawal_type_id',
       });
       PaymentMethod.belongsToMany(models.Member, {
         as: 'excluded_members',
@@ -52,26 +51,26 @@ module.exports = (sequelize, DataTypes) => {
       same_account_options: DataTypes.STRING,
       past_withdrawal_options: {
         type: DataTypes.STRING,
-        get() {
-          let options = this.getDataValue('past_withdrawal_options') || '';
-          if (options !== '') {
-            switch (options) {
-              case 'At least':
-                options = '>=';
-                break;
-              case 'At most':
-                options = '<=';
-                break;
-              case 'Exact':
-                options = '==';
-                break;
-              default:
-            }
-            return options;
-          } else return options;
+        // get() {
+        //   let options = this.getDataValue('past_withdrawal_options') || '';
+        //   if (options !== '') {
+        //     switch (options) {
+        //       case 'At least':
+        //         options = '>=';
+        //         break;
+        //       case 'At most':
+        //         options = '<=';
+        //         break;
+        //       case 'Exact':
+        //         options = '==';
+        //         break;
+        //       default:
+        //     }
+        //     return options;
+        //   } else return options;
 
-          // return this.getDataValue('description') || '';
-        },
+        //   // return this.getDataValue('description') || '';
+        // },
       },
       past_withdrawal_count: DataTypes.INTEGER,
       verified_options: DataTypes.STRING,
@@ -117,20 +116,20 @@ module.exports = (sequelize, DataTypes) => {
       maximum_amount: Joi.optional().allow('').label('Maximum Amount'),
       fixed_amount: Joi.optional().allow('').label('Fixed Amount'),
       withdraw_redo_interval: Joi.optional()
-        .allow(null)
+        .allow('')
         .label('Withdraw Redo Interval'),
       status: Joi.number().required().label('status'),
-      same_account_options: Joi.optional()
-        .allow('')
-        .label('Same Account Options'),
+      // same_account_options: Joi.optional()
+      //   .allow('')
+      //   .label('Same Account Options'),
       past_withdrawal_options: Joi.optional()
         .allow('')
         .label('Past Withdrawal Options'),
       past_withdrawal_count: Joi.optional()
         .allow('')
         .label('Past Withdrawal Count'),
-      verified_options: Joi.optional().allow('').label('Verified Options'),
-      upgrade_options: Joi.optional().allow('').label('Upgrade Options'),
+      // verified_options: Joi.optional().allow('').label('Verified Options'),
+      // upgrade_options: Joi.optional().allow('').label('Upgrade Options'),
       fee_percent: Joi.optional().allow('').label('Fee Percentage'),
       api_username: Joi.optional().allow('').label('Api Username'),
       api_password: Joi.optional().allow('').label('Api Password'),

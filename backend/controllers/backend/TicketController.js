@@ -68,12 +68,22 @@ class TicketController extends Controller {
     options.offset = offset;
     options.subQuery = false;
 
-    // console.log(util.inspect(options, { showHidden: false, depth: null, colors: true }))
-
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     for (let i = 0; i < result.rows.length; i++) {
-      result.rows[i].setDataValue('username', result.rows[i].Member.username);
+      console.log(
+        util.inspect(result.rows[i], {
+          showHidden: false,
+          depth: null,
+          colors: true,
+        })
+      );
+      if (result.rows[i].Member)
+        result.rows[i].setDataValue(
+          'username',
+          result.rows[i].Member.username || ''
+        );
+      else result.rows[i].setDataValue('username', '');
     }
 
     return {
