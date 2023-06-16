@@ -51,26 +51,26 @@ module.exports = (sequelize, DataTypes) => {
       same_account_options: DataTypes.STRING,
       past_withdrawal_options: {
         type: DataTypes.STRING,
-        get() {
-          let options = this.getDataValue('past_withdrawal_options') || '';
-          if (options !== '') {
-            switch (options) {
-              case 'At least':
-                options = '>=';
-                break;
-              case 'At most':
-                options = '<=';
-                break;
-              case 'Exact':
-                options = '==';
-                break;
-              default:
-            }
-            return options;
-          } else return options;
+        // get() {
+        //   let options = this.getDataValue('past_withdrawal_options') || '';
+        //   if (options !== '') {
+        //     switch (options) {
+        //       case 'At least':
+        //         options = '>=';
+        //         break;
+        //       case 'At most':
+        //         options = '<=';
+        //         break;
+        //       case 'Exact':
+        //         options = '==';
+        //         break;
+        //       default:
+        //     }
+        //     return options;
+        //   } else return options;
 
-          // return this.getDataValue('description') || '';
-        },
+        //   // return this.getDataValue('description') || '';
+        // },
       },
       past_withdrawal_count: DataTypes.INTEGER,
       verified_options: DataTypes.STRING,

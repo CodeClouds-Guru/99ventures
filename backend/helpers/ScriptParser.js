@@ -196,8 +196,19 @@ class ScriptParser {
                   payment.WithdrawalRequests[0].MemberTransaction.completed_at;
                 var hours = (Math.abs(date1 - date2) / 36e5).toFixed(2);
               }
-
               data[key].setDataValue('redo_diff', hours);
+              var past_withdrawal_symbol = '';
+              if (payment.past_withdrawal_options === 'At least')
+                past_withdrawal_symbol = '>=';
+              if (payment.past_withdrawal_options === 'At most')
+                past_withdrawal_symbol = '<=';
+              if (payment.past_withdrawal_options === 'Exact')
+                past_withdrawal_symbol = '==';
+
+              data[key].setDataValue(
+                'past_withdrawal_symbol',
+                past_withdrawal_symbol
+              );
             });
 
             break;

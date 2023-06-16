@@ -50,7 +50,7 @@ class PaymentConfigurationController extends Controller {
           model: Member,
           as: 'excluded_members',
           required: false,
-          attributes: ['id', 'username'],
+          attributes: ['id', 'username', 'email'],
         },
         {
           model: Country,
