@@ -175,8 +175,7 @@ class MemberAuthController {
         let member_details = [];
         if (existing_email_or_username) {
           member_status = false;
-          member_message =
-            'Sorry! this email has already been taken';
+          member_message = 'Sorry! this email has already been taken';
         } else {
           req.body.membership_tier_id = 1;
           // let files = [];
@@ -567,23 +566,21 @@ class MemberAuthController {
               }
               break;
             case 'STATE':
-              if (member_details.state)
-                precode = member_details.state
+              if (member_details.state) precode = member_details.state;
               break;
-
           }
           if (precode) {
-            let precode_id = ''
+            let precode_id = '';
             let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
               where: {
                 precode: record.survey_provider_question_id,
                 survey_provider_id: record.survey_provider_id,
-                option: precode
-              }
-            })
+                option: precode,
+              },
+            });
             if (survey_answer_precodes) {
-              precode_id = survey_answer_precodes.id
-              precode = ''
+              precode_id = survey_answer_precodes.id;
+              precode = '';
             }
             member_eligibility.push({
               member_id: member_id,
@@ -821,7 +818,8 @@ class MemberAuthController {
     if (payment_method_details.payment_field_options == 'Phone')
       regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
-    if (!regex.test(request_data.payment_field)) {
+    // if (!regex.test(request_data.payment_field)) {
+    if (!request_data.payment_field.match(regex)) {
       return {
         member_status: false,
         member_message:
