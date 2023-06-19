@@ -23,5 +23,5 @@ module.exports = async function (req, res, next) {
             }
         }
     }
-    // next();
+    next();
 }
