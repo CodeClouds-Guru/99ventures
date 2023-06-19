@@ -136,9 +136,10 @@ class PageParser {
       : '';
 
     let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
-    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js?render=${google_captcha.site_key}"></script>` : '';
+    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js?render=${google_captcha.site_key}&onload=onGcaptchaLoadCallback"></script>` : '';
     const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
     <script>
+    function onGcaptchaLoadCallback() {
       grecaptcha.ready(function() {
         grecaptcha.execute('${google_captcha.site_key}')
             .then(function(token) {
@@ -152,6 +153,7 @@ class PageParser {
               }
             });
       });
+    }
     </script>` : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
