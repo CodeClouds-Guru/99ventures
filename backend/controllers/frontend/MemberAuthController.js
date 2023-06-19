@@ -703,7 +703,7 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
-    console.log(request_data);
+    // console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
 
     //get member
