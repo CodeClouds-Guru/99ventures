@@ -632,6 +632,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <Autocomplete
                                         {...field}
+                                        limitTags={5}
                                         multiple
                                         className="w-full"
                                         id="checkboxes-country"
@@ -813,6 +814,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <Autocomplete
                                         {...field}
+                                        limitTags={5}
                                         value={ selectedMember }
                                         id="asynchronous-demo"
                                         multiple
