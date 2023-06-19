@@ -289,7 +289,7 @@ const CreateEditForm = () => {
         let params = {
             search: '',
             page: 1,
-            show: 5,
+            show: 100,
             module: 'members',
             where: {
                 "status":[],
