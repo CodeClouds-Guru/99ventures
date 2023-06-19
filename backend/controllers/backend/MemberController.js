@@ -4,19 +4,20 @@ const {
   MembershipTier,
   IpLog,
   Country,
+  EmailAlert,
   MemberNote,
-  MemberTransaction,
   MemberPaymentInformation,
   PaymentMethod,
   MemberReferral,
   MemberBalance,
+  MemberTransaction,
   Member,
   User,
   CompanyPortal,
   Survey,
   SurveyProvider,
   Company,
-  EmailAlert,
+  WithdrawalRequest,
   sequelize,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
@@ -26,6 +27,8 @@ const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
 const membertransaction = require('../../models/membertransaction');
 const { isNull } = require('lodash');
 const util = require('util');
+const withdrawalrequest = require('../../models/withdrawalrequest');
+const moment = require("moment");
 class MemberController extends Controller {
   constructor() {
     super('Member');
@@ -51,14 +54,14 @@ class MemberController extends Controller {
       "IpLogs.browser": "Browser",
       "IpLogs.browser_language": "Browser Language",
       "status": "Status",
-      "MembershipTiers.name": "Membership level",
+      "MembershipTier.name": "Membership level",
       "address": "Address",
       "phone_no": "Telephone",
-      "a": "Email marketing opt in",
-      "MemberTransactions.amount": "Current Balance",
-      "b": "Total Earnings",
-      "c": "Withdrawal - total paid",
-      "d": "Withdrawal - last cash out (date)",
+      "MemberEmailAlerts.id": "Email marketing opt in",
+      "MemberTransactions.balance": "Current Balance",
+      "MemberTransactions.amount": "Total Earnings",
+      "WithdrawalRequests.amount": "Withdrawal - total paid",
+      "WithdrawalRequests.created_at": "Withdrawal - last cash out (date)",
       "admin_status": "Verified/unverified",
     }
   }
@@ -427,6 +430,18 @@ class MemberController extends Controller {
       {
         model: MembershipTier,
         attributes: ['name']
+      },
+      {
+        model: WithdrawalRequest,
+        order: [['id', 'DESC']]
+      },
+      {
+        model: MemberTransaction,
+        order: [['id', 'DESC']]
+      },
+      {
+        model: EmailAlert,
+        as: 'MemberEmailAlerts'
       }
     ];
     options.where = {
@@ -445,6 +460,59 @@ class MemberController extends Controller {
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
+
+    result.rows.map(row => {
+      let ip = '';
+      let geo_location = '';
+      let isp = '';
+      let browser = '';
+      let browser_language = '';
+      let membership_tier_name = '';
+      let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+      let member_account_balance = 0.0;
+      let member_total_earnings = 0.00;
+      let total_paid = 0.00;
+      let cashout_date = 'N/A';
+      if (row.IpLogs.length > 0) {
+        let last_row = row.IpLogs[0];
+        ip = last_row.ip
+        geo_location = last_row.geo_location
+        isp = last_row.isp
+        browser = last_row.browser
+        browser_language = last_row.browser_language
+      }
+      if (row.MembershipTier) {
+        membership_tier_name = row.MembershipTier.name;
+      }
+      if (row.MemberTransactions.length > 0) {
+        member_account_balance = row.MemberTransactions[0].balance;
+        member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
+          if (item.type === 'credited')
+            sum += item.amount;
+          return sum;
+        }, 0.0)
+      }
+      if (row.WithdrawalRequests > 0) {
+        cashout_date = moment(row.WithdrawalRequests[0].created_at).format('YYYY-MM-DD');
+        total_paid = row.MemberTransactions.reduce((sum, item) => {
+          if (item.type === 'approved')
+            sum += item.amount;
+          return sum;
+        }, 0.0)
+      }
+      row.setDataValue('IpLogs.ip', ip);
+      row.setDataValue('IpLogs.geo_location', geo_location);
+      row.setDataValue('IpLogs.isp', isp);
+      row.setDataValue('IpLogs.browser', browser);
+      row.setDataValue('IpLogs.browser_language', browser_language);
+      row.setDataValue('MembershipTier.name', membership_tier_name);
+      row.setDataValue('MemberEmailAlerts.id', opted_for_email_alerts);
+      row.setDataValue('MemberTransactions.balance', member_account_balance);
+      row.setDataValue('MemberTransactions.amount', member_total_earnings);
+      row.setDataValue('WithdrawalRequests.amount', total_paid);
+      row.setDataValue('WithdrawalRequests.created_at', cashout_date);
+      return row;
+    });
 
     return {
       result: { data: result.rows, pages, total: result.count },
