@@ -11,7 +11,6 @@ module.exports = async function (req, res, next) {
             var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
             try {
                 const re = await axios.get(verificationUrl, { "Content-Type": "application/x-www-form-urlencoded", 'json': true })
-                console.log('gcap', re.data);
                 if (re.data.success) {
                     next();
                 }

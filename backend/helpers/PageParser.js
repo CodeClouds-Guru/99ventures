@@ -135,26 +135,30 @@ class PageParser {
       ? layout_descriptions.tag_content
       : '';
 
-    let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
-    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
-    const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
-    <script>
-    function onGcaptchaLoadCallback() {
-      grecaptcha.ready(function() {
-        grecaptcha.execute('${google_captcha.site_key}')
-            .then(function(token) {
-              var items = document.getElementsByClassName("g-recaptcha")
-              const hidden = document.createElement("input");
-              hidden.setAttribute("type", "hidden");
-              hidden.setAttribute("name", "g-captcha");
-              hidden.setAttribute("value", token);
-              for (let item of items) {
-                  item.appendChild(hidden)
-              }
-            });
-      });
+    let current_company_portal = this.getCompanyPortal();
+    if (current_company_portal && current_company_portal.is_google_captcha_used === 1) {
+
+      let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
+      let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
+      const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
+      <script>
+      function onGcaptchaLoadCallback() {
+        grecaptcha.ready(function() {
+          grecaptcha.execute('${google_captcha.site_key}')
+              .then(function(token) {
+                var items = document.getElementsByClassName("g-recaptcha")
+                const hidden = document.createElement("input");
+                hidden.setAttribute("type", "hidden");
+                hidden.setAttribute("name", "g-captcha");
+                hidden.setAttribute("value", token);
+                for (let item of items) {
+                    item.appendChild(hidden)
+                }
+              });
+        });
+      }
+      </script>` : '';
     }
-    </script>` : '';
 
     const default_scripted_codes = this.addDefaultAddOns();
     layout_html = layout_html.replaceAll('{{content}}', content);
