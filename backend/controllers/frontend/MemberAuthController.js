@@ -15,7 +15,6 @@ const {
   PaymentMethod,
   MemberPaymentInformation,
   WithdrawalRequest,
-  WithdrawalType,
   CompanyPortal,
   Company,
   User,
@@ -177,7 +176,7 @@ class MemberAuthController {
         if (existing_email_or_username) {
           member_status = false;
           member_message =
-            'Sorry! this username or email has already been taken';
+            'Sorry! this email has already been taken';
         } else {
           req.body.membership_tier_id = 1;
           // let files = [];
@@ -197,7 +196,7 @@ class MemberAuthController {
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
-            username: req.body.email.split('@')[0],
+            username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
             created_at: new Date(),
           };
           const res = await Member.create(data);
@@ -433,7 +432,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          username: Joi.string().required().label('User Name'),
+          // username: Joi.string().optional().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
@@ -568,21 +567,23 @@ class MemberAuthController {
               }
               break;
             case 'STATE':
-              if (member_details.state) precode = member_details.state;
+              if (member_details.state)
+                precode = member_details.state
               break;
+
           }
           if (precode) {
-            let precode_id = '';
+            let precode_id = ''
             let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
               where: {
                 precode: record.survey_provider_question_id,
                 survey_provider_id: record.survey_provider_id,
-                option: precode,
-              },
-            });
+                option: precode
+              }
+            })
             if (survey_answer_precodes) {
-              precode_id = survey_answer_precodes.id;
-              precode = '';
+              precode_id = survey_answer_precodes.id
+              precode = ''
             }
             member_eligibility.push({
               member_id: member_id,

@@ -18,10 +18,7 @@ $(() => {
   };
   var showSnackbar = (msg, success) => {
     $('.snackbar .snack_msg').text(msg);
-    $('element').removeClass('bg-success');
-    $('element').removeClass('bg-danger');
-    $('.snackbar').addClass(success ? 'bg-success' : 'bg-danger');
-    $('.snackbar').addClass('show').css('display', 'block');
+    $('.snackbar').removeClass('bg-success').removeClass('bg-danger').addClass(success ? 'bg-success' : 'bg-danger').addClass('show').css('display', 'block');
     setTimeout(function () {
       $('.snackbar').removeClass('show').css('display', 'none');;
     }, 3000);
