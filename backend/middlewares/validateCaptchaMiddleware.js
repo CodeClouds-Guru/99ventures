@@ -13,15 +13,17 @@ module.exports = async function (req, res, next) {
                 const re = await axios.get(verificationUrl, { "Content-Type": "application/x-www-form-urlencoded", 'json': true })
                 console.log('gcap', re.data);
                 if (re.data.success) {
-                    return next();
+                    next();
                 }
             } catch (error) {
                 console.error(error)
-            } finally {
                 req.session.flash = { error: 'Captcha verification failed' };
                 return res.redirect('back');
             }
+        } else {
+            next();
         }
+    } else {
+        next();
     }
-    next();
 }
