@@ -415,8 +415,8 @@ function List(props) {
 			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'withdrawal-requests') {
+			const status = processFieldValue(n[field.field_name], field);
 			if (field.field_name === 'status') {
-				const status = processFieldValue(n[field.field_name], field);
 				if (status === 'pending')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
 				else if (status === 'approved')
@@ -429,6 +429,14 @@ function List(props) {
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
 				else if (status === 'declined')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			}
+			if (field.field_name === 'Member.admin_status') {
+				if (status === 'verified')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="success" size="small" />
+				else if (status === 'pending')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
+				else if (status === 'not_verified')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
 			}
 			if (field.field_name === 'Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['Member.username']}</a>
@@ -605,7 +613,7 @@ function List(props) {
 								</Typography>
 							)
 						}
-						<div className="flex items-center justify-end space-x-8 w-full lg:w-1/3 ml-auto">
+						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
 							{
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
