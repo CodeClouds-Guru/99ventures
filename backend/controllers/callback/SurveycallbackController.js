@@ -1,6 +1,7 @@
 const {
 	MemberSurvey,
 	MemberTransaction,
+	MemberEligibilities,
 	Member,
 	SurveyProvider,
 	Survey,
@@ -18,7 +19,8 @@ class SurveycallbackController {
 	constructor() {
 		this.storeSurveyQualifications = this.storeSurveyQualifications.bind(this);
 		this.syncSurvey = this.syncSurvey.bind(this);
-		this.memberTransaction = this.memberTransaction.bind(this)
+		this.memberTransaction = this.memberTransaction.bind(this);
+		this.memberEligibitityUpdate = this.memberEligibitityUpdate.bind(this);
 	}
 
 	async save(req, res) {
@@ -452,6 +454,7 @@ class SurveycallbackController {
 					});
 					if (member) {
 						await this.memberTransaction( survey, 'Lucid', surveyNumber, member, requestParam );
+						await this.memberEligibitityUpdate(requestParam);
 						/*const provider = await SurveyProvider.findOne({
 							attributes: ['currency_percent'],
 							where: {
@@ -587,6 +590,75 @@ class SurveycallbackController {
 			console.error(error)
 		} finally {
 			return true;
+		}
+	}
+
+	/**
+	 * Update member's eligibility based on the postback data
+	 * @param {query String} queryObj 
+	 * @returns 
+	 */
+	async memberEligibitityUpdate(queryObj){
+		try{
+			// const queryObj = req.query;
+
+			const queryKeys = Object.keys(queryObj);
+			const obj = {}
+			for (let key of queryKeys) {
+				if(!isNaN(key) && queryObj[key] != '' && queryObj.termed_qualification_id != key){
+					obj[key] = queryObj[key];
+				}
+			}
+
+			const provider = await SurveyProvider.findOne({
+				attributes: ['id'],
+				where: {
+					name: 'Lucid'
+				}
+			});
+
+			const precodes = Object.keys(obj);
+			const surveyQuestions = await SurveyQuestion.findAll({
+				attributes: ['id', 'survey_provider_question_id', 'question_type'],
+				where: {
+					survey_provider_question_id: precodes,
+					survey_provider_id: provider
+				},
+				include: {
+					model: SurveyAnswerPrecodes,
+					where: {
+						option: Object.values(obj)
+					}
+				}
+			});
+
+			const params = [];
+			for(let precode of precodes) {
+				let matchedQuest = surveyQuestions.find(row => row.survey_provider_question_id === +precode);			
+				let answerPrecode = matchedQuest.SurveyAnswerPrecodes.find(r=> +r.option === +obj[precode] && +r.precode === +precode);
+				if(matchedQuest && answerPrecode){
+					params.push({
+						member_id: queryObj.pid,
+						survey_question_id: matchedQuest.id,
+						survey_answer_precode_id: answerPrecode.id
+					});
+				}			
+			}
+			const result = await MemberEligibilities.bulkCreate(params, {
+				updateOnDuplicate:['survey_answer_precode_id']
+			});
+
+			return result;
+		} 
+		catch (err) {
+			const logger = require('../../helpers/Logger')(
+				`lucid-postback-errror.log`
+			);
+			logger.error(err);
+			return {
+				status: false,
+				message: err.message
+			};
 		}
 	}
 }
