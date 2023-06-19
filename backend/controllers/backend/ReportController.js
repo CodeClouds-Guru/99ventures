@@ -253,7 +253,8 @@ class ReportController{
                                             attributes: ['name'],
                                           }
                                         })
-        names.push(survey.dataValues.name+" ("+ survey.dataValues.SurveyProvider.dataValues.name+")")
+        if(survey)
+          names.push(survey.dataValues.name+" ("+ survey.dataValues.SurveyProvider.dataValues.name+")")
       }
     }
     return {
