@@ -703,7 +703,7 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
-    // console.log(request_data);
+    console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
 
     //get member
@@ -813,14 +813,13 @@ class MemberAuthController {
       };
     }
     var regex = '';
-    if (payment_method_details.payment_field_options == 'Email')
+    if (payment_method_details.payment_field_options === 'Email')
       regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (payment_method_details.payment_field_options == 'Phone')
+    if (payment_method_details.payment_field_options === 'Phone')
       regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
-    // if (!regex.test(request_data.payment_field)) {
-
-    if (!request_data.payment_field.match(regex)) {
+    if (!regex.test(request_data.payment_field)) {
+      // if (!request_data.payment_field.match(regex)) {
       return {
         member_status: false,
         member_message:
