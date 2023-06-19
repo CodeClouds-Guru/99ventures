@@ -136,7 +136,7 @@ class PageParser {
       : '';
 
     let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
-    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js?&onload=onGcaptchaLoadCallback&render=explicit"></script>` : '';
+    let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
     const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
     <script>
     function onGcaptchaLoadCallback() {
