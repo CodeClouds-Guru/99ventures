@@ -597,14 +597,15 @@ function List(props) {
 									initial={{ x: -20 }}
 									animate={{ x: 0, transition: { delay: 0.2 } }}
 									delay={300}
-									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
+									className="w-2/3 lg:w-1/3 font-extrabold tracking-tight capitalize"
+									variant="h5"
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
 									{(!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
 								</Typography>
 							)
 						}
-						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
+						<div className="flex items-center justify-end space-x-8 w-full lg:w-1/3 ml-auto">
 							{
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
@@ -624,11 +625,11 @@ function List(props) {
 											component={motion.div}
 											initial={{ y: -20, opacity: 0 }}
 											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center xl:w-2/5 sm:w-1/3 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
+											className="flex items-center justify-around w-full space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
 											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
 											onClick={() => setDatepickerStatus(!datepickerStatus)}
 										>
-											<FuseSvgIcon className="text-48 cursor-pointer" size={24} color="disabled">feather:calendar</FuseSvgIcon>
+											<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={24} color="disabled">feather:calendar</FuseSvgIcon>
 											<Input
 												label="Select daterange"
 												className="datepicker--input cursor-pointer"
