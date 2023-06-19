@@ -819,6 +819,7 @@ class MemberAuthController {
       regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
     // if (!regex.test(request_data.payment_field)) {
+
     if (!request_data.payment_field.match(regex)) {
       return {
         member_status: false,
