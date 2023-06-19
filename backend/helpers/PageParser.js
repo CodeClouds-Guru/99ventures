@@ -136,11 +136,12 @@ class PageParser {
       : '';
 
     let current_company_portal = this.getCompanyPortal();
+    var google_captcha_header = '';
+    var scripted_captcha_field = '';
     if (current_company_portal && current_company_portal.is_google_captcha_used === 1) {
-
       let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
-      let google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
-      const scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
+      google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
+      scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
       <script>
       function onGcaptchaLoadCallback() {
         grecaptcha.ready(function() {
