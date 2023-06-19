@@ -1,4 +1,5 @@
-
+const { promisify } = require('util');
+const request = promisify(require('request'));
 module.exports = async function (req, res, next) {
     if (['POST', 'PUT', 'DELETE', 'PATCH'].indexOf(req.method) >= 0 && req.session.google_captcha_settings && req.session.company_portal.is_google_captcha_used === 1) {
         if ('body' in req && 'g-recaptcha-response' in req.body) {
@@ -8,15 +9,23 @@ module.exports = async function (req, res, next) {
                 return res.redirect('back');
             }
             var secretKey = req.session.google_captcha_settings.site_token;
-            var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
-            request(verificationUrl, function (error, response, body) {
-                body = JSON.parse(body);
-                if (body.success !== undefined && !body.success) {
-                    req.session.flash = { error: 'Blocked by Google Captcha' };
+            var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g-recaptcha-response'];
+            try {
+                const re = await request({
+                    url: verificationUrl,
+                    headers: { "Content-Type": "application/x-www-form-urlencoded", 'json': true }
+                });
+                if (!JSON.parse(re.body)['success']) {
+                    req.session.flash = { error: 'Captcha verification failed' };
                     return res.redirect('back');
+                } else {
+                    return next();
                 }
-            });
+            } catch (error) {
+                req.session.flash = { error: 'Captcha verification failed' };
+                return res.redirect('back');
+            }
         }
     }
-    next();
+    // next();
 }
