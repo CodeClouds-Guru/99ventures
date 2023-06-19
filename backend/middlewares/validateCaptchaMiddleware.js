@@ -3,7 +3,7 @@ module.exports = async function (req, res, next) {
     if (['POST', 'PUT', 'DELETE', 'PATCH'].indexOf(req.method) >= 0 && req.session.google_captcha_settings && req.session.company_portal.is_google_captcha_used === 1) {
         if ('body' in req && 'g-recaptcha-response' in req.body) {
             gcap = req.body['g-recaptcha-response']
-            if (gcap === undefined || gcap === '' || gcap) {
+            if (gcap === undefined || gcap === '' || !gcap) {
                 req.session.flash = { error: 'Invalid Google Captcha' };
                 return res.redirect('back');
             }
