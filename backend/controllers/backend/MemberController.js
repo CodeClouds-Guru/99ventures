@@ -34,6 +34,33 @@ class MemberController extends Controller {
     this.delete = this.delete.bind(this);
     this.deleteMemberNotes = this.deleteMemberNotes.bind(this);
     this.export = this.export.bind(this);
+    this.generateFields = this.generateFields.bind(this);
+    this.fieldConfig = {
+      "id": "ID",
+      "username": "Username",
+      "first_name": "First name",
+      "last_name": "Last Name",
+      "created_at": "Join date",
+      "last_active_on": "Last active date",
+      "MemberReferral.referral_email": "Referral",
+      "email": "Registration email ",
+      "MemberPaymentInformations.email": "Payment emails",
+      "IpLogs.ip": "Current IP",
+      "IpLogs.geo_location": "Geo location",
+      "IpLogs.isp": "Geo ISP",
+      "IpLogs.browser": "Browser",
+      "IpLogs.browser_language": "Browser Language",
+      "status": "Status",
+      "MembershipTiers.name": "Membership level",
+      "address": "Address",
+      "phone_no": "Telephone",
+      "a": "Email marketing opt in",
+      "MemberTransactions.amount": "Current Balance",
+      "b": "Total Earnings",
+      "c": "Withdrawal - total paid",
+      "d": "Withdrawal - last cash out (date)",
+      "admin_status": "Verified/unverified",
+    }
   }
   async save(req, res) {
     try {
@@ -380,66 +407,64 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
-    let roles = req.user.roles.map((role) => {
-      if (role.id == 1) return role.id;
-    });
-    let fields = this.model.fields;
     options.include = [
       {
         model: IpLog,
         attributes: ['ip', 'isp', 'geo_location', 'browser'],
-        order: [['id', 'DESC']],
-        limit: 1,
+        order: [['id', 'DESC']]
       },
       {
         model: MemberReferral,
         attributes: ['referral_email'],
       },
+      {
+        model: MemberPaymentInformation,
+        attributes: ['value']
+      },
+      {
+        model: MembershipTier,
+        attributes: ['name']
+      }
     ];
-    if (roles == 1) {
-      options.include.push({ model: CompanyPortal, attributes: ['name'] });
-    } else {
-      options.where = {
-        ...options.where,
-        company_portal_id: site_id,
-      };
-    }
-    // options.distinct = true;
+    options.where = {
+      ...options.where,
+      company_portal_id: site_id,
+    };
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
     options.subQuery = false;
+    options.attributes = req.query.fields || ['id', 'first_name', 'username'];
+
+    console.log(options)
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
 
-    for (let i = 0; i < result.rows.length; i++) {
-      if (roles == 1) {
-        result.rows[i].setDataValue(
-          'company_portal_id',
-          result.rows[i].CompanyPortal.name
-        );
-        fields.company_portal_id.listing = true;
-      } else {
-        fields.company_portal_id.listing = false;
-      }
-      if (result.rows[i].IpLogs != undefined && result.rows[i].IpLogs.length) {
-        result.rows[i].setDataValue('ip', result.rows[i].IpLogs[0].ip);
-      } else {
-        result.rows[i].setDataValue('ip', '');
-      }
-    }
-
     return {
       result: { data: result.rows, pages, total: result.count },
-      fields: fields,
+      fields: this.generateFields(req.query.fields || []),
     };
   }
+
+  generateFields(header_fields) {
+    var fields = {}
+    for (const key of header_fields) {
+      fields[key] = {
+        field_name: key,
+        db_name: key,
+        listing: true,
+        placeholder: key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col'
+      }
+    }
+    return fields;
+  }
+
 
   async export(req, res) {
     let data = await this.list(req);
@@ -510,7 +535,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 

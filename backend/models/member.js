@@ -185,6 +185,12 @@ module.exports = (sequelize, DataTypes) => {
           return `${this.first_name} ${this.last_name}`;
         },
       },
+      address: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.address_1 ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''}, zipcode - ${this.zip_code || ''}` : '';
+        },
+      },
       state: DataTypes.STRING,
       admin_status: {
         type: DataTypes.ENUM('not_verified', 'verified', 'pending'),
@@ -409,8 +415,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -462,8 +468,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let result = await Member.update(
         {
