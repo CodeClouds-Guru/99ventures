@@ -70,7 +70,7 @@ class Paypal {
       clientId,
       clientSecret
     );
-    console.log(environment);
+    // console.log(environment);
     return new paypal.core.PayPalHttpClient(environment);
   }
 

@@ -184,7 +184,6 @@ function CreateEditForm(props) {
   }
 
   const handleSwitch = (e) => {
-    console.log(e.target.checked)
     setSwitchField(e.target.checked);
   }
   const onSubmit = async data => {
