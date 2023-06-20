@@ -163,11 +163,11 @@ class SchlesingerController {
                                     }
                                 }
                             ],
-                        },
-                        order: [[Sequelize.literal(orderBy), order]],
-                        limit: perPage,
-                        offset: (pageNo - 1) * perPage,
-                    }
+                        }
+                    },
+                    order: [[Sequelize.literal(orderBy), order]],
+                    limit: perPage,
+                    offset: (pageNo - 1) * perPage,
                 });
                 var data_count = await Survey.findAndCountAll({
                     attributes: ['id'],
