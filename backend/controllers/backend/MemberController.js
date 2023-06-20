@@ -456,7 +456,7 @@ class MemberController extends Controller {
     options.subQuery = false;
     options.attributes = req.query.fields || ['id', 'first_name', 'username'];
 
-    console.log(options)
+    // console.log(options)
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
