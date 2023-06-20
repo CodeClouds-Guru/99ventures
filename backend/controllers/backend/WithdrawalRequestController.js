@@ -76,15 +76,6 @@ class WithdrawalRequestController extends Controller {
       query_where = JSON.parse(query_where);
       var new_option = {};
       var and_query = {};
-      var fields = this.model.fields;
-      if ('withdrawal_type_id' in query_where) {
-        fields['$Member.username$'].listing = true;
-        fields['$Member.username$'].searchable = true;
-      } else {
-        fields['$Member.username$'].listing = false;
-        fields['$Member.username$'].searchable = false;
-      }
-
       if ('created_at' in query_where) {
         var and_query = {
           created_at: {
@@ -192,10 +183,109 @@ class WithdrawalRequestController extends Controller {
           }
         }
       }
-
+      var fields = {
+        '$Member.username$': {
+          field_name: 'Member.username',
+          db_name: '`Member`.`username`',
+          type: 'text',
+          placeholder: 'Username',
+          listing: false,
+          show_in_form: false,
+          sort: true,
+          required: false,
+          value: '',
+          width: '50',
+          searchable: true,
+        },
+        requested_on: {
+          field_name: 'requested_on',
+          db_name: 'requested_on',
+          type: 'text',
+          placeholder: 'Requested on',
+          listing: true,
+          show_in_form: false,
+          sort: true,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: false,
+        },
+        payment_email: {
+          field_name: 'payment_email',
+          db_name: 'payment_email',
+          type: 'text',
+          placeholder: 'Email',
+          listing: true,
+          show_in_form: true,
+          sort: true,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: true,
+        },
+        currency: {
+          field_name: 'currency',
+          db_name: 'currency',
+          type: 'text',
+          placeholder: 'Currency',
+          listing: true,
+          show_in_form: false,
+          sort: true,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: false,
+        },
+        amount: {
+          field_name: 'amount',
+          db_name: 'amount',
+          type: 'text',
+          placeholder: 'Amount',
+          listing: true,
+          show_in_form: true,
+          sort: true,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: true,
+        },
+        '$Member.admin_status$': {
+          field_name: 'Member.admin_status',
+          db_name: '`Member`.`admin_status`',
+          type: 'text',
+          placeholder: 'Admin Status',
+          listing: true,
+          show_in_form: false,
+          sort: true,
+          required: false,
+          value: '',
+          width: '50',
+          searchable: true,
+        },
+        ip: {
+          field_name: 'ip',
+          db_name: 'ip',
+          type: 'text',
+          placeholder: 'IP',
+          listing: true,
+          show_in_form: false,
+          sort: true,
+          required: true,
+          value: '',
+          width: '50',
+          searchable: true,
+        }
+      }
+      if ('withdrawal_type_id' in query_where) {
+        fields['$Member.username$'].listing = true;
+        fields['$Member.username$'].searchable = true;
+      } else {
+        fields['$Member.username$'].listing = false;
+        fields['$Member.username$'].searchable = false;
+      }
       return {
         result: { data: results.rows, pages, total: results.count },
-        fields: this.model.fields,
+        fields: fields,
         programs: programsList,
       };
     }

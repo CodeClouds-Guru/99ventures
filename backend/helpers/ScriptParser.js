@@ -20,6 +20,9 @@ class ScriptParser {
     this.parseScript = this.parseScript.bind(this);
     this.getModuleWhere = this.getModuleWhere.bind(this);
     this.getSurveys = this.getSurveys.bind(this);
+    this.instance = axios.create({
+      baseURL: this.baseUrl,
+  });
     // this.getOfferWallList = this.getOfferWallList.bind(this);
     // this.getTicketList = this.getTicketList.bind(this);
   }
@@ -220,22 +223,33 @@ class ScriptParser {
               script.module,
               params
             );
-            data = temp_survey_list.surveys;
-            if (temp_survey_list.status)
+            
+            if (temp_survey_list.status){
+              data = temp_survey_list.surveys;
               page_count = temp_survey_list.page_count;
-            //pagination
-            if ('pagination' in params && params.pagination === 'true') {
-              script_html = await this.appendPagination(
-                script_html,
-                script_id,
-                pageNo
-              );
+            }else{
+              data = {}
             }
+            // console.log('temp_survey_list',temp_survey_list)
+            //pagination
+              if (
+                'pagination' in params &&
+                params.pagination === 'true' &&
+                page_count > 1
+              ) {
+                script_html = await this.appendPagination(
+                  script_html,
+                  script_id,
+                  pageNo,
+                  page_count
+                );
+              }
             break;
         }
       }
     }
     // console.log('===================', JSON.parse(JSON.stringify(data)));
+
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -244,7 +258,7 @@ class ScriptParser {
     };
   }
   //get survey
-  async getSurveys(user, survey_provider_id, script_module, params) {
+  async getSurveysBkp(user, survey_provider_id, script_module, params) {
     let memberId = user.id;
     if (!memberId) {
       return {
@@ -266,7 +280,6 @@ class ScriptParser {
         surveys: [],
       };
     }
-
     /**
      * check and get member's eligibility
      */
@@ -428,6 +441,53 @@ class ScriptParser {
         surveys: [],
       };
     }
+  }
+  //get all matched surveys
+   //get survey
+   async getSurveys(user, survey_provider_id, script_module, params) {
+    let memberId = user.id;
+    if (!memberId) {
+      return {
+        status: false,
+        message: 'Member id not found!',
+        surveys: [],
+      };
+    }
+    const provider = await SurveyProvider.findOne({
+      attributes: ['id'],
+      where: {
+        id: survey_provider_id,
+      },
+    });
+    if (!provider) {
+      return {
+        status: false,
+        message: 'Survey provider not found!',
+        surveys: [],
+      };
+    }
+    //check provider name
+    let file_name = ''
+    switch(survey_provider_id){
+      case '1':
+        file_name = 'LucidController'
+        break;
+      case '2':
+        file_name = 'CintController'
+        break;
+      case '3':
+        file_name = 'PureSpectrumController'
+        break;
+      case '4':
+        file_name = 'SchlesingerController'
+        break;
+      default:
+        break;
+    }
+    const ProviderControllerClass = require(`../controllers/frontend/${file_name}`)
+    const ProviderController = new ProviderControllerClass();
+    let response = await ProviderController.surveys(memberId,params) 
+    return response
   }
   getModuleWhere(module, user) {
     switch (module) {
