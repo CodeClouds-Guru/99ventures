@@ -45,7 +45,7 @@ router.get('/survey/:status', StaticPageController.showStatus);
 router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
-router.get('/cint/surveys', CintController.survey);
+router.get('/cint/surveys', CintController.surveys);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);

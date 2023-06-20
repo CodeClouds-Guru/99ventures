@@ -1,4 +1,5 @@
 const {
+    sequelize,
     Member,
     Survey,
     SurveyProvider,
@@ -11,6 +12,7 @@ const { Op } = require('sequelize')
 const LucidHelper = require('../../helpers/Lucid')
 const Crypto = require('crypto');
 const { generateHashForLucid } = require('../../helpers/global')
+const Sequelize = require('sequelize');
 
 class LucidController {
 
@@ -37,14 +39,13 @@ class LucidController {
             throw error('Invalid access!');
     }
 
-    surveys = async (req, res) => {
-        const memberId = req.query.user_id;
+    surveys = async (memberId,params) => {
+        // const memberId = req.query.user_id;
         if (!memberId) {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Member id not found!'
-            });
-            return;
+            }
         }
 
         const provider = await SurveyProvider.findOne({
@@ -54,18 +55,20 @@ class LucidController {
             }
         });
         if (!provider) {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Survey Provider not found!'
-            });
-            return;
+            }
         }
-
+        const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+        const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+        const orderBy = 'orderby' in params ? params.orderby : 'id';
+        const order = 'order' in params ? params.order : 'desc';
         /**
          * check and get member's eligibility
          */
         const eligibilities = await MemberEligibilities.findAll({
-            attributes: ['survey_question_id', 'precode_id', 'open_ended_value', 'id'],
+            attributes: ['survey_question_id', 'survey_answer_precode_id', 'open_ended_value', 'id'],
             where: {
                 member_id: memberId
             },
@@ -114,7 +117,7 @@ class LucidController {
 
             
             const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerIds = eligibilities.map(eg => eg.precode_id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
 
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 const queryString = {};
@@ -158,58 +161,86 @@ class LucidController {
                             ],
                         }
                     },
-                    limit: 200
+                    //limit: 200
+                    order: [[Sequelize.literal(orderBy), order]],
+                    limit: perPage,
+                    offset: (pageNo - 1) * perPage,
                 });
+                var data_count = await Survey.findAndCountAll({
+                    attributes: ['id'],
+                    where: {
+                        survey_provider_id: provider.id,
+                        status: "active",
+                    }
+                });
+                var page_count = Math.ceil(data_count.count / perPage);
 
                 // res.send(surveys);
                 // return;
-                
+                var survey_list = {}
                 if(surveys.length){
                     var surveyHtml = '';
+                    var count = 0;
                     for (let survey of surveys) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
-                        surveyHtml += `
-                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                                <div class="bg-white card mb-2">
-                                    <div class="card-body position-relative">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-primary m-0">${survey.name}</h6>
-                                        </div>
-                                        <div class="text-primary small">5 Minutes</div>
-                                        <div class="d-grid mt-1">
-                                            <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `
+                        survey.link = link
+                        survey_list.push(survey)
+                        // surveyHtml += `
+                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                        //         <div class="bg-white card mb-2">
+                        //             <div class="card-body position-relative">
+                        //                 <div class="d-flex justify-content-between">
+                        //                     <h6 class="text-primary m-0">${survey.name}</h6>
+                        //                 </div>
+                        //                 <div class="text-primary small">5 Minutes</div>
+                        //                 <div class="d-grid mt-1">
+                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                        //                 </div>
+                        //             </div>
+                        //         </div>
+                        //     </div>
+                        // `
+
                     }
                     
-                    res.send({
+                    // res.send({
+                    //     status: true,
+                    //     message: 'Success',
+                    //     result: surveyHtml
+                    // });
+                    return {
                         status: true,
                         message: 'Success',
-                        result: surveyHtml
-                    });
+                        result: {
+                            surveys:survey_list,
+                            page_count
+                        }
+                    }
                 }
                 else {
-                    res.json({
+                    return {
                         staus: false,
                         message: 'Surveys not found!'
-                    });
+                    }
                 }
             }
             else {
-                res.json({
+                
+                return {
                     staus: false,
                     message: 'No surveys have been matched!'
-                });
+                }
             }
 
         } else {
-            res.json({
-                status: false,
+            // res.json({
+            //     status: false,
+            //     message: 'Member eiligibility not found!'
+            // });
+            return {
+                staus: false,
                 message: 'Member eiligibility not found!'
-            });
+            }
         }
 
 

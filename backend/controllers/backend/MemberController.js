@@ -117,7 +117,7 @@ class MemberController extends Controller {
       }
     } catch (error) {
       console.error('error saving member', error);
-      this.throwCustomError('Unable to save data', 500);
+      this.throwCustomError(error.data, 402);
     }
   }
 
