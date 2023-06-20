@@ -75,6 +75,9 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'payment_method_id',
         timestamps: false,
       });
+      Member.hasMany(models.WithdrawalRequest, {
+        foreignKey: 'member_id',
+      });
     }
   }
   Member.validate = function (req) {

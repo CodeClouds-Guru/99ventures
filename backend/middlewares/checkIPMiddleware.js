@@ -84,7 +84,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
         );
         req.session.member = { ...member, status: 'suspended' }
     }
-    console.log({ access_error: msg });
+    // console.log({ access_error: msg });
     req.session.flash = { access_error: msg };
     res.redirect('/404');
 }

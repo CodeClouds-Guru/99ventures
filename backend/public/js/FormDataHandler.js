@@ -194,7 +194,7 @@ $(() => {
     if (
       loginForm &&
       ['email', 'password', 'remember_me'].every(
-        (val) => Object.keys(loginForm.elements).indexOf(val) > -1
+        (val) => Object.keys(loginForm.elements).indexOf(val)
       )
     ) {
       $(loginForm).attr('action', '/login');
@@ -213,7 +213,7 @@ $(() => {
         'password',
         'confirm_password',
         'newsletter',
-      ].every((val) => Object.keys(signupForm.elements).indexOf(val) > -1)
+      ].every((val) => Object.keys(signupForm.elements).indexOf(val))
     ) {
       $(signupForm).attr('action', '/signup');
       $(signupForm).attr('method', 'POST');
@@ -225,7 +225,7 @@ $(() => {
     if (
       forgotPasswordForm &&
       ['email'].every(
-        (val) => Object.keys(forgotPasswordForm.elements).indexOf(val) > -1
+        (val) => Object.keys(forgotPasswordForm.elements).indexOf(val)
       )
     ) {
       $(forgotPasswordForm).attr('action', '/member-forgot-password');
@@ -238,7 +238,7 @@ $(() => {
     if (
       resetPasswordForm &&
       ['password', 'c_password'].every(
-        (val) => Object.keys(resetPasswordForm.elements).indexOf(val) > -1
+        (val) => Object.keys(resetPasswordForm.elements).indexOf(val)
       )
     ) {
       $(resetPasswordForm).attr('action', '/save-password');
@@ -251,7 +251,7 @@ $(() => {
     if (
       ticketCreateForm &&
       ['ticket_subject', 'ticket_file', 'ticket_content'].every(
-        (val) => Object.keys(ticketCreateForm.elements).indexOf(val) > -1
+        (val) => Object.keys(ticketCreateForm.elements).indexOf(val)
       )
     ) {
       $(ticketCreateForm).attr('action', '/ticket/create');
