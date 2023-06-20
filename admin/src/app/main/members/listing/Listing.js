@@ -375,6 +375,7 @@ function Listing(props) {
         setFilters([{ column: 'username', match: 'substring', search: '' }]);
         setMemberStatus([]);
         setWhere({});
+        setPage(0);
     }
     const handleChangeFilter = (event, key, field) => {
         filters[key][field] = event.target.value;
@@ -389,6 +390,7 @@ function Listing(props) {
         setWhere(where);
         setFilterActive(true);
         setOpenAlertDialog(false);
+        setPage(0);
     }
     const modifyList = () => {
         fetchModules();
