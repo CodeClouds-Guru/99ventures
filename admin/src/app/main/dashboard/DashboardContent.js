@@ -39,17 +39,8 @@ const DashboardContent = () => {
 
     const dateRangeSelected = (val) => {
         toggle();
-<<<<<<< HEAD
-        // setDateRange({
-        //     startDate: moment(val.startDate).toDate(),
-        //     endDate: moment(val.endDate).toDate()
-        // });
-        updateDate(
-            moment(val.startDate), 
-=======
         updateDate(
             moment(val.startDate),
->>>>>>> b24dedfaabbee95390ffe11d8821b8a81f5402ff
             moment(val.endDate)
         )
     }
@@ -63,14 +54,6 @@ const DashboardContent = () => {
         getDaterangeLessReport();
     }, [])
 
-<<<<<<< HEAD
-    // useEffect(() => {
-    //     constructParam();
-    // }, [dateRange])
-
-
-=======
->>>>>>> b24dedfaabbee95390ffe11d8821b8a81f5402ff
     useEffect(() => {
         getCompletedSurveys();
         getLoginPerDay();
@@ -82,22 +65,10 @@ const DashboardContent = () => {
     const clearFilter = () => {
         setReRenderPicker(false)
         setOpen(false)
-<<<<<<< HEAD
-        // setDateRange({
-        //     startDate: moment().subtract(7, 'd').startOf('day').toDate(),
-        //     endDate: moment().toDate(),
-        // });        
-        updateDate(
-            moment().subtract(7, 'd').startOf('day'), 
-            moment()
-        )
-
-=======
         updateDate(
             moment().subtract(7, 'd').startOf('day'),
             moment()
         )
->>>>>>> b24dedfaabbee95390ffe11d8821b8a81f5402ff
     }
 
     const updateDate = (startDate, endDate) => {
