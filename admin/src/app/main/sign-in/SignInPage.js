@@ -10,10 +10,12 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import jwtService from '../../auth/services/jwtService';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
+import LoadingButton from '@mui/lab/LoadingButton';
+
 /**
  * Form Validation Schema
  */
@@ -33,6 +35,7 @@ const defaultValues = {
 
 function SignInPage() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const { control, formState, handleSubmit, setError, setValue } = useForm({
     mode: 'onChange',
     defaultValues,
@@ -47,6 +50,7 @@ function SignInPage() {
   }, [setValue]);
 
   const onSubmit = ({ email, password }) => {
+    setLoading(true);
     jwtService
       .signInWithEmailAndPassword(email, password)
       .then((response) => {
@@ -65,6 +69,9 @@ function SignInPage() {
         // } else {
         //   dispatch(showMessage({ variant: 'error', message: _errors.message }));
         // }
+      })
+      .finally(()=>{
+        setLoading(false);
       });
   }
 
@@ -126,18 +133,16 @@ function SignInPage() {
                 Forgot password?
               </Link>
             </div>
-
-            <Button
-              variant="contained"
-              color="secondary"
-              className=" w-full mt-16"
-              aria-label="Sign in"
+            <LoadingButton
               disabled={_.isEmpty(dirtyFields) || !isValid}
               type="submit"
-              size="large"
+              color="secondary"             
+              loading={loading}
+              variant="contained"
+              className=" w-full mt-16"
             >
-              Sign in
-            </Button>
+              <span>Sign in</span>
+            </LoadingButton>
           </form>
         </div>
       </Paper>
