@@ -2,23 +2,26 @@ const Cint = require('../../helpers/Cint');
 const { Member } = require('../../models');
 class CintController {
 
-    survey = async(req, res) => {        
-        if (!req.session.member) {
-            res.status(401).json({
+    surveys = async(userId,params) => {        
+        if (!userId) {
+            return{
                 staus: false,
                 message: 'Unauthorized!'
-            });
+            }
         } 
         else {
             try {
-                const userId = req.query.user_id;
+                // const userId = req.query.user_id;
+                const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+                const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+                const orderBy = 'orderby' in params ? params.orderby : 'id';
+                const order = 'order' in params ? params.order : 'desc';
+                const ssi = 'ssi' in params ? params.ssi : '';
                 if(!userId) {
-                    res.status(422).json({
+                    return {
                         staus: false,
                         message: 'Userid not found!'
-                    });
-                    return;
-                }
+                    }                }
                 const member = await Member.findOne({
                     attributes: ['username', 'gender', 'email', 'zip_code', 'dob'],
                     where: {
@@ -32,53 +35,59 @@ class CintController {
                     const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
                     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
                 
-                    const surveys = result.surveys;                
+                    const surveys = result.surveys;   
+                    var survey_list = {}             
                     if (surveys.length) {
                         var surveyHtml = '';
                         for (let survey of surveys) {
                             const entryLink = survey.entry_link;
-                            const rebuildEntryLink = entryLink.replace('SUBID', req.query.ssi);
-                            tbodyData += `
-                                <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                                    <div class="bg-white card mb-2">
-                                        <div class="card-body position-relative">
-                                            <div class="d-flex justify-content-between">
-                                                <h6 class="text-primary m-0">${survey.name}</h6>
-                                            </div>
-                                            <div class="text-primary small">5 Minutes</div>
-                                            <div class="d-grid mt-1">
-                                                <a href="${rebuildEntryLink}" class="btn btn-primary text-white rounded-1">Earn $${survey.conversion_rate}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>                        
-                            `;
+                            const rebuildEntryLink = entryLink.replace('SUBID', ssi);
+                            survey.link = rebuildEntryLink
+                            survey_list.push(survey)
+                            // tbodyData += `
+                            //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                            //         <div class="bg-white card mb-2">
+                            //             <div class="card-body position-relative">
+                            //                 <div class="d-flex justify-content-between">
+                            //                     <h6 class="text-primary m-0">${survey.name}</h6>
+                            //                 </div>
+                            //                 <div class="text-primary small">5 Minutes</div>
+                            //                 <div class="d-grid mt-1">
+                            //                     <a href="${rebuildEntryLink}" class="btn btn-primary text-white rounded-1">Earn $${survey.conversion_rate}</a>
+                            //                 </div>
+                            //             </div>
+                            //         </div>
+                            //     </div>                        
+                            // `;
                         }
-                        res.send({
+                        return {
                             status: true,
                             message: 'Success',
-                            result: surveyHtml
-                        });
+                            result: {
+                                surveys:survey_list,
+                                page_count:0
+                            }
+                        }
                     } else {
-                        res.json({
+                        return{
                             staus: false,
                             message: 'Surveys not found!'
-                        });
+                        }
                     }
                 } else {
-                    res.json({
+                    return{
                         staus: false,
                         message: 'Member not found!'
-                    });
+                    }
                 }
             }
             catch (error) {
-                res.status(500).json({
-                    staus: false,
-                    message: error.response.data.messages
-                });
                 const logger = require('../../helpers/Logger')(`cint-survey-errror.log`);
                 logger.error(error);
+                return{
+                    staus: false,
+                    message: error.response ? error.response.data.messages : 'No Survey Found!'
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ const {
 } = require('../../models');
 const PurespectrumHelper = require('../../helpers/Purespectrum')
 const { Op } = require('sequelize')
+const Sequelize = require('sequelize');
 class PureSpectrumController {
 
     constructor(){
@@ -34,14 +35,13 @@ class PureSpectrumController {
             throw error('Invalid access!');
     }
 
-    surveys = async (req, res) => {
-        const memberId = req.query.user_id;
+    surveys = async (memberId,params) => {
+        // const memberId = req.query.user_id;
         if (!memberId) {
-            res.status(422).json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Member id not found!'
-            });
-            return;
+            }
         }
         const provider = await SurveyProvider.findOne({
             attributes: ['id'],
@@ -50,12 +50,15 @@ class PureSpectrumController {
             }
         });
         if (!provider) {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Survey Provider not found!'
-            });
-            return;
+            }
         }
+        const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+        const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+        const orderBy = 'orderby' in params ? params.orderby : 'id';
+        const order = 'order' in params ? params.order : 'desc';
         /**
          * check and get member's eligibility
          */
@@ -156,53 +159,68 @@ class PureSpectrumController {
                                 }
                             ],
                         }
+                    },
+                    order: [[Sequelize.literal(orderBy), order]],
+                    limit: perPage,
+                    offset: (pageNo - 1) * perPage,
+                });
+                var data_count = await Survey.findAndCountAll({
+                    attributes: ['id'],
+                    where: {
+                        survey_provider_id: provider.id,
+                        status: "active",
                     }
                 });
-                
+                var page_count = Math.ceil(data_count.count / perPage);
+                var survey_list = {}
                 if(surveys && surveys.length){
                     var surveyHtml = '';
                     for (let survey of surveys) {
                         let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
-                        surveyHtml += `
-                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                                <div class="bg-white card mb-2">
-                                    <div class="card-body position-relative">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-primary m-0">${survey.name}</h6>
-                                        </div>
-                                        <div class="text-primary small">${survey.loi} Minutes</div>
-                                        <div class="d-grid mt-1">
-                                            <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `
+                        survey.link = link
+                        survey_list.push(survey)
+                        // surveyHtml += `
+                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                        //         <div class="bg-white card mb-2">
+                        //             <div class="card-body position-relative">
+                        //                 <div class="d-flex justify-content-between">
+                        //                     <h6 class="text-primary m-0">${survey.name}</h6>
+                        //                 </div>
+                        //                 <div class="text-primary small">${survey.loi} Minutes</div>
+                        //                 <div class="d-grid mt-1">
+                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                        //                 </div>
+                        //             </div>
+                        //         </div>
+                        //     </div>
+                        // `
                     }
-                    res.send({
+                    return {
                         status: true,
                         message: 'Success',
-                        result: surveyHtml
-                    });
+                        result: {
+                            surveys:survey_list,
+                            page_count
+                        }
+                    }
                 }
                 else {
-                    res.send({
-                        status: true,
-                        message: 'No survey found!',
-                        result: surveyHtml
-                    });
+                    return {
+                        staus: false,
+                        message: 'Surveys not found!'
+                    }
                 }
             } else {
-                res.json({
+                return {
                     staus: false,
                     message: 'No surveys have been matched!'
-                });
+                }
             }
         } else {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Member eiligibility not found!'
-            });
+            }
         }
     }
 

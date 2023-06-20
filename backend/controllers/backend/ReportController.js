@@ -23,19 +23,8 @@ class ReportController{
     var start_date = new Date(req.query.from)
     var end_date = new Date(req.query.to)
     let company_portal_id = req.headers.site_id
-    // if(start_date){
-    //   start_date = new Date(start_date+' 00:00:00')
-    // }else{
-    //   start_date = moment().subtract(30, 'days').toISOString()
-    // }
-    // if(end_date){
-    //   end_date = new Date(end_date+' 23:59:59')
-    // }else{
-    //   end_date = moment().toISOString()
-    // }
     let d_time = Math.abs(end_date - start_date);
     let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24)); 
-    console.log(total_days)
     var query_string = "DATE"
     if(total_days > 15 && total_days <= 31){
       query_string = "WEEK"
@@ -312,7 +301,6 @@ class ReportController{
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
-    console.log(query_string,total_days)
     var dt = new Date(start_date);
     if(query_string === "DATE"){
       while (dt <= end_date) {
