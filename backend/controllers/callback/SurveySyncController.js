@@ -33,19 +33,19 @@ class SurveySyncController {
         this.schlesingerLanguageId = 3;
     }
 
-    index(req, res){
+    index(req, res) {
         const action = req.params.action;
-        this.getProvider(req, res);        
-        if(action === 'question') {
+        this.getProvider(req, res);
+        if (action === 'question') {
             this.syncSurveyQuestion(req, res);
-        } else if(action === 'survey') {
+        } else if (action === 'survey') {
             this.syncSurveyQualification(req, res);
-        }  else {
+        } else {
             res.send('Invalid action argument!')
         }
     }
 
-    async getProvider(req, res){
+    async getProvider(req, res) {
         const providerName = req.params.provider;
         const provider = await SurveyProvider.findOne({
             attributes: ['id'],
@@ -53,23 +53,23 @@ class SurveySyncController {
                 name: capitalizeFirstLetter(providerName)
             }
         });
-        
+
         this.providerId = (provider.id).toString()
         return provider;
     }
 
     async syncSurveyQuestion(req, res) {
         const provider = req.params.provider;
-        if(provider === 'purespectrum') {
+        if (provider === 'purespectrum') {
             this.pureSpectrumSurveyQuestions(req, res);
         }
-        else if(provider === 'schlesinger') {
+        else if (provider === 'schlesinger') {
             this.schlesingerSurveyQuestions(req, res);
-        }  
-        else if(provider === 'toluna') {
+        }
+        else if (provider === 'toluna') {
             this.tolunaSurveyQuestions(req, res);
         }
-        else if(provider === 'lucid') {
+        else if (provider === 'lucid') {
             this.lucidSurveyQuestions(req, res);
         }
         else {
@@ -79,10 +79,10 @@ class SurveySyncController {
 
     async syncSurveyQualification(req, res) {
         const provider = req.params.provider;
-        if(provider === 'purespectrum') {
+        if (provider === 'purespectrum') {
             this.pureSpectrumQualification(req, res);
         }
-        else if(provider === 'schlesinger') {
+        else if (provider === 'schlesinger') {
             this.schlesingerQualification(req, res);
         }
         else {
@@ -95,15 +95,15 @@ class SurveySyncController {
      * Pure Spectrum To create all the questions
      */
     async pureSpectrumSurveyQuestions(req, res) {
-        try{
+        try {
             const psObj = new PurespectrumHelper;
             const allAttributes = await psObj.fetchAndReturnData('/attributes?localization=en_US&format=true');
-            
-            if ('success' === allAttributes.apiStatus) {    
-                const qualAttributes = allAttributes.qual_attributes;    
-               
-                const questions = [];           
-                for(let attr of qualAttributes){
+
+            if ('success' === allAttributes.apiStatus) {
+                const qualAttributes = allAttributes.qual_attributes;
+
+                const questions = [];
+                for (let attr of qualAttributes) {
                     let params = {
                         question_text: attr.text,
                         name: attr.desc,
@@ -112,18 +112,18 @@ class SurveySyncController {
                         question_type: psObj.getQuestionType(attr.type),
                         created_at: new Date()
                     }
-                    const precodes = []; 
-                    if(attr.condition_codes.length) {
-                        for(let op of attr.condition_codes){
+                    const precodes = [];
+                    if (attr.condition_codes.length) {
+                        for (let op of attr.condition_codes) {
                             precodes.push({
                                 option: op.id,
                                 precode: attr.qualification_code
                             })
                         }
-                    } else if(attr.condition_codes.length < 1) {
+                    } else if (attr.condition_codes.length < 1) {
                         const format = attr.format;
-                        if(format.min !== null && format.max !== null) {
-                            for(let op = format.min; op<=format.max; op++){
+                        if (format.min !== null && format.max !== null) {
+                            for (let op = format.min; op <= format.max; op++) {
                                 precodes.push({
                                     option: op,
                                     precode: attr.qualification_code
@@ -137,7 +137,7 @@ class SurveySyncController {
                         }
                     }
 
-                    questions.push({...params, SurveyAnswerPrecodes: precodes});
+                    questions.push({ ...params, SurveyAnswerPrecodes: precodes });
                 };
 
                 const result = await SurveyQuestion.bulkCreate(questions, {
@@ -147,7 +147,7 @@ class SurveySyncController {
                         ignoreDuplicates: true
                     }]
                 });
-                res.json({ status: true, message: 'Question Updated', total:result.length, result });
+                res.json({ status: true, message: 'Question Updated', total: result.length, result });
             } else {
                 res.json({ status: false, message: 'No record found!' });
             }
@@ -158,18 +158,18 @@ class SurveySyncController {
             res.json({ status: false, message: 'Something went wrong!' });
         }
     }
- 
+
     /**
      * Schlesinger To create all the questions
      */
-    async schlesingerSurveyQuestions(req, res){
-        try{
+    async schlesingerSurveyQuestions(req, res) {
+        try {
             const schObj = new SchlesingerHelper;
             const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + this.schlesingerLanguageId);
-                        
+
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
-                const qualificationData = qualifications.qualifications; 
-                
+                const qualificationData = qualifications.qualifications;
+
                 const params = qualificationData.map(attr => {
                     return {
                         question_text: attr.text,
@@ -182,21 +182,21 @@ class SurveySyncController {
                 });
 
                 await SurveyQuestion.bulkCreate(params, {
-                    updateOnDuplicate: ["question_text", "question_type", "name"] 
+                    updateOnDuplicate: ["question_text", "question_type", "name"]
                 });
 
                 const ansPrecode = [];
-                for(let attr of qualificationData) {
+                for (let attr of qualificationData) {
                     const qualificationAnswers = attr.qualificationAnswers;
-                    for(let qa of qualificationAnswers){
+                    for (let qa of qualificationAnswers) {
                         /*if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
                             ansPrecode.push({
                                 option: null,
                                 precode: attr.qualificationId,
                             });
                         } else */
-                        if([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59){ // Age
-                            for(let i = 15; i<=99; i++){
+                        if ([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59) { // Age
+                            for (let i = 15; i <= 99; i++) {
                                 ansPrecode.push({
                                     option: i,
                                     precode: attr.qualificationId,
@@ -207,16 +207,16 @@ class SurveySyncController {
                                 option: qa.answerId,
                                 precode: attr.qualificationId,
                             });
-                        }    
-                                
+                        }
+
                     }
                 }
-                if(ansPrecode.length) {
+                if (ansPrecode.length) {
                     await SurveyAnswerPrecodes.bulkCreate(ansPrecode, {
                         updateOnDuplicate: ['option']
                     });
                 }
-                
+
                 res.json({ status: true, message: 'Updated' });
             } else {
                 res.json(qualifications);
@@ -233,13 +233,13 @@ class SurveySyncController {
      * Pure Spectrum survey
      */
     async pureSpectrumSurvey(req, res) {
-        try{
+        try {
             const psObj = new PurespectrumHelper;
-            const allSurveys = await psObj.fetchAndReturnData('/surveys');         
+            const allSurveys = await psObj.fetchAndReturnData('/surveys');
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
                 const surveyData = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5);
-               
-                if(!surveyData.length) {
+
+                if (!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
@@ -260,13 +260,13 @@ class SurveySyncController {
                 });
                 //----------
 
-                const surveyIds = surveyData.map(sr => sr.survey_id);                
+                const surveyIds = surveyData.map(sr => sr.survey_id);
                 const existingSurveys = await Survey.findAll({
                     attributes: ['id', 'survey_number'],
                     where: {
                         survey_provider_id: this.providerId,
                         survey_number: {
-                            [Op.in] : surveyIds
+                            [Op.in]: surveyIds
                         }
                     }
                 });
@@ -283,14 +283,14 @@ class SurveySyncController {
                         original_json: sr,
                         created_at: new Date()
                     }
-                    if(data) {
+                    if (data) {
                         params.id = data.id
                     }
                     return params;
                 });
 
                 const result = await Survey.bulkCreate(insertParams, {
-                    updateOnDuplicate: ["loi", "cpi", "status", "name", "original_json"] 
+                    updateOnDuplicate: ["loi", "cpi", "status", "name", "original_json"]
                 });
                 return result;
             } else {
@@ -307,14 +307,14 @@ class SurveySyncController {
      * Schlesinger survey
      */
     async schlesingerSurvey(req, res) {
-        try{
+        try {
             const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
-            
-            if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
+
+            if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
-                
-                if(!surveyData.length) {
+
+                if (!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
@@ -335,14 +335,14 @@ class SurveySyncController {
                 });
                 //----------
 
-                for(let survey of surveyData ){
+                for (let survey of surveyData) {
                     const checkExists = await Survey.count({
                         where: {
                             survey_provider_id: this.providerId,
                             survey_number: survey.SurveyId,
                         },
                     });
-                    if(!checkExists) {
+                    if (!checkExists) {
                         await Survey.create({
                             survey_provider_id: this.providerId,
                             loi: survey.LOI,
@@ -368,13 +368,13 @@ class SurveySyncController {
                     }
                 }
                 return await Survey.findAll({
-                    attributes:['id', 'survey_number', 'loi', 'cpi'],
+                    attributes: ['id', 'survey_number', 'loi', 'cpi'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
                     }
                 });
-                
+
             } else {
                 return [];
             }
@@ -389,28 +389,28 @@ class SurveySyncController {
      * [Pure Spectrum] To Save Survey, Qualifications, Qualification Answer
      */
     async pureSpectrumQualification(req, res) {
-        if(req.query.mode && req.query.mode === 'db') {
-            try{
+        if (req.query.mode && req.query.mode === 'db') {
+            try {
                 //Save Surveys
                 const allSurveys = await this.pureSpectrumSurvey(req, res);
-                if(allSurveys.length) {
+                if (allSurveys.length) {
                     const psObj = new PurespectrumHelper;
-                    for(let survey of allSurveys) {
+                    for (let survey of allSurveys) {
                         const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
                         if ('success' === surveyData.apiStatus) {
                             const qualifications = surveyData.survey.qualifications;
-                            if(qualifications.length){
-                                for(let qualification of qualifications){
+                            if (qualifications.length) {
+                                for (let qualification of qualifications) {
                                     const questionData = await SurveyQuestion.findOne({
-                                        attributes:['id', 'question_type', 'survey_provider_question_id'],
+                                        attributes: ['id', 'question_type', 'survey_provider_question_id'],
                                         where: {
                                             survey_provider_question_id: qualification.qualification_code,
                                             survey_provider_id: this.providerId
                                         }
                                     });
-                                    
+
                                     // Qualifications insert || Find
-                                    if(questionData && questionData.id) {
+                                    if (questionData && questionData.id) {
                                         var surveyQualification = await SurveyQualification.findOne({
                                             where: {
                                                 survey_id: survey.id,
@@ -426,8 +426,8 @@ class SurveySyncController {
                                             }, { silent: true });
                                         }
                                         // Survey Precode Check and survey_answer_precode_survey_qualifications save
-                                        if(surveyQualification && surveyQualification.id) {
-                                            if(qualification.condition_codes){
+                                        if (surveyQualification && surveyQualification.id) {
+                                            if (qualification.condition_codes) {
                                                 const precodeData = await SurveyAnswerPrecodes.findAll({
                                                     where: {
                                                         precode: qualification.qualification_code,
@@ -438,11 +438,11 @@ class SurveySyncController {
                                                         }
                                                     }
                                                 });
-                                                if(precodeData && precodeData.length) {
+                                                if (precodeData && precodeData.length) {
                                                     await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                                 }
                                             }
-                                            else if(qualification.range_sets){
+                                            else if (qualification.range_sets) {
                                                 const precodeData = await SurveyAnswerPrecodes.findAll({
                                                     where: {
                                                         precode: qualification.qualification_code,
@@ -452,19 +452,19 @@ class SurveySyncController {
                                                         }
                                                     }
                                                 });
-                                                
-                                                if(precodeData && precodeData.length) {
+
+                                                if (precodeData && precodeData.length) {
                                                     await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                                 }
                                             }
                                         }
-                                        
+
                                     }
                                 }
                             }
                         }
                     }
-                    res.json({ status: true, message: 'Data updated'});
+                    res.json({ status: true, message: 'Data updated' });
                 } else {
                     res.json({ status: true, message: 'No survey found!' });
                 }
@@ -474,7 +474,7 @@ class SurveySyncController {
                 console.error(error);
                 throw error;
             }
-        } else {            
+        } else {
             return this.pureSpectrumSurveySaveToSQS(req, res);
         }
     }
@@ -483,26 +483,26 @@ class SurveySyncController {
      * [Schlesinger] To Save Survey, Qualifications, Qualification Answer
      */
     async schlesingerQualification(req, res) {
-        if(req.query.mode && req.query.mode === 'db') {
-            try{
-                const allSurveys = await this.schlesingerSurvey(req, res);  
-                if(allSurveys.length) {
-                    const psObj = new SchlesingerHelper;                
-                    for(let survey of allSurveys) {                    
+        if (req.query.mode && req.query.mode === 'db') {
+            try {
+                const allSurveys = await this.schlesingerSurvey(req, res);
+                if (allSurveys.length) {
+                    const psObj = new SchlesingerHelper;
+                    for (let survey of allSurveys) {
                         const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + survey.survey_number);
-    
-                        if (surveyData.Result.Success && surveyData.Result.TotalCount !=0) {
+
+                        if (surveyData.Result.Success && surveyData.Result.TotalCount != 0) {
                             const surveyQualifications = surveyData.SurveyQualifications;
-                            for(let ql of surveyQualifications){
+                            for (let ql of surveyQualifications) {
                                 const questionData = await SurveyQuestion.findOne({
-                                    attributes:['id', 'question_type', 'survey_provider_question_id'],
+                                    attributes: ['id', 'question_type', 'survey_provider_question_id'],
                                     where: {
                                         survey_provider_question_id: ql.QualificationId,
                                         survey_provider_id: this.providerId
                                     }
                                 });
-    
-                                if(questionData && questionData.id) {
+
+                                if (questionData && questionData.id) {
                                     var surveyQualification = await SurveyQualification.findOne({
                                         where: {
                                             survey_id: survey.id,
@@ -517,13 +517,13 @@ class SurveySyncController {
                                             created_at: new Date()
                                         }, { silent: true });
                                     }
-    
-    
-                                    if(surveyQualification && surveyQualification.id) {
-                                        if(questionData.question_type == 'range' && questionData.survey_provider_question_id == 59){
+
+
+                                    if (surveyQualification && surveyQualification.id) {
+                                        if (questionData.question_type == 'range' && questionData.survey_provider_question_id == 59) {
                                             const start = ql.AnswerIds[0].split('-')[0];
                                             const end = ql.AnswerIds[ql.AnswerIds.length - 1].split('-')[1];
-                                            
+
                                             const precodeData = await SurveyAnswerPrecodes.findAll({
                                                 where: {
                                                     precode: ql.QualificationId,
@@ -533,7 +533,7 @@ class SurveySyncController {
                                                     }
                                                 }
                                             });
-                                            if(precodeData && precodeData.length) {
+                                            if (precodeData && precodeData.length) {
                                                 await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                             }
                                         } else {
@@ -544,17 +544,17 @@ class SurveySyncController {
                                                     option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
                                                 }
                                             });
-                                            if(precodeData && precodeData.id) {
+                                            if (precodeData && precodeData.id) {
                                                 await surveyQualification.addSurveyAnswerPrecodes(precodeData);
                                             }
                                         }
-                                        
+
                                     }
                                 }
                             }
                         }
                     }
-                    res.json({ status: true, message: 'Data updated'});
+                    res.json({ status: true, message: 'Data updated' });
                 } else {
                     res.json({ status: true, message: 'No survey found!' });
                 }
@@ -572,31 +572,31 @@ class SurveySyncController {
      * Schlesiner Survey Sync through SQS
      */
     async schlesingerSurveySaveToSQS(req, res) {
-        try{
+        try {
             const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');   
-            
-            if (allSurveys.Result.Success && allSurveys.Result.TotalCount !=0) {
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
+
+            if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
-                
-                if(!surveyData.length) {
+
+                if (!surveyData.length) {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
                 const responses = [];
                 const sqsHelper = new SqsHelper();
-                
-                for(let element of surveyData){
+
+                for (let element of surveyData) {
                     let body = {
                         ...element,
                         survey_provider_id: this.providerId,
                     };
                     const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
-                    if (qualifications.Result.Success && qualifications.Result.TotalCount !=0) {
+                    if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
                         body.qualifications = qualifications.SurveyQualifications;
                     }
                     const send_message = await sqsHelper.sendData(body);
-                    console.log('send_message', send_message);
+                    // console.log('send_message', send_message);
                     responses.push(send_message);
                 };
                 res.send({
@@ -607,9 +607,9 @@ class SurveySyncController {
                 res.send('No survey found!');
             }
         }
-        catch(error) {
+        catch (error) {
             const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
-			logger.error(error);
+            logger.error(error);
             res.send(error)
         }
     }
@@ -617,28 +617,28 @@ class SurveySyncController {
     /**
      * Toluna Question & Answer Sync
      */
-    async tolunaSurveyQuestions(req, res){
-        try{
+    async tolunaSurveyQuestions(req, res) {
+        try {
             const payload = {
                 "CultureIDs": [1],   //1 = "en-us"
                 "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
                 "LastUpdateDate": "",
-                "IncludeComputed" : "true",
+                "IncludeComputed": "true",
                 "IncludeRoutables": "true",
                 "IncludeDemographics": "true"
             }
             const tObj = new TolunaHelper;
             const questions = await tObj.getQuestionsAnswer(payload);
-            
+
             const params = questions.map(qs => {
                 let surveyAnswerPrecodes = qs.TranslatedAnswers.map(ans => {
-                    return{
+                    return {
                         survey_provider_id: this.providerId,
                         precode: qs.TranslatedQuestion.QuestionID,
-                        option:  ans.AnswerID 
+                        option: ans.AnswerID
                     }
                 });
-                
+
                 let params = {
                     question_text: qs.TranslatedQuestion.DisplayNameTranslation,
                     name: qs.InternalName,
@@ -646,9 +646,9 @@ class SurveySyncController {
                     survey_provider_question_id: qs.TranslatedQuestion.QuestionID,
                     question_type: qs.AnswerType,
                     created_at: new Date(),
-                    SurveyAnswerPrecodes: surveyAnswerPrecodes                
+                    SurveyAnswerPrecodes: surveyAnswerPrecodes
                 };
-                
+
                 return params;
             });
 
@@ -656,13 +656,13 @@ class SurveySyncController {
                 include: [{
                     model: SurveyAnswerPrecodes
                 }]
-            });            
+            });
             res.send('Data Updated!');
             return;
-            
+
         } catch (error) {
             const logger = require('../../helpers/Logger')(`toluna-qna-errror.log`);
-			logger.error(error);
+            logger.error(error);
             throw error;
         }
     }
@@ -670,18 +670,18 @@ class SurveySyncController {
     /**
      * Lucid Question & Answer Sync
      */
-    async lucidSurveyQuestions(req, res){
-        try{
+    async lucidSurveyQuestions(req, res) {
+        try {
             const lucidHelper = new LucidHelper();
-            if(req.query.type === 'question'){
+            if (req.query.type === 'question') {
                 const questions = await lucidHelper.fetchAndReturnData(
                     'https://api.samplicio.us/Lookup/v1/QuestionLibrary/AllQuestions/9'
                 );
                 let questionsArry = [];
-                
+
                 if (questions && questions.ResultCount && questions.ResultCount > 0) {
                     let allQues = questions.Questions;
-                    for(let element of allQues){
+                    for (let element of allQues) {
                         questionsArry.push({
                             question_text: element.QuestionText,
                             name: element.Name,
@@ -695,13 +695,13 @@ class SurveySyncController {
                         updateOnDuplicate: ['survey_provider_question_id'],
                         ignoreDuplicates: true,
                     });
-                    res.send({message: 'Data Updated!', total_record:questionData.length, data: questionData});
+                    res.send({ message: 'Data Updated!', total_record: questionData.length, data: questionData });
                     return;
                 }
-            } else if(req.query.type === 'options') {
+            } else if (req.query.type === 'options') {
                 let page = req.query.page ? req.query.page : 1;
                 let limit = 40;
-                let offset = (page-1) * limit;
+                let offset = (page - 1) * limit;
 
                 let surveyQuestions = await SurveyQuestion.findAll({
                     attributes: ['survey_provider_question_id', 'question_type'],
@@ -711,32 +711,32 @@ class SurveySyncController {
                     offset: offset,
                     limit: limit,
                 });
-                
+
                 let optionsArry = [];
                 if (surveyQuestions.length > 0) {
                     const lucidHelper = new LucidHelper();
-                    for(let question of surveyQuestions) {
+                    for (let question of surveyQuestions) {
                         const quesOptions = await lucidHelper.questionOptions(
                             9,
                             question.survey_provider_question_id
                         );
-                        
+
                         if (quesOptions.ResultCount > 0 && quesOptions.QuestionOptions) {
                             let options = quesOptions.QuestionOptions;
-                            if(question.question_type == 'Numeric - Open-end' && question.survey_provider_question_id == 42){
-                                for(let i = 15; i<=99; i++){
+                            if (question.question_type == 'Numeric - Open-end' && question.survey_provider_question_id == 42) {
+                                for (let i = 15; i <= 99; i++) {
                                     optionsArry.push({
                                         option: i,
                                         precode: question.survey_provider_question_id
                                     })
                                 }
-                            } else if(question.question_type == 'Numeric - Open-end'){
+                            } else if (question.question_type == 'Numeric - Open-end') {
                                 optionsArry.push({
                                     option: null,
                                     precode: question.survey_provider_question_id
                                 })
                             } else {
-                                for(let opt of options){
+                                for (let opt of options) {
                                     optionsArry.push({
                                         option: opt.Precode,
                                         precode: opt.QuestionID
@@ -745,12 +745,12 @@ class SurveySyncController {
                             }
                         }
                     }
-                    
+
                     const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
                         updateOnDuplicate: ['option']
                     });
 
-                    res.send({message: 'Data Updated!', data: optionsData});
+                    res.send({ message: 'Data Updated!', data: optionsData });
                     return;
                 } else {
                     res.send('No more question available!')
@@ -761,7 +761,7 @@ class SurveySyncController {
             return;
         } catch (error) {
             const logger = require('../../helpers/Logger')(`lucid-qna-errror.log`);
-			logger.error(error);
+            logger.error(error);
             throw error;
         }
     }
@@ -770,24 +770,24 @@ class SurveySyncController {
      * Pure Spectrum Survey Sync through SQS
      */
     async pureSpectrumSurveySaveToSQS(req, res) {
-        try{
+        try {
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
                 const surveyIds = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5).map(sr => sr.survey_id);
-                
+
                 const responses = [];
-                const sqsHelper = new SqsHelper();                
-                for(let survey_id of surveyIds) {
+                const sqsHelper = new SqsHelper();
+                for (let survey_id of surveyIds) {
                     const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey_id);
                     if ('success' === surveyData.apiStatus) {
                         let body = {
                             ...surveyData.survey,
                             survey_provider_id: this.providerId,
                         };
-                        
+
                         const send_message = await sqsHelper.sendData(body);
-                        console.log('send_message', send_message);
+                        // console.log('send_message', send_message);
                         responses.push(send_message);
                     }
                 }
@@ -801,9 +801,9 @@ class SurveySyncController {
             }
 
         }
-        catch(error) {
+        catch (error) {
             const logger = require('../../helpers/Logger')(`purespectrum-sync-errror.log`);
-			logger.error(error);
+            logger.error(error);
             res.send(error)
         }
     }
@@ -816,7 +816,7 @@ class SurveySyncController {
      * Pure Spectrum - Old Survey disabled 
      */
     async pureSpectrumSurveyUpdate(req, res) {
-        try{
+        try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
                 where: {
@@ -894,9 +894,9 @@ class SurveySyncController {
                     }
                 });
             }
-            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
         }
-        catch(error) {
+        catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
 			logger.error(error);
             res.send(error.message);
@@ -907,8 +907,8 @@ class SurveySyncController {
     /**
      * Schlesinger - Old Survey disabled
      */
-    async schlesingerSurveyUpdate(req, res){
-        try{
+    async schlesingerSurveyUpdate(req, res) {
+        try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
                 where: {
@@ -924,17 +924,17 @@ class SurveySyncController {
                 }
             });
             const surveyNumber = [];
-            for(let survey of surveys){
-                try{
+            for (let survey of surveys) {
+                try {
                     const surveyData = await psObj.fetchSellerAPI('/survey/survey-quotas/' + survey.survey_number);
-                    if(surveyData.SurveyQuotas && surveyData.SurveyQuotas.length < 1 ) {
+                    if (surveyData.SurveyQuotas && surveyData.SurveyQuotas.length < 1) {
                         surveyNumber.push(survey.survey_number);
                     }
                 } catch (error) {
                     surveyNumber.push(survey.survey_number);
                 }
             }
-            if(surveyNumber.length) {
+            if (surveyNumber.length) {
                 await Survey.update({
                     status: 'closed',
                     deleted_at: new Date()
@@ -944,11 +944,11 @@ class SurveySyncController {
                     }
                 });
             }
-            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
         }
-        catch(error) {
+        catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
-			logger.error(error);
+            logger.error(error);
             res.send(error);
         }
     }
@@ -956,14 +956,14 @@ class SurveySyncController {
     /**
      * Lucid - Old Survey disabled
      */
-    async lucidSurveyUpdate(req, res){
-        try{
+    async lucidSurveyUpdate(req, res) {
+        try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
                 where: {
                     name: 'Lucid'
                 }
-            });     
+            });
             const psObj = new LucidHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number'],
@@ -972,17 +972,17 @@ class SurveySyncController {
                     status: 'live'
                 }
             });
-            for(let survey of surveys){
-                try{
+            for (let survey of surveys) {
+                try {
                     const quota = await psObj.showQuota(survey.survey_number);
-                    if(quota.SurveyStillLive == false) {
+                    if (quota.SurveyStillLive == false) {
                         surveyNumber.push(survey.survey_number);
                     }
                 } catch (error) {
                     surveyNumber.push(survey.survey_number);
                 }
             }
-            if(surveyNumber.length) {
+            if (surveyNumber.length) {
                 await Survey.update({
                     status: 'closed',
                     deleted_at: new Date()
@@ -992,11 +992,11 @@ class SurveySyncController {
                     }
                 });
             }
-            res.send({status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber});
+            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
 
-        } catch(error) {
+        } catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
-			logger.error(error);
+            logger.error(error);
             res.send(error);
         }
     }

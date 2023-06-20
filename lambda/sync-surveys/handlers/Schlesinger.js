@@ -11,13 +11,13 @@ class Schlesinger {
     }
 
     async main() {
-        console.log('Main Func');
+        // console.log('Main Func');
         const surveyId = await this.surveySync();
         await this.surveyQualificationSync(surveyId);
         return true;
     }
 
-    surveySync = async()=> {
+    surveySync = async () => {
         const params = {
             loi: this.record.LOI,
             cpi: this.record.CPI,
@@ -35,23 +35,23 @@ class Schlesinger {
                 survey_number: this.record.SurveyId,
             },
         });
-        if(checkExists) { 
+        if (checkExists) {
             params.id = checkExists.id;
             await checkExists.destroy();
         }
         const survey = await Models.Survey.create(params);
-        console.log('surveySync Func');
+        // console.log('surveySync Func');
         return survey.id;
     }
 
-    surveyQualificationSync = async(surveyId) => {
-        console.log('surveySync Func');
-        if(this.record.qualifications){
+    surveyQualificationSync = async (surveyId) => {
+        // console.log('surveySync Func');
+        if (this.record.qualifications) {
             const qualifications = this.record.qualifications;
-            if(qualifications.length){
+            if (qualifications.length) {
                 const qualificationIds = qualifications.map(ql => ql.QualificationId);
                 const questionData = await Models.SurveyQuestion.findAll({
-                    attributes:['id', 'question_type', 'survey_provider_question_id'],
+                    attributes: ['id', 'question_type', 'survey_provider_question_id'],
                     where: {
                         survey_provider_id: this.record.survey_provider_id,
                         survey_provider_question_id: {
@@ -62,7 +62,7 @@ class Schlesinger {
                         model: Models.SurveyAnswerPrecodes
                     }
                 });
-        
+
                 const params = questionData.map(qd => {
                     let params = {
                         survey_id: surveyId,
@@ -76,15 +76,15 @@ class Schlesinger {
                     //         params.SurveyAnswerPrecodes = data
                     //     }
                     // }
-                    if(qd.SurveyAnswerPrecodes && qd.SurveyAnswerPrecodes.length){
-                        if(qd.question_type == 'range'){
-                            const data = qualifications.find(ql=> ql.QualificationId == qd.survey_provider_question_id);
+                    if (qd.SurveyAnswerPrecodes && qd.SurveyAnswerPrecodes.length) {
+                        if (qd.question_type == 'range') {
+                            const data = qualifications.find(ql => ql.QualificationId == qd.survey_provider_question_id);
                             const range = data.AnswerIds[0].split("-")
                             const result = qd.SurveyAnswerPrecodes.filter(pr => pr.option >= range[0] && pr.option <= range[1]);
-                            params.SurveyAnswerPrecodes = result;                            
+                            params.SurveyAnswerPrecodes = result;
                         } else {
-                            const data = qd.SurveyAnswerPrecodes.filter(pr=> qualifications.some(ql=> ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
-                            if(data && data.length){
+                            const data = qd.SurveyAnswerPrecodes.filter(pr => qualifications.some(ql => ql.QualificationId == pr.precode && ql.AnswerIds.includes(pr.option)));
+                            if (data && data.length) {
                                 params.SurveyAnswerPrecodes = data
                             }
                         }
@@ -96,7 +96,7 @@ class Schlesinger {
                     const surveyQualification = await Models.SurveyQualification.create(el);
                     await surveyQualification.addSurveyAnswerPrecodes(el.SurveyAnswerPrecodes);
                 });
-    
+
             }
         }
         return true;

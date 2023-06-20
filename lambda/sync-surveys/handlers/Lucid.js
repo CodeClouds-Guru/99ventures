@@ -24,7 +24,7 @@ class Lucid {
             survey_number: this.record.survey_id,
             original_json: this.record
         };
-        console.log('Finding survey');
+        // console.log('Finding survey');
         const existing_data = await Models.Survey.findOne({
             attributes: ['id'],
             where: {
@@ -42,13 +42,13 @@ class Lucid {
             // });
             await existing_data.destroy();
         }
-        console.log('deleted survey');
+        // console.log('deleted survey');
         if ((this.record.is_live || this.record.is_live === 'true') && this.record.message_reason !== 'deactivated') {
             const survey = await Models.Survey.create(data);
-            console.log('created survey');
+            // console.log('created survey');
 
             const survey_qualifications = await this.getSurveyQuestionIds(survey.id);
-            console.log('fetched qualification');
+            // console.log('fetched qualification');
 
 
             await Models.SurveyQualification.bulkCreate(survey_qualifications, {
@@ -56,7 +56,7 @@ class Lucid {
                     model: Models.SurveyAnswerPrecodes,
                 }]
             });
-            console.log('created qualification');
+            // console.log('created qualification');
         }
         return true;
     }

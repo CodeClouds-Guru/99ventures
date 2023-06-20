@@ -12,14 +12,14 @@ const db = {};
 //   sequelize = new Sequelize(config.database, config.username, config.password, config);
 // }
 
-console.log('DB environment', {
-  DB_NAME: process.env.DB_NAME,
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST || '127.0.0.1',
-  dialect: 'mysql',
-  port: process.env.DB_PORT || 3306,
-});
+// console.log('DB environment', {
+//   DB_NAME: process.env.DB_NAME,
+//   DB_USER: process.env.DB_USER,
+//   DB_PASSWORD: process.env.DB_PASSWORD,
+//   host: process.env.DB_HOST || '127.0.0.1',
+//   dialect: 'mysql',
+//   port: process.env.DB_PORT || 3306,
+// });
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,

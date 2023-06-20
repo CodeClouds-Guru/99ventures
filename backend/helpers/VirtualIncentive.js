@@ -63,7 +63,7 @@ class VirtualIncentive {
               amount: row.amount,
             });
           });
-          console.log(params);
+          // console.log(params);
           payload.push({ [data]: params });
         });
 
