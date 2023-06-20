@@ -415,8 +415,8 @@ function List(props) {
 			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'withdrawal-requests') {
+			const status = processFieldValue(n[field.field_name], field);
 			if (field.field_name === 'status') {
-				const status = processFieldValue(n[field.field_name], field);
 				if (status === 'pending')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
 				else if (status === 'approved')
@@ -429,6 +429,14 @@ function List(props) {
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
 				else if (status === 'declined')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			}
+			if (field.field_name === 'Member.admin_status') {
+				if (status === 'verified')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="success" size="small" />
+				else if (status === 'pending')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
+				else if (status === 'not_verified')
+					return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
 			}
 			if (field.field_name === 'Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['Member.username']}</a>
@@ -597,14 +605,15 @@ function List(props) {
 									initial={{ x: -20 }}
 									animate={{ x: 0, transition: { delay: 0.2 } }}
 									delay={300}
-									className="w-full text-24 md:text-32 font-extrabold tracking-tight capitalize"
+									className="w-2/3 lg:w-1/3 font-extrabold tracking-tight capitalize"
+									variant="h5"
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
 									{(!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
 								</Typography>
 							)
 						}
-						<div className="flex items-center justify-end space-x-8 w-full ml-auto">
+						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
 							{
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
@@ -624,11 +633,11 @@ function List(props) {
 											component={motion.div}
 											initial={{ y: -20, opacity: 0 }}
 											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center xl:w-2/5 sm:w-1/3 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
+											className="flex items-center justify-around w-full space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
 											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
 											onClick={() => setDatepickerStatus(!datepickerStatus)}
 										>
-											<FuseSvgIcon className="text-48 cursor-pointer" size={24} color="disabled">feather:calendar</FuseSvgIcon>
+											<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={24} color="disabled">feather:calendar</FuseSvgIcon>
 											<Input
 												label="Select daterange"
 												className="datepicker--input cursor-pointer"

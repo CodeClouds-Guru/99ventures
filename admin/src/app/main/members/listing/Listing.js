@@ -68,14 +68,14 @@ function Listing(props) {
         "IpLogs.browser": "Browser",
         "IpLogs.browser_language": "Browser Language",
         "status": "Status",
-        "MembershipTiers.name": "Membership level",
+        "MembershipTier.name": "Membership level",
         "address": "Address",
         "phone_no": "Telephone",
-        "a": "Email marketing opt in",
-        "MemberTransactions.amount": "Current Balance",
-        "b": "Total Earnings",
-        "c": "Withdrawal - total paid",
-        "d": "Withdrawal - last cash out (date)",
+        "MemberEmailAlerts.id": "Email marketing opt in",
+        "MemberTransactions.balance": "Current Balance",
+        "MemberTransactions.amount": "Total Earnings",
+        "WithdrawalRequests.amount": "Withdrawal - total paid",
+        "WithdrawalRequests.created_at": "Withdrawal - last cash out (date)",
         "admin_status": "Verified/unverified",
     }
     const column_object = {
@@ -404,7 +404,8 @@ function Listing(props) {
                     initial={{ x: -20 }}
                     animate={{ x: 0, transition: { delay: 0.2 } }}
                     delay={300}
-                    className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
+                    className="flex font-extrabold tracking-tight capitalize"
+                    variant="h5"
                 >
                     Members
                 </Typography>

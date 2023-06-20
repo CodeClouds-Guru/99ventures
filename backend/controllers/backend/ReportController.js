@@ -232,29 +232,18 @@ class ReportController{
   }
 
   async topSurveys(start_date, end_date,query_string){
-    let top_surveys = await MemberSurvey.findAll({
-      attributes:['survey_number',[sequelize.fn('COUNT', '*'), 'count']],
-      limit:5,
-      offset:0,
-      order: [[sequelize.fn('COUNT', '*'), 'DESC']],
-      group:'survey_number',
-      where:{
-        completed_on: {
-          [Op.between]: [start_date,end_date]
-        }
+    let query = "SELECT `member_surveys`.`survey_number`, COUNT('*') AS `count`,`surveys`.`name`,`survey_providers`.`name` as provider_name FROM `member_surveys` JOIN `surveys` ON `member_surveys`.`survey_number` = `surveys`.`survey_number` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` WHERE `member_surveys`.`completed_on` BETWEEN ? AND ? GROUP BY `member_surveys`.`survey_number`,`surveys`.`name`,provider_name ORDER BY COUNT('*') DESC LIMIT 0, 5;"
+    let top_surveys = await db.sequelize.query(
+      query,
+      {
+        replacements: [start_date,end_date],
+        type: QueryTypes.SELECT,
       }
-    })
+    );
     let names = []
     if(top_surveys.length){
       for(let i of top_surveys){
-        let survey = await Survey.findOne({where:{survey_number:i.survey_number},
-                                            include:{
-                                            model: SurveyProvider,
-                                            attributes: ['name'],
-                                          }
-                                        })
-        if(survey)
-          names.push(survey.dataValues.name+" ("+ survey.dataValues.SurveyProvider.dataValues.name+")")
+        names.push(i.name+" ("+ i.provider_name+")")
       }
     }
     return {
