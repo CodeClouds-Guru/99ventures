@@ -39,10 +39,14 @@ const DashboardContent = () => {
 
     const dateRangeSelected = (val) => {
         toggle();
-        setDateRange({
-            startDate: moment(val.startDate).toDate(),
-            endDate: moment(val.endDate).toDate()
-        });
+        // setDateRange({
+        //     startDate: moment(val.startDate).toDate(),
+        //     endDate: moment(val.endDate).toDate()
+        // });
+        updateDate(
+            moment(val.startDate), 
+            moment(val.endDate)
+        )
     }
     const constructParam = () => {
         setParam({
@@ -53,9 +57,12 @@ const DashboardContent = () => {
     useEffect(() => {
         getDaterangeLessReport();
     }, [])
-    useEffect(() => {
-        constructParam();
-    }, [dateRange])
+
+    // useEffect(() => {
+    //     constructParam();
+    // }, [dateRange])
+
+
     useEffect(() => {
         getCompletedSurveys();
         getLoginPerDay();
@@ -67,10 +74,26 @@ const DashboardContent = () => {
     const clearFilter = () => {
         setReRenderPicker(false)
         setOpen(false)
+        // setDateRange({
+        //     startDate: moment().subtract(7, 'd').startOf('day').toDate(),
+        //     endDate: moment().toDate(),
+        // });        
+        updateDate(
+            moment().subtract(7, 'd').startOf('day'), 
+            moment()
+        )
+
+    }
+
+    const updateDate = (startDate, endDate) => {
         setDateRange({
-            startDate: moment().subtract(7, 'd').startOf('day').toDate(),
-            endDate: moment().toDate(),
+            startDate: startDate.toDate(),
+            endDate: endDate.toDate(),
         });
+        setParam({
+            from: startDate,
+            to: endDate
+        })
     }
 
     const getDaterangeLessReport = () => {
