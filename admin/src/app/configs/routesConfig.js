@@ -40,7 +40,6 @@ const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInC
 * This is to redirect to company-site selection screen if company and site ID is not set
 */
 if (localStorage.getItem('jwt_access_token') && !jwtService.checkCompanySiteId() && window.location.pathname !== '/company-site') {
-  console.log(4654654)
   window.location.href = '/company-site';
 }
 

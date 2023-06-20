@@ -50,7 +50,7 @@ const CreateUpdateForm = () => {
     }
 
     const onActionTypeChange = (e) => {
-        console.log(e)
+        // console.log(e)
         setAllData({ ...allData, action_type: e.target.value })
     }
 
