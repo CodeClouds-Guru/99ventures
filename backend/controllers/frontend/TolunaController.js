@@ -9,7 +9,7 @@ class TolunaController {
 
     constructor(){
         this.registerMember = this.registerMember.bind(this);
-        this.getSurveys = this.getSurveys.bind(this);
+        this.surveys = this.surveys.bind(this);
     }
 
     /**
@@ -71,20 +71,18 @@ class TolunaController {
      * @returns 
      */
     async surveys(memberId,params) {
-        if(!req.session.member) {
-            res.status(401).json({
+        if(!memberId) {
+            return{
                 status: false,
                 message: 'Unauthorized!'
-            });
-            return;
+            }
         }
         // const memberId = req.query.user_id;
         if (!memberId) {
-            res.status(422).json({
+            return {
                 status: false,
                 message: 'Member id not found!'
-            });
-            return;
+            }
         }
         const member = await Member.findOne({
             attributes: ['username', 'id'],

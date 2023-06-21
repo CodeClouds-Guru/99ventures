@@ -481,6 +481,8 @@ class ScriptParser {
       case '4':
         file_name = 'SchlesingerController'
         break;
+      case '6':
+        file_name = 'TolunaController'
       default:
         break;
     }
