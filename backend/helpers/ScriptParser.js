@@ -231,7 +231,7 @@ class ScriptParser {
             }else{
               data = []
             }
-            console.log('===================', JSON.parse(JSON.stringify(data)));
+            // console.log('===================', JSON.parse(JSON.stringify(data)));
             //pagination
               if (
                 'pagination' in params &&

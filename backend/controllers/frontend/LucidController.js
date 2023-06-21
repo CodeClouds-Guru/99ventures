@@ -185,6 +185,7 @@ class LucidController {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
                         let temp_survey = survey
                         temp_survey.link = link
+                        console.log(temp_survey)
                         survey_list.push(temp_survey)
                         // surveyHtml += `
                         //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
