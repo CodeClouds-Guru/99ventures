@@ -237,9 +237,14 @@ function Listing(props) {
 
     async function handleDeselect(selectedIds) {
         try {
-            await axios.delete(`${module}/delete`, { data: { modelIds: selectedIds } });
-            setSelected([]);
-            setModuleDeleted(true);
+            await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then(res => {
+                if (res.data.results.status) {
+                    setLoading(true)
+                    setSelected([]);
+                    setModuleDeleted(true);
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                }
+            });
         } catch (error) {
             console.log(error);
         }

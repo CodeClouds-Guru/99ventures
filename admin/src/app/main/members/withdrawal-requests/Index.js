@@ -11,7 +11,6 @@ const Index = (props) => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const module = 'withdrawal-requests';
     const [withdrawalTypes, setWithdrawalTypes] = useState([]);
-    const [withdrawalCounts, setWithdrawalCounts] = useState({});
     const [withdrawalTypeID, setWithdrawalTypeID] = useState(null);
     const [listElem, setListElem] = useState('');
 
@@ -25,7 +24,6 @@ const Index = (props) => {
             addable={false}
             deletable={false}
             actionable={true}
-            getWithdrawalCount={getWithdrawalCount}
         />)
     }, [withdrawalTypeID]);
 
@@ -33,21 +31,12 @@ const Index = (props) => {
         axios.get(jwtServiceConfig.getWithdrawalRequests, { params: { type: 'withdrawal-types' } }).then((response) => {
             if (response.data.results.result.data) {
                 setWithdrawalTypes(response.data.results.result.data)
-                getWithdrawalCount();
             } else {
                 console.error('Failed to fetch Withdrawal Types');
             }
         });
     }
-    const getWithdrawalCount = () => {
-        axios.get(jwtServiceConfig.getWithdrawalRequests, { params: { type: 'withdrawal-count' } }).then((response) => {
-            if (response.data.results.result.data) {
-                setWithdrawalCounts(response.data.results.result.data)
-            } else {
-                console.error('Failed to fetch Withdrawal Count');
-            }
-        });
-    }
+
     const singleWithdrawalTypeID = (id) => {
         setWithdrawalTypeID(id);
         setListElem('');
@@ -57,7 +46,7 @@ const Index = (props) => {
             <FusePageCarded
                 className="sm:px-20"
                 header={
-                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} singleWithdrawalTypeID={singleWithdrawalTypeID} withdrawalCounts={withdrawalCounts} />
+                    <WithdrawalRequestsHeader withdrawalTypesProps={withdrawalTypes} singleWithdrawalTypeID={singleWithdrawalTypeID} />
                 }
                 content={
                     <Box className="sm:p-16 lg:p-22 md:p-16 xl:p-32 flex flex-col w-full" >
