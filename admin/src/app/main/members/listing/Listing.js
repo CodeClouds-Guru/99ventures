@@ -1,6 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Tooltip, FormGroup, FormControlLabel } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, FormControlLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,7 +16,6 @@ import { selectUser, setUser } from 'app/store/userSlice';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
-import { downloadFile } from '../../filemanager/helper';
 
 function Listing(props) {
     const dispatch = useDispatch();
@@ -423,15 +422,16 @@ function Listing(props) {
                 </Typography>
 
                 <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
-                    <Button
-                        className=""
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>}
-                        onClick={(e) => { e.preventDefault(); setListConfigDialog(true) }}
-                    >
-                        Configure
-                    </Button>
+                    <Tooltip title="Configure table" placement="top">
+                        <Button
+                            className="p-0 m-0"
+                            variant="contained"
+                            color="secondary"
+                            onClick={(e) => { e.preventDefault(); setListConfigDialog(true) }}
+                        >
+                            <FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>
+                        </Button>
+                    </Tooltip>
                     <Button variant="outlined" startIcon={<SearchIcon />} onClick={() => setOpenAlertDialog(true)}>
                         Search
                     </Button>
