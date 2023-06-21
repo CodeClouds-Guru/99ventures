@@ -49,7 +49,7 @@ router.get('/cint/surveys', CintController.surveys);
 router.get('/pure-spectrum/:action', PureSpectrumController.index);
 router.get('/schlesigner/:action', SchlesingerController.index);
 router.get('/lucid/:action', LucidController.index);
-router.get('/toluna/surveys', TolunaController.getSurveys);
+router.get('/toluna/surveys', TolunaController.surveys);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
