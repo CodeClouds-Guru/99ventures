@@ -50,7 +50,7 @@ class Toluna {
             const response = await instance.post('/Respondent', payload);           
             return response;
         } catch(error) {
-            console.error(error.response.data)
+            console.error(error)
             throw error.response.data;
         }
     }
