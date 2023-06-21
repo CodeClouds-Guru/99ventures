@@ -1,6 +1,7 @@
 $(() => {
   var errorsArray = [];
-  var password_regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
+  var password_regex =
+    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
   var displayErrors = () => {
     $('span.alert-msg').remove();
     errorsArray.forEach((item) => {
@@ -18,9 +19,14 @@ $(() => {
   };
   var showSnackbar = (msg, success) => {
     $('.snackbar .snack_msg').text(msg);
-    $('.snackbar').removeClass('bg-success').removeClass('bg-danger').addClass(success ? 'bg-success' : 'bg-danger').addClass('show').css('display', 'block');
+    $('.snackbar')
+      .removeClass('bg-success')
+      .removeClass('bg-danger')
+      .addClass(success ? 'bg-success' : 'bg-danger')
+      .addClass('show')
+      .css('display', 'block');
     setTimeout(function () {
-      $('.snackbar').removeClass('show').css('display', 'none');;
+      $('.snackbar').removeClass('show').css('display', 'none');
     }, 3000);
   };
   var hideSnackbar = () => {
@@ -66,7 +72,7 @@ $(() => {
   $('body').append(closeTicketModal);
   let errorMsg = $('#scripteed_error_message_div').text();
   if (errorMsg.trim().length > 0) {
-    $('body').append(snackbar)
+    $('body').append(snackbar);
     showSnackbar(
       errorMsg,
       $('#scripteed_error_message_div').hasClass('success-snack')
@@ -74,20 +80,22 @@ $(() => {
   }
   $(document).on('click', '.scripteed-close-ticket', (e) => {
     e.stopImmediatePropagation();
-    $('#closeTicketModal').modal('show').attr('data-tid', $(e.target).data('tid'));
-  })
+    $('#closeTicketModal')
+      .modal('show')
+      .attr('data-tid', $(e.target).data('tid'));
+  });
 
   $('#confirmCloseTicketBtn').click((e) => {
     e.preventDefault();
     let tid = $('#closeTicketModal').data('tid');
     $.ajax({
-      type: "POST",
+      type: 'POST',
       url: '/ticket/update',
       data: {
         ticket_id: tid,
         type: 'ticket_status',
         field_name: 'status',
-        value: 'closed'
+        value: 'closed',
       },
       success: (response) => {
         if (response.status) {
@@ -99,7 +107,7 @@ $(() => {
         }
       },
     });
-  })
+  });
 
   const loginForm = $('#scripteed_login_form').get(0);
   const loginBtn = $('#scripteed_login_btn').get(0);
@@ -157,19 +165,19 @@ $(() => {
       $(location).attr('href').includes('?')
       ? $(location).attr('href').split('#')[1].split('?')[0]
       : $(location).attr('href').includes('#')
-        ? $(location).attr('href').split('#')[1]
-        : '';
+      ? $(location).attr('href').split('#')[1]
+      : '';
   };
   if (getUrlHash() === 'signup') {
     goToRegister();
   }
   $('input[name="newsletter"]').on('change', () => {
-    if ($('input[name="newsletter"]').is(":checked")) {
-      $('input[name="newsletter"]').attr('value', true)
+    if ($('input[name="newsletter"]').is(':checked')) {
+      $('input[name="newsletter"]').attr('value', true);
     } else {
-      $('input[name="newsletter"]').attr('value', false)
+      $('input[name="newsletter"]').attr('value', false);
     }
-  })
+  });
   $(loginBtn).click((e) => {
     e.preventDefault();
     goTologin();
@@ -266,7 +274,10 @@ $(() => {
     const email = $(loginForm).find('input[name="email"]').get(0);
     const password = $(loginForm).find('input[name="password"]').get(0);
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
+      errorsArray.push({
+        field: $(email),
+        message: 'Please enter a valid email',
+      });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -309,7 +320,10 @@ $(() => {
       });
     }
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
+      errorsArray.push({
+        field: $(email),
+        message: 'Please enter a valid email',
+      });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -389,7 +403,10 @@ $(() => {
     $('span.alert-msg').remove();
     const email = $(forgotPasswordForm).find('input[name="email"]').get(0);
     if ($(email).val().trim().length === 0) {
-      errorsArray.push({ field: $(email), message: 'Please enter a valid email' });
+      errorsArray.push({
+        field: $(email),
+        message: 'Please enter a valid email',
+      });
     } else if (!validateEmail($(email).val().trim())) {
       errorsArray.push({
         field: $(email),
@@ -404,7 +421,6 @@ $(() => {
     const confirm_password = $(resetPasswordForm)
       .find('input[name="c_password"]')
       .get(0);
-
 
     if ($(password).val().trim().length < 8) {
       errorsArray.push({
@@ -533,20 +549,25 @@ $(() => {
     $('#header_streak_or_refresh').append(str);
   }
 
-  $(".copy-text").click((e) => {
+  $('.copy-text').click((e) => {
     e.preventDefault();
     var reference = e.currentTarget.dataset?.reference;
-    var tempInput = document.createElement("input");
-    tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+    var tempInput = document.createElement('input');
+    tempInput.style = 'position: absolute; left: -1000px; top: -1000px';
     tempInput.value = $(`#${reference}`).val();
     document.body.appendChild(tempInput);
     tempInput.select();
-    document.execCommand("copy");
+    document.execCommand('copy');
     document.body.removeChild(tempInput);
-    $(".copy-text").find("i").removeClass('fa-regular fa-copy').addClass('fa-solid fa-check');
+    $('.copy-text')
+      .find('i')
+      .removeClass('fa-regular fa-copy')
+      .addClass('fa-solid fa-check');
     setTimeout(() => {
-      $(".copy-text").find("i").removeClass('fa-solid fa-check').addClass('fa-regular fa-copy');
+      $('.copy-text')
+        .find('i')
+        .removeClass('fa-solid fa-check')
+        .addClass('fa-regular fa-copy');
     }, 3000);
-  })
-
+  });
 });

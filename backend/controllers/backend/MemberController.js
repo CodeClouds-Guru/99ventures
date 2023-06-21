@@ -39,6 +39,7 @@ class MemberController extends Controller {
     this.deleteMemberNotes = this.deleteMemberNotes.bind(this);
     this.export = this.export.bind(this);
     this.generateFields = this.generateFields.bind(this);
+    this.getMembersList = this.getMembersList.bind(this);
     this.fieldConfig = {
       "id": "ID",
       "username": "Username",
@@ -390,6 +391,10 @@ class MemberController extends Controller {
 
   //override list function
   async list(req, res) {
+    // The purpose of this IF statement is to populate excluded members dropdown on Payment Configuration tab.
+    if(req.query.source_module && req.query.source_module === 'paymentconfiguration') {
+      return this.getMembersList(req, res);
+    }
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
@@ -512,7 +517,7 @@ class MemberController extends Controller {
       row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       row.setDataValue('MemberTransactions.balance', member_account_balance);
       row.setDataValue('MemberTransactions.amount', member_total_earnings);
-      row.setDataValue('WithdrawalRequests.amount', total_paid);
+      row.setDataValue('WithdrawalRequests.amount', toptions['where'][Op.and],otal_paid);
       row.setDataValue('WithdrawalRequests.created_at', cashout_date);
       return row;
     });
@@ -702,6 +707,52 @@ class MemberController extends Controller {
   async deleteMemberNotes(req) {
     await MemberNote.destroy({ where: { id: req.body.ids } });
     return true;
+  }
+
+  /**
+   * Get Member List. 
+   * This Fn is using only for the dropdown purpose
+   * @param {*} req 
+   * @param {*} res 
+   * @returns 
+   */
+  async getMembersList(req, res){
+    const options = this.getQueryOptions(req);
+    let company_id = req.headers.company_id;
+    let site_id = req.headers.site_id;
+    let page = req.query.page || 1;
+    let limit = parseInt(req.query.show) || 10; // per page record
+    let offset = (page - 1) * limit;
+    options.attributes = ['id', 'username', 'email'];
+    options.limit = limit;
+    options.offset = offset;
+    
+    var query_where = JSON.parse(req.query.where);
+    var temp = {};
+    if (query_where) {
+      if (query_where.filters) {
+        temp = query_where.filters.map((filter) => {
+          return {
+            [filter.column]: {
+              [Op[filter.match]]: filter.search,
+            },
+          };
+        });
+      }
+    }
+    options.where = {
+      ...(temp && { [Op.and]: temp }),
+      ...(query_where.status &&
+        query_where.status.length > 0 && {
+          status: { [Op.in]: query_where.status },
+      }),
+      company_portal_id: site_id
+    };
+    
+    const { docs, pages, total } = await this.model.paginate(options);
+    return {
+      result: { data: docs, pages, total}
+    };
   }
 }
 
