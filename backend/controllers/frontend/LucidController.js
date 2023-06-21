@@ -184,9 +184,9 @@ class LucidController {
                     var count = 0;
                     for (let survey of surveys) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
-                        temp_survey = [...survey]
+                        temp_survey = survey
                         temp_survey.link = link
-                        survey_list.push(temp_survey)
+                        survey_list.push(...temp_survey)
                         // surveyHtml += `
                         //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                         //         <div class="bg-white card mb-2">
