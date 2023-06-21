@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
+import FuseLoading from '@fuse/core/FuseLoading';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
@@ -72,6 +73,7 @@ const CreateEditForm = () => {
     const [memberList, setMemberList] = useState([]);
     const [countryList, setCountryList] = useState([]);
     const [paymentData, setPaymentData] = useState([]);
+    const [pageloader, setPageloader] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [selectedMember, setSelectedMember] = useState([]);
     const [showSignature, setShowSignature] = useState(false);
@@ -79,7 +81,7 @@ const CreateEditForm = () => {
     const [selectedCountry, setSelectedCountry] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
-
+    
     /**
      * Toggle type of Password & Signature fields
      */
@@ -216,6 +218,7 @@ const CreateEditForm = () => {
                     setValue('amount', defaultValues.amount, { shouldDirty: false, shouldValidate: true });
                 }
             }
+            setPageloader(false);
         })
         .catch(error => console.log(error))
     }
@@ -291,6 +294,7 @@ const CreateEditForm = () => {
             page: 1,
             show: 100,
             module: 'members',
+            source_module: 'paymentconfiguration',
             where: {
                 "status":[],
                 ...clause
@@ -311,6 +315,10 @@ const CreateEditForm = () => {
             setAutoCompleteLoading(false);
         })
         .catch(error => console.log(error))
+    }
+
+    if(pageloader){
+        return <FuseLoading />;
     }
 
     return (
@@ -888,7 +896,7 @@ const CreateEditForm = () => {
                                         {...field}
                                         id="payment_type"
                                         select
-                                        label="Payment Tyoe"
+                                        label="Payment Type"
                                         helperText=""
                                         className="w-full mt-20"
                                         >
@@ -925,7 +933,7 @@ const CreateEditForm = () => {
                         className="whitespace-nowrap mx-4"
                         variant="contained"
                         color="error"
-                        onClick={() => navigate(`/configuration`)}
+                        onClick={() => navigate(`/configuration?tab=paymentconfigurations`)}
                     >
                         Cancel
                     </Button>

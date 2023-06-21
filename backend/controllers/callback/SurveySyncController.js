@@ -831,29 +831,60 @@ class SurveySyncController {
                     status: psObj.getSurveyStatus(22)
                 }
             });
-            var count = 0;
-            const interval = 10;
-            // const limit = 10;
-            const limit = surveys.length > interval ? surveys.length : interval;
-            const surveyNumber = [];
-            var loopSurveys = surveys.slice(0, limit)
 
-            while (count < limit) {
-                for (let survey of loopSurveys) {
-                    try {
-                        const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
-                        if (surveyData.apiStatus === "success" && surveyData.survey.survey_status !== 22) {
-                            surveyNumber.push(survey.survey_number)
-                        }
-                    } catch (error) {
+            for(let survey of surveys){
+                try{
+                    const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
+                    if(surveyData.apiStatus === "success" && surveyData.survey.survey_status !== 22 ) {
                         surveyNumber.push(survey.survey_number)
                     }
+                } catch (error) {
+                    surveyNumber.push(survey.survey_number)
                 }
-                count = count + interval
-                loopSurveys = surveys.slice(count, interval + count)
             }
 
-            if (surveyNumber.length) {
+            /* Using Generator Fn
+            var start = 0;
+            var end = 10;
+            const limit = surveys.length;
+            const surveyNumber = [];
+            const perpage = 10;
+            async function getSurveys(loopSurveys) {
+                let surveys = []
+                for(let survey of loopSurveys){
+                    try{
+                        const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
+                        if(surveyData.apiStatus === "success" && surveyData.survey.survey_status !== 22 ) {
+                            surveys.push(survey.survey_number)
+                        }
+                    } catch (error) {
+                        surveys.push(survey.survey_number)
+                    }
+                }
+                return surveys;
+            }
+
+            async function* asyncGenerator() {                
+                for (let i = 1; i <= Math.ceil(limit/perpage); i++) {
+                    let loopSurveys = surveys.slice(start, end)
+                    let res = await getSurveys(loopSurveys)
+                    start = 10* i
+                    end = start+perpage
+                    yield res;
+                }
+            }
+            
+            async function consumer() {                
+                for await (const value of asyncGenerator()) {
+                    surveyNumber.push(value);
+                }                
+            }
+              
+            await consumer();
+            */
+
+
+            if(surveyNumber.length) {
                 await Survey.update({
                     status: psObj.getSurveyStatus(44),
                     deleted_at: new Date()
@@ -867,8 +898,9 @@ class SurveySyncController {
         }
         catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
-            logger.error(error);
-            res.send(error);
+			logger.error(error);
+            res.send(error.message);
+            //throw error;
         }
     }
 

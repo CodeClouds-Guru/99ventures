@@ -51,7 +51,10 @@ class Toluna {
             return response;
         } catch(error) {
             console.error(error)
-            throw error.response.data;
+            if(error.response)
+                throw error.response.data;
+            else
+                throw error
         }
     }
 
