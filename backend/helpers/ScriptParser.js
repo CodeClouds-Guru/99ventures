@@ -230,7 +230,7 @@ class ScriptParser {
             }else{
               data = {}
             }
-            // console.log('temp_survey_list',temp_survey_list)
+            console.log('temp_survey_list',temp_survey_list)
             //pagination
               if (
                 'pagination' in params &&
