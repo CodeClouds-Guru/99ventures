@@ -172,7 +172,7 @@ class PureSpectrumController {
                     }
                 });
                 var page_count = Math.ceil(data_count.count / perPage);
-                var survey_list = {}
+                var survey_list = []
                 if(surveys && surveys.length){
                     var surveyHtml = '';
                     for (let survey of surveys) {
