@@ -1,6 +1,7 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');;
+const { sequelize } = require("../../models/index");
 const {
   Member,
   User,
@@ -14,60 +15,86 @@ class WithdrawalRequestController extends Controller {
   constructor() {
     super('WithdrawalRequest');
     this.changeStatus = this.changeStatus.bind(this);
+    this.getPaymentMethods = this.getPaymentMethods.bind(this);
+    this.generateFields = this.generateFields.bind(this);
+    this.fieldConfig = {
+      'id': 'ID',
+      'PaymentMethod.name': 'Method',
+      'status': 'Status',
+      'payment_email': 'Email',
+      'Member.status': 'Account',
+      'created_at': 'Date',
+      'Member.username': 'Username',
+      'amount': 'Cash',
+    }
+  }
+
+  async getPaymentMethods() {
+    let withdrawal_type_list = await sequelize.query("SELECT id, name, slug, (SELECT COUNT(*) from withdrawal_requests where withdrawal_requests.withdrawal_type_id = payment_methods.id and withdrawal_requests.status = 'pending') as pending_withdrawal_count FROM `payment_methods`;", { type: QueryTypes.SELECT });
+    return {
+      result: {
+        data: withdrawal_type_list,
+      },
+    };
+  }
+
+  generateFields(header_fields) {
+    var fields = {}
+    for (const key of header_fields) {
+      fields[key] = {
+        field_name: key,
+        db_name: key,
+        listing: true,
+        placeholder: key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col'
+      }
+    }
+    return fields;
   }
 
   //list
   async list(req, res) {
     var withdrawal_type = req.query.type;
-
     if (withdrawal_type === 'withdrawal-types') {
-      let withdrawal_type_list = await PaymentMethod.findAll({
-        attributes: ['id', 'name', 'slug'],
-      });
-      let company_portal_id = req.headers.site_id;
-      for (
-        let type_list = 0;
-        type_list < withdrawal_type_list.length;
-        type_list++
-      ) {
-        var pending_withdrawal_count = await this.model.getPendingRequest(
-          withdrawal_type_list[type_list].id,
-          company_portal_id,
-          Member
-        );
-        withdrawal_type_list[type_list].setDataValue(
-          'pending_withdrawal_count',
-          pending_withdrawal_count
-        );
-      }
-      return {
-        result: {
-          data: withdrawal_type_list,
-        },
-      };
-    } else if (withdrawal_type === 'withdrawal-count') {
-      let withdrawal_type_list = await PaymentMethod.findAll({
-        attributes: ['id', 'name', 'slug'],
-      });
-      var all_counts = {};
-      var pending_withdrawal_count = 0;
-      let company_portal_id = req.headers.site_id;
-      for (var type_list of withdrawal_type_list) {
-        var pending_withdrawal_count = await this.model.getPendingRequest(
-          type_list.id,
-          company_portal_id,
-          Member
-        );
-        all_counts[type_list.slug] = pending_withdrawal_count;
-      }
-      return {
-        result: {
-          data: all_counts,
-        },
-      };
+      return await this.getPaymentMethods();
     } else {
+      let limit = parseInt(req.query.show) || 10;
+      let fields = req.query.fields || ['id', 'first_name', 'username'];
+      const options = this.getQueryOptions(req);
+      options.include = [
+        {
+          model: PaymentMethod,
+          attributes: ['name'],
+        },
+        {
+          model: Member,
+          attributes: ['username', 'status'],
+        },
+      ];
+      options.subQuery = false;
+      options.distinct = true;
+      options.attributes = fields;
+
+      let programsList = [];
+      let results = await this.model.findAndCountAll(options);
+      let pages = Math.ceil(results.count / limit);
+
+      results.rows.map(row => {
+        let [payment_method_name, username, status] = ['', '', ''];
+        if (row.Member) {
+          username = row.Member.username;
+          status = row.Member.status;
+        }
+        if (row.PaymentMethod) {
+          payment_method_name = row.PaymentMethod.name;
+        }
+        row.setDataValue('Member.username', username);
+        row.setDataValue('Member.status', status);
+        row.setDataValue('PaymentMethod.name', payment_method_name);
+      });
+
+      /**
       let page = req.query.page || 1;
-      let limit = parseInt(req.query.show) || 10; // per page record
+      let limit = parseInt(req.query.show) || 10;
       let offset = (page - 1) * limit;
       var options = super.getQueryOptions(req);
       var option_where = options.where || {};
@@ -283,9 +310,10 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].listing = false;
         fields['$Member.username$'].searchable = false;
       }
+      */
       return {
         result: { data: results.rows, pages, total: results.count },
-        fields: fields,
+        fields: this.generateFields(fields),
         programs: programsList,
       };
     }

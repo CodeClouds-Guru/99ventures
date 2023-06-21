@@ -36,7 +36,7 @@ class CintController {
                     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
                 
                     const surveys = result.surveys;   
-                    var survey_list = {}             
+                    var survey_list = []             
                     if (surveys.length) {
                         var surveyHtml = '';
                         for (let survey of surveys) {

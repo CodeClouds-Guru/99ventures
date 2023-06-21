@@ -74,14 +74,14 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['id', 'PaymentMethod.name', 'status', 'account', 'username', 'amount']);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['id', 'PaymentMethod.name', 'status', 'Member.status', 'Member.username', 'amount']);
 
 	const display_column_object = {
 		'id': 'ID',
 		'payment_email': 'Email',
 		'Member.username': 'Username',
 		'PaymentMethod.name': 'Method',
-		'account': 'Account',
+		'Member.status': 'Account',
 		'amount': 'Cash',
 		'status': 'Status',
 		'created_at': 'Date',
@@ -121,7 +121,10 @@ function List(props) {
 			...queryParams
 		}
 		if (module === 'withdrawal-requests') {
-			params.fields = displayColumnArray
+			var ordered_fields = displayColumnArray.sort((a, b) =>
+				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+			)
+			params.fields = ordered_fields
 		}
 		/* order is added if it's not the very first call os API listing */
 		if (!firstCall) {
@@ -610,6 +613,9 @@ function List(props) {
 		setListConfigDialog(false);
 	}
 	const exportAll = () => {
+		var ordered_fields = displayColumnArray.sort((a, b) =>
+			Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+		)
 		let params = {
 			search: searchText,
 			page: page + 1,
@@ -617,7 +623,8 @@ function List(props) {
 			module: module,
 			where,
 			ids: [],
-			all: 1
+			all: 1,
+			fields: ordered_fields
 		}
 		axios.get(`/${module}/export`, { params }).then(res => {
 

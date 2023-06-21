@@ -101,7 +101,7 @@ class TolunaController {
             const centAmt = provider.currency_percent ? provider.currency_percent : 0;
             const tObj = new TolunaHelper;
             const surveys = await tObj.getSurveys(member.id);
-            var survey_list = {}
+            var survey_list = []
             if (surveys && surveys.length) {
                 var surveyHtml = '';
                 // for (let survey of surveys) {

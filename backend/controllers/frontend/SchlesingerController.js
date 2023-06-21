@@ -177,7 +177,7 @@ class SchlesingerController {
                     }
                 });
                 var page_count = Math.ceil(data_count.count / perPage);
-                var survey_list = {}
+                var survey_list = []
                 if (!surveys.length) {
                     return{
                         status: false,

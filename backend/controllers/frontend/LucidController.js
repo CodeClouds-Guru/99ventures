@@ -177,7 +177,7 @@ class LucidController {
 
                 // res.send(surveys);
                 // return;
-                var survey_list = {}
+                var survey_list = []
                 if(surveys.length){
                     var surveyHtml = '';
                     var count = 0;
