@@ -178,13 +178,15 @@ class LucidController {
                 // res.send(surveys);
                 // return;
                 var survey_list = []
+                var temp_survey = []
                 if(surveys.length){
                     var surveyHtml = '';
                     var count = 0;
                     for (let survey of surveys) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
-                        survey.link = link
-                        survey_list.push(survey)
+                        temp_survey = survey
+                        temp_survey.link = link
+                        survey_list.push(...temp_survey)
                         // surveyHtml += `
                         //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                         //         <div class="bg-white card mb-2">
@@ -208,6 +210,7 @@ class LucidController {
                     //     message: 'Success',
                     //     result: surveyHtml
                     // });
+                    console.log('survey_list',survey_list)
                     return {
                         status: true,
                         message: 'Success',

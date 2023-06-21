@@ -10,6 +10,8 @@ const {
   WithdrawalRequest,
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
+const CsvHelper = require("../../helpers/CsvHelper");
+
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -17,6 +19,7 @@ class WithdrawalRequestController extends Controller {
     this.changeStatus = this.changeStatus.bind(this);
     this.getPaymentMethods = this.getPaymentMethods.bind(this);
     this.generateFields = this.generateFields.bind(this);
+    this.getProgramList = this.getProgramList.bind(this);
     this.fieldConfig = {
       'id': 'ID',
       'PaymentMethod.name': 'Method',
@@ -74,9 +77,23 @@ class WithdrawalRequestController extends Controller {
       options.distinct = true;
       options.attributes = fields;
 
-      let programsList = [];
+      let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
+
+      results.rows.map(row => {
+        let [payment_method_name, username, status] = ['', '', ''];
+        if (row.Member) {
+          username = row.Member.username;
+          status = row.Member.status;
+        }
+        if (row.PaymentMethod) {
+          payment_method_name = row.PaymentMethod.name;
+        }
+        row.setDataValue('Member.username', username);
+        row.setDataValue('Member.status', status);
+        row.setDataValue('PaymentMethod.name', payment_method_name);
+      });
 
       /**
       let page = req.query.page || 1;
@@ -157,45 +174,6 @@ class WithdrawalRequestController extends Controller {
         }
       });
 
-      var programsList = [];
-      if ('withdrawal_type_id' in query_where) {
-        const withdrawlType = await PaymentMethod.findOne({
-          attributes: ['slug'],
-          where: { id: query_where.withdrawal_type_id },
-        });
-        if (withdrawlType.slug === 'gift_card_pass') {
-          const viObj = new VirtualIncentive(company_portal_id);
-          const programs = await viObj.getProgramBalance();
-          if (Object.keys(programs).length && programs.program) {
-            programsList = programs.program
-              .filter(
-                (row) => row.name !== 'DO NOT USE' && row.type === 'Gift Cards'
-              )
-              .map((row) => {
-                return {
-                  ...row,
-                  id: row.programid,
-                };
-              });
-          }
-        } else if (withdrawlType.slug === 'venmo') {
-          const viObj = new VirtualIncentive(company_portal_id);
-          const programs = await viObj.getProgramBalance();
-          if (Object.keys(programs).length && programs.program) {
-            programsList = programs.program
-              .filter(
-                (row) =>
-                  row.name !== 'DO NOT USE' && row.type === 'Virtual Reward'
-              )
-              .map((row) => {
-                return {
-                  ...row,
-                  id: row.programid,
-                };
-              });
-          }
-        }
-      }
       var fields = {
         '$Member.username$': {
           field_name: 'Member.username',
@@ -303,6 +281,70 @@ class WithdrawalRequestController extends Controller {
         programs: programsList,
       };
     }
+  }
+
+
+  async getProgramList(req) {
+    let company_portal_id = req.headers.site_id;
+    var query_where = req.query.where || '{}';
+    query_where = JSON.parse(query_where);
+    var programsList = [];
+    if ('withdrawal_type_id' in query_where) {
+      const withdrawlType = await PaymentMethod.findOne({
+        attributes: ['slug'],
+        where: { id: query_where.withdrawal_type_id },
+      });
+      if (withdrawlType.slug === 'gift_card_pass') {
+        const viObj = new VirtualIncentive(company_portal_id);
+        const programs = await viObj.getProgramBalance();
+        if (Object.keys(programs).length && programs.program) {
+          programsList = programs.program
+            .filter(
+              (row) => row.name !== 'DO NOT USE' && row.type === 'Gift Cards'
+            )
+            .map((row) => {
+              return {
+                ...row,
+                id: row.programid,
+              };
+            });
+        }
+      } else if (withdrawlType.slug === 'venmo') {
+        const viObj = new VirtualIncentive(company_portal_id);
+        const programs = await viObj.getProgramBalance();
+        if (Object.keys(programs).length && programs.program) {
+          programsList = programs.program
+            .filter(
+              (row) =>
+                row.name !== 'DO NOT USE' && row.type === 'Virtual Reward'
+            )
+            .map((row) => {
+              return {
+                ...row,
+                id: row.programid,
+              };
+            });
+        }
+      }
+    }
+    return programsList;
+  }
+
+  async export(req, res) {
+    req.query.show = 100000;
+    let { fields, result } = await this.list(req);
+    var header = [];
+    for (const head of Object.values(fields)) {
+
+      header.push({ id: head.field_name, title: head.placeholder })
+    }
+    const rows = JSON.parse(JSON.stringify(result.data));
+    const csv_helper = new CsvHelper(rows, header);
+    csv_helper.generateAndEmailCSV(req.user.email);
+    return {
+      status: true,
+      message: 'The CSV will be sent to your email address shortly.'
+    };
   }
 
   //save

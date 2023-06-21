@@ -15,6 +15,7 @@ const {
   SurveyProvider,
 } = require('../models/index');
 const axios = require('axios');
+const { json } = require('body-parser');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -225,12 +226,12 @@ class ScriptParser {
             );
             
             if (temp_survey_list.status){
-              data = temp_survey_list.surveys;
-              page_count = temp_survey_list.page_count;
+              data = temp_survey_list.result.surveys;
+              page_count = temp_survey_list.result.page_count;
             }else{
-              data = {}
+              data = []
             }
-            // console.log('temp_survey_list',temp_survey_list)
+            // console.log('===================', JSON.parse(JSON.stringify(data)));
             //pagination
               if (
                 'pagination' in params &&
@@ -248,7 +249,7 @@ class ScriptParser {
         }
       }
     }
-    // console.log('===================', JSON.parse(JSON.stringify(data)));
+    
 
     return {
       data: JSON.parse(JSON.stringify(data)),
