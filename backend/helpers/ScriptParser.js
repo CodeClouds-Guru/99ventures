@@ -232,7 +232,7 @@ class ScriptParser {
               data = []
             }
             data = JSON.parse(data)
-            console.log('temp_survey_list',temp_survey_list)
+            console.log('temp_survey_list',data)
             //pagination
               if (
                 'pagination' in params &&
