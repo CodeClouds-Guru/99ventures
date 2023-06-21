@@ -214,7 +214,6 @@ class LucidController {
                     //     message: 'Success',
                     //     result: surveyHtml
                     // });
-                    console.log('survey_list',survey_list)
                     return {
                         status: true,
                         message: 'Success',
