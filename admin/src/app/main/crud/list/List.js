@@ -688,7 +688,7 @@ function List(props) {
 						}
 						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
 							{module === 'withdrawal-requests' &&
-								<Tooltip title="Configure table" placement="top">
+								<Tooltip title="Configure" placement="top">
 									<Button
 										className="p-0 m-0"
 										variant="contained"
