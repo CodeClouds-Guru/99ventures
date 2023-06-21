@@ -24,6 +24,7 @@ const Index = (props) => {
             addable={false}
             deletable={false}
             actionable={true}
+            searchable={false}
         />)
     }, [withdrawalTypeID]);
 
