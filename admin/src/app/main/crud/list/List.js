@@ -21,6 +21,7 @@ import Helper from 'src/app/helper';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 function List(props) {
 	const dispatch = useDispatch();
@@ -46,6 +47,8 @@ function List(props) {
 	const [totalRecords, setTotalRecords] = useState(0);
 
 	const [loading, setLoading] = useState(true);
+	const [applyLoading, setApplyLoading] = useState(true);
+	const [exportLoading, setExportLoading] = useState(true);
 	const [selected, setSelected] = useState([]);
 	const [data, setData] = useState(modules);
 	const [page, setPage] = useState(0);
@@ -133,6 +136,7 @@ function List(props) {
 		}
 
 		axios.get(`/${module}`, { params }).then(res => {
+			setListConfigDialog(false);
 			let fields_var = res.data.results.fields;
 			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {
 				db_name: "actions",
@@ -151,12 +155,15 @@ function List(props) {
 			setModules(res.data.results.result.data);
 			setTotalRecords(res.data.results.result.total)
 			setLoading(false);
+			setApplyLoading(false);
+			setExportLoading(false);
 			setFirstCall(false);
 			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
 			if (res.data.results.programs) {
 				setProgramList(res.data.results.programs)
 			}
 		}).catch(error => {
+			setListConfigDialog(false);
 			let message = 'Something went wrong!'
 			if (error && error.response.data && error.response.data.errors) {
 				message = error.response.data.errors
@@ -436,6 +443,16 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (module === 'withdrawal-requests') {
 			const status = processFieldValue(n[field.field_name], field);
+			if (field.field_name === 'Member.status') {
+				if (status === 'member')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				else if (status === 'suspended')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="primary" />
+				else if (status === 'validating')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				else if (status === 'deleted')
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+			}
 			if (field.field_name === 'status') {
 				if (status === 'pending')
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
@@ -571,6 +588,10 @@ function List(props) {
 		});
 		const param = module === 'member-transactions' ? {
 			completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+		} : module === 'withdrawal-requests' ? {
+			created_at: {
+				scripted_99_between: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			}
 		} : {
 			created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
 		}
@@ -609,10 +630,11 @@ function List(props) {
 		e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
 	}
 	const modifyList = () => {
+		setApplyLoading(true)
 		fetchModules();
-		setListConfigDialog(false);
 	}
 	const exportAll = () => {
+		setExportLoading(true);
 		var ordered_fields = displayColumnArray.sort((a, b) =>
 			Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
 		)
@@ -627,8 +649,13 @@ function List(props) {
 			fields: ordered_fields
 		}
 		axios.get(`/${module}/export`, { params }).then(res => {
-
+			setExportLoading(false);
+			if (res.data.results.status) {
+				dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+				setListConfigDialog(false)
+			}
 		}).catch(error => {
+			setExportLoading(false);
 			let message = 'Something went wrong!'
 			if (error && error.response.data && error.response.data.errors) {
 				message = error.response.data.errors
@@ -662,8 +689,8 @@ function List(props) {
 					</div>
 				</DialogContent>
 				<DialogActions className="mx-16 mb-16">
-					<Button variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</Button>
-					<Button variant="contained" color="primary" onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</Button>
+					<LoadingButton loading={applyLoading} variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</LoadingButton>
+					<LoadingButton loading={exportLoading} variant="contained" color="primary" onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</LoadingButton>
 				</DialogActions>
 			</Dialog>
 			{/* End */}
@@ -724,7 +751,7 @@ function List(props) {
 											component={motion.div}
 											initial={{ y: -20, opacity: 0 }}
 											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center justify-around w-full space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
+											className="flex items-center justify-around w-5/12 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
 											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
 											onClick={() => setDatepickerStatus(!datepickerStatus)}
 										>
