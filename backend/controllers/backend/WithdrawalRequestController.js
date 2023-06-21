@@ -78,6 +78,20 @@ class WithdrawalRequestController extends Controller {
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
+      results.rows.map(row => {
+        let [payment_method_name, username, status] = ['', '', ''];
+        if (row.Member) {
+          username = row.Member.username;
+          status = row.Member.status;
+        }
+        if (row.PaymentMethod) {
+          payment_method_name = row.PaymentMethod.name;
+        }
+        row.setDataValue('Member.username', username);
+        row.setDataValue('Member.status', status);
+        row.setDataValue('PaymentMethod.name', payment_method_name);
+      });
+
       /**
       let page = req.query.page || 1;
       let limit = parseInt(req.query.show) || 10;
