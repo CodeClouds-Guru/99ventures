@@ -15,6 +15,7 @@ const {
   SurveyProvider,
 } = require('../models/index');
 const axios = require('axios');
+const { json } = require('body-parser');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -228,8 +229,9 @@ class ScriptParser {
               data = temp_survey_list.surveys;
               page_count = temp_survey_list.page_count;
             }else{
-              data = {}
+              data = []
             }
+            data = JSON.parse(data)
             console.log('temp_survey_list',temp_survey_list)
             //pagination
               if (
