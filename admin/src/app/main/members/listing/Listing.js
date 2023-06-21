@@ -16,6 +16,7 @@ import { selectUser, setUser } from 'app/store/userSlice';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 function Listing(props) {
     const dispatch = useDispatch();
@@ -30,6 +31,8 @@ function Listing(props) {
     const [totalRecords, setTotalRecords] = useState(0);
 
     const [loading, setLoading] = useState(true);
+    const [applyLoading, setApplyLoading] = useState(true);
+    const [exportLoading, setExportLoading] = useState(true);
     const [selected, setSelected] = useState([]);
     const [data, setData] = useState(modules);
     const [page, setPage] = useState(0);
@@ -133,12 +136,16 @@ function Listing(props) {
         params.sort = ('sort' in params && params.sort !== 'id') ? params.sort : 'Member.id'
 
         axios.get(`/${module}`, { params }).then(res => {
+            setListConfigDialog(false);
             setFields(res.data.results.fields);
             setModules(res.data.results.result.data);
             setTotalRecords(res.data.results.result.total)
             setLoading(false);
+            setApplyLoading(false);
+            setExportLoading(false);
             setFirstCall(false);
         }).catch(error => {
+            setListConfigDialog(false);
             let message = 'Something went wrong!'
             if (error && error.response.data && error.response.data.errors) {
                 message = error.response.data.errors
@@ -152,6 +159,7 @@ function Listing(props) {
     }
 
     const exportAll = () => {
+        setExportLoading(true);
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
         )
@@ -165,11 +173,13 @@ function Listing(props) {
             fields: ordered_fields
         }
         axios.get(`/${module}/export`, { params }).then(res => {
+            setExportLoading(false);
             if (res.data.results.status) {
                 dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
                 setListConfigDialog(false)
             }
         }).catch(error => {
+            setExportLoading(false);
             let message = 'Something went wrong!'
             if (error && error.response.data && error.response.data.errors) {
                 message = error.response.data.errors
@@ -407,8 +417,8 @@ function Listing(props) {
         setPage(0);
     }
     const modifyList = () => {
+        setApplyLoading(true)
         fetchModules();
-        setListConfigDialog(false);
     }
 
     return (
@@ -461,8 +471,8 @@ function Listing(props) {
                             </div>
                         </DialogContent>
                         <DialogActions className="mx-16 mb-16">
-                            <Button variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</Button>
-                            <Button variant="contained" color="primary" disabled={applyBtnSts} onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</Button>
+                            <LoadingButton loading={applyLoading} variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</LoadingButton>
+                            <LoadingButton loading={exportLoading} variant="contained" color="primary" disabled={applyBtnSts} onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</LoadingButton>
                         </DialogActions>
                     </Dialog>
                     <Dialog
