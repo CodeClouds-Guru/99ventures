@@ -121,7 +121,10 @@ function List(props) {
 			...queryParams
 		}
 		if (module === 'withdrawal-requests') {
-			params.fields = displayColumnArray
+			var ordered_fields = displayColumnArray.sort((a, b) =>
+				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+			)
+			params.fields = ordered_fields
 		}
 		/* order is added if it's not the very first call os API listing */
 		if (!firstCall) {
@@ -610,6 +613,9 @@ function List(props) {
 		setListConfigDialog(false);
 	}
 	const exportAll = () => {
+		var ordered_fields = displayColumnArray.sort((a, b) =>
+			Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+		)
 		let params = {
 			search: searchText,
 			page: page + 1,
@@ -617,7 +623,8 @@ function List(props) {
 			module: module,
 			where,
 			ids: [],
-			all: 1
+			all: 1,
+			fields: ordered_fields
 		}
 		axios.get(`/${module}/export`, { params }).then(res => {
 
