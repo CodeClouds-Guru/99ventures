@@ -32,6 +32,7 @@ const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
+const TolunaHelper = require('../../helpers/Toluna')
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -392,7 +393,7 @@ class MemberAuthController {
       );
       req.session.member = member_details;
       //set member eligibility
-      await this.setMemberEligibility(member_details.id);
+      await this.setMemberEligibility(member_details.id,member_details.profile_completed_on);
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
@@ -431,7 +432,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          // username: Joi.string().optional().label('User Name'),
+          username: Joi.string().optional().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
@@ -470,7 +471,7 @@ class MemberAuthController {
           where: { id: member_id },
         });
         //set eligibility
-        await this.setMemberEligibility(member_id);
+        await this.setMemberEligibility(member_id,member.profile_completed_on);
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
@@ -513,9 +514,9 @@ class MemberAuthController {
     }
   }
   //set member eligibility
-  async setMemberEligibility(member_id) {
+  async setMemberEligibility(member_id,profile_completed_on) {
     //gender
-
+    console.log('profile_completed_on',profile_completed_on)
     let member_details = await Member.findOne({ where: { id: member_id } });
     var member_eligibility = [];
 
@@ -524,7 +525,7 @@ class MemberAuthController {
     let questions = await SurveyQuestion.findAll({
       where: { name: nmae_list },
     });
-
+    
     if (questions.length) {
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
@@ -550,6 +551,12 @@ class MemberAuthController {
                   precode = 58;
                 } else if (member_details.gender == 'female') {
                   precode = 59;
+                }
+              } else if (record.survey_provider_id == 6) {
+                if (member_details.gender == 'male') {
+                  precode = 2000247;
+                } else if (member_details.gender == 'female') {
+                  precode = 2000246;
                 }
               }
               break;
@@ -596,6 +603,41 @@ class MemberAuthController {
         force: true,
       });
       await MemberEligibilities.bulkCreate(member_eligibility);
+    }
+    if(!profile_completed_on){
+      var toluna_questions = []
+      if(member_details.gender == 'male'){
+        toluna_questions.push({
+          "QuestionID": 1001007,
+          "Answers": [{"AnswerID":2000247}]
+        })
+      }
+      else if(member_details.gender == 'female'){
+        toluna_questions.push({
+          "QuestionID": 1001007,
+          "Answers": [{"AnswerID":2000246}]
+        })
+      }
+      // toluna_questions.push({
+      //   "QuestionID": 1001042,
+      //   "Answers": [{"AnswerValue":member_details.zip_code}]
+      // })
+      try{      
+        let tolunaHelper = new TolunaHelper
+        const payload = {
+                            "PartnerGUID": process.env.PARTNER_GUID,
+                            "MemberCode": member_details.id,
+                            "Email": member_details.email,
+                            "BirthDate": member_details.dob,
+                            "PostalCode": member_details.zip_code,
+                            // "IsActive": true,
+                            // "IsTest": true,
+                            "RegistrationAnswers": toluna_questions
+                        }
+        let t = await tolunaHelper.addMemebr(payload);
+      }catch(error){
+        console.log(error)
+      }
     }
     return;
   }
