@@ -4,54 +4,26 @@ import { useDeepCompareEffect } from '@fuse/hooks';
 import Button from '@mui/material/Button';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
 import withReducer from 'app/store/withReducer';
+import Typography from '@mui/material/Typography';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import _ from '@lodash';
-import { FormProvider, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-// import { getModule, resetModule, selectModule, getModuleFields } from '../store/moduleSlice';
-// import reducer from '../store';
-import CreateEditHeader from '../../crud/create-edit/CreateEditHeader';
 import CreateEditForm from './CreateEditForm';
-import Alert from '@mui/material/Alert';
 import MainHeader from '../../../shared-components/MainHeader'
 
 function CreateEdit(props) {
   const dispatch = useDispatch();
-  const navigate = useNavigate()
-//   const moduleData = useSelector(selectModule);
+  const navigate = useNavigate();
+
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
-//   const errors = useSelector(state => state.crud.module.errors)
- 
-  const routeParams = useParams();
   const module = 'paymentconfigurations';
-  const [tabValue, setTabValue] = useState(0);
   const [noModule, setNoModule] = useState(false);
 
   const { moduleId } = useParams();
-
-  useEffect(() => {
-    // function updateModuleState() {
-
-    //   if (moduleId === 'create') {
-    //     module !== 'pages' ? dispatch(getModuleFields({ module })) : '';
-    //   } else {
-    //     dispatch(getModule({ moduleId, module })).then((action) => {
-    //       if (!action.payload) {
-    //         setNoModule(true);
-    //       }
-    //     });
-    //   }
-    // }
-    // updateModuleState();
-  }, [dispatch, routeParams]);
-
 
 
   useEffect(() => {
@@ -106,18 +78,15 @@ function CreateEdit(props) {
     navigate(url);
   }
 
-  const createForm = () => { }
-  const module_arr = ['email-templates', 'tickets', 'components', 'pages', 'layouts']
   return (
     <FusePageCarded
       header={
-        <MainHeader module={'Payment Gateway'} backUrl="/configuration" moduleId={moduleId} />
+        <MainHeader module={'Payment Gateway'} backUrl="/configuration?tab=paymentconfigurations" moduleId={moduleId} />
       }
       content={
         <>
             <div>
                 <div className='w-full p-32'>
-                    {/* {errors && <Alert severity="error">{errors}</Alert>} */}
                     <CreateEditForm />
                 </div>
             </div>
