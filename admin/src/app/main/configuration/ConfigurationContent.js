@@ -56,7 +56,7 @@ function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
-        //'data-module': index
+        'data-module': index
     };
 }
 
@@ -98,7 +98,6 @@ function ConfigurationContent() {
     const [value, setValue] = useState(0);
     const [selectedTab, setSelectedTab] = useState('');
     const [param, setParam]  = useSearchParams();
-    // const history = useHistory();
 
     const tabPanel = () => {
         let initialIndx = 0;
