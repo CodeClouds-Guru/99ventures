@@ -29,6 +29,7 @@ const { isNull } = require('lodash');
 const util = require('util');
 const withdrawalrequest = require('../../models/withdrawalrequest');
 const moment = require("moment");
+const CsvHelper = require("../../helpers/CsvHelper");
 class MemberController extends Controller {
   constructor() {
     super('Member');
@@ -47,7 +48,7 @@ class MemberController extends Controller {
       "last_active_on": "Last active date",
       "MemberReferral.referral_email": "Referral",
       "email": "Registration email ",
-      "MemberPaymentInformations.email": "Payment emails",
+      "MemberPaymentInformations.value": "Payment emails",
       "IpLogs.ip": "Current IP",
       "IpLogs.geo_location": "Geo location",
       "IpLogs.isp": "Geo ISP",
@@ -57,7 +58,7 @@ class MemberController extends Controller {
       "MembershipTier.name": "Membership level",
       "address": "Address",
       "phone_no": "Telephone",
-      "MemberEmailAlerts.id": "Email marketing opt in",
+      "MemberEmailAlerts.slug": "Email marketing opt in",
       "MemberTransactions.balance": "Current Balance",
       "MemberTransactions.amount": "Total Earnings",
       "WithdrawalRequests.amount": "Withdrawal - total paid",
@@ -433,15 +434,18 @@ class MemberController extends Controller {
       },
       {
         model: WithdrawalRequest,
-        order: [['id', 'DESC']]
+        order: [['id', 'DESC']],
+        attributes: ['created_at', 'status', ['amount', 'withdrawal_amount']]
       },
       {
         model: MemberTransaction,
-        order: [['id', 'DESC']]
+        order: [['id', 'DESC']],
+        attributes: ['balance', 'type', 'amount']
       },
       {
         model: EmailAlert,
-        as: 'MemberEmailAlerts'
+        as: 'MemberEmailAlerts',
+        attributes: ['slug']
       }
     ];
     options.where = {
@@ -454,9 +458,8 @@ class MemberController extends Controller {
     options.limit = limit;
     options.offset = offset;
     options.subQuery = false;
+    options.distinct = true;
     options.attributes = req.query.fields || ['id', 'first_name', 'username'];
-
-    // console.log(options)
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
@@ -495,7 +498,7 @@ class MemberController extends Controller {
       if (row.WithdrawalRequests > 0) {
         cashout_date = moment(row.WithdrawalRequests[0].created_at).format('YYYY-MM-DD');
         total_paid = row.MemberTransactions.reduce((sum, item) => {
-          if (item.type === 'approved')
+          if (item.status === 'approved')
             sum += item.amount;
           return sum;
         }, 0.0)
@@ -506,7 +509,7 @@ class MemberController extends Controller {
       row.setDataValue('IpLogs.browser', browser);
       row.setDataValue('IpLogs.browser_language', browser_language);
       row.setDataValue('MembershipTier.name', membership_tier_name);
-      row.setDataValue('MemberEmailAlerts.id', opted_for_email_alerts);
+      row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       row.setDataValue('MemberTransactions.balance', member_account_balance);
       row.setDataValue('MemberTransactions.amount', member_total_earnings);
       row.setDataValue('WithdrawalRequests.amount', total_paid);
@@ -535,8 +538,20 @@ class MemberController extends Controller {
 
 
   async export(req, res) {
-    let data = await this.list(req);
-    return data;
+    req.query.show = 100000;
+    let { fields, result } = await this.list(req);
+    var header = [];
+    for (const head of Object.values(fields)) {
+
+      header.push({ id: head.field_name, title: head.placeholder })
+    }
+    const rows = JSON.parse(JSON.stringify(result.data));
+    const csv_helper = new CsvHelper(rows, header);
+    csv_helper.generateAndEmailCSV(req.user.email);
+    return {
+      status: true,
+      message: 'The CSV will be sent to your email address shortly.'
+    };
   }
 
   //update member details and avatar

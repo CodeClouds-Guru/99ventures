@@ -61,7 +61,7 @@ function Listing(props) {
         "last_active_on": "Last active date",
         "MemberReferral.referral_email": "Referral",
         "email": "Registration email ",
-        "MemberPaymentInformations.email": "Payment emails",
+        "MemberPaymentInformations.value": "Payment emails",
         "IpLogs.ip": "Current IP",
         "IpLogs.geo_location": "Geo location",
         "IpLogs.isp": "Geo ISP",
@@ -71,7 +71,7 @@ function Listing(props) {
         "MembershipTier.name": "Membership level",
         "address": "Address",
         "phone_no": "Telephone",
-        "MemberEmailAlerts.id": "Email marketing opt in",
+        "MemberEmailAlerts.slug": "Email marketing opt in",
         "MemberTransactions.balance": "Current Balance",
         "MemberTransactions.amount": "Total Earnings",
         "WithdrawalRequests.amount": "Withdrawal - total paid",
@@ -115,19 +115,23 @@ function Listing(props) {
     }
 
     const fetchModules = () => {
+        var ordered_fields = displayColumnArray.sort((a, b) =>
+            Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+        )
         let params = {
             search: searchText,
             page: page + 1,
             show: rowsPerPage,
             module: module,
             where,
-            fields: displayColumnArray
+            fields: ordered_fields
         }
         /* order is added if it's not the very first call os API listing */
         if (!firstCall) {
             params.sort = order.id
             params.sort_order = order.direction
         }
+        params.sort = ('sort' in params && params.sort !== 'id') ? params.sort : 'Member.id'
 
         axios.get(`/${module}`, { params }).then(res => {
             setFields(res.data.results.fields);
@@ -149,6 +153,9 @@ function Listing(props) {
     }
 
     const exportAll = () => {
+        var ordered_fields = displayColumnArray.sort((a, b) =>
+            Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+        )
         let params = {
             search: searchText,
             page: page + 1,
@@ -156,10 +163,13 @@ function Listing(props) {
             module: module,
             where,
             ids: [],
-            all: 1
+            fields: ordered_fields
         }
         axios.get(`/${module}/export`, { params }).then(res => {
-
+            if (res.data.results.status) {
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                setListConfigDialog(false)
+            }
         }).catch(error => {
             let message = 'Something went wrong!'
             if (error && error.response.data && error.response.data.errors) {

@@ -70,7 +70,7 @@ class TolunaController {
      * @param {*} res 
      * @returns 
      */
-    async getSurveys(req, res) {
+    async surveys(memberId,params) {
         if(!req.session.member) {
             res.status(401).json({
                 status: false,
@@ -78,7 +78,7 @@ class TolunaController {
             });
             return;
         }
-        const memberId = req.query.user_id;
+        // const memberId = req.query.user_id;
         if (!memberId) {
             res.status(422).json({
                 status: false,

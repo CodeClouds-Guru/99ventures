@@ -136,7 +136,7 @@ class EmailHelper {
     return email_body;
   }
   //send mail
-  async sendMail(body, to, subject) {
+  async sendMail(body, to, subject, attachments = []) {
     // create reusable transporter object using the default SMTP transport
     try {
       let req = this.req_data;
@@ -170,7 +170,9 @@ class EmailHelper {
           //text: 'That was easy!',
           html: body,
         };
-        // console.log('Mail Data', mailData);
+        if (attachments.length > 0) {
+          mailData.attachments = attachments
+        }
         await transporter.sendMail(mailData);
       }
     } catch (error) {

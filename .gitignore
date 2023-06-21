@@ -2,6 +2,7 @@
 dbdiagram.txt
 backend/.env
 backend/public/uploads/*
+backend/public/exports/*
 frontend/.env
 backend/node_modules
 frontend/node_modules
