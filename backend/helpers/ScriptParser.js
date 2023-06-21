@@ -231,7 +231,8 @@ class ScriptParser {
             }else{
               data = []
             }
-            data = JSON.parse(data)
+            if(Array.isArray(data))
+              data = JSON.stringify(data)
             console.log('temp_survey_list',data)
             //pagination
               if (
