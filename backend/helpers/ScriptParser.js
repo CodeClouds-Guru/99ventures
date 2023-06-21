@@ -233,7 +233,7 @@ class ScriptParser {
             }
             if(Array.isArray(data))
               data = JSON.stringify(data)
-            console.dir('temp_survey_list', temp_survey_list.surveys)
+            console.log('temp_survey_list', temp_survey_list.surveys)
             //pagination
               if (
                 'pagination' in params &&
