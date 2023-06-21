@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon, Popover } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon, Popover, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,6 +73,20 @@ function List(props) {
 	const [memberID, setMemberID] = useState(0)
 	const stateUser = useSelector(state => state.user);
 
+	const [listConfigDialog, setListConfigDialog] = useState(false);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['id', 'PaymentMethod.name', 'status', 'account', 'username', 'amount']);
+
+	const display_column_object = {
+		'id': 'ID',
+		'payment_email': 'Email',
+		'Member.username': 'Username',
+		'PaymentMethod.name': 'Method',
+		'account': 'Account',
+		'amount': 'Cash',
+		'status': 'Status',
+		'created_at': 'Date',
+	}
+
 	const handlePopoverOpen = (event) => {
 		event.stopPropagation();
 		setDescPopoverAnchorEl(event.currentTarget);
@@ -105,6 +119,9 @@ function List(props) {
 			module,
 			where,
 			...queryParams
+		}
+		if (module === 'withdrawal-requests') {
+			params.fields = displayColumnArray
 		}
 		/* order is added if it's not the very first call os API listing */
 		if (!firstCall) {
@@ -585,8 +602,64 @@ function List(props) {
 			</Tooltip>
 		)
 	}
+	const handleConfigurColumn = (e) => {
+		e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
+	}
+	const modifyList = () => {
+		fetchModules();
+		setListConfigDialog(false);
+	}
+	const exportAll = () => {
+		let params = {
+			search: searchText,
+			page: page + 1,
+			show: rowsPerPage,
+			module: module,
+			where,
+			ids: [],
+			all: 1
+		}
+		axios.get(`/${module}/export`, { params }).then(res => {
+
+		}).catch(error => {
+			let message = 'Something went wrong!'
+			if (error && error.response.data && error.response.data.errors) {
+				message = error.response.data.errors
+			}
+			dispatch(showMessage({ variant: 'error', message }));
+		})
+	}
 	return (
 		<div>
+
+			{/* Withdrawal Requests table Configure dialog */}
+			{/* Start */}
+			<Dialog
+				open={listConfigDialog}
+				onClose={() => { setListConfigDialog(false) }}
+				disableEscapeKeyDown
+				aria-labelledby="scroll-dialog-title"
+				aria-describedby="scroll-dialog-description"
+				fullWidth
+				maxWidth="md"
+			>
+				<DialogTitle id="scroll-dialog-title">Select Fields</DialogTitle>
+				<DialogContent>
+					<div className="flex flex-wrap w-full justify-between my-10">
+						{Object.keys(display_column_object).map((val, index) => {
+							return (
+								<FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
+							)
+						})
+						}
+					</div>
+				</DialogContent>
+				<DialogActions className="mx-16 mb-16">
+					<Button variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</Button>
+					<Button variant="contained" color="primary" onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</Button>
+				</DialogActions>
+			</Dialog>
+			{/* End */}
 			{openRevertAlertDialog &&
 				<AlertDialog
 					open={openRevertAlertDialog}
@@ -614,6 +687,17 @@ function List(props) {
 							)
 						}
 						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
+							{module === 'withdrawal-requests' &&
+								<Tooltip title="Configure" placement="top">
+									<Button
+										className="p-0 m-0"
+										variant="contained"
+										color="secondary"
+										onClick={(e) => { e.preventDefault(); setListConfigDialog(true) }}
+									>
+										<FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>
+									</Button>
+								</Tooltip>}
 							{
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>

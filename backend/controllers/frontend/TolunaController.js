@@ -7,7 +7,7 @@ const TolunaHelper = require('../../helpers/Toluna');
 
 class TolunaController {
 
-    constructor(){
+    constructor() {
         this.registerMember = this.registerMember.bind(this);
         this.surveys = this.surveys.bind(this);
     }
@@ -18,7 +18,7 @@ class TolunaController {
      * @param {*} res 
      */
     async registerMember(req, res) {
-        try{
+        try {
             const tObj = new TolunaHelper;
             const payload = {
                 "PartnerGUID": process.env.PARTNER_GUID,
@@ -29,37 +29,37 @@ class TolunaController {
                 "RegistrationAnswers": [
                     {
                         "QuestionID": 1001007,
-                        "Answers": [{"AnswerID":2000247}]
+                        "Answers": [{ "AnswerID": 2000247 }]
                     },
                     {
                         "QuestionID": 1001101,
-                        "Answers": [{"AnswerID":2002275}]
+                        "Answers": [{ "AnswerID": 2002275 }]
                     },
                     {
                         "QuestionID": 1001107,
-                        "Answers": [{"AnswerID": 2002330}]
+                        "Answers": [{ "AnswerID": 2002330 }]
                     },
                     {
                         "QuestionID": 1001012,
-                        "Answers": [{"AnswerID": 2000270}]
+                        "Answers": [{ "AnswerID": 2000270 }]
                     },
                     {
                         "QuestionID": 1005145,
-                        "Answers": [{"AnswerID": 2796316}]
+                        "Answers": [{ "AnswerID": 2796316 }]
                     },
                     {
                         "QuestionID": 1001102,
-                        "Answers": [{"AnswerID": 2002280}]
+                        "Answers": [{ "AnswerID": 2002280 }]
                     },
                     {
                         "QuestionID": 1012395,
-                        "Answers": [{"AnswerID": 3056609}]
+                        "Answers": [{ "AnswerID": 3056609 }]
                     }
                 ]
             }
             await tObj.addMemebr(payload);
             res.send('Member Created!');
-        } catch(error) {
+        } catch (error) {
             res.send(error)
         }
     }
@@ -90,8 +90,8 @@ class TolunaController {
                 id: memberId
             }
         });
-        
-        if(member){
+
+        if (member) {
             const provider = await SurveyProvider.findOne({
                 attributes: ['currency_percent'],
                 where: {
@@ -102,7 +102,7 @@ class TolunaController {
             const tObj = new TolunaHelper;
             const surveys = await tObj.getSurveys(member.id);
             var survey_list = {}
-            if(surveys && surveys.length) {
+            if (surveys && surveys.length) {
                 var surveyHtml = '';
                 // for (let survey of surveys) {
                 //     let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? survey.PartnerAmount / centAmt : 0;
@@ -126,8 +126,8 @@ class TolunaController {
                     status: true,
                     message: 'Success',
                     result: {
-                        surveys:surveys,
-                        page_count:0
+                        surveys: surveys,
+                        page_count: 0
                     }
                 }
             }
@@ -138,7 +138,7 @@ class TolunaController {
                 }
             }
         } else {
-            return{
+            return {
                 status: false,
                 message: 'Member not found!'
             }
