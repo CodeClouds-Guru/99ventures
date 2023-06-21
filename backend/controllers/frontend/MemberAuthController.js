@@ -981,24 +981,24 @@ class MemberAuthController {
     }
 
     // email body for admin
-    let admin_mail = await this.sendMailEvent({
-      action: 'Withdraw Request Admin',
-      data: {
-        email: result,
-        details: {
-          members: {
-            ...member,
-            amount: withdrawal_amount,
-            requested_on: moment(new Date()).format('llll'),
-          },
-          withdraw_requests: {
-            amount: withdrawal_amount,
-            requested_on: moment(new Date()).format('llll'),
-          },
-        },
-      },
-      req: req,
-    });
+    // let admin_mail = await this.sendMailEvent({
+    //   action: 'Withdraw Request Admin',
+    //   data: {
+    //     email: result,
+    //     details: {
+    //       members: {
+    //         ...member,
+    //         amount: withdrawal_amount,
+    //         requested_on: moment(new Date()).format('llll'),
+    //       },
+    //       withdraw_requests: {
+    //         amount: withdrawal_amount,
+    //         requested_on: moment(new Date()).format('llll'),
+    //       },
+    //     },
+    //   },
+    //   req: req,
+    // });
 
     return {
       member_status: true,
