@@ -601,7 +601,9 @@ class SurveycallbackController {
 	async memberEligibitityUpdate(queryObj){
 		try{
 			// const queryObj = req.query;
-
+			if((queryObj.pid).toLowerCase() === 'test') {
+				return;
+			}
 			const queryKeys = Object.keys(queryObj);
 			const obj = {}
 			for (let key of queryKeys) {

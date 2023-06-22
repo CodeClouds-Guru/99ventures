@@ -105,7 +105,7 @@ class TolunaController {
             if (surveys && surveys.length) {
                 var surveyHtml = '';
                 for (let survey of surveys) {
-                    let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? survey.PartnerAmount / centAmt : 0;
+                    let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? (survey.PartnerAmount * centAmt)/100 : 0;
                     let temp_survey = {
                         survey_number: '',
                         name: survey.Name,
