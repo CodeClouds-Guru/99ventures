@@ -187,8 +187,14 @@ class SchlesingerController {
                 var surveyHtml = '';
                 for (let survey of surveys) {
                     let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
-                    survey.link = link
-                    survey_list.push(survey)
+                    let temp_survey = {
+                        survey_number: survey.survey_number,
+                        name: survey.name,
+                        cpi: survey.cpi,
+                        loi: survey.loi,
+                        link:link
+                    }
+                    survey_list.push(temp_survey)
                     // surveyHtml += `
                     //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                     //         <div class="bg-white card mb-2">
