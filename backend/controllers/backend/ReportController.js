@@ -69,7 +69,7 @@ class ReportController {
   }
   async countReport(company_portal_id) {
     //get total active surveys
-    let survey_list = await Survey.findAndCountAll({ where: { status: 1 } })
+    let survey_list = await Survey.findAndCountAll({ where: { status: 'active' } })
     //no of active members
     let member_list = await Member.findAndCountAll({ where: { status: 'member', company_portal_id: company_portal_id } })
     //no of verified members
