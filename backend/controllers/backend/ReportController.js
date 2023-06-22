@@ -71,7 +71,7 @@ class ReportController {
     //get total active surveys
     let survey_list = await Survey.findAndCountAll({ where: { status: 'active' } })
     //no of active members
-    let member_list = await Member.findAndCountAll({ where: { status: 'member', company_portal_id: company_portal_id } })
+    let member_list = await Member.findAndCountAll({ where: { company_portal_id: company_portal_id } })
     //no of verified members
     let verified_member = await Member.findAndCountAll({ where: { admin_status: 'verified', company_portal_id: company_portal_id } })
 
