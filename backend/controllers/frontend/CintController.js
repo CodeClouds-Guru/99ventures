@@ -71,7 +71,7 @@ class CintController {
                             message: 'Success',
                             result: {
                                 surveys:survey_list,
-                                page_count:0
+                                page_count:1
                             }
                         }
                     } else {

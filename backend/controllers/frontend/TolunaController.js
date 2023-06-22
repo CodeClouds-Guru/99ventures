@@ -104,8 +104,16 @@ class TolunaController {
             var survey_list = []
             if (surveys && surveys.length) {
                 var surveyHtml = '';
-                // for (let survey of surveys) {
-                //     let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? survey.PartnerAmount / centAmt : 0;
+                for (let survey of surveys) {
+                    let memberAmount = (centAmt !=0 && survey.PartnerAmount !=0 ) ? survey.PartnerAmount / centAmt : 0;
+                    let temp_survey = {
+                        survey_number: '',
+                        name: survey.Name,
+                        cpi: memberAmount,
+                        loi: survey.Duration,
+                        link: survey.URL
+                    }
+                    survey_list.push(temp_survey)
                 //     surveyHtml += `
                 //         <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                 //             <div class="bg-white card mb-2">
@@ -121,13 +129,13 @@ class TolunaController {
                 //             </div>
                 //         </div>
                 //     `
-                // }
+                }
                 return {
                     status: true,
                     message: 'Success',
                     result: {
-                        surveys: surveys,
-                        page_count: 0
+                        surveys: survey_list,
+                        page_count: 1
                     }
                 }
             }
