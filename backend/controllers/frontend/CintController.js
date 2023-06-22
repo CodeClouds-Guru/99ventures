@@ -42,8 +42,14 @@ class CintController {
                         for (let survey of surveys) {
                             const entryLink = survey.entry_link;
                             const rebuildEntryLink = entryLink.replace('SUBID', ssi);
-                            survey.link = rebuildEntryLink
-                            survey_list.push(survey)
+                            let temp_survey = {
+                                survey_number: '',
+                                name: survey.name,
+                                cpi: survey.conversion_rate,
+                                loi: '',
+                                link:rebuildEntryLink
+                            }
+                            survey_list.push(temp_survey)
                             // tbodyData += `
                             //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
                             //         <div class="bg-white card mb-2">
