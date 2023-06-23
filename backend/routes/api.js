@@ -24,18 +24,8 @@ const DynamicRouteController = require('../controllers/backend/DynamicRouteContr
 
 const Paypal = require('../helpers/Paypal');
 
-router.get('/', [AuthMiddleware], (req, res) => {
-  const eventBus = require('../eventBus');
-  let email_body = eventBus.emit('send_email', {
-    action: 'Invitation',
-    data: {
-      email: 'mailto:sourabh.das@codeclouds.in',
-      company_id: 1,
-      company_portal_id: 1,
-    },
-    req: req,
-  });
-  res.json({ message: 'API working', email_body: email_body });
+router.get('/', async (req, res) => {
+  res.json({ message: 'API working', });
 });
 
 router.post('/signup', AuthController.signup);
