@@ -156,12 +156,14 @@ class PaymentConfigurationController extends Controller {
       req.body.company_portal_id = req.headers.site_id;
       const updated_country_list = req.body.country_list;
       const updated_member_list = req.body.member_list;
+      const field_option_list = req.body.field_option_list;
       req.body.withdraw_redo_interval =
         req.body.withdraw_redo_interval === ''
           ? null
           : req.body.withdraw_redo_interval;
       delete req.body.country_list;
       delete req.body.member_list;
+      delete req.body.field_option_list;
       let payment_method = await this.model.findOne({
         where: { id: req.params.id },
       });
@@ -199,6 +201,13 @@ class PaymentConfigurationController extends Controller {
             }
           );
           await this.insertExcludedMembers(updated_member_list, req.params.id);
+        }
+        if (field_option_list.length > 0) {
+          //remove previous PaymentMethodFieldOption records
+          await PaymentMethodFieldOption.destroy({
+            where: { payment_method_id: req.params.id },
+          });
+          await this.insertFieldOptions(field_option_list, req.params.id);
         }
       }
       return {
@@ -251,10 +260,7 @@ class PaymentConfigurationController extends Controller {
       };
     });
     // console.log('member_data', member_data);
-    await queryInterface.bulkInsert(
-      'payment_method_field_options',
-      field_option_data
-    );
+    await PaymentMethodFieldOption.bulkCreate(field_option_data);
   }
 }
 
