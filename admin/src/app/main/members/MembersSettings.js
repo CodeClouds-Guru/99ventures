@@ -32,15 +32,19 @@ const MembersSettings = () => {
     }
 
     const handleData = (event) => {
-        setFields(prevState => {
-            const newState = prevState.map(obj => {
-                if (obj.settings_key === event.target.name) {
-                    return { ...obj, settings_value: Number(event.target.value) };
-                }
-                return obj;
+        if (Number(event.target.value) >= 0) {
+            setFields(prevState => {
+                const newState = prevState.map(obj => {
+                    if (obj.settings_key === event.target.name) {
+                        return { ...obj, settings_value: Number(event.target.value) };
+                    }
+                    return obj;
+                });
+                return newState;
             });
-            return newState;
-        });
+        } else {
+            dispatch(showMessage({ variant: 'error', message: 'Negative value not accepted' }))
+        }
     }
     const updateSettings = () => {
         setLoading(true);
