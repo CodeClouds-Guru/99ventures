@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'payment_method_id',
         // as: "credentials",
       });
+      PaymentMethod.hasMany(models.PaymentMethodFieldOption, {
+        foreignKey: 'payment_method_id',
+        // as: "credentials",
+      });
     }
   }
   PaymentMethod.init(
@@ -42,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.STRING,
       image_url: DataTypes.STRING,
       type_user_info_again: DataTypes.TINYINT,
-      payment_field_options: DataTypes.STRING,
+      // payment_field_options: DataTypes.STRING,
       minimum_amount: DataTypes.FLOAT,
       maximum_amount: DataTypes.FLOAT,
       fixed_amount: DataTypes.FLOAT,
@@ -109,9 +113,9 @@ module.exports = (sequelize, DataTypes) => {
       type_user_info_again: Joi.optional()
         .allow('')
         .label('Type User Info Again'),
-      payment_field_options: Joi.string()
-        .required()
-        .label('Payment Field Options'),
+      // payment_field_options: Joi.string()
+      //   .required()
+      //   .label('Payment Field Options'),
       minimum_amount: Joi.optional().allow('').label('Minimum Amount'),
       maximum_amount: Joi.optional().allow('').label('Maximum Amount'),
       fixed_amount: Joi.optional().allow('').label('Fixed Amount'),

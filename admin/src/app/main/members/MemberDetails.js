@@ -422,41 +422,50 @@ const MemberDetails = () => {
                                     variant="h5"
                                     sx={{
                                         marginRight: '10px',
+                                        '@media screen and (max-width: 1600px)': {
+                                            fontSize: '2rem'
+                                        },
                                         '@media screen and (max-width: 1400px)': {
+                                            fontSize: '1.4rem'
+                                        },
+                                        '@media screen and (max-width: 1200px)': {
                                             fontSize: '2rem'
                                         },
                                         '@media screen and (max-width: 768px)': {
                                             fontSize: '3rem'
                                         }
                                     }}
-                                ><strong>{memberData.username}</strong> </Typography>
+                                >
+                                    <strong>{memberData.username}</strong> 
+                                    {
+                                        !editMode ? (
+                                            <Tooltip title="Click to edit" placement="top-start">
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
+                                            <>
+                                                <Tooltip title="Click to save" placement="top-start">
+                                                    <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => onOpenAlertDialogHandle('save_profile')}>
+                                                        <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">feather:save</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Click to cancel" placement="top-start">
+                                                    <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={handleCancelEdit}>
+                                                        <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        )
+                                    }
+                                </Typography>
                             )
                         }
 
-                        <sub className={editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
-                            {
-                                !editMode ? (
-                                    <Tooltip title="Click to edit" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
-                                            <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
-                                ) : (
-                                    <>
-                                        <Tooltip title="Click to save" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => onOpenAlertDialogHandle('save_profile')}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">feather:save</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Click to cancel" placement="top-start">
-                                            <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={handleCancelEdit}>
-                                                <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:cancel</FuseSvgIcon>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </>
-                                )
-                            }
-                        </sub>
+                        {/* <sub className={editMode ? "xl:w-2/5 sm:w-2/5" : ""}>
+                            
+                        </sub> */}
                     </div>
                     <div className='lg:flex justify-center sm:hidden'>
                         <MemberAvatar

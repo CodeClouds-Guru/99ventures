@@ -14,7 +14,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import {Visibility, VisibilityOff, ExpandMore, CheckBox, CheckBoxOutlineBlank} from '@mui/icons-material';
-import { TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment, CircularProgress } from '@mui/material';
+import { Select, TextField, MenuItem, Autocomplete, Accordion, AccordionDetails, AccordionSummary, Checkbox, Button, Typography, InputLabel, FormControl, FormControlLabel, FormGroup, Switch, IconButton, OutlinedInput, InputAdornment, CircularProgress, ListItemText } from '@mui/material';
 
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
@@ -31,7 +31,7 @@ const defaultValues = {
     image_url: '',
     type_user_info_again: false,
     status: true,
-    payment_field_options: 'Email',
+    field_option_list: [],
     maximum_amount: 0,
     withdraw_redo_interval: 0,
     // same_account_options: 'Mark as cheater',
@@ -53,13 +53,35 @@ const defaultValues = {
 
 const validationSchema = yup.object().shape({
     name: yup.string().required(`Please enter payment gateway name!`),
-    payment_field_options: yup.string().required(`Please select payment field options!`),
+    field_option_list: yup.array().min(1, 'Please select payment field options!').required(),
     // api_username: yup.string().required(`Please enter API Username!`),
     // api_password: yup.string().required(`Please enter name!`),
     // api_signature: yup.string().required(`Please enter name!`),
     // api_memo: yup.string().required(`Please enter name!`),
 });
 
+const fields = [
+    {
+        field_name: "Full Name",
+        field_type: "input"
+    },
+    {
+        field_name: "First Name",
+        field_type: "input"
+    },
+    {
+        field_name: "Last Name",
+        field_type: "input"
+    },
+    {
+        field_name: "Email",
+        field_type: "email",
+    },
+    {
+        field_name: "Phone",
+        field_type: "number",
+    }
+]
 
 const CreateEditForm = () => {
     const dispatch = useDispatch();
@@ -71,9 +93,10 @@ const CreateEditForm = () => {
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(true);
     const [memberList, setMemberList] = useState([]);
+    const [pageloader, setPageloader] = useState(true);
     const [countryList, setCountryList] = useState([]);
     const [paymentData, setPaymentData] = useState([]);
-    const [pageloader, setPageloader] = useState(true);
+    const [paymentFields, setPaymentFields] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [selectedMember, setSelectedMember] = useState([]);
     const [showSignature, setShowSignature] = useState(false);
@@ -87,7 +110,7 @@ const CreateEditForm = () => {
      */
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleClickSignature = () => setShowSignature((show) => !show);
-
+    
     const {
         control,
         formState: { isValid, dirtyFields, errors },
@@ -108,6 +131,11 @@ const CreateEditForm = () => {
         }
     }, [errors]);
 
+    const handlePaymentFieldChange = (e) => {
+        setPaymentFields(e.target.value);
+        setValue('field_option_list', e.target.value, { shouldDirty: false, shouldValidate: true })
+    }
+
     /**
      * Confirm Box before update
      */
@@ -115,9 +143,9 @@ const CreateEditForm = () => {
         setPayload(data);
         if(
             !isNaN(moduleId) && (
-                data.api_username !== paymentData.api_username || 
-                data.api_password !== paymentData.api_password || 
-                data.api_signature !== paymentData.api_signature
+                paymentData.api_username && data.api_username !== paymentData.api_username || 
+                paymentData.api_password && data.api_password !== paymentData.api_password || 
+                paymentData.api_signature && data.api_signature !== paymentData.api_signature
             )
         ) {
             setOpenAlertDialog(true)
@@ -144,7 +172,8 @@ const CreateEditForm = () => {
         data.member_list = (selectedMember.length ? selectedMember.map(r=> r.id) : []);
         data.type_user_info_again = (Boolean(data.type_user_info_again) === true) ? 1 : 0;
         data.status = (Boolean(data.status) === true) ? 1 : 0;
-
+        data.field_option_list = fields.filter(f => paymentFields.includes(f.field_name))
+        
         const url = isNaN(moduleId) ? jwtServiceConfig.savePaymentMethodConfiguration : jwtServiceConfig.updatePaymentMethodConfiguration +'/'+moduleId;
         setLoading(true);
         axios.post(url, data)
@@ -199,10 +228,10 @@ const CreateEditForm = () => {
                 setSelectedCountry(result.allowed_countries);
 
                 Object.keys(defaultValues).forEach((key, indx) => {
-                    if(key == 'name' || key == 'payment_field_options') {    // This two fields added in the validation rule. That's why shouldDirty should be false
+                    if(key == 'name') {    // This two fields added in the validation rule. That's why shouldDirty should be false
                         setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: false, shouldValidate: true });
                     }
-                    else if(!['member_list', 'country_list'].includes(key)) {
+                    else if(!['member_list', 'country_list', 'field_option_list'].includes(key)) {
                         setValue(key, (typeof result[key] === 'undefined' ? '' : result[key]), { shouldDirty: !false, shouldValidate: true });
                     }
                 });
@@ -217,6 +246,9 @@ const CreateEditForm = () => {
                     setValue('amount_type', defaultValues.amount_type, { shouldDirty: false, shouldValidate: true });
                     setValue('amount', defaultValues.amount, { shouldDirty: false, shouldValidate: true });
                 }
+                const pFields = result.PaymentMethodFieldOptions.map(f => f.field_name);
+                setPaymentFields(pFields);
+                setValue('field_option_list', pFields, { shouldDirty: false, shouldValidate: true })
             }
             setPageloader(false);
         })
@@ -380,27 +412,55 @@ const CreateEditForm = () => {
                             />
 
                             <Controller
-                                name="payment_field_options"
+                                name="field_option_list"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        id="outlined-select-currency"
-                                        select
-                                        label="Payment Field"
-                                        helperText=""
-                                        className="w-full mt-20"
+                                    <FormControl className="w-full mt-20">
+                                        <InputLabel id="demo-multiple-checkbox-label">Payment Field</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="demo-multiple-checkbox-label"
+                                            id="demo-multiple-checkbox"
+                                            multiple
+                                            required
+                                            value={paymentFields}
+                                            onChange={handlePaymentFieldChange}
+                                            input={<OutlinedInput label="Payment Field" />}
+                                            renderValue={(selected) => selected.join(', ')}
+                                           
                                         >
-                                        <MenuItem value="Name">
-                                            Name
-                                        </MenuItem>
-                                        <MenuItem value="Email">
-                                            Email
-                                        </MenuItem>
-                                        <MenuItem value="Phone">
-                                            Phone
-                                        </MenuItem>
-                                    </TextField>
+                                        {fields.map((field, index) => (
+                                            <MenuItem key={index} value={field.field_name}>
+                                                <Checkbox checked={paymentFields.includes(field.field_name)} />
+                                                <ListItemText primary={field.field_name} />
+                                            </MenuItem>
+                                        ))}
+                                        </Select>
+                                    </FormControl>
+                                    // <TextField
+                                    //     {...field}
+                                    //     id="outlined-select-currency"
+                                    //     multiselect="true"
+                                    //     label="Payment Field"
+                                    //     helperText=""
+                                    //     className="w-full mt-20"
+                                    //     >
+                                    //     <MenuItem value="Full Name">
+                                    //         Full Name
+                                    //     </MenuItem>
+                                    //     <MenuItem value="First Name">
+                                    //         First Name
+                                    //     </MenuItem>
+                                    //     <MenuItem value="Last Name">
+                                    //         Last Name
+                                    //     </MenuItem>
+                                    //     <MenuItem value="Email">
+                                    //         Email
+                                    //     </MenuItem>
+                                    //     <MenuItem value="Phone">
+                                    //         Phone
+                                    //     </MenuItem>
+                                    // </TextField>
                                 )}
                             />
                              <Controller
@@ -452,7 +512,7 @@ const CreateEditForm = () => {
                                         />
                                     )}
                                 />
-                                <small className='mt-5 text-gray-600'>If you wish the user to entet how much cash they wish to receuve then please select the "Minimum". Fixed means the user has to receive the amount specified.</small>
+                                <small className='mt-5 text-gray-600'>If you wish the user to enter how much cash they wish to receive then please select the "Minimum". Fixed means the user has to receive the amount specified.</small>
                             </FormGroup>
 
                             <FormGroup aria-label="position" row className="mt-20">   
@@ -882,7 +942,7 @@ const CreateEditForm = () => {
                                     <TextField
                                         {...field}
                                         id="outlined-required-fee"
-                                        label="Fees"
+                                        label="Fee Percent (%)"
                                         className="w-full mt-20"
                                         helperText="In cent format"
                                     />
