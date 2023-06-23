@@ -139,7 +139,7 @@ module.exports = (sequelize, DataTypes) => {
         notification_verbose =
           'Registration bonus of $' +
           amount +
-          ' has been added to your wallet on ' +
+          ' has been credited to your wallet on ' +
           updated_on;
         notification_action = 'registration_bonus';
         break;
@@ -147,11 +147,12 @@ module.exports = (sequelize, DataTypes) => {
         notification_verbose =
           'Profile Completion bonus of $' +
           amount +
-          ' has been added to your wallet on ' +
+          ' has been credited to your wallet on ' +
           updated_on;
         notification_action = 'profile_completion_bonus';
         break;
       case 'ticket_reply':
+        notification_verbose = 'You have a new message on a ticket you had created';
         notification_action = 'ticket_reply';
         break;
       default:
