@@ -134,8 +134,8 @@ function List(props) {
 			params.sort = order.id
 			params.sort_order = order.direction
 		}
-
-		axios.get(`/${module}`, { params }).then(res => {
+		let endpoint = module === 'completed-surveys' ? `/survey-providers?action=completed-surveys` : `/${module}`;
+		axios.get(endpoint, { params }).then(res => {
 			setListConfigDialog(false);
 			let fields_var = res.data.results.fields;
 			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {

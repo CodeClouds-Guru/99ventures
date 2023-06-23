@@ -27,6 +27,12 @@ const CardPanel = (props) => {
                     <Typography variant="h6" component="div">Completed Surveys</Typography>
                 </CardContent>
             </Card>
+            <Card className="w-1/4 m-5" sx={{ backgroundColor: '#f2dfb0', color: '#6d634d' }}>
+                <CardContent>
+                    <Typography variant="h3" component="div">${props.withdrawn}</Typography>
+                    <Typography variant="h6" component="div">Withdrawn</Typography>
+                </CardContent>
+            </Card>
         </div>
     )
 }
