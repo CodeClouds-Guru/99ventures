@@ -11,6 +11,7 @@ class MemberSurveyController extends Controller{
     }
     async list(req, res) {
         var options = await this.getQueryOptions(req); 
+        let company_portal_id = req.headers.site_id;
         options.include = [
             {
               model: SurveyProvider,
@@ -22,7 +23,8 @@ class MemberSurveyController extends Controller{
                 include:[
                     {
                         model: Member,
-                        attributes: ['username']
+                        attributes: ['username'],
+                        where:{company_portal_id:company_portal_id}
                     }
                 ]
               },
@@ -41,9 +43,9 @@ class MemberSurveyController extends Controller{
               row.setDataValue('SurveyProvider.name', '');
             }
             if(row.MemberTransaction.transaction_id){
-              row.setDataValue('Member.username', row.MemberTransaction.Member.username);
+              row.setDataValue('MemberTransaction->Member.username', row.MemberTransaction.Member.username);
             }else{
-              row.setDataValue('Member.username', '');
+              row.setDataValue('MemberTransaction->Member.username', '');
             }
           })
           return {

@@ -116,9 +116,9 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    '$Member.username$': {
-      field_name: 'Member.username',
-      db_name: '`Member`.`username`',
+    '$MemberTransaction->Member.username$': {
+      field_name: 'MemberTransaction->Member.username',
+      db_name: '`MemberTransaction->Member`.`username`',
       type: 'text',
       placeholder: 'Username',
       listing: true,
