@@ -1,5 +1,9 @@
 const Controller = require('./Controller');
-const { Country, Member, PaymentMethod } = require('../../models/index');
+const {
+  Country,
+  Member,
+  PaymentMethodFieldOption,
+} = require('../../models/index');
 const db = require('../../models/index');
 const { sequelize } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
@@ -58,6 +62,10 @@ class PaymentConfigurationController extends Controller {
           required: false,
           attributes: ['id', ['nicename', 'name'], 'phonecode', 'iso3'],
         },
+        {
+          model: PaymentMethodFieldOption,
+          required: false,
+        },
       ],
     });
     response.fields = this.model.fields;
@@ -82,6 +90,7 @@ class PaymentConfigurationController extends Controller {
       req.body.company_portal_id = req.headers.site_id;
       const updated_country_list = req.body.country_list;
       const updated_member_list = req.body.member_list;
+      const field_option_list = req.body.field_option_list;
       req.body.withdraw_redo_interval =
         req.body.withdraw_redo_interval === ''
           ? null
@@ -96,8 +105,10 @@ class PaymentConfigurationController extends Controller {
       if (payment_method_exist) {
         this.throwCustomError('This payment method already exist', 500);
       }
+
       delete req.body.country_list;
       delete req.body.member_list;
+      delete req.body.field_option_list;
       const { error, value } = this.model.validate(req);
 
       if (error) {
@@ -123,6 +134,9 @@ class PaymentConfigurationController extends Controller {
             updated_member_list,
             response.result.id
           );
+        }
+        if (field_option_list.length > 0) {
+          await this.insertFieldOptions(field_option_list, response.result.id);
         }
       }
       return {
@@ -224,6 +238,22 @@ class PaymentConfigurationController extends Controller {
     await queryInterface.bulkInsert(
       'excluded_member_payment_method',
       member_data
+    );
+  }
+
+  async insertFieldOptions(field_option_list, payment_method_id) {
+    let field_option_data = [];
+    field_option_data = field_option_list.map((fields) => {
+      return {
+        payment_method_id: payment_method_id,
+        field_name: fields.field_name,
+        field_type: fields.field_type,
+      };
+    });
+    // console.log('member_data', member_data);
+    await queryInterface.bulkInsert(
+      'payment_method_field_options',
+      field_option_data
     );
   }
 }
