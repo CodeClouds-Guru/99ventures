@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'survey_provider_id',
       }),
       MemberSurvey.belongsTo(models.MemberTransaction, {
-        foreignKey: 'survey_provider_id',
+        foreignKey: 'member_transaction_id',
       })
     }
   }

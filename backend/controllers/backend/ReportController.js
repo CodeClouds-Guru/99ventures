@@ -85,13 +85,13 @@ class ReportController {
       }
     );
     let completed_surveys = await MemberSurvey.count()
-    console.log('completed_surveys',completed_surveys)
+    total_withdrawn = total_withdrawn[0].amount ?? 0
     return {
       results: {
         no_of_surveys: survey_list,
         no_of_members: member_list,
         no_of_verified_members: verified_member,
-        total_withdrawn: total_withdrawn[0].amount,
+        total_withdrawn: total_withdrawn ? parseFloat(total_withdrawn).toFixed(2) : 0,
         completed_surveys:completed_surveys
       }
     }

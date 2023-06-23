@@ -180,7 +180,7 @@ class PureSpectrumController {
                         let temp_survey = {
                             survey_number: survey.survey_number,
                             name: survey.name,
-                            cpi: survey.cpi,
+                            cpi: parseFloat(survey.cpi).toFixed(2),
                             loi: survey.loi,
                             link:link
                         }

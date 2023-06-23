@@ -109,7 +109,7 @@ class TolunaController {
                     let temp_survey = {
                         survey_number: '',
                         name: survey.Name,
-                        cpi: memberAmount,
+                        cpi: parseFloat(memberAmount).toFixed(2),
                         loi: survey.Duration,
                         link: survey.URL
                     }
