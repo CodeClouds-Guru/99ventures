@@ -141,13 +141,20 @@ module.exports = [
       }
     },
   },
+  // {
+  //   name: 'getObjectValueIfMatched',
+  //   fn: function (arr, finder) {
+  //     const index = arr.findIndex((object) => {
+  //       return object.name === finder.toLowerCase();
+  //     });
+  //     if (index >= 0) return arr[index].value;
+  //   },
+  // },
   {
-    name: 'getObjectValueIfMatched',
-    fn: function (arr, finder) {
-      const index = arr.findIndex((object) => {
-        return object.name === finder.toLowerCase();
-      });
-      if (index >= 0) return arr[index].value;
+    name: 'convertObjectToString',
+    fn: function (obj) {
+      console.log(obj);
+      return JSON.stringify(obj);
     },
   },
 ];

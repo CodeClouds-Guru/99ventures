@@ -23,7 +23,7 @@ class ScriptParser {
     this.getSurveys = this.getSurveys.bind(this);
     this.instance = axios.create({
       baseURL: this.baseUrl,
-  });
+    });
     // this.getOfferWallList = this.getOfferWallList.bind(this);
     // this.getTicketList = this.getTicketList.bind(this);
   }
@@ -202,19 +202,34 @@ class ScriptParser {
               }
               data[key].setDataValue('redo_diff', hours);
               var past_withdrawal_symbol = '';
-              if (payment.past_withdrawal_options === 'At least')
-                past_withdrawal_symbol = '>=';
-              if (payment.past_withdrawal_options === 'At most')
-                past_withdrawal_symbol = '<=';
-              if (payment.past_withdrawal_options === 'Exact')
-                past_withdrawal_symbol = '==';
+              switch (payment.past_withdrawal_options) {
+                case 'At least':
+                  past_withdrawal_symbol = '>=';
+                  break;
+                case 'At most':
+                  past_withdrawal_symbol = '<=';
+                  break;
+                case 'Exact':
+                  past_withdrawal_symbol = '==';
+                  break;
+                default:
+                  past_withdrawal_symbol = '>';
+                  break;
+              }
 
               data[key].setDataValue(
                 'past_withdrawal_symbol',
                 past_withdrawal_symbol
               );
             });
-
+            console.log(
+              '===================',
+              JSON.parse(JSON.stringify(data))
+            );
+            console.log(
+              '===================',
+              JSON.parse(JSON.stringify(other_details))
+            );
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -224,32 +239,31 @@ class ScriptParser {
               script.module,
               params
             );
-            
-            if (temp_survey_list.status){
+
+            if (temp_survey_list.status) {
               data = temp_survey_list.result.surveys;
               page_count = temp_survey_list.result.page_count;
-            }else{
-              data = []
+            } else {
+              data = [];
             }
-            // console.log('===================', JSON.parse(JSON.stringify(data)));
+
             //pagination
-              if (
-                'pagination' in params &&
-                params.pagination === 'true' &&
-                page_count > 1
-              ) {
-                script_html = await this.appendPagination(
-                  script_html,
-                  script_id,
-                  pageNo,
-                  page_count
-                );
-              }
+            if (
+              'pagination' in params &&
+              params.pagination === 'true' &&
+              page_count > 1
+            ) {
+              script_html = await this.appendPagination(
+                script_html,
+                script_id,
+                pageNo,
+                page_count
+              );
+            }
             break;
         }
       }
     }
-    
 
     return {
       data: JSON.parse(JSON.stringify(data)),
@@ -444,8 +458,8 @@ class ScriptParser {
     }
   }
   //get all matched surveys
-   //get survey
-   async getSurveys(user, survey_provider_id, script_module, params) {
+  //get survey
+  async getSurveys(user, survey_provider_id, script_module, params) {
     let memberId = user.id;
     if (!memberId) {
       return {
@@ -468,29 +482,29 @@ class ScriptParser {
       };
     }
     //check provider name
-    let file_name = ''
-    switch(survey_provider_id){
+    let file_name = '';
+    switch (survey_provider_id) {
       case '1':
-        file_name = 'LucidController'
+        file_name = 'LucidController';
         break;
       case '2':
-        file_name = 'CintController'
+        file_name = 'CintController';
         break;
       case '3':
-        file_name = 'PureSpectrumController'
+        file_name = 'PureSpectrumController';
         break;
       case '4':
-        file_name = 'SchlesingerController'
+        file_name = 'SchlesingerController';
         break;
       case '6':
-        file_name = 'TolunaController'
+        file_name = 'TolunaController';
       default:
         break;
     }
-    const ProviderControllerClass = require(`../controllers/frontend/${file_name}`)
+    const ProviderControllerClass = require(`../controllers/frontend/${file_name}`);
     const ProviderController = new ProviderControllerClass();
-    let response = await ProviderController.surveys(memberId,params) 
-    return response
+    let response = await ProviderController.surveys(memberId, params);
+    return response;
   }
   getModuleWhere(module, user) {
     switch (module) {
@@ -561,13 +575,12 @@ class ScriptParser {
             'id',
             'image_url',
             'type_user_info_again',
-            'payment_field_options',
+            // 'payment_field_options',
             'minimum_amount',
             'maximum_amount',
             'fixed_amount',
             'type_user_info_again',
             'withdraw_redo_interval',
-            'past_withdrawal_options',
             'past_withdrawal_count',
             'payment_type',
             [
@@ -589,15 +602,14 @@ class ScriptParser {
           ],
           order: [
             [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
+            [Models.PaymentMethodFieldOption, 'id', 'ASC'],
           ],
           include: [
-            // {
-            //   model: Models.Member,
-            //   as: 'excluded_members',
-            //   attributes: ['id'],
-            //   required: false,
-            //   where: { id: user.id },
-            // },
+            {
+              model: Models.PaymentMethodFieldOption,
+              attributes: ['field_name', 'field_type'],
+              required: false,
+            },
             // {
             //   model: Models.Country,
             //   as: 'allowed_countries',
