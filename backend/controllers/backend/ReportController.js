@@ -5,6 +5,7 @@ const {
   Member,
   MemberSurvey,
   MemberTransaction,
+  WithdrawalRequest,
   sequelize,
 } = require("../../models/index");
 const { Op, QueryTypes } = require("sequelize");
@@ -69,17 +70,29 @@ class ReportController {
   }
   async countReport(company_portal_id) {
     //get total active surveys
-    let survey_list = await Survey.findAndCountAll({ where: { status: 'active' } })
+    let survey_list = await Survey.count({ where: { status: 'active' } })
     //no of active members
-    let member_list = await Member.findAndCountAll({ where: { company_portal_id: company_portal_id } })
+    let member_list = await Member.count({ where: { company_portal_id: company_portal_id } })
     //no of verified members
-    let verified_member = await Member.findAndCountAll({ where: { admin_status: 'verified', company_portal_id: company_portal_id } })
+    let verified_member = await Member.count({ where: { admin_status: 'verified', company_portal_id: company_portal_id } })
+    //total withdrawal amount 
+    let query ="SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status='approved'"
 
+    let total_withdrawn = await db.sequelize.query(query,
+      {
+        replacements: [company_portal_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    let completed_surveys = await MemberSurvey.count()
+    console.log('completed_surveys',completed_surveys)
     return {
       results: {
-        no_of_surveys: survey_list.count,
-        no_of_members: member_list.count,
-        no_of_verified_members: verified_member.count
+        no_of_surveys: survey_list,
+        no_of_members: member_list,
+        no_of_verified_members: verified_member,
+        total_withdrawn: total_withdrawn[0].amount,
+        completed_surveys:completed_surveys
       }
     }
   }
@@ -229,7 +242,7 @@ class ReportController {
   }
 
   async topSurveys(start_date, end_date, query_string) {
-    let query = "SELECT `member_surveys`.`survey_number`, COUNT('*') AS `count`,`surveys`.`name`,`survey_providers`.`name` as provider_name FROM `member_surveys` JOIN `surveys` ON `member_surveys`.`survey_number` = `surveys`.`survey_number` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` WHERE `member_surveys`.`completed_on` BETWEEN ? AND ? GROUP BY `member_surveys`.`survey_number`,`surveys`.`name`,provider_name ORDER BY COUNT('*') DESC LIMIT 0, 5;"
+    let query = "SELECT `member_surveys`.`survey_number`, COUNT('*') AS `count`,`survey_providers`.`name` as provider_name FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` WHERE `member_surveys`.`completed_on` BETWEEN ? AND ? GROUP BY `member_surveys`.`survey_number`,provider_name ORDER BY COUNT('*') DESC LIMIT 0, 5;"
     let top_surveys = await db.sequelize.query(
       query,
       {
@@ -240,7 +253,7 @@ class ReportController {
     let names = []
     if (top_surveys.length) {
       for (let i of top_surveys) {
-        names.push(i.name + " (" + i.provider_name + ")")
+        names.push('#'+i.survey_number + " (" + i.provider_name + ")")
       }
     }
     return {
