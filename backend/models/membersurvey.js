@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       }),
       MemberSurvey.belongsTo(models.SurveyProvider, {
         foreignKey: 'survey_provider_id',
+      }),
+      MemberSurvey.belongsTo(models.MemberTransaction, {
+        foreignKey: 'survey_provider_id',
       })
     }
   }
@@ -99,7 +102,33 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
-    }
+    },
+    '$SurveyProvider.name$': {
+      field_name: 'SurveyProvider.name',
+      db_name: '`SurveyProvider`.`name`',
+      type: 'text',
+      placeholder: 'Survey Provider',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    '$Member.username$': {
+      field_name: 'Member.username',
+      db_name: '`Member`.`username`',
+      type: 'text',
+      placeholder: 'Username',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
   };
   sequelizePaginate.paginate(MemberSurvey);
   return MemberSurvey;
