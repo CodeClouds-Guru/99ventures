@@ -6,7 +6,7 @@ class SurveyProviderController extends Controller {
     super('SurveyProvider');
   }
   async list(req,res){
-    let action = req.query.module
+    let action = req.query.action
     var response = {}
     switch(action){
       case 'completed-surveys':
