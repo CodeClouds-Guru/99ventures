@@ -42,7 +42,7 @@ class MemberSurveyController extends Controller{
             }else{
               row.setDataValue('SurveyProvider.name', '');
             }
-            if(row.MemberTransaction.transaction_id){
+            if(row.MemberTransaction){
               row.setDataValue('MemberTransaction->Member.username', row.MemberTransaction.Member.username);
             }else{
               row.setDataValue('MemberTransaction->Member.username', '');
