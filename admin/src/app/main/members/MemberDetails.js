@@ -349,7 +349,7 @@ const MemberDetails = () => {
      * Delete Account
      */
     const deleteAccount = () => {
-        axios.delete(jwtServiceConfig.memberDelete, { data: { modelIds: [moduleId] } })
+        axios.delete(jwtServiceConfig.memberDelete, { data: { model_ids: [moduleId] } })
             .then(res => {
                 if (res.data.results.message) {
                     dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
@@ -448,7 +448,7 @@ const MemberDetails = () => {
                                         }
                                     }}
                                 >
-                                    <strong>{memberData.username}</strong> 
+                                    <strong>{memberData.username}</strong>
                                     <Tooltip title="Click to edit" placement="top-start">
                                         <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
                                             <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>

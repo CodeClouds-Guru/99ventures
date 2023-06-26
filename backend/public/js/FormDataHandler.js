@@ -165,8 +165,8 @@ $(() => {
       $(location).attr('href').includes('?')
       ? $(location).attr('href').split('#')[1].split('?')[0]
       : $(location).attr('href').includes('#')
-      ? $(location).attr('href').split('#')[1]
-      : '';
+        ? $(location).attr('href').split('#')[1]
+        : '';
   };
   if (getUrlHash() === 'signup') {
     goToRegister();
@@ -293,7 +293,7 @@ $(() => {
       errorsArray.push({
         field: $(password),
         message:
-          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+          'Password must contain a lowercase, a uppercase, a numeric digit and a special character',
       });
     }
   };
@@ -339,7 +339,7 @@ $(() => {
       errorsArray.push({
         field: $(password),
         message:
-          'Password should be contain at least one lowercase, one uppercase, one numeric digit and one special character',
+          'Password must contain a lowercase, a uppercase, a numeric digit and a special character',
       });
     }
     if ($(password).val().trim() !== $(confirm_password).val().trim()) {
