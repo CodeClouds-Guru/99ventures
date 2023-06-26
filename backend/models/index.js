@@ -29,7 +29,7 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST || '127.0.0.1',
     dialect: 'mysql',
     port: process.env.DB_PORT || 3306,
-    logging: true,
+    logging: false,
     operatorsAliases: {
       scripted_99_between: Sequelize.Op.between,
       scripted_99_like: Sequelize.Op.like,
