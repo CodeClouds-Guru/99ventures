@@ -7,6 +7,7 @@ const { capitalizeFirstLetter } = require('../../helpers/global')
 const SqsHelper = require('../../helpers/SqsHelper');
 const LucidHelper = require('../../helpers/Lucid');
 const { isBuffer } = require('lodash');
+const moment = require('moment')
 
 class SurveySyncController {
 
@@ -592,8 +593,7 @@ class SurveySyncController {
                         status: 'live',
                         survey_number: ids
                     }
-                });
-                               
+                });               
                 const responses = [];
                 const sqsHelper = new SqsHelper();
                 
@@ -630,8 +630,7 @@ class SurveySyncController {
                         }
                     }
                     if('qualifications' in body){
-                        const send_message = await sqsHelper.sendData(body);
-                        console.log('send_message', send_message);
+                        const send_message = await sqsHelper.sendData(body);                        
                         responses.push(send_message);
                         // responses.push(body);
                     }
@@ -804,6 +803,10 @@ class SurveySyncController {
         }
     }
 
+    /****************************************************
+     ************* CRON Functions ***********************
+     ****************************************************/
+
     /** 
      * Pure Spectrum Survey Sync through SQS
      */
@@ -863,11 +866,6 @@ class SurveySyncController {
             res.send(error)
         }
     }
-
-    /****************************************************
-     ************* CRON Functions ***********************
-     ****************************************************/
-
     /**
      * Pure Spectrum - Old Survey disabled 
      */
@@ -973,30 +971,64 @@ class SurveySyncController {
             });
             const psObj = new SchlesingerHelper;
             const surveys = await Survey.findAll({
-                attributes: ['survey_number'],
+                attributes: ['survey_number', 'updated_at'],
                 where: {
                     survey_provider_id: provider.id,
-                    status: 'live'
+                    status: 'live',
+                    updated_at: {
+                        [Op.lt]: moment().format('YYYY-MM-DD')
+                    }
+                },
+                order: [
+                    ['id', 'ASC'],
+                ],
+                limit: 20
+            });
+            
+            //Survey disabled by adding deleted_at value
+            const surveyNumberArry = surveys.map(s=> s.survey_number);
+            await Survey.update({
+                deleted_at: new Date()
+            }, {
+                where: {
+                    survey_number: surveyNumberArry
                 }
             });
+            
             const surveyNumber = [];
             for (let survey of surveys) {
                 try {
-                    const surveyData = await psObj.fetchSellerAPI('/survey/survey-quotas/' + survey.survey_number);
+                    const surveyData = await psObj.fetchSellerAPI('/api/v2/survey/survey-quotas/' + survey.survey_number);                    
                     if (surveyData.SurveyQuotas && surveyData.SurveyQuotas.length < 1) {
                         surveyNumber.push(survey.survey_number);
                     }
                 } catch (error) {
-                    surveyNumber.push(survey.survey_number);
+                    //console.log(survey.survey_number)
+                    // surveyNumber.push(survey.survey_number);
                 }
             }
+            
             if (surveyNumber.length) {
                 await Survey.update({
                     status: 'closed',
-                    deleted_at: new Date()
+                    // deleted_at: new Date()
                 }, {
+                    paranoid: false,
                     where: {
                         survey_number: surveyNumber
+                    }
+                });
+            }
+
+            // Available survey making active by removing the deleted_at value
+            const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
+            if(idTobeUpdated) {
+                await Survey.update({
+                    deleted_at: null
+                }, {
+                    paranoid: false,
+                    where: {
+                        survey_number: idTobeUpdated
                     }
                 });
             }
