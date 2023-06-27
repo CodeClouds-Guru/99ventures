@@ -62,6 +62,10 @@ const validationSchema = yup.object().shape({
 
 const fields = [
     {
+        field_name: 'Username',
+        field_type: 'input',
+    },
+    {
         field_name: "Full Name",
         field_type: "input"
     },
@@ -437,30 +441,6 @@ const CreateEditForm = () => {
                                         ))}
                                         </Select>
                                     </FormControl>
-                                    // <TextField
-                                    //     {...field}
-                                    //     id="outlined-select-currency"
-                                    //     multiselect="true"
-                                    //     label="Payment Field"
-                                    //     helperText=""
-                                    //     className="w-full mt-20"
-                                    //     >
-                                    //     <MenuItem value="Full Name">
-                                    //         Full Name
-                                    //     </MenuItem>
-                                    //     <MenuItem value="First Name">
-                                    //         First Name
-                                    //     </MenuItem>
-                                    //     <MenuItem value="Last Name">
-                                    //         Last Name
-                                    //     </MenuItem>
-                                    //     <MenuItem value="Email">
-                                    //         Email
-                                    //     </MenuItem>
-                                    //     <MenuItem value="Phone">
-                                    //         Phone
-                                    //     </MenuItem>
-                                    // </TextField>
                                 )}
                             />
                              <Controller
