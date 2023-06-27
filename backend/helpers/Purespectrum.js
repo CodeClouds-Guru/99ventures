@@ -21,7 +21,7 @@ class Purespectrum {
 	constructor() {
 		this.instance = axios.create({
 			baseURL: process.env.PURESPECTRUM_BASEURL,
-			timeout: 20000,
+			timeout: 30000,
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
@@ -30,12 +30,33 @@ class Purespectrum {
 		});
 		this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
 		this.createData = this.createData.bind(this);
+		this.getSurveyData = this.getSurveyData.bind(this);
 		return new Proxy(this, handler);
 	}
 
 	async fetchAndReturnData(partUrl) {
 		const response = await this.instance.get(partUrl);
 		return response.data;
+	}
+
+	async getSurveyData(surveyNumber){
+		const response = await this.instance.get('/surveys/' + surveyNumber);		
+		if (
+			'success' === response.data.apiStatus && 
+			('survey' in response.data) && 
+			+response.data.survey.survey_status === 22     // 22 means live
+		) {
+			return {
+				is_active: true, 
+				status: response.data.survey.survey_status, 
+				data: response.data.survey
+			}
+		} else {
+			return {
+				is_active: false, 
+				status: response.data.survey.survey_status
+			};
+		}
 	}
 
 	async createData(partUrl, payload) {

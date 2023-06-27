@@ -583,21 +583,59 @@ class SurveySyncController {
                     res.json({ status: true, message: 'No survey found for this language!' });
                     return;
                 }
+
+                const ids = surveyData.map(r=> r.SurveyId);
+                const dbSurveys = await Survey.findAll({
+                    attributes: ['original_json', 'survey_number'],
+                    where: {
+                        survey_provider_id: this.providerId,
+                        status: 'live',
+                        survey_number: ids
+                    }
+                });
+                               
                 const responses = [];
                 const sqsHelper = new SqsHelper();
-
+                
                 for (let element of surveyData) {
-                    let body = {
-                        ...element,
-                        survey_provider_id: this.providerId,
-                    };
-                    const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
-                    if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
-                        body.qualifications = qualifications.SurveyQualifications;
+                    var surveyId;
+                    var body = {};
+                    const index = dbSurveys.findIndex(row => +row.survey_number === +element.SurveyId);
+                    
+                    if(index != -1){    // If matched and index found
+                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
+                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
+                            let surveyQl = qualifications.SurveyQualifications;                            
+                            for(let ql of surveyQl) {
+                                let match = dbSurveys[index].original_json.qualifications.some(r=> r.UpdateTimeStamp === ql.UpdateTimeStamp);
+                                if(!match) {
+                                    body = {
+                                        ...element,
+                                        survey_provider_id: this.providerId,
+                                        qualifications: surveyQl
+                                    };
+                                }                                
+                            }
+                        }
+                    } 
+                    else {
+                        surveyId = element.SurveyId
+                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + surveyId);
+                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
+                            body = {
+                                ...element,
+                                survey_provider_id: this.providerId,
+                                qualifications: qualifications.SurveyQualifications
+                            }
+                        }
                     }
-                    const send_message = await sqsHelper.sendData(body);
-                    // console.log('send_message', send_message);
-                    responses.push(send_message);
+                    if('qualifications' in body){
+                        const send_message = await sqsHelper.sendData(body);
+                        console.log('send_message', send_message);
+                        responses.push(send_message);
+                        // responses.push(body);
+                    }
+                    
                 };
                 res.send({
                     message: 'Sending to SQS',
@@ -774,23 +812,40 @@ class SurveySyncController {
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
-                const surveyIds = allSurveys.surveys.filter(sr => sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5).map(sr => sr.survey_id);
+                const surveyIds = allSurveys.surveys.filter(sr => sr.survey_status == 22 && sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5).map(sr => sr.survey_id);
+               
+                const existingSurveys = await Survey.findAll({
+                    attributes: ['survey_number'],
+                    where: {
+                        survey_provider_id: this.providerId,
+                        status: 'live',
+                        survey_number: surveyIds
+                    }
+                });
+
+                const allowedIds = existingSurveys.length ? surveyIds.filter(id => existingSurveys.some(r => +r.survey_number !== +id)) : surveyIds;
 
                 const responses = [];
-                const sqsHelper = new SqsHelper();
-                for (let survey_id of surveyIds) {
-                    const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey_id);
-                    if ('success' === surveyData.apiStatus) {
-                        let body = {
-                            ...surveyData.survey,
-                            survey_provider_id: this.providerId,
-                        };
+                if(allowedIds.length) {
+                    const sqsHelper = new SqsHelper();
+                    for (let survey_id of allowedIds) {
+                        try{
+                            let result = await psObj.getSurveyData(survey_id);
+                            if (result.is_active == true) {
+                                let body = {
+                                    ...result.data,
+                                    survey_provider_id: this.providerId,
+                                };
 
-                        const send_message = await sqsHelper.sendData(body);
-                        // console.log('send_message', send_message);
-                        responses.push(send_message);
+                                let sendMessage = await sqsHelper.sendData(body);
+                                responses.push(sendMessage);
+                                // responses.push(body);
+                            }
+                        }
+                        catch(error) {}
                     }
                 }
+                
                 res.send({
                     message: 'Sending to SQS',
                     data: responses
@@ -804,6 +859,7 @@ class SurveySyncController {
         catch (error) {
             const logger = require('../../helpers/Logger')(`purespectrum-sync-errror.log`);
             logger.error(error);
+            console.error(error)
             res.send(error)
         }
     }
