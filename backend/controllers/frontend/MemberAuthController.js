@@ -112,7 +112,7 @@ class MemberAuthController {
         } else {
           // await this.geoTrack(req, ip, member)
         }
-        if (member.status != 'member') {
+        if (member.status != 'member' && member.status != 'suspended') {
           member_status = false;
           member_message =
             'Your account status is ' +

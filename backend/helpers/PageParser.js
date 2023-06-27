@@ -43,6 +43,7 @@ class PageParser {
       where: { slug: this.slug, company_portal_id: portal.id },
       include: 'Layout',
     });
+    
     this.pageLayout = page ? page.Layout : null;
     this.page = page;
     if (!this.pageLayout) {
