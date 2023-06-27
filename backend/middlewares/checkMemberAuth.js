@@ -97,12 +97,15 @@ module.exports = async function (req, res, next) {
     const redirect = auth_redirection_page
       ? auth_redirection_page.slug
       : '/404';
-
     if (['/', '/login'].indexOf(req.path) >= 0) {
-      // console.log(req);
-
       res.status(302).redirect(redirect);
       return;
+    }
+    let req_path = req.path.replaceAll('/','')
+    if(req.method === 'GET' && member.status === 'suspended' && ['dashboard', 'get-scripts','get-login-streak','404','500','ticket','profile','faq','create-ticket','support-tickets'].indexOf(req_path) == -1){
+      req.session.flash = { error: 'Your account status is suspended. Please contact to our admin.' };
+      res.status(401).redirect('/faq');
+      return
     }
   }
   next();

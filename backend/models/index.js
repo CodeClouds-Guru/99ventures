@@ -34,6 +34,7 @@ const sequelize = new Sequelize(
       scripted_99_between: Sequelize.Op.between,
       scripted_99_like: Sequelize.Op.like,
       scripted_99_substring: Sequelize.Op.substring,
+      scripted_99_or: Sequelize.Op.or,
     },
   }
 );
