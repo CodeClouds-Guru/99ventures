@@ -877,15 +877,42 @@ class SurveySyncController {
                     name: 'Purespectrum'
                 }
             });
+
+            if(!provider) {
+                res.send({
+                    status: false,
+                    message: 'Invalid provider'
+                });
+                return;
+            }
+
             const psObj = new PurespectrumHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number'],
                 where: {
                     survey_provider_id: provider.id,
-                    status: psObj.getSurveyStatus(22)
+                    status: psObj.getSurveyStatus(22),
+                    updated_at: {
+                        [Op.lt]: moment().format('YYYY-MM-DD')
+                    }
+                },
+                order: [
+                    ['id', 'ASC'],
+                ],
+                limit: 20
+            });
+
+            //Survey disabled by adding deleted_at value
+            const surveyNumberArry = surveys.map(s=> s.survey_number);
+            await Survey.update({
+                deleted_at: new Date()
+            }, {
+                where: {
+                    survey_number: surveyNumberArry
                 }
             });
 
+            const surveyNumber = [];
             for(let survey of surveys){
                 try{
                     const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
@@ -893,58 +920,31 @@ class SurveySyncController {
                         surveyNumber.push(survey.survey_number)
                     }
                 } catch (error) {
-                    surveyNumber.push(survey.survey_number)
-                }
-            }
-
-            /* Using Generator Fn
-            var start = 0;
-            var end = 10;
-            const limit = surveys.length;
-            const surveyNumber = [];
-            const perpage = 10;
-            async function getSurveys(loopSurveys) {
-                let surveys = []
-                for(let survey of loopSurveys){
-                    try{
-                        const surveyData = await psObj.fetchAndReturnData('/surveys/' + survey.survey_number);
-                        if(surveyData.apiStatus === "success" && surveyData.survey.survey_status !== 22 ) {
-                            surveys.push(survey.survey_number)
-                        }
-                    } catch (error) {
-                        surveys.push(survey.survey_number)
-                    }
-                }
-                return surveys;
-            }
-
-            async function* asyncGenerator() {                
-                for (let i = 1; i <= Math.ceil(limit/perpage); i++) {
-                    let loopSurveys = surveys.slice(start, end)
-                    let res = await getSurveys(loopSurveys)
-                    start = 10* i
-                    end = start+perpage
-                    yield res;
+                    //surveyNumber.push(survey.survey_number)
                 }
             }
             
-            async function consumer() {                
-                for await (const value of asyncGenerator()) {
-                    surveyNumber.push(value);
-                }                
-            }
-              
-            await consumer();
-            */
-
-
             if(surveyNumber.length) {
                 await Survey.update({
                     status: psObj.getSurveyStatus(44),
-                    deleted_at: new Date()
+                    // deleted_at: new Date()
                 }, {
+                    paranoid: false,
                     where: {
                         survey_number: surveyNumber
+                    }
+                });
+            }
+
+            // Available survey making active by removing the deleted_at value
+            const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
+            if(idTobeUpdated) {
+                await Survey.update({
+                    deleted_at: null
+                }, {
+                    paranoid: false,
+                    where: {
+                        survey_number: idTobeUpdated
                     }
                 });
             }
@@ -954,7 +954,6 @@ class SurveySyncController {
             const logger = require('../../helpers/Logger')(`cron.log`);
 			logger.error(error);
             res.send(error.message);
-            //throw error;
         }
     }
 
@@ -969,6 +968,15 @@ class SurveySyncController {
                     name: 'Schlesinger'
                 }
             });
+
+            if(!provider) {
+                res.send({
+                    status: false,
+                    message: 'Invalid provider'
+                });
+                return;
+            }
+
             const psObj = new SchlesingerHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number', 'updated_at'],
