@@ -219,7 +219,7 @@ class LucidController {
                         message: 'Success',
                         result: {
                             surveys:survey_list,
-                            page_count
+                            page_count:page_count
                         }
                     }
                 }

@@ -216,7 +216,7 @@ class SchlesingerController {
                     message: 'Success',
                     result: {
                         surveys:survey_list,
-                        page_count
+                        page_count:page_count
                     }
                 }
             } else {
