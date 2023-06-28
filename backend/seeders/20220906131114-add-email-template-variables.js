@@ -103,6 +103,16 @@ module.exports = {
           code: '${logo}',
           module: '',
         },
+        {
+          name: 'Referral Bonus',
+          code: '${referral_bonus}',
+          module: '',
+        },
+        {
+          name: 'Registration Bonus',
+          code: '${registration_bonus}',
+          module: '',
+        }
       ],
       {}
     );
