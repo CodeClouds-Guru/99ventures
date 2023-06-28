@@ -46,6 +46,20 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
       },
+      amount_with_currency: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          const amount = this.getDataValue('amount');
+          const currency = this.getDataValue('currency');
+          if (
+            (['usd', 'USD', '$'].includes(currency)) && amount
+          ) {
+            return '$' + amount;
+          } else {
+            return amount;
+          }
+        },
+      },
       withdrawal_type_id: DataTypes.BIGINT,
       requested_on: 'TIMESTAMP',
       status: DataTypes.ENUM('approved', 'pending', 'rejected', 'expired'),

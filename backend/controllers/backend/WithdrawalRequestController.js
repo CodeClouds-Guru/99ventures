@@ -28,7 +28,7 @@ class WithdrawalRequestController extends Controller {
       'Member.status': 'Account',
       'created_at': 'Date',
       'Member.username': 'Username',
-      'amount': 'Cash',
+      'amount_with_currency': 'Cash',
     }
   }
 
@@ -75,7 +75,7 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = fields;
+      options.attributes = ['amount', 'currency', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);

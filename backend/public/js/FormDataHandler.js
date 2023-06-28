@@ -570,4 +570,11 @@ $(() => {
         .addClass('fa-regular fa-copy');
     }, 3000);
   });
+
+  const selectElement = document.querySelector("#custom-script-ticket");
+  selectElement.addEventListener("change", (event) => {
+    setTimeout(function () {
+      $('#subject-search').focus();
+    }, 500);
+  });
 });
