@@ -188,7 +188,7 @@ function List(props) {
 
 	useEffect(() => {
 		fetchModules();
-	}, [searchText, page, rowsPerPage, order, where, props.params]);
+	}, [searchText, page, rowsPerPage, order.id, order.direction, where, props.params]);
 
 	/**
 	 * Unmounted the sate value
@@ -366,6 +366,7 @@ function List(props) {
 	}
 
 	function handleChangePage(event, value) {
+		setLoading(true)
 		setPage(value);
 		setFirstCall(true);
 	}
