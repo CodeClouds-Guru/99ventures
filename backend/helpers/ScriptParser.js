@@ -193,14 +193,18 @@ class ScriptParser {
             data = await Models[script.module].findAll(condition);
 
             data.forEach(function (payment, key) {
-              var date1 = new Date();
+              var date1 = new Date().getTime();
               var hours = payment.withdraw_redo_interval;
               if (payment.WithdrawalRequests.length > 0) {
-                var date2 =
-                  payment.WithdrawalRequests[0].MemberTransaction.completed_at;
-                var hours = (Math.abs(date1 - date2) / 36e5).toFixed(2);
+                // var date2 = new Date(
+                //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
+                // );
+                var date2 = new Date(
+                  payment.WithdrawalRequests[0].created_at
+                ).getTime();
+                var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
               }
-              data[key].setDataValue('redo_diff', hours);
+              data[key].setDataValue('redo_diff', parseFloat(hours));
               var past_withdrawal_symbol = '';
               switch (payment.past_withdrawal_options) {
                 case 'At least':
@@ -213,7 +217,7 @@ class ScriptParser {
                   past_withdrawal_symbol = '==';
                   break;
                 default:
-                  past_withdrawal_symbol = '>';
+                  past_withdrawal_symbol = '>=';
                   break;
               }
 
@@ -222,14 +226,14 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            console.log(
-              '===================',
-              JSON.parse(JSON.stringify(data))
-            );
-            console.log(
-              '===================',
-              JSON.parse(JSON.stringify(other_details))
-            );
+            // console.log(
+            //   '===================',
+            //   JSON.parse(JSON.stringify(data))
+            // );
+            // console.log(
+            //   '===================',
+            //   JSON.parse(JSON.stringify(other_details))
+            // );
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -575,7 +579,7 @@ class ScriptParser {
             'id',
             'image_url',
             'type_user_info_again',
-            // 'payment_field_options',
+            'past_withdrawal_options',
             'minimum_amount',
             'maximum_amount',
             'fixed_amount',
@@ -600,6 +604,7 @@ class ScriptParser {
               'allowed_country',
             ],
           ],
+          where: { company_portal_id: user.company_portal_id, status: 1 },
           order: [
             [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
             [Models.PaymentMethodFieldOption, 'id', 'ASC'],
@@ -625,7 +630,7 @@ class ScriptParser {
             },
             {
               model: Models.WithdrawalRequest,
-              attributes: ['member_transaction_id'],
+              attributes: ['member_transaction_id', 'created_at'],
               required: false,
               where: { member_id: user.id },
               include: {
