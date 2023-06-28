@@ -164,15 +164,8 @@ class PureSpectrumController {
                     limit: perPage,
                     offset: (pageNo - 1) * perPage,
                 });
-                // var data_count = await Survey.findAndCountAll({
-                //     attributes: ['id'],
-                //     where: {
-                //         survey_provider_id: provider.id,
-                //         status: "active",
-                //     }
-                // });
-                console.log(surveys.count)
-                var page_count = Math.ceil(data_count.count / perPage);
+                
+                var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
