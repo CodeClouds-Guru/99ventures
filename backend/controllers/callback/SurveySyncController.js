@@ -574,6 +574,21 @@ class SurveySyncController {
      */
     async schlesingerSurveySaveToSQS(req, res) {
         try {
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Schlesinger'
+                }
+            });
+
+            if(!provider) {
+                res.send({
+                    status: false,
+                    message: 'Invalid provider'
+                });
+                return;
+            }
+            const providerId = provider.id;
             const psObj = new SchlesingerHelper();
             const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
 
@@ -589,7 +604,7 @@ class SurveySyncController {
                 const dbSurveys = await Survey.findAll({
                     attributes: ['original_json', 'survey_number'],
                     where: {
-                        survey_provider_id: this.providerId,
+                        survey_provider_id: providerId,
                         status: 'live',
                         survey_number: ids
                     }
@@ -611,7 +626,7 @@ class SurveySyncController {
                                 if(!match) {
                                     body = {
                                         ...element,
-                                        survey_provider_id: this.providerId,
+                                        survey_provider_id: providerId,
                                         qualifications: surveyQl
                                     };
                                 }                                
@@ -624,7 +639,7 @@ class SurveySyncController {
                         if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
                             body = {
                                 ...element,
-                                survey_provider_id: this.providerId,
+                                survey_provider_id: providerId,
                                 qualifications: qualifications.SurveyQualifications
                             }
                         }
@@ -812,6 +827,21 @@ class SurveySyncController {
      */
     async pureSpectrumSurveySaveToSQS(req, res) {
         try {
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Purespectrum'
+                }
+            });
+
+            if(!provider) {
+                res.send({
+                    status: false,
+                    message: 'Invalid provider'
+                });
+                return;
+            }
+            const providerId = provider.id;
             const psObj = new PurespectrumHelper;
             const allSurveys = await psObj.fetchAndReturnData('/surveys');
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
@@ -820,7 +850,7 @@ class SurveySyncController {
                 const existingSurveys = await Survey.findAll({
                     attributes: ['survey_number'],
                     where: {
-                        survey_provider_id: this.providerId,
+                        survey_provider_id: providerId,
                         status: 'live',
                         survey_number: surveyIds
                     }
@@ -837,7 +867,7 @@ class SurveySyncController {
                             if (result.is_active == true) {
                                 let body = {
                                     ...result.data,
-                                    survey_provider_id: this.providerId,
+                                    survey_provider_id: providerId,
                                 };
 
                                 let sendMessage = await sqsHelper.sendData(body);
