@@ -28,8 +28,8 @@ const membertransaction = require('../../models/membertransaction');
 const { isNull } = require('lodash');
 const util = require('util');
 const withdrawalrequest = require('../../models/withdrawalrequest');
-const moment = require("moment");
-const CsvHelper = require("../../helpers/CsvHelper");
+const moment = require('moment');
+const CsvHelper = require('../../helpers/CsvHelper');
 class MemberController extends Controller {
   constructor() {
     super('Member');
@@ -41,31 +41,31 @@ class MemberController extends Controller {
     this.generateFields = this.generateFields.bind(this);
     this.getMembersList = this.getMembersList.bind(this);
     this.fieldConfig = {
-      "id": "ID",
-      "username": "Username",
-      "first_name": "First name",
-      "last_name": "Last Name",
-      "created_at": "Join date",
-      "last_active_on": "Last active date",
-      "MemberReferral.referral_email": "Referral",
-      "email": "Registration email ",
-      "MemberPaymentInformations.value": "Payment emails",
-      "IpLogs.ip": "Current IP",
-      "IpLogs.geo_location": "Geo location",
-      "IpLogs.isp": "Geo ISP",
-      "IpLogs.browser": "Browser",
-      "IpLogs.browser_language": "Browser Language",
-      "status": "Status",
-      "MembershipTier.name": "Membership level",
-      "address": "Address",
-      "phone_no": "Telephone",
-      "MemberEmailAlerts.slug": "Email marketing opt in",
-      "MemberTransactions.balance": "Current Balance",
-      "MemberTransactions.amount": "Total Earnings",
-      "WithdrawalRequests.amount": "Withdrawal - total paid",
-      "WithdrawalRequests.created_at": "Withdrawal - last cash out (date)",
-      "admin_status": "Verified/unverified",
-    }
+      id: 'ID',
+      username: 'Username',
+      first_name: 'First name',
+      last_name: 'Last Name',
+      created_at: 'Join date',
+      last_active_on: 'Last active date',
+      'MemberReferral.referral_email': 'Referral',
+      email: 'Registration email ',
+      'MemberPaymentInformations.value': 'Payment emails',
+      'IpLogs.ip': 'Current IP',
+      'IpLogs.geo_location': 'Geo location',
+      'IpLogs.isp': 'Geo ISP',
+      'IpLogs.browser': 'Browser',
+      'IpLogs.browser_language': 'Browser Language',
+      status: 'Status',
+      'MembershipTier.name': 'Membership level',
+      address: 'Address',
+      phone_no: 'Telephone',
+      'MemberEmailAlerts.slug': 'Email marketing opt in',
+      'MemberTransactions.balance': 'Current Balance',
+      'MemberTransactions.amount': 'Total Earnings',
+      'WithdrawalRequests.amount': 'Withdrawal - total paid',
+      'WithdrawalRequests.created_at': 'Withdrawal - last cash out (date)',
+      admin_status: 'Verified/unverified',
+    };
   }
   async save(req, res) {
     try {
@@ -364,7 +364,10 @@ class MemberController extends Controller {
       } else if (req.body.type == 'payment_email') {
         result = await MemberPaymentInformation.updatePaymentInformation({
           member_id: req.params.id,
-          payment_email: req.body.email,
+          member_payment_info: [
+            { field_name: 'email', field_value: req.body.email },
+          ],
+          // payment_email: req.body.email,
         });
         delete req.body.type;
       } else {
@@ -392,7 +395,10 @@ class MemberController extends Controller {
   //override list function
   async list(req, res) {
     // The purpose of this IF statement is to populate excluded members dropdown on Payment Configuration tab.
-    if (req.query.source_module && req.query.source_module === 'paymentconfiguration') {
+    if (
+      req.query.source_module &&
+      req.query.source_module === 'paymentconfiguration'
+    ) {
       return this.getMembersList(req, res);
     }
     const options = this.getQueryOptions(req);
@@ -416,14 +422,14 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
     options.include = [
       {
         model: IpLog,
         attributes: ['ip', 'isp', 'geo_location', 'browser'],
-        order: [['id', 'DESC']]
+        order: [['id', 'DESC']],
       },
       {
         model: MemberReferral,
@@ -431,27 +437,27 @@ class MemberController extends Controller {
       },
       {
         model: MemberPaymentInformation,
-        attributes: ['value']
+        attributes: ['value'],
       },
       {
         model: MembershipTier,
-        attributes: ['name']
+        attributes: ['name'],
       },
       {
         model: WithdrawalRequest,
         order: [['id', 'DESC']],
-        attributes: ['created_at', 'status', ['amount', 'withdrawal_amount']]
+        attributes: ['created_at', 'status', ['amount', 'withdrawal_amount']],
       },
       {
         model: MemberTransaction,
         order: [['id', 'DESC']],
-        attributes: ['balance', 'type', 'amount']
+        attributes: ['balance', 'type', 'amount'],
       },
       {
         model: EmailAlert,
         as: 'MemberEmailAlerts',
-        attributes: ['slug']
-      }
+        attributes: ['slug'],
+      },
     ];
     options.where = {
       ...options.where,
@@ -470,25 +476,26 @@ class MemberController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
 
-    result.rows.map(row => {
+    result.rows.map((row) => {
       let ip = '';
       let geo_location = '';
       let isp = '';
       let browser = '';
       let browser_language = '';
       let membership_tier_name = '';
-      let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+      let opted_for_email_alerts =
+        row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
       let member_account_balance = 0.0;
-      let member_total_earnings = 0.00;
-      let total_paid = 0.00;
+      let member_total_earnings = 0.0;
+      let total_paid = 0.0;
       let cashout_date = 'N/A';
       if (row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
-        ip = last_row.ip
-        geo_location = last_row.geo_location
-        isp = last_row.isp
-        browser = last_row.browser
-        browser_language = last_row.browser_language
+        ip = last_row.ip;
+        geo_location = last_row.geo_location;
+        isp = last_row.isp;
+        browser = last_row.browser;
+        browser_language = last_row.browser_language;
       }
       if (row.MembershipTier) {
         membership_tier_name = row.MembershipTier.name;
@@ -496,18 +503,18 @@ class MemberController extends Controller {
       if (row.MemberTransactions.length > 0) {
         member_account_balance = row.MemberTransactions[0].balance;
         member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
-          if (item.type === 'credited')
-            sum += item.amount;
+          if (item.type === 'credited') sum += item.amount;
           return sum;
-        }, 0.0)
+        }, 0.0);
       }
       if (row.WithdrawalRequests > 0) {
-        cashout_date = moment(row.WithdrawalRequests[0].created_at).format('YYYY-MM-DD');
+        cashout_date = moment(row.WithdrawalRequests[0].created_at).format(
+          'YYYY-MM-DD'
+        );
         total_paid = row.MemberTransactions.reduce((sum, item) => {
-          if (item.status === 'approved')
-            sum += item.amount;
+          if (item.status === 'approved') sum += item.amount;
           return sum;
-        }, 0.0)
+        }, 0.0);
       }
       row.setDataValue('IpLogs.ip', ip);
       row.setDataValue('IpLogs.geo_location', geo_location);
@@ -530,33 +537,32 @@ class MemberController extends Controller {
   }
 
   generateFields(header_fields) {
-    var fields = {}
+    var fields = {};
     for (const key of header_fields) {
       fields[key] = {
         field_name: key,
         db_name: key,
         listing: true,
-        placeholder: key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col'
-      }
+        placeholder:
+          key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col',
+      };
     }
     return fields;
   }
-
 
   async export(req, res) {
     req.query.show = 100000;
     let { fields, result } = await this.list(req);
     var header = [];
     for (const head of Object.values(fields)) {
-
-      header.push({ id: head.field_name, title: head.placeholder })
+      header.push({ id: head.field_name, title: head.placeholder });
     }
     const rows = JSON.parse(JSON.stringify(result.data));
     const csv_helper = new CsvHelper(rows, header);
     csv_helper.generateAndEmailCSV(req.user.email);
     return {
       status: true,
-      message: 'The CSV will be sent to your email address shortly.'
+      message: 'The CSV will be sent to your email address shortly.',
     };
   }
 
@@ -624,7 +630,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -712,11 +718,11 @@ class MemberController extends Controller {
   }
 
   /**
-   * Get Member List. 
+   * Get Member List.
    * This Fn is using only for the dropdown purpose
-   * @param {*} req 
-   * @param {*} res 
-   * @returns 
+   * @param {*} req
+   * @param {*} res
+   * @returns
    */
   async getMembersList(req, res) {
     const options = this.getQueryOptions(req);
@@ -746,14 +752,14 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
-      company_portal_id: site_id
+          status: { [Op.in]: query_where.status },
+        }),
+      company_portal_id: site_id,
     };
 
     const { docs, pages, total } = await this.model.paginate(options);
     return {
-      result: { data: docs, pages, total }
+      result: { data: docs, pages, total },
     };
   }
 }

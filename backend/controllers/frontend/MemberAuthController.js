@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const {
+  sequelize,
   Member,
   MemberBalance,
   IpLog,
@@ -19,6 +20,7 @@ const {
   Company,
   User,
   Group,
+  PaymentMethodFieldOption,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -32,7 +34,7 @@ const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
-const TolunaHelper = require('../../helpers/Toluna')
+const TolunaHelper = require('../../helpers/Toluna');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -411,7 +413,10 @@ class MemberAuthController {
       );
       req.session.member = member_details;
       //set member eligibility
-      await this.setMemberEligibility(member_details.id,member_details.profile_completed_on);
+      await this.setMemberEligibility(
+        member_details.id,
+        member_details.profile_completed_on
+      );
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
@@ -489,7 +494,7 @@ class MemberAuthController {
           where: { id: member_id },
         });
         //set eligibility
-        await this.setMemberEligibility(member_id,member.profile_completed_on);
+        await this.setMemberEligibility(member_id, member.profile_completed_on);
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
@@ -532,9 +537,9 @@ class MemberAuthController {
     }
   }
   //set member eligibility
-  async setMemberEligibility(member_id,profile_completed_on) {
+  async setMemberEligibility(member_id, profile_completed_on) {
     //gender
-    console.log('profile_completed_on',profile_completed_on)
+    // console.log('profile_completed_on', profile_completed_on);
     let member_details = await Member.findOne({ where: { id: member_id } });
     var member_eligibility = [];
 
@@ -543,7 +548,7 @@ class MemberAuthController {
     let questions = await SurveyQuestion.findAll({
       where: { name: nmae_list },
     });
-    
+
     if (questions.length) {
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
@@ -622,39 +627,38 @@ class MemberAuthController {
       });
       await MemberEligibilities.bulkCreate(member_eligibility);
     }
-    if(!profile_completed_on){
-      var toluna_questions = []
-      if(member_details.gender == 'male'){
+    if (!profile_completed_on) {
+      var toluna_questions = [];
+      if (member_details.gender == 'male') {
         toluna_questions.push({
-          "QuestionID": 1001007,
-          "Answers": [{"AnswerID":2000247}]
-        })
-      }
-      else if(member_details.gender == 'female'){
+          QuestionID: 1001007,
+          Answers: [{ AnswerID: 2000247 }],
+        });
+      } else if (member_details.gender == 'female') {
         toluna_questions.push({
-          "QuestionID": 1001007,
-          "Answers": [{"AnswerID":2000246}]
-        })
+          QuestionID: 1001007,
+          Answers: [{ AnswerID: 2000246 }],
+        });
       }
       // toluna_questions.push({
       //   "QuestionID": 1001042,
       //   "Answers": [{"AnswerValue":member_details.zip_code}]
       // })
-      try{      
-        let tolunaHelper = new TolunaHelper
+      try {
+        let tolunaHelper = new TolunaHelper();
         const payload = {
-                            "PartnerGUID": process.env.PARTNER_GUID,
-                            "MemberCode": member_details.id,
-                            "Email": member_details.email,
-                            "BirthDate": member_details.dob,
-                            "PostalCode": member_details.zip_code,
-                            // "IsActive": true,
-                            // "IsTest": true,
-                            "RegistrationAnswers": toluna_questions
-                        }
+          PartnerGUID: process.env.PARTNER_GUID,
+          MemberCode: member_details.id,
+          Email: member_details.email,
+          BirthDate: member_details.dob,
+          PostalCode: member_details.zip_code,
+          // "IsActive": true,
+          // "IsTest": true,
+          RegistrationAnswers: toluna_questions,
+        };
         let t = await tolunaHelper.addMemebr(payload);
-      }catch(error){
-        console.log(error)
+      } catch (error) {
+        console.log(error);
       }
     }
     return;
@@ -763,7 +767,6 @@ class MemberAuthController {
   //Add Payment Credentials
   async withdraw(req) {
     let request_data = req.body;
-    // console.log(request_data);
     var withdrawal_amount = parseFloat(request_data.amount);
 
     //get member
@@ -805,6 +808,7 @@ class MemberAuthController {
     let result = await User.findAll(options);
     result = JSON.parse(JSON.stringify(result));
     result = result.map((x) => x.email);
+    //get admin and super admin - end
 
     //get withdrawal type
     let payment_method_details = await PaymentMethod.findOne({
@@ -813,7 +817,6 @@ class MemberAuthController {
         'name',
         'slug',
         'type_user_info_again',
-        'payment_field_options',
         'minimum_amount',
         'maximum_amount',
         'fixed_amount',
@@ -822,10 +825,16 @@ class MemberAuthController {
         'past_withdrawal_count',
         'payment_type',
       ],
+      include: {
+        model: PaymentMethodFieldOption,
+        attributes: ['field_name', 'field_type'],
+        required: false,
+      },
     });
     payment_method_details = JSON.parse(JSON.stringify(payment_method_details));
 
-    //check all conditions
+    // console.log(payment_method_details);
+    //check all conditions for amount
     if (
       parseFloat(payment_method_details.minimum_amount) > 0 &&
       withdrawal_amount < parseFloat(payment_method_details.minimum_amount)
@@ -838,7 +847,7 @@ class MemberAuthController {
     }
     if (
       parseFloat(payment_method_details.maximum_amount) > 0 &&
-      withdrawal_amount >= parseFloat(payment_method_details.maximum_amount)
+      withdrawal_amount > parseFloat(payment_method_details.maximum_amount)
     ) {
       return {
         member_status: false,
@@ -848,7 +857,7 @@ class MemberAuthController {
     }
     if (
       parseFloat(payment_method_details.fixed_amount) > 0 &&
-      withdrawal_amount == parseFloat(payment_method_details.fixed_amount)
+      withdrawal_amount !== parseFloat(payment_method_details.fixed_amount)
     ) {
       return {
         member_status: false,
@@ -864,52 +873,76 @@ class MemberAuthController {
       };
     }
 
-    if (request_data.payment_field === '') {
-      return {
-        member_status: false,
-        member_message:
-          'Please enter payment ' +
-          payment_method_details.payment_field_options.toLowerCase(),
-      };
-    }
-    var regex = '';
-    if (payment_method_details.payment_field_options === 'Email')
-      regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (payment_method_details.payment_field_options === 'Phone')
-      regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-
-    if (!regex.test(request_data.payment_field)) {
-      // if (!request_data.payment_field.match(regex)) {
-      return {
-        member_status: false,
-        member_message:
-          'Please enter valid payment ' +
-          payment_method_details.payment_field_options.toLowerCase(),
-      };
-    }
-
-    let check_same_acc = await WithdrawalRequest.findOne({
+    let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
-        payment_email: request_data.payment_field,
-        member_id: { [Op.ne]: request_data.member_id },
+        status: 'pending',
+        member_id: { member_id: request_data.member_id },
       },
     });
 
-    if (check_same_acc) {
+    if (
+      pending_withdrawal_req_amount >
+      parseFloat(member.member_amounts[0].amount)
+    ) {
       return {
         member_status: false,
         member_message:
-          'This payment ' +
-          payment_method_details.payment_field_options.toLowerCase() +
-          ' has already been used, please reach out to admin',
+          'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
+      };
+    }
+    var payment_field = [];
+    var member_payment_info = [];
+    for (const option of payment_method_details.PaymentMethodFieldOptions) {
+      var field_name = option.field_name.toLowerCase().replaceAll(' ', '');
+      const option_arr = ['email', 'phone', 'username'];
+      if (option_arr.includes(field_name)) {
+        payment_field.push(request_data[field_name]);
+        member_payment_info.push({
+          field_name: field_name,
+          field_value: request_data[field_name],
+        });
+      }
+      if (request_data[field_name] === '') {
+        return {
+          member_status: false,
+          member_message: 'Please enter ' + option.field_name.toLowerCase(),
+        };
+      }
+      if (option.field_type !== 'input') {
+        var regex = '';
+        if (option.field_type === 'email')
+          regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (option.field_type === 'number')
+          regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+        if (!regex.test(request_data[field_name])) {
+          // if (!request_data.payment_field.match(regex)) {
+          return {
+            member_status: false,
+            member_message:
+              'Please enter valid ' + option.field_name.toLowerCase(),
+          };
+        }
+      }
+    }
+    let check_same_acc = await WithdrawalRequest.count({
+      where: {
+        payment_email: payment_field,
+        member_id: { [Op.ne]: request_data.member_id },
+      },
+    });
+    if (check_same_acc > 0) {
+      return {
+        member_status: false,
+        member_message:
+          'This payment info has already been used, please reach out to admin',
       };
     }
 
     await MemberPaymentInformation.updatePaymentInformation({
       member_id: request_data.member_id,
-      payment_email: request_data.payment_field,
-      payment_field_option:
-        payment_method_details.payment_field_options.toLowerCase(),
+      member_payment_info,
     });
 
     var ip = req.ip;

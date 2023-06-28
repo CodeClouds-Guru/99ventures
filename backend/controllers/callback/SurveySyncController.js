@@ -569,103 +569,6 @@ class SurveySyncController {
         }
     }
 
-    /** 
-     * Schlesiner Survey Sync through SQS
-     */
-    async schlesingerSurveySaveToSQS(req, res) {
-        try {
-            const provider = await SurveyProvider.findOne({
-                attributes: ['id'],
-                where: {
-                    name: 'Schlesinger'
-                }
-            });
-
-            if(!provider) {
-                res.send({
-                    status: false,
-                    message: 'Invalid provider'
-                });
-                return;
-            }
-            const providerId = provider.id;
-            const psObj = new SchlesingerHelper();
-            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
-
-            if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
-                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
-
-                if (!surveyData.length) {
-                    res.json({ status: true, message: 'No survey found for this language!' });
-                    return;
-                }
-
-                const ids = surveyData.map(r=> r.SurveyId);
-                const dbSurveys = await Survey.findAll({
-                    attributes: ['original_json', 'survey_number'],
-                    where: {
-                        survey_provider_id: providerId,
-                        status: 'live',
-                        survey_number: ids
-                    }
-                });               
-                const responses = [];
-                const sqsHelper = new SqsHelper();
-                
-                for (let element of surveyData) {
-                    var surveyId;
-                    var body = {};
-                    const index = dbSurveys.findIndex(row => +row.survey_number === +element.SurveyId);
-                    
-                    if(index != -1){    // If matched and index found
-                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
-                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
-                            let surveyQl = qualifications.SurveyQualifications;                            
-                            for(let ql of surveyQl) {
-                                let match = dbSurveys[index].original_json.qualifications.some(r=> r.UpdateTimeStamp === ql.UpdateTimeStamp);
-                                if(!match) {
-                                    body = {
-                                        ...element,
-                                        survey_provider_id: providerId,
-                                        qualifications: surveyQl
-                                    };
-                                }                                
-                            }
-                        }
-                    } 
-                    else {
-                        surveyId = element.SurveyId
-                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + surveyId);
-                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
-                            body = {
-                                ...element,
-                                survey_provider_id: providerId,
-                                qualifications: qualifications.SurveyQualifications
-                            }
-                        }
-                    }
-                    if('qualifications' in body){
-                        const send_message = await sqsHelper.sendData(body);                        
-                        responses.push(send_message);
-                        // responses.push(body);
-                    }
-                    
-                };
-                res.send({
-                    message: 'Sending to SQS',
-                    data: responses
-                })
-            } else {
-                res.send('No survey found!');
-            }
-        }
-        catch (error) {
-            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
-            logger.error(error);
-            res.send(error)
-        }
-    }
-
     /**
      * Toluna Question & Answer Sync
      */
@@ -823,9 +726,118 @@ class SurveySyncController {
      ****************************************************/
 
     /** 
+    * Schlesiner Survey Sync through SQS
+    */
+    async schlesingerSurveySaveToSQS() {
+        try {
+            const provider = await SurveyProvider.findOne({
+                attributes: ['id'],
+                where: {
+                    name: 'Schlesinger'
+                }
+            });
+
+            if(!provider) {
+                // res.send({
+                //     status: false,
+                //     message: 'Invalid provider'
+                // });
+                return {
+                    status: false,
+                    message: 'Invalid provider'
+                }
+            }
+            const providerId = provider.id;
+            const psObj = new SchlesingerHelper();
+            const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
+
+            if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
+
+                if (!surveyData.length) {
+                    // res.json({ status: true, message: 'No survey found for this language!' });
+                    return { status: true, message: 'No survey found for this language!' };
+                }
+
+                const ids = surveyData.map(r=> r.SurveyId);
+                const dbSurveys = await Survey.findAll({
+                    attributes: ['original_json', 'survey_number'],
+                    where: {
+                        survey_provider_id: providerId,
+                        status: 'live',
+                        survey_number: ids
+                    }
+                });               
+                const responses = [];
+                const sqsHelper = new SqsHelper();
+                
+                for (let element of surveyData) {
+                    var surveyId;
+                    var body = {};
+                    const index = dbSurveys.findIndex(row => +row.survey_number === +element.SurveyId);
+                    
+                    if(index != -1){    // If matched and index found
+                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + element.SurveyId);
+                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
+                            let surveyQl = qualifications.SurveyQualifications;                            
+                            for(let ql of surveyQl) {
+                                let match = dbSurveys[index].original_json.qualifications.some(r=> r.UpdateTimeStamp === ql.UpdateTimeStamp);
+                                if(!match) {
+                                    body = {
+                                        ...element,
+                                        survey_provider_id: providerId,
+                                        qualifications: surveyQl
+                                    };
+                                }                                
+                            }
+                        }
+                    } 
+                    else {
+                        surveyId = element.SurveyId
+                        const qualifications = await psObj.fetchSellerAPI('/api/v2/survey/survey-qualifications/' + surveyId);
+                        if (qualifications.Result.Success && qualifications.Result.TotalCount != 0) {
+                            body = {
+                                ...element,
+                                survey_provider_id: providerId,
+                                qualifications: qualifications.SurveyQualifications
+                            }
+                        }
+                    }
+                    if('qualifications' in body){
+                        const send_message = await sqsHelper.sendData(body);                        
+                        responses.push(send_message);
+                        // responses.push(body);
+                    }
+                    
+                };
+                // res.send({
+                //     message: 'Sending to SQS',
+                //     data: responses
+                // })
+                return {
+                    message: 'Sending to SQS',
+                    data: responses
+                };
+            } else {
+                return {
+                    message: 'No survey found!'
+                }
+                // res.send('No survey found!');
+            }
+        }
+        catch (error) {
+            const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
+            logger.error(error);
+            return {
+                error: error.message
+            }
+        }
+    }
+
+    /** 
      * Pure Spectrum Survey Sync through SQS
      */
-    async pureSpectrumSurveySaveToSQS(req, res) {
+    async pureSpectrumSurveySaveToSQS() {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -835,11 +847,15 @@ class SurveySyncController {
             });
 
             if(!provider) {
-                res.send({
+                return {
                     status: false,
                     message: 'Invalid provider'
-                });
-                return;
+                }
+                // res.send({
+                //     status: false,
+                //     message: 'Invalid provider'
+                // });
+                // return;
             }
             const providerId = provider.id;
             const psObj = new PurespectrumHelper;
@@ -876,30 +892,38 @@ class SurveySyncController {
                             }
                         }
                         catch(error) {}
-                    }
+                    }                    
                 }
-                
-                res.send({
+                return {
                     message: 'Sending to SQS',
                     data: responses
-                });
+                }
+                // res.send({
+                //     message: 'Sending to SQS',
+                //     data: responses
+                // });
             }
             else {
-                res.send('No survey found!');
+                // res.send('No survey found!');
+                return {
+                    message: 'No survey found!',
+                }
             }
 
         }
         catch (error) {
             const logger = require('../../helpers/Logger')(`purespectrum-sync-errror.log`);
             logger.error(error);
-            console.error(error)
-            res.send(error)
+            return {
+                message: error.message
+            }
         }
     }
+    
     /**
      * Pure Spectrum - Old Survey disabled 
      */
-    async pureSpectrumSurveyUpdate(req, res) {
+    async pureSpectrumSurveyUpdate() {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -909,11 +933,14 @@ class SurveySyncController {
             });
 
             if(!provider) {
-                res.send({
+                return {
                     status: false,
                     message: 'Invalid provider'
-                });
-                return;
+                }
+                // res.send({
+                //     status: false,
+                //     message: 'Invalid provider'
+                // });
             }
 
             const psObj = new PurespectrumHelper;
@@ -931,6 +958,11 @@ class SurveySyncController {
                 ],
                 limit: 20
             });
+
+            if(surveys.length < 1) {
+                // res.send({ status: true, message: 'No more survey exists!' });
+                return { status: true, message: 'No more survey exists!' }
+            }
 
             //Survey disabled by adding deleted_at value
             const surveyNumberArry = surveys.map(s=> s.survey_number);
@@ -950,7 +982,7 @@ class SurveySyncController {
                         surveyNumber.push(survey.survey_number)
                     }
                 } catch (error) {
-                    //surveyNumber.push(survey.survey_number)
+                    surveyNumber.push(survey.survey_number)
                 }
             }
             
@@ -978,19 +1010,22 @@ class SurveySyncController {
                     }
                 });
             }
-            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
+            return { status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber };
+            // res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
         }
         catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
 			logger.error(error);
-            res.send(error.message);
+            return {
+                error: error.message
+            };
         }
     }
 
     /**
      * Schlesinger - Old Survey disabled
      */
-    async schlesingerSurveyUpdate(req, res) {
+    async schlesingerSurveyUpdate() {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -1000,11 +1035,14 @@ class SurveySyncController {
             });
 
             if(!provider) {
-                res.send({
+                // res.send({
+                //     status: false,
+                //     message: 'Invalid provider'
+                // });
+                return {
                     status: false,
                     message: 'Invalid provider'
-                });
-                return;
+                }
             }
 
             const psObj = new SchlesingerHelper;
@@ -1022,6 +1060,11 @@ class SurveySyncController {
                 ],
                 limit: 20
             });
+
+            if(surveys.length < 1) {
+                // res.send({ status: true, message: 'No more survey exists!' });
+                return { status: true, message: 'No more survey exists!' }
+            }
             
             //Survey disabled by adding deleted_at value
             const surveyNumberArry = surveys.map(s=> s.survey_number);
@@ -1070,12 +1113,15 @@ class SurveySyncController {
                     }
                 });
             }
-            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
+            // res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
+            return { status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber };
         }
         catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
             logger.error(error);
-            res.send(error);
+            return {
+                message: error.message
+            }
         }
     }
 

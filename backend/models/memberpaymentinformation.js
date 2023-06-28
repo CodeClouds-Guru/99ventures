@@ -38,6 +38,13 @@ module.exports = (sequelize, DataTypes) => {
   );
   MemberPaymentInformation.updatePaymentInformation = async (data) => {
     const { PaymentMethod } = require('../models/index');
+    // console.log(data);
+
+    var info = data.member_payment_info.map((info) => {
+      return info.field_name;
+    });
+    // console.log('--------info', info);
+
     await MemberPaymentInformation.update(
       {
         status: 0,
@@ -45,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         where: {
           member_id: data.member_id,
-          name: data.payment_field_option,
+          name: info,
         },
       }
     );
@@ -53,19 +60,33 @@ module.exports = (sequelize, DataTypes) => {
       where: { status: [1, '1'] },
       attributes: ['id'],
     });
-    payment_methods = payment_methods.map((methods) => {
-      return {
-        member_id: data.member_id,
-        payment_method_id: methods.id,
-        name: data.payment_field_option,
-        value: data.payment_email,
-        created_by: data.member_id,
-        status: 1,
-      };
-    });
-    // console.log(payment_methods);
-    if (payment_methods.length > 0) {
-      await MemberPaymentInformation.bulkCreate(payment_methods);
+
+    var member_payment_information = [];
+    for (const methods of payment_methods) {
+      for (const option of data.member_payment_info) {
+        member_payment_information.push({
+          member_id: data.member_id,
+          payment_method_id: methods.id,
+          name: option.field_name,
+          value: option.field_value,
+          created_by: data.member_id,
+          status: 1,
+        });
+      }
+    }
+    // payment_methods = payment_methods.map((methods) => {
+    //   return {
+    //     member_id: data.member_id,
+    //     payment_method_id: methods.id,
+    //     name: data.payment_field_option,
+    //     value: data.payment_email,
+    //     created_by: data.member_id,
+    //     status: 1,
+    //   };
+    // });
+    // console.log('member_payment_information', member_payment_information);
+    if (member_payment_information.length > 0) {
+      await MemberPaymentInformation.bulkCreate(member_payment_information);
     }
     return true;
   };

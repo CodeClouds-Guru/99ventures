@@ -1,3 +1,4 @@
+const { min } = require('lodash');
 const moment = require('moment');
 module.exports = [
   {
@@ -142,12 +143,24 @@ module.exports = [
     },
   },
   {
-    name: 'getObjectValueIfMatched',
-    fn: function (arr, finder) {
-      const index = arr.findIndex((object) => {
-        return object.name === finder.toLowerCase();
-      });
-      if (index >= 0) return arr[index].value;
+    name: 'calHoursToDays',
+    fn: function (h1) {
+      var result = '';
+      var days = Math.floor(h1 / 24);
+      var remainder = h1 % 24;
+      var hours = Math.floor(remainder);
+      var minutes = Math.floor(60 * (remainder - hours));
+
+      result += days > 0 ? days + ' Days ' : '';
+      result += hours > 0 ? hours + ' Hours ' : '';
+      result += minutes > 0 ? minutes + ' Minutes' : '';
+      return result;
+    },
+  },
+  {
+    name: 'convertObjectToString',
+    fn: function (obj) {
+      return JSON.stringify(obj);
     },
   },
 ];

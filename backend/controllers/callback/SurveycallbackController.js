@@ -14,6 +14,7 @@ const { QueryTypes, Op } = require('sequelize');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const SqsHelper = require('../../helpers/SqsHelper');
 const eventBus = require('../../eventBus');
+const LucidHelper = require('../../helpers/Lucid')
 
 class SurveycallbackController {
 	constructor() {
@@ -21,6 +22,7 @@ class SurveycallbackController {
 		this.syncSurvey = this.syncSurvey.bind(this);
 		this.memberTransaction = this.memberTransaction.bind(this);
 		this.memberEligibitityUpdate = this.memberEligibitityUpdate.bind(this);
+		this.getMember = this.getMember.bind(this);
 	}
 
 	async save(req, res) {
@@ -54,9 +56,10 @@ class SurveycallbackController {
 		try {
 			//SQS
 			const sqsHelper = new SqsHelper();
+			const lcObj = new LucidHelper;
 			if (survey.length > 0) {
 				const provider = req.params.provider;
-				//   //get survey provider
+				//get survey provider
 				let survey_provider = await SurveyProvider.findOne({
 					attributes: ['id'],
 					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
@@ -64,91 +67,25 @@ class SurveycallbackController {
 
 				// console.log(survey_provider.id);
 				survey.forEach(async (element) => {
-					let lucid_data = {
-						...element,
-						survey_provider_id: survey_provider.id,
-						///survey_provider.id,
-					};
-					// element['survey_provider_id'] = survey_provider.id;
-					const send_message = await sqsHelper.sendData(lucid_data);
-					// console.log('lucid survey')
-					// console.log(send_message);
+					const quota = await lcObj.showQuota(element.survey_id);
+					if('SurveyStillLive' in quota && quota.SurveyStillLive == true) {
+						let lucid_data = {
+							...element,
+							survey_provider_id: survey_provider.id,
+							///survey_provider.id,
+						};
+						// element['survey_provider_id'] = survey_provider.id;
+						const send_message = await sqsHelper.sendData(lucid_data);
+						// console.log('lucid survey')
+						// console.log(send_message);
+					}
 				});
 			}
-			//SQS
-			// if (survey.length > 0) {
-			//   const provider = req.params.provider;
-			//   //get survey provider
-			//   let survey_provider = await SurveyProvider.findOne({
-			//     attributes: ['id'],
-			//     where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
-			//   });
-			//   //survey questions
-			//   let survey_questions = await SurveyQuestion.findAll({
-			//     attributes: ['survey_provider_question_id'],
-			//   });
-			//   survey.map(async (record) => {
-			//     let status = 'draft'
-			//     if (record.is_live == true || record.is_live == 'true') {
-			//       status = 'active'
-			//     }
-			//     //create survey
-			//     let model = {};
-			//     let data = {
-			//       survey_provider_id: survey_provider.id,
-			//       loi: record.length_of_interview,
-			//       cpi: record.cpi,
-			//       name: record.survey_name,
-			//       survey_number: record.survey_id,
-			//       status: status
-			//     }
-			//     var survey_status = 'created';
-			//     var obj = await Survey.findOne({ where: { survey_number: record.survey_id, survey_provider_id: survey_provider.id } })
-			//     if (obj) {
-			//       survey_status = 'updated'
-			//       model = await obj.update(data);
-			//     }
-			//     else {
-			//       model = await Survey.create(data);
-			//     }
-
-			//     if ('survey_qualifications' in record && Array.isArray(record.survey_qualifications) && record.survey_qualifications.length > 0) {
-			//       let qualification_ids = []
-			//       //clear all the previous records if the status is updated
-			//       if (survey_status === 'updated') {
-			//         //get all qualification
-			//         var qualification_ids_rows = await SurveyQualification.findAll({ where: { survey_id: model.id }, attributes: ['id'] })
-			//         qualification_ids = qualification_ids_rows.map((qualification_id) => {
-			//           return qualification_id.id
-			//         })
-			//         if (qualification_ids.length > 0) {
-			//           //remove qualifications
-			//           await SurveyQualification.destroy({
-			//             where: {
-			//               id: {
-			//                 [Op.in]: qualification_ids
-			//               }
-			//             },
-			//             force: true
-			//           });
-			//           await db.sequelize.query(
-			//             "DELETE FROM `survey_answer_precode_survey_qualifications` WHERE `survey_qualification_id` IN (" + qualification_ids.join(',') + ")", { type: QueryTypes.DELETE }
-			//           );
-			//         }
-			//       }
-			//       //store survey qualifications
-			//       await this.storeSurveyQualifications(record, model, survey_questions, req)
-			//     }
-			//   });
-			// }
+			
 		} catch (error) {
 			const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
 			logger1.error(error);
 		} finally {
-			// const logger1 = require('../../helpers/Logger')(
-			//   `lucid-${new Date()}.log`
-			// );
-			// logger1.info(JSON.stringify(req.body));
 			res.status(200).json({
 				status: true,
 				message: 'Data synced.',
@@ -200,73 +137,36 @@ class SurveycallbackController {
 		}
 	}
 
+	/**************************************************************************
+	**					POST BACK RELATED FUNCTIONALITY						**
+	***************************************************************************/
+
 	/**
 	 * Cint Callback details sync
 	 */
 	async cintPostBack(req, res) {
-		const username = req.params.ssi;
-		const reward = req.params.reward;
-		const txnId = req.params.txn_id;
+		try {
+			const username = req.params.ssi;
+			const reward = req.params.reward;
+			const txnId = req.params.txn_id;
 
-		let member = await Member.findOne({
-			attributes: ['id', 'username'],
-			where: {
-				username: username,
-			}
-		});
-		if (member) {
-			const survey = {
-				cpi: reward
-			}
-			await this.memberTransaction( survey, 'Cint', txnId, member, req.params );
-
-			/*const provider = await SurveyProvider.findOne({
-				attributes: ['currency_percent', 'id'],
-				where: {
-					name: 'Cint'
+			let member = await this.getMember({username});
+			if (member) {
+				const survey = {
+					cpi: reward
 				}
-			});
-
-			let amount = reward;
-			if (reward != 0 && parseInt(provider.currency_percent) != 0) {
-				amount = (reward * 100) / parseInt(provider.currency_percent);
+				await this.memberTransaction( survey, 'Cint', txnId, member, req.params, req);				
 			}
-
-			const note = provider;
-			const transaction_obj = {
-				transaction_id: 'Cint #'+txnId,
-				member_id: member ? member.id : null,
-				amount: amount,
-				note: note + ' ' + req.params.status,
-				type: 'credited',
-				amount_action: 'survey',
-				created_by: null,
-				payload: JSON.stringify(req.query),
-			};
-
-			await MemberSurvey.create({
-				survey_provider_id: provider.id,
-				survey_number: txnId,
-				original_json: req.query,
-				completed_on: new Date()
-			}, { silent: true });
-
-			//   console.log('transaction_obj', transaction_obj);
-			let result = await MemberTransaction.updateMemberTransactionAndBalance(
-				transaction_obj
-			);*/
-			//event for shoutbox
-			let evntbus = eventBus.emit('happening_now', {
-				action: 'survey-and-offer-completions',
-				company_portal_id: req.session.company_portal.id,
-				company_id: req.session.company_portal.company_id,
-				data: {
-					members: req.session.member,
-					amount: '$' + amount,
-					surveys: { name: provider },
-				},
+		} catch (error) {
+			const logger = require('../../helpers/Logger')(
+				`cint-postback-errror.log`
+			);
+			logger.error(error);
+		} finally {
+			res.send({
+				status: true,
+				message: 'success'
 			});
-			res.send(req.query);
 		}
 	}
 
@@ -317,55 +217,9 @@ class SurveycallbackController {
 					},
 				});
 				if (survey) {
-					const username = requestParam.ps_supplier_respondent_id;
-					let member = await Member.findOne({
-						attributes: ['id', 'username'],
-						where: {
-							username: username,
-						},
-					});
+					let member = await this.getMember({username: requestParam.ps_supplier_respondent_id});
 					if (member) {
-						await this.memberTransaction( survey, 'Purespectrum', surveyNumber, member, requestParam );
-						/*const provider = await SurveyProvider.findOne({
-							attributes: ['currency_percent', 'id'],
-							where: {
-								name: 'Purespectrum'
-							}
-						});
-						const partnerAmount = survey.cpi;
-						let amount = survey.cpi;
-						if (partnerAmount != 0 && parseInt(provider.currency_percent) != 0) {
-							amount = (partnerAmount * 100) / parseInt(provider.currency_percent);
-						}
-						const transaction_obj = {
-							transaction_id: 'Purespectrum #'+surveyNumber,
-							member_id: member.id,
-							amount: amount,
-							note: 'Pure Spectrum survey (#' + surveyNumber + ') completion',
-							type: 'credited',
-							amount_action: 'survey',
-							created_by: null,
-							payload: JSON.stringify(req.query),
-							survey_provider_id: provider.id,
-							survey_number: surveyNumber
-						};*/
-						// await MemberTransaction.updateMemberTransactionAndBalance(
-						// 	transaction_obj
-						// );
-
-						await SurveycallbackController.prototype.addMemberTransacrion(transaction_obj);
-
-						//event for shoutbox
-						let evntbus = eventBus.emit('happening_now', {
-							action: 'survey-and-offer-completions',
-							company_portal_id: req.session.company_portal.id,
-							company_id: req.session.company_portal.company_id,
-							data: {
-								members: req.session.member,
-								amount: '$' + amount,
-								surveys: { name: 'Pure Spectrum' },
-							},
-						});
+						await this.memberTransaction( survey, 'Purespectrum', surveyNumber, member, requestParam, req);				
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`purespectrum-postback-errror.log`
@@ -405,14 +259,9 @@ class SurveycallbackController {
 					}
 				});
 				if (survey) {
-					let member = await Member.findOne({
-						attributes: ['id', 'username'],
-						where: {
-							username: queryData.uid,
-						}
-					});
+					let member = await this.getMember({username: queryData.uid});
 					if (member) {
-						await this.memberTransaction( survey, 'Schlesinger', surveyNumber, member, queryData );
+						await this.memberTransaction( survey, 'Schlesinger', surveyNumber, member, queryData, req);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`schlesinger-postback-errror.log`
@@ -445,41 +294,10 @@ class SurveycallbackController {
 					}
 				});
 				if (survey) {
-					const username = requestParam.pid;
-					let member = await Member.findOne({
-						attributes: ['id', 'username'],
-						where: {
-							username: username,
-						}
-					});
+					let member = await this.getMember({username: requestParam.pid});
 					if (member) {
-						await this.memberTransaction( survey, 'Lucid', surveyNumber, member, requestParam );
+						await this.memberTransaction( survey, 'Lucid', surveyNumber, member, requestParam, req);
 						await this.memberEligibitityUpdate(requestParam);
-						/*const provider = await SurveyProvider.findOne({
-							attributes: ['currency_percent'],
-							where: {
-								name: 'Lucid'
-							}
-						});
-						const partnerAmount = survey.cpi;
-						let amount = survey.cpi;
-						if (partnerAmount != 0 && parseInt(provider.currency_percent) != 0) {
-							amount = (partnerAmount * 100) / parseInt(provider.currency_percent);
-						}
-
-						const transaction_obj = {
-							transaction_id: 'Lucid #'+surveyNumber,							
-							member_id: member.id,
-							amount: amount,
-							note: 'Lucid survey (#' + surveyNumber + ') completion',
-							type: 'credited',
-							amount_action: 'survey',
-							created_by: null,
-							payload: JSON.stringify(req.body),
-						};
-						await MemberTransaction.updateMemberTransactionAndBalance(
-							transaction_obj
-						);*/
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`lucid-postback-errror.log`
@@ -514,18 +332,12 @@ class SurveycallbackController {
 			const surveyRef = requestBody.SurveyRef;
 			const partnerAmount = requestBody.Revenue;  // the amount already converted to cent
 			try {
-				let member = await Member.findOne({
-					attributes: ['id'],
-					where: {
-						id: userId,
-					},
-				});
-
+				let member = await this.getMember({id: userId});
 				if (member) {
 					const survey = {
 						cpi: (partnerAmount / 100)
 					}
-					await this.memberTransaction( survey, 'Toluna', surveyId, member, requestBody );
+					await this.memberTransaction( survey, 'Toluna', surveyId, member, requestBody, req);
 				} else {
 					const tolunaLog = require('../../helpers/Logger')(
 						`toluna-postback-errror.log`
@@ -547,7 +359,7 @@ class SurveycallbackController {
 	/**
 	 * Sync Member Transaction & Member Survey
 	 */
-	async memberTransaction( survey, providerName, surveyNumber, member, payload ) {
+	async memberTransaction( survey, providerName, surveyNumber, member, payload, req) {
 		try{
 			const provider = await SurveyProvider.findOne({
 				attributes: ['currency_percent', 'id'],
@@ -585,6 +397,41 @@ class SurveycallbackController {
 					original_json: payload,
 					completed_on: new Date()
 				}, { silent: true });
+
+				//event for shoutbox
+				eventBus.emit('happening_now', {
+					action: 'survey-and-offer-completions',
+					company_portal_id: member.company_portal_id,
+					company_id: member.company_id,
+					data: {
+						members: member,
+						amount: '$' + amount,
+						surveys: { name: providerName },
+					},
+				});
+
+				//event for email
+				eventBus.emit('send_email', {
+					action: 'Survey Completed',
+					data: {
+						email: member.email,
+						details: {
+							survey: {
+								amount: '$' + amount,
+								survey_number: surveyNumber
+							}
+						},
+					},
+					req: {
+						...req,
+						headers: {
+							...req.headers,
+							company_id: member.company_id,
+							company_portal_id: member.company_portal_id
+						},
+						users: member
+					}
+				});
 			}
 		} catch (error) {
 			console.error(error)
@@ -662,6 +509,20 @@ class SurveycallbackController {
 				message: err.message
 			};
 		}
+	}
+
+	/**
+	 * Get Member Data
+	 */
+	async getMember(clause){
+		return await Member.findOne({
+			attributes: {
+				exclude: ['password', 'created_by', 'updated_by', 'deleted_by', 'deleted_at', 'updated_at', 'last_active_on', 'email_verified_on', 'profile_completed_on', 'avatar', 'dob']
+			},
+			where: {
+				...clause
+			}
+		});
 	}
 }
 

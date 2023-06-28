@@ -137,7 +137,7 @@ class SchlesingerController {
             const generateQueryString = new URLSearchParams(queryString).toString();
 
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
-                const surveys = await Survey.findAll({
+                const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
                         survey_provider_id: provider.id,
@@ -169,54 +169,50 @@ class SchlesingerController {
                     limit: perPage,
                     offset: (pageNo - 1) * perPage,
                 });
-                var data_count = await Survey.findAndCountAll({
-                    attributes: ['id'],
-                    where: {
-                        survey_provider_id: provider.id,
-                        status: "active",
-                    }
-                });
-                var page_count = Math.ceil(data_count.count / perPage);
+                
+                var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
-                if (!surveys.length) {
+                if (!surveys.count) {
                     return{
                         status: false,
                         message: 'No matching surveys!'
                     }
                 }
                 var surveyHtml = '';
-                for (let survey of surveys) {
-                    let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
-                    let temp_survey = {
-                        survey_number: survey.survey_number,
-                        name: survey.name,
-                        cpi: parseFloat(survey.cpi).toFixed(2),
-                        loi: survey.loi,
-                        link:link
+                if(surveys.rows && surveys.rows.length){
+                    for (let survey of surveys.rows) {
+                        let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
+                        let temp_survey = {
+                            survey_number: survey.survey_number,
+                            name: survey.name,
+                            cpi: parseFloat(survey.cpi).toFixed(2),
+                            loi: survey.loi,
+                            link:link
+                        }
+                        survey_list.push(temp_survey)
+                        // surveyHtml += `
+                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                        //         <div class="bg-white card mb-2">
+                        //             <div class="card-body position-relative">
+                        //                 <div class="d-flex justify-content-between">
+                        //                     <h6 class="text-primary m-0">Exciting New Survey #${survey.survey_number}</h6>
+                        //                 </div>
+                        //                 <div class="text-primary small">${survey.loi} Minutes</div>
+                        //                 <div class="d-grid mt-1">
+                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                        //                 </div>
+                        //             </div>
+                        //         </div>
+                        //     </div>
+                        // `
                     }
-                    survey_list.push(temp_survey)
-                    // surveyHtml += `
-                    //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                    //         <div class="bg-white card mb-2">
-                    //             <div class="card-body position-relative">
-                    //                 <div class="d-flex justify-content-between">
-                    //                     <h6 class="text-primary m-0">Exciting New Survey #${survey.survey_number}</h6>
-                    //                 </div>
-                    //                 <div class="text-primary small">${survey.loi} Minutes</div>
-                    //                 <div class="d-grid mt-1">
-                    //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                    //                 </div>
-                    //             </div>
-                    //         </div>
-                    //     </div>
-                    // `
                 }
                 return {
                     status: true,
                     message: 'Success',
                     result: {
                         surveys:survey_list,
-                        page_count
+                        page_count:page_count
                     }
                 }
             } else {
