@@ -465,9 +465,10 @@ class MemberController extends Controller {
     options.subQuery = false;
     options.distinct = true;
     options.attributes = req.query.fields || ['id', 'first_name', 'username'];
+    options.group = 'Member.id';
 
     let result = await this.model.findAndCountAll(options);
-    let pages = Math.ceil(result.count / limit);
+    let pages = Math.ceil(result.count.length / limit);
 
     result.rows.map(row => {
       let ip = '';
@@ -523,7 +524,7 @@ class MemberController extends Controller {
     });
 
     return {
-      result: { data: result.rows, pages, total: result.count },
+      result: { data: result.rows, pages, total: result.count.length },
       fields: this.generateFields(req.query.fields || []),
     };
   }
