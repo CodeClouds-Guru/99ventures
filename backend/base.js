@@ -9,6 +9,8 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const Handlebars = require('handlebars');
 const HandlebarHelpers = require("./config/handlebars_helpers");
+const jobs = require('./config/schedules');
+const cron = require('node-cron');
 
 /**
  * This functions initialize an express app
@@ -111,6 +113,25 @@ function initializeSession(app) {
   );
 }
 
+/**
+ * Run Cron
+ */
+function runSchedule(){
+  if(process.env.DEV_MODE != 1) {
+    const schedules = {}
+    jobs.forEach((job, idx) => {
+      schedules[idx] = cron.schedule(
+        job.pattern,
+        async () => {
+          await job.function()
+          console.log(job.name)
+        },
+        ...job.options
+      )
+    })
+  }
+}
+
 module.exports = function () {
   const app = init();
   setup(app);
@@ -118,6 +139,7 @@ module.exports = function () {
   initializeHandlebars(app);
   chainMiddlewares(app);
   chainRoutes(app);
+  runSchedule();
   app.enable('trust proxy')
   //General exception handler
   app.use((err, req, res, next) => {

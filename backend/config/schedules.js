@@ -28,32 +28,32 @@ const schedules = [
 		},
 		options: [null, true],
 	},
-	// {
-	// 	name: 'sago survey status check and update',
-	// 	pattern: '*/20 * * * *',
-	// 	function: async () => {
-	// 		try {
-	// 			let cronJob = new SurveySyncClass();
-	// 			await cronJob.schlesingerSurveyUpdate();
-	// 		} catch (e) {
-	// 			console.log(e.message)
-	// 		}
-	// 	},
-	// 	options: [null, true],
-	// },
-	// {
-	// 	name: 'purespectrum survey status check and update',
-	// 	pattern: '*/20 * * * *',
-	// 	function: async () => {
-	// 		try {
-	// 			let cronJob = new SurveySyncClass();
-	// 			await cronJob.pureSpectrumSurveyUpdate();
-	// 		} catch (e) {
-	// 			console.log(e.message)
-	// 		}
-	// 	},
-	// 	options: [null, true],
-	// }
+	{
+		name: 'sago survey status check and update',
+		pattern: '*/20 * * * *',
+		function: async () => {
+			try {
+				let cronJob = new SurveySyncClass();
+				await cronJob.schlesingerSurveyUpdate();
+			} catch (e) {
+				console.log(e.message)
+			}
+		},
+		options: [null, true],
+	},
+	{
+		name: 'purespectrum survey status check and update',
+		pattern: '*/20 * * * *',
+		function: async () => {
+			try {
+				let cronJob = new SurveySyncClass();
+				await cronJob.pureSpectrumSurveyUpdate();
+			} catch (e) {
+				console.log(e.message)
+			}
+		},
+		options: [null, true],
+	}
 ]
 
 module.exports = schedules;
