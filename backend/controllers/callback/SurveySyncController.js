@@ -919,6 +919,7 @@ class SurveySyncController {
             }
         }
     }
+    
     /**
      * Pure Spectrum - Old Survey disabled 
      */
@@ -940,7 +941,6 @@ class SurveySyncController {
                 //     status: false,
                 //     message: 'Invalid provider'
                 // });
-                // return;
             }
 
             const psObj = new PurespectrumHelper;
@@ -961,7 +961,6 @@ class SurveySyncController {
 
             if(surveys.length < 1) {
                 // res.send({ status: true, message: 'No more survey exists!' });
-                // return;
                 return { status: true, message: 'No more survey exists!' }
             }
 
@@ -983,7 +982,7 @@ class SurveySyncController {
                         surveyNumber.push(survey.survey_number)
                     }
                 } catch (error) {
-                    //surveyNumber.push(survey.survey_number)
+                    surveyNumber.push(survey.survey_number)
                 }
             }
             
