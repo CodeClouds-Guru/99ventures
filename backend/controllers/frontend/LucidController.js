@@ -133,7 +133,7 @@ class LucidController {
                 }
                 const generateQueryString = new URLSearchParams(queryString).toString();
                 
-                const surveys = await Survey.findAll({
+                const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
                         survey_provider_id: provider.id,
@@ -166,22 +166,16 @@ class LucidController {
                     limit: perPage,
                     offset: (pageNo - 1) * perPage,
                 });
-                var data_count = await Survey.findAndCountAll({
-                    attributes: ['id'],
-                    where: {
-                        survey_provider_id: provider.id,
-                        status: "active",
-                    }
-                });
-                var page_count = Math.ceil(data_count.count / perPage);
+                
+                var page_count = Math.ceil(surveys.count / perPage);
 
                 // res.send(surveys);
                 // return;
                 var survey_list = []
-                if(surveys.length){
+                if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
                     var count = 0;
-                    for (let survey of surveys) {
+                    for (let survey of surveys.rows) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
                         let temp_survey = {
                                 survey_number: survey.survey_number,
