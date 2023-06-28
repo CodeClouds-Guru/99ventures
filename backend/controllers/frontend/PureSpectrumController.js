@@ -132,7 +132,7 @@ class PureSpectrumController {
                 /** End */
                 const generateQueryString = new URLSearchParams(queryString).toString();
 
-                const surveys = await Survey.findAll({
+                const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     where: {
                         survey_provider_id: provider.id,
@@ -164,18 +164,19 @@ class PureSpectrumController {
                     limit: perPage,
                     offset: (pageNo - 1) * perPage,
                 });
-                var data_count = await Survey.findAndCountAll({
-                    attributes: ['id'],
-                    where: {
-                        survey_provider_id: provider.id,
-                        status: "active",
-                    }
-                });
+                // var data_count = await Survey.findAndCountAll({
+                //     attributes: ['id'],
+                //     where: {
+                //         survey_provider_id: provider.id,
+                //         status: "active",
+                //     }
+                // });
+                console.log(surveys.count)
                 var page_count = Math.ceil(data_count.count / perPage);
                 var survey_list = []
-                if(surveys && surveys.length){
+                if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
-                    for (let survey of surveys) {
+                    for (let survey of surveys.rows) {
                         let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
                         let temp_survey = {
                             survey_number: survey.survey_number,
