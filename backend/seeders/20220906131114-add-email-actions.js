@@ -29,6 +29,18 @@ module.exports = {
           id: 12,
           action: 'Transaction Reversed',
         },
+        {
+          id: 13,
+          action: 'Referral Bonus',
+        },
+        {
+          id: 14,
+          action: 'Survey Completed',
+        },
+        {
+          id: 15,
+          action: 'Registration Bonus',
+        },
       ],
       {}
     );

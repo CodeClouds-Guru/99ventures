@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PageParser = require('../helpers/PageParser');
 const SqsHelper = require('../helpers/SqsHelper');
+const EmaiHelper = require('../helpers/EmailHelper');
 const { OfferWall } = require('../models');
 const Paypal = require('../helpers/Paypal');
 router.get('/robots.txt', (req, res) => {
@@ -60,7 +61,16 @@ router.post('/save-password', MemberAuthController.resetPassword);
 
 router.post('/update-notification', NotificationController.update);
 router.delete('/update-notification', NotificationController.delete);
-
+router.get('/test-mail', async (req, res) => {
+  const emaiHelper = new EmaiHelper({
+    user: req.session.member,
+    headers:{
+      site_id:1
+    }
+  });
+  const send_message = await emaiHelper.parse({action:'Referral Bonus',data:{}});
+  res.send(send_message);
+});
 router.get('/test-payment', async (req, res) => {
   const paypal_class = new Paypal(1);
   const create_resp = await paypal_class.payout([

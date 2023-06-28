@@ -344,6 +344,24 @@ class MemberAuthController {
       currency: 'USD',
       created_by: 0,
     });
+    //send mail
+    let req = {
+      headers: {
+        site_id: member_details.company_portal_id,
+      },
+      user:member_details
+    };
+    let evntbus = eventBus.emit('send_email', {
+      action: 'Registration Bonus',
+      data: {
+        email: member_details.email,
+        details: {
+          members: member_details,
+          registration_bonus: parseFloat(registration_bonus.settings_value).toFixed(2),
+        },
+      },
+      req: req,
+    });
   }
   //geo track
   async geoTrack(req, ip, member) {

@@ -372,11 +372,12 @@ module.exports = (sequelize, DataTypes) => {
       Setting,
       MemberNotification,
     } = require('../models/index');
+    const eventBus = require('../eventBus');
     let member = JSON.parse(
       JSON.stringify(
         await Member.findOne({
           where: { id: member_id },
-          attributes: ['member_referral_id'],
+          attributes: ['member_referral_id','company_portal_id'],
           include: {
             model: MemberBalance,
             as: 'member_amounts',
@@ -390,7 +391,7 @@ module.exports = (sequelize, DataTypes) => {
       JSON.stringify(
         await Member.findOne({
           where: { id: member.member_referral_id, status: 'member' },
-          attributes: ['member_referral_id'],
+          attributes: ['member_referral_id','id','email'],
           include: {
             model: MemberBalance,
             as: 'member_amounts',
@@ -428,6 +429,24 @@ module.exports = (sequelize, DataTypes) => {
           })
         )
       );
+      //send mail to referrer
+      let req = {
+        headers: {
+          site_id: member.company_portal_id,
+        },
+        user:referral_member
+      };
+      let evntbus = eventBus.emit('send_email', {
+        action: 'Referral Bonus',
+        data: {
+          email: referral_member.email,
+          details: {
+            members: referral_member,
+            referral_bonus: parseFloat(referral_amount).toFixed(2),
+          },
+        },
+        req: req,
+      });
       await MemberTransaction.updateMemberBalance({
         amount: ref_modified_total_earnings,
         member_id: member.member_referral_id,
