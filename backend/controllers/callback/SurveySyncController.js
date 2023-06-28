@@ -932,6 +932,11 @@ class SurveySyncController {
                 limit: 20
             });
 
+            if(surveys.length < 1) {
+                res.send({ status: true, message: 'No more survey exists!' });
+                return;
+            }
+
             //Survey disabled by adding deleted_at value
             const surveyNumberArry = surveys.map(s=> s.survey_number);
             await Survey.update({
@@ -1022,6 +1027,11 @@ class SurveySyncController {
                 ],
                 limit: 20
             });
+
+            if(surveys.length > 1) {
+                res.send({ status: true, message: 'No more survey exists!' });
+                return;
+            }
             
             //Survey disabled by adding deleted_at value
             const surveyNumberArry = surveys.map(s=> s.survey_number);
