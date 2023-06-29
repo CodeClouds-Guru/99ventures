@@ -167,7 +167,6 @@ class PureSpectrumController {
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
-                console.log('count ===>',surveys.count)
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
