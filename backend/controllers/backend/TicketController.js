@@ -71,13 +71,13 @@ class TicketController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     for (let i = 0; i < result.rows.length; i++) {
-      console.log(
-        util.inspect(result.rows[i], {
-          showHidden: false,
-          depth: null,
-          colors: true,
-        })
-      );
+      // console.log(
+      //   util.inspect(result.rows[i], {
+      //     showHidden: false,
+      //     depth: null,
+      //     colors: true,
+      //   })
+      // );
       if (result.rows[i].Member)
         result.rows[i].setDataValue(
           'username',

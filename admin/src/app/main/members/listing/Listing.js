@@ -190,7 +190,7 @@ function Listing(props) {
 
     useEffect(() => {
         fetchModules();
-    }, [searchText, page, rowsPerPage, order, where]);
+    }, [searchText, page, rowsPerPage, order.id, order.direction, where]);
 
     useEffect(() => {
         resetModulesListConfig();
@@ -325,6 +325,7 @@ function Listing(props) {
     }
 
     function handleChangePage(event, value) {
+        setLoading(true)
         setPage(value);
         setFirstCall(true);
     }
