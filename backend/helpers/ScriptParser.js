@@ -251,7 +251,7 @@ class ScriptParser {
               data = [];
             }
             if(page_count > 5){
-              page_count = 5
+              page_count = 5;
             }
             //pagination
             if (
