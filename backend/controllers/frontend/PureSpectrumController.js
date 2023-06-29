@@ -134,6 +134,7 @@ class PureSpectrumController {
 
                 const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
+                    distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "live",
@@ -166,7 +167,7 @@ class PureSpectrumController {
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
-                
+                console.log('count ===>',surveys.count)
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
