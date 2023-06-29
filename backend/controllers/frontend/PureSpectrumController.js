@@ -166,6 +166,36 @@ class PureSpectrumController {
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
+                const survey_count = await Survey.count({
+                    where: {
+                        survey_provider_id: provider.id,
+                        status: "live",
+                    },
+                    include: {
+                        model: SurveyQualification,
+                        required: true,
+                        include: {
+                            model: SurveyAnswerPrecodes,
+                            where: {
+                                id: matchingAnswerIds
+                            },
+                            required: true,
+                            include: [
+                                {
+                                    model: SurveyQuestion,
+                                    where: {
+                                        id: matchingQuestionIds
+                                    }
+                                }
+                            ],
+                        }
+                    },
+                    order: [[Sequelize.literal(orderBy), order]],
+                    limit: perPage,
+                    offset: (pageNo - 1) * perPage,
+                });
+                console.log('Survey Count: ',surveys.count)
+                console.log('Survey count count : ',survey_count)
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
