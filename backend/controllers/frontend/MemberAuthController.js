@@ -351,7 +351,7 @@ class MemberAuthController {
       headers: {
         site_id: member_details.company_portal_id,
       },
-      user:member_details
+      user: member_details,
     };
     let evntbus = eventBus.emit('send_email', {
       action: 'Registration Bonus',
@@ -359,7 +359,9 @@ class MemberAuthController {
         email: member_details.email,
         details: {
           members: member_details,
-          registration_bonus: parseFloat(registration_bonus.settings_value).toFixed(2),
+          registration_bonus: parseFloat(
+            registration_bonus.settings_value
+          ).toFixed(2),
         },
       },
       req: req,
@@ -866,7 +868,7 @@ class MemberAuthController {
       };
     }
     // console.log(JSON.parse(JSON.stringify(member)));
-    if (withdrawal_amount >= parseFloat(member.member_amounts[0].amount)) {
+    if (withdrawal_amount > parseFloat(member.member_amounts[0].amount)) {
       return {
         member_status: false,
         member_message: 'Please check your balance',
@@ -877,13 +879,14 @@ class MemberAuthController {
       attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
         status: 'pending',
-        member_id: { member_id: request_data.member_id },
+        member_id: request_data.member_id,
       },
     });
 
     if (
-      pending_withdrawal_req_amount >
-      parseFloat(member.member_amounts[0].amount)
+      member.member_amounts[0].amount <
+      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
+        withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -939,160 +942,173 @@ class MemberAuthController {
           'This payment info has already been used, please reach out to admin',
       };
     }
+    if (member_payment_info.length > 0) {
+      await MemberPaymentInformation.updatePaymentInformation({
+        member_id: request_data.member_id,
+        member_payment_info,
+      });
 
-    await MemberPaymentInformation.updatePaymentInformation({
-      member_id: request_data.member_id,
-      member_payment_info,
-    });
+      var ip = req.ip;
+      if (Array.isArray(ip)) {
+        ip = ip[0];
+      } else {
+        ip = ip.replace('::ffff:', '');
+      }
 
-    var ip = req.ip;
-    if (Array.isArray(ip)) {
-      ip = ip[0];
-    } else {
-      ip = ip.replace('::ffff:', '');
-    }
+      let withdrawal_req_data = {
+        member_id: request_data.member_id,
+        amount: withdrawal_amount,
+        amount_type: 'cash',
+        currency: 'USD',
+        status: 'pending',
+        requested_on: new Date(),
+        payment_email: request_data.payment_field,
+        withdrawal_type_id: parseInt(request_data.payment_method_id),
+        ip: ip,
+      };
+      let transaction_resp = {};
+      // if (
+      //   payment_method_details.slug == 'instant_paypal' ||
+      //   payment_method_details.slug == 'skrill'
+      // ) {
+      if (payment_method_details.payment_type == 'Auto') {
+        withdrawal_req_data.note = 'Withdrawal request auto approved';
+        withdrawal_req_data.transaction_made_by = request_data.member_id;
+        withdrawal_req_data.status = 'approved';
 
-    let withdrawal_req_data = {
-      member_id: request_data.member_id,
-      amount: withdrawal_amount,
-      amount_type: 'cash',
-      currency: 'USD',
-      status: 'pending',
-      requested_on: new Date(),
-      payment_email: request_data.payment_field,
-      withdrawal_type_id: parseInt(request_data.payment_method_id),
-      ip: ip,
-    };
-    let transaction_resp = {};
-    if (
-      payment_method_details.slug == 'instant_paypal' ||
-      payment_method_details.slug == 'skrill'
-    ) {
-      withdrawal_req_data.note = 'Withdrawal request auto approved';
-      withdrawal_req_data.transaction_made_by = request_data.member_id;
-      withdrawal_req_data.status = 'approved';
-
-      //Insert into member transaction and update balance
-      transaction_resp =
-        await MemberTransaction.updateMemberTransactionAndBalance({
-          member_id: request_data.member_id,
-          amount: -withdrawal_amount,
-          note: 'Withdrawal request for $' + withdrawal_amount,
-          type: 'withdraw',
-          amount_action: 'member_withdrawal',
-          created_by: request_data.member_id,
-          status: payment_method_details.slug == 'instant_paypal' ? 1 : 2,
-        });
-      // console.log(withdrawal_req_data);
-      if (payment_method_details.slug == 'instant_paypal') {
-        const paypal_class = new Paypal(
-          req.session.company_portal.id,
-          'instant_paypal'
-        );
-        const create_resp = await paypal_class.payout([
-          {
-            amount: withdrawal_amount,
-            currency: 'USD',
+        //Insert into member transaction and update balance
+        transaction_resp =
+          await MemberTransaction.updateMemberTransactionAndBalance({
             member_id: request_data.member_id,
-            email: request_data.payment_field,
-            first_name: member.first_name,
-            last_name: member.last_name,
-            member_transaction_id: transaction_resp.transaction_id,
-          },
-        ]);
-        // console.log('create_resp', create_resp);
-        if (create_resp.status) {
-          await MemberTransaction.update(
+            amount: -withdrawal_amount,
+            note: 'Withdrawal request for $' + withdrawal_amount,
+            type: 'withdraw',
+            amount_action: 'member_withdrawal',
+            created_by: request_data.member_id,
+            status: payment_method_details.slug == 'instant_paypal' ? 1 : 2,
+          });
+        // console.log(withdrawal_req_data);
+        if (payment_method_details.slug == 'instant_paypal') {
+          const paypal_class = new Paypal(
+            req.session.company_portal.id,
+            'instant_paypal'
+          );
+          var paypal_request = [
             {
-              batch_id: create_resp.batch_id,
-              status: 2,
-              balance:
+              amount: withdrawal_amount,
+              currency: 'USD',
+              member_id: request_data.member_id,
+              // email: request_data.payment_field,
+              first_name: member.first_name,
+              last_name: member.last_name,
+              member_transaction_id: transaction_resp.transaction_id,
+            },
+          ];
+          for (const info of member_payment_info) {
+            // console.log(info);
+            paypal_request[0][info.field_name] = info.field_value;
+          }
+          // console.log(paypal_request);
+          const create_resp = await paypal_class.payout(paypal_request);
+          // console.log('create_resp', create_resp);
+          if (create_resp.status) {
+            await MemberTransaction.update(
+              {
+                batch_id: create_resp.batch_id,
+                status: 2,
+                balance:
+                  parseFloat(member.member_amounts[0].amount) -
+                  parseFloat(withdrawal_amount),
+              },
+              { where: { id: transaction_resp.transaction_id } }
+            );
+            await MemberTransaction.updateMemberBalance({
+              amount:
                 parseFloat(member.member_amounts[0].amount) -
                 parseFloat(withdrawal_amount),
-            },
-            { where: { id: transaction_resp.transaction_id } }
-          );
-          await MemberTransaction.updateMemberBalance({
-            amount:
-              parseFloat(member.member_amounts[0].amount) -
-              parseFloat(withdrawal_amount),
-            transaction_amount: withdrawal_amount,
-            action: 'member_withdrawal',
-            member_id: request_data.member_id,
-          });
+              transaction_amount: withdrawal_amount,
+              action: 'member_withdrawal',
+              member_id: request_data.member_id,
+            });
+          }
         }
+        //paypal payment section
       }
-      //paypal payment section
-    }
-    if (transaction_resp.status)
-      withdrawal_req_data.member_transaction_id =
-        transaction_resp.transaction_id;
-    // Insert in WithdrawalRequest
-    // console.log('====================', withdrawal_req_data);
-    const res = await WithdrawalRequest.create(withdrawal_req_data);
+      if (transaction_resp.status)
+        withdrawal_req_data.member_transaction_id =
+          transaction_resp.transaction_id;
+      // Insert in WithdrawalRequest
+      // console.log('====================', withdrawal_req_data);
+      const res = await WithdrawalRequest.create(withdrawal_req_data);
 
-    //member activity
-    const activityEventbus = eventBus.emit('member_activity', {
-      member_id: request_data.member_id,
-      action: 'Member cash withdrawal request',
-    });
-    // console.log(withdrawal_type, member);
-    if (
-      payment_method_details.slug == 'instant_paypal' ||
-      payment_method_details.slug == 'skrill'
-    ) {
-      // email body for member
-      let member_mail = await this.sendMailEvent({
-        action: 'Member Cash Withdrawal',
-        data: {
-          email: member.email,
-          details: {
-            members: member,
-            withdraw_requests: {
-              amount: withdrawal_amount,
-              date: moment(new Date()).format('llll'),
+      //member activity
+      const activityEventbus = eventBus.emit('member_activity', {
+        member_id: request_data.member_id,
+        action: 'Member cash withdrawal request',
+      });
+      // console.log(withdrawal_type, member);
+      if (
+        payment_method_details.slug == 'instant_paypal' ||
+        payment_method_details.slug == 'skrill'
+      ) {
+        // email body for member
+        let member_mail = await this.sendMailEvent({
+          action: 'Member Cash Withdrawal',
+          data: {
+            email: member.email,
+            details: {
+              members: member,
+              withdraw_requests: {
+                amount: withdrawal_amount,
+                date: moment(new Date()).format('llll'),
+              },
             },
           },
-        },
-        req: req,
-      });
+          req: req,
+        });
+      } else {
+        let member_mail = await this.sendMailEvent({
+          action: 'Withdraw Request Member',
+          data: {
+            email: member.email,
+            details: {
+              members: member,
+              withdraw_requests: {
+                amount: withdrawal_amount,
+                date: moment(new Date()).format('llll'),
+              },
+            },
+          },
+          req: req,
+        });
+      }
+
+      // email body for admin
+      // let admin_mail = await this.sendMailEvent({
+      //   action: 'Withdraw Request Admin',
+      //   data: {
+      //     email: result,
+      //     details: {
+      //       members: {
+      //         ...member,
+      //         amount: withdrawal_amount,
+      //         requested_on: moment(new Date()).format('llll'),
+      //       },
+      //       withdraw_requests: {
+      //         amount: withdrawal_amount,
+      //         requested_on: moment(new Date()).format('llll'),
+      //       },
+      //     },
+      //   },
+      //   req: req,
+      // });
     } else {
-      let member_mail = await this.sendMailEvent({
-        action: 'Withdraw Request Member',
-        data: {
-          email: member.email,
-          details: {
-            members: member,
-            withdraw_requests: {
-              amount: withdrawal_amount,
-              date: moment(new Date()).format('llll'),
-            },
-          },
-        },
-        req: req,
-      });
+      return {
+        member_status: false,
+        member_message:
+          'Your request can not be processed right now. Please try again later',
+      };
     }
-
-    // email body for admin
-    // let admin_mail = await this.sendMailEvent({
-    //   action: 'Withdraw Request Admin',
-    //   data: {
-    //     email: result,
-    //     details: {
-    //       members: {
-    //         ...member,
-    //         amount: withdrawal_amount,
-    //         requested_on: moment(new Date()).format('llll'),
-    //       },
-    //       withdraw_requests: {
-    //         amount: withdrawal_amount,
-    //         requested_on: moment(new Date()).format('llll'),
-    //       },
-    //     },
-    //   },
-    //   req: req,
-    // });
-
     return {
       member_status: true,
       member_message: 'Action executed successfully',
