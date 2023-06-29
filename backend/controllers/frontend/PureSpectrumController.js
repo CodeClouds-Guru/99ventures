@@ -183,16 +183,14 @@ class PureSpectrumController {
                             include: [
                                 {
                                     model: SurveyQuestion,
+                                    attributes:['kl'],
                                     where: {
                                         id: matchingQuestionIds
                                     }
                                 }
                             ],
                         }
-                    },
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
                 console.log('Survey Count: ',surveys.count)
                 console.log('Survey count count : ',survey_count)
