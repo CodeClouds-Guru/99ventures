@@ -112,6 +112,11 @@ module.exports = {
           name: 'Registration Bonus',
           code: '${registration_bonus}',
           module: '',
+        },
+        {
+          name: 'Bonus',
+          code: '${bonus}',
+          module: '',
         }
       ],
       {}

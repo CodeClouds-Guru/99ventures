@@ -541,7 +541,7 @@ module.exports = (sequelize, DataTypes) => {
         let mailEventbus = eventBus.emit('send_email', {
           action: 'Member Profile Completion',
           data: {
-            email: 'debosmita.dey@codeclouds.co.in',
+            email: member.email,
             details: {
               desc:
                 'Congratulation! You got a bonus of $' +
@@ -549,6 +549,7 @@ module.exports = (sequelize, DataTypes) => {
                 ' on sucessfully completing your profile on ' +
                 moment(new Date()).format('llll'),
               members: JSON.parse(JSON.stringify(member)),
+              bonus: parseFloat(bonus.settings_value).toFixed(2)
             },
           },
           req: req,
