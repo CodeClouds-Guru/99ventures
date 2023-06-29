@@ -451,7 +451,7 @@ const CreateEditForm = () => {
                                         {...field}
                                         type="tel"
                                         id="outlined-required-redo-wait"
-                                        label="Redo Wait"
+                                        label="Redo Wait (in hour)"
                                         className="w-full mt-20"
                                     />
                                 )}

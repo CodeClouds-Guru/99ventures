@@ -651,7 +651,7 @@ class MemberController extends Controller {
         type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
         amount_action: 'admin_adjustment',
         created_by: req.user.id,
-        status: 0,
+        status: 2,
       });
       if (result.status) {
         return true;

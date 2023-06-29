@@ -139,6 +139,7 @@ class SchlesingerController {
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
+                    distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "live",

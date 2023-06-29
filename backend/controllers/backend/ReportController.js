@@ -189,24 +189,24 @@ class ReportController {
         }
       }
     })
-    let profile_verified_members = await Member.findAll({
-      attributes: [[sequelize.fn('COUNT', '*'), 'count']],
-      where:
-      {
-        admin_status: 'verified',
-        company_portal_id: company_portal_id
-      }
-    })
-    let profile_complted_members = await Member.findAll({
-      attributes: [[sequelize.fn('COUNT', '*'), 'count']],
-      where:
-      {
-        company_portal_id: company_portal_id,
-        profile_completed_on: { [Op.ne]: null },
-      }
-    })
-    var member_status = ['Member', 'Validating', 'Suspended', 'Deleted', 'Verified', 'Profile completed']
-    var member_status_value = [0, 0, 0, 0, profile_verified_members[0].dataValues.count, profile_complted_members[0].dataValues.count]
+    // let profile_verified_members = await Member.findAll({
+    //   attributes: [[sequelize.fn('COUNT', '*'), 'count']],
+    //   where:
+    //   {
+    //     admin_status: 'verified',
+    //     company_portal_id: company_portal_id
+    //   }
+    // })
+    // let profile_complted_members = await Member.findAll({
+    //   attributes: [[sequelize.fn('COUNT', '*'), 'count']],
+    //   where:
+    //   {
+    //     company_portal_id: company_portal_id,
+    //     profile_completed_on: { [Op.ne]: null },
+    //   }
+    // })
+    var member_status = ['Member', 'Validating', 'Suspended', 'Deleted']//'Verified', 'Profile completed'
+    var member_status_value = [0, 0, 0, 0]//, profile_verified_members[0].dataValues.count, profile_complted_members[0].dataValues.count
 
     if (member_by_status.length) {
       for (let member of member_by_status) {
