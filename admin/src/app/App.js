@@ -28,7 +28,6 @@ if (window.location.origin === 'https://adminstaging.moresurveys.com') {
 } else {
   axios.defaults.baseURL = 'http://localhost:4000/api/';
 }
-axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
