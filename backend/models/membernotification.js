@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
             case 'referral_bonus':
             case 'admin_adjustment':
             case 'achievement_complete':
+            case 'registration_bonus':
               return '/earning-history';
             case 'payment_confirmation':
             case 'member_withdrawal':
@@ -67,6 +68,7 @@ module.exports = (sequelize, DataTypes) => {
             case 'referral_bonus':
             case 'payment_confirmation':
             case 'admin_adjustment':
+            case 'registration_bonus':
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationprizeicon.png';
             case 'achievement_complete':
               return 'https://99-ventures-bucket.s3.us-east-2.amazonaws.com/CodeClouds/1/file-manager/images/notificationbadgeicon.png';
