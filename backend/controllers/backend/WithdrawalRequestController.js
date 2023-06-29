@@ -70,7 +70,7 @@ class WithdrawalRequestController extends Controller {
         },
         {
           model: Member,
-          attributes: ['username', 'status'],
+          attributes: ['id', 'username', 'status'],
         },
       ];
       options.subQuery = false;
