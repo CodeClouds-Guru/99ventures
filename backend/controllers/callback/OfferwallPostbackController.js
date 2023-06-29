@@ -94,6 +94,7 @@ class OfferwallPostbackController {
               payload: req.body
                 ? JSON.stringify(req.body)
                 : JSON.stringify(req.query),
+              status: 2
             };
             // console.log('transaction_obj', transaction_obj);
             let result =

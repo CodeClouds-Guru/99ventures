@@ -426,6 +426,7 @@ module.exports = (sequelize, DataTypes) => {
             amount_action: 'referral',
             modified_total_earnings: ref_modified_total_earnings,
             parent_transaction_id: parent_transaction_id,
+            status:2
           })
         )
       );

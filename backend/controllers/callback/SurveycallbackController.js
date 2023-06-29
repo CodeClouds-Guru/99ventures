@@ -383,6 +383,7 @@ class SurveycallbackController {
 				created_by: null,
 				payload: JSON.stringify(payload),
 				survey_provider_id: provider.id,
+				status:2
 			};			
 
 			const txn = await MemberTransaction.updateMemberTransactionAndBalance(
