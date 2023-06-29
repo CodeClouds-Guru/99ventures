@@ -9,7 +9,7 @@ services:
     # image: $ECR_REPO_FOR_BACKEND
     build:
       context: ./backend
-      dockerfile: Dockerfile.staging
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file: ./.env
     ports:
@@ -57,7 +57,7 @@ services:
     restart: always
     build:
       context: ./admin
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.staging
       args:
         - REACT_APP_API_BASE_URL=$STAGING_CLIENT_API_BASE_URL
     ports:
