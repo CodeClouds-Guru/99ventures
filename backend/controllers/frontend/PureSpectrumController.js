@@ -183,7 +183,6 @@ class PureSpectrumController {
                             include: [
                                 {
                                     model: SurveyQuestion,
-                                    attributes:['kl'],
                                     where: {
                                         id: matchingQuestionIds
                                     }
