@@ -868,7 +868,7 @@ class MemberAuthController {
       };
     }
     // console.log(JSON.parse(JSON.stringify(member)));
-    if (withdrawal_amount >= parseFloat(member.member_amounts[0].amount)) {
+    if (withdrawal_amount > parseFloat(member.member_amounts[0].amount)) {
       return {
         member_status: false,
         member_message: 'Please check your balance',
@@ -879,13 +879,14 @@ class MemberAuthController {
       attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
         status: 'pending',
-        member_id: { member_id: request_data.member_id },
+        member_id: request_data.member_id,
       },
     });
 
     if (
-      pending_withdrawal_req_amount >
-      parseFloat(member.member_amounts[0].amount)
+      member.member_amounts[0].amount <
+      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
+        withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -1003,12 +1004,13 @@ class MemberAuthController {
               member_transaction_id: transaction_resp.transaction_id,
             },
           ];
-          for (const info in member_payment_info) {
+          for (const info of member_payment_info) {
+            // console.log(info);
             paypal_request[0][info.field_name] = info.field_value;
           }
-          console.log(paypal_request);
+          // console.log(paypal_request);
           const create_resp = await paypal_class.payout(paypal_request);
-          console.log('create_resp', create_resp);
+          // console.log('create_resp', create_resp);
           if (create_resp.status) {
             await MemberTransaction.update(
               {

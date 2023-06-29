@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   MemberSurvey.init({
+    member_transaction_id: DataTypes.INTEGER,
     survey_number: DataTypes.STRING,
     survey_provider_id: DataTypes.BIGINT,
     original_json: DataTypes.JSON,
