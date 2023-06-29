@@ -91,6 +91,7 @@ services:
       - WDS_SOCKET_HOST=127.0.0.1 
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true 
+      - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     volumes:
       - ./admin:/usr/src/frontend
       - /usr/src/frontend/node_modules
