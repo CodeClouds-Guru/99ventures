@@ -221,7 +221,7 @@ class PureSpectrumController {
                 const entryLink = data.survey_entry_url + '&' + generateQueryString;
                 res.redirect(entryLink)
             } else {
-                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/purespectrum' };
+                req.session.flash = { notice: 'Unable to get entry link!', redirect_url: '/purespectrum' };
                 res.redirect('/notice');
             }
         }
@@ -233,7 +233,7 @@ class PureSpectrumController {
                     survey_number: queryString.survey_number
                 }
             });
-            req.session.flash = { error: 'Sorry! this survey has been closed.', redirect_url: '/pure-spectrum' };
+            req.session.flash = { notice: 'Sorry! this survey has been closed.', redirect_url: '/pure-spectrum' };
             res.redirect('/notice');
         }
     }

@@ -287,8 +287,7 @@ class LucidController {
                     }
                 });
             }
-            // res.send(error)
-            req.session.flash = { error: error.message, redirect_url: '/lucid' };
+            req.session.flash = { notice: error.message, redirect_url: '/lucid' };
             res.redirect('/notice');
         }
     }
