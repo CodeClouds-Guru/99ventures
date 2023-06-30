@@ -23,13 +23,13 @@ class LucidController {
     }
 
     index = (req, res) => {
-        // if(!req.session.member) {
-        //     res.status(401).json({
-        //         status: false,
-        //         message: 'Unauthorized!'
-        //     });
-        //     return;
-        // }
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -133,12 +133,23 @@ class LucidController {
                 }
                 const generateQueryString = new URLSearchParams(queryString).toString();
                 
+                const acceptedSurveys = await Member.acceptedSurveys(memberId, provider.id);
+                const clause = {};            
+                if(acceptedSurveys.length) {
+                    const attemptedSurveysNumber = acceptedSurveys.map(r=> r.survey_number);
+                    clause = {
+                        survey_number: {
+                            [Op.notIn]: attemptedSurveysNumber
+                        }
+                    }
+                }
                 const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "active",
+                        ...clause
                     },
                     include: {
                         model: SurveyQualification,
@@ -263,27 +274,34 @@ class LucidController {
             delete params.uid
             
             var entrylink;
-            if(quota.SurveyStillLive == true) {
+            if(quota.SurveyStillLive !== true) {
                 const survey = await Survey.findOne({
                     attributes: ['url'],
                     where: {
                         survey_number: surveyNumber
                     }
                 });
+            
                 if(survey && survey.url){
                     entrylink = survey.url;
-                } else {                    
-                    const result = await lcObj.createEntryLink(surveyNumber);
-                    if(result.data && result.data.SupplierLink) {
-                        const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
-                        await Survey.update({
-                            url: url
-                        }, {
-                            where: {
-                                survey_number: surveyNumber
-                            }
-                        });
-                        entrylink = url;
+                } else {
+                    try{
+                        //Sometimes the survey entrylink not created and API sending 404 response.
+                        //That's why making this survey to draft as catch block
+                        const result = await lcObj.createEntryLink(surveyNumber);
+                        if(result.data && result.data.SupplierLink) {
+                            const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
+                            await Survey.update({
+                                url: url
+                            }, {
+                                where: {
+                                    survey_number: surveyNumber
+                                }
+                            });
+                            entrylink = url;
+                        }
+                    } catch(error) {
+                        throw {survey_number: surveyNumber, message: 'Sorry! Survey not found.'};
                     }
                 }
                 
@@ -291,20 +309,22 @@ class LucidController {
                 // res.send(URL)
                 res.redirect(URL);
             } else {
+                throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
+            }
+        }
+        catch(error) {
+            console.error(error);
+            if('survey_number' in error && error.surveyNumber) {
                 await Survey.update({
                     status: 'draft',
                     deleted_at: new Date()
                 },{
                     where: {
-                        survey_number: surveyNumber
+                        survey_number: error.surveyNumber
                     }
                 });
-                req.session.flash = { error: 'Survey is not live now!', redirect_url: '/lucid' };
-                res.redirect('/notice');
             }
-        }
-        catch(error) {
-            console.error(error);
+            // res.send(error)
             req.session.flash = { error: error.message, redirect_url: '/lucid' };
             res.redirect('/notice');
         }

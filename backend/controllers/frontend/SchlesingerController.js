@@ -137,12 +137,23 @@ class SchlesingerController {
             const generateQueryString = new URLSearchParams(queryString).toString();
 
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
+                const acceptedSurveys = await Member.acceptedSurveys(memberId, provider.id);
+                const clause = {};            
+                if(acceptedSurveys.length) {
+                    const attemptedSurveysNumber = acceptedSurveys.map(r=> r.survey_number);
+                    clause = {
+                        survey_number: {
+                            [Op.notIn]: attemptedSurveysNumber
+                        }
+                    }
+                }
                 const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "live",
+                        ...clause
                     },
                     include: {
                         model: SurveyQualification,
@@ -170,7 +181,6 @@ class SchlesingerController {
                     limit: perPage,
                     offset: (pageNo - 1) * perPage,
                 });
-                
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
                 if (!surveys.count) {

@@ -132,12 +132,23 @@ class PureSpectrumController {
                 /** End */
                 const generateQueryString = new URLSearchParams(queryString).toString();
 
+                const acceptedSurveys = await Member.acceptedSurveys(memberId, provider.id);
+                const clause = {};            
+                if(acceptedSurveys.length) {
+                    const attemptedSurveysNumber = acceptedSurveys.map(r=> r.survey_number);
+                    clause = {
+                        survey_number: {
+                            [Op.notIn]: attemptedSurveysNumber
+                        }
+                    }
+                }
                 const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
                     distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "live",
+                        ...clause
                     },
                     include: {
                         model: SurveyQualification,
