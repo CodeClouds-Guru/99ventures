@@ -48,6 +48,9 @@ class MemberTransactionController extends Controller {
           process.env.S3_BUCKET_OBJECT_URL +
           record.dataValues.Member.dataValues.avatar;
       }
+      if(record.dataValues.transaction_id === null){
+        record.dataValues.transaction_id = 'N/A'
+      }
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';

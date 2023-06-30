@@ -2,10 +2,10 @@ import List from '../crud/list/List';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, tabsClasses, Typography } from '@mui/material';
+import { useSearchParams } from 'react-router-dom';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
-
     return (
         <div
             role="tabpanel"
@@ -37,14 +37,15 @@ function a11yProps(index) {
 }
 
 const Index = () => {
-    const [value, setValue] = useState(0);
+    const [tabParam] = useSearchParams();
+
+    const [value, setValue] = useState(tabParam.get('completed-surveys') === '1' ? 1 : 0);
     const [selectedTab, setSelectedTab] = useState('');
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
         setSelectedTab(event.target.id);
     };
-
 
     return (
         <Box sx={{ width: '100%' }} className="px-10">

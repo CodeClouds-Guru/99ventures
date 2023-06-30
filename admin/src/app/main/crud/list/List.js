@@ -477,7 +477,7 @@ function List(props) {
 					return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
 			}
 			if (field.field_name === 'Member.username') {
-				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['Member.username']}</a>
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (module === 'campaigns' || module === 'member-transactions') {

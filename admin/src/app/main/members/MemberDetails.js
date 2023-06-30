@@ -680,7 +680,7 @@ const MemberDetails = () => {
                                             </Tooltip>
                                         </div>
                                     ) : (
-                                        <div className='flex items-center'>
+                                        <div className='flex items-center' style={wordWrap}>
                                             <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
                                                 {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
                                             </Typography>
