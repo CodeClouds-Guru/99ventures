@@ -128,61 +128,24 @@ class LucidController {
                     openEndedData.forEach(eg => {
                         queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
                         matchingQuestionIds.push(eg.SurveyQuestion.id);
-
                     });
                 }
-                const generateQueryString = new URLSearchParams(queryString).toString();
-                
-                const acceptedSurveys = await Member.acceptedSurveys(memberId, provider.id);
-                const clause = {};            
-                if(acceptedSurveys.length) {
-                    const attemptedSurveysNumber = acceptedSurveys.map(r=> r.survey_number);
-                    clause = {
-                        survey_number: {
-                            [Op.notIn]: attemptedSurveysNumber
-                        }
-                    }
-                }
-                const surveys = await Survey.findAndCountAll({
-                    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-                    distinct: true,
-                    where: {
-                        survey_provider_id: provider.id,
+                const generateQueryString = new URLSearchParams(queryString).toString();                
+                const surveys = await Survey.getSurveysAndCount({
+                    member_id: memberId,
+                    provider_id: provider.id,
+                    matching_answer_ids: matchingAnswerIds,
+                    matching_question_ids: matchingQuestionIds,
+                    order,
+                    pageno: pageNo,
+                    per_page: perPage,
+                    order_by: orderBy,
+                    clause: {
                         status: "active",
-                        ...clause
-                    },
-                    include: {
-                        model: SurveyQualification,
-                        attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,
-                        include: {
-                            model: SurveyAnswerPrecodes,
-                            attributes: ['id', 'option', 'precode'],
-                            where: {
-                                id: matchingAnswerIds
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: SurveyQuestion,
-                                    attributes: ['id', 'survey_provider_question_id'],
-                                    where: {
-                                        id: matchingQuestionIds
-                                    }
-                                }
-                            ],
-                        }
-                    },
-                    //limit: 200
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
-
-                // res.send(surveys);
-                // return;
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
