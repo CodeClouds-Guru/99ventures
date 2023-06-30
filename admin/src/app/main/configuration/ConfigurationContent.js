@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -8,7 +9,8 @@ import EmailConfiguration from './email-configuration/EmailConfiguration';
 import GeneralConfiguration from './general-configuration';
 import IpConfiguration from './ip-configuration/IpConfiguration';
 import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguration';
-import PaymentGateway from './payment-gateway/PaymentGateway';
+// import PaymentGateway from './payment-gateway/PaymentGateway';
+import PaymentGateway from './payment-gateway/GatewayList';
 import MetatagConfiguration from './metatags-configuration/MetatagConfiguration';
 import { usePermission } from '@fuse/hooks';
 
@@ -54,6 +56,7 @@ function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
+        'data-module': index
     };
 }
 
@@ -90,11 +93,11 @@ const tabs = [
     }
 ];
 
-
-
+ 
 function ConfigurationContent() {
     const [value, setValue] = useState(0);
     const [selectedTab, setSelectedTab] = useState('');
+    const [param, setParam]  = useSearchParams();
 
     const tabPanel = () => {
         let initialIndx = 0;
@@ -103,7 +106,7 @@ function ConfigurationContent() {
             const Component = tab.component;
             if (hasPermission('view')) {
                 return (
-                    <TabPanel value={value} panel={selectedTab} panelIndx={`simple-tab-${indx}`} index={++initialIndx} key={indx}>
+                    <TabPanel value={value} panel={selectedTab} panelIndx={`simple-tab-${tab.module}`} index={++initialIndx} key={indx}>
                         <Component permission={hasPermission} />
                     </TabPanel>
                 )
@@ -114,13 +117,24 @@ function ConfigurationContent() {
     const handleChange = (event, newValue) => {
         setValue(newValue);
         setSelectedTab(event.target.id);
+        param.set('tab', event.target.dataset.module);
+        setParam(param)
     };
-
+    
+    useEffect(()=>{
+        if(param.has('tab')) {
+            const tabIndx = tabs.findIndex(tab=> tab.module === param.get('tab'));
+            if(tabIndx !== -1){
+                setSelectedTab(`simple-tab-${param.get('tab')}`);
+                setValue(tabIndx);
+            }
+        }
+    }, [param]);
 
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={value} onChange={handleChange} scrollButtons={false}
+                <Tabs value={value} onChange={handleChange} scrollBuseHistoryuttons={false}
                     textColor="secondary"
                     indicatorColor="secondary"
                     aria-label="visible arrows tabs example"
@@ -132,7 +146,7 @@ function ConfigurationContent() {
                     {
                         tabs.map((tab, indx) => {
                             const { hasPermission } = usePermission(tab.module);
-                            return hasPermission('view') && <Tab key={indx} label={tab.name} {...a11yProps(indx)} />;
+                            return hasPermission('view') && <Tab key={indx} label={tab.name} {...a11yProps(tab.module)} />;
                         })
                     }
                 </Tabs>

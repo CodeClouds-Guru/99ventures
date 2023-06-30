@@ -6,11 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index",
-    "start": "node index"
+    "start": "node index.js"
   },
   "author": "Sourabh Das (sourabh.das@codeclouds.in)",
   "license": "ISC",
   "dependencies": {
+    "@paypal/payouts-sdk": "^1.1.1",
     "archiver": "^5.3.1",
     "aws-sdk": "^2.1204.0",
     "axios": "^1.2.2",
@@ -34,6 +35,7 @@
     "mime-types": "^2.1.35",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
+    "node-cron": "^3.0.2",
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^5.0.0",
     "pluralize": "^8.0.0",

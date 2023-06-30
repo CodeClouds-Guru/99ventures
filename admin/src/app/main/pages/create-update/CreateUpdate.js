@@ -21,6 +21,7 @@ import { customComponents, scriptBlockManager, compoentBlockManager } from '../.
 import { customCheckboxTrait, memberTrait } from '../../../grapesjs/traitPlugins'
 import { customCodeEditor } from '../../../grapesjs/editorPlugins'
 
+
 const CreateUpdate = () => {
     const module = 'pages';
     const navigate = useNavigate();
@@ -158,13 +159,11 @@ const CreateUpdate = () => {
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match(reg)[1];
-            generatedHTML +=
-                `<main>
-                    ${css}
-                    ${htmlData}            
-                </main>`;
+            var htmlData = editor.getHtml().match(reg)[1];
+            htmlData = Helper.replaceSpecialCharacters(htmlData);
+            generatedHTML +=`${css}\n${htmlData}`;
         }
+
         return generatedHTML;
     }
 

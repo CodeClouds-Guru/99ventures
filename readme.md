@@ -1,4 +1,4 @@
-# Fouramedia Backend
+# 99Ventures Backend
 
 It is the repo for 99 ventures
 
@@ -11,7 +11,7 @@ at first copy all the fields from .env.example file and create a .env file in th
 Then run the following command to set up the dev environment
 
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose-dev.yml up -d
 ```
 
 ## Ports

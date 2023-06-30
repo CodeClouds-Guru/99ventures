@@ -26,7 +26,11 @@ const jwtServiceConfig = {
   getMetaTagsConfiguration: 'meta-tag-configurations',
   saveMetaTagsConfiguration: 'meta-tag-configurations/update',
   getPaymentMethodConfiguration: 'payment-configurations',
-  savePaymentMethodConfiguration: 'payment-configurations/update',
+  savePaymentMethodConfiguration: 'payment-configurations/save',
+  updatePaymentMethodConfiguration: 'payment-configurations/update',
+  addPaymentMethodConfiguration: 'payment-configurations/add',
+  editPaymentMethodConfiguration: 'payment-configurations/edit',
+  getScriptFieldData: 'scripts/add',
   saveScriptsData: 'scripts/save',
   updateScriptsData: 'scripts/update',
   getSingleScriptData: 'scripts/edit',
@@ -62,6 +66,9 @@ const jwtServiceConfig = {
   offerwallUpdate: 'offer-walls/update',
   shoutboxConfigurations: 'shoutbox-configurations',
   shoutboxConfigurationUpdate: 'shoutbox-configurations/update',
+  getWithdrawalRequests: 'withdrawal-requests',
+  deleteMemberNotes: 'members/delete',
+  dashboardReport: 'report',
 };
 
 export default jwtServiceConfig;

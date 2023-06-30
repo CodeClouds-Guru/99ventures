@@ -45,6 +45,7 @@ const CreateUpdate = (props) => {
     useEffect(() => {
         dispatch(setRevisionData([]));
         const editor = grapesjs.init({
+            selectorManager: { escapeName: name => name },
             allowScripts: 1,
             container: '#gjs',
             fromElement: false,
@@ -133,7 +134,7 @@ const CreateUpdate = (props) => {
             getSingleRecordById(moduleId, editor);
         } else {
             const storageManager = editor.Storage;
-            const data = storageManager.load();
+            const data = await storageManager.load();
             editor.loadProjectData(data);
             setAllData({
                 ...allData,
@@ -168,12 +169,14 @@ const CreateUpdate = (props) => {
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
             const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
-            const htmlData = editor.getHtml().match(reg)[1];
+            var htmlData = editor.getHtml().match(reg)[1];
+            htmlData = Helper.replaceSpecialCharacters(htmlData);
             generatedHTML += `${css}\n${htmlData}`;
         }
         if((moduleId !== 'create' && !isNaN(moduleId))){
             generatedHTML = generatedHTML.replace(/<\!--.*?-->/g, "");   // To remove HTML Comment tag
         }
+        
         return generatedHTML;
     }
 

@@ -10,12 +10,12 @@ import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 
 const FileManagerList = () => {
-    const jsonData = useSelector(state=> state.filemanager.jsonData)
+    const jsonData = useSelector(state => state.filemanager.jsonData)
     // const sideBar = useSelector(state=>state.filemanager.show_sidebar)
     // const dispatch = useDispatch();
-        
+
     const handleDragOver = () => {
-        console.log('ss')
+        // console.log('ss')
     }
 
     return (
@@ -25,19 +25,19 @@ const FileManagerList = () => {
                 sx={{
                     backgroundColor: 'rgb(246, 249, 251)',
                 }}
-                >
+            >
                 <div className="flex flex-wrap ">
                     {
                         jsonData.map((el, i) => {
-                            if(el.type === 'folder') {
-                                return <FolderItem key={i} file={ el }/>
+                            if (el.type === 'folder') {
+                                return <FolderItem key={i} file={el} />
                             }
                         })
                     }
                     {
                         jsonData.map((el, i) => {
-                            if(el.type === 'file') {
-                                return <FileItems key={i} file={ el } />
+                            if (el.type === 'file') {
+                                return <FileItems key={i} file={el} />
                             }
                         })
                     }
@@ -48,7 +48,7 @@ const FileManagerList = () => {
                     <FileItems type="JPG"/>
                     <FileItems type="PPT"/>
                     <FileItems type="GIF"/> */}
-                    
+
                 </div>
             </Box>
             <Box
@@ -56,8 +56,8 @@ const FileManagerList = () => {
                 sx={{
                     backgroundColor: 'rgb(246, 249, 251)',
                 }}
-                >
-                <Dropzone />   
+            >
+                <Dropzone />
             </Box>
         </div>
     )

@@ -8,6 +8,7 @@ const {
   User,
   CompanyPortal,
   EmailConfiguration,
+  EmailAlert,
   sequelize,
 } = require('../models/index');
 const queryInterface = sequelize.getQueryInterface();
@@ -22,7 +23,7 @@ class EmailHelper {
   }
   //email parsing
   async parse(payload) {
-    let req = this.req_data;
+    var req = this.req_data;
     let user = req.user;
     let receiver_module = '';
     let search = { id: '1' };
@@ -46,7 +47,9 @@ class EmailHelper {
           where: { company_portal_id: req.headers.site_id },
         },
       });
-      if (email_action && email_action.EmailTemplates) {
+      //check for email alert 
+      let email_alert = await this.checkEmailAlert(payload.action,all_details.users)
+      if (email_alert && email_action && email_action.EmailTemplates) {
         let email_template = email_action.EmailTemplates[0];
         let email_body = '';
         let email_subject = '';
@@ -121,6 +124,8 @@ class EmailHelper {
   }
   //replace email variables
   async replaceVariables(details, replace_data, email_body) {
+    const safeEval = require('safe-eval');
+
     if (replace_data) {
       replace_data.forEach(function (value, key) {
         let new_value = value;
@@ -130,34 +135,35 @@ class EmailHelper {
         email_body = email_body.replaceAll(value, replace_data[key]);
       });
     }
+    // email_body = safeEval('`' + email_body + '`', details);
     return email_body;
   }
   //send mail
-  async sendMail(body, to, subject) {
+  async sendMail(body, to, subject, attachments = []) {
     // create reusable transporter object using the default SMTP transport
     try {
       let req = this.req_data;
       let company_portal_id = req.headers.site_id;
-      let email_configurations = await EmailConfiguration.findAll({
+      let email_configurations = await EmailConfiguration.findOne({
         where: { company_portal_id: company_portal_id },
       });
       if (email_configurations) {
         var transporter = nodemailer.createTransport({
-          host: email_configurations[0].email_server_host, //"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
-          port: email_configurations[0].email_server_port, //465,//2525,
+          host: email_configurations.email_server_host, //"email-smtp.us-east-2.amazonaws.com",//"smtp.mailtrap.io",
+          port: email_configurations.email_server_port, //465,//2525,
           auth: {
-            user: email_configurations[0].email_username, //"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
-            pass: email_configurations[0].password, //"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
+            user: email_configurations.email_username, //"AKIAW4QB5PVEBC4SVRUC",//"7f4f85b9351b0d",
+            pass: email_configurations.password, //"BDHv1Tp/ZfPTGvebdDyTmNPi2wFzSycpKE7VJ8BvU7wc",//"1c385733adeb77"
           },
         });
-        if (email_configurations[0].site_name_visible == '1') {
-          subject = email_configurations[0].from_name + ' - ' + subject;
+        if (email_configurations.site_name_visible == '1') {
+          subject = email_configurations.from_name + ' - ' + subject;
         }
         const mailData = {
           from:
-            email_configurations[0].from_name +
+            email_configurations.from_name +
             '<' +
-            email_configurations[0].from_email +
+            email_configurations.from_email +
             '>', //'info@moresurveys.com', // sender address
           to: to, // list of receivers
           // from: 'sourabh.das@codeclouds.in',
@@ -166,12 +172,39 @@ class EmailHelper {
           //text: 'That was easy!',
           html: body,
         };
-        console.log('Mail Data', mailData);
+        if (attachments.length > 0) {
+          mailData.attachments = attachments
+        }
         await transporter.sendMail(mailData);
       }
     } catch (error) {
       console.error('error sending email', error);
+      return;
     }
+    return true;
+  }
+  //email alert checking
+  async checkEmailAlert(email_action,user){
+    var email_alert_status = true
+    if(user){
+      let email_alerts = await EmailAlert.getEmailAlertList(user.id);
+      for(let item of email_alerts){
+        let member_email_alert = item.dataValues.MemberEmailAlerts
+        if(member_email_alert.length === 0){
+          let notifications = ['Survey Completed','Withdrawal Approval','Member Profile Completion']
+          if(item.dataValues.slug === 'notifications' && notifications.includes(email_action)){
+            email_alert_status = false
+          }
+          else if(item.dataValues.slug === 'completed_withdraw' && email_action === 'Payment Confirmation'){
+            email_alert_status = false
+          }
+          else if(item.dataValues.slug === 'referrals' && email_action === 'Referral Bonus'){
+            email_alert_status = false
+          }
+        }
+      }
+    }
+    return email_alert_status
   }
 }
 module.exports = EmailHelper;

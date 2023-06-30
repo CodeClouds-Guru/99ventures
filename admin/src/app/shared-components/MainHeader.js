@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
+
 function MainHeader(props) {
 	const theme = useTheme();
 
 	return (
-		<div className="lg:py-24 md:py-20 sm:py-20 w-full flex flex-col sm:flex-row space-y-8 sm:space-y-0 items-center justify-between">
+		<div className="lg:py-16 md:py-16 sm:py-20 w-full flex flex-col sm:flex-row space-y-8 sm:space-y-0 items-center justify-between">
 			<div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0">
 				{props.backUrl && (
 					<motion.div
@@ -40,8 +41,8 @@ function MainHeader(props) {
 
 					<Typography
 						component={Link}
-						to={`/app/${props.slug}`}
-						className="text-20 md:text-32 font-extrabold tracking-tight leading-none pl-20"
+						to={props.backUrl ?? '#'}
+						className="text-20 md:text-24 font-extrabold tracking-tight leading-none pl-20"
 						role="button"
 					>
 						{props.module}

@@ -5,7 +5,7 @@ const Handlebars = require('handlebars');
 const util = require('util');
 
 class StaticPageController {
-  constructor() {}
+  constructor() { }
 
   /**
    * Show Survey Status
@@ -75,7 +75,7 @@ class StaticPageController {
       if (req.query.member) {
         var user = await Member.findOne({ where: { id: req.query.member } });
         // console.log('===========', user);
-      }else{
+      } else {
         var user = req.session.member
       }
       const scriptParser = new ScriptParser();
@@ -84,18 +84,17 @@ class StaticPageController {
         user,
         params
       );
-      //   console.log(util.inspect(parsed, false, null, true));
       const template = Handlebars.compile(parsed.script_html);
+      // console.log('other_details', parsed.other_details)
       var html = template({
         data: parsed.data,
         page_count: parsed.page_count,
         other_details: parsed.other_details,
       });
-      // console.log('======', html);
       resp = {
         ...resp,
         status: true,
-        html,
+        html
       };
     } catch (e) {
       console.error(e);

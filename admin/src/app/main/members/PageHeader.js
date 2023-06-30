@@ -8,10 +8,13 @@ const buttonStyle = {
     borderRadius: '5px',
     paddingLeft: 6,
     paddingRight: 6,
-    '@media screen and (max-width: 768px)': {
-        fontSize: '1rem',
-        width: '70px',
-    },
+    '@media screen and (max-width: 1700px)': {
+        width: '130px',
+        paddingLeft: '22px',
+        paddingRight: '22px',
+        fontSize: '1.3rem'
+
+    },    
     '@media screen and (max-width: 1400px)': {
         width: '105px',
         paddingLeft: '18px',
@@ -19,12 +22,9 @@ const buttonStyle = {
         fontSize: '1.2rem'
 
     },
-    '@media screen and (max-width: 1700px)': {
-        width: '130px',
-        paddingLeft: '22px',
-        paddingRight: '22px',
-        fontSize: '1.3rem'
-
+    '@media screen and (max-width: 768px)': {
+        fontSize: '1rem',
+        width: '90px',
     }
 }
 

@@ -30,16 +30,16 @@ class CampaignController extends Controller {
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_condition_met=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'leads',
       ],
       [
         sequelize.literal(
           `(SELECT COUNT(if(campaign_member.is_reversed=1,1,null)) ` +
-            query_str +
-            `)`
+          query_str +
+          `)`
         ),
         'reversals',
       ],
@@ -49,9 +49,9 @@ class CampaignController extends Controller {
     let offset = (page - 1) * limit;
     options.limit = limit;
     options.offset = offset;
-    console.log(
-      util.inspect(options, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   util.inspect(options, { showHidden: false, depth: null, colors: true })
+    // );
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     return {
@@ -134,7 +134,7 @@ class CampaignController extends Controller {
           custom_where['is_postback_triggered'] = 0;
         }
       }
-      custom_where['campaign_id'] = req.params.id
+      custom_where['campaign_id'] = req.params.id;
       req.query.where = JSON.stringify(custom_where);
       fields = {
         id: {
@@ -314,7 +314,7 @@ class CampaignController extends Controller {
           order: [['created_at', 'DESC']],
         },
       };
-      
+
       const { docs, pages, total } = await CampaignMember.paginate(options);
 
       let report_details = [];
@@ -354,15 +354,47 @@ class CampaignController extends Controller {
           order: [['created_at', 'DESC']],
         };
         let report_data = await CampaignMember.findAll(options);
-        let csv_class = new csv();
-        const csv_response_filename = await csv_class.generateDataForCsv(
-          report_data,
-          model
-        );
-        console.log(
-          'fs.existsSync(path)',
-          fs.existsSync(csv_response_filename)
-        );
+        let report_details = [];
+        report_data.forEach(function (record, key) {
+          if (record.dataValues.Member != null) {
+            let ip =
+              record.dataValues.Member.dataValues &&
+                record.dataValues.Member.dataValues.IpLogs[0]
+                ? record.dataValues.Member.dataValues.IpLogs[0].dataValues.ip
+                : '';
+            report_details.push({
+              user_id: record.dataValues.member_id,
+              username: record.dataValues.Member.dataValues.username,
+              user_click_date: '',
+              user_joined_date: record.dataValues.Member.dataValues.created_at,
+              user_conversion_date: '',
+              user_ip: ip,
+              user_status: record.dataValues.Member.dataValues.status,
+              cash_earned: model.dataValues.payout_amount,
+              points_earned: model.dataValues.payout_amount,
+              track_status: '',
+              tracking_code: record.dataValues.track_id,
+            });
+          }
+        });
+        let csv_class = new csv(report_details, [
+          { id: 'user_id', title: 'ID' },
+          { id: 'username', title: 'Username' },
+          { id: 'user_status', title: 'Status' },
+          { id: 'cash_earned', title: 'Cash Earned' },
+          { id: 'points_earned', title: 'Points Earned' },
+          { id: 'user_click_date', title: 'User Click Date' },
+          { id: 'user_joined_date', title: 'user Joined Date' },
+          { id: 'user_conversion_date', title: 'User Conversion Date' },
+          { id: 'user_ip', title: 'User Ip' },
+          { id: 'track_status', title: 'Track Status' },
+          { id: 'tracking_code', title: 'Tracking Code' },
+        ]);
+        const csv_response_filename = await csv_class.generateCsv();
+        // console.log(
+        //   'fs.existsSync(path)',
+        //   fs.existsSync(csv_response_filename)
+        // );
 
         return {
           downloadable_file: {
@@ -399,7 +431,7 @@ class CampaignController extends Controller {
       .filter((attr) => extra_fields.indexOf(attr.db_name) == -1)
       .map((attr) => attr.db_name);
 
-    console.log('==============attributes', attributes);
+    // console.log('==============attributes', attributes);
 
     let searchable_fields = [];
     for (const key in fields) {

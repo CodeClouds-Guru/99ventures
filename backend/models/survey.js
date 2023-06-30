@@ -17,11 +17,14 @@ module.exports = (sequelize, DataTypes) => {
       Survey.belongsToMany(models.MemberTransaction, {
         through: 'member_surveys',
         timestamps: false,
-        foreignKey: 'survey_id',
+        foreignKey: 'survey_number',
         otherKey: 'member_transaction_id',
       }),
       Survey.hasMany(models.SurveyQualification, {
         foreignKey: 'survey_id',
+      })
+      Survey.belongsTo(models.MemberSurvey, {
+        foreignKey: 'survey_number',
       })
     }
   }
@@ -32,7 +35,13 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     survey_number: DataTypes.STRING,
     status: DataTypes.STRING,
-    url: DataTypes.STRING,
+    url:{ 
+      type: DataTypes.STRING,
+      // get(param, context) {
+      //   console.log(this.query)
+      //   console.log('laddu', context, param);
+      // },
+    },
     original_json: DataTypes.JSON,
     created_at: 'TIMESTAMP',
     updated_at: 'TIMESTAMP',

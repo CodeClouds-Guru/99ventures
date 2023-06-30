@@ -70,7 +70,7 @@ class Controller {
         ...query_where
       }
     }
-    
+
     return options;
   }
 
@@ -128,17 +128,14 @@ class Controller {
 
   async delete(req, res) {
     try {
-      let modelIds = req.body.modelIds ?? [];
-      let models = await this.model.findAll({ where: { id: modelIds } });
-      await this.model.destroy({ where: { id: modelIds } });
-      if (models) {
-        models.forEach(async (model) => {
-          model.deleted_by = req.user.id;
-          await model.save();
-        });
+      let modelIds = req.body.model_ids ?? [];
+      let columns = Object.keys(this.model.rawAttributes);
+      if (columns.indexOf('deleted_by') >= 0) {
+        await this.model.update({ deleted_by: req.user.id }, { where: { id: modelIds } })
       }
+      let resp = await this.model.destroy({ where: { id: modelIds } });
       return {
-        message: "Record has been deleted successfully",
+        message: "Record(s) has been deleted successfully",
       };
     } catch (error) {
       throw error;

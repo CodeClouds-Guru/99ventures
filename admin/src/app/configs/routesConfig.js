@@ -28,14 +28,18 @@ import OfferwallsConfig from '../main/members/campaigns/offerwalls/OfferwallsCon
 import ShoutboxConfig from '../main/shoutbox/ShoutboxConfig';
 import ConfigurationsConfig from '../main/shoutbox/configurations/ConfigurationsConfig';
 import PaypalConfig from '../main/paypal/PaypalConfig';
+import WithdrawalRequestsConfig from '../main/members/withdrawal-requests/WithdrawalRequestsConfig';
+import SurveyProvidersConfig from '../main/survey-providers/SurveyProvidersConfig';
+import PaymentGatewayConfig from '../main/configuration/payment-gateway/PaymentGatewayConfig';
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig];
+
+
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig, SurveyProvidersConfig, PaymentGatewayConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
 */
 if (localStorage.getItem('jwt_access_token') && !jwtService.checkCompanySiteId() && window.location.pathname !== '/company-site') {
-  console.log(4654654)
   window.location.href = '/company-site';
 }
 

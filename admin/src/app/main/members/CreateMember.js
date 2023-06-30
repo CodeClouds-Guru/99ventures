@@ -209,41 +209,45 @@ const CreateMember = () => {
             })
     }
     const onSubmit = ({ first_name, last_name, email, username, status, address_1, address_2, city, zip_code, phone_no, country_id, gender }) => {
-        let form_data = new FormData();
-        form_data.append('company_id', companyId);
-        form_data.append('company_portal_id', companyPortalId);
-        form_data.append('avatar', avatar);
-        form_data.append('first_name', first_name);
-        form_data.append('last_name', last_name);
-        form_data.append('email', email);
-        form_data.append('username', username);
-        form_data.append('gender', gender);
-        form_data.append('status', status);
-        form_data.append('address_1', address_1);
-        form_data.append('address_2', address_2);
-        form_data.append('city', city);
-        form_data.append('zip_code', zip_code);
-        form_data.append('phone_no', phone_no);
-        form_data.append('country_id', country_id);
-        const country_code = countryOptions.find(cnt => cnt.id === country_id);
-        form_data.append('country_code', country_code ? country_code.phonecode : '+1');
-        form_data.append('dob', moment(dob).format('YYYY/MM/DD'));
+        if (companyId && companyPortalId) {
+            let form_data = new FormData();
+            form_data.append('company_id', companyId);
+            form_data.append('company_portal_id', companyPortalId);
+            form_data.append('avatar', avatar);
+            form_data.append('first_name', first_name);
+            form_data.append('last_name', last_name);
+            form_data.append('email', email);
+            form_data.append('username', username);
+            form_data.append('gender', gender);
+            form_data.append('status', status);
+            form_data.append('address_1', address_1);
+            form_data.append('address_2', address_2);
+            form_data.append('city', city);
+            form_data.append('zip_code', zip_code);
+            form_data.append('phone_no', phone_no);
+            form_data.append('country_id', country_id);
+            const country_code = countryOptions.find(cnt => cnt.id === country_id);
+            form_data.append('country_code', country_code ? country_code.phonecode : '+1');
+            form_data.append('dob', moment(dob).format('YYYY/MM/DD'));
 
-        setLoading(true);
-        axios.post(jwtServiceConfig.membersSave, form_data)
-            .then((response) => {
-                if (response.status === 200) {
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    navigate(`/app/members/${response.data.results.result.id}`);
-                } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
-                }
-            })
-            .catch((error) => {
-                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
-            }).finally(() => {
-                setLoading(false)
-            })
+            setLoading(true);
+            axios.post(jwtServiceConfig.membersSave, form_data)
+                .then((response) => {
+                    if (response.status === 200) {
+                        dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                        navigate(`/app/members/${response.data.results.result.id}`);
+                    } else {
+                        dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                    }
+                })
+                .catch((error) => {
+                    dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+                }).finally(() => {
+                    setLoading(false)
+                })
+        } else {
+            dispatch(showMessage({ variant: 'error', message: 'Company and Portal is required' }))
+        }
     }
 
     return (

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../helpers/Logger')();
-
+const Paypal = require('../helpers/Paypal');
 const OfferwallPostbackControllerClass = require('../controllers/callback/OfferwallPostbackController');
 const OfferwallPostbackController = new OfferwallPostbackControllerClass();
 const SurveycallbackControllerClass = require('../controllers/callback/SurveycallbackController');
@@ -9,7 +9,7 @@ const SurveycallbackController = new SurveycallbackControllerClass();
 
 const SurveyQuestionsControllerClass = require('../controllers/callback/SurveyQuestionsController');
 const SurveyQuestionsController = new SurveyQuestionsControllerClass();
-
+const { CompanyPortal } = require('../models/index');
 router.get('/test-adgate', (req, res) => {
   console.dir(logger);
   logger.info(JSON.stringify(req.query));
@@ -80,6 +80,26 @@ router.get('/test-hbs', (req, res) => {
   const html = template({ PositionsTotal: 34 });
   res.send(html);
 })
+router.all('/confirm-payment/', async (req,res) => {
+  var response = {}
+  const logger1 = require('../helpers/Logger')(
+    `paypal_callback.log`
+  );
+  logger1.info(JSON.stringify(req.body));
+  try {
+    let company_portal_id = 1
+    const paypal_class = new Paypal(company_portal_id);
+    response = await paypal_class.getPayouts(req);
+    // res.send(response)
+  }catch(e) {
+    logger1.error(JSON.stringify(req.body));
+    response = {
+      error: e
+    }
+  }finally {
+    res.json(response)
+  }
+});
 module.exports = {
   prefix: '/callback',
   router,

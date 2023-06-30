@@ -4,12 +4,13 @@ import { Checkbox, FormGroup, FormControlLabel} from '@mui/material';
 
 const selectAll = () => {
     const selectedItemsId = useSelector(state=> state.filemanager.selectedItemsId);
-    const listData = useSelector(state=> state.filemanager.listData)
+    const listData = useSelector(state=> state.filemanager.listData);
+    const fileLists = listData.filter(el => el.type !== 'folder');
     const dispatch = useDispatch();
 
     const handleChange = (event) => {
         if(event.target.checked){
-            const ids = listData.filter(el => el.type !== 'folder').map(el=> el.id);
+            const ids = fileLists.map(el=> el.id);
             dispatch(setSelectedItemsId(ids))
         } else {
             dispatch(setSelectedItemsId([]));
@@ -22,10 +23,10 @@ const selectAll = () => {
                 <Checkbox                     
                     sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                     checked={ Boolean(
-                        selectedItemsId.length && selectedItemsId.length === listData.filter(el => el.type !== 'folder').length
+                        selectedItemsId.length && selectedItemsId.length === fileLists.length
                     ) }
                     onChange={handleChange} 
-                    inputProps={{ 'aria-label': 'controlled', 'disabled': (listData.length < 1 ? true : false) }}
+                    inputProps={{ 'aria-label': 'controlled', 'disabled': (fileLists.length < 1 ? true : false) }}
                 />
             } label="Select All" />
         </FormGroup>

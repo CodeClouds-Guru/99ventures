@@ -44,7 +44,7 @@ function ConfigurationContent() {
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [dateRange.startDate.startOf('day'), dateRange.endDate]
+            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).add(1, 'day')]
         }
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
@@ -67,7 +67,9 @@ function ConfigurationContent() {
                                 initial={{ x: -20 }}
                                 animate={{ x: 0, transition: { delay: 0.2 } }}
                                 delay={300}
-                                className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize">
+                                className="flex font-extrabold tracking-tight capitalize"
+                                variant="h5"
+                            >
                                 Tickets ({unreadTicketCount})
                             </Typography>
                         </Grid> : ''}
@@ -126,7 +128,7 @@ function ConfigurationContent() {
             {/* {JSON.stringify(whereClause)} */}
             <List
                 module="tickets"
-                moduleHeading={ true }
+                moduleHeading={false}
                 where={whereClause}
                 key={listKey}
                 addable={false}

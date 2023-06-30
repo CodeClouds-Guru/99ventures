@@ -5,22 +5,22 @@ const handler = {
     return !(prop in target)
       ? target[prop]
       : function (...args) {
-          try {
-            return target[prop].apply(this, args);
-          } catch (e) {
-            return {
-              status: false,
-              error: e.message,
-            };
-          }
-        };
+        try {
+          return target[prop].apply(this, args);
+        } catch (e) {
+          return {
+            status: false,
+            error: e.message,
+          };
+        }
+      };
   },
 };
 class Lucid {
   constructor() {
     this.instance = axios.create({
       baseURL: 'https://api.samplicio.us',
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         Authorization: process.env.LUCID_API_KEY,
         Accept: 'application/json, text/plain, */*',
@@ -47,7 +47,7 @@ class Lucid {
       'Content-Type': 'application/json',
       data: payload,
     };
-    
+
     const response = await this.instance.post(partUrl);
     return response.data;
   }
@@ -138,9 +138,9 @@ class Lucid {
   async questionText(language_id, question_id) {
     const data = await this.fetchAndReturnData(
       '/Lookup/v1/QuestionLibrary/AllCustomQuestionsByAccount/' +
-        language_id +
-        '/' +
-        question_id
+      language_id +
+      '/' +
+      question_id
     );
     return data;
   }
@@ -148,9 +148,9 @@ class Lucid {
   async questionOptions(language_id, question_id) {
     const data = await this.fetchAndReturnData(
       '/Lookup/v1/QuestionLibrary/AllQuestionOptions/' +
-        language_id +
-        '/' +
-        question_id
+      language_id +
+      '/' +
+      question_id
     );
     return data;
   }
@@ -226,9 +226,9 @@ class Lucid {
   async qualifiedRespondents(survey_number, supplier_code) {
     const data = await this.fetchAndReturnData(
       '/Demand/v1/SurveyQualifiedRespondents/BySurveyNumberSupplierCode/' +
-        survey_number +
-        '/' +
-        supplier_code
+      survey_number +
+      '/' +
+      supplier_code
     );
     return data;
   }
@@ -297,9 +297,9 @@ class Lucid {
   async applyMarketplaceTemplate(payload) {
     const data = await this.createData(
       'Demand/v1/ExchangeTemplates/ApplyToSurvey/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.ExchangeTemplateId,
+      payload.SurveyNumber +
+      '/' +
+      payload.ExchangeTemplateId,
       payload
     );
     return data;
@@ -330,9 +330,9 @@ class Lucid {
   async addSuppliersToGroup(payload) {
     const data = await this.createData(
       '/Demand/v1/SupplierGroups/AddSuppliersToGroup/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierGroupID,
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierGroupID,
       payload
     );
     return data;
@@ -340,7 +340,7 @@ class Lucid {
   async removeFromMarketplaceGroup(payload) {
     const data = await this.createData(
       '/Demand/v1/SupplierGroups/RemoveSuppliersFromGroup/' +
-        payload.SurveyNumber,
+      payload.SurveyNumber,
       payload
     );
     return data;
@@ -366,9 +366,9 @@ class Lucid {
   async createLink(payload) {
     const data = await this.createData(
       '/Demand/v1/SupplierAllocations/Targets/Create/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierCode,
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierCode,
       payload
     );
     return data;
@@ -376,9 +376,9 @@ class Lucid {
   async updateLink(payload) {
     const data = await this.updateData(
       '/Demand/v1/SupplierAllocations/Targets/Update/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierCode,
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierCode,
       payload
     );
     return data;
@@ -388,9 +388,9 @@ class Lucid {
   async updateQualifiedRespondents(payload) {
     const data = await this.updateData(
       '/Demand/v1/SurveyQualifiedRespondents/Update/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierCode,
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierCode,
       payload
     );
     return data;
@@ -419,9 +419,9 @@ class Lucid {
   async deleteGroup(payload) {
     const data = await this.deleteData(
       '/Demand/v1/SupplierGroups/Delete/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierGroupID
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierGroupID
     );
     return data;
   }
@@ -430,9 +430,9 @@ class Lucid {
   async deleteAllocation(payload) {
     const data = await this.deleteData(
       '/Demand/v1/SupplierAllocations/Delete/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierCode
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierCode
     );
     return data;
   }
@@ -441,9 +441,9 @@ class Lucid {
   async deleteLink(payload) {
     const data = await this.deleteData(
       '/Demand/v1/SupplierAllocations/Targets/Update/' +
-        payload.SurveyNumber +
-        '/' +
-        payload.SupplierCode
+      payload.SurveyNumber +
+      '/' +
+      payload.SupplierCode
     );
     return data;
   }
@@ -454,40 +454,40 @@ class Lucid {
   async createEntryLink(surveyNumber) {
     const payload = {
       "SupplierLinkTypeCode": "OWS",
-      "TrackingTypeCode": "S2S"
+      "TrackingTypeCode": "NONE"
     };
-    
+
     const instance = {
-      headers: { 
-        'Authorization': process.env.LUCID_API_KEY, 
+      headers: {
+        'Authorization': process.env.LUCID_API_KEY,
         'Content-Type': 'application/json',
       }
     };
-    
+
     const response = await axios.post(
-      'https://api.samplicio.us/Supply/v1/SupplierLinks/Create/' + surveyNumber +'/6373', 
-      payload, 
+      'https://api.samplicio.us/Supply/v1/SupplierLinks/Create/' + surveyNumber + '/6373',
+      payload,
       instance
     )
-    .catch(err => {
-      throw err;
-    });
+      .catch(err => {
+        throw err;
+      });
 
-    return response;    
-    
+    return response;
+
   }
   /*------------------- Entry Link Create End ----------------*/
 
   /*------------------- Supply Integration - Quotas ---------------------*/
   async showQuota(surveyNumber) {
-    console.log(surveyNumber)
+    // console.log(surveyNumber)
     const data = await this.fetchAndReturnData(
-      '/Supply/v1/SurveyQuotas/BySurveyNumber/'+surveyNumber+'/6373'
+      '/Supply/v1/SurveyQuotas/BySurveyNumber/' + surveyNumber + '/6373'
     );
     return data;
   }
   /*------------------- Supply Integration - Quotas End---------------------*/
-  
+
 
 }
 

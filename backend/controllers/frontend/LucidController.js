@@ -1,4 +1,5 @@
 const {
+    sequelize,
     Member,
     Survey,
     SurveyProvider,
@@ -11,6 +12,7 @@ const { Op } = require('sequelize')
 const LucidHelper = require('../../helpers/Lucid')
 const Crypto = require('crypto');
 const { generateHashForLucid } = require('../../helpers/global')
+const Sequelize = require('sequelize');
 
 class LucidController {
 
@@ -21,6 +23,13 @@ class LucidController {
     }
 
     index = (req, res) => {
+        // if(!req.session.member) {
+        //     res.status(401).json({
+        //         status: false,
+        //         message: 'Unauthorized!'
+        //     });
+        //     return;
+        // }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -30,14 +39,13 @@ class LucidController {
             throw error('Invalid access!');
     }
 
-    surveys = async (req, res) => {
-        const memberId = req.query.user_id;
+    surveys = async (memberId,params) => {
+        // const memberId = req.query.user_id;
         if (!memberId) {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Member id not found!'
-            });
-            return;
+            }
         }
 
         const provider = await SurveyProvider.findOne({
@@ -47,42 +55,87 @@ class LucidController {
             }
         });
         if (!provider) {
-            res.json({
-                status: false,
+            return {
+                staus: false,
                 message: 'Survey Provider not found!'
-            });
-            return;
+            }
         }
-
+        const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+        const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+        const orderBy = 'orderby' in params ? params.orderby : 'id';
+        const order = 'order' in params ? params.order : 'desc';
         /**
          * check and get member's eligibility
          */
         const eligibilities = await MemberEligibilities.findAll({
-            attributes: ['survey_question_id', 'precode_id', 'text'],
+            attributes: ['survey_question_id', 'survey_answer_precode_id', 'open_ended_value', 'id'],
             where: {
                 member_id: memberId
             },
-            include: [{
-                model: SurveyQuestion,
-                attributes: ['id', 'survey_provider_question_id', 'question_type'],
-                where: {
-                    survey_provider_id: provider.id
+            include: [
+                {
+                    model: SurveyQuestion,
+                    attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                },
+                {
+                    model: Member,
+                    attributes: ['username']
+                },
+                {
+                    model: SurveyAnswerPrecodes,
+                    attributes: ['id', 'option', 'precode'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
                 }
-            }, {
-                model: Member,
-                attributes: ['username']
-            }]
+            ]
         });
 
         if(eligibilities) {
-            const matchingQuestionCodes = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerCodes = eligibilities
-                .filter(eg => eg.SurveyQuestion.question_type !== 'Numeric - Open-end') // Removed open ended question. We will not get the value from survey_answer_precodes
-                .map(eg => eg.precode_id);
+            /** Get Open Ended QnA Start */
+            const eligibilityIds = eligibilities.map(eg => eg.id);
+            const openEndedData =  await MemberEligibilities.findAll({
+                attributes: ['survey_question_id', 'open_ended_value'],
+                where: {
+                    member_id: memberId,
+                    id: {
+                        [Op.notIn]: eligibilityIds
+                    }
+                },
+                include: [{
+                    model: SurveyQuestion,
+                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: provider.id
+                    }
+                }]
+            });
+            /** end */
 
-            if (matchingAnswerCodes.length && matchingQuestionCodes.length) {
-                const surveys = await Survey.findAll({
+            
+            const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
+            const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
+
+            if (matchingAnswerIds.length && matchingQuestionIds.length) {
+                const queryString = {};
+                eligibilities.forEach(eg => {
+                    queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option
+                });
+                if(openEndedData && openEndedData.length) {
+                    openEndedData.forEach(eg => {
+                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
+                        matchingQuestionIds.push(eg.SurveyQuestion.id);
+
+                    });
+                }
+                const generateQueryString = new URLSearchParams(queryString).toString();
+                
+                const surveys = await Survey.findAndCountAll({
                     attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
+                    distinct: true,
                     where: {
                         survey_provider_id: provider.id,
                         status: "active",
@@ -95,7 +148,7 @@ class LucidController {
                             model: SurveyAnswerPrecodes,
                             attributes: ['id', 'option', 'precode'],
                             where: {
-                                option: matchingAnswerCodes // [111, 30]
+                                id: matchingAnswerIds
                             },
                             required: true,
                             include: [
@@ -103,67 +156,92 @@ class LucidController {
                                     model: SurveyQuestion,
                                     attributes: ['id', 'survey_provider_question_id'],
                                     where: {
-                                        id: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
-                                        // name: matchingQuestionCodes // ['Age', 'Gender', 'Zipcode']
+                                        id: matchingQuestionIds
                                     }
                                 }
                             ],
                         }
-                    }
+                    },
+                    //limit: 200
+                    order: [[Sequelize.literal(orderBy), order]],
+                    limit: perPage,
+                    offset: (pageNo - 1) * perPage,
                 });
                 
-                if(surveys.length){
-                    const queryString = {};
-                    eligibilities.map(eg => {
-                        queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.precode_id
-                    });
-                    const generateQueryString = new URLSearchParams(queryString).toString();
-                    
+                var page_count = Math.ceil(surveys.count / perPage);
+
+                // res.send(surveys);
+                // return;
+                var survey_list = []
+                if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
-                    for (let survey of surveys) {
+                    var count = 0;
+                    for (let survey of surveys.rows) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${eligibilities[0].Member.username}&${generateQueryString}`;
-                        surveyHtml += `
-                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                                <div class="bg-white card mb-2">
-                                    <div class="card-body position-relative">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-primary m-0">${survey.name}</h6>
-                                        </div>
-                                        <div class="text-primary small">5 Minutes</div>
-                                        <div class="d-grid mt-1">
-                                            <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `
+                        let temp_survey = {
+                                survey_number: survey.survey_number,
+                                name: survey.name,
+                                cpi: parseFloat(survey.cpi).toFixed(2),
+                                loi: survey.loi,
+                                link:link
+                            }
+                        survey_list.push(temp_survey)
+                        // surveyHtml += `
+                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                        //         <div class="bg-white card mb-2">
+                        //             <div class="card-body position-relative">
+                        //                 <div class="d-flex justify-content-between">
+                        //                     <h6 class="text-primary m-0">${survey.name}</h6>
+                        //                 </div>
+                        //                 <div class="text-primary small">5 Minutes</div>
+                        //                 <div class="d-grid mt-1">
+                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
+                        //                 </div>
+                        //             </div>
+                        //         </div>
+                        //     </div>
+                        // `
+
                     }
                     
-                    res.send({
+                    // res.send({
+                    //     status: true,
+                    //     message: 'Success',
+                    //     result: surveyHtml
+                    // });
+                    return {
                         status: true,
                         message: 'Success',
-                        result: surveyHtml
-                    });
+                        result: {
+                            surveys:survey_list,
+                            page_count:page_count
+                        }
+                    }
                 }
                 else {
-                    res.json({
+                    return {
                         staus: false,
                         message: 'Surveys not found!'
-                    });
+                    }
                 }
             }
             else {
-                res.json({
+                
+                return {
                     staus: false,
                     message: 'No surveys have been matched!'
-                });
+                }
             }
 
         } else {
-            res.json({
-                status: false,
+            // res.json({
+            //     status: false,
+            //     message: 'Member eiligibility not found!'
+            // });
+            return {
+                staus: false,
                 message: 'Member eiligibility not found!'
-            });
+            }
         }
 
 
@@ -174,6 +252,7 @@ class LucidController {
             const lcObj = new LucidHelper;
             const surveyNumber = req.query.survey_number;    
             const quota = await lcObj.showQuota(surveyNumber);
+            
             const queryParams = req.query;
             const params = {
                 MID: Date.now(),
@@ -193,7 +272,7 @@ class LucidController {
                 });
                 if(survey && survey.url){
                     entrylink = survey.url;
-                } else {
+                } else {                    
                     const result = await lcObj.createEntryLink(surveyNumber);
                     if(result.data && result.data.SupplierLink) {
                         const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
@@ -207,7 +286,9 @@ class LucidController {
                         entrylink = url;
                     }
                 }
+                
                 const URL = this.rebuildEntryLink(entrylink, params);
+                // res.send(URL)
                 res.redirect(URL);
             } else {
                 await Survey.update({
@@ -237,12 +318,12 @@ class LucidController {
         if(process.env.DEV_MODE == 1) {
             delete queryParams.PID;
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&MID='+queryParams.MID+'&'+params+'&';
-            const hash = generateHashForLucid(urlTobeHashed);
+            const urlTobeHashed = url+'&'+params+'&';
+            const hash = generateHashForLucid(urlTobeHashed);            
             return url +'&'+params+'&hash='+hash;
         } else {
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&PID='+queryParams.PID+'&MID='+queryParams.MID+'&'+params+'&';
+            const urlTobeHashed = url+'&PID='+queryParams.PID+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);
             return url +'&'+params+'&hash='+hash;
         }

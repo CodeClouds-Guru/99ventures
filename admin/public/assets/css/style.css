@@ -39,6 +39,7 @@ textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
 */
 .date-range-wrapper > div{right: 23px; top: 172px;}
 .member-txn-list.date-range-wrapper > div{right: 67px; top: 112px;}
+.custom-code-editor.scripts-editor{ min-height: 500px;}
 @media screen and (max-width: 768px) {
     .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
 } 

@@ -1,8 +1,8 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Box, Tooltip } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, FormControlLabel } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import withRouter from '@fuse/core/withRouter';
 import FuseLoading from '@fuse/core/FuseLoading';
@@ -10,14 +10,13 @@ import ListHead from './ListHead';
 import moment from 'moment';
 import axios from "axios"
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { selectUser, setUser } from 'app/store/userSlice';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
-import { column, match } from 'stylis';
-import { object } from 'prop-types';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 function Listing(props) {
     const dispatch = useDispatch();
@@ -32,6 +31,8 @@ function Listing(props) {
     const [totalRecords, setTotalRecords] = useState(0);
 
     const [loading, setLoading] = useState(true);
+    const [applyLoading, setApplyLoading] = useState(true);
+    const [exportLoading, setExportLoading] = useState(true);
     const [selected, setSelected] = useState([]);
     const [data, setData] = useState(modules);
     const [page, setPage] = useState(0);
@@ -50,7 +51,35 @@ function Listing(props) {
     // const [filters, setFilters] = useState([{ column: 'address_1', match: 'substring', search: '' }]);
     const [applyBtnSts, setApplyBtnSts] = useState(true);
     const [addBtnSts, setAddBtnSts] = useState(true);
+    const [listConfigDialog, setListConfigDialog] = useState(false);
+    const [displayColumnArray, setDisplayColumnArray] = useState(['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at']);
 
+    const display_column_object = {
+        "id": "ID",
+        "username": "Username",
+        "first_name": "First name",
+        "last_name": "Last Name",
+        "created_at": "Join date",
+        "last_active_on": "Last active date",
+        "MemberReferral.referral_email": "Referral",
+        "email": "Registration email ",
+        "MemberPaymentInformations.value": "Payment emails",
+        "IpLogs.ip": "Current IP",
+        "IpLogs.geo_location": "Geo location",
+        "IpLogs.isp": "Geo ISP",
+        "IpLogs.browser": "Browser",
+        "IpLogs.browser_language": "Browser Language",
+        "status": "Status",
+        "MembershipTier.name": "Membership level",
+        "address": "Address",
+        "phone_no": "Telephone",
+        "MemberEmailAlerts.slug": "Email marketing opt in",
+        "MemberTransactions.balance": "Current Balance",
+        "MemberTransactions.amount": "Total Earnings",
+        "WithdrawalRequests.amount": "Withdrawal - total paid",
+        "WithdrawalRequests.created_at": "Withdrawal - last cash out (date)",
+        "admin_status": "Verified/unverified",
+    }
     const column_object = {
         'address_1': 'Billing Street Address',
         '$IpLogs.browser$': 'Browser',
@@ -88,38 +117,80 @@ function Listing(props) {
     }
 
     const fetchModules = () => {
+        var ordered_fields = displayColumnArray.sort((a, b) =>
+            Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+        )
         let params = {
             search: searchText,
             page: page + 1,
             show: rowsPerPage,
             module: module,
-            where
+            where,
+            fields: ordered_fields
         }
         /* order is added if it's not the very first call os API listing */
         if (!firstCall) {
             params.sort = order.id
             params.sort_order = order.direction
         }
+        params.sort = ('sort' in params && params.sort !== 'id') ? params.sort : 'Member.id'
 
         axios.get(`/${module}`, { params }).then(res => {
+            setListConfigDialog(false);
             setFields(res.data.results.fields);
             setModules(res.data.results.result.data);
             setTotalRecords(res.data.results.result.total)
             setLoading(false);
+            setApplyLoading(false);
+            setExportLoading(false);
             setFirstCall(false);
         }).catch(error => {
+            setListConfigDialog(false);
             let message = 'Something went wrong!'
             if (error && error.response.data && error.response.data.errors) {
                 message = error.response.data.errors
             }
             dispatch(showMessage({ variant: 'error', message }));
-            navigate('/dashboard');
+        })
+    }
+
+    const handleConfigurColumn = (e) => {
+        e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
+    }
+
+    const exportAll = () => {
+        setExportLoading(true);
+        var ordered_fields = displayColumnArray.sort((a, b) =>
+            Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+        )
+        let params = {
+            search: searchText,
+            page: page + 1,
+            show: rowsPerPage,
+            module: module,
+            where,
+            ids: [],
+            fields: ordered_fields
+        }
+        axios.get(`/${module}/export`, { params }).then(res => {
+            setExportLoading(false);
+            if (res.data.results.status) {
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                setListConfigDialog(false)
+            }
+        }).catch(error => {
+            setExportLoading(false);
+            let message = 'Something went wrong!'
+            if (error && error.response.data && error.response.data.errors) {
+                message = error.response.data.errors
+            }
+            dispatch(showMessage({ variant: 'error', message }));
         })
     }
 
     useEffect(() => {
         fetchModules();
-    }, [searchText, page, rowsPerPage, order, where]);
+    }, [searchText, page, rowsPerPage, order.id, order.direction, where]);
 
     useEffect(() => {
         resetModulesListConfig();
@@ -176,9 +247,31 @@ function Listing(props) {
 
     async function handleDeselect(selectedIds) {
         try {
-            await axios.delete(`${module}/delete`, { data: { modelIds: selectedIds } });
-            setSelected([]);
-            setModuleDeleted(true);
+            await axios.delete(`${module}/delete`, { data: { model_ids: selectedIds } }).then(res => {
+                if (res.data.results.status) {
+                    setLoading(true)
+                    setSelected([]);
+                    setModuleDeleted(true);
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async function exportSelected(selectedIds) {
+        try {
+            await axios.get(`${module}/export`, {
+                params: {
+                    ids: selectedIds,
+                    all: 0
+                }
+            }).then(res => {
+                if (res.data.results.message) {
+                    setSelected([]);
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                }
+            })
         } catch (error) {
             console.log(error);
         }
@@ -232,6 +325,7 @@ function Listing(props) {
     }
 
     function handleChangePage(event, value) {
+        setLoading(true)
         setPage(value);
         setFirstCall(true);
     }
@@ -262,8 +356,8 @@ function Listing(props) {
     }
 
     const customizedRowValue = (n, field) => {
+        const status = processFieldValue(n[field.field_name], field);
         if (field.field_name === 'status') {
-            const status = processFieldValue(n[field.field_name], field);
             if (status === 'member')
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
             else if (status === 'suspended')
@@ -272,8 +366,15 @@ function Listing(props) {
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
             else if (status === 'deleted')
                 return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+        } else if (field.field_name === 'admin_status') {
+            if (status === 'verified')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="success" size="small" />
+            else if (status === 'pending')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
+            else if (status === 'not_verified')
+                return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
         } else {
-            return processFieldValue(n[field.field_name], field)
+            return status
         }
     }
 
@@ -299,6 +400,7 @@ function Listing(props) {
         setFilters([{ column: 'username', match: 'substring', search: '' }]);
         setMemberStatus([]);
         setWhere({});
+        setPage(0);
     }
     const handleChangeFilter = (event, key, field) => {
         filters[key][field] = event.target.value;
@@ -313,8 +415,12 @@ function Listing(props) {
         setWhere(where);
         setFilterActive(true);
         setOpenAlertDialog(false);
+        setPage(0);
     }
-
+    const modifyList = () => {
+        setApplyLoading(true)
+        fetchModules();
+    }
 
     return (
         <div>
@@ -325,15 +431,51 @@ function Listing(props) {
                     initial={{ x: -20 }}
                     animate={{ x: 0, transition: { delay: 0.2 } }}
                     delay={300}
-                    className="flex text-24 md:text-32 font-extrabold tracking-tight capitalize"
+                    className="flex font-extrabold tracking-tight capitalize"
+                    variant="h5"
                 >
                     Members
                 </Typography>
 
                 <div className="flex items-center justify-end space-x-8 xl:w-2/3 sm:w-auto">
+                    <Tooltip title="Configure" placement="top">
+                        <Button
+                            className="p-0 m-0"
+                            variant="contained"
+                            color="secondary"
+                            onClick={(e) => { e.preventDefault(); setListConfigDialog(true) }}
+                        >
+                            <FuseSvgIcon>heroicons-outline:cog</FuseSvgIcon>
+                        </Button>
+                    </Tooltip>
                     <Button variant="outlined" startIcon={<SearchIcon />} onClick={() => setOpenAlertDialog(true)}>
                         Search
                     </Button>
+                    <Dialog
+                        open={listConfigDialog}
+                        onClose={() => { setListConfigDialog(false) }}
+                        disableEscapeKeyDown
+                        aria-labelledby="scroll-dialog-title"
+                        aria-describedby="scroll-dialog-description"
+                        fullWidth
+                        maxWidth="md"
+                    >
+                        <DialogTitle id="scroll-dialog-title">Select Fields</DialogTitle>
+                        <DialogContent>
+                            <div className="flex flex-wrap w-full justify-between my-10">
+                                {Object.keys(display_column_object).map((val, index) => {
+                                    return (
+                                        <FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
+                                    )
+                                })
+                                }
+                            </div>
+                        </DialogContent>
+                        <DialogActions className="mx-16 mb-16">
+                            <LoadingButton loading={applyLoading} variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</LoadingButton>
+                            <LoadingButton loading={exportLoading} variant="contained" color="primary" disabled={applyBtnSts} onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</LoadingButton>
+                        </DialogActions>
+                    </Dialog>
                     <Dialog
                         open={openAlertDialog}
                         onClose={() => { setOpenAlertDialog(false) }}
@@ -480,6 +622,7 @@ function Listing(props) {
                             rowCount={data.length}
                             onMenuItemClick={handleDeselect}
                             onChangeMultirowStatus={handleMultirowStatus}
+                            exportSelected={exportSelected}
                             {...props}
                             fields={fields}
                         />

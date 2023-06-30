@@ -6,7 +6,7 @@ const Lucid = require('../helpers/Lucid');
 // const PurespectrumHelper = require('../helpers/Purespectrum');
 const SqsHelper = require('../helpers/SqsHelper');
 const { OfferWall } = require('../models');
-const { csrfErrorHandler, doubleCsrfProtection } = require("../config/csrf");
+const { csrfErrorHandler, doubleCsrfProtection } = require('../config/csrf');
 
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -30,7 +30,7 @@ const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 
-const frontendrRouter = require('./frontend')
+const frontendrRouter = require('./frontend');
 
 router.get('/offer-wall/list', async (req, res) => {
   var offer_walls = await OfferWall.findAll({ where: { status: '1' } });
@@ -78,10 +78,24 @@ router.get('/sqs-receive-message', async (req, res) => {
   res.send(receive_message);
 });
 
+router.get('/404', async (req, res) => {
+  var pagePerser = new PageParser('404');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+router.get('/500', async (req, res) => {
+  var pagePerser = new PageParser('500');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+router.get('/503', async (req, res) => {
+  var pagePerser = new PageParser('503');
+  var page_content = await pagePerser.preview(req);
+  res.render('page', { page_content });
+});
+
 //ROUTES FOR FRONTEND
-const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
-const checkMemberAuth = require('../middlewares/checkMemberAuth');
-router.use(frontendrRouter.router, [checkMemberAuth])
+router.use(frontendrRouter.router);
 
 module.exports = {
   prefix: '/',

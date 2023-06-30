@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
       WithdrawalType.belongsTo(models.PaymentMethod, {
         foreignKey: 'payment_method_id',
       });
+      WithdrawalType.hasMany(models.WithdrawalRequest, {
+        foreignKey: 'withdrawal_type_id',
+      });
     }
   }
   WithdrawalType.init(
@@ -24,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: 'WithdrawalType',
       tableName: 'withdrawal_types',
+      timestamps: false,
     }
   );
   return WithdrawalType;

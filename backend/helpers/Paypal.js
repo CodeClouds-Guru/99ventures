@@ -2,12 +2,20 @@ const axios = require('axios');
 const { Console } = require('winston/lib/winston/transports');
 const {
   MemberTransaction,
-  PaymentMethodCredential,
+  PaymentMethod,
   WithdrawalRequest,
   Member,
+  MemberBalance,
+  MemberNotification,
 } = require('../models');
+const paypal = require('@paypal/payouts-sdk');
+const db = require('../models/index');
+const { QueryTypes, Op } = require('sequelize');
+const eventBus = require('../eventBus');
 class Paypal {
-  constructor() {
+  constructor(company_portal_id = '', slug = '') {
+    this.company_portal_id = company_portal_id;
+    this.slug = slug || 'paypal';
     this.clientId =
       'AS34VNOhe5wGedg3E8MkZsWWIb7VoHE54CoLYrGbib8FeNFmAlrMUwgsIDPbYNIC48YPXN6Vl-9FMR7H';
     this.clientSecret =
@@ -15,212 +23,203 @@ class Paypal {
     this.auth = Buffer.from(this.clientId + ':' + this.clientSecret).toString(
       'base64'
     );
-    this.baseURL = {
-      sandbox: 'https://api-m.sandbox.paypal.com',
-      production: 'https://api-m.paypal.com',
-    };
-    this.instance = axios.create({
-      baseURL: this.baseURL.sandbox,
-      timeout: 10000,
-    });
-    this.postAndReturnData = this.postAndReturnData.bind(this);
-    this.paypalConfig = this.paypalConfig.bind(this);
-    this.generateAccessToken = this.generateAccessToken.bind(this);
-    this.createOrder = this.createOrder.bind(this);
+    // this.baseURL = {
+    //   sandbox: 'https://api-m.sandbox.paypal.com',
+    //   production: 'https://api-m.paypal.com',
+    // };
+    // this.instance = axios.create({
+    //   baseURL: this.baseURL.sandbox,
+    //   timeout: 10000,
+    // });
+    // this.postAndReturnData = this.postAndReturnData.bind(this);
+    // this.paypalConfig = this.paypalConfig.bind(this);
+    // this.generateAccessToken = this.generateAccessToken.bind(this);
+    // this.createOrder = this.createOrder.bind(this);
+    this.payout = this.payout.bind(this);
+    this.getPaypalClient = this.getPaypalClient.bind(this);
+    this.createPayouts = this.createPayouts.bind(this);
   }
 
-  async postAndReturnData(partUrl) {
-    let resp = {
-      status: false,
-      report: null,
-      error: '',
-    };
-    try {
-      const instance = axios.create({
-        baseURL: this.baseURL.sandbox,
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json, text/plain, */*',
-          Authorization: `Basic ${this.auth}`,
-        },
-      });
-      let response = await instance.post(
-        partUrl,
-        'grant_type=client_credentials'
-      );
-      const jsonData = await this.handleResponse(response);
-      resp.status = true;
-      resp.report = jsonData.access_token;
-    } catch (e) {
-      resp.error = e.message;
-    } finally {
-      return resp;
-    }
-  }
-
-  async postWithPayload(partUrl, accessToken, payload = '') {
-    let resp = {
-      status: false,
-      report: null,
-      error: '',
-    };
-    try {
-      const instance = axios.create({
-        baseURL: this.baseURL.sandbox,
-        timeout: 10000,
-        // method: post,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      let response = {};
-      if (payload !== '') {
-        response = await instance.post(partUrl, payload);
-      } else {
-        response = await instance.post(partUrl);
-      }
-      const jsonData = await this.handleResponse(response);
-      resp.status = true;
-      resp.report = jsonData;
-    } catch (e) {
-      resp.error = e.message;
-    } finally {
-      return resp;
-    }
-  }
-
-  async paypalConfig(site_id) {
-    const paypal_creds = await PaymentMethodCredential.findAll({
-      attributes: ['slug', 'value'],
+  /**
+   * Function to return paypal client
+   * @returns {paypal.core.PayPalHttpClient}
+   */
+  async getPaypalClient() {
+    let paypal_credentials = await PaymentMethod.findOne({
+      attributes: ['api_username', 'api_password'],
       where: {
-        payment_method_id: 1,
-        company_portal_id: site_id,
+        slug: this.slug,
+        company_portal_id: this.company_portal_id,
       },
     });
-    console.log('paypal_creds', paypal_creds);
-    // this.clientId =
-    //   paypal_creds[0].slug === 'client_id'
-    //     ? paypal_creds[0].value
-    //     : paypal_creds[1].value;
-    // this.clientSecret =
-    //   paypal_creds[1].slug === 'client_id'
-    //     ? paypal_creds[1].value
-    //     : paypal_creds[0].value;
-  }
+    let clientId = '';
+    let clientSecret = '';
+    // for (let record of paypal_credentials) {
+    //   if (record.slug == 'client_id') {
+    //     clientId = record.value;
+    //   } else if (record.slug == 'secret') {
+    //     clientSecret = record.value;
+    //   }
+    // }
+    clientId = paypal_credentials.api_username;
+    clientSecret = paypal_credentials.api_password;
 
-  // generate an access token using client id and app secret
-  async generateAccessToken(site_id) {
-    // this.paypalConfig(site_id);
-    const response = await this.postAndReturnData('/v1/oauth2/token/');
-    console.log('postAndReturnData', response);
-    return response.report;
-  }
-
-  // use the orders api to create an order
-  async createOrder(req) {
-    const site_id = req.headers.site_id || 1;
-    const accessToken = await this.generateAccessToken(site_id);
-    console.log('accessToken', accessToken);
-    const payload = JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value: '20.00',
-          },
-        },
-      ],
-    });
-    const data = await this.postWithPayload(
-      this.baseURL.sandbox + '/v2/checkout/orders',
-      accessToken,
-      payload
+    // let clientId = this.clientId;
+    // let clientSecret = this.clientSecret;
+    let environment = new paypal.core.SandboxEnvironment(
+      clientId,
+      clientSecret
     );
-    console.log('createOrder', data);
-    return data;
+    // console.log(environment);
+    return new paypal.core.PayPalHttpClient(environment);
   }
 
-  // use the orders api to capture payment for an order
-  async capturePayment(req) {
-    const site_id = req.headers.site_id || 1;
-    const accessToken = await this.generateAccessToken(site_id);
-    console.log(req.body.order_id);
-    const data = await this.postWithPayload(
-      '/v2/checkout/orders/' + req.body.order_id + '/capture/',
-      accessToken
-    );
-    console.log('capturePayment', data);
-    return data;
-  }
-
-  //store in transaction
-  async successPayment(req) {
-    const member_id = req.body.member_id || null;
-    const member = await Member.findOne({ where: { id: member_id } });
-    const transaction_obj = {
-      member_id: member_id,
-      amount: req.body.payout_amount,
-      note: 'Cash withdrawn',
-      type: parseFloat(req.body.payout_amount) > 0 ? 'credited' : 'withdraw',
-      amount_action: 'admin_adjustment',
-      created_by: req.user.id,
-      transaction_id: req.body.transaction_id || null,
-      payload: req.body ? JSON.stringify(req.body) : null,
+  /**
+   * Function to create Request Body
+   * @param {Array} items
+   * @returns {Object}
+   */
+  createRequestBody(items) {
+    return {
+      sender_batch_header: {
+        recipient_type: 'EMAIL',
+        email_message: 'Payments',
+        note: 'Payment from Moresurveys',
+        sender_batch_id: `MS-Batch-TXN-${Date.now()}`,
+        email_subject:
+          'Congratulations! Payment credited to your paypal account',
+      },
+      items: items,
     };
-    console.log('transaction_obj', transaction_obj);
-    let result = await MemberTransaction.updateMemberTransactionAndBalance(
-      transaction_obj
-    );
-    if (result) {
-      const withdrawal_req_obj = {};
+  }
 
-      console.log('withdrawal_req_obj', withdrawal_req_obj);
-      let result = await WithdrawalRequest.update(withdrawal_req_obj, {
-        where: { id: req.body.request_id },
-      });
-      const member_name = member.first_name + ' ' + member.last_name;
-      //email
-      const eventBus = require('../eventBus');
-      //send mail to admin
-      let adminEventbus = eventBus.emit('send_email', {
-        action: 'Member Cash Withdrawal',
-        data: {
-          email: req.user.email,
-          details: {
-            desc:
-              member_name +
-              ' has withdrawn $' +
-              req.body.payout_amount +
-              ' on ' +
-              req.body.date,
+  /**
+   * Function to perform payout
+   * @returns {Boolean}
+   * @param {Array} payload
+   * [{ email: 'sb-vwa0c25891350@business.example.com', member_transaction_id: 0, currency: 'USD',amount: 1.00}]
+   */
+  async payout(payload) {
+    try {
+      let items = payload.map((item) => {
+        return {
+          note: `Payment for withdrawal request #${item.member_transaction_id}`,
+          amount: {
+            currency: item.currency || 'USD',
+            value: item.amount,
           },
-        },
-        req: req,
+          receiver: item.email,
+          sender_item_id: `${item.member_transaction_id}`,
+        };
       });
-      //send mail to admin
-      let memberEventbus = eventBus.emit('send_email', {
-        action: 'Withdrawal Approval',
-        data: {
-          email: member.email,
-          details: {
-            desc:
-              'Admin has approved your withdrawn request of $' +
-              req.body.payout_amount +
-              ' on ' +
-              req.body.date,
-          },
-        },
-        req: req,
-      });
+      const requestBody = this.createRequestBody(items);
+      let request = new paypal.payouts.PayoutsPostRequest();
+      request.requestBody(requestBody);
+      const resp = await this.createPayouts(request);
+      let batch_id = '';
+      if (parseInt(resp.statusCode) == 201) {
+        batch_id = resp.result.batch_header.payout_batch_id;
+        return {
+          status: true,
+          message: 'Payment request initiated.',
+          batch_id: batch_id,
+          res: resp,
+        };
+      } else {
+        return {
+          status: false,
+          message: 'Failed to initiate the payment.',
+        };
+      }
+    } catch (e) {
+      console.log(e);
+      return {
+        status: false,
+        message: e,
+      };
     }
   }
 
-  async handleResponse(response) {
-    if (response.status === 200 || response.status === 201) {
-      return response.data;
+  /**
+   * Function to make the transaction
+   * @param {Object} request
+   * @returns {Object}
+   */
+  async createPayouts(request) {
+    const client = await this.getPaypalClient();
+    try {
+      let response = await client.execute(request);
+      return response;
+    } catch (e) {
+      var err = {};
+      if (e.statusCode) {
+        const error = JSON.parse(e.message);
+        err = {
+          status_code: e.statusCode,
+          failure_response: error,
+          headers: e.headers,
+        };
+        console.log(err);
+      } else {
+        err.e = e;
+        console.log(e);
+      }
+      return { status: false, error: err };
+    }
+  }
+  //get confirmation
+  async getPayouts(req) {
+    try {
+      if (req.body.event_type) {
+        let batchId = req.body.resource.batch_header.payout_batch_id;
+        const client = await this.getPaypalClient();
+        let request = new paypal.payouts.PayoutsGetRequest(batchId);
+        request.page(1);
+        request.pageSize(10);
+        request.totalRequired(true);
+        // Call API with your client and get a response for your call
+        let response = await client.execute(request);
+        //console.log(`Response: ${JSON.stringify(response)}`);
+        // If call returns body in response, you can get the deserialized version from the result attribute of the response.
+        //console.log(`Payouts Batch: ${JSON.stringify(response.result)}`);
+        var status = 4;
+        if (req.body.event_type === 'PAYMENT.PAYOUTSBATCH.SUCCESS') {
+          status = 2;
+        } else if (req.body.event_type === 'PAYMENT.PAYOUTSBATCH.PROCESSING') {
+          status = 1;
+        }
+        if (parseInt(response.statusCode) == 200 && status != 1) {
+          let items = response.result.items;
+          for (let record of items) {
+            let member_transaction_id = record.payout_item.sender_item_id;
+            // console.log({
+            //   member_transaction_id:member_transaction_id,
+            //   transaction_id: record.transaction_id,
+            //   status:status,
+            //   amount: record.payout_item.amount.value,
+            //   body: req.body,
+            //   company_portal_id:this.company_portal_id
+            // })
+            await MemberTransaction.updateMemberWithdrawalRequest({
+              member_transaction_id: member_transaction_id,
+              transaction_id: record.transaction_id,
+              status: status,
+              amount: record.payout_item.amount.value,
+              body: req.body,
+              company_portal_id: this.company_portal_id,
+            });
+          }
+        }
+      }
+      return {
+        status: true,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        status: false,
+        message: e,
+      };
     }
   }
 }

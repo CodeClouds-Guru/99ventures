@@ -10,6 +10,7 @@ const {
   AutoResponder,
   sequelize,
   User,
+  MemberNotification,
 } = require('../../models/index');
 
 const { Op } = require('sequelize');
@@ -67,12 +68,22 @@ class TicketController extends Controller {
     options.offset = offset;
     options.subQuery = false;
 
-    // console.log(util.inspect(options, { showHidden: false, depth: null, colors: true }))
-
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     for (let i = 0; i < result.rows.length; i++) {
-      result.rows[i].setDataValue('username', result.rows[i].Member.username);
+      // console.log(
+      //   util.inspect(result.rows[i], {
+      //     showHidden: false,
+      //     depth: null,
+      //     colors: true,
+      //   })
+      // );
+      if (result.rows[i].Member)
+        result.rows[i].setDataValue(
+          'username',
+          result.rows[i].Member.username || ''
+        );
+      else result.rows[i].setDataValue('username', '');
     }
 
     return {
@@ -101,7 +112,7 @@ class TicketController extends Controller {
         ];
         options.where = { [Op.and]: { id: ticket_id } };
         options.order = [
-          [TicketConversation, 'created_at', 'DESC'],
+          [TicketConversation, 'created_at', 'ASC'],
           [Member, MemberNote, 'created_at', 'DESC'],
         ];
         options.include = [
@@ -115,7 +126,7 @@ class TicketController extends Controller {
               },
               {
                 model: Member,
-                attributes: ['first_name', 'last_name', 'username'],
+                attributes: ['first_name', 'last_name', 'username', 'id'],
               },
               {
                 model: User,
@@ -205,8 +216,6 @@ class TicketController extends Controller {
 
   //update for all type of updation
   async update(req, res) {
-    console.log(req);
-
     const member_id = req.body.member_id || null;
     // const user_id = req.body.user_id || null;
     // const attachments = req.files ? req.files.attachments : [];
@@ -237,19 +246,20 @@ class TicketController extends Controller {
       console.error(error);
       this.throwCustomError('Unable to get data', 500);
     } finally {
-      if (change)
-        return {
-          status: true,
-          message: 'Data updated.',
-        };
+      return {
+        status: true,
+        message: 'Data updated.',
+      };
     }
   }
 
   // //update for all type of updation
 
-  async changeStatus(value, field_name, ticket_id) {
-    // console.log(value, field_name, ticket_id, "--------------");
+  async changeStatus(req) {
     try {
+      let field_name = req.body.field_name;
+      let value = req.body.value;
+      let ticket_id = req.body.id;
       let update = await Ticket.changeStatus(field_name, value, ticket_id);
       // console.log(update);
       if (update > 0) return true;
@@ -275,7 +285,18 @@ class TicketController extends Controller {
       if (user_id !== null) data.user_id = user_id;
 
       let savedTicketConversation = await TicketConversation.create(data);
+      // console.log(user_id);
+      if (user_id) {
+        let ticket = await Ticket.findOne({ where: { id: ticket_id } });
 
+        await MemberNotification.addMemberNotification({
+          member_id: ticket.member_id,
+          verbose:
+            'You have a new response on your ticket, subject : ' +
+            ticket.subject,
+          action: 'ticket_reply',
+        });
+      }
       if (savedTicketConversation.id > 0 && attachments) {
         let files = [];
         if (attachments.length > 1) files = attachments;
@@ -286,7 +307,7 @@ class TicketController extends Controller {
           req
         );
         const file_name = await fileHelper.upload();
-        console.log(file_name);
+        // console.log(file_name);
         const dataFiles = file_name.files.map((values) => {
           return {
             ticket_conversation_id: savedTicketConversation.id,

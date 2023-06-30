@@ -20,23 +20,43 @@ const handler = {
 class Purespectrum {
 	constructor() {
 		this.instance = axios.create({
-			// baseURL: (process.env.DEV_MODE === 0) ? 'http://staging.spectrumsurveys.com/suppliers/v2/' : 'https://api.spectrumsurveys.com/suppliers/v2/',
-			baseURL: 'http://staging.spectrumsurveys.com/suppliers/v2/',
-			timeout: 20000,
+			baseURL: process.env.PURESPECTRUM_BASEURL,
+			timeout: 30000,
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/json',
-				'access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYzZkZmYxY2ZlNWEzMGI4ZTI4NjNjYiIsInVzcl9pZCI6IjI0MDgiLCJpYXQiOjE2NzM5Nzc4NDF9.nSZ01i3FsezOsunZmTxql3_QtS_jnaFWm4ZXfYFTtw4'
+				'access-token': process.env.PURESPECTRUM_ACCESS_TOKEN
 			},
 		});
 		this.fetchAndReturnData = this.fetchAndReturnData.bind(this);
 		this.createData = this.createData.bind(this);
+		this.getSurveyData = this.getSurveyData.bind(this);
 		return new Proxy(this, handler);
 	}
 
 	async fetchAndReturnData(partUrl) {
 		const response = await this.instance.get(partUrl);
 		return response.data;
+	}
+
+	async getSurveyData(surveyNumber){
+		const response = await this.instance.get('/surveys/' + surveyNumber);		
+		if (
+			'success' === response.data.apiStatus && 
+			('survey' in response.data) && 
+			+response.data.survey.survey_status === 22     // 22 means live
+		) {
+			return {
+				is_active: true, 
+				status: response.data.survey.survey_status, 
+				data: response.data.survey
+			}
+		} else {
+			return {
+				is_active: false, 
+				status: response.data.survey.survey_status
+			};
+		}
 	}
 
 	async createData(partUrl, payload) {
@@ -48,23 +68,6 @@ class Purespectrum {
 		};
 
 		const response = await this.instance.post(partUrl);
-		return response.data;
-	}
-
-	async updateData(partUrl, payload) {
-		this.instance = {
-			...this.instance,
-			Accept: 'application/json, text/plain, */*',
-			'Content-Type': 'application/json',
-			data: payload,
-		};
-
-		const response = await this.instance.put(partUrl);
-		return response.data;
-	}
-
-	async deleteData(partUrl) {
-		const response = await this.instance.del(partUrl);
 		return response.data;
 	}
 

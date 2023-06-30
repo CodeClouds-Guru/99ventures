@@ -168,6 +168,7 @@ const CreateEditForm = (props) => {
             '\n\n<!-- Additional Script Start-->\n' +
             '${additional_header_script}\n' +
             '${default_scripted_codes}\n' +
+            '${google_captcha_header}\n' +
             '<!-- Additional Script End -->\n' +
             layoutCode.header.value +
             '</head>\n' + layoutCode.body.value + '\n' +

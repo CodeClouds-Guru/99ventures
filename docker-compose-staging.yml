@@ -1,0 +1,69 @@
+version: '3'
+
+networks:
+  99Bridge:
+
+services:
+  backend:
+    container_name: '99-live-node'
+    # image: $ECR_REPO_FOR_BACKEND
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - 4000:4000
+    environment:
+      - DB_HOST=$STAGING_MYSQLDB_HOST
+      - DB_USER=$STAGING_MYSQLDB_USER
+      - DB_PASSWORD=$STAGING_MYSQLDB_ROOT_PASSWORD
+      - DB_NAME=$STAGING_MYSQLDB_DATABASE
+      - DB_PORT=$STAGING_MYSQLDB_DOCKER_PORT
+      - CLIENT_ORIGIN=$STAGING_CLIENT_ORIGIN
+      - APP_SECRET=$STAGING_NODE_APP_SECRET
+      - S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_NAME=$S3_BUCKET_NAME
+      - DEFAULT_REGION=$AWS_DEFAULT_REGION
+      - CLIENT_API_PUBLIC_URL=$STAGING_CLIENT_API_PUBLIC_URL
+      - S3_BUCKET_OBJECT_URL=$S3_BUCKET_OBJECT_URL
+      - SQS_QUEUE_URL=$SQS_QUEUE_URL
+      - LUCID_API_KEY=$LUCID_API_KEY
+      - IP_QUALITY_SCORE_PRIVATE_KEY=$IP_QUALITY_SCORE_PRIVATE_KEY
+      - PORT=4000
+      - DEV_MODE=0
+      - IP_CORE_URL=$IP_CORE_URL
+      - IP_REF_DATA_URL=$IP_REF_DATA_URL
+      - IP_ES_URL=$IP_ES_URL
+      - PARTNER_AUTH_KEY=$PARTNER_AUTH_KEY
+      - PARTNER_GUID=$PARTNER_GUID
+      - PURESPECTRUM_BASEURL=$PURESPECTRUM_BASEURL
+      - PURESPECTRUM_ACCESS_TOKEN=$PURESPECTRUM_ACCESS_TOKEN
+      - SCHLESINGER_SUPPLY_API_BASEURL
+      - SCHLESINGER_DEFINITION_API_BASEURL
+      - SCHLESINGER_ACCESS_TOKEN
+    networks:
+      - 99Bridge
+    volumes:
+      - ./backend:/usr/src/backend
+      - /usr/src/backend/node_modules
+
+  admin:
+    depends_on:
+      - backend
+    container_name: '99-live-react'
+    # image: $ECR_REPO_FOR_ADMIN
+    restart: always
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.staging
+      args:
+        - REACT_APP_API_BASE_URL=$STAGING_CLIENT_API_BASE_URL
+    ports:
+      - 80:80
+      - 443:443
+    environment: 
+      - REACT_APP_API_BASE_URL=$STAGING_CLIENT_API_BASE_URL
+    networks:
+      - 99Bridge

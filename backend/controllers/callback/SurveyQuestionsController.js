@@ -51,6 +51,7 @@ class SurveyQuestionsController {
             precode_list.push({
               option: options.OptionText,
               lucid_precode: options.Precode,
+              survey_provider_id:1
             });
           });
           precodes = await SurveyAnswerPrecodes.bulkCreate(precode_list, {
@@ -60,7 +61,7 @@ class SurveyQuestionsController {
         }
       });
     }
-    console.log(precodes);
+    // console.log(precodes);
     res.json({ status: true, message: 'Updated', precodes: precodes });
     return;
   }

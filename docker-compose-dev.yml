@@ -59,6 +59,16 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true 
       - DEV_MODE=1
+      - IP_CORE_URL=$IP_CORE_URL
+      - IP_REF_DATA_URL=$IP_REF_DATA_URL
+      - IP_ES_URL=$IP_ES_URL
+      - PARTNER_AUTH_KEY=$PARTNER_AUTH_KEY
+      - PARTNER_GUID=$PARTNER_GUID
+      - PURESPECTRUM_BASEURL=$PURESPECTRUM_BASEURL
+      - PURESPECTRUM_ACCESS_TOKEN=$PURESPECTRUM_ACCESS_TOKEN
+      - SCHLESINGER_SUPPLY_API_BASEURL
+      - SCHLESINGER_DEFINITION_API_BASEURL
+      - SCHLESINGER_ACCESS_TOKEN
     networks:
       - backend
       - frontend
@@ -81,6 +91,7 @@ services:
       - WDS_SOCKET_HOST=127.0.0.1 
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true 
+      - REACT_APP_API_BASE_URL=$CLIENT_API_BASE_URL
     volumes:
       - ./admin:/usr/src/frontend
       - /usr/src/frontend/node_modules

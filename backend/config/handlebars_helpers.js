@@ -1,3 +1,4 @@
+const { min } = require('lodash');
 const moment = require('moment');
 module.exports = [
   {
@@ -30,6 +31,20 @@ module.exports = [
           return v1 && v2 ? options.fn(this) : options.inverse(this);
         case '||':
           return v1 || v2 ? options.fn(this) : options.inverse(this);
+        case 'in':
+          var v2_arr = v2.split(',').map((x) => Number(x));
+          if (v2_arr.indexOf(v1) >= 0) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
+        case 'inString':
+          var v2_arr = v2.split(',');
+          if (v2_arr.indexOf(v1) >= 0) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
         default:
           return options.inverse(this);
       }
@@ -56,7 +71,7 @@ module.exports = [
         return format
           ? moment(date).format(format)
           : moment(date).format('DD/MM/YYYY');
-      else return;
+      else return '';
     },
   },
   {
@@ -66,7 +81,13 @@ module.exports = [
         return format
           ? moment(date).format(format)
           : moment(date).format('hh:mm a');
-      else return;
+      else return '';
+    },
+  },
+  {
+    name: 'timeFromNow',
+    fn: function (date) {
+      return date ? moment(date).fromNow() : '';
     },
   },
   {
@@ -88,6 +109,58 @@ module.exports = [
     name: 'toLower',
     fn: function (value) {
       return value.toLowerCase();
+    },
+  },
+  {
+    name: 'toUpper',
+    fn: function (value) {
+      return value.toUpperCase();
+    },
+  },
+  {
+    name: 'ucFirst',
+    fn: function (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+  },
+  {
+    name: 'cal',
+    fn: function (v1, operator, v2, options) {
+      v1 = Number(v1);
+      v2 = Number(v2);
+      switch (operator) {
+        case '+':
+          return v1 + v2;
+        case '-':
+          return v1 - v2;
+        case '/':
+          return v1 / v2;
+        case '*':
+          return v1 * v2;
+        default:
+          return 0;
+      }
+    },
+  },
+  {
+    name: 'calHoursToDays',
+    fn: function (h1) {
+      var result = '';
+      var days = Math.floor(h1 / 24);
+      var remainder = h1 % 24;
+      var hours = Math.floor(remainder);
+      var minutes = Math.floor(60 * (remainder - hours));
+
+      result += days > 0 ? days + ' Days ' : '';
+      result += hours > 0 ? hours + ' Hours ' : '';
+      result += minutes > 0 ? minutes + ' Minutes' : '';
+      return result;
+    },
+  },
+  {
+    name: 'convertObjectToString',
+    fn: function (obj) {
+      return JSON.stringify(obj);
     },
   },
 ];

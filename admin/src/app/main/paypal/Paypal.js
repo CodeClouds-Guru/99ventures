@@ -4,10 +4,10 @@ import axios from 'axios';
 const Paypal = () => {
     // const [{ isPending }] = usePayPalScriptReducer();
     const initialOptions = {
-        "client-id": "AS34VNOhe5wGedg3E8MkZsWWIb7VoHE54CoLYrGbib8FeNFmAlrMUwgsIDPbYNIC48YPXN6Vl-9FMR7H",
+        "client-id": "AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6",
         currency: "USD",
         intent: "capture",
-        // "data-client-token": btoa("AS34VNOhe5wGedg3E8MkZsWWIb7VoHE54CoLYrGbib8FeNFmAlrMUwgsIDPbYNIC48YPXN6Vl-9FMR7H" + ':' + "EPa00U3-OJlqXifqGPFmVDSz5LXQmSO4KDoVGmqaLwgRpeMc5KkgdxTRj6Kw6yq3aCf_Tp8xg6MYiOuF")
+        // "data-client-token": btoa("AevkQd7_MKUI6mSpcLXyL0MXYwxY_Y5vy8-fQG4IowQuHRXwk9dXQnqm7wqlfPAx2MkcFeuJwlcKl6-6" + ':' + "EK-L43SaFqcrTtmRgABvcZHVUToVoHxMtOGeIBkk-TdWKDg4lirK-PZ7zcZq0F26LwiWDVPf4a4VLaBv")
     };
 
     return (

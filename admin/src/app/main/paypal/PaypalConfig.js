@@ -1,6 +1,7 @@
 import { React } from 'react';
 import settingsConfig from 'app/configs/settingsConfig';
 import Paypal from './Paypal';
+import Paypal2 from './Paypal2';
 
 const PaypalConfig = {
     settings: {
@@ -27,7 +28,7 @@ const PaypalConfig = {
     routes: [
         {
             path: 'app/paypal',
-            element: <Paypal />,
+            element: <Paypal2 />,
             auth: settingsConfig.defaultAuth
         },
     ],

@@ -4,6 +4,8 @@ const {
   Page,
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
+  GoogleCaptchaConfiguration,
+  IpConfiguration
 } = require('../models');
 const util = require('util');
 const { QueryTypes, Op } = require('sequelize');
@@ -36,17 +38,23 @@ class PageParser {
   }
 
   async getPageNLayout() {
+    const portal = this.getCompanyPortal();
     const page = await Page.findOne({
-      where: { slug: this.slug },
+      where: { slug: this.slug, company_portal_id: portal.id },
       include: 'Layout',
     });
+    
     this.pageLayout = page ? page.Layout : null;
     this.page = page;
     if (!this.pageLayout) {
-      const portal = this.getCompanyPortal();
       this.pageLayout = await Layout.findByPk(portal.site_layout_id);
     }
     if (!this.page || !this.pageLayout) {
+      const errorObj = new Error('Sorry! Page not found');
+      errorObj.statusCode = 404;
+      throw errorObj;
+    }
+    if (this.page && this.page.status !== 'published') {
       const errorObj = new Error('Sorry! Page not found');
       errorObj.statusCode = 404;
       throw errorObj;
@@ -61,6 +69,21 @@ class PageParser {
   async preview(req) {
     if ('company_portal' in req.session) {
       this.companyPortal = req.session.company_portal;
+      if (this.companyPortal.status === 2) {
+        const whitelisted_ip = await IpConfiguration.findOne({
+          where: {
+            company_portal_id: this.companyPortal.id,
+            ip: req.ip,
+            status: 1
+          }
+        });
+        if (!whitelisted_ip && req.path !== '/503') {
+          req.session.flash = { error: this.companyPortal.downtime_message };
+          const errorObj = new Error('Temporarily Unavailable');
+          errorObj.statusCode = 503;
+          throw errorObj;
+        }
+      }
     }
     if ('member' in req.session) {
       this.sessionUser = req.session.member;
@@ -76,11 +99,11 @@ class PageParser {
       }
       delete req.session.flash;
     }
-    const page_content = await this.generateHtml();
+    const page_content = await this.generateHtml(req);
     return page_content;
   }
 
-  async generateHtml() {
+  async generateHtml(req) {
     await this.getPageNLayout();
     let layout_html = this.pageLayout.html;
     const page_title = this.page.name;
@@ -113,6 +136,32 @@ class PageParser {
       ? layout_descriptions.tag_content
       : '';
 
+    let current_company_portal = this.getCompanyPortal();
+    var google_captcha_header = '';
+    var scripted_captcha_field = '';
+    if (current_company_portal && current_company_portal.is_google_captcha_used === 1) {
+      let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
+      google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
+      scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
+      <script>
+      function onGcaptchaLoadCallback() {
+        grecaptcha.ready(function() {
+          grecaptcha.execute('${google_captcha.site_key}')
+              .then(function(token) {
+                var items = document.getElementsByClassName("g-recaptcha")
+                const hidden = document.createElement("input");
+                hidden.setAttribute("type", "hidden");
+                hidden.setAttribute("name", "g-captcha");
+                hidden.setAttribute("value", token);
+                for (let item of items) {
+                    item.appendChild(hidden)
+                }
+              });
+        });
+      }
+      </script>` : '';
+    }
+
     const default_scripted_codes = this.addDefaultAddOns();
     layout_html = layout_html.replaceAll('{{content}}', content);
     layout_html = layout_html.replaceAll(
@@ -129,13 +178,17 @@ class PageParser {
       layout_keywords,
       layout_descriptions,
       default_scripted_codes,
+      google_captcha_header,
     });
     const template = Handlebars.compile(layout_html);
     const flash = this.getFlashObject();
+    const sc_request = { base_url: req.baseUrl, hostname: req.hostname, ip: req.ip, original_url: req.originalUrl, path: req.path, query: req.query, xhr: req.xhr };
     layout_html = template({
       user,
       error_message,
-      flash
+      flash,
+      sc_request,
+      scripted_captcha_field,
     });
     this.sessionMessage = '';
 
@@ -165,7 +218,7 @@ class PageParser {
   async convertScriptToHtml(layout_html) {
     // var regex_match = layout_html.match(/{{[s]\d+-+\d+}}/g);
     var regex_match = layout_html.match(/\${do_script(.*?)}/g);
-    console.log('regex_match', regex_match);
+    // console.log('regex_match', regex_match);
 
     if (regex_match) {
       await regex_match.forEach(async (script_id) => {

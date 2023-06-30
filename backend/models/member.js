@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'member_id',
         as: 'member_amounts',
       });
-      Member.hasMany(models.MemberReferral, {
-        foreignKey: 'referral_id',
-      });
+      // Member.hasMany(models.MemberReferral, {
+      //   foreignKey: 'referral_id',
+      // });
       Member.belongsTo(models.CompanyPortal, {
         foreignKey: 'company_portal_id',
       });
@@ -61,6 +61,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'member_id',
         otherKey: 'email_alert_id',
         timestamps: false,
+      });
+      Member.hasMany(models.MemberNotification, {
+        foreignKey: 'member_id',
+      });
+      Member.hasMany(models.MemberActivityLog, {
+        foreignKey: 'member_id',
+      });
+      Member.belongsToMany(models.PaymentMethod, {
+        as: 'excluded_members',
+        through: 'excluded_member_payment_method',
+        foreignKey: 'member_id',
+        otherKey: 'payment_method_id',
+        timestamps: false,
+      });
+      Member.hasMany(models.WithdrawalRequest, {
+        foreignKey: 'member_id',
       });
     }
   }
@@ -86,6 +102,7 @@ module.exports = (sequelize, DataTypes) => {
       avatar: Joi.optional().label('Avatar'),
       country_code: Joi.optional().label('Country Code'),
       state: Joi.string().allow('').optional().label('State'),
+      admin_status: Joi.string().allow('').optional().label('Admin Status'),
     });
     return schema.validate(req.body);
   };
@@ -171,7 +188,25 @@ module.exports = (sequelize, DataTypes) => {
           return `${this.first_name} ${this.last_name}`;
         },
       },
+      address: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.address_1 ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''}, zipcode - ${this.zip_code || ''}` : '';
+        },
+      },
       state: DataTypes.STRING,
+      admin_status: {
+        type: DataTypes.ENUM('not_verified', 'verified', 'pending'),
+        // get() {
+        //   let rawValue = this.getDataValue('admin_status') || null;
+        //   rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
+        //   return rawValue
+        //     .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        //       return index == 0 ? word.toUpperCase() : word.toLowerCase();
+        //     })
+        //     .replace(/\s+/g, ' ');
+        // },
+      },
     },
     {
       sequelize,
@@ -246,6 +281,19 @@ module.exports = (sequelize, DataTypes) => {
       placeholder: 'Status',
       listing: true,
       show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    admin_status: {
+      field_name: 'admin_status',
+      db_name: 'admin_status',
+      type: 'text',
+      placeholder: 'Admin Status',
+      listing: true,
+      show_in_form: true,
       sort: false,
       required: false,
       value: '',
@@ -370,8 +418,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -407,6 +455,38 @@ module.exports = (sequelize, DataTypes) => {
         });
         if (data.length > 0) await MemberNote.bulkCreate(data);
       }
+      return result[0];
+    } catch (error) {
+      console.error(error);
+      // this.throwCustomError("Unable to save data", 500);
+    }
+  };
+
+  Member.changeAdminStatus = async (req) => {
+    const { MemberNote } = require('../models/index');
+
+    const value = req.body.value || '';
+    const field_name = req.body.field_name || '';
+    const id = req.params.id || null;
+    const member_ids = id
+      ? [id]
+      : Array.isArray(req.body.member_id)
+        ? req.body.member_id
+        : [req.body.member_id];
+    try {
+      let result = await Member.update(
+        {
+          [field_name]: value,
+        },
+        {
+          where: {
+            id: {
+              [Op.in]: member_ids,
+            },
+          },
+          return: true,
+        }
+      );
       return result[0];
     } catch (error) {
       console.error(error);
@@ -451,24 +531,25 @@ module.exports = (sequelize, DataTypes) => {
         status: 2,
         note: bonus_key,
         member_id: member.id,
-        amount_action: 'admin_adjustment',
+        amount_action: 'profile_completion_bonus',
         balance: parseFloat(bonus.settings_value),
       };
       let resp = await MemberTransaction.updateMemberTransactionAndBalance(
         data
       );
-      if (resp) {
+      if (resp.status) {
         let mailEventbus = eventBus.emit('send_email', {
           action: 'Member Profile Completion',
           data: {
-            email: 'debosmita.dey@codeclouds.co.in',
+            email: member.email,
             details: {
               desc:
                 'Congratulation! You got a bonus of $' +
                 parseFloat(bonus.settings_value) +
                 ' on sucessfully completing your profile on ' +
-                new Date(),
+                moment(new Date()).format('llll'),
               members: JSON.parse(JSON.stringify(member)),
+              bonus: parseFloat(bonus.settings_value).toFixed(2)
             },
           },
           req: req,

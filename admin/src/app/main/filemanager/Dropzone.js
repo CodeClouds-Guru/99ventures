@@ -81,17 +81,17 @@ function Dropzone(props) {
 			'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.docx', '.csv', '.xlsx', '.pptx', '.doc', '.xls', '.ppt', '.pdf']
 		},
 		onDrop: acceptedFiles => {
-			console.log(acceptedFiles)
+			// console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
 				preview: URL.createObjectURL(file)
 			})));
 		},
-		onDropAccepted: (e)=> {
+		onDropAccepted: (e) => {
 			console.log(e)
 			const config = {
 				onUploadProgress: progressEvent => {
 					var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-      				console.log(percentCompleted)
+					// console.log(percentCompleted)
 				}
 			}
 			axios.put('/upload/server', {}, config)
@@ -128,7 +128,7 @@ function Dropzone(props) {
 	}, []);
 
 	const handleFile = (e) => {
-		console.log(e.target.files)
+		// console.log(e.target.files)
 		// setImageSent(e.target.files[0]);
 	};
 

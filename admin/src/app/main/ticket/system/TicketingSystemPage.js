@@ -42,6 +42,7 @@ function TicketingSystemPage(props) {
     const [previousTickets, setPreviousTIckets] = useState([]);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [memberNote, setMemberNote] = useState('');
+    const [ticketSubject, setTicketSubject] = useState('');
 
     const stateUser = useSelector(state => state.user);
     const navigate = useNavigate();
@@ -71,12 +72,13 @@ function TicketingSystemPage(props) {
                         variant: 'error', message: `File size allowed upto 2MB`
                     }))
                 }
+                e.target.value = '';
             })
-            // setInputFiles(allowed_files);
             setInputFiles(allowed_files.map(file => Object.assign(file, {
                 preview: URL.createObjectURL(file)
             })));
         } else {
+            e.target.value = '';
             dispatch(showMessage({ variant: 'error', message: 'Allowed upto 4 files at a time.' }));
         }
     };
@@ -164,6 +166,7 @@ function TicketingSystemPage(props) {
                     setMemberStatus(response.data.results.data.Member.status);
                     setPreviousTIckets(response.data.results.data.previous_tickets);
                     setQuickResponseOptions(response.data.results.data.auto_responders);
+                    setTicketSubject(response.data.results.data.subject)
                     if (response.data.results.data.is_read === 0) {
                         updateTicket({
                             value: 1,
@@ -201,7 +204,7 @@ function TicketingSystemPage(props) {
     }
 
     const setEditorValue = (value) => {
-        wysiwygEditorRef.current.props.onEditorStateChange( EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))) )
+        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
     }
 
 
@@ -266,6 +269,7 @@ function TicketingSystemPage(props) {
                                                 : 'heroicons-outline:arrow-sm-right'}
                                         </FuseSvgIcon>
                                         <span className="flex mx-4 font-medium capitalize">Tickets</span>
+                                        (Sub:&nbsp; <b>{ticketSubject}</b> )
                                     </Typography>
                                 </div>
                                 <div className="flex flex-col justify-center sm:justify-end p-0 m-0 pt-5">
@@ -291,9 +295,14 @@ function TicketingSystemPage(props) {
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
                                             <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
-                                                    <span style={{ fontSize: '12px' }}>
-                                                        <i> <b>{val.Member ? `${val.Member.first_name} ${val.Member.last_name}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
-                                                    </span>
+                                                    {Object.keys(val).length > 0 &&
+                                                        <span style={{ fontSize: '12px' }}>
+                                                            <Link to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
+                                                                <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
+                                                            </Link>
+
+                                                        </span>
+                                                    }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
                                                 <div>
@@ -465,19 +474,19 @@ function TicketingSystemPage(props) {
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
-                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '40rem' }}>
+                                <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '30rem' }}>
                                     <div className="flex flex-row justify-start p-0 m-0 px-4 my-5">
                                         <Typography component={'h2'}>
                                             <b>Notes ({memberDetails.MemberNotes.length})</b>
                                         </Typography>
                                     </div>
-                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '20rem' }} className="px-4">
+                                    <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '30rem' }} className="px-4">
                                         {memberDetails.MemberNotes.map((val, key) => {
                                             return (
                                                 <div key={key} className="w-auto flex flex-col justify-items-center p-10 px-10 mt-10 rounded-8" style={{ background: '#dcdcdc' }}>
                                                     <div className="flex flex-row justify-between">
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <i><b>{`${val.User.alias_name}`}
+                                                            <i><b>{`${val.User ? val.User.alias_name : 'Application Firewall'}`}
                                                                 <span style={{ fontSize: '8px' }}> - More Surveys Support Team</span></b></i>
                                                         </span>
 
@@ -503,7 +512,7 @@ function TicketingSystemPage(props) {
                                         <b>Other Tickets ({previousTickets.length})</b>
                                     </Typography>
                                 </div>
-                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '150px' }} className="px-4">
+                                <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '34rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
                                             <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>

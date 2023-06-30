@@ -66,5 +66,12 @@ export default {
     } else {
       return document.execCommand('copy', true, text);
     }
+  },
+  replaceSpecialCharacters(string){
+    return string.replaceAll(/&gt;/g, '>')
+                .replaceAll(/&lt;/g, '<')
+                .replaceAll(/&#039;/g, "'")
+                .replaceAll(/&amp;/g, '&')
+                .replaceAll(/&quot;/g, '"')
   }
 }

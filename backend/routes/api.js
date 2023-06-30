@@ -17,22 +17,15 @@ const FileManagerController = new FileManagerControllerClass();
 const PageControllerClass = require('../controllers/backend/PageController');
 const PageController = new PageControllerClass();
 
+const ReportControllerClass = require('../controllers/backend/ReportController');
+const ReportController = new ReportControllerClass();
+
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController');
 
 const Paypal = require('../helpers/Paypal');
 
-router.get('/', [AuthMiddleware], (req, res) => {
-  const eventBus = require('../eventBus');
-  let email_body = eventBus.emit('send_email', {
-    action: 'Invitation',
-    data: {
-      email: 'mailto:sourabh.das@codeclouds.in',
-      company_id: 1,
-      company_portal_id: 1,
-    },
-    req: req,
-  });
-  res.json({ message: 'API working', email_body: email_body });
+router.get('/', async (req, res) => {
+  res.json({ message: 'API working', });
 });
 
 router.post('/signup', AuthController.signup);
@@ -53,7 +46,7 @@ router.post('/invitation-details', InvitationController.invitationDetails);
 
 //check password
 router.post('/check-auth', [AuthMiddleware], AuthController.checkAuth);
-
+router.get('/report', ReportController.getReport);
 //change ticket read status
 // router.get("/tickets/change-status", [AuthMiddleware], TicketController.changeStatus);
 
@@ -63,7 +56,7 @@ router.get('/campaign-callback', [AuthMiddleware], (req, res) => {
 
   let axios_class = new axios();
   let axios_callback = axios_class.makeRequest();
-  console.log('axios_callback', axios_callback);
+  // console.log('axios_callback', axios_callback);
   res.json(axios_callback);
 });
 
@@ -73,6 +66,17 @@ router.post(
   FileManagerController.download
 );
 router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
+
+/**
+ * CRON PATH
+ */
+const SurveySyncControllerClass = require('../controllers/callback/SurveySyncController');
+const SurveySyncController = new SurveySyncControllerClass();
+router.all('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
+router.all('/schlesinger-update', SurveySyncController.schlesingerSurveyUpdate);
+router.all('/lucid-update', SurveySyncController.lucidSurveyUpdate);
+
+
 
 //paypal integration
 // router.post('/order-create', async (req, res) => {
