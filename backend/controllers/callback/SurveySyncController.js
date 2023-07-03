@@ -1000,7 +1000,7 @@ class SurveySyncController {
 
             // Available survey making active by removing the deleted_at value
             const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
-            if(idTobeUpdated) {
+            if(idTobeUpdated.length) {
                 await Survey.update({
                     deleted_at: null
                 }, {
@@ -1103,7 +1103,7 @@ class SurveySyncController {
 
             // Available survey making active by removing the deleted_at value
             const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
-            if(idTobeUpdated) {
+            if(idTobeUpdated.length) {
                 await Survey.update({
                     deleted_at: null
                 }, {
@@ -1196,7 +1196,7 @@ class SurveySyncController {
 
             // Available survey making active by removing the deleted_at value
             const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
-            if(idTobeUpdated) {
+            if(idTobeUpdated.length) {
                 await Survey.update({
                     deleted_at: null
                 }, {
