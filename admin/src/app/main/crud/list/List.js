@@ -188,7 +188,7 @@ function List(props) {
 
 	useEffect(() => {
 		fetchModules();
-	}, [searchText, page, rowsPerPage, order.id, order.direction, where, props.params]);
+	}, [searchText, page, rowsPerPage, order.id, order.direction, where, props.params, props.module]);
 
 	/**
 	 * Unmounted the sate value
