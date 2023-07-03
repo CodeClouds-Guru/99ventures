@@ -13,6 +13,7 @@ const {
   SurveyAnswerPrecodes,
   SurveyQualification,
   SurveyProvider,
+  MemberTransaction
 } = require('../models/index');
 const axios = require('axios');
 const { json } = require('body-parser');
@@ -87,11 +88,11 @@ class ScriptParser {
               page_count = Math.ceil(data_count.count / perPage);
 
               if (script.module == 'MemberReferral') {
-                let total = await Models[script.module].findOne({
+                let total = await Models.MemberReferral.findOne({
                   attributes: [
                     [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
                   ],
-                  where: { member_id: user.id },
+                  where: { member_id: user.id},
                 });
                 other_details = {
                   ...other_details,
@@ -559,7 +560,7 @@ class ScriptParser {
         };
       case 'MemberReferral':
         return {
-          include: {
+          include: [{
             model: Models.Member,
             // as: 'member_referrer',
             include: {
@@ -568,10 +569,12 @@ class ScriptParser {
               limit: 1,
               order: [['created_at', 'DESC']],
             },
-          },
-          where: {
-            member_id: user.id,
-          },
+          }
+        ],
+        where: {
+          member_id: user.id,
+        },
+
         };
       case 'PaymentMethod':
         return {

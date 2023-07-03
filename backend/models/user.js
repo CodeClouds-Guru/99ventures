@@ -185,7 +185,7 @@ module.exports = (sequelize, DataTypes) => {
     phone_no: {
       field_name: 'phone_no',
       db_name: 'phone_no',
-      type: 'text',
+      type: 'number',
       placeholder: 'Phone No',
       listing: false,
       show_in_form: true,
