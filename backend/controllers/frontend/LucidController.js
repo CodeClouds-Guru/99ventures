@@ -23,13 +23,13 @@ class LucidController {
     }
 
     index = (req, res) => {
-        // if(!req.session.member) {
-        //     res.status(401).json({
-        //         status: false,
-        //         message: 'Unauthorized!'
-        //     });
-        //     return;
-        // }
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         const action = req.params.action;
         if(action === 'surveys')
             this.surveys(req, res);
@@ -128,50 +128,24 @@ class LucidController {
                     openEndedData.forEach(eg => {
                         queryString[eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
                         matchingQuestionIds.push(eg.SurveyQuestion.id);
-
                     });
                 }
-                const generateQueryString = new URLSearchParams(queryString).toString();
-                
-                const surveys = await Survey.findAndCountAll({
-                    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-                    distinct: true,
-                    where: {
-                        survey_provider_id: provider.id,
+                const generateQueryString = new URLSearchParams(queryString).toString();                
+                const surveys = await Survey.getSurveysAndCount({
+                    member_id: memberId,
+                    provider_id: provider.id,
+                    matching_answer_ids: matchingAnswerIds,
+                    matching_question_ids: matchingQuestionIds,
+                    order,
+                    pageno: pageNo,
+                    per_page: perPage,
+                    order_by: orderBy,
+                    clause: {
                         status: "active",
-                    },
-                    include: {
-                        model: SurveyQualification,
-                        attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,
-                        include: {
-                            model: SurveyAnswerPrecodes,
-                            attributes: ['id', 'option', 'precode'],
-                            where: {
-                                id: matchingAnswerIds
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: SurveyQuestion,
-                                    attributes: ['id', 'survey_provider_question_id'],
-                                    where: {
-                                        id: matchingQuestionIds
-                                    }
-                                }
-                            ],
-                        }
-                    },
-                    //limit: 200
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
-
-                // res.send(surveys);
-                // return;
                 var survey_list = []
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
@@ -263,27 +237,34 @@ class LucidController {
             delete params.uid
             
             var entrylink;
-            if(quota.SurveyStillLive == true) {
+            if(quota.SurveyStillLive !== true) {
                 const survey = await Survey.findOne({
                     attributes: ['url'],
                     where: {
                         survey_number: surveyNumber
                     }
                 });
+            
                 if(survey && survey.url){
                     entrylink = survey.url;
-                } else {                    
-                    const result = await lcObj.createEntryLink(surveyNumber);
-                    if(result.data && result.data.SupplierLink) {
-                        const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
-                        await Survey.update({
-                            url: url
-                        }, {
-                            where: {
-                                survey_number: surveyNumber
-                            }
-                        });
-                        entrylink = url;
+                } else {
+                    try{
+                        //Sometimes the survey entrylink not created and API sending 404 response.
+                        //That's why making this survey to draft as catch block
+                        const result = await lcObj.createEntryLink(surveyNumber);
+                        if(result.data && result.data.SupplierLink) {
+                            const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
+                            await Survey.update({
+                                url: url
+                            }, {
+                                where: {
+                                    survey_number: surveyNumber
+                                }
+                            });
+                            entrylink = url;
+                        }
+                    } catch(error) {
+                        throw {survey_number: surveyNumber, message: 'Sorry! Survey not found.'};
                     }
                 }
                 
@@ -291,21 +272,22 @@ class LucidController {
                 // res.send(URL)
                 res.redirect(URL);
             } else {
+                throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
+            }
+        }
+        catch(error) {
+            console.error(error);
+            if('survey_number' in error && error.surveyNumber) {
                 await Survey.update({
                     status: 'draft',
                     deleted_at: new Date()
                 },{
                     where: {
-                        survey_number: surveyNumber
+                        survey_number: error.surveyNumber
                     }
                 });
-                req.session.flash = { error: 'Survey is not live now!', redirect_url: '/lucid' };
-                res.redirect('/notice');
             }
-        }
-        catch(error) {
-            console.error(error);
-            req.session.flash = { error: error.message, redirect_url: '/lucid' };
+            req.session.flash = { notice: error.message, redirect_url: '/lucid' };
             res.redirect('/notice');
         }
     }

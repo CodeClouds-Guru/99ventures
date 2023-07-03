@@ -135,42 +135,21 @@ class SchlesingerController {
             }
             /** End */
             const generateQueryString = new URLSearchParams(queryString).toString();
-
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
-                const surveys = await Survey.findAndCountAll({
-                    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-                    distinct: true,
-                    where: {
-                        survey_provider_id: provider.id,
+                const surveys = await Survey.getSurveysAndCount({
+                    member_id: memberId,
+                    provider_id: provider.id,
+                    matching_answer_ids: matchingAnswerIds,
+                    matching_question_ids: matchingQuestionIds,
+                    order,
+                    pageno: pageNo,
+                    per_page: perPage,
+                    order_by: orderBy,
+                    clause: {
                         status: "live",
-                    },
-                    include: {
-                        model: SurveyQualification,
-                        attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,                        
-                        include: {
-                            model: SurveyAnswerPrecodes,
-                            attributes: ['id', 'option', 'precode'],
-                            where: {
-                                id: matchingAnswerIds
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: SurveyQuestion,
-                                    attributes: ['id'],
-                                    where: {
-                                        id: matchingQuestionIds 
-                                    }
-                                }
-                            ],
-                        }
-                    },
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
-                
+
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
                 if (!surveys.count) {
@@ -266,16 +245,16 @@ class SchlesingerController {
                     }
                     else {
                         this.updateSurvey(surveyNumber);
-                        req.session.flash = { error: 'No quota exists!', redirect_url: '/schlesigner' };
+                        req.session.flash = { notice: 'No quota exists!', redirect_url: '/schlesigner' };
                         res.redirect('/notice');
                     }                    
                 } else {
                     this.updateSurvey(surveyNumber);
-                    req.session.flash = { error: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
+                    req.session.flash = { notice: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
                     res.redirect('/notice');
                 }
             } else {
-                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/schlesigner' };
+                req.session.flash = { notice: 'Unable to get entry link!', redirect_url: '/schlesigner' };
                 res.redirect('/notice');
             }
         } catch (error) {

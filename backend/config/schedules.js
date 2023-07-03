@@ -53,6 +53,19 @@ const schedules = [
 			}
 		},
 		options: [null, true],
+	},
+	{
+		name: 'lucid survey status check and update',
+		pattern: '*/20 * * * *',
+		function: async () => {
+			try {
+				let cronJob = new SurveySyncClass();
+				await cronJob.lucidSurveyUpdate();
+			} catch (e) {
+				console.log(e.message)
+			}
+		},
+		options: [null, true],
 	}
 ]
 

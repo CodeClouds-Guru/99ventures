@@ -954,7 +954,9 @@ class MemberAuthController {
       } else {
         ip = ip.replace('::ffff:', '');
       }
-
+      var index = member_payment_info.findIndex(
+        (info) => info.field_name === 'email'
+      );
       let withdrawal_req_data = {
         member_id: request_data.member_id,
         amount: withdrawal_amount,
@@ -962,7 +964,11 @@ class MemberAuthController {
         currency: 'USD',
         status: 'pending',
         requested_on: new Date(),
-        payment_email: request_data.payment_field,
+        // payment_email: request_data.payment_field,
+        payment_email:
+          index !== -1
+            ? member_payment_info[index].field_value
+            : member_payment_info[0].field_value,
         withdrawal_type_id: parseInt(request_data.payment_method_id),
         ip: ip,
       };
