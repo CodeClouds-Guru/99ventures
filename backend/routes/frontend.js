@@ -26,14 +26,10 @@ const PureSpectrumControllerClass = require('../controllers/frontend/PureSpectru
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SchlesingerControllerClass = require('../controllers/frontend/SchlesingerController');
 const SchlesingerController = new SchlesingerControllerClass();
-const CintControllerClass = require('../controllers/frontend/CintController');
-const CintController = new CintControllerClass();
 const TicketControllerClass = require('../controllers/frontend/TicketController');
 const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
-const TolunaControllerClass = require('../controllers/frontend/TolunaController');
-const TolunaController = new TolunaControllerClass();
 const NotificationControllerClass = require("../controllers/frontend/NotificationController");
 const NotificationController = new NotificationControllerClass();
 
@@ -46,11 +42,9 @@ router.get('/survey/:status', StaticPageController.showStatus);
 router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
-router.get('/cint/surveys', CintController.surveys);
-router.get('/pure-spectrum/:action', PureSpectrumController.index);
-router.get('/schlesigner/:action', SchlesingerController.index);
-router.get('/lucid/:action', LucidController.index);
-router.get('/toluna/surveys', TolunaController.surveys);
+router.get('/purespectrum/entrylink', PureSpectrumController.generateEntryLink);
+router.get('/schlesigner/entrylink', SchlesingerController.generateEntryLink);
+router.get('/lucid/entrylink', LucidController.generateEntryLink);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
