@@ -500,6 +500,7 @@ class MemberAuthController {
 
         // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
         let email_alerts = req.body.email_alerts || [];
+        console.log('=======================email_alerts');
         if (email_alerts.length > 0) {
           member_status = await EmailAlert.saveEmailAlerts(
             member_id,
