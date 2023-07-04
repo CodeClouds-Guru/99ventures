@@ -116,8 +116,8 @@ function initializeSession(app) {
 /**
  * Run Cron
  */
-function runSchedule(){
-  if(process.env.DEV_MODE != 1) {
+function runSchedule() {
+  if (process.env.DEV_MODE !== '1') {
     const schedules = {}
     jobs.forEach((job, idx) => {
       schedules[idx] = cron.schedule(
