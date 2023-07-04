@@ -36,18 +36,13 @@ const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 const NotificationControllerClass = require("../controllers/frontend/NotificationController");
 const NotificationController = new NotificationControllerClass();
-var sitemap;
 router.get('/sitemap.xml', async (req, res) => {
   const SiteMapControllerClass = require("../controllers/frontend/SiteMapController");
   const SiteMapController = new SiteMapControllerClass();
   res.header('Content-Type', 'application/xml');
   res.header('Content-Encoding', 'gzip');
-  if (sitemap) {
-    res.send(sitemap)
-    return
-  }
   try {
-    const smStream = await SiteMapController.generate('https://moresurveys.com');
+    const smStream = await SiteMapController.generate(process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : req.baseUrl);
     const pipeline = smStream.pipe(createGzip())
     streamToPromise(pipeline).then(sm => sitemap = sm)
     smStream.end()
