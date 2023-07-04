@@ -47,28 +47,26 @@ module.exports = (sequelize, DataTypes) => {
         attributes: ['id'],
       };
     }
-
-    // console.log(options);
     return await EmailAlert.findAll(options);
   };
 
   EmailAlert.saveEmailAlerts = async (member_id, email_alerts) => {
-    if (email_alerts) {
-      const { sequelize } = require('../models/index');
-      const queryInterface = sequelize.getQueryInterface();
-      const db = require('../models/index');
-      const { QueryTypes } = require('sequelize');
-      let resp = true;
-
-      try {
-        //remove existing data
-        let alert_del = await db.sequelize.query(
-          `DELETE FROM email_alert_member WHERE member_id=?`,
-          {
-            replacements: [member_id],
-            type: QueryTypes.DELETE,
-          }
-        );
+    // if (email_alerts) {
+    const { sequelize } = require('../models/index');
+    const queryInterface = sequelize.getQueryInterface();
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    let resp = true;
+    try {
+      //remove existing data
+      let alert_del = await db.sequelize.query(
+        `DELETE FROM email_alert_member WHERE member_id=?`,
+        {
+          replacements: [member_id],
+          type: QueryTypes.DELETE,
+        }
+      );
+      if (email_alerts) {
         if (
           email_alerts &&
           Array.isArray(email_alerts) &&
@@ -89,13 +87,14 @@ module.exports = (sequelize, DataTypes) => {
         }
 
         resp = true;
-      } catch (error) {
-        console.error(error);
-        resp = false;
-      } finally {
-        return resp;
       }
+    } catch (error) {
+      console.error(error);
+      resp = false;
+    } finally {
+      return resp;
     }
+    // }
   };
   return EmailAlert;
 };
