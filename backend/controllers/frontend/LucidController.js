@@ -17,26 +17,8 @@ const Sequelize = require('sequelize');
 class LucidController {
 
     constructor(){
-        this.index = this.index.bind(this);
         this.surveys = this.surveys.bind(this);
         this.rebuildEntryLink =  this.rebuildEntryLink.bind(this)
-    }
-
-    index = (req, res) => {
-        if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
-            return;
-        }
-        const action = req.params.action;
-        if(action === 'surveys')
-            this.surveys(req, res);
-        else if(action === 'entrylink')
-            this.generateEntryLink(req, res);
-        else 
-            throw error('Invalid access!');
     }
 
     surveys = async (memberId,params) => {
@@ -222,6 +204,13 @@ class LucidController {
     }
 
     generateEntryLink = async (req, res) => {
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         try{
             const lcObj = new LucidHelper;
             const surveyNumber = req.query.survey_number;    
@@ -276,7 +265,6 @@ class LucidController {
             }
         }
         catch(error) {
-            console.error(error);
             if('survey_number' in error && error.surveyNumber) {
                 await Survey.update({
                     status: 'draft',

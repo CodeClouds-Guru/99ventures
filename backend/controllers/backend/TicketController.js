@@ -324,6 +324,29 @@ class TicketController extends Controller {
       throw error;
     }
   }
+
+  /**
+   * Delete Ticket Attachment using CRON
+   */
+  async removeAttachments() {
+    try{
+      await TicketAttachment.destroy({
+        where: {
+          created_at: {
+            [Op.lt]: new Date(new Date().setDate(new Date().getDate() - 30)) // 30days before
+          }
+        },
+        //force: true
+      });
+    } catch(error) {
+      const logger = require('../../helpers/Logger')(`cron.log`);
+      logger.error(error);
+    } finally {
+      return {
+        message: 'Success'
+      }
+    }
+  }
 }
 
 module.exports = TicketController;
