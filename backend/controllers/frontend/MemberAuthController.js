@@ -498,16 +498,12 @@ class MemberAuthController {
         //set eligibility
         await this.setMemberEligibility(member_id, member.profile_completed_on);
 
-        // if (req.body.email_alerts && req.body.email_alerts.length > 0) {
-        let email_alerts = req.body.email_alerts || [];
-        if (email_alerts.length > 0) {
-          member_status = await EmailAlert.saveEmailAlerts(
-            member_id,
-            email_alerts
-          );
-        }
+        let email_alerts = req.body.email_alerts || null;
 
-        // }
+        member_status = await EmailAlert.saveEmailAlerts(
+          member_id,
+          email_alerts
+        );
       }
       if (method === 'PUT') {
         let rsp = await this.changePassword(req, member);
