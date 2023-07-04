@@ -5,6 +5,10 @@ const SqsHelper = require('../helpers/SqsHelper');
 const EmaiHelper = require('../helpers/EmailHelper');
 const { OfferWall } = require('../models');
 const Paypal = require('../helpers/Paypal');
+const { SitemapStream, streamToPromise } = require('sitemap')
+const { createGzip } = require('zlib')
+const { Readable } = require('stream')
+
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow: /');
@@ -32,6 +36,27 @@ const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 const NotificationControllerClass = require("../controllers/frontend/NotificationController");
 const NotificationController = new NotificationControllerClass();
+var sitemap;
+router.get('/sitemap.xml', async (req, res) => {
+  const SiteMapControllerClass = require("../controllers/frontend/SiteMapController");
+  const SiteMapController = new SiteMapControllerClass();
+  res.header('Content-Type', 'application/xml');
+  res.header('Content-Encoding', 'gzip');
+  if (sitemap) {
+    res.send(sitemap)
+    return
+  }
+  try {
+    const smStream = await SiteMapController.generate('https://moresurveys.com');
+    const pipeline = smStream.pipe(createGzip())
+    streamToPromise(pipeline).then(sm => sitemap = sm)
+    smStream.end()
+    pipeline.pipe(res).on('error', (e) => { throw e })
+  } catch (e) {
+    console.error("Sitemap generation error", e);
+    res.status(500).send("Something went wrong")
+  }
+});
 
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
@@ -58,11 +83,11 @@ router.delete('/update-notification', NotificationController.delete);
 router.get('/test-mail', async (req, res) => {
   const emaiHelper = new EmaiHelper({
     user: req.session.member,
-    headers:{
-      site_id:1
+    headers: {
+      site_id: 1
     }
   });
-  const send_message = await emaiHelper.parse({action:'Referral Bonus',data:{}});
+  const send_message = await emaiHelper.parse({ action: 'Referral Bonus', data: {} });
   res.send(send_message);
 });
 router.get('/test-payment', async (req, res) => {
@@ -104,9 +129,9 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 
-router.get('/:slug?', async (req, res) => {
-  //checkIPMiddleware
-  var pagePerser = new PageParser(req.params.slug || '/');
+router.get('*', async (req, res) => {
+  const slug = req.path.length > 1 ? req.path.substring(1) : req.path;
+  var pagePerser = new PageParser(slug);
   try {
     var page_content = await pagePerser.preview(req);
   } catch (e) {
