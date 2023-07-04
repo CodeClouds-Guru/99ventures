@@ -695,6 +695,7 @@ class ScriptParser {
     script_html =
       script_html +
       `<div class="pagination-sec d-flex justify-content-center justify-content-md-end pb-2 pt-0 pb-xl-4 pt-xl-2 px-3 px-lg-4 rounded-bottom">\
+      <input type="hidden" id="filter_where">\
     <nav aria-label="Page navigation example">\
       <ul class="pagination mb-0">\
       {{#ifCond '` +
@@ -759,6 +760,7 @@ class ScriptParser {
         });\
         function callPagination(element) {\
           var dataAttrs = $(element).data();\
+          var filter_where = $("#filter_where").val();\
           if("where" in dataAttrs){ dataAttrs.where =  isJson(dataAttrs.where)}\
           var params = {pageno: 1,perpage: 10,orderby: null,order: null,script: "",member: null,...dataAttrs};\
           $.ajax({\
@@ -768,6 +770,22 @@ class ScriptParser {
             success: function (res) {\
               if (res.status) {\
                 $(element).html(res.html);\
+                if(filter_where){\
+                  filter_where = JSON.parse(filter_where);
+                  Object.keys(filter_where).forEach(key => {\
+                    let filter_elem = "#"+key;\
+                    if($(filter_elem).is("input")){\
+                      $(filter_elem).val(filter_where[key]);\
+                    }else{\
+                      $(filter_elem).html(filter_where[key]);\
+                    }\
+                  });\
+                  $("#filter_where").val(JSON.stringify(filter_where));\
+                  let isFunction = typeof setFilters === 'function';\
+                  if(isFunction){\
+                    setFilters();\
+                  }\
+               }\
               }\
             }
           })\
