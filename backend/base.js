@@ -12,13 +12,14 @@ const HandlebarHelpers = require("./config/handlebars_helpers");
 const jobs = require('./config/schedules');
 const cron = require('node-cron');
 
+
 /**
  * This functions initialize an express app
  * @returns Object (Express)
  */
 function init() {
-  const app = express();
-  return app;
+  const app = express()
+  return app
 }
 
 /**
@@ -36,13 +37,15 @@ function setup(app) {
       useTempFiles: true,
       tempFileDir: '/tmp/',
     })
-  );
+  )
+
 
   app.use(express.static(path.join(__dirname, '/public')));
   app.use(cookieParser('scripted-' + process.env.NODE_APP_SECRET));
 
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
+
   app.use(
     cors({
       origin: '*',
@@ -55,7 +58,7 @@ function setup(app) {
       // },
       optionsSuccessStatus: 200,
     })
-  );
+  )
 }
 
 function initializeHandlebars(app) {
@@ -79,7 +82,7 @@ function chainMiddlewares(app) {
     if ('run' in middleObj && typeof middleObj.run === 'function') {
       app.use(middleObj.run);
     }
-  });
+  })
 }
 
 /**
@@ -94,6 +97,7 @@ function chainRoutes(app) {
       const { prefix, router } = require('./routes/' + file);
       app.use(prefix, router);
     });
+
 }
 
 /**
@@ -141,14 +145,15 @@ module.exports = function () {
   chainRoutes(app);
   runSchedule();
   app.enable('trust proxy')
+
   //General exception handler
   app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error(err.stack)
     res.status(500).json({
       status: false,
       errors: ['Oops! Something went wrong'],
       trace: err.stack,
-    });
-  });
-  return app;
-};
+    })
+  })
+  return app
+}

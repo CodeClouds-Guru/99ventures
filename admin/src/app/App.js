@@ -20,7 +20,7 @@ import axios from 'axios';
  * Axios HTTP Request defaults
  */
 //  datas-loadb-16icz3rsivdw8-bdf77d8837c7d527.elb.us-east-2.amazonaws.com
-console.log(window.location.origin);
+
 if (window.location.origin === 'https://adminstaging.moresurveys.com') {
   axios.defaults.baseURL = 'https://staging.moresurveys.com/api/';
 } else if (window.location.origin === 'https://admin.moresurveys.com') {
