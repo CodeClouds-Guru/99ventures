@@ -1,19 +1,11 @@
 import { styled } from '@mui/material/styles';
 // import { useTranslation } from 'react-i18next';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import DemoContent from '@fuse/core/DemoContent';
+import FusePageCarded from '@fuse/core/FusePageCarded/FusePageCarded';
+// import DemoContent from '@fuse/core/DemoContent';
+import DashboardContent from './DashboardContent';
 
-const Root = styled(FusePageSimple)(({ theme }) => ({
-    '& .FusePageSimple-header': {
-        backgroundColor: theme.palette.background.paper,
-        borderBottomWidth: 1,
-        borderStyle: 'solid',
-        borderColor: theme.palette.divider,
-    },
-    '& .FusePageSimple-toolbar': {},
-    '& .FusePageSimple-content': {},
-    '& .FusePageSimple-sidebarHeader': {},
-    '& .FusePageSimple-sidebarContent': {},
+const Root = styled(FusePageCarded)(({ theme }) => ({
 }));
 
 function DashboardPage(props) {
@@ -28,8 +20,8 @@ function DashboardPage(props) {
                 </div>
             }
             content={
-                <div className="p-24">
-                    <DemoContent />
+                <div className="p-10">
+                    <DashboardContent />
                 </div>
             }
             scroll="content"

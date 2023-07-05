@@ -6,10 +6,13 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT
       },
       company_id: {
         allowNull: false,
+        type: Sequelize.BIGINT
+      },
+      site_layout_id : {
         type: Sequelize.BIGINT
       },
       domain: {
@@ -23,7 +26,9 @@ module.exports = {
         type: Sequelize.TEXT
       },
       status: {
-        type: Sequelize.INTEGER
+        type: Sequelize.TINYINT,
+        defaultValue:1,
+        comment: "0=Inactive, 1=Active, 2=Shutdown"
       },
       created_by: {
         type: Sequelize.BIGINT

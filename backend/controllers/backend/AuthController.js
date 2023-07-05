@@ -3,8 +3,8 @@
  * @author Sourabh (CodeClouds)
  */
 
-const Joi = require("joi");
-const { User } = require("../../models/index");
+const Joi = require('joi');
+const { User } = require('../../models/index');
 const {
   Invitation,
   GroupRole,
@@ -13,14 +13,18 @@ const {
   Permission,
   Group,
   Company,
-} = require("../../models/index");
-const { QueryTypes, Op } = require("sequelize");
-const db = require("../../models/index");
-const bcrypt = require("bcryptjs");
-const { generateToken } = require("../../helpers/global");
-const permission = require("../../models/permission");
-const UserResources = require("../../resources/UserResources");
-const FileHelper = require("../../helpers/fileHelper");
+  Ticket,
+  CompanyPortal,
+  WithdrawalRequest,
+  Member,
+} = require('../../models/index');
+const { QueryTypes, Op } = require('sequelize');
+const db = require('../../models/index');
+const bcrypt = require('bcryptjs');
+const { generateToken } = require('../../helpers/global');
+const permission = require('../../models/permission');
+const UserResources = require('../../resources/UserResources');
+const FileHelper = require('../../helpers/fileHelper');
 
 class AuthController {
   constructor() {
@@ -40,7 +44,7 @@ class AuthController {
       last_name: Joi.string().required(),
       username: Joi.string().alphanum().min(3).max(30).required(),
       password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
       phone_no: Joi.string().required(),
       email: Joi.string().email().required(),
@@ -52,7 +56,7 @@ class AuthController {
       let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
     }
 
@@ -65,32 +69,32 @@ class AuthController {
       });
 
       if (
-        (existing_user.length > 0 && value.invitation == "") ||
+        (existing_user.length > 0 && value.invitation == '') ||
         (value.invitation == 1 &&
           existing_user.length > 0 &&
-          existing_user[0].status == "1")
+          existing_user[0].status == '1')
       ) {
         return res.status(400).json({
           status: false,
-          errors: "User Already Exists",
+          errors: 'User Already Exists',
         });
       }
-      let hash_obj = "";
-      if (value.invitation == "1") {
-        hash_obj = Buffer.from(value.token, "base64");
-        hash_obj = hash_obj.toString("utf8");
+      let hash_obj = '';
+      if (value.invitation == '1') {
+        hash_obj = Buffer.from(value.token, 'base64');
+        hash_obj = hash_obj.toString('utf8');
         hash_obj = JSON.parse(hash_obj);
         if (new Date(hash_obj.expired_at) < new Date()) {
           return res.status(400).json({
             status: false,
-            errors: "This link has been expired",
+            errors: 'This link has been expired',
           });
         }
       }
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(value.password, salt);
       let new_user = [];
-      if (value.invitation == "1") {
+      if (value.invitation == '1') {
         let update_user = await User.update(
           {
             first_name: value.first_name,
@@ -131,7 +135,7 @@ class AuthController {
       console.log(err.message);
       res.status(500).json({
         status: false,
-        errors: "Unable to save data",
+        errors: 'Unable to save data',
       });
     }
   }
@@ -139,7 +143,7 @@ class AuthController {
   async login(req, res) {
     const schema = Joi.object({
       password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
       email: Joi.string().email().required(),
     });
@@ -148,7 +152,7 @@ class AuthController {
       let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
       return;
     }
@@ -156,7 +160,7 @@ class AuthController {
     if (!user) {
       res.status(401).json({
         status: false,
-        errors: "Email is not registered",
+        errors: 'Email is not registered',
       });
       return;
     }
@@ -164,7 +168,7 @@ class AuthController {
     if (!isMatch) {
       res.status(401).json({
         status: false,
-        errors: "Invalid Credentials",
+        errors: 'Invalid Credentials',
       });
       return;
     }
@@ -174,7 +178,7 @@ class AuthController {
       },
     });
 
-    const companies = await user.getCompanies({ include: ["CompanyPortals"] });
+    const companies = await user.getCompanies({ include: ['CompanyPortals'] });
 
     const userResourcesObj = new UserResources(user);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
@@ -196,10 +200,28 @@ class AuthController {
     var roles = [];
     var permissions = [];
     let user = req.user;
-    const header_company_id = req.header("company_id") || 0;
+    const header_company_id = req.header('company_id') || 0;
+    const header_company_portal_id = req.header('site_id') || 0;
 
     const userResourcesObj = new UserResources(user, header_company_id);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
+
+    var unread_ticket_count = await Ticket.getTicketCount(
+      0,
+      header_company_portal_id
+    );
+    var pending_withdrawal_count = await WithdrawalRequest.getPendingRequest(
+      '',
+      header_company_portal_id,
+      Member
+    );
+    var company_portal = await CompanyPortal.findByPk(header_company_portal_id);
+    userResourcesData.setDataValue('unread_tickets', unread_ticket_count);
+    userResourcesData.setDataValue('loggedin_portal', company_portal);
+    userResourcesData.setDataValue(
+      'pending_withrawal_request',
+      pending_withdrawal_count
+    );
     return userResourcesData;
   }
   async logout(req, res) {
@@ -208,7 +230,7 @@ class AuthController {
 
   async refreshToken(req, res) {
     const user = req.user;
-    const companies = await user.getCompanies({ include: ["CompanyPortals"] });
+    const companies = await user.getCompanies({ include: ['CompanyPortals'] });
 
     const token = generateToken({
       user: {
@@ -236,7 +258,7 @@ class AuthController {
     });
     res.status(200).json({
       status: true,
-      companies: "Companies" in user && user.Companies ? user.Companies : [],
+      companies: 'Companies' in user && user.Companies ? user.Companies : [],
     });
   }
   //forgot password
@@ -249,7 +271,7 @@ class AuthController {
       let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
       return;
     }
@@ -258,19 +280,35 @@ class AuthController {
     if (!user) {
       res.status(401).json({
         status: false,
-        errors: "Email is not registered",
+        errors: 'Email is not registered',
       });
       return;
     }
+    const companies = await user.getCompanies({ include: ['CompanyPortals'] });
+    req.headers.site_id = companies[0].CompanyPortals[0].id;
     let reset_obj = { id: user.id, email: user.email };
     reset_obj = JSON.stringify(reset_obj);
-    let base64data = Buffer.from(reset_obj, "utf8");
-    let base64String = base64data.toString("base64");
+    let base64data = Buffer.from(reset_obj, 'utf8');
+    let base64String = base64data.toString('base64');
+    //send mail
+    const eventBus = require('../../eventBus');
+    let evntbus = eventBus.emit('send_email', {
+      action: 'Forgot Password',
+      data: {
+        email: value.email,
+        details: {
+          reset_password_link:
+            process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
+        },
+      },
+      req: req,
+    });
+
     res.status(200).json({
       status: true,
       reset_link:
-        process.env.CLIENT_ORIGIN + "/reset-password?hash=" + base64String,
-      message: "Reset password mail has been sent to your email",
+        process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
+      message: 'Reset password mail has been sent to your email',
     });
   }
   //reset password
@@ -278,20 +316,20 @@ class AuthController {
     const schema = Joi.object({
       hash: Joi.string().required(),
       password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
     });
 
     const { error, value } = schema.validate(req.body);
-    let hash_obj = Buffer.from(value.hash, "base64");
-    hash_obj = hash_obj.toString("utf8");
+    let hash_obj = Buffer.from(value.hash, 'base64');
+    hash_obj = hash_obj.toString('utf8');
     hash_obj = JSON.parse(hash_obj);
 
     if (error) {
       let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
       return;
     }
@@ -300,7 +338,7 @@ class AuthController {
     if (!user) {
       res.status(401).json({
         status: false,
-        errors: "Email is not registered",
+        errors: 'Email is not registered',
       });
       return;
     }
@@ -313,7 +351,7 @@ class AuthController {
     );
     res.status(200).json({
       status: true,
-      message: "Password updated",
+      message: 'Password updated',
     });
   }
   //get user permissions
@@ -322,7 +360,7 @@ class AuthController {
     const companies = await user.getCompanies();
     //user roles
     let roles = await GroupRole.findAll({
-      attributes: ["group_id", "role_id"],
+      attributes: ['group_id', 'role_id'],
       where: { group_id: companies[0].company_user.group_id },
     });
     roles = roles.map((role) => {
@@ -334,7 +372,7 @@ class AuthController {
       include: {
         model: Permission,
         required: true,
-        attributes: ["name", "id", "slug"],
+        attributes: ['name', 'id', 'slug'],
       },
     });
     permissions = permissions.map((permission) => {
@@ -349,19 +387,19 @@ class AuthController {
   //profile update
   async profileUpdate(req, res) {
     let user = req.user;
-    if (req.body.type == "basic_details") {
+    if (req.body.type == 'basic_details') {
       delete req.body.type;
       this.updateBasicDetails(req, res);
-    } else if (req.body.type == "change_avatar") {
+    } else if (req.body.type == 'change_avatar') {
       delete req.body.type;
       this.changeAvatar(req, res);
-    } else if (req.body.type == "change_password") {
+    } else if (req.body.type == 'change_password') {
       delete req.body.type;
       this.changePassword(req, res);
     } else {
       res.status(401).json({
         status: false,
-        errors: "Type is required.",
+        errors: 'Type is required.',
       });
     }
   }
@@ -379,7 +417,7 @@ class AuthController {
       let error_msg = error.details.map((err) => err.message);
       res.status(422).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
       return;
     }
@@ -395,7 +433,7 @@ class AuthController {
       // let profile_details = await this.profileDetails(req)
       res.status(200).json({
         status: true,
-        message: "Profile Updated.",
+        message: 'Profile Updated.',
         // user: profile_details
       });
     } catch (error) {
@@ -409,27 +447,32 @@ class AuthController {
       let pre_avatar = user.avatar;
       let files = [];
       files[0] = req.files.avatar;
-      const fileHelper = new FileHelper(files, "users", req);
-      const file_name = await fileHelper.upload();
+      const fileHelper = new FileHelper(files, 'users', req);
+      let file_name = await fileHelper.upload();
+      // console.log('file_name',file_name)
+      let avatar_name = '';
+      if (file_name.status == true) {
+        avatar_name = file_name.files[0].filename;
+      }
       await User.update(
         {
-          avatar: file_name.files[0].filename,
+          avatar: avatar_name,
         },
         { where: { id: user.id } }
       );
-      if (pre_avatar != "") {
+      if (pre_avatar != '') {
         let file_delete = await fileHelper.deleteFile(pre_avatar);
       }
       // let profile_details = await this.profileDetails(req)
       res.status(200).json({
         status: true,
-        message: "Avatar Updated.",
+        message: 'Avatar Updated.',
         // user: profile_details
       });
     } else {
       res.status(422).json({
         status: false,
-        errors: "Avatar is required.",
+        errors: 'Avatar is required.',
       });
     }
   }
@@ -438,10 +481,10 @@ class AuthController {
     let user = req.user;
     const schema = Joi.object({
       old_password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
       password: Joi.string()
-        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required(),
     });
     const { error, value } = schema.validate(req.body);
@@ -449,7 +492,7 @@ class AuthController {
       let error_msg = error.details.map((err) => err.message);
       res.status(401).json({
         status: false,
-        errors: error_msg.join(","),
+        errors: error_msg.join(','),
       });
       return;
     }
@@ -460,7 +503,7 @@ class AuthController {
     if (!isMatch) {
       res.status(422).json({
         status: false,
-        errors: "Old password does not match",
+        errors: 'Old password does not match',
       });
       return;
     }
@@ -485,18 +528,18 @@ class AuthController {
   //check password
   async checkAuth(req, res) {
     try {
-      const password = req.body.password || "";
+      const password = req.body.password || '';
       if (!password) {
         return res.status(422).json({
           status: false,
-          errors: "Password missing",
+          errors: 'Password missing',
         });
       }
       const user = await User.findOne({ where: { id: req.user.id } });
       if (!user) {
         return res.status(422).json({
           status: false,
-          errors: "User does not exists",
+          errors: 'User does not exists',
         });
       }
       // console.log(user)
@@ -504,19 +547,19 @@ class AuthController {
       if (!isMatch) {
         return res.status(422).json({
           status: false,
-          errors: "Invalid Credentials",
+          errors: 'Invalid Credentials',
         });
       }
 
       return res.status(200).json({
         status: true,
-        message: "Paswword correct",
+        message: 'Paswword correct',
       });
     } catch (err) {
       console.log(err.message);
       return res.status(500).json({
         status: false,
-        errors: "Unable to get data",
+        errors: 'Unable to get data',
       });
     }
   }

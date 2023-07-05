@@ -24,7 +24,7 @@ function Configuration(props) {
             //     </div>
             // }
             content={
-                <div className="p-24" style={{ width: '100%' }}>
+                <div className="p-10" style={{ width: '100%' }}>
                     <ConfigurationContent />
                 </div>
             }

@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 const modules = [
   {
     slug: 'users',
@@ -138,13 +138,184 @@ const modules = [
   {
     slug: 'scripts',
     name: 'Scripts',
-    parent_module: 'Configurations',
+    parent_module: 'Pages and Layout',
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
-]
+  {
+    slug: 'filemanager',
+    name: 'File Manager',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'tickets',
+    name: 'Tickets',
+    parent_module: null,
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'settings',
+    name: 'Settings',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'components',
+    name: 'Components',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'layouts',
+    name: 'Layouts',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'pages',
+    name: 'Pages',
+    parent_module: 'Pages and Layout',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'members',
+    name: 'Members',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'memberbalances',
+    name: 'Member Balances',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'memberactivitylogs',
+    name: 'Member Activity Logs',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'memberpaymentinformations',
+    name: 'Member Payment Informations',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'iplogs',
+    name: 'IP Logs',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'membertransactions',
+    name: 'Member Transactions',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'memberreferrals',
+    name: 'Member Referrals',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'campaigns',
+    name: 'Member Campaigns',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'offerwalls',
+    name: 'Offer Walls',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'shoutbox',
+    name: 'Shoutbox',
+    parent_module: 'Shoutbox',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'shoutboxconfigurations',
+    name: 'Shoutbox Configurations',
+    parent_module: 'Shoutbox',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'withdrawalrequests',
+    name: 'Withdrawal Requests',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
+    slug: 'surveyproviders',
+    name: 'Survey Providers',
+    parent_module: null,
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+];
 module.exports = {
   async up(queryInterface, Sequelize) {
     /**
@@ -156,7 +327,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    await queryInterface.bulkInsert('modules', modules)
+    await queryInterface.bulkInsert('modules', modules);
   },
 
   async down(queryInterface, Sequelize) {
@@ -166,6 +337,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete('modules', null, {})
+    await queryInterface.bulkDelete('modules', null, {});
   },
-}
+};

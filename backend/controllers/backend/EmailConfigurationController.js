@@ -14,10 +14,10 @@ class EmailConfigurationController extends Controller {
     let email_details = await EmailConfiguration.findOne({
       where: { company_portal_id: site_id },
     })
-    res.status(200).json({
+    return {
       status: true,
       data: email_details,
-    })
+    }
   }
   //update email configuration
   async save(req, res) {
@@ -26,11 +26,7 @@ class EmailConfigurationController extends Controller {
     const { error, value } = EmailConfiguration.validate(req)
     if (error) {
       let message = error.details.map((err) => err.message).join(', ')
-      res.status(401).json({
-        status: false,
-        errors: message,
-      })
-      return
+      this.throwCustomError(message, 401);
     }
     //
     let email_details = await EmailConfiguration.findOne({
@@ -42,10 +38,10 @@ class EmailConfigurationController extends Controller {
     } else {
       await super.save(req)
     }
-    res.status(200).json({
+    return {
       status: true,
       message: 'Record Updated',
-    })
+    }
   }
 }
 

@@ -1,25 +1,15 @@
-import TextField from '@mui/material/TextField';
+import { TextField, MenuItem, OutlinedInput, InputLabel, FormControl, ListItemText, Select, Checkbox, Button, Switch, FormControlLabel, FormGroup } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Controller, useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { saveModule, updateModule, selectModule } from "../store/moduleSlice"
-import MenuItem from '@mui/material/MenuItem';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { showMessage } from 'app/store/fuse/messageSlice';
-
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-import ListItemText from '@mui/material/ListItemText';
-import Select from '@mui/material/Select';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-
 import { motion } from 'framer-motion';
-
+import { useState } from 'react';
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -48,7 +38,7 @@ function CreateEditForm(props) {
     resolver: yupResolver(schema)
   });
   const { module, moduleId } = useParams();
-
+  const [switchField, setSwitchField] = useState(false)
   const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
     let fieldOptions = fieldConfig.options || []
@@ -147,6 +137,36 @@ function CreateEditForm(props) {
           type="password"
         />
       case "text":
+        return (<TextField
+          {...field}
+          className="mt-8 mb-16"
+          error={!!errors.name}
+          helperText={errors?.name?.message}
+          label={fieldConfig.placeholder}
+          autoFocus
+          id={fieldConfig.field_name}
+          variant="outlined"
+          fullWidth
+        />)
+      case "switch":
+        return (
+          <FormControl>
+            <FormGroup>
+              <FormControlLabel
+                {...field}
+                className="mt-8 mb-16"
+                control={
+                  <Switch
+                    defaultChecked={fieldConfig.value === 1}
+                    onChange={(e) => { handleSwitch(e) }}
+                    value={switchField}
+                  />
+                }
+                id={fieldConfig.field_name}
+                label={fieldConfig.placeholder} />
+            </FormGroup>
+          </FormControl>
+        )
       default:
         return (<TextField
           {...field}
@@ -163,6 +183,9 @@ function CreateEditForm(props) {
     }
   }
 
+  const handleSwitch = (e) => {
+    setSwitchField(e.target.checked);
+  }
   const onSubmit = async data => {
     if (moduleId == 'create') {
       let res = await dispatch(saveModule({ ...data, module }));
@@ -179,7 +202,7 @@ function CreateEditForm(props) {
 
   };
 
-  
+
 
 
   return (
@@ -199,7 +222,7 @@ function CreateEditForm(props) {
               />
             </div>
           }
-          )}      
+          )}
 
         <motion.div
           className="flex"

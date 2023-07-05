@@ -1,94 +1,105 @@
-'use strict'
+"use strict";
 const actions = [
   {
-    slug: 'add',
-    name: 'Add',
+    slug: "add",
+    name: "Add",
+    parent_action: "update",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'save',
-    name: 'Save',
+    slug: "save",
+    name: "Save",
+    parent_action: "update",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'list',
-    name: 'List',
+    slug: "list",
+    name: "List",
+    parent_action: "view",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'edit',
-    name: 'Edit',
+    slug: "edit",
+    name: "Edit",
+    parent_action: "update",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'update',
-    name: 'Update',
+    slug: "update",
+    name: "Update",
+    parent_action: "update",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'view',
-    name: 'View',
+    slug: "view",
+    name: "View",
+    parent_action: "view",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'delete',
-    name: 'Soft Delete',
+    slug: "delete",
+    name: "Soft Delete",
+    parent_action: "delete",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'destroy',
-    name: 'Delete',
+    slug: "destroy",
+    name: "Delete",
+    parent_action: "delete",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'export',
-    name: 'Export',
+    slug: "export",
+    name: "Export",
+    parent_action: "view",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'import',
-    name: 'Import',
+    slug: "import",
+    name: "Import",
+    parent_action: "update",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
   {
-    slug: 'navigation',
-    name: 'Navigation',
+    slug: "navigation",
+    name: "Navigation",
+    parent_action: "view",
     created_by: 1,
     updated_by: null,
     deleted_by: null,
     created_at: new Date(),
   },
-]
+];
 module.exports = {
   async up(queryInterface, Sequelize) {
     /**
@@ -100,7 +111,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    await queryInterface.bulkInsert('actions', actions)
+    await queryInterface.bulkInsert("actions", actions);
   },
 
   async down(queryInterface, Sequelize) {
@@ -110,7 +121,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete('actions', null, {})
+    await queryInterface.bulkDelete("actions", null, {});
   },
-}
+};
 // 20220726141342 - add - actions.js

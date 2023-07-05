@@ -1,0 +1,37 @@
+service: moresurveys-serverless-lambda
+
+custom:
+  secrets: ${file(secrets.json)}
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  timeout: 30
+  region: us-east-2
+  stage: ${self:custom.secrets.NODE_ENV}
+  environment: 
+    NODE_ENV: ${self:custom.secrets.NODE_ENV}
+    DB_NAME: ${self:custom.secrets.DB_NAME}
+    DB_USER: ${self:custom.secrets.DB_USER}
+    DB_PASSWORD: ${self:custom.secrets.DB_PASSWORD}
+    DB_HOST: ${self:custom.secrets.DB_HOST}
+    DB_PORT: ${self:custom.secrets.DB_PORT}
+  
+
+functions:
+  surveySync:
+    handler: handler.surveySync
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-2:473524174152:99ventures-queue
+          batchSize: 5
+          maximumBatchingWindow: 60
+          functionResponseType: ReportBatchItemFailures
+      - http:
+          path: /
+          method: get
+          cors: true
+
+
+plugins:
+  - serverless-offline

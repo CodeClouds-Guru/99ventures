@@ -78,25 +78,29 @@ function EmailConfiguration(props) {
     const getEmailConfiguration = () => {
         axios.get(jwtServiceConfig.getEmailConguration)
             .then((response) => {
-                if (response.data.status) {
-                    setValue('fromName', response.data.data.from_name, { shouldDirty: false, shouldValidate: true });
-                    setValue('fromEmail', response.data.data.from_email, { shouldDirty: false, shouldValidate: true });
-                    setValue('emailUsername', response.data.data.email_username, { shouldDirty: false, shouldValidate: true });
-                    setValue('emailServerHost', response.data.data.email_server_host, { shouldDirty: false, shouldValidate: true });
-                    setValue('port', response.data.data.email_server_port, { shouldDirty: false, shouldValidate: true });
-                    setValue('password', response.data.data.password, { shouldDirty: false, shouldValidate: true });
-                    setSslRequired(response.data.data.ssl_required === 1);
-                    setSiteNameVisible(response.data.data.site_name_visible === 1);
-                } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                if (response.data.results.status && response.data.results.data) {
+                    setValue('fromName', response.data.results.data.from_name, { shouldDirty: false, shouldValidate: true });
+                    setValue('fromEmail', response.data.results.data.from_email, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailUsername', response.data.results.data.email_username, { shouldDirty: false, shouldValidate: true });
+                    setValue('emailServerHost', response.data.results.data.email_server_host, { shouldDirty: false, shouldValidate: true });
+                    setValue('port', response.data.results.data.email_server_port, { shouldDirty: false, shouldValidate: true });
+                    setValue('password', response.data.results.data.password, { shouldDirty: false, shouldValidate: true });
+                    setSslRequired(response.data.results.data.ssl_required === 1);
+                    setSiteNameVisible(response.data.results.data.site_name_visible === 1);
+                    'sslRequired' in dirtyFields ? delete dirtyFields.sslRequired : '';
+                    'siteNameVisible' in dirtyFields ? delete dirtyFields.siteNameVisible : '';
+
                 }
+                // else {
+                //     dispatch(showMessage({ variant: 'error', message: response.data.errors }))
+                // }
             })
             .catch((error) => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
 
-    const onSubmit = ({ fromName, fromEmail, emailUsername, emailServerHost, port, sslRequired, siteNameVisible, password }) => {
+    const onSubmit = ({ fromName, fromEmail, emailUsername, emailServerHost, port, password }) => {
         let data = {
             "from_name": fromName,
             "from_email": fromEmail,
@@ -110,11 +114,11 @@ function EmailConfiguration(props) {
 
         axios.post(jwtServiceConfig.saveEmailConguration, data)
             .then((response) => {
-                if (response.data.status) {
-                    dispatch(showMessage({ variant: 'success', message: response.data.message }))
+                if (response.data.results.status) {
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }))
                     getEmailConfiguration();
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
             })
             .catch((error) => {
@@ -122,14 +126,16 @@ function EmailConfiguration(props) {
             })
     }
     const selectSslRequired = (event) => {
+        dirtyFields.sslRequired = true
         setSslRequired(event.target.checked)
     }
     const selectSiteNameVisible = (event) => {
+        dirtyFields.siteNameVisible = true;
         setSiteNameVisible(event.target.checked)
     }
     return (
         <div className="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-1 max-w-full">
-            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-64 md:p-64 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
+            <Paper className="h-full sm:h-auto md:flex md:items-center md:justify-center w-full md:h-full md:w-full py-8 px-16 sm:p-36 md:p-36 sm:rounded-2xl md:rounded-none sm:shadow md:shadow-none ltr:border-r-1 rtl:border-l-1">
                 <div className="w-full mx-auto sm:mx-0">
                     <Typography variant="h6">Email Configurations</Typography>
                     <Typography variant="body2">Please add the below details</Typography>
@@ -155,7 +161,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -174,7 +180,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -193,7 +199,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -212,7 +218,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -231,7 +237,7 @@ function EmailConfiguration(props) {
                                     variant="outlined"
                                     required
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -249,7 +255,7 @@ function EmailConfiguration(props) {
                                     helperText={errors?.password?.message}
                                     variant="outlined"
                                     fullWidth
-                                    disabled={ !permission }
+                                    disabled={!permission}
                                 />
                             )}
                         />
@@ -284,9 +290,9 @@ function EmailConfiguration(props) {
                                     <FormHelperText>{errors?.siteNameVisible?.message}</FormHelperText>
                                 </FormControl>
                             )}
-                        />  
+                        />
                         {
-                            permission ? 
+                            permission ?
                                 <span className="flex items-center justify-center">
                                     <Button
                                         variant="contained"
@@ -300,9 +306,9 @@ function EmailConfiguration(props) {
                                         Save
                                     </Button>
                                 </span>
-                            : ''
+                                : ''
                         }
-                        
+
                     </form>
                 </div>
             </Paper>

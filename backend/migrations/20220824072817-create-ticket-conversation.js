@@ -6,7 +6,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT
       },
       ticket_id: {
         type: Sequelize.BIGINT,
@@ -14,15 +14,14 @@ module.exports = {
       },
       member_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
       },
       message: {
         type: Sequelize.TEXT,
         allowNull: false,
+        charset: 'utf8mb4',
       },
       user_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
       },
       created_at: {
         type: 'TIMESTAMP',
@@ -34,6 +33,9 @@ module.exports = {
       deleted_at: {
         type: 'TIMESTAMP'
       }
+    },{
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
     });
   },
   async down(queryInterface, Sequelize) {

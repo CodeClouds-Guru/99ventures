@@ -14,14 +14,85 @@ const navigationConfig = [
     type: 'item',
     icon: 'heroicons-outline:cog',
     url: 'configuration',
+    depends_on: ['generalconfigurations', 'emailconfigurations', 'ipconfigurations', 'metatagconfigurations', 'paymentconfigurations', 'downtime']
   },
   {
-    id: 'scripts',
-    title: 'Scripts',
-    translate: 'Scripts',
+    id: 'tickets',
+    title: 'Tickets',
+    translate: 'Tickets',
     type: 'item',
-    icon: 'heroicons-outline:code',
-    url: 'app/scripts',
+    icon: 'heroicons-outline:ticket',
+    url: 'app/tickets',
+    badge: {
+      title: 0,
+      classes: 'px-8 bg-pink-600 text-white rounded-full',
+    },
+  },
+  {
+    id: 'members',
+    title: 'Members',
+    translate: 'Members',
+    type: 'item',
+    icon: 'heroicons-outline:user-group',
+    url: 'app/members',
+    end: true,
+  },
+  // {
+  //   id: 'membersMenu',
+  //   title: 'Members',
+  //   translate: 'Members',
+  //   type: 'collapse',
+  //   icon: 'heroicons-outline:user-group',
+  //   depends_on: ['members', 'campaigns', 'offerwalls'],
+  //   children: [
+  //     {
+  //       id: 'members',
+  //       title: 'Members',
+  //       type: 'item',
+  //       icon: 'heroicons-outline:view-list',
+  //       url: 'app/members',
+  //       end: true,
+  //     },
+
+  //   ],
+  // },
+  {
+    id: 'campaigns',
+    title: 'Campaigns',
+    translate: 'Campaigns',
+    type: 'item',
+    icon: 'material-outline:campaign',
+    url: 'app/campaigns',
+    end: true,
+  },
+  {
+    id: 'offerwalls',
+    title: 'Offerwalls',
+    translate: 'Offerwalls',
+    type: 'item',
+    icon: 'material-outline:attach_money',
+    url: 'app/offer-walls',
+    end: true,
+  },
+  {
+    id: 'surveyproviders',
+    title: 'Survey Providers',
+    type: 'item',
+    icon: 'heroicons-outline:color-swatch',
+    url: 'app/survey-providers',
+    end: true,
+  },
+  {
+    id: 'withdrawalrequests',
+    title: 'Withdrawal Requests',
+    type: 'item',
+    icon: 'heroicons-solid:cash',
+    url: 'app/withdrawal-requests',
+    badge: {
+      title: 0,
+      classes: 'px-8 bg-pink-600 text-white rounded-full',
+    },
+    end: true,
   },
   {
     id: 'administration',
@@ -58,7 +129,7 @@ const navigationConfig = [
         end: true,
       },
       {
-        id: 'email-templates',
+        id: 'emailtemplates',
         title: 'Email Templates',
         type: 'item',
         icon: 'heroicons-outline:mail',
@@ -75,7 +146,86 @@ const navigationConfig = [
       // },
     ]
   },
-
+  {
+    id: 'pagesAndLayouts',
+    title: 'Pages & Layouts',
+    type: 'collapse',
+    icon: 'material-outline:auto_awesome_mosaic',
+    children: [
+      {
+        id: 'components',
+        title: 'Components',
+        type: 'item',
+        icon: 'material-outline:view_agenda',
+        url: 'app/components',
+        end: true,
+      },
+      {
+        id: 'layouts',
+        title: 'Layouts',
+        type: 'item',
+        icon: 'material-outline:view_quilt',
+        url: 'app/layouts',
+        end: true,
+      },
+      {
+        id: 'pages',
+        title: 'Pages',
+        type: 'item',
+        icon: 'material-outline:description',
+        url: 'app/pages',
+        end: true,
+      },
+      {
+        id: 'scripts',
+        title: 'Scripts',
+        translate: 'Scripts',
+        type: 'item',
+        icon: 'heroicons-outline:code',
+        url: 'app/scripts',
+      },
+      {
+        id: 'filemanager',
+        title: 'File Manager',
+        // translate: 'File Manager',
+        type: 'item',
+        icon: 'heroicons-outline:folder',
+        url: 'app/filemanager',
+      },
+      {
+        id: 'settings',
+        title: 'Settings',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/settings',
+        end: true,
+      },
+    ]
+  },
+  {
+    id: 'shoutboxMenu',
+    title: 'Shoutbox',
+    type: 'collapse',
+    icon: 'heroicons-solid:speakerphone',
+    children: [
+      {
+        id: 'shoutbox',
+        title: 'Shoutbox List',
+        type: 'item',
+        icon: 'heroicons-outline:view-list',
+        url: 'app/shoutbox',
+        end: true,
+      },
+      {
+        id: 'shoutboxconfigurations',
+        title: 'Configurations',
+        type: 'item',
+        icon: 'material-outline:settings',
+        url: 'app/shoutbox-configurations',
+        end: true,
+      },
+    ]
+  },
 ];
 
 export default navigationConfig;

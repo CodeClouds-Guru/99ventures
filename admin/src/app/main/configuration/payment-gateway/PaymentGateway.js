@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Tabs, Tab, Typography }from '@mui/material';
+import { Box, Tabs, Tab, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PaymentCredentials from './PaymentCredentials';
 import { useSelector } from 'react-redux';
@@ -47,7 +47,7 @@ const PaymentGateway = (props) => {
 	const [value, setValue] = React.useState(0);
 	const [gateways, setGateways] = React.useState([])
 	const hasPermission = props.permission;
-	    
+
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
@@ -63,17 +63,32 @@ const PaymentGateway = (props) => {
 		const params = {
 			auth: confirmAccountStatus	// true|false
 		}
-		axios.get(jwtServiceConfig.getPaymentMethodConfiguration, {params})
-		.then(response => {
-			if (response.data.status && response.data.payment_method_list.length > 0) {
-				setGateways(response.data.payment_method_list);
-			} else {
-                console.log('Unable to get payment gateways');
-            }
-		})
-		.catch(error => console.log(error))
+		axios.get(jwtServiceConfig.getPaymentMethodConfiguration, { params })
+			.then(response => {
+				if (response.data.results.status && response.data.results.data.payment_method_list.length > 0) {
+					const results = response.data.results.data.payment_method_list;
+					if (results.length) {
+						results.map((pm, ind) => {
+							const credentials = [];
+							pm.credentials.map((cr) => {
+								credentials.push({
+									...cr,
+									auth: cr.value ? true : false
+								});
+							})
+							results[ind]['credentials'] = credentials
+						})
+					}
+					setGateways(results);
+					// setGateways(response.data.results.data.payment_method_list);
+
+				} else {
+					console.log('Unable to get payment gateways');
+				}
+			})
+			.catch(error => console.log(error))
 	}
-	
+
 	return (
 		<Box
 			sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 'auto' }}
@@ -89,15 +104,21 @@ const PaymentGateway = (props) => {
 			>
 				{
 					gateways.map((gateway, indx) => {
-						return <Tab key={ indx } label={ gateway.name } {...a11yProps(indx)} icon={<PlayArrowIcon />} iconPosition="start" />
+						return <Tab key={indx} label={gateway.name} {...a11yProps(indx)} icon={<PlayArrowIcon />} iconPosition="start" />
 					})
 				}
 			</Tabs>
 			{
 				gateways.map((gateway, indx) => {
 					return (
-						<TabPanel key={ indx } value={value} index={ indx } className="w-full">
-							<PaymentCredentials gateway={gateway.name} credentials={ gateway.credentials } permission={hasPermission} />
+						<TabPanel
+							key={indx}
+							value={value}
+							index={indx}
+							className="w-full"
+						>
+							<PaymentCredentials retrieveGateways={retrieveGateways} gateway={gateway.name} details={gateway} permission={hasPermission} />
+							{/* credentials={gateway.credentials} */}
 						</TabPanel>
 					)
 				})
@@ -105,5 +126,6 @@ const PaymentGateway = (props) => {
 		</Box>
 	);
 }
+
 
 export default PaymentGateway;

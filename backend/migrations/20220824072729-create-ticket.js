@@ -6,9 +6,9 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT
       },
-      company_portal_id_id: {
+      company_portal_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
@@ -21,8 +21,9 @@ module.exports = {
         allowNull: false,
       },
       status: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        type: Sequelize.TINYINT,
+        defaultValue: 1,
+        comment: "1=open,2=pending,0=closed"
       },
       created_at: {
         type: 'TIMESTAMP',

@@ -6,15 +6,19 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
       },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       slug: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
-      parent_module: { type: Sequelize.STRING },
+      parent_module: {
+        type: Sequelize.STRING,
+      },
       created_by: {
         type: Sequelize.BIGINT,
       },
