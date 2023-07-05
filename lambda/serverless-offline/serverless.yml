@@ -1,4 +1,4 @@
-service: survey-sync
+service: moresurveys-serverless-lambda
 
 custom:
   secrets: ${file(secrets.json)}
