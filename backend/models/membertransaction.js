@@ -371,6 +371,7 @@ module.exports = (sequelize, DataTypes) => {
       Member,
       Setting,
       MemberNotification,
+      MemberReferral,
     } = require('../models/index');
     const eventBus = require('../eventBus');
     let member = JSON.parse(
@@ -430,6 +431,16 @@ module.exports = (sequelize, DataTypes) => {
           })
         )
       );
+      //update member referral table
+          await MemberReferral.update({
+            amount: parseFloat(referral_amount)
+          },
+          {
+            where:{
+              member_id: member.member_referral_id,
+              referral_id: member_id
+            }
+          })
       //send mail to referrer
       let req = {
         headers: {

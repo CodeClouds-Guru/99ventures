@@ -1,4 +1,5 @@
 const SurveySyncClass = require('../controllers/callback/SurveySyncController');
+const TicketControllerClass = require('../controllers/backend/TicketController');
 
 
 const schedules = [
@@ -48,6 +49,32 @@ const schedules = [
 			try {
 				let cronJob = new SurveySyncClass();
 				await cronJob.pureSpectrumSurveyUpdate();
+			} catch (e) {
+				console.log(e.message)
+			}
+		},
+		options: [null, true],
+	},
+	{
+		name: 'lucid survey status check and update',
+		pattern: '*/20 * * * *',
+		function: async () => {
+			try {
+				let cronJob = new SurveySyncClass();
+				await cronJob.lucidSurveyUpdate();
+			} catch (e) {
+				console.log(e.message)
+			}
+		},
+		options: [null, true],
+	},
+	{
+		name: 'remove ticket attachment before 30days',
+		pattern: '0 0 * * *',	//Once per day
+		function: async () => {
+			try {
+				let cronJob = new TicketControllerClass();
+				await cronJob.removeAttachments();
 			} catch (e) {
 				console.log(e.message)
 			}

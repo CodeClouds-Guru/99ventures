@@ -5,6 +5,10 @@ const SqsHelper = require('../helpers/SqsHelper');
 const EmaiHelper = require('../helpers/EmailHelper');
 const { OfferWall } = require('../models');
 const Paypal = require('../helpers/Paypal');
+const { SitemapStream, streamToPromise } = require('sitemap')
+const { createGzip } = require('zlib')
+const { Readable } = require('stream')
+
 router.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow: /');
@@ -26,16 +30,28 @@ const PureSpectrumControllerClass = require('../controllers/frontend/PureSpectru
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SchlesingerControllerClass = require('../controllers/frontend/SchlesingerController');
 const SchlesingerController = new SchlesingerControllerClass();
-const CintControllerClass = require('../controllers/frontend/CintController');
-const CintController = new CintControllerClass();
 const TicketControllerClass = require('../controllers/frontend/TicketController');
 const TicketController = new TicketControllerClass();
 const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
-const TolunaControllerClass = require('../controllers/frontend/TolunaController');
-const TolunaController = new TolunaControllerClass();
 const NotificationControllerClass = require("../controllers/frontend/NotificationController");
 const NotificationController = new NotificationControllerClass();
+router.get('/sitemap.xml', async (req, res) => {
+  const SiteMapControllerClass = require("../controllers/frontend/SiteMapController");
+  const SiteMapController = new SiteMapControllerClass();
+  res.header('Content-Type', 'application/xml');
+  res.header('Content-Encoding', 'gzip');
+  try {
+    const smStream = await SiteMapController.generate(process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : req.baseUrl);
+    const pipeline = smStream.pipe(createGzip())
+    streamToPromise(pipeline).then(sm => sitemap = sm)
+    smStream.end()
+    pipeline.pipe(res).on('error', (e) => { throw e })
+  } catch (e) {
+    console.error("Sitemap generation error", e);
+    res.status(500).send("Something went wrong")
+  }
+});
 
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
@@ -46,11 +62,9 @@ router.get('/survey/:status', StaticPageController.showStatus);
 router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
-router.get('/cint/surveys', CintController.surveys);
-router.get('/pure-spectrum/:action', PureSpectrumController.index);
-router.get('/schlesigner/:action', SchlesingerController.index);
-router.get('/lucid/:action', LucidController.index);
-router.get('/toluna/surveys', TolunaController.surveys);
+router.get('/purespectrum/entrylink', PureSpectrumController.generateEntryLink);
+router.get('/schlesigner/entrylink', SchlesingerController.generateEntryLink);
+router.get('/lucid/entrylink', LucidController.generateEntryLink);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
@@ -64,11 +78,11 @@ router.delete('/update-notification', NotificationController.delete);
 router.get('/test-mail', async (req, res) => {
   const emaiHelper = new EmaiHelper({
     user: req.session.member,
-    headers:{
-      site_id:1
+    headers: {
+      site_id: 1
     }
   });
-  const send_message = await emaiHelper.parse({action:'Referral Bonus',data:{}});
+  const send_message = await emaiHelper.parse({ action: 'Referral Bonus', data: {} });
   res.send(send_message);
 });
 router.get('/test-payment', async (req, res) => {
@@ -110,9 +124,9 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 
-router.get('/:slug?', async (req, res) => {
-  //checkIPMiddleware
-  var pagePerser = new PageParser(req.params.slug || '/');
+router.get('*', async (req, res) => {
+  const slug = req.path.length > 1 ? req.path.substring(1) : req.path;
+  var pagePerser = new PageParser(slug);
   try {
     var page_content = await pagePerser.preview(req);
   } catch (e) {

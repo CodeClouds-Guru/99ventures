@@ -43,6 +43,7 @@
     "sequelize": "^6.21.3",
     "sequelize-cli": "^6.5.2",
     "sequelize-paginate": "^1.1.6",
+    "sitemap": "^7.1.1",
     "socket.io": "^4.5.4",
     "winston": "^3.8.1"
   }

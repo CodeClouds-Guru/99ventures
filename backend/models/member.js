@@ -561,5 +561,16 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
 
+  //Get All Attempted Surveys
+  Member.acceptedSurveys = async (memberId, surveyProviderId) => {
+    try {
+      const [ results ] = await sequelize.query(`SELECT DISTINCT(ms.survey_number) FROM member_surveys AS ms WHERE EXISTS ( SELECT mt.id FROM member_transactions AS mt WHERE ms.member_transaction_id = mt.id AND mt.member_id = ${memberId}) AND ms.survey_provider_id = ${surveyProviderId}`);
+
+      return results;
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
   return Member;
 };

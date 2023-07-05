@@ -67,17 +67,6 @@ router.post(
 );
 router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
 
-/**
- * CRON PATH
- */
-const SurveySyncControllerClass = require('../controllers/callback/SurveySyncController');
-const SurveySyncController = new SurveySyncControllerClass();
-router.all('/purespectrum-update', SurveySyncController.pureSpectrumSurveyUpdate);
-router.all('/schlesinger-update', SurveySyncController.schlesingerSurveyUpdate);
-router.all('/lucid-update', SurveySyncController.lucidSurveyUpdate);
-
-
-
 //paypal integration
 // router.post('/order-create', async (req, res) => {
 //   console.log('paypal order-create');

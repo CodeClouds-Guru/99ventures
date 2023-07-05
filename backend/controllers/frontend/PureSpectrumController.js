@@ -15,24 +15,6 @@ class PureSpectrumController {
     constructor(){
         this.surveys = this.surveys.bind(this);
         this.generateEntryLink = this.generateEntryLink.bind(this);
-        this.index = this.index.bind(this);
-    }
-
-    index = (req, res) => {
-        if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
-            return;
-        }
-        const action = req.params.action;
-        if(action === 'surveys')
-            this.surveys(req, res);
-        else if(action === 'entrylink')
-            this.generateEntryLink(req, res);
-        else 
-            throw error('Invalid access!');
     }
 
     surveys = async (memberId,params) => {
@@ -131,39 +113,18 @@ class PureSpectrumController {
 
                 /** End */
                 const generateQueryString = new URLSearchParams(queryString).toString();
-
-                const surveys = await Survey.findAndCountAll({
-                    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-                    distinct: true,
-                    where: {
-                        survey_provider_id: provider.id,
+                const surveys = await Survey.getSurveysAndCount({
+                    member_id: memberId,
+                    provider_id: provider.id,
+                    matching_answer_ids: matchingAnswerIds,
+                    matching_question_ids: matchingQuestionIds,
+                    order,
+                    pageno: pageNo,
+                    per_page: perPage,
+                    order_by: orderBy,
+                    clause: {
                         status: "live",
-                    },
-                    include: {
-                        model: SurveyQualification,
-                        attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,
-                        include: {
-                            model: SurveyAnswerPrecodes,
-                            attributes: ['id', 'option', 'precode'],
-                            where: {
-                                id: matchingAnswerIds
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: SurveyQuestion,
-                                    attributes: ['id'],
-                                    where: {
-                                        id: matchingQuestionIds
-                                    }
-                                }
-                            ],
-                        }
-                    },
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
                 
                 var page_count = Math.ceil(surveys.count / perPage);
@@ -171,7 +132,7 @@ class PureSpectrumController {
                 if(surveys.rows && surveys.rows.length){
                     var surveyHtml = '';
                     for (let survey of surveys.rows) {
-                        let link = `/pure-spectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
+                        let link = `/purespectrum/entrylink?survey_number=${survey.survey_number}${generateQueryString ? '&' + generateQueryString : ''}`;
                         let temp_survey = {
                             survey_number: survey.survey_number,
                             name: survey.name,
@@ -226,37 +187,61 @@ class PureSpectrumController {
     }
 
     generateEntryLink = async (req, res) => {
-        const queryString = req.query;
-        const psObj = new PurespectrumHelper;
-        const survey = await psObj.fetchAndReturnData('/surveys/' + queryString.survey_number);
-        if(survey.apiStatus === 'success' && survey.survey.survey_status === 22)   // 22 means live
-        {
-            if(process.env.DEV_MODE == 1){
-                queryString.bsec = 'a70mx8';
-            }
-            const data = await psObj.createData(`surveys/register/${queryString.survey_number}`);
-            delete queryString['survey_number'];
-            const generateQueryString = new URLSearchParams(queryString).toString();
-        
-            if (data.apiStatus === 'success' && data.survey_entry_url) {
-                const entryLink = data.survey_entry_url + '&' + generateQueryString;
-                res.redirect(entryLink)
-            } else {
-                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/purespectrum' };
-                res.redirect('/notice');
-            }
-        }
-        else {
-            await Survey.update({
-                status: psObj.getSurveyStatus(22)
-            }, {
-                where: {
-                    survey_number: queryString.survey_number
-                }
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
             });
-            req.session.flash = { error: 'Sorry! this survey has been closed.', redirect_url: '/pure-spectrum' };
-            res.redirect('/notice');
+            return;
         }
+        var returnObj = {};
+        const psObj = new PurespectrumHelper;
+        const queryString = req.query;
+        try{
+            const survey = await psObj.fetchAndReturnData('/surveys/' + queryString.survey_number);            
+            if(survey.apiStatus === 'success' && survey.survey.survey_status === 22)   // 22 means live
+            {
+                if(process.env.DEV_MODE == 1){
+                    queryString.bsec = 'a70mx8';
+                }
+                const data = await psObj.createData(`surveys/register/${queryString.survey_number}`);
+                delete queryString['survey_number'];
+                const generateQueryString = new URLSearchParams(queryString).toString();
+            
+                if (data.apiStatus === 'success' && data.survey_entry_url) {
+                    const entryLink = data.survey_entry_url + '&' + generateQueryString;
+                    res.redirect(entryLink)
+                } else {
+                    returnObj = {notice: 'Unable to get entry link!', redirect_url: '/purespectrum' };
+                }
+            } else {
+                throw {statusCode: 404, message: 'Sorry! this survey has been closed'};
+            }
+        }
+        catch (error) {
+            if(
+               (
+                'response' in error && 
+                error.response.data.statusCode && 
+                error.response.data.statusCode === 404
+               ) || (error.statusCode === 404)
+            ) {
+                await Survey.update({
+                    status: psObj.getSurveyStatus(44),
+                    deleted_at: new Date()
+                }, {
+                    where: {
+                        survey_number: queryString.survey_number
+                    }
+                });
+                returnObj = { notice: 'Sorry! this survey has been closed.', redirect_url: '/purespectrum' };
+            } else {
+                returnObj = { notice: error.message, redirect_url: '/purespectrum' };
+            }
+        }
+
+        req.session.flash = returnObj;
+        res.redirect('/notice');
     }
 }
 

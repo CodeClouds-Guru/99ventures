@@ -1000,7 +1000,7 @@ class SurveySyncController {
 
             // Available survey making active by removing the deleted_at value
             const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
-            if(idTobeUpdated) {
+            if(idTobeUpdated.length) {
                 await Survey.update({
                     deleted_at: null
                 }, {
@@ -1103,7 +1103,7 @@ class SurveySyncController {
 
             // Available survey making active by removing the deleted_at value
             const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
-            if(idTobeUpdated) {
+            if(idTobeUpdated.length) {
                 await Survey.update({
                     deleted_at: null
                 }, {
@@ -1128,7 +1128,7 @@ class SurveySyncController {
     /**
      * Lucid - Old Survey disabled
      */
-    async lucidSurveyUpdate(req, res) {
+    async lucidSurveyUpdate() {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -1136,14 +1136,41 @@ class SurveySyncController {
                     name: 'Lucid'
                 }
             });
+            if(!provider) {
+                return {
+                    status: false,
+                    message: 'Invalid provider'
+                }
+            }
             const psObj = new LucidHelper;
             const surveys = await Survey.findAll({
                 attributes: ['survey_number'],
                 where: {
                     survey_provider_id: provider.id,
-                    status: 'live'
+                    status: 'active'
+                },
+                order: [
+                    ['id', 'ASC'],
+                ],
+                limit: 20
+            });
+
+            if(surveys.length < 1) {
+                // res.send({ status: true, message: 'No more survey exists!' });
+                return { status: true, message: 'No more survey exists!' }
+            }
+
+            //Survey disabled by adding deleted_at value
+            const surveyNumberArry = surveys.map(s=> s.survey_number);
+            await Survey.update({
+                deleted_at: new Date()
+            }, {
+                where: {
+                    survey_number: surveyNumberArry
                 }
             });
+
+            const surveyNumber = [];
             for (let survey of surveys) {
                 try {
                     const quota = await psObj.showQuota(survey.survey_number);
@@ -1154,22 +1181,41 @@ class SurveySyncController {
                     surveyNumber.push(survey.survey_number);
                 }
             }
+
             if (surveyNumber.length) {
                 await Survey.update({
-                    status: 'closed',
+                    status: 'draft',
                     deleted_at: new Date()
                 }, {
+                    paranoid: false,
                     where: {
                         survey_number: surveyNumber
                     }
                 });
             }
-            res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
+
+            // Available survey making active by removing the deleted_at value
+            const idTobeUpdated = surveyNumberArry.filter(row=> !surveyNumber.includes(row));
+            if(idTobeUpdated.length) {
+                await Survey.update({
+                    deleted_at: null
+                }, {
+                    paranoid: false,
+                    where: {
+                        survey_number: idTobeUpdated
+                    }
+                });
+            }
+
+            // res.send({ status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber });
+            return { status: true, total: surveyNumber.length, message: 'Updated', survey_number: surveyNumber };
 
         } catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);
             logger.error(error);
-            res.send(error);
+            return {
+                message: error.message
+            }
         }
     }
 

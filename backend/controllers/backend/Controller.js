@@ -41,10 +41,13 @@ class Controller {
         searchable_fields.push(key)
       }
     }
+    let offset = (page - 1) * show;
     let options = {
       attributes,
-      page,
-      paginate: show,
+      //page,
+      //paginate: show,
+      limit:show,
+      offset,
       order: [[Sequelize.literal(sort_field), sort_order]],
     };
     if (search != "") {

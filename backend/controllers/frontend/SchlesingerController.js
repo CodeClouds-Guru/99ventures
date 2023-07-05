@@ -13,26 +13,8 @@ const Sequelize = require('sequelize');
 class SchlesingerController {
 
     constructor() {
-        this.index = this.index.bind(this);
         this.surveys = this.surveys.bind(this);
         this.generateEntryLink = this.generateEntryLink.bind(this);
-    }
-
-    index = (req, res) => {
-        if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
-            return;
-        }
-        const action = req.params.action;
-        if(action === 'surveys')
-            this.surveys(req, res);
-        else if(action === 'entrylink')
-            this.generateEntryLink(req, res);
-        else 
-            throw error('Invalid access!');
     }
 
     surveys = async(memberId,params) => {
@@ -135,42 +117,21 @@ class SchlesingerController {
             }
             /** End */
             const generateQueryString = new URLSearchParams(queryString).toString();
-
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
-                const surveys = await Survey.findAndCountAll({
-                    attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
-                    distinct: true,
-                    where: {
-                        survey_provider_id: provider.id,
+                const surveys = await Survey.getSurveysAndCount({
+                    member_id: memberId,
+                    provider_id: provider.id,
+                    matching_answer_ids: matchingAnswerIds,
+                    matching_question_ids: matchingQuestionIds,
+                    order,
+                    pageno: pageNo,
+                    per_page: perPage,
+                    order_by: orderBy,
+                    clause: {
                         status: "live",
-                    },
-                    include: {
-                        model: SurveyQualification,
-                        attributes: ['id', 'survey_id', 'survey_question_id'],
-                        required: true,                        
-                        include: {
-                            model: SurveyAnswerPrecodes,
-                            attributes: ['id', 'option', 'precode'],
-                            where: {
-                                id: matchingAnswerIds
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: SurveyQuestion,
-                                    attributes: ['id'],
-                                    where: {
-                                        id: matchingQuestionIds 
-                                    }
-                                }
-                            ],
-                        }
-                    },
-                    order: [[Sequelize.literal(orderBy), order]],
-                    limit: perPage,
-                    offset: (pageNo - 1) * perPage,
+                    }
                 });
-                
+
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
                 if (!surveys.count) {
@@ -233,7 +194,15 @@ class SchlesingerController {
     }
 
     generateEntryLink = async(req, res) => {
+        if(!req.session.member) {
+            res.status(401).json({
+                status: false,
+                message: 'Unauthorized!'
+            });
+            return;
+        }
         try{
+            var returnObj = {};
             const queryString = req.query;
             const surveyNumber = queryString['survey_number'];
             const data = await Survey.findOne({
@@ -262,26 +231,27 @@ class SchlesingerController {
                         delete liveLinkParams['zid'];   // We dont have any value for zid
                         const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({...liveLinkParams, ...params}).toString();
                         // res.send(entryLink)
-                        res.redirect(entryLink)
+                        res.redirect(entryLink);
+                        return;
                     }
                     else {
                         this.updateSurvey(surveyNumber);
-                        req.session.flash = { error: 'No quota exists!', redirect_url: '/schlesigner' };
-                        res.redirect('/notice');
-                    }                    
+                        returnObj = { notice: 'No quota exists!', redirect_url: '/schlesinger' };
+                    }
                 } else {
                     this.updateSurvey(surveyNumber);
-                    req.session.flash = { error: 'Survey quota does not exists!', redirect_url: '/schlesigner' };
-                    res.redirect('/notice');
+                    returnObj = { notice: 'Survey quota does not exists!', redirect_url: '/schlesinger' };
                 }
             } else {
-                req.session.flash = { error: 'Unable to get entry link!', redirect_url: '/schlesigner' };
-                res.redirect('/notice');
+                returnObj = { notice: 'Unable to get entry link!', redirect_url: '/schlesinger' };
             }
         } catch (error) {
             console.error(error);
-            throw error;
+            returnObj = { notice: error.message, redirect_url: '/schlesinger' };
         }
+        
+        req.session.flash = returnObj;
+        res.redirect('/notice');
     }
 
     updateSurvey = async(surveyNumber) => {
