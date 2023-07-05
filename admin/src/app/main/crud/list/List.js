@@ -52,7 +52,7 @@ function List(props) {
 	const [selected, setSelected] = useState([]);
 	const [data, setData] = useState(modules);
 	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(100);
 	const [order, setOrder] = useState({
 		direction: 'desc',
 		id: 'id',
@@ -110,7 +110,7 @@ function List(props) {
 			id: 'id',
 		});
 		setPage(0);
-		setRowsPerPage(10);
+		setRowsPerPage(100);
 		setFirstCall(true);
 	}
 
@@ -953,7 +953,7 @@ function List(props) {
 						}}
 						onPageChange={handleChangePage}
 						onRowsPerPageChange={handleChangeRowsPerPage}
-						rowsPerPageOptions={[2, 5, 10, 20]}
+						rowsPerPageOptions={[10, 20, 50, 100]}
 					/>}
 
 				</FuseScrollbars>
