@@ -871,12 +871,13 @@ class MemberAuthController {
       };
     }
 
+    //check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
       attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
         status: 'pending',
         member_id: request_data.member_id,
-      },
+      }
     });
 
     if (
