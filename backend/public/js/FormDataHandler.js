@@ -165,8 +165,8 @@ $(() => {
       $(location).attr('href').includes('?')
       ? $(location).attr('href').split('#')[1].split('?')[0]
       : $(location).attr('href').includes('#')
-        ? $(location).attr('href').split('#')[1]
-        : '';
+      ? $(location).attr('href').split('#')[1]
+      : '';
   };
   if (getUrlHash() === 'signup') {
     goToRegister();
@@ -201,8 +201,8 @@ $(() => {
   var loginFormSanitisation = () => {
     if (
       loginForm &&
-      ['email', 'password', 'remember_me'].every(
-        (val) => Object.keys(loginForm.elements).indexOf(val)
+      ['email', 'password', 'remember_me'].every((val) =>
+        Object.keys(loginForm.elements).indexOf(val)
       )
     ) {
       $(loginForm).attr('action', '/login');
@@ -232,8 +232,8 @@ $(() => {
   var forgotPasswordFormSanitisation = () => {
     if (
       forgotPasswordForm &&
-      ['email'].every(
-        (val) => Object.keys(forgotPasswordForm.elements).indexOf(val)
+      ['email'].every((val) =>
+        Object.keys(forgotPasswordForm.elements).indexOf(val)
       )
     ) {
       $(forgotPasswordForm).attr('action', '/member-forgot-password');
@@ -245,8 +245,8 @@ $(() => {
   var resetPasswordFormSanitisation = () => {
     if (
       resetPasswordForm &&
-      ['password', 'c_password'].every(
-        (val) => Object.keys(resetPasswordForm.elements).indexOf(val)
+      ['password', 'c_password'].every((val) =>
+        Object.keys(resetPasswordForm.elements).indexOf(val)
       )
     ) {
       $(resetPasswordForm).attr('action', '/save-password');
@@ -258,8 +258,8 @@ $(() => {
   var ticketCreateFormSanitisation = () => {
     if (
       ticketCreateForm &&
-      ['ticket_subject', 'ticket_file', 'ticket_content'].every(
-        (val) => Object.keys(ticketCreateForm.elements).indexOf(val)
+      ['ticket_subject', 'ticket_file', 'ticket_content'].every((val) =>
+        Object.keys(ticketCreateForm.elements).indexOf(val)
       )
     ) {
       $(ticketCreateForm).attr('action', '/ticket/create');
@@ -542,12 +542,12 @@ $(() => {
     str += '</div></div>';
     $('#header_streak_or_refresh').append(str);
   }
-  if (pathname === 'contest') {
-    str +=
-      '<div class="row"><div class="col-md-12 mb-3 mb-lg-4"><div class="cash-contest-sec bg-primary text-white rounded-4 px-3 px-md-4 px-lg-5 py-3 mb-2"><div class="row align-items-center"><div class="col-md-8"><h1 class="mb-2 heading">CASH CONTEST</h1><p class="m-0">The Top 20 members who earn the most by 31st June 2023 will win a prize.</p></div><div class="col-md-4"><div class="d-flex justify-content-end mt-3 mt-md-0"><figure class="m-0 text-center"><img src="images/cash-contest-img.svg" alt="Cash Contest Image" class="img-fluid"></figure></div></div></div></div><div class="cash-contest-info text-white d-flex align-items-center mt-2"><i class="fa-solid fa-circle-info"></i><p class="m-0 ms-2 lh-base">Moresurveys.com<strong>$1000</strong>Cash Contest Description. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p></div></div></div>';
-    str += '</div></div>';
-    $('#header_streak_or_refresh').append(str);
-  }
+  // if (pathname === 'contest') {
+  //   str +=
+  //     '<div class="row"><div class="col-md-12 mb-3 mb-lg-4"><div class="cash-contest-sec bg-primary text-white rounded-4 px-3 px-md-4 px-lg-5 py-3 mb-2"><div class="row align-items-center"><div class="col-md-8"><h1 class="mb-2 heading">CASH CONTEST</h1><p class="m-0">The Top 20 members who earn the most by 31st June 2023 will win a prize.</p></div><div class="col-md-4"><div class="d-flex justify-content-end mt-3 mt-md-0"><figure class="m-0 text-center"><img src="images/cash-contest-img.svg" alt="Cash Contest Image" class="img-fluid"></figure></div></div></div></div><div class="cash-contest-info text-white d-flex align-items-center mt-2"><i class="fa-solid fa-circle-info"></i><p class="m-0 ms-2 lh-base">Moresurveys.com<strong>$1000</strong>Cash Contest Description. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p></div></div></div>';
+  //   str += '</div></div>';
+  //   $('#header_streak_or_refresh').append(str);
+  // }
 
   $('.copy-text').click((e) => {
     e.preventDefault();
