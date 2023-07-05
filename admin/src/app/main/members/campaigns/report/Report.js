@@ -13,65 +13,65 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 const UsersTracking = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [ campaignDetails, setCampaignDetails ] = useState({});
-    const [ listData, setListData ] = useState({});
-    const [ filter, setFilter ] = useState('all');
-    const { campaignId } = useParams(); 
-    const [ order, setOrder ] = useState({});
-    const [ page, setPage ] = useState(0);
-	const [ rowsPerPage, setRowsPerPage ] = useState(10);
+    const [campaignDetails, setCampaignDetails] = useState({});
+    const [listData, setListData] = useState({});
+    const [filter, setFilter] = useState('all');
+    const { campaignId } = useParams();
+    const [order, setOrder] = useState({});
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(100);
 
-    useEffect(()=>{
+    useEffect(() => {
         getDetails();
     }, [filter, order, page, rowsPerPage]);
 
     const getDetails = () => {
         const params = {
             report: 1,
-            page: page+1,
+            page: page + 1,
             show: rowsPerPage
         };
-        if('all' !== filter) {
+        if ('all' !== filter) {
             params.campaign_status = filter
         }
-        if(order.id && order.direction) {
+        if (order.id && order.direction) {
             params.sort = order.id
-			params.sort_order = order.direction
+            params.sort_order = order.direction
         }
         sendRequest(params, '');
     }
-    
+
     const handleFilter = (e) => {
         setFilter(e.target.value);
     }
 
     const handleRequestSort = (e, property) => {
-		const id = property;
-		let direction = 'desc';
-		if (order.id === property && order.direction === 'desc') {
-			direction = 'asc';
-		}
-		setOrder({
-			direction,
-			id,
-		});
-	}
+        const id = property;
+        let direction = 'desc';
+        if (order.id === property && order.direction === 'desc') {
+            direction = 'asc';
+        }
+        setOrder({
+            direction,
+            id,
+        });
+    }
 
     const handleChangePage = (event, value) => {
-		setPage(value);
-	}
+        setPage(value);
+    }
 
-	const handleChangeRowsPerPage = (event) => {
-		setPage(0);
-		setRowsPerPage(event.target.value);
-	}
+    const handleChangeRowsPerPage = (event) => {
+        setPage(0);
+        setRowsPerPage(event.target.value);
+    }
 
     const hanldeExport = () => {
         const params = {
             export_csv: 1,
-            report:1
+            report: 1
         }
-        if('all' !== filter) {
+        if ('all' !== filter) {
             params.campaign_status = filter
         }
         sendRequest(params, 'csv_download');
@@ -79,21 +79,21 @@ const UsersTracking = () => {
 
     const sendRequest = (params, mode) => {
         axios.get(jwtServiceConfig.getSingleCampaign + '/' + campaignId, { params })
-        .then(res => {
-            if(mode == 'csv_download') {
-                downloadCSV(res.data)
-            }
-            else if(res.data.results) {
-                const result = res.data.results;
-                setListData(result);
-                setCampaignDetails(result.result.campaign_details);
-            }   
-        })
-        .catch(errors => {
-            console.log(errors)
-            dispatch(showMessage({ variant: 'error', message: errors.message}));
-            // navigate('/app/campaigns')
-        })
+            .then(res => {
+                if (mode == 'csv_download') {
+                    downloadCSV(res.data)
+                }
+                else if (res.data.results) {
+                    const result = res.data.results;
+                    setListData(result);
+                    setCampaignDetails(result.result.campaign_details);
+                }
+            })
+            .catch(errors => {
+                console.log(errors)
+                dispatch(showMessage({ variant: 'error', message: errors.message }));
+                // navigate('/app/campaigns')
+            })
     }
 
     const downloadCSV = (data) => {
@@ -109,16 +109,16 @@ const UsersTracking = () => {
         <>
             <div className="xl:px-0 lg:px-16 md:px-16 sm:px-10">
                 <div className='flex mb-16 w-full justify-between items-center'>
-                    <CampaignDetails campaign={ campaignDetails } />
+                    <CampaignDetails campaign={campaignDetails} />
                     <div className="flex">
                         <FormControl sx={{ minWidth: 300 }} size="small" className="mr-5">
                             <InputLabel id="demo-select-small">Filter</InputLabel>
                             <Select
                                 labelId="demo-select-small"
                                 id="demo-select-small"
-                                value={ filter }
+                                value={filter}
                                 label="Filter"
-                                onChange={ handleFilter }
+                                onChange={handleFilter}
                             >
                                 <MenuItem value='all'>All</MenuItem>
                                 <MenuItem value={1}>Condition Met (Postback Triggered)</MenuItem>
@@ -131,7 +131,7 @@ const UsersTracking = () => {
                             (listData.result && listData.result.data.length) ? (
                                 <div>
                                     <Tooltip title="Export to CSV">
-                                        <IconButton color="primary" aria-label="Export to CSV" component="label" onClick={ hanldeExport }>
+                                        <IconButton color="primary" aria-label="Export to CSV" component="label" onClick={hanldeExport}>
                                             <FuseSvgIcon className="text-48" size={28} color="action">feather:download</FuseSvgIcon>
                                         </IconButton>
                                     </Tooltip>
@@ -144,20 +144,20 @@ const UsersTracking = () => {
                     <Chip label="Condition Met (Postback Triggered)" size="small" color="success" />
                     <Chip label="Condition Met (Postback Not Triggered)" size="small" color="warning" />
                     <Chip label="Condition Met (Reversed)" size="small" color="primary" />
-                    <Chip label="Condition Not Met" size="small" color="error" sx={{ '@media(max-width: 900px)': {marginTop: '5px !important'}}} />
+                    <Chip label="Condition Not Met" size="small" color="error" sx={{ '@media(max-width: 900px)': { marginTop: '5px !important' } }} />
                 </Stack>
             </div>
-            <ReportList 
+            <ReportList
                 page={page}
                 rowsPerPage={rowsPerPage}
-                order={order} 
-                result={listData} 
+                order={order}
+                result={listData}
                 handleRequestSort={handleRequestSort}
                 handleChangePage={handleChangePage}
                 handleChangeRowsPerPage={handleChangeRowsPerPage}
             />
         </>
-        
+
     )
 }
 

@@ -14,18 +14,18 @@ function ReportList(props) {
 	const [loading, setLoading] = useState(true);
 	const [selected, setSelected] = useState([]);
 	const [data, setData] = useState(modules);
-	const order = Object.keys(props.order).length ? props.order : {direction: 'desc', id: 'id'};
+	const order = Object.keys(props.order).length ? props.order : { direction: 'desc', id: 'id' };
 	const page = props.page;
 	const rowsPerPage = props.rowsPerPage;
 
-    const fetchModules = () => {
-		if(props.result.result){
+	const fetchModules = () => {
+		if (props.result.result) {
 			setFields(props.result.fields);
 			setModules(props.result.result.data);
 			setTotalRecords(props.result.result.total)
 			setLoading(false);
 		}
-    }
+	}
 
 	useEffect(() => {
 		fetchModules();
@@ -51,21 +51,21 @@ function ReportList(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (n, field) => {
-		if(field.field_name === 'created_at')
+		if (field.field_name === 'created_at')
 			return Helper.parseTimeStamp(n[field.field_name]);
 		else
 			return n[field.field_name];
 	}
 
 	const rowIndicator = (campaign_status) => {
-		if(campaign_status === 0)	// Condition Not Met
+		if (campaign_status === 0)	// Condition Not Met
 			return <Chip label="" color="error" />
-		else if(campaign_status === 1)	// Condition Met (Postback Triggered)
+		else if (campaign_status === 1)	// Condition Met (Postback Triggered)
 			return <Chip label="" color="success" />
-		else if(campaign_status === 2)	// Condition Met (Postback Not Triggered)
+		else if (campaign_status === 2)	// Condition Met (Postback Not Triggered)
 			return <Chip label="" color="warning" />
-		else if(campaign_status === 3)	// Condition Met (Reversed)
-			return <Chip label="" color="primary" />		 
+		else if (campaign_status === 3)	// Condition Met (Reversed)
+			return <Chip label="" color="primary" />
 	}
 
 	return (
@@ -79,7 +79,7 @@ function ReportList(props) {
 							onSelectAllClick=""
 							onRequestSort={props.handleRequestSort}
 							rowCount={data.length}
-							onMenuItemClick=""							
+							onMenuItemClick=""
 							fields={fields}
 							module=""
 							deletable=""
@@ -107,11 +107,11 @@ function ReportList(props) {
 												key={n.id}
 												selected={isSelected}
 											>
-												<TableCell className="w-40 md:w-64 text-center" padding="none">													
+												<TableCell className="w-40 md:w-64 text-center" padding="none">
 													{
 														rowIndicator(n.campaign_status)
 													}
-												</TableCell>												
+												</TableCell>
 
 												{Object.values(fields)
 													.filter(field => field.listing === true)
@@ -144,11 +144,11 @@ function ReportList(props) {
 						}}
 						onPageChange={props.handleChangePage}
 						onRowsPerPageChange={props.handleChangeRowsPerPage}
-						rowsPerPageOptions={[2, 5, 10, 20]}
+						rowsPerPageOptions={[10, 20, 50, 100]}
 					/>}
 
 				</FuseScrollbars>
-			</div> 
+			</div>
 		</div>
 	);
 }
