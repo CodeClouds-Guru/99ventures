@@ -417,9 +417,13 @@ class SurveycallbackController {
 					data: {
 						email: member.email,
 						details: {
+							members: {
+								first_name: member.first_name,
+							},
 							survey: {
-								amount: '$' + amount,
-								survey_number: surveyNumber
+								amount: amount,
+								survey_number: surveyNumber,
+								provider: providerName
 							}
 						},
 					},
@@ -428,9 +432,9 @@ class SurveycallbackController {
 						headers: {
 							...req.headers,
 							company_id: member.company_id,
-							company_portal_id: member.company_portal_id
+							site_id: member.company_portal_id
 						},
-						users: member
+						user: member
 					}
 				});
 			}
