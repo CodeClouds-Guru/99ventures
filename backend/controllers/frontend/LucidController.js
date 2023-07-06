@@ -205,10 +205,7 @@ class LucidController {
 
     generateEntryLink = async (req, res) => {
         if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
+            res.redirect('/login')
             return;
         }
         try{
@@ -265,13 +262,13 @@ class LucidController {
             }
         }
         catch(error) {
-            if('survey_number' in error && error.surveyNumber) {
+            if('survey_number' in error && error.survey_number) {
                 await Survey.update({
                     status: 'draft',
                     deleted_at: new Date()
                 },{
                     where: {
-                        survey_number: error.surveyNumber
+                        survey_number: error.survey_number
                     }
                 });
             }

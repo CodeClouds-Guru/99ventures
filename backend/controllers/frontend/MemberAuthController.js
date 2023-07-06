@@ -552,7 +552,9 @@ class MemberAuthController {
       for (let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
-          switch (record.name) {
+          var question_name = record.name
+          question_name = question_name.toUpperCase()
+          switch (question_name) {
             //get precodes
             case 'GENDER':
               if (record.survey_provider_id == 1) {
