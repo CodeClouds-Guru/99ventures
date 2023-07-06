@@ -198,9 +198,8 @@ module.exports = async function (req, res, next) {
             await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
             return;
         }
+        await logIP(req, ip, geo)
     }
-
-    await logIP(req, ip, geo)
     next();
 
 }
