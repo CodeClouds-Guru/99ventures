@@ -165,8 +165,8 @@ $(() => {
       $(location).attr('href').includes('?')
       ? $(location).attr('href').split('#')[1].split('?')[0]
       : $(location).attr('href').includes('#')
-      ? $(location).attr('href').split('#')[1]
-      : '';
+        ? $(location).attr('href').split('#')[1]
+        : '';
   };
   if (getUrlHash() === 'signup') {
     goToRegister();
@@ -569,5 +569,15 @@ $(() => {
         .removeClass('fa-solid fa-check')
         .addClass('fa-regular fa-copy');
     }, 3000);
+  });
+
+  $('input[type="password"]').on({
+    keydown: function (e) {
+      if (e.which === 32)
+        return false;
+    },
+    change: function () {
+      this.value = this.value.replace(/\s/g, "");
+    }
   });
 });
