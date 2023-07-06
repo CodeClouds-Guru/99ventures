@@ -18,7 +18,7 @@ const checkMemberAuth = require('../middlewares/checkMemberAuth');
 const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
-// router.use(checkIPMiddleware);
+router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
