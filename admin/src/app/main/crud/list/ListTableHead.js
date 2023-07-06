@@ -24,6 +24,11 @@ function ListTableHead(props) {
   const dispatch = useDispatch();
   const { module } = props;
 
+  let selectable = true
+  if (module === 'withdrawal-requests' && props.withdrawalRequestStatus !== '' && props.withdrawalRequestStatus !== 'pending') {
+    selectable = false
+  }
+
   const createSortHandler = (property) => (event) => {
     if (property.sort) {
       props.onRequestSort(event, property.field_name);
@@ -68,11 +73,12 @@ function ListTableHead(props) {
               darken(theme.palette.background.paper, theme.palette.mode === 'light' ? 0.02 : 0.2),
           }}
         >
-          {(deletable || actionable) && <Checkbox
+          {selectable && (deletable || actionable) && <Checkbox
             indeterminate={numSelected > 0 && numSelected < props.rowCount}
             checked={props.rowCount !== 0 && numSelected === props.rowCount}
             onChange={props.onSelectAllClick}
-          />}
+          />
+          }
           {numSelected > 0 && (
             <Box
               className="flex items-center justify-center absolute w-64 top-0 ltr:left-0 rtl:right-0 mx-56 h-64 z-10 border-b-1"
