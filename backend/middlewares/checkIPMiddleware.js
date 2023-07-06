@@ -85,8 +85,8 @@ async function redirectWithErrorMessage(req, res, error_code) {
         req.session.member = { ...member, status: 'suspended' }
     }
     // console.log({ access_error: msg });
-    req.session.flash = { access_error: msg };
-    res.redirect('/404');
+    req.session.flash = { access_error: msg,notice: msg, };
+    res.redirect('/notice');
 }
 
 async function logIP(req, ip, geo) {
@@ -132,69 +132,72 @@ async function checkIfCountryChanged(req, country_code) {
 
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
-    const company_portal_id = await getCompanyPortalId(req)
-    const is_blacklisted_ip = await IpConfiguration.count({
-        where: {
-            company_portal_id: company_portal_id,
-            status: 0,
-            ip: ip,
+    let partial_path = req.path
+    if(!(['/notice', '/404','/503','/500'].includes(partial_path))){
+        const company_portal_id = await getCompanyPortalId(req)
+        const is_blacklisted_ip = await IpConfiguration.count({
+            where: {
+                company_portal_id: company_portal_id,
+                status: 0,
+                ip: ip,
+            }
+        });
+        if (is_blacklisted_ip > 0) {
+            await redirectWithErrorMessage(req, res, 'IP_BLACKLISTED')
+            return;
         }
-    });
-    if (is_blacklisted_ip > 0) {
-        await redirectWithErrorMessage(req, res, 'IP_BLACKLISTED')
-        return;
-    }
-    const reportObj = new IpQualityScoreClass();
-    const geo = await reportObj.getIpReport(ip);
+        const reportObj = new IpQualityScoreClass();
+        const geo = await reportObj.getIpReport(ip);
 
-    const is_blacklisted_isp = await IspConfiguration.count({
-        where: {
-            company_portal_id: company_portal_id,
-            status: 0,
-            isp: geo.report.ISP,
+        const is_blacklisted_isp = await IspConfiguration.count({
+            where: {
+                company_portal_id: company_portal_id,
+                status: 0,
+                isp: geo.report.ISP,
+            }
+        });
+        if (is_blacklisted_isp > 0) {
+            await redirectWithErrorMessage(req, res, 'ISP_BLACKLISTED')
+            return;
         }
-    });
-    if (is_blacklisted_isp > 0) {
-        await redirectWithErrorMessage(req, res, 'ISP_BLACKLISTED')
-        return;
-    }
 
-    const is_blacklisted_country = await CountryConfiguration.count({
-        where: {
-            company_portal_id: company_portal_id,
-            status: 0,
-            iso: geo.report.country_code,
+        const is_blacklisted_country = await CountryConfiguration.count({
+            where: {
+                company_portal_id: company_portal_id,
+                status: 0,
+                iso: geo.report.country_code,
+            }
+        });
+        if (is_blacklisted_country > 0) {
+            await redirectWithErrorMessage(req, res, 'UNAVAILABLE_COUNTRY')
+            return;
         }
-    });
-    if (is_blacklisted_country > 0) {
-        await redirectWithErrorMessage(req, res, 'UNAVAILABLE_COUNTRY')
-        return;
-    }
 
-    const is_blacklisted_browser = await BrowserConfiguration.count({
-        where: {
-            company_portal_id: company_portal_id,
-            status: 0,
-            browser: getBrowser(req),
+        const is_blacklisted_browser = await BrowserConfiguration.count({
+            where: {
+                company_portal_id: company_portal_id,
+                status: 0,
+                browser: getBrowser(req),
+            }
+        });
+        if (is_blacklisted_browser > 0) {
+            await redirectWithErrorMessage(req, res, 'UNSUPPORTED_BROWSER')
+            return;
         }
-    });
-    if (is_blacklisted_browser > 0) {
-        await redirectWithErrorMessage(req, res, 'UNSUPPORTED_BROWSER')
-        return;
-    }
 
-    if (geo.report.vpn) {
-        await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
-        return;
-    }
-    if (geo.report.tor) {
-        await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
-        return;
-    }
-    const is_country_changed = await checkIfCountryChanged(req, geo.report.country_code);
-    if (is_country_changed) {
-        await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
-        return;
+        if (geo.report.vpn) {
+            await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
+            return;
+        }
+        if (geo.report.tor) {
+            await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
+            return;
+        }
+        const is_country_changed = await checkIfCountryChanged(req, geo.report.country_code);
+        if (is_country_changed) {
+            await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
+            return;
+        }
     }
 
     await logIP(req, ip, geo)
