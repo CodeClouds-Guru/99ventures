@@ -484,11 +484,17 @@ const CreateEditForm = () => {
                                     render={({ field }) => (
                                         <TextField  
                                             {...field}
-                                            type="tel"
+                                            type="number"
+                                            InputProps={{ inputProps: { min: 0 } }}
                                             required
                                             id="outlined-required"
                                             label="Amount"
                                             className="w-1/2"
+                                            onKeyPress={(event) => {
+                                                if (!/[0-9.]/.test(event.key)) {
+                                                  event.preventDefault();
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -651,12 +657,12 @@ const CreateEditForm = () => {
                                     <TextField
                                         {...field}
                                         type="number"
-                                        InputProps={{ inputProps: { min: 0, max: 10 } }}
+                                        InputProps={{ inputProps: { min: 0 } }}
                                         id="outlined-required-maximum-amount"
                                         label="Maximum Amount"
                                         className="w-full mt-20"
                                         onKeyPress={(event) => {
-                                            if (!/[0-9]/.test(event.key)) {
+                                            if (!/[0-9.]/.test(event.key)) {
                                               event.preventDefault();
                                             }
                                         }}
@@ -805,11 +811,17 @@ const CreateEditForm = () => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            type="tel"
+                                            type="number"
+                                            InputProps={{ inputProps: { min: 0 } }}
                                             id="outlined-required-past-withdrawl"
                                             label=""
                                             helperText='Past withdraw(s)'
                                             className="w-1/2"
+                                            onKeyPress={(event) => {
+                                                if (!/[0-9]/.test(event.key)) {
+                                                  event.preventDefault();
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -828,40 +840,6 @@ const CreateEditForm = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                         <div className='flex flex-col mx-auto w-1/2 justify-center p-16'>
-                            {/*<Controller
-                                name="member_list"
-                                control={control}
-                                render={({ field }) => (
-                                    <Autocomplete
-                                        {...field}
-                                        value={ selectedMember }
-                                        multiple
-                                        className="w-full"
-                                        id="checkboxes-users"
-                                        options={ memberList }
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option) => option.member_name}
-                                        onChange={(e, val)=>{
-                                            setSelectedMember(val);
-                                        }}
-                                        renderOption={(props, option, { selected }) => (
-                                            <li {...props} key={option.id}>
-                                                <Checkbox
-                                                    icon={icon}
-                                                    checkedIcon={checkedIcon}
-                                                    style={{ marginRight: 8 }}
-                                                    checked={selected}
-                                                />
-                                                {option.member_name}
-                                            </li>
-                                        )}
-                                        renderInput={(params) => (
-                                            <TextField {...params} label="Excluded Users" placeholder="Excluded Users" />
-                                        )}
-                                    />
-                                )}
-                            /> */}
-
                             <Controller
                                 name="member_list"
                                 control={control}
@@ -927,10 +905,17 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
+                                        type="number"
+                                        InputProps={{ inputProps: { min: 0 } }}
                                         id="outlined-required-fee"
                                         label="Fee Percent (%)"
                                         className="w-full mt-20"
                                         helperText="In cent format"
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9.]/.test(event.key)) {
+                                              event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />
