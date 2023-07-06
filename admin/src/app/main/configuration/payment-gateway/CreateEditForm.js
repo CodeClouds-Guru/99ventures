@@ -650,10 +650,16 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        type="tel"
+                                        type="number"
+                                        InputProps={{ inputProps: { min: 0, max: 10 } }}
                                         id="outlined-required-maximum-amount"
                                         label="Maximum Amount"
                                         className="w-full mt-20"
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9]/.test(event.key)) {
+                                              event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />
