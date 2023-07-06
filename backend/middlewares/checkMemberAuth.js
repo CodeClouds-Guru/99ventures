@@ -102,7 +102,7 @@ module.exports = async function (req, res, next) {
       return;
     }
     let req_path = req.path.replaceAll('/','')
-    if(req.method === 'GET' && member.status === 'suspended' && ['dashboard', 'get-scripts','get-login-streak','404','500','ticket','profile','faq','create-ticket','support-tickets'].indexOf(req_path) == -1){
+    if(req.method === 'GET' && member.status === 'suspended' && ['dashboard', 'get-scripts','get-login-streak','404','500','ticket','profile','faq','create-ticket','support-tickets','notice'].indexOf(req_path) == -1){
       req.session.flash = { error: 'Your account status is suspended. Please contact to our admin.' };
       res.status(401).redirect('/faq');
       return
