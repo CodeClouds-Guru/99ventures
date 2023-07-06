@@ -69,7 +69,7 @@ async function getCompanyPortalId(req) {
 
 async function redirectWithErrorMessage(req, res, error_code) {
     const member = getMemberOfThisSession(req);
-    const msg = error_message in messageBox ? messageBox[error_message] : 'Some unexpected error occured'
+    const msg = error_code in messageBox ? messageBox[error_code].error_message : 'Some unexpected error occured'
     if (['VPN_DETECTED', 'TOR_DETECTED', 'COUNTRY_CHANGED'].includes(error_code) && member) {//&& member.status !== 'suspended'
         await MemberNote.create({
             user_id: 0,
