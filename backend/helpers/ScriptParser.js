@@ -200,24 +200,25 @@ class ScriptParser {
                 // var date2 = new Date(
                 //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
                 // );
-                console.log(payment);
-                var date2 =
-                  payment.WithdrawalRequests.length > 0
-                    ? new Date(payment.WithdrawalRequests[0].created_at)
-                    : new Date();
-                var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
-                // console.log(withdraw_redo_interval, hours, date1, date2);
-                data[key].setDataValue('redo_diff', parseFloat(hours));
-                data[key].setDataValue(
-                  'redo_diff_calculation',
-                  parseFloat(withdraw_redo_interval) - parseFloat(hours)
-                );
-              } else {
+                // console.log(payment);
                 data[key].setDataValue(
                   'redo_diff',
                   parseFloat(withdraw_redo_interval)
                 );
                 data[key].setDataValue('redo_diff_calculation', 0);
+                if (payment.WithdrawalRequests.length > 0) {
+                  var date2 =
+                    payment.WithdrawalRequests.length > 0
+                      ? new Date(payment.WithdrawalRequests[0].created_at)
+                      : new Date();
+                  var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
+                  // console.log(withdraw_redo_interval, hours, date1, date2);
+                  data[key].setDataValue('redo_diff', parseFloat(hours));
+                  data[key].setDataValue(
+                    'redo_diff_calculation',
+                    parseFloat(withdraw_redo_interval) - parseFloat(hours)
+                  );
+                }
               }
               var past_withdrawal_symbol = '';
               switch (payment.past_withdrawal_options) {
