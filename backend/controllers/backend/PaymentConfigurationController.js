@@ -123,18 +123,18 @@ class PaymentConfigurationController extends Controller {
 
       let response = await super.save(req);
       if (response.result.id) {
-        if (updated_country_list.length > 0) {
-          await this.insertAllowedCountries(
-            updated_country_list,
-            response.result.id
-          );
-        }
-        if (updated_member_list.length > 0) {
-          await this.insertExcludedMembers(
-            updated_member_list,
-            response.result.id
-          );
-        }
+        // if (updated_country_list.length > 0) {
+        await this.insertAllowedCountries(
+          updated_country_list,
+          response.result.id
+        );
+        // }
+        // if (updated_member_list.length > 0) {
+        await this.insertExcludedMembers(
+          updated_member_list,
+          response.result.id
+        );
+        // }
         if (field_option_list.length > 0) {
           await this.insertFieldOptions(field_option_list, response.result.id);
         }
@@ -178,30 +178,27 @@ class PaymentConfigurationController extends Controller {
       if (req.body.fixed_amount) req.body.minimum_amount = 0;
       let response = await super.update(req);
       if (req.params.id) {
-        if (updated_country_list.length > 0) {
-          //remove existing data
-          let country_del = await db.sequelize.query(
-            `DELETE FROM allowed_country_payment_method WHERE payment_method_id=?`,
-            {
-              replacements: [req.params.id],
-              type: QueryTypes.DELETE,
-            }
-          );
-          await this.insertAllowedCountries(
-            updated_country_list,
-            req.params.id
-          );
-        }
-        if (updated_member_list.length > 0) {
-          let country_del = await db.sequelize.query(
-            `DELETE FROM excluded_member_payment_method WHERE payment_method_id=?`,
-            {
-              replacements: [req.params.id],
-              type: QueryTypes.DELETE,
-            }
-          );
-          await this.insertExcludedMembers(updated_member_list, req.params.id);
-        }
+        // if (updated_country_list.length > 0) {
+        //remove existing data
+        let country_del = await db.sequelize.query(
+          `DELETE FROM allowed_country_payment_method WHERE payment_method_id=?`,
+          {
+            replacements: [req.params.id],
+            type: QueryTypes.DELETE,
+          }
+        );
+        await this.insertAllowedCountries(updated_country_list, req.params.id);
+        // }
+        // if (updated_member_list.length > 0) {
+        let member_del = await db.sequelize.query(
+          `DELETE FROM excluded_member_payment_method WHERE payment_method_id=?`,
+          {
+            replacements: [req.params.id],
+            type: QueryTypes.DELETE,
+          }
+        );
+        await this.insertExcludedMembers(updated_member_list, req.params.id);
+        // }
         if (field_option_list.length > 0) {
           //remove previous PaymentMethodFieldOption records
           await PaymentMethodFieldOption.destroy({
@@ -221,33 +218,37 @@ class PaymentConfigurationController extends Controller {
   }
 
   async insertAllowedCountries(updated_country_list, payment_method_id) {
-    let country_data = [];
-    country_data = updated_country_list.map((country) => {
-      return {
-        payment_method_id: payment_method_id,
-        country_id: country,
-      };
-    });
-    // console.log('country_data', country_data);
-    await queryInterface.bulkInsert(
-      'allowed_country_payment_method',
-      country_data
-    );
+    if (updated_country_list.length > 0) {
+      let country_data = [];
+      country_data = updated_country_list.map((country) => {
+        return {
+          payment_method_id: payment_method_id,
+          country_id: country,
+        };
+      });
+      // console.log('country_data', country_data);
+      await queryInterface.bulkInsert(
+        'allowed_country_payment_method',
+        country_data
+      );
+    }
   }
 
   async insertExcludedMembers(updated_member_list, payment_method_id) {
-    let member_data = [];
-    member_data = updated_member_list.map((member) => {
-      return {
-        payment_method_id: payment_method_id,
-        member_id: member,
-      };
-    });
-    // console.log('member_data', member_data);
-    await queryInterface.bulkInsert(
-      'excluded_member_payment_method',
-      member_data
-    );
+    if (updated_member_list.length > 0) {
+      let member_data = [];
+      member_data = updated_member_list.map((member) => {
+        return {
+          payment_method_id: payment_method_id,
+          member_id: member,
+        };
+      });
+      // console.log('member_data', member_data);
+      await queryInterface.bulkInsert(
+        'excluded_member_payment_method',
+        member_data
+      );
+    }
   }
 
   async insertFieldOptions(field_option_list, payment_method_id) {

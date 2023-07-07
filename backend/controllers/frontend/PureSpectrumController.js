@@ -188,10 +188,7 @@ class PureSpectrumController {
 
     generateEntryLink = async (req, res) => {
         if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
+            res.redirect('/login');
             return;
         }
         var returnObj = {};
