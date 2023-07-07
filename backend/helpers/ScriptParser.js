@@ -200,9 +200,11 @@ class ScriptParser {
                 // var date2 = new Date(
                 //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
                 // );
-                var date2 = payment.WithdrawalRequests
-                  ? new Date(payment.WithdrawalRequests[0].created_at)
-                  : new Date();
+                console.log(payment);
+                var date2 =
+                  payment.WithdrawalRequests.length > 0
+                    ? new Date(payment.WithdrawalRequests[0].created_at)
+                    : new Date();
                 var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
                 // console.log(withdraw_redo_interval, hours, date1, date2);
                 data[key].setDataValue('redo_diff', parseFloat(hours));
