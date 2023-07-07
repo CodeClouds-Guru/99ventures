@@ -163,4 +163,12 @@ module.exports = [
       return JSON.stringify(obj);
     },
   },
+  {
+    name: 'generateLink',
+    fn: function (value) {
+      value = value.toLowerCase()
+      value = value.replaceAll(' ', '-')
+      return process.env.URI+'/'+value
+    },
+  },
 ];
