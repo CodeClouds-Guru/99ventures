@@ -24,10 +24,9 @@ const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
-const membertransaction = require('../../models/membertransaction');
-const { isNull } = require('lodash');
+// const membertransaction = require('../../models/membertransaction');
 const util = require('util');
-const withdrawalrequest = require('../../models/withdrawalrequest');
+// const withdrawalrequest = require('../../models/withdrawalrequest');
 const moment = require('moment');
 const CsvHelper = require('../../helpers/CsvHelper');
 class MemberController extends Controller {
@@ -392,7 +391,7 @@ class MemberController extends Controller {
     }
   }
 
-  //override list function
+  //override list function 
   async list(req, res) {
     // The purpose of this IF statement is to populate excluded members dropdown on Payment Configuration tab.
     if (
@@ -425,40 +424,49 @@ class MemberController extends Controller {
           status: { [Op.in]: query_where.status },
         }),
     };
-    options.include = [
+
+    // Do not delete these variables, these are using dynamically
+    const IpLogs = IpLog;
+    const MemberPaymentInformations = MemberPaymentInformation;
+    const WithdrawalRequests = WithdrawalRequest;
+    const MemberTransactions = MemberTransaction;
+
+    const includesModel = [
       {
         model: IpLog,
-        attributes: ['ip', 'isp', 'geo_location', 'browser'],
+        // attributes: ['ip', 'isp', 'geo_location', 'browser'],
         order: [['id', 'DESC']],
-      },
-      {
-        model: MemberReferral,
-        attributes: ['referral_email'],
-      },
-      {
-        model: MemberPaymentInformation,
-        attributes: ['value'],
-      },
-      {
-        model: MembershipTier,
-        attributes: ['name'],
-      },
-      {
-        model: WithdrawalRequest,
-        order: [['id', 'DESC']],
-        attributes: ['created_at', 'status', ['amount', 'withdrawal_amount']],
-      },
-      {
-        model: MemberTransaction,
-        order: [['id', 'DESC']],
-        attributes: ['balance', 'type', 'amount'],
-      },
-      {
-        model: EmailAlert,
-        as: 'MemberEmailAlerts',
-        attributes: ['slug'],
-      },
+      }
     ];
+
+    // Dynamically generating Model Relationships
+    const fields = req.query.fields;
+    for(let field of fields) {
+      const mdl = field.split('.');
+      if(mdl.length >1 && mdl[0] !== 'MemberEmailAlerts') {
+        let indx = includesModel.findIndex(el => el.model == eval(mdl[0]));
+        if(indx !== -1){
+          if(includesModel[indx].attributes)
+            includesModel[indx].attributes = [...new Set([...includesModel[indx].attributes, mdl[1]])];
+          else 
+            includesModel[indx].attributes = [mdl[1]];
+        } else {
+          includesModel.push({
+            model: eval(mdl[0]),
+            attributes: [mdl[1]]
+          })
+        }
+      }
+      else if(mdl.length >1 && mdl[0] === 'MemberEmailAlerts') {
+        includesModel.push({
+          model: EmailAlert,
+          as: 'MemberEmailAlerts',
+          attributes: [mdl[1]]
+        })
+      }
+    }
+    
+    options.include = includesModel;
     options.where = {
       ...options.where,
       company_portal_id: site_id,
@@ -475,7 +483,6 @@ class MemberController extends Controller {
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
-
     result.rows.map((row) => {
       let ip = '';
       let geo_location = '';
@@ -483,13 +490,12 @@ class MemberController extends Controller {
       let browser = '';
       let browser_language = '';
       let membership_tier_name = '';
-      let opted_for_email_alerts =
-        row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+      // let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
       let member_account_balance = 0.0;
       let member_total_earnings = 0.0;
       let total_paid = 0.0;
       let cashout_date = 'N/A';
-      if (row.IpLogs.length > 0) {
+      if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
         ip = last_row.ip;
         geo_location = last_row.geo_location;
@@ -500,14 +506,14 @@ class MemberController extends Controller {
       if (row.MembershipTier) {
         membership_tier_name = row.MembershipTier.name;
       }
-      if (row.MemberTransactions.length > 0) {
+      if (row.MemberTransactions && row.MemberTransactions.length > 0) {
         member_account_balance = row.MemberTransactions[0].balance;
         member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
           if (item.type === 'credited') sum += item.amount;
           return sum;
         }, 0.0);
       }
-      if (row.WithdrawalRequests > 0) {
+      if (row.WithdrawalRequests && row.WithdrawalRequests > 0) {
         cashout_date = moment(row.WithdrawalRequests[0].created_at).format(
           'YYYY-MM-DD'
         );
@@ -516,17 +522,46 @@ class MemberController extends Controller {
           return sum;
         }, 0.0);
       }
-      row.setDataValue('IpLogs.ip', ip);
-      row.setDataValue('IpLogs.geo_location', geo_location);
-      row.setDataValue('IpLogs.isp', isp);
-      row.setDataValue('IpLogs.browser', browser);
-      row.setDataValue('IpLogs.browser_language', browser_language);
-      row.setDataValue('MembershipTier.name', membership_tier_name);
-      row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
-      row.setDataValue('MemberTransactions.balance', member_account_balance);
-      row.setDataValue('MemberTransactions.amount', member_total_earnings);
-      row.setDataValue('WithdrawalRequests.amount', total_paid);
-      row.setDataValue('WithdrawalRequests.created_at', cashout_date);
+      if(fields.includes('IpLogs.ip')){
+        row.setDataValue('IpLogs.ip', ip);
+      }
+      if(fields.includes('IpLogs.geo_location')){
+        row.setDataValue('IpLogs.geo_location', geo_location);
+      }
+      if(fields.includes('IpLogs.isp')){
+        row.setDataValue('IpLogs.isp', isp);
+      }
+      if(fields.includes('IpLogs.browser')){
+        row.setDataValue('IpLogs.browser', browser);
+      }
+      if(fields.includes('IpLogs.browser_language')){
+        row.setDataValue('IpLogs.browser_language', browser_language);
+      }
+
+      if(fields.includes('MembershipTier.name')){
+        row.setDataValue('MembershipTier.name', membership_tier_name);
+      }
+      if(fields.includes('MemberTransactions.balance')){
+        row.setDataValue('MemberTransactions.balance', member_account_balance);
+      }
+      if(fields.includes('MemberTransactions.amount')){
+        row.setDataValue('MemberTransactions.amount', member_total_earnings);
+      }
+      if(fields.includes('WithdrawalRequests.amount')){
+        row.setDataValue('WithdrawalRequests.amount', total_paid);
+      } 
+      if(fields.includes('WithdrawalRequests.created_at')){
+        row.setDataValue('WithdrawalRequests.created_at', cashout_date);
+      }
+      if(fields.includes('MemberEmailAlerts.slug')){
+         let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+        row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
+      }
+      // row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
+      // row.setDataValue('MemberTransactions.balance', member_account_balance);
+      // row.setDataValue('MemberTransactions.amount', member_total_earnings);
+      // row.setDataValue('WithdrawalRequests.amount', total_paid);
+      // row.setDataValue('WithdrawalRequests.created_at', cashout_date);
       return row;
     });
 
