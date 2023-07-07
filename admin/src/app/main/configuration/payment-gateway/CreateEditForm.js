@@ -162,14 +162,23 @@ const CreateEditForm = () => {
      * Save|Update Payment Details
      */
     const savePaymentDataToDB = (data) => {
+        
         if(data.amount_type === 'Minimum') {
-            data.minimum_amount = data.amount;
+            data.minimum_amount = data.amount ? data.amount : 0;
             data.fixed_amount = 0;
         } else {
-            data.fixed_amount = data.amount;
+            data.fixed_amount = data.amount ? data.amount : 0;
             data.minimum_amount = 0;
         }
-        
+        if(!data.fee_percent || data.fee_percent == ""){
+            data.fee_percent = 0;
+        }
+        if(!data.past_withdrawal_count || data.past_withdrawal_count == ""){
+            data.past_withdrawal_count = 0;
+        }
+        if(!data.maximum_amount || data.maximum_amount == ""){
+            data.maximum_amount = 0;
+        }
         delete data.amount;
         delete data.amount_type;
         data.country_list = (selectedCountry.length ? selectedCountry.map(r=> r.id) : []);
@@ -449,10 +458,16 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        type="tel"
+                                        type="number"
                                         id="outlined-required-redo-wait"
                                         label="Redo Wait (in hour)"
                                         className="w-full mt-20"
+                                        InputProps={{ inputProps: { min: 0 } }}
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9.]/.test(event.key)) {
+                                                event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />
