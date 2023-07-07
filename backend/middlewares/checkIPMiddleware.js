@@ -85,7 +85,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
         req.session.member = { ...member, status: 'suspended' }
     }
     // console.log({ access_error: msg });
-    req.session.flash = { access_error: msg,notice: msg, };
+    req.session.flash = { access_error: msg, notice: msg, };
     res.redirect('/notice');
 }
 
@@ -133,7 +133,7 @@ async function checkIfCountryChanged(req, country_code) {
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if(!(['/notice', '/404','/503','/500'].includes(partial_path))){
+    if (!(['/notice', '/404', '/503', '/500'].includes(partial_path))) {
         const company_portal_id = await getCompanyPortalId(req)
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {
@@ -153,7 +153,7 @@ module.exports = async function (req, res, next) {
             where: {
                 company_portal_id: company_portal_id,
                 status: 0,
-                isp: geo.report.ISP,
+                isp: geo.report.ISP || '',
             }
         });
         if (is_blacklisted_isp > 0) {
@@ -165,7 +165,7 @@ module.exports = async function (req, res, next) {
             where: {
                 company_portal_id: company_portal_id,
                 status: 0,
-                iso: geo.report.country_code,
+                iso: geo.report.country_code || '',
             }
         });
         if (is_blacklisted_country > 0) {
@@ -185,15 +185,15 @@ module.exports = async function (req, res, next) {
             return;
         }
 
-        if (geo.report.vpn) {
+        if ('vpn' in geo.report && geo.report.vpn) {
             await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
             return;
         }
-        if (geo.report.tor) {
+        if ('tor' in geo.report && geo.report.tor) {
             await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
             return;
         }
-        const is_country_changed = await checkIfCountryChanged(req, geo.report.country_code);
+        const is_country_changed = await checkIfCountryChanged(req, geo.report.country_code || '');
         if (is_country_changed) {
             await redirectWithErrorMessage(req, res, 'COUNTRY_CHANGED')
             return;
