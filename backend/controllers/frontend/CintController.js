@@ -77,7 +77,7 @@ class CintController {
                     } else {
                         return{
                             staus: false,
-                            message: 'Surveys not found!'
+                            message: 'Sorry! no surveys have been matched now! Please try again later.'
                         }
                     }
                 } else {
