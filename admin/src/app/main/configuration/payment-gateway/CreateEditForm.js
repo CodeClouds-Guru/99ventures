@@ -64,26 +64,32 @@ const fields = [
     {
         field_name: 'Username',
         field_type: 'input',
+        required: true
     },
     {
         field_name: "Full Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "First Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "Last Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "Email",
         field_type: "email",
+        required: true
     },
     {
         field_name: "Phone",
         field_type: "number",
+        required: true
     }
 ]
 
@@ -163,7 +169,12 @@ const CreateEditForm = () => {
      * Save|Update Payment Details
      */
     const savePaymentDataToDB = (data) => {
-        
+        const mandatoryFields = fields.filter(field => field.required === true).map(item=> item.field_name);
+        const check = data.field_option_list.some(field=> mandatoryFields.includes(field));
+        if(!check) {
+            dispatch(showMessage({ variant: 'error', message: "Please select anyone mandatory fields like  username or email or phone from Payment Fields Dropdown." }));
+            return;
+        }
         if(data.amount_type === 'Minimum') {
             data.minimum_amount = data.amount ? data.amount : 0;
             data.fixed_amount = 0;
@@ -256,6 +267,8 @@ const CreateEditForm = () => {
                 } else if(result.fixed_amount > 0){
                     setValue('amount_type', 'Fixed', { shouldDirty: false, shouldValidate: true });
                     setValue('amount', result.fixed_amount, { shouldDirty: false, shouldValidate: true });
+                    setDisabled(true);
+                    setValue("maximum_amount", 0, { shouldDirty: false, shouldValidate: false });
                 } else {
                     setValue('amount_type', defaultValues.amount_type, { shouldDirty: false, shouldValidate: true });
                     setValue('amount', defaultValues.amount, { shouldDirty: false, shouldValidate: true });
