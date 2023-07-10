@@ -200,17 +200,16 @@ class ScriptParser {
                 // var date2 = new Date(
                 //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
                 // );
-                // console.log(payment);
+                console.log(payment.WithdrawalRequests);
                 data[key].setDataValue(
                   'redo_diff',
                   parseFloat(withdraw_redo_interval)
                 );
                 data[key].setDataValue('redo_diff_calculation', 0);
+                var date2 = new Date();
                 if (payment.WithdrawalRequests.length > 0) {
-                  var date2 =
-                    payment.WithdrawalRequests.length > 0
-                      ? new Date(payment.WithdrawalRequests[0].created_at)
-                      : new Date();
+                  date2 = new Date(payment.WithdrawalRequests[0].created_at);
+
                   var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
                   // console.log(withdraw_redo_interval, hours, date1, date2);
                   data[key].setDataValue('redo_diff', parseFloat(hours));
@@ -241,14 +240,14 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            // console.log(
-            //   '===================',
-            //   JSON.parse(JSON.stringify(data))
-            // );
-            // console.log(
-            //   '===================',
-            //   JSON.parse(JSON.stringify(other_details))
-            // );
+            console.log(
+              '===================',
+              JSON.parse(JSON.stringify(data))
+            );
+            console.log(
+              '===================',
+              JSON.parse(JSON.stringify(other_details))
+            );
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -649,7 +648,11 @@ class ScriptParser {
             },
             {
               model: Models.WithdrawalRequest,
-              attributes: ['member_transaction_id', 'created_at'],
+              attributes: [
+                'member_transaction_id',
+                'created_at',
+                'requested_on',
+              ],
               required: false,
               where: { member_id: user.id },
               include: {
