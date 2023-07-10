@@ -35,6 +35,7 @@ class ScriptParser {
       total_withdrawal_amount: 0,
       member_balance: 0,
       user: user,
+      message:""
     };
     var page_count = 0;
     var script_html = '';
@@ -264,6 +265,7 @@ class ScriptParser {
               page_count = temp_survey_list.result.page_count;
             } else {
               data = [];
+              other_details.message = temp_survey_list.message
             }
             if (page_count > 5) {
               page_count = 5;
