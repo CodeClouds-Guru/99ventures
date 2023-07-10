@@ -180,7 +180,7 @@ class SchlesingerController {
             } else {
                 return{
                     status: false,
-                    message: 'Member eiligibility not found!'
+                    message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
         }
