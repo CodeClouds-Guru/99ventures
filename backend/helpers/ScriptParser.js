@@ -197,21 +197,21 @@ class ScriptParser {
             data.forEach(function (payment, key) {
               var date1 = new Date();
               var withdraw_redo_interval = payment.withdraw_redo_interval;
+              data[key].setDataValue(
+                'redo_diff',
+                parseFloat(withdraw_redo_interval)
+              );
+              data[key].setDataValue('redo_diff_calculation', 0);
               if (withdraw_redo_interval > 0) {
                 // var date2 = new Date(
                 //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
                 // );
-                // console.log(payment);
-                data[key].setDataValue(
-                  'redo_diff',
-                  parseFloat(withdraw_redo_interval)
-                );
-                data[key].setDataValue('redo_diff_calculation', 0);
+
+                var date2 = new Date();
                 if (payment.WithdrawalRequests.length > 0) {
-                  var date2 =
-                    payment.WithdrawalRequests.length > 0
-                      ? new Date(payment.WithdrawalRequests[0].created_at)
-                      : new Date();
+                  // console.log(payment.WithdrawalRequests[0]);
+                  date2 = new Date(payment.WithdrawalRequests[0].created_at);
+
                   var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
                   // console.log(withdraw_redo_interval, hours, date1, date2);
                   data[key].setDataValue('redo_diff', parseFloat(hours));
@@ -627,7 +627,7 @@ class ScriptParser {
           ],
           where: { company_portal_id: user.company_portal_id, status: 1 },
           order: [
-            [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
+            [Models.WithdrawalRequest, 'id', 'DESC'],
             [Models.PaymentMethodFieldOption, 'id', 'ASC'],
           ],
           include: [
@@ -636,13 +636,6 @@ class ScriptParser {
               attributes: ['field_name', 'field_type'],
               required: false,
             },
-            // {
-            //   model: Models.Country,
-            //   as: 'allowed_countries',
-            //   where: { id: user.country_id },
-            //   required: false,
-            //   attributes: ['id'],
-            // },
             {
               model: Models.MemberPaymentInformation,
               attributes: ['name', 'value'],
@@ -651,9 +644,14 @@ class ScriptParser {
             },
             {
               model: Models.WithdrawalRequest,
-              attributes: ['member_transaction_id', 'created_at'],
+              attributes: [
+                'id',
+                'member_transaction_id',
+                'created_at',
+                'requested_on',
+              ],
               required: false,
-              where: { member_id: user.id },
+              // where: { member_id: user.id },
               include: {
                 model: Models.MemberTransaction,
                 attributes: ['completed_at'],

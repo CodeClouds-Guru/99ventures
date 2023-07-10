@@ -96,6 +96,7 @@ const CreateEditForm = () => {
     const [payload, setPayload] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(true);
+    const [disabled, setDisabled] = useState(false);
     const [memberList, setMemberList] = useState([]);
     const [pageloader, setPageloader] = useState(true);
     const [countryList, setCountryList] = useState([]);
@@ -176,7 +177,7 @@ const CreateEditForm = () => {
         if(!data.past_withdrawal_count || data.past_withdrawal_count == ""){
             data.past_withdrawal_count = 0;
         }
-        if(!data.maximum_amount || data.maximum_amount == ""){
+        if(!data.maximum_amount || data.maximum_amount == "" || data.amount_type === 'Fixed'){
             data.maximum_amount = 0;
         }
         delete data.amount;
@@ -366,6 +367,16 @@ const CreateEditForm = () => {
         return <FuseLoading />;
     }
 
+    const handleAmountTypeSelect = (e) => {
+        if('Fixed' === e.target.value){
+            setDisabled(true);
+            setValue("maximum_amount", 0, { shouldDirty: false, shouldValidate: false });
+        } else {
+            setDisabled(false)
+        }
+        setValue("amount_type", e.target.value, { shouldDirty: false, shouldValidate: true });
+    }
+
     return (
         <div>
             <form
@@ -483,6 +494,7 @@ const CreateEditForm = () => {
                                             label="Amount Type"
                                             helperText=''
                                             className="w-1/2 pr-24"
+                                            onChange={ handleAmountTypeSelect }
                                             >
                                             <MenuItem value="Minimum">
                                                 Minimum
@@ -671,6 +683,7 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
+                                        disabled={disabled}
                                         type="number"
                                         InputProps={{ inputProps: { min: 0 } }}
                                         id="outlined-required-maximum-amount"
