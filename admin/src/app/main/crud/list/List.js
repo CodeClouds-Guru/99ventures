@@ -264,7 +264,6 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
-				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -287,7 +286,6 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
-				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
