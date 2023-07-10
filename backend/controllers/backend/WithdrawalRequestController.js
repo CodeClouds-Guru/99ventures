@@ -75,7 +75,7 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['amount', 'currency', ...fields];
+      options.attributes = ['id', 'amount', 'currency', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
