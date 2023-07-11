@@ -76,13 +76,13 @@ class CintController {
                         }
                     } else {
                         return{
-                            staus: false,
+                            status: false,
                             message: 'Sorry! no surveys have been matched now! Please try again later.'
                         }
                     }
                 } else {
                     return{
-                        staus: false,
+                        status: false,
                         message: 'Member not found!'
                     }
                 }
@@ -91,7 +91,7 @@ class CintController {
                 const logger = require('../../helpers/Logger')(`cint-survey-errror.log`);
                 logger.error(error);
                 return{
-                    staus: false,
+                    status: false,
                     message: error.response ? error.response.data.messages : 'No Survey Found!'
                 }
             }

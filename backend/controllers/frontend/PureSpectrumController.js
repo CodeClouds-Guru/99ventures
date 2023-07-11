@@ -168,19 +168,19 @@ class PureSpectrumController {
                 }
                 else {
                     return {
-                        staus: false,
+                        status: false,
                         message: 'Surveys not found!'
                     }
                 }
             } else {
                 return {
-                    staus: false,
+                    status: false,
                     message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
         } else {
             return {
-                staus: false,
+                status: false,
                 message: 'Member eiligibility not found!'
             }
         }

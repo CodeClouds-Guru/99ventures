@@ -176,7 +176,7 @@ class LucidController {
                 }
                 else {
                     return {
-                        staus: false,
+                        status: false,
                         message: 'Surveys not found!'
                     }
                 }
@@ -184,7 +184,7 @@ class LucidController {
             else {
                 
                 return {
-                    staus: false,
+                    status: false,
                     message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
@@ -195,7 +195,7 @@ class LucidController {
             //     message: 'Member eiligibility not found!'
             // });
             return {
-                staus: false,
+                status: false,
                 message: 'Member eiligibility not found!'
             }
         }
