@@ -34,7 +34,7 @@ class SchlesingerController {
             });
             if (!provider) {
                 return {
-                    staus: false,
+                    status: false,
                     message: 'Survey Provider not found!'
                 }
             }
