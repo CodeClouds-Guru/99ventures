@@ -87,12 +87,14 @@ function Listing(props) {
         'address_1': 'Billing Street Address',
         '$IpLogs.browser$': 'Browser',
         'email': 'Email',
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
         '$IpLogs.isp$': 'ISP',
         '$IpLogs.geo_location$': 'Geo Location',
         'id': 'ID',
         '$IpLogs.ip$': 'IP Address',
         '$IpLogs.ip$': 'IP Log',
-        'email': 'Payment Email',       //this need to change to payment_email
+        '$MemberPaymentInformations.value': 'Payment Email',       //this need to change to payment_email
         '$MemberReferral.referral_email$': 'Referrer',
         'phone_no': 'Phone',
         'username': 'Username',
@@ -164,9 +166,9 @@ function Listing(props) {
 
     const exportAll = () => {
         setExportLoading(true);
-        if(columnArray.sort() !== displayColumnArray.sort()) {
+        if (columnArray.sort() !== displayColumnArray.sort()) {
             setDisplayColumnArray(columnArray)
-        }        
+        }
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
         )
