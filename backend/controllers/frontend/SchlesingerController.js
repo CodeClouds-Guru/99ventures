@@ -151,22 +151,7 @@ class SchlesingerController {
                             loi: survey.loi,
                             link:link
                         }
-                        survey_list.push(temp_survey)
-                        // surveyHtml += `
-                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                        //         <div class="bg-white card mb-2">
-                        //             <div class="card-body position-relative">
-                        //                 <div class="d-flex justify-content-between">
-                        //                     <h6 class="text-primary m-0">Exciting New Survey #${survey.survey_number}</h6>
-                        //                 </div>
-                        //                 <div class="text-primary small">${survey.loi} Minutes</div>
-                        //                 <div class="d-grid mt-1">
-                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                        //                 </div>
-                        //             </div>
-                        //         </div>
-                        //     </div>
-                        // `
+                        survey_list.push(temp_survey);            
                     }
                 }
                 return {
@@ -198,8 +183,9 @@ class SchlesingerController {
             res.redirect('/login')
             return;
         }
+        var redirectURL = '';
+        var returnObj = {};
         try{
-            var returnObj = {};
             const queryString = req.query;
             const surveyNumber = queryString['survey_number'];
             const data = await Survey.findOne({
@@ -233,22 +219,27 @@ class SchlesingerController {
                     }
                     else {
                         this.updateSurvey(surveyNumber);
-                        returnObj = { notice: 'No quota exists!', redirect_url: '/schlesinger' };
+                        // returnObj = { notice: 'No quota exists!', redirect_url: '/schlesinger' };
+                        redirectURL = '/survey-quota';
                     }
                 } else {
                     this.updateSurvey(surveyNumber);
-                    returnObj = { notice: 'Survey quota does not exists!', redirect_url: '/schlesinger' };
+                    // returnObj = { notice: 'Survey quota does not exists!', redirect_url: '/schlesinger' };
+                    redirectURL = '/survey-quota';
                 }
             } else {
-                returnObj = { notice: 'Unable to get entry link!', redirect_url: '/schlesinger' };
+                // returnObj = { notice: 'Unable to get entry link!', redirect_url: '/schlesinger' };
+                redirectURL = '/survey-notavailable';
             }
         } catch (error) {
             console.error(error);
-            returnObj = { notice: error.message, redirect_url: '/schlesinger' };
+            // returnObj = { notice: error.message, redirect_url: '/schlesinger' };
+            redirectURL = '/survey-notavailable';
         }
-        
-        req.session.flash = returnObj;
-        res.redirect('/notice');
+
+        res.redirect(redirectURL);
+        // req.session.flash = returnObj;
+        // res.redirect('/notice');
     }
 
     updateSurvey = async(surveyNumber) => {

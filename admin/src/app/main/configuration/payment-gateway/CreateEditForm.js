@@ -191,6 +191,12 @@ const CreateEditForm = () => {
         if(!data.maximum_amount || data.maximum_amount == "" || data.amount_type === 'Fixed'){
             data.maximum_amount = 0;
         }
+
+        if(data.minimum_amount > 0 && data.maximum_amount < data.minimum_amount ){
+            dispatch(showMessage({ variant: 'error', message: "Maximum amount should be greater than of Minimum Amount!" }));
+            return;
+        }
+
         delete data.amount;
         delete data.amount_type;
         data.country_list = (selectedCountry.length ? selectedCountry.map(r=> r.id) : []);
@@ -292,7 +298,6 @@ const CreateEditForm = () => {
     const onConfirmAlertDialogHandle = () => {
         savePaymentDataToDB(payload);
     }
-
 
     const handleMemberSearch = (e) => {
         debounceFn(e.target.value);
