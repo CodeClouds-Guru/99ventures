@@ -406,9 +406,26 @@ class MemberController extends Controller {
     var query_where = JSON.parse(req.query.where);
     var temp = {};
     var status_filter = {};
+    const modelsFromSearch = [];
+
+    // Do not delete these variables, these are using dynamically
+    const IpLogs = IpLog;
+    const MemberPaymentInformations = MemberPaymentInformation;
+    const WithdrawalRequests = WithdrawalRequest;
+    const MemberTransactions = MemberTransaction;
+
     if (query_where) {
       if (query_where.filters) {
         temp = query_where.filters.map((filter) => {
+          // This piece of code added to get the Relationship Model name & attributes if it's exists on the serach filter.
+          let clmnArry = filter.column.replace(/[^a-zA-Z_.]/g, '').split('.');
+          if(clmnArry.length > 1){
+            modelsFromSearch.push({
+              model: eval(clmnArry[0]),
+              attributes: [clmnArry[1]]
+            })
+          }
+          //---------- END
           return {
             [filter.column]: {
               [Op[filter.match]]: filter.search,
@@ -425,21 +442,13 @@ class MemberController extends Controller {
       }),
     };
 
-    // Do not delete these variables, these are using dynamically
-    const IpLogs = IpLog;
-    const MemberPaymentInformations = MemberPaymentInformation;
-    const WithdrawalRequests = WithdrawalRequest;
-    const MemberTransactions = MemberTransaction;
-
     const includesModel = [
       {
         model: IpLog,
         // attributes: ['ip', 'isp', 'geo_location', 'browser'],
         order: [['id', 'DESC']],
       },
-      {
-        model: MemberPaymentInformation,
-      }
+      ...modelsFromSearch
     ];
 
     // Dynamically generating Model Relationships
@@ -564,6 +573,11 @@ class MemberController extends Controller {
         let email = row.MemberPaymentInformations.length ? row.MemberPaymentInformations[0].value : ''
         row.setDataValue('MemberPaymentInformations.value', email);
       }
+      if(fields.includes('MemberReferral.referral_email') && row.MemberReferral !== null && typeof row.MemberReferral == 'object'){
+        let referral_email = Object.keys(row.MemberReferral).length ? row.MemberReferral.referral_email : ''
+        row.setDataValue('MemberReferral.referral_email', referral_email);
+      }
+
       // row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       // row.setDataValue('MemberTransactions.balance', member_account_balance);
       // row.setDataValue('MemberTransactions.amount', member_total_earnings);
