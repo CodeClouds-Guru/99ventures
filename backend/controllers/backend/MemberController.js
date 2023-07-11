@@ -557,6 +557,10 @@ class MemberController extends Controller {
          let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
         row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       }
+      if(fields.includes('MemberPaymentInformations.value')){
+        let email = row.MemberPaymentInformations.length ? row.MemberPaymentInformations[0].value : ''
+        row.setDataValue('MemberPaymentInformations.value', email);
+      }
       // row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       // row.setDataValue('MemberTransactions.balance', member_account_balance);
       // row.setDataValue('MemberTransactions.amount', member_total_earnings);
