@@ -421,8 +421,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
 
     // Do not delete these variables, these are using dynamically
@@ -436,19 +436,22 @@ class MemberController extends Controller {
         model: IpLog,
         // attributes: ['ip', 'isp', 'geo_location', 'browser'],
         order: [['id', 'DESC']],
+      },
+      {
+        model: MemberPaymentInformation,
       }
     ];
 
     // Dynamically generating Model Relationships
     const fields = req.query.fields;
-    for(let field of fields) {
+    for (let field of fields) {
       const mdl = field.split('.');
-      if(mdl.length >1 && mdl[0] !== 'MemberEmailAlerts') {
+      if (mdl.length > 1 && mdl[0] !== 'MemberEmailAlerts') {
         let indx = includesModel.findIndex(el => el.model == eval(mdl[0]));
-        if(indx !== -1){
-          if(includesModel[indx].attributes)
+        if (indx !== -1) {
+          if (includesModel[indx].attributes)
             includesModel[indx].attributes = [...new Set([...includesModel[indx].attributes, mdl[1]])];
-          else 
+          else
             includesModel[indx].attributes = [mdl[1]];
         } else {
           includesModel.push({
@@ -457,7 +460,7 @@ class MemberController extends Controller {
           })
         }
       }
-      else if(mdl.length >1 && mdl[0] === 'MemberEmailAlerts') {
+      else if (mdl.length > 1 && mdl[0] === 'MemberEmailAlerts') {
         includesModel.push({
           model: EmailAlert,
           as: 'MemberEmailAlerts',
@@ -465,7 +468,7 @@ class MemberController extends Controller {
         })
       }
     }
-    
+
     options.include = includesModel;
     options.where = {
       ...options.where,
@@ -522,39 +525,39 @@ class MemberController extends Controller {
           return sum;
         }, 0.0);
       }
-      if(fields.includes('IpLogs.ip')){
+      if (fields.includes('IpLogs.ip')) {
         row.setDataValue('IpLogs.ip', ip);
       }
-      if(fields.includes('IpLogs.geo_location')){
+      if (fields.includes('IpLogs.geo_location')) {
         row.setDataValue('IpLogs.geo_location', geo_location);
       }
-      if(fields.includes('IpLogs.isp')){
+      if (fields.includes('IpLogs.isp')) {
         row.setDataValue('IpLogs.isp', isp);
       }
-      if(fields.includes('IpLogs.browser')){
+      if (fields.includes('IpLogs.browser')) {
         row.setDataValue('IpLogs.browser', browser);
       }
-      if(fields.includes('IpLogs.browser_language')){
+      if (fields.includes('IpLogs.browser_language')) {
         row.setDataValue('IpLogs.browser_language', browser_language);
       }
 
-      if(fields.includes('MembershipTier.name')){
+      if (fields.includes('MembershipTier.name')) {
         row.setDataValue('MembershipTier.name', membership_tier_name);
       }
-      if(fields.includes('MemberTransactions.balance')){
+      if (fields.includes('MemberTransactions.balance')) {
         row.setDataValue('MemberTransactions.balance', member_account_balance);
       }
-      if(fields.includes('MemberTransactions.amount')){
+      if (fields.includes('MemberTransactions.amount')) {
         row.setDataValue('MemberTransactions.amount', member_total_earnings);
       }
-      if(fields.includes('WithdrawalRequests.amount')){
+      if (fields.includes('WithdrawalRequests.amount')) {
         row.setDataValue('WithdrawalRequests.amount', total_paid);
-      } 
-      if(fields.includes('WithdrawalRequests.created_at')){
+      }
+      if (fields.includes('WithdrawalRequests.created_at')) {
         row.setDataValue('WithdrawalRequests.created_at', cashout_date);
       }
-      if(fields.includes('MemberEmailAlerts.slug')){
-         let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+      if (fields.includes('MemberEmailAlerts.slug')) {
+        let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
         row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       }
       // row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
@@ -665,7 +668,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -787,8 +790,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
       company_portal_id: site_id,
     };
 
