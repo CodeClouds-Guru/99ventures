@@ -94,7 +94,7 @@ function Listing(props) {
         'id': 'ID',
         '$IpLogs.ip$': 'IP Address',
         '$IpLogs.ip$': 'IP Log',
-        '$MemberPaymentInformations.value': 'Payment Email',       //this need to change to payment_email
+        '$MemberPaymentInformations.value$': 'Payment Email',
         '$MemberReferral.referral_email$': 'Referrer',
         'phone_no': 'Phone',
         'username': 'Username',
