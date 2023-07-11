@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
             case 'admin_adjustment':
             case 'achievement_complete':
             case 'registration_bonus':
+            case 'profile_completion_bonus':
               return '/earning-history';
             case 'payment_confirmation':
             case 'member_withdrawal':

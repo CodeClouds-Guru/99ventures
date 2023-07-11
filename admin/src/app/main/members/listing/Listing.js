@@ -18,6 +18,8 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import LoadingButton from '@mui/lab/LoadingButton';
 
+const initialColumns = ['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at'];
+
 function Listing(props) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -52,7 +54,8 @@ function Listing(props) {
     const [applyBtnSts, setApplyBtnSts] = useState(true);
     const [addBtnSts, setAddBtnSts] = useState(true);
     const [listConfigDialog, setListConfigDialog] = useState(false);
-    const [displayColumnArray, setDisplayColumnArray] = useState(['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at']);
+    const [displayColumnArray, setDisplayColumnArray] = useState(initialColumns);
+    const [columnArray, setColumnArray] = useState(initialColumns);
 
     const display_column_object = {
         "id": "ID",
@@ -84,12 +87,14 @@ function Listing(props) {
         'address_1': 'Billing Street Address',
         '$IpLogs.browser$': 'Browser',
         'email': 'Email',
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
         '$IpLogs.isp$': 'ISP',
         '$IpLogs.geo_location$': 'Geo Location',
         'id': 'ID',
         '$IpLogs.ip$': 'IP Address',
         '$IpLogs.ip$': 'IP Log',
-        'email': 'Payment Email',       //this need to change to payment_email
+        '$MemberPaymentInformations.value$': 'Payment Email',
         '$MemberReferral.referral_email$': 'Referrer',
         'phone_no': 'Phone',
         'username': 'Username',
@@ -117,6 +122,7 @@ function Listing(props) {
     }
 
     const fetchModules = () => {
+        setColumnArray(displayColumnArray)
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
         )
@@ -160,6 +166,9 @@ function Listing(props) {
 
     const exportAll = () => {
         setExportLoading(true);
+        if (columnArray.sort() !== displayColumnArray.sort()) {
+            setDisplayColumnArray(columnArray)
+        }
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
         )

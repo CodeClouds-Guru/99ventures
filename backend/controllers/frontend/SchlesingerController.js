@@ -34,7 +34,7 @@ class SchlesingerController {
             });
             if (!provider) {
                 return {
-                    staus: false,
+                    status: false,
                     message: 'Survey Provider not found!'
                 }
             }
@@ -180,7 +180,7 @@ class SchlesingerController {
             } else {
                 return{
                     status: false,
-                    message: 'Member eiligibility not found!'
+                    message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
         }
@@ -195,10 +195,7 @@ class SchlesingerController {
 
     generateEntryLink = async(req, res) => {
         if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
+            res.redirect('/login')
             return;
         }
         try{

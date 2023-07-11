@@ -149,11 +149,14 @@ module.exports = [
       var days = Math.floor(h1 / 24);
       var remainder = h1 % 24;
       var hours = Math.floor(remainder);
-      var minutes = Math.floor(60 * (remainder - hours));
+      var total_minutes = 60 * (remainder - hours); //11.4
+      var minutes = Math.floor(total_minutes); //11
+      var seconds = Math.floor(60 * (total_minutes - minutes));
 
       result += days > 0 ? days + ' Days ' : '';
       result += hours > 0 ? hours + ' Hours ' : '';
-      result += minutes > 0 ? minutes + ' Minutes' : '';
+      result += minutes > 0 ? minutes + ' Minutes ' : '';
+      result += seconds > 0 ? seconds + ' Seconds' : '';
       return result;
     },
   },
@@ -161,6 +164,14 @@ module.exports = [
     name: 'convertObjectToString',
     fn: function (obj) {
       return JSON.stringify(obj);
+    },
+  },
+  {
+    name: 'generateLink',
+    fn: function (value) {
+      value = value.toLowerCase();
+      value = value.replaceAll(' ', '-');
+      return '/' + value;
     },
   },
 ];

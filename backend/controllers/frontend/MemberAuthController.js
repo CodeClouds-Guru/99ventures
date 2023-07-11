@@ -552,7 +552,9 @@ class MemberAuthController {
       for (let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
-          switch (record.name) {
+          var question_name = record.name;
+          question_name = question_name.toUpperCase();
+          switch (question_name) {
             //get precodes
             case 'GENDER':
               if (record.survey_provider_id == 1) {
@@ -877,7 +879,7 @@ class MemberAuthController {
       where: {
         status: 'pending',
         member_id: request_data.member_id,
-      }
+      },
     });
 
     if (
@@ -988,7 +990,7 @@ class MemberAuthController {
             type: 'withdraw',
             amount_action: 'member_withdrawal',
             created_by: request_data.member_id,
-            status: payment_method_details.slug == 'instant_paypal' ? 1 : 2,
+            status: payment_method_details.payment_type == 'Auto' ? 2 : 1,
           });
         // console.log(withdrawal_req_data);
         if (payment_method_details.slug == 'instant_paypal') {
@@ -1050,10 +1052,7 @@ class MemberAuthController {
         action: 'Member cash withdrawal request',
       });
       // console.log(withdrawal_type, member);
-      if (
-        payment_method_details.slug == 'instant_paypal' ||
-        payment_method_details.slug == 'skrill'
-      ) {
+      if (payment_method_details.payment_type == 'Auto') {
         // email body for member
         let member_mail = await this.sendMailEvent({
           action: 'Member Cash Withdrawal',

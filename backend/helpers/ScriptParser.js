@@ -13,7 +13,7 @@ const {
   SurveyAnswerPrecodes,
   SurveyQualification,
   SurveyProvider,
-  MemberTransaction
+  MemberTransaction,
 } = require('../models/index');
 const axios = require('axios');
 const { json } = require('body-parser');
@@ -35,6 +35,7 @@ class ScriptParser {
       total_withdrawal_amount: 0,
       member_balance: 0,
       user: user,
+      message:""
     };
     var page_count = 0;
     var script_html = '';
@@ -92,7 +93,7 @@ class ScriptParser {
                   attributes: [
                     [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
                   ],
-                  where: { member_id: user.id},
+                  where: { member_id: user.id },
                 });
                 other_details = {
                   ...other_details,
@@ -194,18 +195,32 @@ class ScriptParser {
             data = await Models[script.module].findAll(condition);
 
             data.forEach(function (payment, key) {
-              var date1 = new Date().getTime();
-              var hours = payment.withdraw_redo_interval;
-              if (payment.WithdrawalRequests.length > 0) {
+              var date1 = new Date();
+              var withdraw_redo_interval = payment.withdraw_redo_interval;
+              data[key].setDataValue(
+                'redo_diff',
+                parseFloat(withdraw_redo_interval)
+              );
+              data[key].setDataValue('redo_diff_calculation', 0);
+              if (withdraw_redo_interval > 0) {
                 // var date2 = new Date(
                 //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
                 // );
-                var date2 = new Date(
-                  payment.WithdrawalRequests[0].created_at
-                ).getTime();
-                var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
+
+                var date2 = new Date();
+                if (payment.WithdrawalRequests.length > 0) {
+                  // console.log(payment.WithdrawalRequests[0]);
+                  date2 = new Date(payment.WithdrawalRequests[0].created_at);
+
+                  var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
+                  // console.log(withdraw_redo_interval, hours, date1, date2);
+                  data[key].setDataValue('redo_diff', parseFloat(hours));
+                  data[key].setDataValue(
+                    'redo_diff_calculation',
+                    parseFloat(withdraw_redo_interval) - parseFloat(hours)
+                  );
+                }
               }
-              data[key].setDataValue('redo_diff', parseFloat(hours));
               var past_withdrawal_symbol = '';
               switch (payment.past_withdrawal_options) {
                 case 'At least':
@@ -250,8 +265,9 @@ class ScriptParser {
               page_count = temp_survey_list.result.page_count;
             } else {
               data = [];
+              other_details.message = temp_survey_list.message
             }
-            if(page_count > 5){
+            if (page_count > 5) {
               page_count = 5;
             }
             //pagination
@@ -560,21 +576,21 @@ class ScriptParser {
         };
       case 'MemberReferral':
         return {
-          include: [{
-            model: Models.Member,
-            // as: 'member_referrer',
-            include: {
-              model: Models.MemberActivityLog,
-              attributes: ['created_at'],
-              limit: 1,
-              order: [['created_at', 'DESC']],
+          include: [
+            {
+              model: Models.Member,
+              // as: 'member_referrer',
+              include: {
+                model: Models.MemberActivityLog,
+                attributes: ['created_at'],
+                limit: 1,
+                order: [['created_at', 'DESC']],
+              },
             },
-          }
-        ],
-        where: {
-          member_id: user.id,
-        },
-
+          ],
+          where: {
+            member_id: user.id,
+          },
         };
       case 'PaymentMethod':
         return {
@@ -611,7 +627,7 @@ class ScriptParser {
           ],
           where: { company_portal_id: user.company_portal_id, status: 1 },
           order: [
-            [Models.WithdrawalRequest, Models.MemberTransaction, 'id', 'DESC'],
+            [Models.WithdrawalRequest, 'id', 'DESC'],
             [Models.PaymentMethodFieldOption, 'id', 'ASC'],
           ],
           include: [
@@ -620,13 +636,6 @@ class ScriptParser {
               attributes: ['field_name', 'field_type'],
               required: false,
             },
-            // {
-            //   model: Models.Country,
-            //   as: 'allowed_countries',
-            //   where: { id: user.country_id },
-            //   required: false,
-            //   attributes: ['id'],
-            // },
             {
               model: Models.MemberPaymentInformation,
               attributes: ['name', 'value'],
@@ -635,9 +644,14 @@ class ScriptParser {
             },
             {
               model: Models.WithdrawalRequest,
-              attributes: ['member_transaction_id', 'created_at'],
+              attributes: [
+                'id',
+                'member_transaction_id',
+                'created_at',
+                'requested_on',
+              ],
               required: false,
-              where: { member_id: user.id },
+              // where: { member_id: user.id },
               include: {
                 model: Models.MemberTransaction,
                 attributes: ['completed_at'],

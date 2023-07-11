@@ -77,7 +77,7 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['id', 'PaymentMethod.name', 'status', 'Member.status', 'Member.username', 'amount_with_currency']);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.username', 'amount_with_currency', 'created_at']);
 
 	const display_column_object = {
 		'id': 'ID',
@@ -264,7 +264,6 @@ function List(props) {
 		// }
 		try {
 			module === 'withdrawal-requests' ? await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'approved' }).then((res) => {
-				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -287,7 +286,6 @@ function List(props) {
 	async function handleWithdrawalRequestsReject(selectedIds, note) {
 		try {
 			await axios.post(`${module}/update`, { model_ids: selectedIds, action_type: 'rejected', note: note }).then((res) => {
-				props.getWithdrawalCount();
 				let updateWithdrawalRequestCount = { ...stateUser, pending_withrawal_request: res.data.results.pending_withrawal_request }
 				dispatch(setUser(updateWithdrawalRequestCount))
 				dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
@@ -387,7 +385,7 @@ function List(props) {
 		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
 			value = Helper.parseTimeStamp(value)
 		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'requested_on') && value) {
-			value = moment(value).format('DD-MMM-YYYY')
+			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
 	}
@@ -889,6 +887,7 @@ function List(props) {
 							onWithdrawalRequestsReject={handleWithdrawalRequestsReject}
 							{...props}
 							fields={fields}
+							withdrawalRequestStatus={withdrawalRequestStatus}
 						/>
 						{data.length === 0 ? <TableBody>
 							<TableRow>

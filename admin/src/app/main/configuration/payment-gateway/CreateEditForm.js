@@ -64,26 +64,32 @@ const fields = [
     {
         field_name: 'Username',
         field_type: 'input',
+        required: true
     },
     {
         field_name: "Full Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "First Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "Last Name",
-        field_type: "input"
+        field_type: "input",
+        required: false
     },
     {
         field_name: "Email",
         field_type: "email",
+        required: true
     },
     {
         field_name: "Phone",
         field_type: "number",
+        required: true
     }
 ]
 
@@ -96,6 +102,7 @@ const CreateEditForm = () => {
     const [payload, setPayload] = useState([]);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(true);
+    const [disabled, setDisabled] = useState(false);
     const [memberList, setMemberList] = useState([]);
     const [pageloader, setPageloader] = useState(true);
     const [countryList, setCountryList] = useState([]);
@@ -162,14 +169,28 @@ const CreateEditForm = () => {
      * Save|Update Payment Details
      */
     const savePaymentDataToDB = (data) => {
+        const mandatoryFields = fields.filter(field => field.required === true).map(item=> item.field_name);
+        const check = data.field_option_list.some(field=> mandatoryFields.includes(field));
+        if(!check) {
+            dispatch(showMessage({ variant: 'error', message: "Please select anyone mandatory fields like  username or email or phone from Payment Fields Dropdown." }));
+            return;
+        }
         if(data.amount_type === 'Minimum') {
-            data.minimum_amount = data.amount;
+            data.minimum_amount = data.amount ? data.amount : 0;
             data.fixed_amount = 0;
         } else {
-            data.fixed_amount = data.amount;
+            data.fixed_amount = data.amount ? data.amount : 0;
             data.minimum_amount = 0;
         }
-        
+        if(!data.fee_percent || data.fee_percent == ""){
+            data.fee_percent = 0;
+        }
+        if(!data.past_withdrawal_count || data.past_withdrawal_count == ""){
+            data.past_withdrawal_count = 0;
+        }
+        if(!data.maximum_amount || data.maximum_amount == "" || data.amount_type === 'Fixed'){
+            data.maximum_amount = 0;
+        }
         delete data.amount;
         delete data.amount_type;
         data.country_list = (selectedCountry.length ? selectedCountry.map(r=> r.id) : []);
@@ -246,6 +267,8 @@ const CreateEditForm = () => {
                 } else if(result.fixed_amount > 0){
                     setValue('amount_type', 'Fixed', { shouldDirty: false, shouldValidate: true });
                     setValue('amount', result.fixed_amount, { shouldDirty: false, shouldValidate: true });
+                    setDisabled(true);
+                    setValue("maximum_amount", 0, { shouldDirty: false, shouldValidate: false });
                 } else {
                     setValue('amount_type', defaultValues.amount_type, { shouldDirty: false, shouldValidate: true });
                     setValue('amount', defaultValues.amount, { shouldDirty: false, shouldValidate: true });
@@ -357,6 +380,16 @@ const CreateEditForm = () => {
         return <FuseLoading />;
     }
 
+    const handleAmountTypeSelect = (e) => {
+        if('Fixed' === e.target.value){
+            setDisabled(true);
+            setValue("maximum_amount", 0, { shouldDirty: false, shouldValidate: false });
+        } else {
+            setDisabled(false)
+        }
+        setValue("amount_type", e.target.value, { shouldDirty: false, shouldValidate: true });
+    }
+
     return (
         <div>
             <form
@@ -449,10 +482,16 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        type="tel"
+                                        type="number"
                                         id="outlined-required-redo-wait"
                                         label="Redo Wait (in hour)"
                                         className="w-full mt-20"
+                                        InputProps={{ inputProps: { min: 0 } }}
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9.]/.test(event.key)) {
+                                                event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />
@@ -468,6 +507,7 @@ const CreateEditForm = () => {
                                             label="Amount Type"
                                             helperText=''
                                             className="w-1/2 pr-24"
+                                            onChange={ handleAmountTypeSelect }
                                             >
                                             <MenuItem value="Minimum">
                                                 Minimum
@@ -484,11 +524,17 @@ const CreateEditForm = () => {
                                     render={({ field }) => (
                                         <TextField  
                                             {...field}
-                                            type="tel"
+                                            type="number"
+                                            InputProps={{ inputProps: { min: 0 } }}
                                             required
                                             id="outlined-required"
                                             label="Amount"
                                             className="w-1/2"
+                                            onKeyPress={(event) => {
+                                                if (!/[0-9.]/.test(event.key)) {
+                                                  event.preventDefault();
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -650,10 +696,17 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        type="tel"
+                                        disabled={disabled}
+                                        type="number"
+                                        InputProps={{ inputProps: { min: 0 } }}
                                         id="outlined-required-maximum-amount"
                                         label="Maximum Amount"
                                         className="w-full mt-20"
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9.]/.test(event.key)) {
+                                              event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />
@@ -799,11 +852,17 @@ const CreateEditForm = () => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            type="tel"
+                                            type="number"
+                                            InputProps={{ inputProps: { min: 0 } }}
                                             id="outlined-required-past-withdrawl"
                                             label=""
                                             helperText='Past withdraw(s)'
                                             className="w-1/2"
+                                            onKeyPress={(event) => {
+                                                if (!/[0-9]/.test(event.key)) {
+                                                  event.preventDefault();
+                                                }
+                                            }}
                                         />
                                     )}
                                 />
@@ -822,40 +881,6 @@ const CreateEditForm = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                         <div className='flex flex-col mx-auto w-1/2 justify-center p-16'>
-                            {/*<Controller
-                                name="member_list"
-                                control={control}
-                                render={({ field }) => (
-                                    <Autocomplete
-                                        {...field}
-                                        value={ selectedMember }
-                                        multiple
-                                        className="w-full"
-                                        id="checkboxes-users"
-                                        options={ memberList }
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option) => option.member_name}
-                                        onChange={(e, val)=>{
-                                            setSelectedMember(val);
-                                        }}
-                                        renderOption={(props, option, { selected }) => (
-                                            <li {...props} key={option.id}>
-                                                <Checkbox
-                                                    icon={icon}
-                                                    checkedIcon={checkedIcon}
-                                                    style={{ marginRight: 8 }}
-                                                    checked={selected}
-                                                />
-                                                {option.member_name}
-                                            </li>
-                                        )}
-                                        renderInput={(params) => (
-                                            <TextField {...params} label="Excluded Users" placeholder="Excluded Users" />
-                                        )}
-                                    />
-                                )}
-                            /> */}
-
                             <Controller
                                 name="member_list"
                                 control={control}
@@ -921,10 +946,17 @@ const CreateEditForm = () => {
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
+                                        type="number"
+                                        InputProps={{ inputProps: { min: 0 } }}
                                         id="outlined-required-fee"
                                         label="Fee Percent (%)"
                                         className="w-full mt-20"
                                         helperText="In cent format"
+                                        onKeyPress={(event) => {
+                                            if (!/[0-9.]/.test(event.key)) {
+                                              event.preventDefault();
+                                            }
+                                        }}
                                     />
                                 )}
                             />

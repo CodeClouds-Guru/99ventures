@@ -168,19 +168,19 @@ class PureSpectrumController {
                 }
                 else {
                     return {
-                        staus: false,
+                        status: false,
                         message: 'Surveys not found!'
                     }
                 }
             } else {
                 return {
-                    staus: false,
-                    message: 'No surveys have been matched!'
+                    status: false,
+                    message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
         } else {
             return {
-                staus: false,
+                status: false,
                 message: 'Member eiligibility not found!'
             }
         }
@@ -188,10 +188,7 @@ class PureSpectrumController {
 
     generateEntryLink = async (req, res) => {
         if(!req.session.member) {
-            res.status(401).json({
-                status: false,
-                message: 'Unauthorized!'
-            });
+            res.redirect('/login');
             return;
         }
         var returnObj = {};

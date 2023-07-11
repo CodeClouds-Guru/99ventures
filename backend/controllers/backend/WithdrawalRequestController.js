@@ -1,7 +1,7 @@
 const Controller = require('./Controller');
 const Paypal = require('../../helpers/Paypal');
-const { Op, QueryTypes } = require('sequelize');;
-const { sequelize } = require("../../models/index");
+const { Op, QueryTypes } = require('sequelize');
+const { sequelize } = require('../../models/index');
 const {
   Member,
   User,
@@ -10,8 +10,7 @@ const {
   WithdrawalRequest,
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
-const CsvHelper = require("../../helpers/CsvHelper");
-
+const CsvHelper = require('../../helpers/CsvHelper');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -21,19 +20,22 @@ class WithdrawalRequestController extends Controller {
     this.generateFields = this.generateFields.bind(this);
     this.getProgramList = this.getProgramList.bind(this);
     this.fieldConfig = {
-      'id': 'ID',
+      id: 'ID',
       'PaymentMethod.name': 'Method',
-      'status': 'Status',
-      'payment_email': 'Email',
+      status: 'Status',
+      payment_email: 'Email',
       'Member.status': 'Account',
-      'created_at': 'Date',
+      created_at: 'Date',
       'Member.username': 'Username',
-      'amount_with_currency': 'Cash',
-    }
+      amount_with_currency: 'Cash',
+    };
   }
 
   async getPaymentMethods() {
-    let withdrawal_type_list = await sequelize.query("SELECT id, name, slug, (SELECT COUNT(*) from withdrawal_requests where withdrawal_requests.withdrawal_type_id = payment_methods.id and withdrawal_requests.status = 'pending') as pending_withdrawal_count FROM `payment_methods`;", { type: QueryTypes.SELECT });
+    let withdrawal_type_list = await sequelize.query(
+      "SELECT id, name, slug, (SELECT COUNT(*) from withdrawal_requests where withdrawal_requests.withdrawal_type_id = payment_methods.id and withdrawal_requests.status = 'pending') as pending_withdrawal_count FROM `payment_methods`;",
+      { type: QueryTypes.SELECT }
+    );
     return {
       result: {
         data: withdrawal_type_list,
@@ -42,14 +44,15 @@ class WithdrawalRequestController extends Controller {
   }
 
   generateFields(header_fields) {
-    var fields = {}
+    var fields = {};
     for (const key of header_fields) {
       fields[key] = {
         field_name: key,
         db_name: key,
         listing: true,
-        placeholder: key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col'
-      }
+        placeholder:
+          key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col',
+      };
     }
     return fields;
   }
@@ -75,13 +78,13 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['amount', 'currency', ...fields];
+      options.attributes = ['id', 'amount', 'currency', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
-      results.rows.map(row => {
+      results.rows.map((row) => {
         let [payment_method_name, username, status] = ['', '', ''];
         if (row.Member) {
           username = row.Member.username;
@@ -283,7 +286,6 @@ class WithdrawalRequestController extends Controller {
     }
   }
 
-
   async getProgramList(req) {
     let company_portal_id = req.headers.site_id;
     var query_where = req.query.where || '{}';
@@ -335,15 +337,14 @@ class WithdrawalRequestController extends Controller {
     let { fields, result } = await this.list(req);
     var header = [];
     for (const head of Object.values(fields)) {
-
-      header.push({ id: head.field_name, title: head.placeholder })
+      header.push({ id: head.field_name, title: head.placeholder });
     }
     const rows = JSON.parse(JSON.stringify(result.data));
     const csv_helper = new CsvHelper(rows, header);
     csv_helper.generateAndEmailCSV(req.user.email);
     return {
       status: true,
-      message: 'The CSV will be sent to your email address shortly.'
+      message: 'The CSV will be sent to your email address shortly.',
     };
   }
 
@@ -417,7 +418,7 @@ class WithdrawalRequestController extends Controller {
             },
             {
               model: PaymentMethod,
-              attributes: ['slug', 'id'],
+              attributes: ['slug', 'id', 'payment_type'],
             },
           ],
         });
@@ -431,9 +432,12 @@ class WithdrawalRequestController extends Controller {
             transaction_ids.push(record.member_transaction_id);
             transaction_id = record.member_transaction_id;
           } else {
-            let transaction_status = 1;
-            if (record.PaymentMethod.slug === 'skrill') {
-              transaction_status = 2;
+            let transaction_status = 2;
+            if (
+              record.PaymentMethod.slug === 'paypal' ||
+              record.PaymentMethod.slug === 'instant_paypal'
+            ) {
+              transaction_status = 1;
             }
 
             let transaction =
@@ -491,6 +495,7 @@ class WithdrawalRequestController extends Controller {
           //do bulk payment
           const paypal_class = new Paypal(company_portal_id);
           const create_resp = await paypal_class.payout(items);
+          // console.log('------------create_resp', create_resp);
           if (create_resp.status) {
             await MemberTransaction.update(
               { batch_id: create_resp.batch_id },
