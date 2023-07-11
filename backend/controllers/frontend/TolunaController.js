@@ -127,14 +127,14 @@ class TolunaController {
                 }
                 else {
                     return {
-                        staus: false,
-                        message: 'No surveys have been matched!'
+                        status: false,
+                        message: 'Sorry! no surveys have been matched now! Please try again later.'
                     }
                 }
             }
             catch(error) {
                 return {
-                    staus: false,
+                    status: false,
                     message: 'Unable to get survey now! Please try again later.'
                 }
             }

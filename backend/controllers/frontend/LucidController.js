@@ -141,30 +141,8 @@ class LucidController {
                                 loi: survey.loi,
                                 link:link
                             }
-                        survey_list.push(temp_survey)
-                        // surveyHtml += `
-                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                        //         <div class="bg-white card mb-2">
-                        //             <div class="card-body position-relative">
-                        //                 <div class="d-flex justify-content-between">
-                        //                     <h6 class="text-primary m-0">${survey.name}</h6>
-                        //                 </div>
-                        //                 <div class="text-primary small">5 Minutes</div>
-                        //                 <div class="d-grid mt-1">
-                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                        //                 </div>
-                        //             </div>
-                        //         </div>
-                        //     </div>
-                        // `
-
-                    }
-                    
-                    // res.send({
-                    //     status: true,
-                    //     message: 'Success',
-                    //     result: surveyHtml
-                    // });
+                        survey_list.push(temp_survey) 
+                    }                  
                     return {
                         status: true,
                         message: 'Success',
@@ -176,26 +154,21 @@ class LucidController {
                 }
                 else {
                     return {
-                        staus: false,
+                        status: false,
                         message: 'Surveys not found!'
                     }
                 }
             }
-            else {
-                
+            else {                
                 return {
-                    staus: false,
-                    message: 'No surveys have been matched!'
+                    status: false,
+                    message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
 
         } else {
-            // res.json({
-            //     status: false,
-            //     message: 'Member eiligibility not found!'
-            // });
             return {
-                staus: false,
+                status: false,
                 message: 'Member eiligibility not found!'
             }
         }
@@ -255,7 +228,6 @@ class LucidController {
                 }
                 
                 const URL = this.rebuildEntryLink(entrylink, params);
-                // res.send(URL)
                 res.redirect(URL);
             } else {
                 throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
@@ -272,8 +244,9 @@ class LucidController {
                     }
                 });
             }
-            req.session.flash = { notice: error.message, redirect_url: '/lucid' };
-            res.redirect('/notice');
+            res.redirect('/survey-notavailable');
+            // req.session.flash = { notice: error.message, redirect_url: '/lucid' };
+            // res.redirect('/notice');
         }
     }
 

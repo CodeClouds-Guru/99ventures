@@ -140,22 +140,7 @@ class PureSpectrumController {
                             loi: survey.loi,
                             link:link
                         }
-                        survey_list.push(temp_survey)
-                        // surveyHtml += `
-                        //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                        //         <div class="bg-white card mb-2">
-                        //             <div class="card-body position-relative">
-                        //                 <div class="d-flex justify-content-between">
-                        //                     <h6 class="text-primary m-0">${survey.name}</h6>
-                        //                 </div>
-                        //                 <div class="text-primary small">${survey.loi} Minutes</div>
-                        //                 <div class="d-grid mt-1">
-                        //                     <a href="${link}" class="btn btn-primary text-white rounded-1">Earn $${survey.cpi}</a>
-                        //                 </div>
-                        //             </div>
-                        //         </div>
-                        //     </div>
-                        // `
+                        survey_list.push(temp_survey);
                     }
                     return {
                         status: true,
@@ -168,19 +153,19 @@ class PureSpectrumController {
                 }
                 else {
                     return {
-                        staus: false,
+                        status: false,
                         message: 'Surveys not found!'
                     }
                 }
             } else {
                 return {
-                    staus: false,
-                    message: 'No surveys have been matched!'
+                    status: false,
+                    message: 'Sorry! no surveys have been matched now! Please try again later.'
                 }
             }
         } else {
             return {
-                staus: false,
+                status: false,
                 message: 'Member eiligibility not found!'
             }
         }
@@ -194,6 +179,7 @@ class PureSpectrumController {
         var returnObj = {};
         const psObj = new PurespectrumHelper;
         const queryString = req.query;
+        var redirectURL = '';
         try{
             const survey = await psObj.fetchAndReturnData('/surveys/' + queryString.survey_number);            
             if(survey.apiStatus === 'success' && survey.survey.survey_status === 22)   // 22 means live
@@ -209,7 +195,8 @@ class PureSpectrumController {
                     const entryLink = data.survey_entry_url + '&' + generateQueryString;
                     res.redirect(entryLink)
                 } else {
-                    returnObj = {notice: 'Unable to get entry link!', redirect_url: '/purespectrum' };
+                    // returnObj = {notice: 'Unable to get entry link!', redirect_url: '/purespectrum' };
+                    throw {statusCode: 404, message: 'Unable to get entry link'};
                 }
             } else {
                 throw {statusCode: 404, message: 'Sorry! this survey has been closed'};
@@ -230,15 +217,17 @@ class PureSpectrumController {
                     where: {
                         survey_number: queryString.survey_number
                     }
-                });
-                returnObj = { notice: 'Sorry! this survey has been closed.', redirect_url: '/purespectrum' };
+                });                
+                // returnObj = { notice: 'Sorry! this survey has been closed.', redirect_url: '/purespectrum' };
             } else {
-                returnObj = { notice: error.message, redirect_url: '/purespectrum' };
+                // returnObj = { notice: error.message, redirect_url: '/purespectrum' };
             }
+            redirectURL = '/survey-notavailable';
         }
 
-        req.session.flash = returnObj;
-        res.redirect('/notice');
+        res.redirect(redirectURL);
+        // req.session.flash = returnObj;
+        // res.redirect('/notice');
     }
 }
 
