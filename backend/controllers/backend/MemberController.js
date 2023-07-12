@@ -406,13 +406,54 @@ class MemberController extends Controller {
     var query_where = JSON.parse(req.query.where);
     var temp = {};
     var status_filter = {};
-    const modelsFromSearch = [];
 
-    // Do not delete these variables, these are using dynamically
-    const IpLogs = IpLog;
-    const MemberPaymentInformations = MemberPaymentInformation;
-    const WithdrawalRequests = WithdrawalRequest;
-    const MemberTransactions = MemberTransaction;
+    var includesModel = [
+      {
+        model: IpLog,
+        model_name: 'IpLog',
+        order: [['id', 'DESC']],
+        status: true
+      },
+      {
+        model: MemberPaymentInformation,
+        model_name: 'MemberPaymentInformations',
+        order: [['id', 'DESC']],
+        where: {
+          name: 'email'
+        },
+        status: false
+      },
+      {
+        model: MembershipTier,
+        model_name: 'MembershipTier',
+        status: false
+      },
+      {
+        model: MemberReferral,
+        model_name: 'MemberReferral',
+        status: false
+      },
+      {
+        model: WithdrawalRequest,
+        model_name: 'WithdrawalRequests',
+        order: [['id', 'DESC']],
+        attributes: ['status'],
+        status: false
+      },
+      {
+        model: MemberTransaction,
+        model_name: 'MemberTransactions',
+        order: [['id', 'DESC']],
+        attributes: ['type'],
+        status: false
+      },
+      {
+        model: EmailAlert,
+        model_name: 'MemberEmailAlerts',
+        as: 'MemberEmailAlerts',
+        status: false
+      }
+    ];
 
     if (query_where) {
       if (query_where.filters) {
@@ -420,10 +461,7 @@ class MemberController extends Controller {
           // This piece of code added to get the Relationship Model name & attributes if it's exists on the serach filter.
           let clmnArry = filter.column.replace(/[^a-zA-Z_.]/g, '').split('.');
           if(clmnArry.length > 1){
-            modelsFromSearch.push({
-              model: eval(clmnArry[0]),
-              attributes: [clmnArry[1]]
-            })
+            includesModel = MemberController.prototype.customizeIncludedModel(includesModel, clmnArry[0], clmnArry[1]);
           }
           //---------- END
           return {
@@ -442,43 +480,24 @@ class MemberController extends Controller {
       }),
     };
 
-    const includesModel = [
-      {
-        model: IpLog,
-        // attributes: ['ip', 'isp', 'geo_location', 'browser'],
-        order: [['id', 'DESC']],
-      },
-      ...modelsFromSearch
-    ];
 
     // Dynamically generating Model Relationships
     const fields = req.query.fields;
     for (let field of fields) {
       const mdl = field.split('.');
-      if (mdl.length > 1 && mdl[0] !== 'MemberEmailAlerts') {
-        let indx = includesModel.findIndex(el => el.model == eval(mdl[0]));
-        if (indx !== -1) {
-          if (includesModel[indx].attributes)
-            includesModel[indx].attributes = [...new Set([...includesModel[indx].attributes, mdl[1]])];
-          else
-            includesModel[indx].attributes = [mdl[1]];
-        } else {
-          includesModel.push({
-            model: eval(mdl[0]),
-            attributes: [mdl[1]]
-          })
-        }
-      }
-      else if (mdl.length > 1 && mdl[0] === 'MemberEmailAlerts') {
-        includesModel.push({
-          model: EmailAlert,
-          as: 'MemberEmailAlerts',
-          attributes: [mdl[1]]
-        })
+      if (mdl.length > 1){
+        includesModel = MemberController.prototype.customizeIncludedModel(includesModel, mdl[0], mdl[1]);        
       }
     }
 
-    options.include = includesModel;
+    options.include = includesModel.filter(r => r.status).map(r => {
+      delete r.status;
+      delete r.model_name;
+      return {
+        ...r
+      }
+    });
+
     options.where = {
       ...options.where,
       company_portal_id: site_id,
@@ -495,6 +514,7 @@ class MemberController extends Controller {
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
+
     result.rows.map((row) => {
       let ip = '';
       let geo_location = '';
@@ -502,7 +522,7 @@ class MemberController extends Controller {
       let browser = '';
       let browser_language = '';
       let membership_tier_name = '';
-      // let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
+      let opted_for_email_alerts = (row.MemberEmailAlerts && row.MemberEmailAlerts.length > 0) ? 'Yes' : 'No';
       let member_account_balance = 0.0;
       let member_total_earnings = 0.0;
       let total_paid = 0.0;
@@ -518,22 +538,33 @@ class MemberController extends Controller {
       if (row.MembershipTier) {
         membership_tier_name = row.MembershipTier.name;
       }
+
       if (row.MemberTransactions && row.MemberTransactions.length > 0) {
-        member_account_balance = row.MemberTransactions[0].balance;
-        member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
-          if (item.type === 'credited') sum += item.amount;
-          return sum;
-        }, 0.0);
+        if('balance' in row.MemberTransactions[0]){
+          member_account_balance = row.MemberTransactions[0].balance;
+        }
+        if('amount' in row.MemberTransactions[0]){
+          member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
+            if (item.type === 'credited') sum += item.amount;
+            return sum;
+          }, 0.0);
+        }
       }
-      if (row.WithdrawalRequests && row.WithdrawalRequests > 0) {
-        cashout_date = moment(row.WithdrawalRequests[0].created_at).format(
-          'YYYY-MM-DD'
-        );
-        total_paid = row.MemberTransactions.reduce((sum, item) => {
-          if (item.status === 'approved') sum += item.amount;
-          return sum;
-        }, 0.0);
+      
+      if (row.WithdrawalRequests && row.WithdrawalRequests.length > 0) {
+        if('created_at' in row.WithdrawalRequests[0]){
+          cashout_date = moment(row.WithdrawalRequests[0].created_at).format(
+            'YYYY-MM-DD'
+          );
+        }
+        if('amount' in row.WithdrawalRequests[0]){
+          total_paid = row.WithdrawalRequests.reduce((sum, item) => {
+            if (item.status === 'approved') sum += item.amount;
+            return sum;
+          }, 0.0);
+        }
       }
+      
       if (fields.includes('IpLogs.ip')) {
         row.setDataValue('IpLogs.ip', ip);
       }
@@ -566,7 +597,6 @@ class MemberController extends Controller {
         row.setDataValue('WithdrawalRequests.created_at', cashout_date);
       }
       if (fields.includes('MemberEmailAlerts.slug')) {
-        let opted_for_email_alerts = row.MemberEmailAlerts.length > 0 ? 'Yes' : 'No';
         row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
       }
       if(fields.includes('MemberPaymentInformations.value')){
@@ -577,12 +607,6 @@ class MemberController extends Controller {
         let referral_email = Object.keys(row.MemberReferral).length ? row.MemberReferral.referral_email : ''
         row.setDataValue('MemberReferral.referral_email', referral_email);
       }
-
-      // row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
-      // row.setDataValue('MemberTransactions.balance', member_account_balance);
-      // row.setDataValue('MemberTransactions.amount', member_total_earnings);
-      // row.setDataValue('WithdrawalRequests.amount', total_paid);
-      // row.setDataValue('WithdrawalRequests.created_at', cashout_date);
       return row;
     });
 
@@ -817,6 +841,18 @@ class MemberController extends Controller {
     return {
       result: { data: docs, pages, total },
     };
+  }
+
+  customizeIncludedModel(relationShipModels, modelName, attr){
+    let indx = relationShipModels.findIndex(el => el.model_name == modelName);
+    if (indx !== -1) {
+      relationShipModels[indx] = {
+        ...relationShipModels[indx],
+        attributes: (relationShipModels[indx].attributes) ? [...new Set([...relationShipModels[indx].attributes, attr])] : [attr],
+        status: true
+      }
+    }
+    return relationShipModels;
   }
 }
 
