@@ -500,7 +500,7 @@ class MemberAuthController {
           member_status = false;
           member_message = 'Username already exists.';
         }
-        request_data.username = member.username;
+        // request_data.username = member.username;
         // request_data.avatar = null;
         if (req.files) {
           request_data.avatar = await Member.updateAvatar(req, member);
