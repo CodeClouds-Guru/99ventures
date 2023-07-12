@@ -254,7 +254,8 @@ class MemberAuthController {
             success_status: true,
             notice: member_message,
           };
-          res.redirect('/notice');
+          // res.redirect('/notice');
+          res.redirect('/alert');
         } else {
           req.session.flash = { error: member_message };
           res.redirect('back');
@@ -457,7 +458,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          // username: Joi.string().optional().label('User Name'),
+          username: Joi.string().optional().allow('').label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
@@ -475,35 +476,58 @@ class MemberAuthController {
           member_status = false;
           member_message = error.details.map((err) => err.message);
         }
-        if (!member.profile_completed_on) {
-          await Member.creditBonusByType(member, 'complete_profile_bonus', req);
-          req.body.profile_completed_on = new Date();
-          let activityEventbus = eventBus.emit('member_activity', {
-            member_id: member.id,
-            action: 'Profile Completed',
-          });
-        }
-        req.body.country_id = req.body.country;
-        req.body.zip_code = req.body.zipcode;
-        request_data = req.body;
-        request_data.updated_by = member_id;
-        request_data.username = member.username;
-        // request_data.avatar = null;
-        if (req.files) {
-          request_data.avatar = await Member.updateAvatar(req, member);
-        }
-        let model = await Member.update(request_data, {
-          where: { id: member_id },
+
+        //check member username
+        let member_username = await Member.findOne({
+          where: {
+            username: req.body.username,
+            id: { [Op.ne]: member.id },
+          },
         });
-        //set eligibility
-        await this.setMemberEligibility(member_id, member.profile_completed_on);
+        if (member_username) {
+          member_status = false;
+          member_message = 'Username already exists.';
+        }
 
-        let email_alerts = req.body.email_alerts || null;
+        if (member_status) {
+          if (!member.profile_completed_on) {
+            await Member.creditBonusByType(
+              member,
+              'complete_profile_bonus',
+              req
+            );
+            req.body.profile_completed_on = new Date();
+            let activityEventbus = eventBus.emit('member_activity', {
+              member_id: member.id,
+              action: 'Profile Completed',
+            });
+          }
+          req.body.country_id = req.body.country;
+          req.body.zip_code = req.body.zipcode;
+          request_data = req.body;
+          request_data.updated_by = member_id;
 
-        member_status = await EmailAlert.saveEmailAlerts(
-          member_id,
-          email_alerts
-        );
+          // request_data.username = member.username;
+          // request_data.avatar = null;
+          if (req.files) {
+            request_data.avatar = await Member.updateAvatar(req, member);
+          }
+          let model = await Member.update(request_data, {
+            where: { id: member_id },
+          });
+          //set eligibility
+          await this.setMemberEligibility(
+            member_id,
+            member.profile_completed_on
+          );
+
+          let email_alerts = req.body.email_alerts || null;
+
+          member_status = await EmailAlert.saveEmailAlerts(
+            member_id,
+            email_alerts
+          );
+        }
       }
       if (method === 'PUT') {
         let rsp = await this.changePassword(req, member);
