@@ -254,7 +254,8 @@ class MemberAuthController {
             success_status: true,
             notice: member_message,
           };
-          res.redirect('/notice');
+          // res.redirect('/notice');
+          res.redirect('/alert');
         } else {
           req.session.flash = { error: member_message };
           res.redirect('back');
@@ -457,7 +458,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          // username: Joi.string().optional().label('User Name'),
+          username: Joi.string().optional().allow('').label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
@@ -487,6 +488,18 @@ class MemberAuthController {
         req.body.zip_code = req.body.zipcode;
         request_data = req.body;
         request_data.updated_by = member_id;
+
+        //check member username
+        let member_username = await Member.findOne({
+          where: {
+            username: request_data.username,
+            id: { [Op.ne]: member.id },
+          },
+        });
+        if (member_username) {
+          member_status = false;
+          member_message = 'Username already exists.';
+        }
         request_data.username = member.username;
         // request_data.avatar = null;
         if (req.files) {
