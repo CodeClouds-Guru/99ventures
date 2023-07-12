@@ -7,7 +7,7 @@ const {
   Page,
   WithdrawalRequest,
   MemberNotification,
-  GoogleCaptchaConfiguration
+  GoogleCaptchaConfiguration,
 } = require('../models');
 const db = require('../models/index');
 const { sequelize } = require('../models/index');
@@ -22,7 +22,9 @@ module.exports = async function (req, res, next) {
     });
   }
   req.session.company_portal = company_portal;
-  let google_captcha_settings = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: company_portal.id } });
+  let google_captcha_settings = await GoogleCaptchaConfiguration.findOne({
+    where: { company_portal_id: company_portal.id },
+  });
   req.session.google_captcha_settings = google_captcha_settings;
   if ('member' in req.session && req.session.member) {
     let ip = req.ip;
@@ -48,7 +50,7 @@ module.exports = async function (req, res, next) {
 
     //total paid
     let total_paid = await db.sequelize.query(
-      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'approved'",
+      "SELECT sum(member_transactions.amount) as total FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'completed'",
       {
         replacements: [req.session.member.id],
         type: QueryTypes.SELECT,
@@ -101,11 +103,29 @@ module.exports = async function (req, res, next) {
       res.status(302).redirect(redirect);
       return;
     }
-    let req_path = req.path.replaceAll('/','')
-    if(req.method === 'GET' && member.status === 'suspended' && ['dashboard', 'get-scripts','get-login-streak','404','500','ticket','profile','faq','create-ticket','support-tickets','notice'].indexOf(req_path) == -1){
-      req.session.flash = { error: 'Your account status is suspended. Please contact to our admin.' };
+    let req_path = req.path.replaceAll('/', '');
+    if (
+      req.method === 'GET' &&
+      member.status === 'suspended' &&
+      [
+        'dashboard',
+        'get-scripts',
+        'get-login-streak',
+        '404',
+        '500',
+        'ticket',
+        'profile',
+        'faq',
+        'create-ticket',
+        'support-tickets',
+        'notice',
+      ].indexOf(req_path) == -1
+    ) {
+      req.session.flash = {
+        error: 'Your account status is suspended. Please contact to our admin.',
+      };
       res.status(401).redirect('/faq');
-      return
+      return;
     }
   }
   next();
