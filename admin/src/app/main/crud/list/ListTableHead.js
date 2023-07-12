@@ -31,7 +31,7 @@ function ListTableHead(props) {
 
   const createSortHandler = (property) => (event) => {
     if (property.sort) {
-      props.onRequestSort(event, property.field_name);
+      props.onRequestSort(event, property.db_name);
     }
   };
 

@@ -179,6 +179,10 @@ const CreateEditForm = () => {
             data.minimum_amount = data.amount ? data.amount : 0;
             data.fixed_amount = 0;
         } else {
+            if(data.amount == 0) {
+                dispatch(showMessage({ variant: 'error', message: "Fixed amount can not be 0!" }));
+                return;
+            }
             data.fixed_amount = data.amount ? data.amount : 0;
             data.minimum_amount = 0;
         }
@@ -191,10 +195,16 @@ const CreateEditForm = () => {
         if(!data.maximum_amount || data.maximum_amount == "" || data.amount_type === 'Fixed'){
             data.maximum_amount = 0;
         }
-
-        if(data.minimum_amount > 0 && data.maximum_amount < data.minimum_amount ){
-            dispatch(showMessage({ variant: 'error', message: "Maximum amount should be greater than of Minimum Amount!" }));
-            return;
+     
+        /**
+         * rules max and min both 0 hote pare.
+         * in > 0 hole then max er sathe check korbe.. Max = 0 hole min er sathe check lagbe na, but max > 0 hole min er thekeo > hbe
+         */
+        if(data.minimum_amount > 0 && data.maximum_amount > 0){
+            if(data.maximum_amount <= data.minimum_amount){
+                dispatch(showMessage({ variant: 'error', message: "Maximum amount should be greater than of Minimum Amount!" }));
+                return;
+            }
         }
 
         delete data.amount;

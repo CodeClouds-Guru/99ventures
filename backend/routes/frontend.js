@@ -18,7 +18,7 @@ const checkMemberAuth = require('../middlewares/checkMemberAuth');
 const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
-// router.use(checkIPMiddleware);
+router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
@@ -57,7 +57,7 @@ router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
-router.get('/survey', SurveyController.getSurvey);
+// router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
 router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);

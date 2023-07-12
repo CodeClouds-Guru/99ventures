@@ -1,5 +1,5 @@
 const cookieName = "99-site-lock";
-const password = "newbattle999";
+const password = "testers999";
 const maxattempt = 3;
 
 function setCookie(name, value, minutes) {
