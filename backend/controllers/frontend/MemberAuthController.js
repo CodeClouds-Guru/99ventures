@@ -480,7 +480,7 @@ class MemberAuthController {
         //check member username
         let member_username = await Member.findOne({
           where: {
-            username: request_data.username,
+            username: req.body.username,
             id: { [Op.ne]: member.id },
           },
         });
