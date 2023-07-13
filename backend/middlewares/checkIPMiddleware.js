@@ -141,7 +141,7 @@ async function checkIfCountryChanged(req, country_code) {
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if (!(['/notice', '/404', '/503', '/500','/faq'].includes(partial_path))) {
+    if (!(['/notice', '/404', '/503', '/500','/faq','/logout'].includes(partial_path))) {
         const company_portal_id = await getCompanyPortalId(req)
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {
