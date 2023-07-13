@@ -85,11 +85,14 @@ async function redirectWithErrorMessage(req, res, error_code) {
         req.session.member = { ...member, status: 'suspended' }
     }
     // console.log({ access_error: msg });
-    req.session.flash = { access_error: msg, notice: msg, };
-    if(error_code === 'COUNTRY_CHANGED')
+    req.session.flash = { access_error: msg, notice: msg };
+    if(error_code === 'COUNTRY_CHANGED'){
+        req.session.flash['error'] = msg
         res.redirect('/faq');
-    else
+    }
+    else{
         res.redirect('/notice');
+    }
 }
 
 async function logIP(req, ip, geo) {
