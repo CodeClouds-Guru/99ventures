@@ -87,7 +87,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
     // console.log({ access_error: msg });
     req.session.flash = { access_error: msg, notice: msg};
     if(error_code === 'COUNTRY_CHANGED'){
-        // req.session.flash.error = msg
+        req.session.flash.error = msg
         res.redirect('/faq');
     }
     else{
