@@ -48,7 +48,11 @@ class EmailHelper {
         },
       });
       //check for email alert 
-      let email_alert = await this.checkEmailAlert(payload.action,all_details.users)
+      var member_arr = {}
+      if(all_details.members){
+        member_arr = all_details.members
+      }
+      let email_alert = await this.checkEmailAlert(payload.action,member_arr)
       if (email_alert && email_action && email_action.EmailTemplates) {
         let email_template = email_action.EmailTemplates[0];
         let email_body = '';
@@ -98,7 +102,6 @@ class EmailHelper {
               match_variables_subject,
               email_subject
             );
-            // console.log('all_details======', all_details)
           } else {
             email_body = email_template.body;
           }

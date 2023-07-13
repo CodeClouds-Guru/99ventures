@@ -25,7 +25,7 @@ const messageBox = {
     },
     COUNTRY_CHANGED: {
         error_code: 'ACCX006',
-        error_message: 'Looks like you are trying to connect from a different location other than your usual location. Please get back to your home location and then try to access this site'
+        error_message: "We've detected that you are trying to connect from a location which does not match your registered country.  Please resolve this issue and try logging in again."
     },
     UNSUPPORTED_BROWSER: {
         error_code: 'ACCX007',
@@ -85,8 +85,14 @@ async function redirectWithErrorMessage(req, res, error_code) {
         req.session.member = { ...member, status: 'suspended' }
     }
     // console.log({ access_error: msg });
-    req.session.flash = { access_error: msg, notice: msg, };
-    res.redirect('/notice');
+    if(error_code === 'COUNTRY_CHANGED'){
+        req.session.flash = { error:msg};
+        res.redirect('/faq');
+    }
+    else{
+        req.session.flash = { access_error: msg, notice: msg};
+        res.redirect('/notice');
+    }
 }
 
 async function logIP(req, ip, geo) {
@@ -100,6 +106,8 @@ async function logIP(req, ip, geo) {
         })
         let flag = last_logged_ip && last_logged_ip.ip === ip;
         if (!flag) {
+            //destroy previous ip logs
+            await IpLog.destroy({where:{member_id:member.id}})
             const browser = detect();
             await IpLog.create({
                 member_id: member.id,
@@ -133,7 +141,7 @@ async function checkIfCountryChanged(req, country_code) {
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if (!(['/notice', '/404', '/503', '/500'].includes(partial_path))) {
+    if (!(['/notice', '/404', '/503', '/500','/faq','/logout'].includes(partial_path))) {
         const company_portal_id = await getCompanyPortalId(req)
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {
