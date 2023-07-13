@@ -400,6 +400,7 @@ class MemberController extends Controller {
     ) {
       return this.getMembersList(req, res);
     }
+
     const options = this.getQueryOptions(req);
     let company_id = req.headers.company_id;
     let site_id = req.headers.site_id;
@@ -411,46 +412,28 @@ class MemberController extends Controller {
       {
         model: IpLog,
         model_name: 'IpLog',
-        order: [['id', 'DESC']],
+        attributes: [
+          'geo_location',
+          'ip',
+          'isp',
+          'browser',
+          'browser_language',
+        ],
         status: true
       },
       {
         model: MemberPaymentInformation,
         model_name: 'MemberPaymentInformations',
-        order: [['id', 'DESC']],
+        attributes: ['id'],
         where: {
           name: 'email'
         },
-        status: false
-      },
-      {
-        model: MembershipTier,
-        model_name: 'MembershipTier',
+        // required: false,
         status: false
       },
       {
         model: MemberReferral,
         model_name: 'MemberReferral',
-        status: false
-      },
-      {
-        model: WithdrawalRequest,
-        model_name: 'WithdrawalRequests',
-        order: [['id', 'DESC']],
-        attributes: ['status'],
-        status: false
-      },
-      {
-        model: MemberTransaction,
-        model_name: 'MemberTransactions',
-        order: [['id', 'DESC']],
-        attributes: ['type'],
-        status: false
-      },
-      {
-        model: EmailAlert,
-        model_name: 'MemberEmailAlerts',
-        as: 'MemberEmailAlerts',
         status: false
       }
     ];
@@ -472,6 +455,7 @@ class MemberController extends Controller {
         });
       }
     }
+
     options.where = {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
@@ -480,15 +464,19 @@ class MemberController extends Controller {
       }),
     };
 
-
     // Dynamically generating Model Relationships
-    const fields = req.query.fields;
+    const fields = req.query.fields  || ['id', 'first_name', 'username'];
+    const colums = [...fields];
     for (let field of fields) {
       const mdl = field.split('.');
-      if (mdl.length > 1){
-        includesModel = MemberController.prototype.customizeIncludedModel(includesModel, mdl[0], mdl[1]);        
+      if (mdl.length > 1 && mdl[0] != 'IpLogs'){
+        let indx = colums.findIndex(el => el == field);
+        if(indx != -1){
+          colums.splice(indx, 1)
+        }
       }
     }
+
 
     options.include = includesModel.filter(r => r.status).map(r => {
       delete r.status;
@@ -500,7 +488,7 @@ class MemberController extends Controller {
 
     options.where = {
       ...options.where,
-      company_portal_id: site_id,
+      company_portal_id: site_id
     };
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
@@ -509,24 +497,49 @@ class MemberController extends Controller {
     options.offset = offset;
     options.subQuery = false;
     options.distinct = true;
-    options.attributes = req.query.fields || ['id', 'first_name', 'username'];
+    options.attributes = colums;
     options.group = 'Member.id';
+    const relationCols = []
+
+    if(fields.includes('MembershipTier.name')){
+      relationCols.push([sequelize.literal("(SELECT name from membership_tiers WHERE id = Member.membership_tier_id)"), 'membership_tier_name']);
+    }
+    if(fields.includes('MemberEmailAlerts.slug')) {
+      relationCols.push([sequelize.literal("(SELECT email_alert_id from email_alert_member WHERE member_id = Member.id LIMIT 1)"), 'email_marketing_opt_in']);
+    }
+    if(fields.includes('MemberReferral.referral_email')){
+      relationCols.push([sequelize.literal("(SELECT referral_email from member_referrals WHERE id = Member.member_referral_id AND deleted_at is NULL)"), 'referral_email']);
+    }
+    if(fields.includes('MemberPaymentInformations.value')){
+      relationCols.push([sequelize.literal("(SELECT value from member_payment_informations WHERE name = 'email' AND member_id = Member.id ORDER BY id DESC LIMIT 1)"), 'member_payment_email']);
+    }
+    if (fields.includes('WithdrawalRequests.created_at')) {
+      relationCols.push([sequelize.literal("(SELECT created_at from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id ORDER BY created_at DESC LIMIT 1)"), 'last_cashout_date']);
+    }
+    if (fields.includes('WithdrawalRequests.amount')) {
+      relationCols.push([sequelize.literal("(SELECT SUM(amount) from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id)"), 'total_paid']);
+    }
+    if (fields.includes('MemberTransactions.amount')) {
+      relationCols.push([sequelize.literal("(SELECT SUM(amount) from member_transactions WHERE type = 'credited' AND member_id = Member.id)"), 'member_total_earnings']);
+    }
+    if (fields.includes('MemberTransactions.balance')) {
+      relationCols.push([sequelize.literal("(SELECT balance from member_transactions WHERE member_id = Member.id ORDER BY id DESC LIMIT 1)"), 'member_account_balance']);
+    }
+
+    options.attributes = [
+      ...options.attributes,
+      ...relationCols
+    ]
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
 
-    result.rows.map((row) => {
+    result.rows.map((row) => {      
       let ip = '';
       let geo_location = '';
       let isp = '';
       let browser = '';
-      let browser_language = '';
-      let membership_tier_name = '';
-      let opted_for_email_alerts = (row.MemberEmailAlerts && row.MemberEmailAlerts.length > 0) ? 'Yes' : 'No';
-      let member_account_balance = 0.0;
-      let member_total_earnings = 0.0;
-      let total_paid = 0.0;
-      let cashout_date = 'N/A';
+      let browser_language = '';      
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
         ip = last_row.ip;
@@ -535,36 +548,7 @@ class MemberController extends Controller {
         browser = last_row.browser;
         browser_language = last_row.browser_language;
       }
-      if (row.MembershipTier) {
-        membership_tier_name = row.MembershipTier.name;
-      }
 
-      if (row.MemberTransactions && row.MemberTransactions.length > 0) {
-        if('balance' in row.MemberTransactions[0]){
-          member_account_balance = row.MemberTransactions[0].balance;
-        }
-        if('amount' in row.MemberTransactions[0]){
-          member_total_earnings = row.MemberTransactions.reduce((sum, item) => {
-            if (item.type === 'credited') sum += item.amount;
-            return sum;
-          }, 0.0);
-        }
-      }
-      
-      if (row.WithdrawalRequests && row.WithdrawalRequests.length > 0) {
-        if('created_at' in row.WithdrawalRequests[0]){
-          cashout_date = moment(row.WithdrawalRequests[0].created_at).format(
-            'YYYY-MM-DD'
-          );
-        }
-        if('amount' in row.WithdrawalRequests[0]){
-          total_paid = row.WithdrawalRequests.reduce((sum, item) => {
-            if (item.status === 'approved') sum += item.amount;
-            return sum;
-          }, 0.0);
-        }
-      }
-      
       if (fields.includes('IpLogs.ip')) {
         row.setDataValue('IpLogs.ip', ip);
       }
@@ -582,30 +566,28 @@ class MemberController extends Controller {
       }
 
       if (fields.includes('MembershipTier.name')) {
-        row.setDataValue('MembershipTier.name', membership_tier_name);
+        row.setDataValue('MembershipTier.name', row.get('membership_tier_name') ?? '0.0');
       }
       if (fields.includes('MemberTransactions.balance')) {
-        row.setDataValue('MemberTransactions.balance', member_account_balance);
+        row.setDataValue('MemberTransactions.balance', row.get('member_account_balance') ?? '0.0');
       }
       if (fields.includes('MemberTransactions.amount')) {
-        row.setDataValue('MemberTransactions.amount', member_total_earnings);
+        row.setDataValue('MemberTransactions.amount', row.get('member_total_earnings') ?? '0.0');
       }
       if (fields.includes('WithdrawalRequests.amount')) {
-        row.setDataValue('WithdrawalRequests.amount', total_paid);
+        row.setDataValue('WithdrawalRequests.amount', row.get('total_paid') ?? '0.0');
       }
       if (fields.includes('WithdrawalRequests.created_at')) {
-        row.setDataValue('WithdrawalRequests.created_at', cashout_date);
+        row.setDataValue('WithdrawalRequests.created_at', row.get('last_cashout_date') ? moment(row.get('last_cashout_date')).format('YYYY-MM-DD') : 'N/A');
       }
       if (fields.includes('MemberEmailAlerts.slug')) {
-        row.setDataValue('MemberEmailAlerts.slug', opted_for_email_alerts);
+        row.setDataValue('MemberEmailAlerts.slug', (row.get('email_marketing_opt_in') !== null ? 'Yes' : 'No'));
       }
       if(fields.includes('MemberPaymentInformations.value')){
-        let email = row.MemberPaymentInformations.length ? row.MemberPaymentInformations[0].value : ''
-        row.setDataValue('MemberPaymentInformations.value', email);
+        row.setDataValue('MemberPaymentInformations.value', row.get('member_payment_email'));
       }
-      if(fields.includes('MemberReferral.referral_email') && row.MemberReferral !== null && typeof row.MemberReferral == 'object'){
-        let referral_email = Object.keys(row.MemberReferral).length ? row.MemberReferral.referral_email : ''
-        row.setDataValue('MemberReferral.referral_email', referral_email);
+      if(fields.includes('MemberReferral.referral_email')){
+        row.setDataValue('MemberReferral.referral_email', row.get('referral_email'));
       }
       return row;
     });
@@ -633,6 +615,7 @@ class MemberController extends Controller {
   async export(req, res) {
     req.query.show = 100000;
     let { fields, result } = await this.list(req);
+    console.log(result);
     var header = [];
     for (const head of Object.values(fields)) {
       header.push({ id: head.field_name, title: head.placeholder });
