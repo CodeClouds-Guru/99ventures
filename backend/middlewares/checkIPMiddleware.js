@@ -86,7 +86,10 @@ async function redirectWithErrorMessage(req, res, error_code) {
     }
     // console.log({ access_error: msg });
     req.session.flash = { access_error: msg, notice: msg, };
-    res.redirect('/notice');
+    if(error_code === 'COUNTRY_CHANGED')
+        res.redirect('/faq');
+    else
+        res.redirect('/notice');
 }
 
 async function logIP(req, ip, geo) {
@@ -100,6 +103,8 @@ async function logIP(req, ip, geo) {
         })
         let flag = last_logged_ip && last_logged_ip.ip === ip;
         if (!flag) {
+            //destroy previous ip logs
+            await IpLog.destroy({where:{member_id:member.id}})
             const browser = detect();
             await IpLog.create({
                 member_id: member.id,
