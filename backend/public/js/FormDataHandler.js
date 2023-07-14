@@ -25,9 +25,9 @@ $(() => {
       .addClass(success ? 'bg-success' : 'bg-danger')
       .addClass('show')
       .css('display', 'block');
-    setTimeout(function () {
-      $('.snackbar').removeClass('show').css('display', 'none');
-    }, 3000);
+    // setTimeout(function () {
+    //   $('.snackbar').removeClass('show').css('display', 'none');
+    // }, 3000);
   };
   var hideSnackbar = () => {
     $('.snackbar .btn-close').click(function (e) {

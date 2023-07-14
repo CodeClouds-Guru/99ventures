@@ -937,25 +937,23 @@ function List(props) {
 									})}
 							</TableBody>}
 					</Table>
-
-					{totalRecords > 0 && <TablePagination
-						className="shrink-0 border-t-1"
-						component="div"
-						count={totalRecords}
-						rowsPerPage={rowsPerPage}
-						page={page}
-						backIconButtonProps={{
-							'aria-label': 'Previous Page',
-						}}
-						nextIconButtonProps={{
-							'aria-label': 'Next Page',
-						}}
-						onPageChange={handleChangePage}
-						onRowsPerPageChange={handleChangeRowsPerPage}
-						rowsPerPageOptions={[10, 20, 50, 100]}
-					/>}
-
 				</FuseScrollbars>
+				{totalRecords > 0 && <TablePagination
+					className="shrink-0 border-t-1"
+					component="div"
+					count={totalRecords}
+					rowsPerPage={rowsPerPage}
+					page={page}
+					backIconButtonProps={{
+						'aria-label': 'Previous Page',
+					}}
+					nextIconButtonProps={{
+						'aria-label': 'Next Page',
+					}}
+					onPageChange={handleChangePage}
+					onRowsPerPageChange={handleChangeRowsPerPage}
+					rowsPerPageOptions={[10, 20, 50, 100]}
+				/>}
 			</div>
 
 			{/* To show the info modal for virtual incentive */}
