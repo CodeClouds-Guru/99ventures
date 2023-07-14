@@ -44,7 +44,7 @@ class LucidController {
         }
         const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
         const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
-        const orderBy = 'orderby' in params ? params.orderby : 'id';
+        const orderBy = 'orderby' in params ? params.orderby : 'created_at';
         const order = 'order' in params ? params.order : 'desc';
         /**
          * check and get member's eligibility
@@ -196,7 +196,7 @@ class LucidController {
             delete params.uid
             
             var entrylink;
-            if(quota.SurveyStillLive !== true) {
+            if(quota.SurveyStillLive == true || quota.SurveyStillLive == 'true') {                
                 const survey = await Survey.findOne({
                     attributes: ['url'],
                     where: {

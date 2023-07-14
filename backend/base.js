@@ -128,7 +128,6 @@ function runSchedule() {
         job.pattern,
         async () => {
           await job.function()
-          console.log(job.name)
         },
         ...job.options
       )
