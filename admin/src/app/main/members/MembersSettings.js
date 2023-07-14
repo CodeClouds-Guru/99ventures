@@ -100,10 +100,10 @@ const MembersSettings = () => {
                                     type="number"
                                     variant="outlined"
                                     required
-                                    InputProps={['referral_percentage', 'registration_bonus'].includes(row.settings_key) ? row.settings_key === 'referral_percentage' ? {
+                                    InputProps={row.settings_key === 'referral_percentage' ? {
                                         endAdornment: <InputAdornment position="start">%</InputAdornment>
                                     } :
-                                        row.settings_key === 'registration_bonus' ? { startAdornment: <InputAdornment position="start">$</InputAdornment> } : '' : ''}
+                                        { startAdornment: <InputAdornment position="start">$</InputAdornment> }}
                                     onChange={(event) => handleData(event)}
                                 />
                             }
