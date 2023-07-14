@@ -196,7 +196,7 @@ class LucidController {
             delete params.uid
             
             var entrylink;
-            if(quota.SurveyStillLive !== true) {
+            if(quota.SurveyStillLive == true || quota.SurveyStillLive == 'true') {                
                 const survey = await Survey.findOne({
                     attributes: ['url'],
                     where: {
