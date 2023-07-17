@@ -452,9 +452,6 @@ class MemberAuthController {
       if (method === 'POST') {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
-
-        // console.log('----------------', req.body);
-
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
@@ -477,6 +474,10 @@ class MemberAuthController {
           member_message = error.details.map((err) => err.message);
         }
 
+        if (!member.profile_completed_on && member.username === req.body.username) {
+          member_status = false;
+          member_message = 'You need to set username to complete your profile';
+        }
         //check member username
         let member_username = await Member.findOne({
           where: {
@@ -909,7 +910,7 @@ class MemberAuthController {
     if (
       member.member_amounts[0].amount <
       parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+      withdrawal_amount
     ) {
       return {
         member_status: false,
