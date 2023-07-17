@@ -74,18 +74,17 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       transaction_action: {
-        type: DataTypes.STRING,
+        type: DataTypes.VIRTUAL,
         get() {
-          var action_str = this.getDataValue('amount_action');
-          action_str = action_str.split('_');
-          action_str = action_str
+          return this.amount_action
+            .split('_')
             .map((word) => {
               return word[0].toUpperCase() + word.substring(1);
             })
             .join(' ');
-          return action_str;
         },
       },
+
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
@@ -106,7 +105,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  MemberTransaction.extra_fields = ['transaction_action'];
+  // MemberTransaction.extra_fields = ['transaction_action'];
   //fields
   MemberTransaction.fields = {
     id: {
@@ -168,11 +167,11 @@ module.exports = (sequelize, DataTypes) => {
       placeholder: 'Transaction Action',
       listing: true,
       show_in_form: false,
-      sort: true,
+      sort: false,
       required: false,
       value: '',
       width: '50',
-      searchable: true,
+      searchable: false,
     },
     // type: {
     //   field_name: 'type',
