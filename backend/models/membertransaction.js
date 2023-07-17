@@ -146,19 +146,32 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    type: {
-      field_name: 'type',
-      db_name: 'type',
+    amount_action: {
+      field_name: 'amount_action',
+      db_name: 'amount_action',
       type: 'text',
-      placeholder: 'Type',
+      placeholder: 'Amount Action',
       listing: true,
-      show_in_form: true,
+      show_in_form: false,
       sort: true,
-      required: true,
+      required: false,
       value: '',
       width: '50',
       searchable: true,
     },
+    // type: {
+    //   field_name: 'type',
+    //   db_name: 'type',
+    //   type: 'text',
+    //   placeholder: 'Type',
+    //   listing: true,
+    //   show_in_form: true,
+    //   sort: true,
+    //   required: true,
+    //   value: '',
+    //   width: '50',
+    //   searchable: true,
+    // },
     amount: {
       field_name: 'amount',
       db_name: 'amount',
@@ -243,9 +256,9 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberTransactionAndBalance = async (data) => {
     const db = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
-    const { MemberNotification,Member,Setting } = require('../models/index');
+    const { MemberNotification, Member, Setting } = require('../models/index');
 
-    let member = await Member.findOne({where:{id:data.member_id}})
+    let member = await Member.findOne({ where: { id: data.member_id } });
     let total_earnings = await db.sequelize.query(
       "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
       {
@@ -281,14 +294,17 @@ module.exports = (sequelize, DataTypes) => {
       if (data.type === 'credited') {
         let config_data = await Setting.findOne({
           attributes: ['settings_value'],
-          where: { settings_key: 'referral_status',company_portal_id:member.company_portal_id },
+          where: {
+            settings_key: 'referral_status',
+            company_portal_id: member.company_portal_id,
+          },
         });
-        if(parseInt(config_data.dataValues.settings_value) == 1){
+        if (parseInt(config_data.dataValues.settings_value) == 1) {
           let referral_data = await MemberTransaction.referralAmountUpdate(
-              data.member_id,
-              data.amount,
-              transaction.id
-            );
+            data.member_id,
+            data.amount,
+            transaction.id
+          );
         }
       }
     }
@@ -378,7 +394,7 @@ module.exports = (sequelize, DataTypes) => {
       JSON.stringify(
         await Member.findOne({
           where: { id: member_id },
-          attributes: ['member_referral_id','company_portal_id'],
+          attributes: ['member_referral_id', 'company_portal_id'],
           include: {
             model: MemberBalance,
             as: 'member_amounts',
@@ -392,7 +408,7 @@ module.exports = (sequelize, DataTypes) => {
       JSON.stringify(
         await Member.findOne({
           where: { id: member.member_referral_id, status: 'member' },
-          attributes: ['member_referral_id','id','email'],
+          attributes: ['member_referral_id', 'id', 'email'],
           include: {
             model: MemberBalance,
             as: 'member_amounts',
@@ -406,7 +422,10 @@ module.exports = (sequelize, DataTypes) => {
     if (member.member_referral_id && referral_member) {
       let config_data = await Setting.findOne({
         attributes: ['settings_value'],
-        where: { settings_key: 'referral_percentage',company_portal_id:member.company_portal_id },
+        where: {
+          settings_key: 'referral_percentage',
+          company_portal_id: member.company_portal_id,
+        },
       });
       let referral_amount =
         (modified_total_earnings *
@@ -427,26 +446,28 @@ module.exports = (sequelize, DataTypes) => {
             amount_action: 'referral',
             modified_total_earnings: ref_modified_total_earnings,
             parent_transaction_id: parent_transaction_id,
-            status:2
+            status: 2,
           })
         )
       );
       //update member referral table
-          await MemberReferral.update({
-            amount: parseFloat(referral_amount)
+      await MemberReferral.update(
+        {
+          amount: parseFloat(referral_amount),
+        },
+        {
+          where: {
+            member_id: member.member_referral_id,
+            referral_id: member_id,
           },
-          {
-            where:{
-              member_id: member.member_referral_id,
-              referral_id: member_id
-            }
-          })
+        }
+      );
       //send mail to referrer
       let req = {
         headers: {
           site_id: member.company_portal_id,
         },
-        user:referral_member
+        user: referral_member,
       };
       let evntbus = eventBus.emit('send_email', {
         action: 'Referral Bonus',

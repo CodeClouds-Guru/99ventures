@@ -297,7 +297,7 @@ function TicketingSystemPage(props) {
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {Object.keys(val).length > 0 &&
                                                         <span style={{ fontSize: '12px' }}>
-                                                            <Link to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
+                                                            <Link target="_blank" to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
                                                                 <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
                                                             </Link>
 
@@ -432,7 +432,9 @@ function TicketingSystemPage(props) {
                                             <Typography component={'h4'} className="pr-5">
                                                 <b>Username:</b>
                                             </Typography>
-                                            {memberDetails.username}
+                                            <Link target="_blank" to={`/app/members/${memberId}`}>
+                                                {memberDetails.username}
+                                            </Link>
                                         </div>
                                     </div>
                                     <div className="flex justify-center sm:justify-start">
