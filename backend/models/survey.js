@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
 			}
 		}
 		const surveys = await Survey.findAndCountAll({
-			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number'],
+			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number', 'created_at'],
 			distinct: true,
 			where: {
 				survey_provider_id: params.provider_id,

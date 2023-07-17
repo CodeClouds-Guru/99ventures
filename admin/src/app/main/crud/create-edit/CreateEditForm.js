@@ -9,7 +9,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as yup from "yup";
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -149,6 +149,9 @@ function CreateEditForm(props) {
           fullWidth
         />)
       case "switch":
+        useEffect(() => {
+          setSwitchField(Boolean(moduleData[fieldConfig.field_name]))
+        }, [moduleData])
         return (
           <FormControl>
             <FormGroup>
@@ -157,9 +160,8 @@ function CreateEditForm(props) {
                 className="mt-8 mb-16"
                 control={
                   <Switch
-                    defaultChecked={fieldConfig.value === 1}
                     onChange={(e) => { handleSwitch(e) }}
-                    value={switchField}
+                    checked={switchField}
                   />
                 }
                 id={fieldConfig.field_name}
@@ -187,6 +189,9 @@ function CreateEditForm(props) {
     setSwitchField(e.target.checked);
   }
   const onSubmit = async data => {
+    if (data.hasOwnProperty('status')) {
+      data.status = switchField ? 1 : 0
+    }
     if (moduleId == 'create') {
       let res = await dispatch(saveModule({ ...data, module }));
       if (!res.error) {
@@ -211,6 +216,8 @@ function CreateEditForm(props) {
         {Object.values(fields).filter(f => f.show_in_form)
           .map(mField => {
             let defaultVal = moduleData && moduleData[mField.field_name] ? moduleData[mField.field_name] : ['select', 'multi-select'].includes(mField.type) ? [] : ''
+            if (mField.type === 'switch') {
+            }
             return <div key={mField.field_name}>
               <Controller
                 name={mField.field_name}
