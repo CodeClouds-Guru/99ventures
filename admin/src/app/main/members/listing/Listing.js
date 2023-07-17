@@ -431,6 +431,13 @@ function Listing(props) {
         fetchModules();
     }
 
+    const handleCloseFieldsPopup = () => {
+        setListConfigDialog(false);
+        if (columnArray.sort() !== displayColumnArray.sort()) {
+            setDisplayColumnArray(columnArray)
+        }
+    }
+
     return (
         <div>
             {/* // header */}
@@ -462,7 +469,7 @@ function Listing(props) {
                     </Button>
                     <Dialog
                         open={listConfigDialog}
-                        onClose={() => { setListConfigDialog(false) }}
+                        onClose={handleCloseFieldsPopup}
                         disableEscapeKeyDown
                         aria-labelledby="scroll-dialog-title"
                         aria-describedby="scroll-dialog-description"
