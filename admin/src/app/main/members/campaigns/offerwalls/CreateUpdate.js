@@ -31,6 +31,7 @@ const schema = yup.object().shape({
     currency_variable: yup.string().required('Please enter Currency Variable'),
     percent: yup.number().required('Please enter Percent').typeError('Please insert only number'),
     // max: yup.number().required('Please enter MAX').typeError('Please insert only number'),
+    description: yup.string().required('Please enter Description'),
 });
 
 const defaultValues = {
@@ -49,6 +50,7 @@ const defaultValues = {
     currency_variable: '',
     percent: 100,
     // max: '',
+    description: ''
 };
 
 const CreateUpdate = () => {
@@ -98,6 +100,7 @@ const CreateUpdate = () => {
         setValue('currency_variable', '', { shouldDirty: true, shouldValidate: false });
         setValue('percent', 100, { shouldDirty: true, shouldValidate: false });
         // setValue('max', '', { shouldDirty: true, shouldValidate: false });
+        setValue('description', '', { shouldDirty: true, shouldValidate: false });
         moduleId === 'create' ? '' : getSingleOfferwall();
     }, [setValue]);
     const getSingleOfferwall = () => {
@@ -133,6 +136,7 @@ const CreateUpdate = () => {
                     setValue('currency_variable', response.data.results.result.currency_variable, { shouldDirty: false, shouldValidate: true });
                     setValue('percent', response.data.results.result.currency_percent, { shouldDirty: false, shouldValidate: true });
                     // setValue('max', response.data.results.result.currency_max, { shouldDirty: false, shouldValidate: true });
+                    setValue('description', response.data.results.result.description, { shouldDirty: false, shouldValidate: true });
                 }
             })
             .catch((error) => {
@@ -169,7 +173,7 @@ const CreateUpdate = () => {
             }
         })
     }
-    const onSubmit = ({ premium_configuration, name, sub_id_prefix, logo, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent }) => {
+    const onSubmit = ({ premium_configuration, name, sub_id_prefix, logo, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent, description }) => {
         // max
         if (allowFromAnyIP && IPs.length > 0) {
             dispatch(showMessage({ variant: 'error', message: 'IPs field should be blank' }));
@@ -203,6 +207,7 @@ const CreateUpdate = () => {
             currency_options: 'Cash',
             currency_percent: percent,
             // currency_max: max
+            description: description
         })
             .then((response) => {
                 if (response.status === 200) {
@@ -610,6 +615,24 @@ const CreateUpdate = () => {
                                     />
                                 )}
                             /> */}
+                            <Controller
+                                name="description"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        className="w-1/2 mb-10 p-5"
+                                        {...field}
+                                        label="Description"
+                                        type="text"
+                                        error={!!errors.description}
+                                        helperText={errors?.description?.message}
+                                        variant="outlined"
+                                        required
+                                        multiline
+                                        rows={4}
+                                    />
+                                )}
+                            />
                             {moduleId !== 'create' &&
                                 <>
                                     <div className="flex  justify-center">
