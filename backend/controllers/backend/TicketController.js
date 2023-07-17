@@ -318,7 +318,9 @@ class TicketController extends Controller {
 
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-
+      req.body.field_name = 'status'
+      req.body.value = 'pending'
+      await this.changeStatus(req);
       return true;
     } catch (error) {
       throw error;

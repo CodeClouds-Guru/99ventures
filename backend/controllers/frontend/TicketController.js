@@ -75,6 +75,8 @@ class TicketController {
           status: 'open',
         });
         ticket_id = savedTicket.id;
+      }else{
+        await Ticket.changeStatus('status', 'open', ticket_id);
       }
       let data = {
         ticket_id: ticket_id,
