@@ -194,8 +194,12 @@ class EmailHelper {
       for(let item of email_alerts){
         let member_email_alert = item.dataValues.MemberEmailAlerts
         if(member_email_alert.length === 0){
-          let notifications = ['Survey Completed','Withdrawal Approval','Member Profile Completion']
+          let notifications = ['Withdrawal Approval','Member Profile Completion']
+          let completed_rewards = ['Survey Completed']
           if(item.dataValues.slug === 'notifications' && notifications.includes(email_action)){
+            email_alert_status = false
+          }
+          else if(item.dataValues.slug === 'completed_rewards' && completed_rewards.includes(email_action)){
             email_alert_status = false
           }
           else if(item.dataValues.slug === 'completed_withdraw' && email_action === 'Payment Confirmation'){
