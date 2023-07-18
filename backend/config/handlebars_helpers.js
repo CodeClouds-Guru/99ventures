@@ -66,12 +66,19 @@ module.exports = [
   },
   {
     name: 'dateFormat',
-    fn: function (date, format) {
-      if (date)
+    fn: function (date, format,timezone) {
+      if (date){
+        console.log('timezone',timezone)
+        if(timezone)
+          date = moment(new Date(date)).clone().tz(timezone)
+        else
+          date = moment(new Date(date))
+        console.log(date)
         return format
-          ? moment(date).format(format)
-          : moment(date).format('DD/MM/YYYY');
-      else return '';
+          ? date.format(format)
+          : date.format('DD/MM/YYYY hh:mm a');
+      }
+      else { return ''; }
     },
   },
   {

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       MemberActivityLog.belongsTo(models.Member, {
-        foreignKey: 'member_id'
+        foreignKey: 'member_id',
       });
     }
   }
@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
                   moment(member_activity_logs.created_at).format('YYYY-MM-DD') +
                   '%',
               },
+              member_id: member_activity_logs.member_id,
             },
           });
         },
