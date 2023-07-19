@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const cardStyle = {
     margin: '5px',
-    width: '19%',
+    width: '20%',
     '@media screen and (max-width: 1600px)': {
         width: '30%'
     },
@@ -23,7 +23,7 @@ const CardPanel = (props) => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex w-full justify-center text-center flex-wrap">
+        <div className="flex w-full justify-center text-center md:flex-nowrap sm:flex-wrap">
             <Card className="flex items-center justify-center cursor-pointer" sx={{ ...cardStyle, backgroundColor: '#ffb0aa', color: '#9e322a' }} onClick={() => navigate('/app/survey-providers')}>
                 <CardContent>
                     <Typography variant="h4" component="p">{props.surveys}</Typography>
