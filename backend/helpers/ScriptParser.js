@@ -30,14 +30,17 @@ class ScriptParser {
   }
   async parseScript(script_id, user, params) {
     var data = [];
-    const client_timezone = 'timezone' in params ? params.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const client_timezone =
+      'timezone' in params
+        ? params.timezone
+        : Intl.DateTimeFormat().resolvedOptions().timeZone;
     var other_details = {
       transaction_count: 0,
       total_withdrawal_amount: 0,
       member_balance: 0,
       user: user,
-      message:"",
-      timezone:client_timezone
+      message: '',
+      timezone: client_timezone,
     };
     var page_count = 0;
     var script_html = '';
@@ -267,7 +270,7 @@ class ScriptParser {
               page_count = temp_survey_list.result.page_count;
             } else {
               data = [];
-              other_details.message = temp_survey_list.message
+              other_details.message = temp_survey_list.message;
             }
             if (page_count > 5) {
               page_count = 5;
@@ -357,7 +360,7 @@ class ScriptParser {
             ? { member_id: user.id, type: 'credited' }
             : { type: 'credited' },
           include: [
-            { model: Models.Member },
+            { model: Models.Member, required: true },
             {
               model: Models.WithdrawalRequest,
               include: {
@@ -520,9 +523,9 @@ class ScriptParser {
       case 'SurveyProvider':
         return {
           where: {
-            status:1
-          }
-        }
+            status: 1,
+          },
+        };
       default:
         return { where: {} };
     }
