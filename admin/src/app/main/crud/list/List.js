@@ -703,7 +703,7 @@ function List(props) {
 
 			{
 				(showModuleHeading || searchable || addable) && (
-					<div className='w-full flex py-32 xpx-24 xmd:px-32'>
+					<div className='w-full flex py-32 px-24 md:px-32'>
 						{
 							showModuleHeading && (
 								<Typography
