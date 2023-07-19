@@ -70,10 +70,11 @@ class WithdrawalRequestController extends Controller {
         {
           model: PaymentMethod,
           attributes: ['name'],
-          paranoid: false
+          paranoid: false,
         },
         {
           model: Member,
+          paranoid: false,
           attributes: ['id', 'username', 'status'],
         },
       ];
@@ -296,7 +297,7 @@ class WithdrawalRequestController extends Controller {
       const withdrawlType = await PaymentMethod.findOne({
         attributes: ['slug'],
         where: { id: query_where.withdrawal_type_id },
-        paranoid: false
+        paranoid: false,
       });
       if (withdrawlType.slug === 'gift_card_pass') {
         const viObj = new VirtualIncentive(company_portal_id);
