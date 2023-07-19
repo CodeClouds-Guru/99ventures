@@ -4,19 +4,18 @@ import FusePageSimple from '@fuse/core/FusePageSimple';
 import FusePageCarded from '@fuse/core/FusePageCarded/FusePageCarded';
 // import DemoContent from '@fuse/core/DemoContent';
 import DashboardContent from './DashboardContent';
-
-const Root = styled(FusePageCarded)(({ theme }) => ({
-}));
+import { Typography } from '@mui/material';
+import { selectUser } from 'app/store/userSlice';
+import { useSelector } from 'react-redux';
 
 function DashboardPage(props) {
     // const { t } = useTranslation('dashboardPage');
-
+    const user = useSelector(selectUser);
     return (
-        <Root
+        <FusePageSimple
             header={
                 <div className="p-24">
-                    {/* <h4>{t('TITLE')}</h4> */}
-                    <h4>Dashboard</h4>
+                    <Typography variant="h5" className="font-bold">Welcome { user.first_name }!</Typography>
                 </div>
             }
             content={
@@ -24,7 +23,7 @@ function DashboardPage(props) {
                     <DashboardContent />
                 </div>
             }
-            scroll="content"
+            scroll="page"
         />
     );
 }

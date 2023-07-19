@@ -117,8 +117,9 @@ function MetatagConfiguration(props) {
                                     <>
                                         <pre>
                                             <code>
-                                                <TextareaAutosize
+                                                <textarea
                                                     {...field}
+                                                    rows={10}
                                                     maxRows={10}
                                                     aria-label="maximum height"
                                                     placeholder={
@@ -126,7 +127,7 @@ function MetatagConfiguration(props) {
                                                         "Ex., \n<script>\n \t//...Add your script \n</script>"
                                                     }
                                                     className="custom-code-editor"
-                                                />
+                                                ></textarea>
                                             </code>
                                         </pre>
                                         <small><em><strong>Note: </strong>You have to wrap your script within {'<script></script>'} tag.</em></small>

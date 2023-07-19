@@ -2,39 +2,56 @@ import { Card, CardContent, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 // import History from 'src/@history/@history';
 
+const cardStyle = {
+    margin: '5px',
+    width: '20%',
+    '@media screen and (max-width: 1600px)': {
+        width: '30%'
+    },
+    '@media screen and (max-width: 1400px)': {
+        width: '19%'
+    },
+    '@media screen and (max-width: 1300px)': {
+        width: '23%'
+    },
+    '@media screen and (max-width: 900px)': {
+        width: '30%'
+    }
+}
+
 const CardPanel = (props) => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex w-full justify-center text-center">
-            <Card className="w-1/4 m-5 flex items-center justify-center cursor-pointer" sx={{ backgroundColor: '#ffb0aa', color: '#9e322a' }} onClick={() => navigate('/app/survey-providers')}>
+        <div className="flex w-full justify-center text-center md:flex-nowrap sm:flex-wrap">
+            <Card className="flex items-center justify-center cursor-pointer" sx={{ ...cardStyle, backgroundColor: '#ffb0aa', color: '#9e322a' }} onClick={() => navigate('/app/survey-providers')}>
                 <CardContent>
-                    <Typography variant="h3" component="div">{props.surveys}</Typography>
-                    <Typography variant="h6" component="div">Surveys</Typography>
+                    <Typography variant="h4" component="p">{props.surveys}</Typography>
+                    <Typography variant="subtitle1" component="p">Surveys</Typography>
                 </CardContent>
             </Card>
-            <Card className="w-1/4 m-5 flex items-center justify-center cursor-pointer" sx={{ backgroundColor: '#E8EAF6', color: '#283593' }} onClick={() => navigate('/app/members')}>
+            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#E8EAF6', color: '#283593' }} onClick={() => navigate('/app/members')}>
                 <CardContent>
-                    <Typography variant="h3" component="div">{props.users}</Typography>
-                    <Typography variant="h6" component="div">Members</Typography>
+                    <Typography variant="h4" component="p">{props.users}</Typography>
+                    <Typography variant="subtitle1" component="p">Members</Typography>
                 </CardContent>
             </Card>
-            <Card className="w-1/4 m-5 flex items-center justify-center cursor-pointer" sx={{ backgroundColor: '#E8F5E9', color: '#2E7D32' }} onClick={() => navigate('/app/members')}>
+            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#E8F5E9', color: '#2E7D32' }} onClick={() => navigate('/app/members')}>
                 <CardContent>
-                    <Typography variant="h3" component="div">{props.verifiedUsers}</Typography>
-                    <Typography variant="h6" component="div">Verified Members</Typography>
+                    <Typography variant="h4" component="p">{props.verifiedUsers}</Typography>
+                    <Typography variant="subtitle1" component="p">Verified Members</Typography>
                 </CardContent>
             </Card>
-            <Card className="w-1/4 m-5 flex items-center justify-center cursor-pointer" sx={{ backgroundColor: '#edb2ff', color: '#77298e' }} onClick={() => navigate('/app/survey-providers?completed-surveys=1')}>
+            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#edb2ff', color: '#77298e' }} onClick={() => navigate('/app/survey-providers?completed-surveys=1')}>
                 <CardContent>
-                    <Typography variant="h3" component="div">{props.completedSurveys}</Typography>
-                    <Typography variant="h6" component="div">Completed Surveys</Typography>
+                    <Typography variant="h4" component="p">{props.completedSurveys}</Typography>
+                    <Typography variant="subtitle1" component="p">Completed Surveys</Typography>
                 </CardContent>
             </Card>
-            <Card className="w-1/4 m-5 flex items-center justify-center cursor-pointer" sx={{ backgroundColor: '#f2dfb0', color: '#6d634d' }} onClick={() => navigate('/app/withdrawal-requests')}>
+            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#f2dfb0', color: '#6d634d' }} onClick={() => navigate('/app/withdrawal-requests')}>
                 <CardContent>
-                    <Typography variant="h3" component="div">${props.withdrawn}</Typography>
-                    <Typography variant="h6" component="div">Withdrawn</Typography>
+                    <Typography variant="h4" component="p">${props.withdrawn}</Typography>
+                    <Typography variant="subtitle1" component="p">Withdrawn</Typography>
                 </CardContent>
             </Card>
         </div>

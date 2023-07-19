@@ -1,7 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import FuseUtils from '@fuse/utils';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon, Popover, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Paper, Input, Button, Chip, TextField, Tooltip, IconButton, FormControl, InputLabel, Select, Menu, MenuList, MenuItem, ListItemText, ListItemIcon, Popover, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, OutlinedInput, InputAdornment } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -703,7 +703,7 @@ function List(props) {
 
 			{
 				(showModuleHeading || searchable || addable) && (
-					<div className='w-full flex py-32 px-24 md:px-32'>
+					<div className='w-full flex py-32 xpx-24 xmd:px-32'>
 						{
 							showModuleHeading && (
 								<Typography
@@ -735,7 +735,7 @@ function List(props) {
 								(module === 'withdrawal-requests' || (module === 'member-transactions' && location.pathname.includes('history'))) && (
 									<>
 										{
-											datepickerStatus && (
+											datepickerStatus ? (
 												<div className="date-range-wrapper member-txn-list">
 													<DateRangePicker
 														wrapperClassName="filter-daterange-picker"
@@ -744,32 +744,46 @@ function List(props) {
 														onChange={dateRangeSelected}
 													/>
 												</div>
-											)
+											) : (<div></div>)
 										}
-										<Paper
-											component={motion.div}
-											initial={{ y: -20, opacity: 0 }}
-											animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
-											className="flex items-center justify-around w-5/12 space-x-8 px-16 rounded-full border-1 shadow-0 cursor-pointer"
-											sx={{ '& .MuiBox-root.muiltr-79elbk': { top: '110px', right: '15%' } }}
-											onClick={() => setDatepickerStatus(!datepickerStatus)}
-										>
-											<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={24} color="disabled">feather:calendar</FuseSvgIcon>
-											<Input
-												label="Select daterange"
-												className="datepicker--input cursor-pointer"
+										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3">
+											<OutlinedInput
+												id="outlined-adornment-datepicker"
+												type="text"
+												readOnly
+												onClick={() => setDatepickerStatus(!datepickerStatus)}
+												className="datepicker--input cursor-pointer rounded-full"
+												startAdornment={
+													<InputAdornment position="start">
+														<IconButton
+														aria-label="toggle password visibility"
+														edge="start"
+														>
+															<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={18} color="disabled">feather:calendar</FuseSvgIcon>
+														</IconButton>
+													</InputAdornment>
+												}												
+												endAdornment={
+													(dateRange && dateRange.startDate) && (
+														<InputAdornment position="end">
+															<IconButton
+															aria-label="toggle password visibility"
+															edge="end"
+															>
+																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>
+															</IconButton>
+														</InputAdornment>
+													)
+												}
+												size="small"												
 												placeholder="Select daterange"
-												disabled
-												disableUnderline
-												size="small"
 												value={
 													dateRange && dateRange.startDate
 														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
 														: ''
 												}
 											/>
-											{(dateRange && dateRange.startDate) && <FuseSvgIcon className="cursor-pointer text-48" size={24} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>}
-										</Paper>
+										</FormControl>
 										{(module === 'member-transactions' && location.pathname.includes('history')) &&
 											<FormControl sx={{ minWidth: 120 }} size="small">
 												<InputLabel id="demo-simple-select-label">Type</InputLabel>

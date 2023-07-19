@@ -1,4 +1,4 @@
-import { TextField, IconButton, Tooltip, Card, CardContent } from '@mui/material';
+import { TextField, IconButton, Tooltip, Card, CardContent, OutlinedInput, InputAdornment, FormControl } from '@mui/material';
 import moment from 'moment';
 import { useState, useEffect } from 'react';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
@@ -14,6 +14,7 @@ import CompletedSurveyChart from './cards-charts/CompletedSurveyChart';
 import MembersChart from './cards-charts/MembersChart';
 import BestPerformingSurveys from './cards-charts/BestPerformingSurveys';
 import BestPerformers from './cards-charts/BestPerformers';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 const DashboardContent = () => {
     const dispatch = useDispatch();
@@ -152,58 +153,70 @@ const DashboardContent = () => {
     }
 
     return (
-        <div>
+        <>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={daterangeLessData.completed_surveys} withdrawn={daterangeLessData.total_withdrawn} />
-            <Card className="w-full m-5 border-1">
-                <CardContent>
-                    <div className="flex w-full ml-5 my-10 justify-start text-center">
-                        {reRenderPicker ?
-                            <DateRangePicker
-                                open={open}
-                                toggle={toggle}
-                                onChange={dateRangeSelected}
-                                className="daterangepicker-filter"
-                                closeOnClickOutside={true}
-                                maxDate={moment().toDate()}
-                                initialDateRange={dateRange}
-                            /> : ''
-                        }
-                        <div className="w-1/2 cursor-pointer" onClick={() => { setReRenderPicker(true); toggle(); }}>
-                            <TextField
-                                className="w-full ml-0"
-                                label="Select a date range"
-                                variant="outlined"
-                                disabled
-                                value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
-                            />
-                        </div>
-                        <Tooltip title="Clear Filter" placement="right">
-                            <IconButton
-                                color="primary"
-                                aria-label="Clear Filter"
-                                component="label"
-                                onClick={clearFilter}
-                            >
-                                <ClearAllIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </div>
+                    
+            <div className="flex w-full ml-5 my-32 justify-center text-center items-center relative dashboard-datepicker">
+                {reRenderPicker ?
+                    <DateRangePicker
+                        open={open}
+                        toggle={toggle}
+                        onChange={dateRangeSelected}
+                        className="daterangepicker-filter"
+                        closeOnClickOutside={true}
+                        maxDate={moment().toDate()}
+                        initialDateRange={dateRange}
+                    /> : ''
+                }
 
-                    <div className="flex flex-wrap w-full justify-between">
-                        <div className="flex flex-wrap w-full lg:w-2/3 justify-between">
-                            <LoginPerDay loginPerDay={loginPerDay} />
-                            <CompletedSurveyChart completedSurveys={completedSurveys} />
-                            <MembersChart membersChart={membersChart} />
-                            <TicketsChart ticketsChart={ticketsChart} />
-                        </div>
-                        <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
-                            <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
-                            <BestPerformers bestPerformers={bestPerformers} />
-                        </div>
+                <FormControl variant="outlined" className="xl:w-3/12 lg:w-4/12 md:w-2/6 mr-10">
+                    <OutlinedInput
+                        id="outlined-adornment-datepicker"
+                        type="text"
+                        readOnly
+                        onClick={() => { setReRenderPicker(true); toggle(); }}                                
+                        startAdornment={
+                            <InputAdornment position="start">
+                                <IconButton
+                                aria-label="toggle password visibility"
+                                edge="start"
+                                >
+                                    <FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={18} color="disabled">feather:calendar</FuseSvgIcon>
+                                </IconButton>
+                            </InputAdornment>
+                        }												
+                        placeholder="Select a date range"
+                        value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
+                    />
+                </FormControl>
+
+                <Tooltip title="Clear Filter" placement="right">
+                    <div>
+                        <IconButton
+                            color="primary"
+                            aria-label="Clear Filter"
+                            component="label"
+                            onClick={clearFilter}
+                        >
+                            <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:refresh</FuseSvgIcon>
+                        </IconButton>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                </Tooltip>
+            </div>
+
+            <div className="flex flex-wrap w-full justify-between">
+                <div className="flex flex-wrap w-full lg:w-2/3 justify-between">
+                    <LoginPerDay loginPerDay={loginPerDay} />
+                    <CompletedSurveyChart completedSurveys={completedSurveys} />
+                    <MembersChart membersChart={membersChart} />
+                    <TicketsChart ticketsChart={ticketsChart} />
+                </div>
+                <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
+                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
+                    <BestPerformers bestPerformers={bestPerformers} />
+                </div>
+            </div>                
+        </>
     )
 
 }
