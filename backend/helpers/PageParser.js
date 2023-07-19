@@ -97,9 +97,9 @@ class PageParser {
       if ('message' in req.session.flash) {
         this.sessionMessage = req.session.flash.message;
       }
-      // console.log('b4 reset', req.session.flash);
+      console.log('b4 reset', req.session.flash);
       req.session.flash = null;
-      // console.log('aftr reset', req.session.flash);
+      console.log('aftr reset', req.session.flash);
       // delete req.session.flash;
     }
     const page_content = await this.generateHtml(req);
@@ -211,7 +211,7 @@ class PageParser {
       sc_request,
       scripted_captcha_field,
     });
-    this.sessionMessage = '';
+    this.sessionMessage = null;
 
     // console.log(user);
     return layout_html;
