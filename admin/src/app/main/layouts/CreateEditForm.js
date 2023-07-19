@@ -423,14 +423,15 @@ const CreateEditForm = (props) => {
                         <div className='p-24'>
                             <pre>
                                 <code>
-                                    <TextareaAutosize
+                                    <textarea
                                         maxRows={10}
+                                        rows={10}
                                         aria-label="maximum height"
                                         placeholder="#Add your external style and script here, e.g., <link rel='stylesheet' href='/style.css' />"
                                         value={layoutCode.header.value}
                                         className="custom-code-editor"
                                         onChange={handleHeader}
-                                    />
+                                    ></textarea>
                                 </code>
                             </pre>
                         </div>
