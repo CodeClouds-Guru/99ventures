@@ -474,7 +474,10 @@ class MemberAuthController {
           member_message = error.details.map((err) => err.message);
         }
 
-        if (!member.profile_completed_on && member.username === req.body.username) {
+        if (
+          !member.profile_completed_on &&
+          member.username === req.body.username
+        ) {
           member_status = false;
           member_message = 'You need to set username to complete your profile';
         }
@@ -548,10 +551,11 @@ class MemberAuthController {
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
 
-        req.session.flash = { message: member_message, success_status: true };
-      } else {
-        req.session.flash = { error: member_message };
+        // req.session.flash = { message: member_message, success_status: true };
       }
+      // else {
+      //   req.session.flash = { error: member_message };
+      // }
       if (method === 'POST') {
         res.redirect('back');
       } else {
@@ -774,12 +778,12 @@ class MemberAuthController {
       member_status = false;
       member_message = 'Error occured';
     } finally {
-      if (member_status) {
-        req.session.flash = { message: member_message, success_status: true };
-        // res.redirect('/');
-      } else {
-        req.session.flash = { error: member_message };
-      }
+      // if (member_status) {
+      //   req.session.flash = { message: member_message, success_status: true };
+      //   // res.redirect('/');
+      // } else {
+      //   req.session.flash = { error: member_message };
+      // }
 
       res.json({
         status: member_status,
@@ -910,7 +914,7 @@ class MemberAuthController {
     if (
       member.member_amounts[0].amount <
       parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-      withdrawal_amount
+        withdrawal_amount
     ) {
       return {
         member_status: false,
