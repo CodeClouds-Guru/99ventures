@@ -30,12 +30,14 @@ class ScriptParser {
   }
   async parseScript(script_id, user, params) {
     var data = [];
+    const client_timezone = 'timezone' in params ? params.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
     var other_details = {
       transaction_count: 0,
       total_withdrawal_amount: 0,
       member_balance: 0,
       user: user,
-      message:""
+      message:"",
+      timezone:client_timezone
     };
     var page_count = 0;
     var script_html = '';

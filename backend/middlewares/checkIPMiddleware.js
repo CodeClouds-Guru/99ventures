@@ -85,12 +85,12 @@ async function redirectWithErrorMessage(req, res, error_code) {
         req.session.member = { ...member, status: 'suspended' }
     }
     // console.log({ access_error: msg });
-    if(error_code === 'COUNTRY_CHANGED'){
-        req.session.flash = { error:msg};
+    if (error_code === 'COUNTRY_CHANGED') {
+        req.session.flash = { error: msg };
         res.redirect('/faq');
     }
-    else{
-        req.session.flash = { access_error: msg, notice: msg};
+    else {
+        req.session.flash = { access_error: msg, notice: msg };
         res.redirect('/notice');
     }
 }
@@ -107,7 +107,7 @@ async function logIP(req, ip, geo) {
         let flag = last_logged_ip && last_logged_ip.ip === ip;
         if (!flag) {
             //destroy previous ip logs
-            await IpLog.destroy({where:{member_id:member.id}})
+            await IpLog.destroy({ where: { member_id: member.id } })
             const browser = detect();
             await IpLog.create({
                 member_id: member.id,
@@ -141,7 +141,7 @@ async function checkIfCountryChanged(req, country_code) {
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if (!(['/notice', '/404', '/503', '/500','/faq','/logout'].includes(partial_path))) {
+    if (!(['/notice', '/404', '/503', '/500', '/faq', '/logout'].includes(partial_path))) {
         const company_portal_id = await getCompanyPortalId(req)
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {
@@ -193,11 +193,11 @@ module.exports = async function (req, res, next) {
             return;
         }
 
-        if ('vpn' in geo.report && geo.report.vpn) {
+        if ('active_vpn' in geo.report && geo.report.active_vpn) {
             await redirectWithErrorMessage(req, res, 'VPN_DETECTED')
             return;
         }
-        if ('tor' in geo.report && geo.report.tor) {
+        if ('active_tor' in geo.report && geo.report.active_tor) {
             await redirectWithErrorMessage(req, res, 'TOR_DETECTED')
             return;
         }

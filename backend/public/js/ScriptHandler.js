@@ -3,8 +3,8 @@ $(() => {
     Array.from(scriptElements).forEach(element => {
         callAndReplaceScripts(element)
     });
-
     function callAndReplaceScripts(element) {
+        $(element).attr("data-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
         const dataAttrs = $(element).data();
         // console.log('data-attrs', dataAttrs);
         let params = {

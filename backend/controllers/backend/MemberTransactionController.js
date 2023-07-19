@@ -37,7 +37,6 @@ class MemberTransactionController extends Controller {
       attributes: ['id', 'first_name', 'last_name', 'email', 'avatar'],
     };
     const { docs, pages, total } = await this.model.paginate(options);
-
     let transaction_list = [];
     docs.forEach(function (record, key) {
       if (
@@ -48,7 +47,7 @@ class MemberTransactionController extends Controller {
           process.env.S3_BUCKET_OBJECT_URL +
           record.dataValues.Member.dataValues.avatar;
       }
-      if(record.dataValues.transaction_id === null){
+      if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A'
       }
       switch (record.dataValues.status) {
@@ -71,7 +70,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'initiated';
           break;
       }
-      transaction_list.push(record.dataValues);
+      transaction_list.push(record);
     });
 
     fields.transaction_id.listing = !(
