@@ -27,7 +27,6 @@ class SqsHelper {
       const data = await this.sqs.sendMessage(params).promise();
       return { success: true, data }
     } catch (error) {
-      console.log(JSON.stringify(body))
       console.log(" sendData error", error)
       return { success: false, data: null }
     }
