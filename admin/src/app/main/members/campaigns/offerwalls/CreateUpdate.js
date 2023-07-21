@@ -50,7 +50,8 @@ const defaultValues = {
     currency_variable: '',
     percent: 100,
     // max: '',
-    description: ''
+    description: '',
+    rating: 0
 };
 
 const CreateUpdate = () => {
@@ -137,6 +138,7 @@ const CreateUpdate = () => {
                     setValue('percent', response.data.results.result.currency_percent, { shouldDirty: false, shouldValidate: true });
                     // setValue('max', response.data.results.result.currency_max, { shouldDirty: false, shouldValidate: true });
                     setValue('description', response.data.results.result.description, { shouldDirty: false, shouldValidate: true });
+                    setValue('rating', response.data.results.result.rating, { shouldDirty: false, shouldValidate: true });
                 }
             })
             .catch((error) => {
@@ -173,7 +175,7 @@ const CreateUpdate = () => {
             }
         })
     }
-    const onSubmit = ({ premium_configuration, name, sub_id_prefix, logo, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent, description }) => {
+    const onSubmit = ({ premium_configuration, name, sub_id_prefix, logo, mode, campaign_id_variable, campaign_name_variable, sub_id_variable, reverse_variable, reverse_variable_value, response_ok, response_fail, currency_variable, percent, description, rating }) => {
         // max
         if (allowFromAnyIP && IPs.length > 0) {
             dispatch(showMessage({ variant: 'error', message: 'IPs field should be blank' }));
@@ -207,7 +209,8 @@ const CreateUpdate = () => {
             currency_options: 'Cash',
             currency_percent: percent,
             // currency_max: max
-            description: description
+            description: description,
+            rating
         })
             .then((response) => {
                 if (response.status === 200) {
@@ -222,6 +225,10 @@ const CreateUpdate = () => {
             }).finally(() => {
                 setLoading(false)
             })
+    }
+
+    const handleSelectRating = (e) => {
+        setValue('rating', e.target.value, { shouldDirty: false, shouldValidate: true });
     }
 
     return (
@@ -335,21 +342,39 @@ const CreateUpdate = () => {
                                 )}
                             />
                             <Controller
-                                name="secureSubIDs"
+                                name="rating"
                                 control={control}
                                 render={({ field }) => (
-                                    <FormControl className="w-1/2 mb-10 p-5">
-                                        <FormControlLabel
-                                            control={<Checkbox
-                                                checked={secureSubIDs}
-                                                onChange={handleSecureSubIDs}
-                                                inputProps={{ 'aria-label': 'controlled' }} />}
-                                            label="Secure Sub IDs"
-                                            labelPlacement="end"
-                                        />
-                                    </FormControl>
+                                    <TextField
+                                        {...field}
+                                        id="outlined-select-currency"
+                                        select
+                                        label="Rating"
+                                        helperText=''
+                                        className="w-1/2 mb-10 p-5"
+                                        onChange={ handleSelectRating }
+                                        >
+                                            <MenuItem value="0">
+                                                0
+                                            </MenuItem>
+                                            <MenuItem value="1">
+                                                1
+                                            </MenuItem>
+                                            <MenuItem value="2">
+                                                2
+                                            </MenuItem>
+                                            <MenuItem value="3">
+                                                3
+                                            </MenuItem>
+                                            <MenuItem value="4">
+                                                4
+                                            </MenuItem>
+                                            <MenuItem value="5">
+                                                5
+                                            </MenuItem>
+                                    </TextField>
                                 )}
-                            />
+                            />                            
                             <Controller
                                 name="logo"
                                 control={control}
@@ -363,6 +388,22 @@ const CreateUpdate = () => {
                                         helperText={errors?.name?.message}
                                         variant="outlined"
                                     />
+                                )}
+                            />
+                            <Controller
+                                name="secureSubIDs"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormControl className="w-1/2 mb-10 p-5">
+                                        <FormControlLabel
+                                            control={<Checkbox
+                                                checked={secureSubIDs}
+                                                onChange={handleSecureSubIDs}
+                                                inputProps={{ 'aria-label': 'controlled' }} />}
+                                            label="Secure Sub IDs"
+                                            labelPlacement="end"
+                                        />
+                                    </FormControl>
                                 )}
                             />
                             <Divider className="pb-10" textAlign="left"><h3>Postback</h3></Divider>
