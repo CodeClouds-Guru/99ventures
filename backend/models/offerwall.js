@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_max: DataTypes.STRING,
       logo: DataTypes.STRING,
       description: DataTypes.TEXT,
+      rating: DataTypes.TINYINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
@@ -440,6 +441,7 @@ module.exports = (sequelize, DataTypes) => {
       currency_variable: Joi.required().label('currency_variable'),
       currency_max: Joi.optional().label('currency_max'),
       logo: Joi.optional().label('logo'),
+      rating: Joi.optional().allow(0).label('rating'),
     });
     return schema.validate(req.body);
   };

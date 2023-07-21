@@ -169,14 +169,14 @@ class MemberAuthController {
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
-        let existing_email_or_username = await Member.findOne({
+        let existing_email_or_username = await Member.count({
           where: {
             company_portal_id: company_portal_id,
             email: req.body.email,
           },
         });
         let member_details = [];
-        if (existing_email_or_username) {
+        if (existing_email_or_username > 0) {
           member_status = false;
           member_message = 'Sorry! this email has already been taken';
         } else {
@@ -498,13 +498,13 @@ class MemberAuthController {
           member_message = 'You need to set username to complete your profile';
         }
         //check member username
-        let member_username = await Member.findOne({
+        let member_username = await Member.count({
           where: {
             username: req.body.username,
             id: { [Op.ne]: member.id },
           },
         });
-        if (member_username) {
+        if (member_username > 0) {
           member_status = false;
           member_message = 'Username already exists.';
         }
