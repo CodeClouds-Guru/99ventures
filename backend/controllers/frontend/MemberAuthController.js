@@ -805,17 +805,17 @@ class MemberAuthController {
           message: member_message,
           success_status: true,
         };
+        res.redirect('/paid-surveys');
       }else{
-        req.session.flash = {
-          error: member_message
-        };
+        // req.session.flash = {
+        //   error: member_message
+        // };
+        res.json({
+          status: member_status,
+          message: member_message,
+          data: response,
+      });
       }
-      // res.json({
-      //   status: member_status,
-      //   message: member_message,
-      //   data: response,
-      // });
-      res.redirect('/paid-surveys');
     }
   }
 
