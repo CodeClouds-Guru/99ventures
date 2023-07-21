@@ -800,7 +800,7 @@ class MemberAuthController {
       // } else {
       //   req.session.flash = { error: member_message };
       // }
-      if(member_status){
+      if(member_status === true){
         req.session.flash = {
           message: member_message,
           success_status: true,
