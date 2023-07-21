@@ -66,10 +66,17 @@ class Paypal {
 
     // let clientId = this.clientId;
     // let clientSecret = this.clientSecret;
-    let environment = new paypal.core.SandboxEnvironment(
-      clientId,
-      clientSecret
-    );
+    if(process.ENV.DEV_MODE === '1'){
+      let environment = new paypal.core.SandboxEnvironment(
+        clientId,
+        clientSecret
+      );
+    }else{
+      let environment = new paypal.core.LiveEnvironment(
+        clientId,
+        clientSecret
+      );
+    }
     // console.log(environment);
     return new paypal.core.PayPalHttpClient(environment);
   }
