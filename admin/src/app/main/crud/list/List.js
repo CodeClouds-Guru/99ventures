@@ -77,12 +77,13 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
 
 	const display_column_object = {
 		'id': 'ID',
 		'payment_email': 'Email',
 		'Member.username': 'Username',
+		'Member.admin_status': 'Admin Status',
 		'PaymentMethod.name': 'Method',
 		'Member.status': 'Account',
 		'amount_with_currency': 'Cash',
