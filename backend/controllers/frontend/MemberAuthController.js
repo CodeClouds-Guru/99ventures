@@ -810,11 +810,12 @@ class MemberAuthController {
           error: member_message
         };
       }
-      res.json({
-        status: member_status,
-        message: member_message,
-        data: response,
-      });
+      // res.json({
+      //   status: member_status,
+      //   message: member_message,
+      //   data: response,
+      // });
+      res.redirect('/paid-surveys');
     }
   }
 
