@@ -125,7 +125,7 @@ class MemberAuthController {
     }
     if (member_status) {
       req.session.member = member;
-
+      if (!member.profile_completed_on) redirect_page = '/profile';
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member.id,
         action: 'Member Logged In',
@@ -433,8 +433,22 @@ class MemberAuthController {
           'Welcome to Moresurveys! Your email has been verified successfully.',
         success_status: true,
       };
+
+      if (!member_details.profile_completed_on) redirect_page = '/profile';
+      else {
+        let company_portal_id = req.session.company_portal.id;
+        let redirect_page = await Page.findOne({
+          where: { company_portal_id: company_portal_id, after_signin: 1 },
+        });
+        if (redirect_page) redirect_page = '/' + redirect_page.slug;
+        else redirect_page = '/';
+      }
+      if (req.session.member) {
+        res.redirect(redirect_page);
+        return;
+      }
     }
-    res.redirect('/dashboard');
+    res.redirect('/');
     return;
   }
 
@@ -455,7 +469,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          username: Joi.string().optional().allow('').label('User Name'),
+          username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
