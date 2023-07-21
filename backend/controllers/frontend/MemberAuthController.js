@@ -125,7 +125,7 @@ class MemberAuthController {
     }
     if (member_status) {
       req.session.member = member;
-
+      if (!member.profile_completed_on) redirect_page = '/profile';
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member.id,
         action: 'Member Logged In',
@@ -169,14 +169,14 @@ class MemberAuthController {
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
-        let existing_email_or_username = await Member.findOne({
+        let existing_email_or_username = await Member.count({
           where: {
             company_portal_id: company_portal_id,
             email: req.body.email,
           },
         });
         let member_details = [];
-        if (existing_email_or_username) {
+        if (existing_email_or_username > 0) {
           member_status = false;
           member_message = 'Sorry! this email has already been taken';
         } else {
@@ -198,7 +198,8 @@ class MemberAuthController {
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
-            username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
+            // username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
+            username: new Date().getMilliseconds(),
             created_at: new Date(),
           };
           const res = await Member.create(data);
@@ -407,6 +408,7 @@ class MemberAuthController {
     if (member_details) {
       let model = await Member.update(
         {
+          username: member_details.id,
           email_verified_on: new Date(),
           status: 'member',
         },
@@ -433,8 +435,22 @@ class MemberAuthController {
           'Welcome to Moresurveys! Your email has been verified successfully.',
         success_status: true,
       };
+      let redirect_page = '';
+      if (!member_details.profile_completed_on) redirect_page = '/profile';
+      else {
+        let company_portal_id = req.session.company_portal.id;
+        redirect_page = await Page.findOne({
+          where: { company_portal_id: company_portal_id, after_signin: 1 },
+        });
+        if (redirect_page) redirect_page = '/' + redirect_page.slug;
+        else redirect_page = '/';
+      }
+      if (req.session.member) {
+        res.redirect(redirect_page);
+        return;
+      }
     }
-    res.redirect('/dashboard');
+    res.redirect('/');
     return;
   }
 
@@ -455,7 +471,7 @@ class MemberAuthController {
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
-          username: Joi.string().optional().allow('').label('User Name'),
+          username: Joi.string().required().label('User Name'),
           country: Joi.number().required().label('Country'),
           zipcode: Joi.string().required().label('Zipcode'),
           city: Joi.string().optional().label('City'),
@@ -482,13 +498,13 @@ class MemberAuthController {
           member_message = 'You need to set username to complete your profile';
         }
         //check member username
-        let member_username = await Member.findOne({
+        let member_username = await Member.count({
           where: {
             username: req.body.username,
             id: { [Op.ne]: member.id },
           },
         });
-        if (member_username) {
+        if (member_username > 0) {
           member_status = false;
           member_message = 'Username already exists.';
         }
@@ -784,7 +800,13 @@ class MemberAuthController {
       // } else {
       //   req.session.flash = { error: member_message };
       // }
-
+      if (member_status === true) {
+        req.session.flash = {
+          message: member_message,
+          success_status: true,
+        };
+        // res.redirect('/paid-surveys');
+      }
       res.json({
         status: member_status,
         message: member_message,
@@ -1005,7 +1027,7 @@ class MemberAuthController {
       //   payment_method_details.slug == 'instant_paypal' ||
       //   payment_method_details.slug == 'skrill'
       // ) {
-      if (payment_method_details.payment_type == 'Auto') {
+      if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
         withdrawal_req_data.status = 'approved';
@@ -1019,7 +1041,7 @@ class MemberAuthController {
             type: 'withdraw',
             amount_action: 'member_withdrawal',
             created_by: request_data.member_id,
-            status: payment_method_details.payment_type == 'Auto' ? 2 : 1,
+            status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
           });
         // console.log(withdrawal_req_data);
         if (payment_method_details.slug == 'instant_paypal') {
@@ -1081,7 +1103,7 @@ class MemberAuthController {
         action: 'Member cash withdrawal request',
       });
       // console.log(withdrawal_type, member);
-      if (payment_method_details.payment_type == 'Auto') {
+      if (payment_method_details.payment_type === 'Auto') {
         // email body for member
         let member_mail = await this.sendMailEvent({
           action: 'Member Cash Withdrawal',
@@ -1140,9 +1162,21 @@ class MemberAuthController {
           'Your request can not be processed right now. Please try again later',
       };
     }
+    //check for payment type
+    let member_message = '';
+    if (
+      payment_method_details &&
+      payment_method_details.payment_type === 'Auto'
+    ) {
+      member_message =
+        'You have successfully requested your payment. The requested amount will be deducted from your balance total once it has been processed by the MoreSurveys Support Team.';
+    } else {
+      member_message =
+        'Congratulations. You have successfully withdrawn your earnings. Start taking more paid surveys here.';
+    }
     return {
       member_status: true,
-      member_message: 'Action executed successfully',
+      member_message: member_message,
     };
   }
 

@@ -158,8 +158,10 @@ class MemberController extends Controller {
             'referral_code',
             'member_referral_id',
             'gender',
+            'deleted_by',
+            'deleted_at',
           ];
-
+          options.paranoid = false;
           options.where = { id: member_id };
 
           options.include = [
@@ -235,6 +237,11 @@ class MemberController extends Controller {
               attributes: ['name', 'value'],
               where: { status: [1, '1'] },
               limit: 1,
+            },
+            {
+              model: User,
+              as: 'deleted_by_admin',
+              attributes: ['id', 'username'],
             },
           ];
           result = await this.model.findOne(options);
@@ -391,7 +398,7 @@ class MemberController extends Controller {
     }
   }
 
-  //override list function 
+  //override list function
   async list(req, res) {
     // The purpose of this IF statement is to populate excluded members dropdown on Payment Configuration tab.
     if (
@@ -419,23 +426,23 @@ class MemberController extends Controller {
           'browser',
           'browser_language',
         ],
-        status: true
+        status: true,
       },
       {
         model: MemberPaymentInformation,
         model_name: 'MemberPaymentInformations',
         attributes: ['id'],
         where: {
-          name: 'email'
+          name: 'email',
         },
         // required: false,
-        status: false
+        status: false,
       },
       {
         model: MemberReferral,
         model_name: 'MemberReferral',
-        status: false
-      }
+        status: false,
+      },
     ];
 
     if (query_where) {
@@ -443,8 +450,12 @@ class MemberController extends Controller {
         temp = query_where.filters.map((filter) => {
           // This piece of code added to get the Relationship Model name & attributes if it's exists on the serach filter.
           let clmnArry = filter.column.replace(/[^a-zA-Z_.]/g, '').split('.');
-          if(clmnArry.length > 1){
-            includesModel = MemberController.prototype.customizeIncludedModel(includesModel, clmnArry[0], clmnArry[1]);
+          if (clmnArry.length > 1) {
+            includesModel = MemberController.prototype.customizeIncludedModel(
+              includesModel,
+              clmnArry[0],
+              clmnArry[1]
+            );
           }
           //---------- END
           return {
@@ -460,35 +471,36 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
 
     // Dynamically generating Model Relationships
-    const fields = req.query.fields  || ['id', 'first_name', 'username'];
+    const fields = req.query.fields || ['id', 'first_name', 'username'];
     const colums = [...fields];
     for (let field of fields) {
       const mdl = field.split('.');
-      if (mdl.length > 1 && mdl[0] != 'IpLogs'){
-        let indx = colums.findIndex(el => el == field);
-        if(indx != -1){
-          colums.splice(indx, 1)
+      if (mdl.length > 1 && mdl[0] != 'IpLogs') {
+        let indx = colums.findIndex((el) => el == field);
+        if (indx != -1) {
+          colums.splice(indx, 1);
         }
       }
     }
 
-
-    options.include = includesModel.filter(r => r.status).map(r => {
-      delete r.status;
-      delete r.model_name;
-      return {
-        ...r
-      }
-    });
+    options.include = includesModel
+      .filter((r) => r.status)
+      .map((r) => {
+        delete r.status;
+        delete r.model_name;
+        return {
+          ...r,
+        };
+      });
 
     options.where = {
       ...options.where,
-      company_portal_id: site_id
+      company_portal_id: site_id,
     };
     let page = req.query.page || 1;
     let limit = parseInt(req.query.show) || 10; // per page record
@@ -499,47 +511,84 @@ class MemberController extends Controller {
     options.distinct = true;
     options.attributes = colums;
     options.group = 'Member.id';
-    const relationCols = []
+    const relationCols = [];
 
-    if(fields.includes('MembershipTier.name')){
-      relationCols.push([sequelize.literal("(SELECT name from membership_tiers WHERE id = Member.membership_tier_id)"), 'membership_tier_name']);
+    if (fields.includes('MembershipTier.name')) {
+      relationCols.push([
+        sequelize.literal(
+          '(SELECT name from membership_tiers WHERE id = Member.membership_tier_id)'
+        ),
+        'membership_tier_name',
+      ]);
     }
-    if(fields.includes('MemberEmailAlerts.slug')) {
-      relationCols.push([sequelize.literal("(SELECT email_alert_id from email_alert_member WHERE member_id = Member.id LIMIT 1)"), 'email_marketing_opt_in']);
+    if (fields.includes('MemberEmailAlerts.slug')) {
+      relationCols.push([
+        sequelize.literal(
+          '(SELECT email_alert_id from email_alert_member WHERE member_id = Member.id LIMIT 1)'
+        ),
+        'email_marketing_opt_in',
+      ]);
     }
-    if(fields.includes('MemberReferral.referral_email')){
-      relationCols.push([sequelize.literal("(SELECT referral_email from member_referrals WHERE id = Member.member_referral_id AND deleted_at is NULL)"), 'referral_email']);
+    if (fields.includes('MemberReferral.referral_email')) {
+      relationCols.push([
+        sequelize.literal(
+          '(SELECT referral_email from member_referrals WHERE id = Member.member_referral_id AND deleted_at is NULL)'
+        ),
+        'referral_email',
+      ]);
     }
-    if(fields.includes('MemberPaymentInformations.value')){
-      relationCols.push([sequelize.literal("(SELECT value from member_payment_informations WHERE name = 'email' AND member_id = Member.id ORDER BY id DESC LIMIT 1)"), 'member_payment_email']);
+    if (fields.includes('MemberPaymentInformations.value')) {
+      relationCols.push([
+        sequelize.literal(
+          "(SELECT value from member_payment_informations WHERE name = 'email' AND member_id = Member.id ORDER BY id DESC LIMIT 1)"
+        ),
+        'member_payment_email',
+      ]);
     }
     if (fields.includes('WithdrawalRequests.created_at')) {
-      relationCols.push([sequelize.literal("(SELECT created_at from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id ORDER BY created_at DESC LIMIT 1)"), 'last_cashout_date']);
+      relationCols.push([
+        sequelize.literal(
+          "(SELECT created_at from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id ORDER BY created_at DESC LIMIT 1)"
+        ),
+        'last_cashout_date',
+      ]);
     }
     if (fields.includes('WithdrawalRequests.amount')) {
-      relationCols.push([sequelize.literal("(SELECT SUM(amount) from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id)"), 'total_paid']);
+      relationCols.push([
+        sequelize.literal(
+          "(SELECT SUM(amount) from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id)"
+        ),
+        'total_paid',
+      ]);
     }
     if (fields.includes('MemberTransactions.amount')) {
-      relationCols.push([sequelize.literal("(SELECT SUM(amount) from member_transactions WHERE type = 'credited' AND member_id = Member.id)"), 'member_total_earnings']);
+      relationCols.push([
+        sequelize.literal(
+          "(SELECT SUM(amount) from member_transactions WHERE type = 'credited' AND member_id = Member.id)"
+        ),
+        'member_total_earnings',
+      ]);
     }
     if (fields.includes('MemberTransactions.balance')) {
-      relationCols.push([sequelize.literal("(SELECT balance from member_transactions WHERE member_id = Member.id ORDER BY id DESC LIMIT 1)"), 'member_account_balance']);
+      relationCols.push([
+        sequelize.literal(
+          '(SELECT balance from member_transactions WHERE member_id = Member.id ORDER BY id DESC LIMIT 1)'
+        ),
+        'member_account_balance',
+      ]);
     }
 
-    options.attributes = [
-      ...options.attributes,
-      ...relationCols
-    ]
+    options.attributes = [...options.attributes, ...relationCols];
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
 
-    result.rows.map((row) => {      
+    result.rows.map((row) => {
       let ip = '';
       let geo_location = '';
       let isp = '';
       let browser = '';
-      let browser_language = '';      
+      let browser_language = '';
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
         ip = last_row.ip;
@@ -566,28 +615,54 @@ class MemberController extends Controller {
       }
 
       if (fields.includes('MembershipTier.name')) {
-        row.setDataValue('MembershipTier.name', row.get('membership_tier_name') ?? '0.0');
+        row.setDataValue(
+          'MembershipTier.name',
+          row.get('membership_tier_name') ?? '0.0'
+        );
       }
       if (fields.includes('MemberTransactions.balance')) {
-        row.setDataValue('MemberTransactions.balance', row.get('member_account_balance') ?? '0.0');
+        row.setDataValue(
+          'MemberTransactions.balance',
+          row.get('member_account_balance') ?? '0.0'
+        );
       }
       if (fields.includes('MemberTransactions.amount')) {
-        row.setDataValue('MemberTransactions.amount', row.get('member_total_earnings') ?? '0.0');
+        row.setDataValue(
+          'MemberTransactions.amount',
+          row.get('member_total_earnings') ?? '0.0'
+        );
       }
       if (fields.includes('WithdrawalRequests.amount')) {
-        row.setDataValue('WithdrawalRequests.amount', row.get('total_paid') ?? '0.0');
+        row.setDataValue(
+          'WithdrawalRequests.amount',
+          row.get('total_paid') ?? '0.0'
+        );
       }
       if (fields.includes('WithdrawalRequests.created_at')) {
-        row.setDataValue('WithdrawalRequests.created_at', row.get('last_cashout_date') ? moment(row.get('last_cashout_date')).format('YYYY-MM-DD') : 'N/A');
+        row.setDataValue(
+          'WithdrawalRequests.created_at',
+          row.get('last_cashout_date')
+            ? moment(row.get('last_cashout_date')).format('YYYY-MM-DD')
+            : 'N/A'
+        );
       }
       if (fields.includes('MemberEmailAlerts.slug')) {
-        row.setDataValue('MemberEmailAlerts.slug', (row.get('email_marketing_opt_in') !== null ? 'Yes' : 'No'));
+        row.setDataValue(
+          'MemberEmailAlerts.slug',
+          row.get('email_marketing_opt_in') !== null ? 'Yes' : 'No'
+        );
       }
-      if(fields.includes('MemberPaymentInformations.value')){
-        row.setDataValue('MemberPaymentInformations.value', row.get('member_payment_email'));
+      if (fields.includes('MemberPaymentInformations.value')) {
+        row.setDataValue(
+          'MemberPaymentInformations.value',
+          row.get('member_payment_email')
+        );
       }
-      if(fields.includes('MemberReferral.referral_email')){
-        row.setDataValue('MemberReferral.referral_email', row.get('referral_email'));
+      if (fields.includes('MemberReferral.referral_email')) {
+        row.setDataValue(
+          'MemberReferral.referral_email',
+          row.get('referral_email')
+        );
       }
       return row;
     });
@@ -693,7 +768,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -815,8 +890,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
       company_portal_id: site_id,
     };
 
@@ -826,14 +901,16 @@ class MemberController extends Controller {
     };
   }
 
-  customizeIncludedModel(relationShipModels, modelName, attr){
-    let indx = relationShipModels.findIndex(el => el.model_name == modelName);
+  customizeIncludedModel(relationShipModels, modelName, attr) {
+    let indx = relationShipModels.findIndex((el) => el.model_name == modelName);
     if (indx !== -1) {
       relationShipModels[indx] = {
         ...relationShipModels[indx],
-        attributes: (relationShipModels[indx].attributes) ? [...new Set([...relationShipModels[indx].attributes, attr])] : [attr],
-        status: true
-      }
+        attributes: relationShipModels[indx].attributes
+          ? [...new Set([...relationShipModels[indx].attributes, attr])]
+          : [attr],
+        status: true,
+      };
     }
     return relationShipModels;
   }

@@ -117,6 +117,11 @@ module.exports = {
           name: 'Bonus',
           code: '${bonus}',
           module: '',
+        },
+        {
+          name: 'Current Year',
+          code: '${year}',
+          module: '',
         }
       ],
       {}

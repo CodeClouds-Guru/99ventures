@@ -39,6 +39,7 @@ class EmailHelper {
         };
       }
       all_details['logo'] = publicURL + '/assets/images/logo/logo.png';
+      all_details['current_year'] = new Date().getFullYear();
       let email_action = await EmailAction.findOne({
         where: { action: payload.action },
         include: {
@@ -91,6 +92,7 @@ class EmailHelper {
             all_details['companies'] = company_portal_details[0].Company;
             company_portal_details[0].Company = {};
             all_details['company_portals'] = company_portal_details[0];
+            all_details['year'] = new Date().getFullYear();
             //set user details
             email_body = await this.replaceVariables(
               all_details,
@@ -193,7 +195,7 @@ class EmailHelper {
       let email_alerts = await EmailAlert.getEmailAlertList(user.id);
       for(let item of email_alerts){
         let member_email_alert = item.dataValues.MemberEmailAlerts
-        if(member_email_alert.length === 0){
+        if(member_email_alert && member_email_alert.length === 0){
           let notifications = ['Withdrawal Approval','Member Profile Completion']
           let completed_rewards = ['Survey Completed']
           if(item.dataValues.slug === 'notifications' && notifications.includes(email_action)){
