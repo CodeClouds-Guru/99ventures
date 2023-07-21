@@ -176,15 +176,13 @@ class PureSpectrumController {
             res.redirect('/login');
             return;
         }
-        var returnObj = {};
         const psObj = new PurespectrumHelper;
         const queryString = req.query;
-        // var redirectURL = '';
         try{
             const survey = await psObj.fetchAndReturnData('/surveys/' + queryString.survey_number);            
             if(survey.apiStatus === 'success' && survey.survey.survey_status === 22)   // 22 means live
             {
-                if(process.env.DEV_MODE == 1){
+                if(process.env.DEV_MODE == '1'){
                     queryString.bsec = 'a70mx8';
                 }
                 const data = await psObj.createData(`surveys/register/${queryString.survey_number}`);
@@ -196,7 +194,6 @@ class PureSpectrumController {
                     res.redirect(entryLink);
                     return;
                 } else {
-                    // returnObj = {notice: 'Unable to get entry link!', redirect_url: '/purespectrum' };
                     throw {statusCode: 404, message: 'Unable to get entry link'};
                 }
             } else {
@@ -218,17 +215,10 @@ class PureSpectrumController {
                     where: {
                         survey_number: queryString.survey_number
                     }
-                });                
-                // returnObj = { notice: 'Sorry! this survey has been closed.', redirect_url: '/purespectrum' };
-            } 
-            /*else {
-                returnObj = { notice: error.message, redirect_url: '/purespectrum' };
-            }*/
-            // redirectURL = '/survey-notavailable';
+                });
+            }             
             res.redirect('/survey-notavailable');
-        }        
-        // req.session.flash = returnObj;
-        // res.redirect('/notice');
+        }
     }
 }
 
