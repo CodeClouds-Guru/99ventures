@@ -198,7 +198,8 @@ class MemberAuthController {
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
-            username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
+            // username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
+            username: new Date().getMilliseconds(),
             created_at: new Date(),
           };
           const res = await Member.create(data);
@@ -407,6 +408,7 @@ class MemberAuthController {
     if (member_details) {
       let model = await Member.update(
         {
+          username: member_details.id,
           email_verified_on: new Date(),
           status: 'member',
         },
