@@ -800,22 +800,18 @@ class MemberAuthController {
       // } else {
       //   req.session.flash = { error: member_message };
       // }
-      if(member_status){
+      if(member_status === true){
         req.session.flash = {
           message: member_message,
           success_status: true,
         };
-      }else{
-        req.session.flash = {
-          error: member_message
-        };
+        // res.redirect('/paid-surveys');
       }
-      // res.json({
-      //   status: member_status,
-      //   message: member_message,
-      //   data: response,
-      // });
-      res.redirect('/paid-surveys');
+      res.json({
+        status: member_status,
+        message: member_message,
+        data: response,
+      });
     }
   }
 
