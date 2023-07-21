@@ -107,12 +107,9 @@ class EmailHelper {
           } else {
             email_body = email_template.body;
           }
-          console.log(email_body)
         }
         return { status: true, email_body: email_body, subject: email_subject };
       } else {
-      console.log('email_body ===== ')
-
         return { status: false };
       }
     } catch (error) {
