@@ -1021,7 +1021,7 @@ class MemberAuthController {
       //   payment_method_details.slug == 'instant_paypal' ||
       //   payment_method_details.slug == 'skrill'
       // ) {
-      if (payment_method_details.payment_type == 'Auto') {
+      if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
         withdrawal_req_data.status = 'approved';
@@ -1035,7 +1035,7 @@ class MemberAuthController {
             type: 'withdraw',
             amount_action: 'member_withdrawal',
             created_by: request_data.member_id,
-            status: payment_method_details.payment_type == 'Auto' ? 2 : 1,
+            status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
           });
         // console.log(withdrawal_req_data);
         if (payment_method_details.slug == 'instant_paypal') {
@@ -1097,7 +1097,7 @@ class MemberAuthController {
         action: 'Member cash withdrawal request',
       });
       // console.log(withdrawal_type, member);
-      if (payment_method_details.payment_type == 'Auto') {
+      if (payment_method_details.payment_type === 'Auto') {
         // email body for member
         let member_mail = await this.sendMailEvent({
           action: 'Member Cash Withdrawal',
@@ -1156,9 +1156,16 @@ class MemberAuthController {
           'Your request can not be processed right now. Please try again later',
       };
     }
+    //check for payment type
+    let  member_message = ''
+    if(payment_method_details && payment_method_details.payment_type === 'Auto'){
+      member_message = "You have successfully requested your payment. The requested amount will be deducted from your balance total once it has been processed by the MoreSurveys Support Team."
+    }else{
+      member_message = "Congratulations. You have successfully withdrawn your earnings. Start taking more paid surveys here."
+    }
     return {
       member_status: true,
-      member_message: 'Action executed successfully',
+      member_message: member_message,
     };
   }
 
