@@ -78,6 +78,10 @@ module.exports = (sequelize, DataTypes) => {
       Member.hasMany(models.WithdrawalRequest, {
         foreignKey: 'member_id',
       });
+      Member.belongsTo(models.User, {
+        foreignKey: 'deleted_by',
+        as: 'deleted_by_admin',
+      });
     }
   }
   Member.validate = function (req) {
@@ -191,7 +195,11 @@ module.exports = (sequelize, DataTypes) => {
       address: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.address_1 ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''}, zipcode - ${this.zip_code || ''}` : '';
+          return this.address_1
+            ? `${this.address_1}, ${this.address_2 || ''}, ${
+                this.city || ''
+              }, zipcode - ${this.zip_code || ''}`
+            : '';
         },
       },
       state: DataTypes.STRING,
@@ -418,8 +426,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -471,8 +479,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let result = await Member.update(
         {
@@ -549,7 +557,7 @@ module.exports = (sequelize, DataTypes) => {
                 ' on sucessfully completing your profile on ' +
                 moment(new Date()).format('llll'),
               members: JSON.parse(JSON.stringify(member)),
-              bonus: parseFloat(bonus.settings_value).toFixed(2)
+              bonus: parseFloat(bonus.settings_value).toFixed(2),
             },
           },
           req: req,
@@ -564,13 +572,15 @@ module.exports = (sequelize, DataTypes) => {
   //Get All Attempted Surveys
   Member.acceptedSurveys = async (memberId, surveyProviderId) => {
     try {
-      const [ results ] = await sequelize.query(`SELECT DISTINCT(ms.survey_number) FROM member_surveys AS ms WHERE EXISTS ( SELECT mt.id FROM member_transactions AS mt WHERE ms.member_transaction_id = mt.id AND mt.member_id = ${memberId}) AND ms.survey_provider_id = ${surveyProviderId}`);
+      const [results] = await sequelize.query(
+        `SELECT DISTINCT(ms.survey_number) FROM member_surveys AS ms WHERE EXISTS ( SELECT mt.id FROM member_transactions AS mt WHERE ms.member_transaction_id = mt.id AND mt.member_id = ${memberId}) AND ms.survey_provider_id = ${surveyProviderId}`
+      );
 
       return results;
-    } catch(error) {
-      console.error(error)
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   return Member;
 };

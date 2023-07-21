@@ -119,7 +119,7 @@ const chipStyle = {
     },
 }
 
-const MemberDetails = () => {
+const MemberDetails = (props) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -209,6 +209,14 @@ const MemberDetails = () => {
                     setMemberData({ ...result, membership_tier_id: result.MembershipTier.id, avatar: avatarUrl });
                     // We set the result info to the state. When user click on cancel edit btn then we will set the value on every input fields from this memberinfo state.
                     setMemberinfo(result);
+                    if (result.deleted_at && result.deleted_by && result.deleted_by_admin) {
+                        props.setDeletedMemberData({
+                            deleted_at: result.deleted_at,
+                            deleted_by: result.deleted_by,
+                            deleted_by_admin: result.deleted_by_admin
+                        })
+                        props.setIsMemberDeleted(true)
+                    }
                 }
             })
             .catch(errors => {

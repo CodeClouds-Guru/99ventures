@@ -39,6 +39,7 @@ class EmailHelper {
         };
       }
       all_details['logo'] = publicURL + '/assets/images/logo/logo.png';
+      all_details['current_year'] = new Date().getFullYear();
       let email_action = await EmailAction.findOne({
         where: { action: payload.action },
         include: {

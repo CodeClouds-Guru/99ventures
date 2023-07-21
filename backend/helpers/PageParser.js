@@ -5,7 +5,7 @@ const {
   CompanyPortalMetaTag,
   CompanyPortalAdditionalHeader,
   GoogleCaptchaConfiguration,
-  IpConfiguration
+  IpConfiguration,
 } = require('../models');
 const util = require('util');
 const { QueryTypes, Op } = require('sequelize');
@@ -43,7 +43,7 @@ class PageParser {
       where: { slug: this.slug, company_portal_id: portal.id },
       include: 'Layout',
     });
-    
+
     this.pageLayout = page ? page.Layout : null;
     this.page = page;
     if (!this.pageLayout) {
@@ -74,8 +74,8 @@ class PageParser {
           where: {
             company_portal_id: this.companyPortal.id,
             ip: req.ip,
-            status: 1
-          }
+            status: 1,
+          },
         });
         if (!whitelisted_ip && req.path !== '/503') {
           req.session.flash = { error: this.companyPortal.downtime_message };
@@ -97,7 +97,10 @@ class PageParser {
       if ('message' in req.session.flash) {
         this.sessionMessage = req.session.flash.message;
       }
-      delete req.session.flash;
+      console.log('b4 reset', req.session.flash);
+      req.session.flash = null;
+      console.log('aftr reset', req.session.flash);
+      // delete req.session.flash;
     }
     const page_content = await this.generateHtml(req);
     return page_content;
@@ -139,10 +142,18 @@ class PageParser {
     let current_company_portal = this.getCompanyPortal();
     var google_captcha_header = '';
     var scripted_captcha_field = '';
-    if (current_company_portal && current_company_portal.is_google_captcha_used === 1) {
-      let google_captcha = await GoogleCaptchaConfiguration.findOne({ where: { company_portal_id: this.page.company_portal_id } });
-      google_captcha_header = google_captcha ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>` : '';
-      scripted_captcha_field = google_captcha ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
+    if (
+      current_company_portal &&
+      current_company_portal.is_google_captcha_used === 1
+    ) {
+      let google_captcha = await GoogleCaptchaConfiguration.findOne({
+        where: { company_portal_id: this.page.company_portal_id },
+      });
+      google_captcha_header = google_captcha
+        ? `<script src="https://www.google.com/recaptcha/api.js" async defer></script>`
+        : '';
+      scripted_captcha_field = google_captcha
+        ? `<div class="g-recaptcha" data-sitekey="${google_captcha.site_key}"></div>
       <script>
       function onGcaptchaLoadCallback() {
         grecaptcha.ready(function() {
@@ -159,7 +170,8 @@ class PageParser {
               });
         });
       }
-      </script>` : '';
+      </script>`
+        : '';
     }
 
     const default_scripted_codes = this.addDefaultAddOns();
@@ -182,7 +194,16 @@ class PageParser {
     });
     const template = Handlebars.compile(layout_html);
     const flash = this.getFlashObject();
-    const sc_request = { base_url: req.baseUrl, hostname: req.hostname, ip: req.ip, original_url: req.originalUrl, path: req.path, query: req.query, xhr: req.xhr };
+
+    const sc_request = {
+      base_url: req.baseUrl,
+      hostname: req.hostname,
+      ip: req.ip,
+      original_url: req.originalUrl,
+      path: req.path,
+      query: req.query,
+      xhr: req.xhr,
+    };
     layout_html = template({
       user,
       error_message,
@@ -190,7 +211,7 @@ class PageParser {
       sc_request,
       scripted_captcha_field,
     });
-    this.sessionMessage = '';
+    this.sessionMessage = null;
 
     // console.log(user);
     return layout_html;

@@ -229,6 +229,7 @@ class LucidController {
                 
                 const URL = this.rebuildEntryLink(entrylink, params);
                 res.redirect(URL);
+                return;
             } else {
                 throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
             }

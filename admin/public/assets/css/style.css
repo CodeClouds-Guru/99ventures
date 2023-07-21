@@ -34,6 +34,11 @@ textarea.custom-code-editor-view-fullscreen{
     color: #ffeeba; 
 }
 textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
+textarea.custom-code-editor::-webkit-scrollbar{width: 10px;}
+textarea.custom-code-editor::-webkit-scrollbar-thumb,
+textarea.custom-code-editor-md::-webkit-scrollbar-thumb,
+textarea.custom-code-editor-view-fullscreen::-webkit-scrollbar-thumb,
+textarea.custom-code-editor-fullscreen::-webkit-scrollbar-thumb{background: #fff;}
 /* .filter-daterange-picker{ top: 235px;}
 .date-range-wrapper .filter-daterange-picker{top: -46px; }
 */
@@ -43,3 +48,4 @@ textarea.custom-code-editor::placeholder{font-style: italic; font-size: 10px;}
 @media screen and (max-width: 768px) {
     .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
 } 
+.dashboard-datepicker div.MuiBox-root{top: 32px; bottom: 100%;}

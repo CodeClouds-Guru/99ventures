@@ -17,7 +17,7 @@ const buttonStyle = {
 
     },
     '@media screen and (max-width: 1700px)': {
-        width: '130px',
+        width: '140px',
         paddingLeft: '22px',
         paddingRight: '22px',
         fontSize: '1.3rem'
