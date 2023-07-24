@@ -743,6 +743,10 @@ function List(props) {
 														open={datepickerStatus}
 														toggle={() => setDatepickerStatus(!datepickerStatus)}
 														onChange={dateRangeSelected}
+														initialDateRange={dateRange.startDate && {
+															startDate: dateRange.startDate.toDate(),
+															endDate: dateRange.endDate.toDate(),
+														}}
 													/>
 												</div>
 											) : (<div></div>)
@@ -770,8 +774,9 @@ function List(props) {
 															<IconButton
 															aria-label="toggle password visibility"
 															edge="end"
+															onClick={handleClearDateRange}
 															>
-																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>
+																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action">material-outline:close</FuseSvgIcon>
 															</IconButton>
 														</InputAdornment>
 													)
