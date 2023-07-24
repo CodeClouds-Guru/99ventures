@@ -285,6 +285,7 @@ class MemberController extends Controller {
           if (result.member_referral_id) {
             member_referrer = await this.model.findOne({
               where: { id: result.member_referral_id },
+              paranoid: false,
             });
             // console.log(member_referrer);
             member_referrer =
