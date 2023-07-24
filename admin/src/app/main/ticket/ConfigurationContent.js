@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { Grid, Box, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Tooltip, Typography } from '@mui/material';
 import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import moment from 'moment';
 import { position } from "stylis";
+import moment from 'moment';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon'
 import { selectUser } from 'app/store/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -15,7 +16,7 @@ function ConfigurationContent() {
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
-        endDate: moment(),
+        endDate: moment(),        
     });
     const [whereClause, setWhereClause] = useState({});
     const [listKey, setListKey] = useState(0);
@@ -58,60 +59,47 @@ function ConfigurationContent() {
     }, [selectedStatus, dateRange])
 
     return (
-        <div>
-            <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2}>
-                    {unreadTicketCount > 0 ?
-                        <Grid item xs={3}>
-                            <Typography component={'span'}
-                                initial={{ x: -20 }}
-                                animate={{ x: 0, transition: { delay: 0.2 } }}
-                                delay={300}
-                                className="flex font-extrabold tracking-tight capitalize"
-                                variant="h5"
-                            >
-                                Tickets ({unreadTicketCount})
-                            </Typography>
-                        </Grid> : ''}
-                    <Grid item xs={2}>
-                        <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Ticket Status</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                label="Ticket Status"
-                                value={selectedStatus}
-                                onChange={handleChange}
-                            >
-                                <MenuItem value="all">All</MenuItem>
-                                <MenuItem value="open">Open</MenuItem>
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="closed">Closed</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={unreadTicketCount > 0 ? 5 : 8}>
-                        {
-                            open
-                                ?
-                                <DateRangePicker
-                                    open={open}
-                                    toggle={toggle}
-                                    onChange={dateRangeSelected}
-                                    className="daterangepicker-filter"
-                                />
-                                :
-                                <div onClick={toggle}>
-                                    <TextField
-                                        label="Select a date range"
-                                        variant="outlined"
-                                        disabled
-                                        value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
-                                    />
-                                </div>
-                        }
-                    </Grid>
-                    <Grid item xs={2}>
+        <>            
+            {/* {JSON.stringify(whereClause)} */}
+            <div className='w-full items-center justify-between flex py-32 px-24 md:px-32 flex-wrap ticket-list'>
+                <div className="w-1/3">
+                    <Typography component={'span'}
+                        initial={{ x: -20 }}
+                        animate={{ x: 0, transition: { delay: 0.2 } }}
+                        delay={300}
+                        className="flex font-extrabold tracking-tight capitalize"
+                        variant="h5"
+                    >
+                        Tickets {unreadTicketCount ? `(${unreadTicketCount})` : ''}
+                    </Typography>
+                </div>
+                <div className="flex items-center justify-end space-x-8 w-full w-2/3 ml-auto relativex">
+                    <FormControl className="xl:w-1/5 md:w-1/3 sm:w-1/3">
+                        <InputLabel id="demo-simple-select-label">Ticket Status</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            label="Ticket Status"
+                            value={selectedStatus}
+                            onChange={handleChange}
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            <MenuItem value="open">Open</MenuItem>
+                            <MenuItem value="pending">Pending</MenuItem>
+                            <MenuItem value="closed">Closed</MenuItem>
+                        </Select>
+                    </FormControl>
+                            
+                    <div className="xl:w-1/3 lg:w-1/2 md:w-1/2 sm:w-2/3 flex items-center justify-between ">
+                        <TextField
+                            label="Select a date range"
+                            onClick={toggle}
+                            variant="outlined"
+                            readOnly={true}
+                            value={dateRange ? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}` : ''}
+                            className="mr-10 w-full"
+                        />
+                        
                         <Tooltip title="Clear Filter(s)" placement="left">
                             <IconButton
                                 color="primary"
@@ -119,13 +107,26 @@ function ConfigurationContent() {
                                 component="label"
                                 onClick={clearFilter}
                             >
-                                <ClearAllIcon />
+                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:sync</FuseSvgIcon>
                             </IconButton>
                         </Tooltip>
-                    </Grid>
-                </Grid>
-            </Box>
-            {/* {JSON.stringify(whereClause)} */}
+                    </div>
+                    {
+                        open && (
+                            <DateRangePicker
+                                open={open}
+                                toggle={toggle}
+                                onChange={dateRangeSelected}
+                                className="daterangepicker-filter"
+                                initialDateRange={{
+                                    startDate: dateRange.startDate.toDate(),
+                                    endDate: dateRange.endDate.toDate(),
+                                }}
+                            />
+                        )
+                    }
+                </div>
+            </div>
             <List
                 module="tickets"
                 moduleHeading={false}
@@ -133,7 +134,7 @@ function ConfigurationContent() {
                 key={listKey}
                 addable={false}
             />
-        </div>
+        </>
     );
 }
 export default ConfigurationContent;
