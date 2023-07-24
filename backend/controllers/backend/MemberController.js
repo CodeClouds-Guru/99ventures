@@ -220,6 +220,7 @@ class MemberController extends Controller {
             },
             {
               model: MemberReferral,
+              paranoid: false,
               attributes: ['referral_email', 'ip', 'member_id'],
               include: {
                 model: Member,
