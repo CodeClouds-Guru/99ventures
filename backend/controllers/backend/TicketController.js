@@ -118,7 +118,7 @@ class TicketController extends Controller {
         options.include = [
           {
             model: TicketConversation,
-            attributes: ['message', 'member_id', 'user_id', 'created_at'],
+            attributes: ['id', 'message', 'member_id', 'user_id', 'created_at'],
             include: [
               {
                 model: TicketAttachment,
@@ -380,8 +380,8 @@ class TicketController extends Controller {
       let ticket_conversation = await TicketConversation.update(
         { message: value },
         {
-          where: { ticket_conversation_id },
-        }
+          where: { id: ticket_conversation_id },
+        },
       );
       // let savedTicketConversation = await TicketConversation.create(data);
       // console.log(user_id);
@@ -434,7 +434,7 @@ class TicketController extends Controller {
   async deleteTicketConversations(req) {
     try {
       const ticket_conversation_id = req.body.ticket_conversation_id || null;
-      let resp = await this.model.destroy({
+      let resp = await TicketConversation.destroy({
         where: { id: ticket_conversation_id },
       });
       await TicketAttachment.destroy({
