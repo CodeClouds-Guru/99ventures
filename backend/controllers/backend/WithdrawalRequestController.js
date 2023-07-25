@@ -25,6 +25,7 @@ class WithdrawalRequestController extends Controller {
       status: 'Status',
       payment_email: 'Email',
       'Member.status': 'Account',
+      'Member.admin_status': 'Admin Status',
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
@@ -75,7 +76,7 @@ class WithdrawalRequestController extends Controller {
         {
           model: Member,
           paranoid: false,
-          attributes: ['id', 'username', 'status'],
+          attributes: ['id', 'username', 'status', 'admin_status'],
         },
       ];
       options.subQuery = false;
@@ -87,16 +88,18 @@ class WithdrawalRequestController extends Controller {
       let pages = Math.ceil(results.count / limit);
 
       results.rows.map((row) => {
-        let [payment_method_name, username, status] = ['', '', ''];
+        let [payment_method_name, username, status, admin_status] = ['', '', '', ''];
         if (row.Member) {
           username = row.Member.username;
           status = row.Member.status;
+          admin_status = row.Member.admin_status;
         }
         if (row.PaymentMethod) {
           payment_method_name = row.PaymentMethod.name;
         }
         row.setDataValue('Member.username', username);
         row.setDataValue('Member.status', status);
+        row.setDataValue('Member.admin_status', admin_status);
         row.setDataValue('PaymentMethod.name', payment_method_name);
       });
 

@@ -435,11 +435,11 @@ class MemberAuthController {
           'Welcome to Moresurveys! Your email has been verified successfully.',
         success_status: true,
       };
-
+      let redirect_page = '';
       if (!member_details.profile_completed_on) redirect_page = '/profile';
       else {
         let company_portal_id = req.session.company_portal.id;
-        let redirect_page = await Page.findOne({
+        redirect_page = await Page.findOne({
           where: { company_portal_id: company_portal_id, after_signin: 1 },
         });
         if (redirect_page) redirect_page = '/' + redirect_page.slug;
@@ -800,7 +800,7 @@ class MemberAuthController {
       // } else {
       //   req.session.flash = { error: member_message };
       // }
-      if(member_status === true){
+      if (member_status === true) {
         req.session.flash = {
           message: member_message,
           success_status: true,
@@ -1163,11 +1163,16 @@ class MemberAuthController {
       };
     }
     //check for payment type
-    let  member_message = ''
-    if(payment_method_details && payment_method_details.payment_type === 'Auto'){
-      member_message = "You have successfully requested your payment. The requested amount will be deducted from your balance total once it has been processed by the MoreSurveys Support Team."
-    }else{
-      member_message = "Congratulations. You have successfully withdrawn your earnings. Start taking more paid surveys here."
+    let member_message = '';
+    if (
+      payment_method_details &&
+      payment_method_details.payment_type === 'Auto'
+    ) {
+      member_message =
+        'You have successfully requested your payment. The requested amount will be deducted from your balance total once it has been processed by the MoreSurveys Support Team.';
+    } else {
+      member_message =
+        'Congratulations. You have successfully withdrawn your earnings. Start taking more paid surveys here.';
     }
     return {
       member_status: true,

@@ -77,12 +77,13 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
 
 	const display_column_object = {
 		'id': 'ID',
 		'payment_email': 'Email',
 		'Member.username': 'Username',
+		'Member.admin_status': 'Admin Status',
 		'PaymentMethod.name': 'Method',
 		'Member.status': 'Account',
 		'amount_with_currency': 'Cash',
@@ -742,6 +743,10 @@ function List(props) {
 														open={datepickerStatus}
 														toggle={() => setDatepickerStatus(!datepickerStatus)}
 														onChange={dateRangeSelected}
+														initialDateRange={dateRange.startDate && {
+															startDate: dateRange.startDate.toDate(),
+															endDate: dateRange.endDate.toDate(),
+														}}
 													/>
 												</div>
 											) : (<div></div>)
@@ -769,8 +774,9 @@ function List(props) {
 															<IconButton
 															aria-label="toggle password visibility"
 															edge="end"
+															onClick={handleClearDateRange}
 															>
-																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action" onClick={handleClearDateRange}>material-outline:close</FuseSvgIcon>
+																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action">material-outline:close</FuseSvgIcon>
 															</IconButton>
 														</InputAdornment>
 													)
