@@ -13,7 +13,7 @@ const {
   MemberNotification,
 } = require('../../models/index');
 
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const moment = require('moment');
 const FileHelper = require('../../helpers/fileHelper');
 const mime = require('mime-types');
@@ -194,6 +194,9 @@ class TicketController extends Controller {
           // },
         });
 
+        //Count Opened Tickets
+        let count_opened_tkt = await sequelize.query("SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ?", {replacements: ['open'], type: QueryTypes.SELECT });
+
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
           attributes: ['name', 'body'],
@@ -201,12 +204,14 @@ class TicketController extends Controller {
         // console.log(auto_responders);
         result.setDataValue('previous_tickets', prev_tickets);
         result.setDataValue('auto_responders', auto_responders);
+        result.setDataValue('opended_ticket', count_opened_tkt[0].total_ticket);
 
         return {
           status: true,
           data: result,
         };
       } catch (error) {
+        console.log(error)
         this.throwCustomError('Unable to get data', 500);
       }
     } else {
