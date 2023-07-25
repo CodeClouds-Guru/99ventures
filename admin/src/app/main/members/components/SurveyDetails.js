@@ -20,7 +20,11 @@ const SurveyDetails = (props) => {
                                         <ListItemText primary={
                                             <>
                                                 <div className='flex justify-between mb-2'>
-                                                    <Typography variant="caption" className="text-xs italic font-bold">{ item.name }</Typography>
+                                                    <Typography variant="caption" className="text-xs italic font-bold">
+                                                        {
+                                                            item.name ? item.name +' - #'+item.survey_number : '#'+item.survey_number
+                                                        }                                                        
+                                                    </Typography>
                                                     <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(item.completed_at)}</Typography>
                                                 </div>
                                                 <Typography variant="body2" className="text-xs">${ item.amount }</Typography>
