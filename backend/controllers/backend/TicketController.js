@@ -363,7 +363,7 @@ class TicketController extends Controller {
     const ticket_id = req.body.id || null;
     const member_id = req.body.member_id || null;
     const user_id = req.body.user_id || null;
-    const ticket_conversation_id = req.body.user_id || null;
+    const ticket_conversation_id = req.body.ticket_conversation_id || null;
     const attachments = req.files ? req.files.attachments : null;
 
     try {
@@ -429,7 +429,7 @@ class TicketController extends Controller {
   }
   async deleteTicketConversations(req) {
     try {
-      const ticket_conversation_id = req.body.user_id || null;
+      const ticket_conversation_id = req.body.ticket_conversation_id || null;
       let resp = await this.model.destroy({
         where: { id: ticket_conversation_id },
       });
