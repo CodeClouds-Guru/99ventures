@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         through: 'member_surveys',
         timestamps: false,
         foreignKey: 'member_transaction_id',
-        otherKey: 'id',
+        otherKey: 'survey_number',
       });
     }
   }
