@@ -221,6 +221,14 @@ class MemberAuthController {
           member_details = await Member.findOne({
             where: { email: req.body.email },
           });
+          let model = await Member.update(
+            {
+              username: member_details.id,
+            },
+            {
+              where: { id: member_details.id },
+            }
+          );
 
           let hash_obj = { id: member_details.id, email: req.body.email };
           var buf = genarateHash(JSON.stringify(hash_obj));
@@ -408,7 +416,7 @@ class MemberAuthController {
     if (member_details) {
       let model = await Member.update(
         {
-          username: member_details.id,
+          // username: member_details.id,
           email_verified_on: new Date(),
           status: 'member',
         },

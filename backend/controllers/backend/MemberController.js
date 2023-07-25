@@ -251,32 +251,43 @@ class MemberController extends Controller {
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
 
-          survey_list = await MemberTransaction.findAll({
-            attributes: ['amount', 'completed_at'],
-            limit: 5,
-            order: [['completed_at', 'DESC']],
-            where: {
-              type: 'credited',
-              status: 2,
-              amount_action: 'survey',
-              member_id: member_id,
-            },
-            include: {
-              model: Survey,
-              attributes: ['id'],
-              include: { model: SurveyProvider, attributes: ['name'] },
-            },
-          });
-          // console.log('survey_list', survey_list);
-          for (let i = 0; i < survey_list.length; i++) {
-            if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
-              survey_list[i].setDataValue(
-                'name',
-                survey_list[i].Surveys[0].SurveyProvider.name
-              );
-            else survey_list[i].setDataValue('name', null);
-            survey_list[i].Surveys = null;
-          }
+          // survey_list = await MemberTransaction.findAll({
+          //   attributes: ['amount', 'completed_at'],
+          //   limit: 5,
+          //   order: [['completed_at', 'DESC']],
+          //   where: {
+          //     type: 'credited',
+          //     status: 2,
+          //     amount_action: 'survey',
+          //     member_id: member_id,
+          //   },
+          //   include: {
+          //     model: Survey,
+          //     attributes: ['id'],
+          //     through: {
+          //       attributes: ['survey_number', 'member_transaction_id','survey_provider_id'],
+          //     },
+          //     include: { model: SurveyProvider, attributes: ['name'] },
+          //   },
+          // });
+
+          let query = "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;"
+          survey_list = await db.sequelize.query(
+            query,
+            {
+              replacements: [member_id],
+              type: QueryTypes.SELECT,
+            }
+          );
+            // for (let i = 0; i < survey_list.length; i++) {
+            //   if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
+            //     survey_list[i].setDataValue(
+            //       'name',
+            //       survey_list[i].Surveys[0].SurveyProvider.name
+            //     );
+            //   else survey_list[i].setDataValue('name', null);
+            //   survey_list[i].Surveys = null;
+            // }
           let membership_tier = await MembershipTier.findAll({
             attributes: ['id', 'name'],
           });
@@ -691,6 +702,7 @@ class MemberController extends Controller {
   async export(req, res) {
     req.query.show = 100000;
     let { fields, result } = await this.list(req);
+    // console.log(result);
     var header = [];
     for (const head of Object.values(fields)) {
       header.push({ id: head.field_name, title: head.placeholder });

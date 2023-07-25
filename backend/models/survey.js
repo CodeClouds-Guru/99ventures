@@ -22,9 +22,9 @@ module.exports = (sequelize, DataTypes) => {
 				foreignKey: 'survey_number',
 				otherKey: 'member_transaction_id',
 			}),
-				Survey.hasMany(models.SurveyQualification, {
-					foreignKey: 'survey_id',
-				})
+			Survey.hasMany(models.SurveyQualification, {
+				foreignKey: 'survey_id',
+			})
 			Survey.belongsTo(models.MemberSurvey, {
 				foreignKey: 'survey_number',
 			})
