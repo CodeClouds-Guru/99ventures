@@ -13,7 +13,7 @@ const {
   MemberNotification,
 } = require('../../models/index');
 
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const moment = require('moment');
 const FileHelper = require('../../helpers/fileHelper');
 const mime = require('mime-types');
@@ -118,7 +118,7 @@ class TicketController extends Controller {
         options.include = [
           {
             model: TicketConversation,
-            attributes: ['message', 'member_id', 'user_id', 'created_at'],
+            attributes: ['id', 'message', 'member_id', 'user_id', 'created_at'],
             include: [
               {
                 model: TicketAttachment,
@@ -194,6 +194,9 @@ class TicketController extends Controller {
           // },
         });
 
+        //Count Opened Tickets
+        let count_opened_tkt = await sequelize.query("SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ?", {replacements: ['open'], type: QueryTypes.SELECT });
+
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
           attributes: ['name', 'body'],
@@ -201,12 +204,14 @@ class TicketController extends Controller {
         // console.log(auto_responders);
         result.setDataValue('previous_tickets', prev_tickets);
         result.setDataValue('auto_responders', auto_responders);
+        result.setDataValue('opended_ticket', count_opened_tkt[0].total_ticket);
 
         return {
           status: true,
           data: result,
         };
       } catch (error) {
+        console.error(error);
         this.throwCustomError('Unable to get data', 500);
       }
     } else {
@@ -237,6 +242,12 @@ class TicketController extends Controller {
           break;
         case 'ticket_chat':
           change = await this.saveTicketConversations(req);
+          break;
+        case 'ticket_chat_update':
+          change = await this.updateTicketConversations(req);
+          break;
+        case 'ticket_chat_delete':
+          change = await this.deleteTicketConversations(req);
           break;
         default:
           const errorObj = new Error('Request failed.');
@@ -318,8 +329,8 @@ class TicketController extends Controller {
 
         let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
-      req.body.field_name = 'status'
-      req.body.value = 'pending'
+      req.body.field_name = 'status';
+      req.body.value = 'pending';
       await this.changeStatus(req);
       return true;
     } catch (error) {
@@ -331,22 +342,110 @@ class TicketController extends Controller {
    * Delete Ticket Attachment using CRON
    */
   async removeAttachments() {
-    try{
+    try {
       await TicketAttachment.destroy({
         where: {
           created_at: {
-            [Op.lt]: new Date(new Date().setDate(new Date().getDate() - 30)) // 30days before
-          }
+            [Op.lt]: new Date(new Date().setDate(new Date().getDate() - 30)), // 30days before
+          },
         },
         //force: true
       });
-    } catch(error) {
+    } catch (error) {
       const logger = require('../../helpers/Logger')(`cron.log`);
       logger.error(error);
     } finally {
       return {
-        message: 'Success'
+        message: 'Success',
+      };
+    }
+  }
+
+  async updateTicketConversations(req) {
+    const value = req.body.value || '';
+    const field_name = req.body.field_name || '';
+    const ticket_id = req.body.id || null;
+    const member_id = req.body.member_id || null;
+    const user_id = req.body.user_id || null;
+    const ticket_conversation_id = req.body.ticket_conversation_id || null;
+    const attachments = req.files ? req.files.attachments : null;
+
+    try {
+      // const data = {
+      //   ticket_id: ticket_id,
+      //   message: value,
+      // };
+      // if (member_id !== null) data.member_id = member_id;
+      // if (user_id !== null) data.user_id = user_id;
+      let ticket_conversation = await TicketConversation.update(
+        { message: value },
+        {
+          where: { id: ticket_conversation_id },
+        },
+      );
+      // let savedTicketConversation = await TicketConversation.create(data);
+      // console.log(user_id);
+      // if (user_id) {
+      //   let ticket = await Ticket.findOne({ where: { id: ticket_id } });
+
+      //   await MemberNotification.addMemberNotification({
+      //     member_id: ticket.member_id,
+      //     verbose:
+      //       'You have a new response on your ticket, subject : ' +
+      //       ticket.subject,
+      //     action: 'ticket_reply',
+      //   });
+      // }
+      await TicketAttachment.destroy({
+        where: {
+          ticket_conversation_id: ticket_conversation_id,
+        },
+        //force: true
+      });
+      if (ticket_conversation_id && attachments) {
+        let files = [];
+        if (attachments.length > 1) files = attachments;
+        else files[0] = attachments;
+        const fileHelper = new FileHelper(
+          files,
+          'tickets/' + ticket_conversation_id,
+          req
+        );
+        const file_name = await fileHelper.upload();
+        // console.log(file_name);
+        const dataFiles = file_name.files.map((values) => {
+          return {
+            ticket_conversation_id: ticket_conversation_id,
+            file_name: values.filename,
+            mime_type: mime.lookup(path.basename(values.filename)),
+          };
+        });
+
+        let savedfiles = await TicketAttachment.bulkCreate(dataFiles);
       }
+      req.body.field_name = 'status';
+      req.body.value = 'pending';
+      await this.changeStatus(req);
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async deleteTicketConversations(req) {
+    try {
+      const ticket_conversation_id = req.body.ticket_conversation_id || null;
+      let resp = await TicketConversation.destroy({
+        where: { id: ticket_conversation_id },
+      });
+      await TicketAttachment.destroy({
+        where: {
+          ticket_conversation_id: ticket_conversation_id,
+        },
+        //force: true
+      });
+      return true;
+    } catch (error) {
+      throw error;
     }
   }
 }
