@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
 				through: 'member_surveys',
 				timestamps: false,
 				foreignKey: 'survey_number',
-				otherKey: 'member_transaction_id',
+				otherKey: 'survey_number',
 			}),
 				Survey.hasMany(models.SurveyQualification, {
 					foreignKey: 'survey_id',
