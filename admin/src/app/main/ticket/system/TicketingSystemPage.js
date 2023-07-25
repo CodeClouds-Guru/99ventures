@@ -21,7 +21,7 @@ import { setUser } from "app/store/userSlice";
 import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
 import parse from 'html-react-parser';
 import { EditorState, convertFromHTML, ContentState } from 'draft-js';
-
+import AlertDialog from 'app/shared-components/AlertDialog';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -43,6 +43,10 @@ function TicketingSystemPage(props) {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [memberNote, setMemberNote] = useState('');
     const [ticketSubject, setTicketSubject] = useState('');
+    const [openedTicket, setOpendedTicket] = useState(null);
+    const [openMsgDelAlert, setMsgDelAlert] = useState(false);
+    const [conversationId, setConversationId] = useState(null);
+    // const [actionType, setActionType] = useState('');
 
     const stateUser = useSelector(state => state.user);
     const navigate = useNavigate();
@@ -50,6 +54,16 @@ function TicketingSystemPage(props) {
     useEffect(() => {
         getTicketDetails();
     }, []);
+
+    // Update the Open Ticker count badge for side navbar
+    useEffect(() => {
+        if(openedTicket !== null && stateUser.unread_tickets !== openedTicket){
+            console.log(openedTicket)
+            let updatedNotReadonlyUser = { ...stateUser, unread_tickets: openedTicket}
+            dispatch(setUser(updatedNotReadonlyUser))
+        }
+    }, [openedTicket]);
+
     const onAttachmentButtonClick = () => {
         inputFileRef.current.click();
     };
@@ -90,8 +104,8 @@ function TicketingSystemPage(props) {
             id: props.ticketId,
             type: 'ticket_status'
         });
-        let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (event.target.value !== 'open' ? stateUser.unread_tickets - 1 : stateUser.unread_tickets + 1) }
-        dispatch(setUser(updatedNotReadonlyUser))
+        // let updatedNotReadonlyUser = { ...stateUser, unread_tickets: (event.target.value !== 'open' ? stateUser.unread_tickets - 1 : stateUser.unread_tickets + 1) }
+        // dispatch(setUser(updatedNotReadonlyUser))
     };
     const handleChangeQuickResponse = (event) => {
         setQuickResponse(event.target.value);
@@ -137,7 +151,7 @@ function TicketingSystemPage(props) {
         data_set.append('id', props.ticketId);
         data_set.append('user_id', user.id);
         // data_set.append('member_id', memberId);
-        data_set.append('type', 'ticket_chat');
+        
         chatField ? data_set.append('value', chatField) : '';
         // `Thanks,
         //     ${user.alias_name} - More Surveys Support Team`
@@ -146,6 +160,15 @@ function TicketingSystemPage(props) {
                 data_set.append('attachments', inputFiles[key])
             }
         }
+        data_set.append('type', 'ticket_chat');
+
+        /*if("ticket_chat_update" === actionType) {
+            data_set.append('type', actionType);
+            data_set.append('ticket_conversation_id', conversationId);
+        } else {
+            data_set.append('type', 'ticket_chat');
+        }*/
+
         updateTicket(data_set);
         setInputFiles({});
         setChatField('');
@@ -167,6 +190,8 @@ function TicketingSystemPage(props) {
                     setPreviousTIckets(response.data.results.data.previous_tickets);
                     setQuickResponseOptions(response.data.results.data.auto_responders);
                     setTicketSubject(response.data.results.data.subject)
+                    setOpendedTicket(response.data.results.data.opended_ticket);
+
                     if (response.data.results.data.is_read === 0) {
                         updateTicket({
                             value: 1,
@@ -198,6 +223,7 @@ function TicketingSystemPage(props) {
                 } else {
                     data_set.type === 'is_read' ? '' : dispatch(showMessage({ variant: 'error', message: response.data.errors }))
                 }
+                // setActionType('');
             }).catch(error => {
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }));
             })
@@ -205,6 +231,32 @@ function TicketingSystemPage(props) {
 
     const setEditorValue = (value) => {
         wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
+    }
+
+    // Conversation Edit feature
+    /*const handleEditMessage = (id, message) => {
+        setEditorValue(message);
+        setActionType('ticket_chat_update');
+        setConversationId(id);
+    }*/
+
+    // Conversation Delete feature
+    const handleDeleteMsgAlert = (id) => {
+        setMsgDelAlert(true);
+        setConversationId(id);
+    }
+
+    const onCloseAlertDialogHandle = () => {
+        setMsgDelAlert(false);
+        setConversationId(null);
+    }
+
+    const onConfirmAlertDialogHandle = () => {
+        updateTicket({
+            type: 'ticket_chat_delete',
+            ticket_conversation_id: conversationId
+        })
+        setMsgDelAlert(false);
     }
 
 
@@ -306,9 +358,7 @@ function TicketingSystemPage(props) {
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
                                                 <div>
-
                                                     {parse(val.message)}
-
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
                                                     <ImageList sx={{ width: '100%', height: 'auto', direction: 'rtl' }} cols={4}>
@@ -331,6 +381,23 @@ function TicketingSystemPage(props) {
                                                     : ''
 
                                                 }
+                                                {
+                                                    val.user_id && (
+                                                        <div className='flex justify-end my-10 conversation--btn'>
+                                                            {/* <Tooltip title="Edit" placement="bottom">
+                                                                <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=> handleEditMessage(val.id, val.message)}>
+                                                                    <FuseSvgIcon className="text-48 text-gray-50" size={18} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip> */}
+                                                            <Tooltip title="Delete" placement="bottom">
+                                                                <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=>handleDeleteMsgAlert(val.id)}>
+                                                                    <FuseSvgIcon className="text-48 text-red-500" size={18} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </div>
+                                                    )
+                                                }
+                                                
                                             </div>
                                         </div>
                                     )
@@ -388,7 +455,23 @@ function TicketingSystemPage(props) {
                                                     })
                                                 }
                                             </ul>
-                                        </Stack>
+                                        </Stack> 
+                                        {/* <ImageList sx={{ width: 500, xheight: 450 }} cols={5} rowHeight={100}>
+                                            {Object.values(inputFiles).map((val, key) => (
+                                                <ImageListItem key={key}>
+                                                    <div>
+                                                        <IconButton aria-label="fingerprint" color="secondary">
+                                                            <FuseSvgIcon className="text-48" size={20} color="secondary">material-outline:close</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </div>
+                                                    <img
+                                                        src={val.preview}
+                                                        srcSet={val.preview}                                                    
+                                                        loading="lazy"
+                                                    />
+                                                </ImageListItem>
+                                            ))}
+                                        </ImageList> */}
                                     </div>
                                     <div className="flex flex-col justify-end pb-8">
                                         <Stack direction="row" spacing={1}>
@@ -407,6 +490,9 @@ function TicketingSystemPage(props) {
                                             </Tooltip>
                                             <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.length === 0} >
                                                 Send
+                                            </Button>
+                                            <Button variant="contained" color="primary" onClick={() => { navigate(`/app/tickets`); }} >
+                                                Back
                                             </Button>
                                         </Stack>
                                     </div>
@@ -536,6 +622,16 @@ function TicketingSystemPage(props) {
                     </div>
                 </Paper>
             </div>
+            {
+                openMsgDelAlert && (
+                    <AlertDialog
+                        content="Do you want to delete this message?"
+                        open={openMsgDelAlert}
+                        onConfirm={onConfirmAlertDialogHandle}
+                        onClose={onCloseAlertDialogHandle}
+                    />
+                )
+            }
         </div>
     )
 }

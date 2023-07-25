@@ -158,10 +158,10 @@ class TicketController extends Controller {
                   'id',
                 ],
                 include: [
-                  {
+                  /*{
                     model: Member,
                     attributes: ['first_name', 'last_name', 'username'],
-                  },
+                  },*/
                   {
                     model: User,
                     attributes: ['first_name', 'last_name', 'alias_name'],
