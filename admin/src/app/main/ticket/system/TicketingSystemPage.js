@@ -383,7 +383,7 @@ function TicketingSystemPage(props) {
                                                 }
                                                 {
                                                     val.user_id && (
-                                                        <div className='flex justify-end my-10'>
+                                                        <div className='flex justify-end my-10 conversation--btn'>
                                                             {/* <Tooltip title="Edit" placement="bottom">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=> handleEditMessage(val.id, val.message)}>
                                                                     <FuseSvgIcon className="text-48 text-gray-50" size={18} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
@@ -391,7 +391,7 @@ function TicketingSystemPage(props) {
                                                             </Tooltip> */}
                                                             <Tooltip title="Delete" placement="bottom">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=>handleDeleteMsgAlert(val.id)}>
-                                                                    <FuseSvgIcon className="text-48" sx={{color: '#f00'}} size={18} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                    <FuseSvgIcon className="text-48 text-red-500" size={18} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </div>
@@ -490,6 +490,9 @@ function TicketingSystemPage(props) {
                                             </Tooltip>
                                             <Button variant="contained" color="secondary" endIcon={<SendIcon />} onClick={sendChatMessage()} disabled={Object.keys(inputFiles).length === 0 && chatField.length === 0} >
                                                 Send
+                                            </Button>
+                                            <Button variant="contained" color="primary" onClick={() => { navigate(`/app/tickets`); }} >
+                                                Back
                                             </Button>
                                         </Stack>
                                     </div>

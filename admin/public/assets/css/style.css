@@ -50,3 +50,4 @@ textarea.custom-code-editor-fullscreen::-webkit-scrollbar-thumb{background: #fff
 } 
 .dashboard-datepicker div.MuiBox-root{top: 32px; bottom: 100%;}
 .ticket-list .MuiBox-root.muiltr-79elbk{top: 117px}
+.conversation--btn button:hover{background-color: #ff000038 !important;}
