@@ -759,7 +759,7 @@ const MemberDetails = (props) => {
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     (memberData.MemberReferral && memberData.member_referral_id && memberData.member_referrer) ? (
                                         <div className='flex items-center'>
-                                            <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base break-all">
                                                 {memberData.member_referrer} ({memberData.MemberReferral.ip})
                                             </Typography>
                                             <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
