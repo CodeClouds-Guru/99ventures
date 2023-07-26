@@ -16,6 +16,15 @@ import BestPerformingSurveys from './cards-charts/BestPerformingSurveys';
 import BestPerformers from './cards-charts/BestPerformers';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
+const types = [
+    'completed_surveys',
+    'login_per_day',
+    'members',
+    'open_vs_closed_tickets',
+    'top_surveys',
+    'top_members'
+];
+
 const DashboardContent = () => {
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
@@ -28,12 +37,12 @@ const DashboardContent = () => {
     const [bestPerformingSurveys, setBestPerformingSurveys] = useState({});
     const [bestPerformers, setBestPerformers] = useState({});
     const [dateRange, setDateRange] = useState({
-        startDate: moment().subtract(7, 'd').startOf('day').toDate(),
-        endDate: moment().toDate(),
+        startDate: moment().subtract(7, 'd').startOf('day'),
+        endDate: moment(),
     });
     const [param, setParam] = useState({
-        from: moment(dateRange.startDate),
-        to: moment(dateRange.endDate)
+        from: moment(dateRange.startDate).startOf('day'),
+        to: moment(dateRange.endDate).endOf('day')
     })
 
     const toggle = () => setOpen(!open);
@@ -42,7 +51,7 @@ const DashboardContent = () => {
         toggle();
         updateDate(
             moment(val.startDate),
-            moment(val.endDate)
+            moment(val.endDate),
         )
     }
     const constructParam = () => {
@@ -56,13 +65,15 @@ const DashboardContent = () => {
     }, [])
 
     useEffect(() => {
-        getCompletedSurveys();
-        getLoginPerDay();
-        getMembersChart();
-        getOpenVsCloseTickets();
-        getBestPerformingSurveys();
-        getBestPerformers();
+        for(let type of types){
+            getDashboardData({
+                type,
+                from: param.from,
+                to: param.to
+            })
+        }
     }, [param])
+
     const clearFilter = () => {
         setReRenderPicker(false)
         setOpen(false)
@@ -74,8 +85,8 @@ const DashboardContent = () => {
 
     const updateDate = (startDate, endDate) => {
         setDateRange({
-            startDate: startDate.toDate(),
-            endDate: endDate.toDate(),
+            startDate: startDate,
+            endDate: endDate,
         });
         setParam({
             from: startDate,
@@ -152,6 +163,49 @@ const DashboardContent = () => {
         });
     }
 
+    /**
+     * Get Dashboard report's data
+     * @param {*} payload 
+     */
+    const getDashboardData = (payload) => {
+        axios.get(jwtServiceConfig.dashboardReport, {params: payload}).then((res) => {
+            const results = res.data.results;
+            if(payload.type === 'completed_surveys'){
+                if (results.hasOwnProperty('survey_names') && results.hasOwnProperty('survey_count')) {
+                    setCompletedSurveys(results);
+                }
+            } 
+            else if(payload.type === 'login_per_day') {
+                if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
+                    setLoginPerDay(results);
+                }
+            }
+            else if(payload.type === 'members') {
+                if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
+                    setMembersChart(results);
+                }
+            }
+            else if(payload.type === 'open_vs_closed_tickets') {
+                if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
+                    setTicketsChart(results);
+                }
+            }
+            else if(payload.type === 'top_surveys') {
+                if (results.hasOwnProperty('names')) {
+                    setBestPerformingSurveys(results);
+                }
+            }
+            else if(payload.type === 'top_members') {
+                if (results.hasOwnProperty('names')) {
+                    setBestPerformers(results);
+                }
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
+        });
+    }
+
     return (
         <>
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={daterangeLessData.completed_surveys} withdrawn={daterangeLessData.total_withdrawn} />
@@ -163,10 +217,12 @@ const DashboardContent = () => {
                         toggle={toggle}
                         onChange={dateRangeSelected}
                         className="daterangepicker-filter"
-                        closeOnClickOutside={true}
                         maxDate={moment().toDate()}
-                        initialDateRange={dateRange}
-                    /> : ''
+                        initialDateRange={{
+                            startDate: dateRange.startDate.toDate(),
+                            endDate: dateRange.endDate.toDate(),
+                        }}
+                    />: ''
                 }
 
                 <FormControl variant="outlined" className="xl:w-3/12 lg:w-4/12 md:w-2/6 mr-10">

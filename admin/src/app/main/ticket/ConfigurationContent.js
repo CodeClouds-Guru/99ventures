@@ -15,7 +15,7 @@ function ConfigurationContent() {
     const [selectedStatus, setSelectedStatus] = useState('open');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
-        startDate: moment().subtract(7, 'd').startOf('day'),
+        startDate: moment().subtract(7, 'd'),
         endDate: moment(),        
     });
     const [whereClause, setWhereClause] = useState({});
@@ -45,12 +45,8 @@ function ConfigurationContent() {
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [
-                moment(dateRange.startDate.startOf('day')).format("YYYY-MM-DD HH:mm:ss"), 
-                moment(dateRange.endDate.endOf('day')).format("YYYY-MM-DD HH:mm:ss")
-            ]
+            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).endOf('day')]
         }
-        
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
         }
@@ -96,7 +92,7 @@ function ConfigurationContent() {
                             
                     <div className="xl:w-1/3 lg:w-1/2 md:w-1/2 sm:w-2/3 flex items-center justify-between ">
                         <TextField
-                            label="Select a date range"
+                            label="Select a date range (GMT)"
                             onClick={toggle}
                             variant="outlined"
                             readOnly={true}
@@ -122,6 +118,7 @@ function ConfigurationContent() {
                                 toggle={toggle}
                                 onChange={dateRangeSelected}
                                 className="daterangepicker-filter"
+                                maxDate={moment().toDate()}
                                 initialDateRange={{
                                     startDate: dateRange.startDate.toDate(),
                                     endDate: dateRange.endDate.toDate(),

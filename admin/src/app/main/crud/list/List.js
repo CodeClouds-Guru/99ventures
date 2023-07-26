@@ -583,24 +583,27 @@ function List(props) {
 	const dateRangeSelected = (val) => {
 		setDatepickerStatus(!datepickerStatus)
 		setDateRange({
-			startDate: moment(val.startDate),
-			endDate: moment(val.endDate)
+			startDate: val.startDate,
+			endDate: val.endDate
 		});
 		const param = module === 'member-transactions' ? {
-			completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			// completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			completed_at: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 		} : module === 'withdrawal-requests' ? {
 			created_at: {
-				scripted_99_between: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+				// scripted_99_between: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+				scripted_99_between: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 			}
 		} : {
-			created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			// created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			created_at: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 		}
 		setWhere({ ...where, ...param });
 	}
 	const handleClearDateRange = () => {
 		setDateRange({
-			startDate: null,
-			endDate: null
+			startDate: '',
+			endDate: ''
 		});
 		module === 'member-transactions' ? delete where.completed_at : delete where.created_at;
 		setWhere({ ...where });
@@ -663,6 +666,7 @@ function List(props) {
 			dispatch(showMessage({ variant: 'error', message }));
 		})
 	}
+	
 	return (
 		<div>
 
@@ -743,9 +747,10 @@ function List(props) {
 														open={datepickerStatus}
 														toggle={() => setDatepickerStatus(!datepickerStatus)}
 														onChange={dateRangeSelected}
+														maxDate={moment().toDate()}
 														initialDateRange={dateRange.startDate && {
-															startDate: dateRange.startDate.toDate(),
-															endDate: dateRange.endDate.toDate(),
+															startDate: dateRange.startDate,
+															endDate: moment(dateRange.endDate).endOf('day').toDate(),
 														}}
 													/>
 												</div>
