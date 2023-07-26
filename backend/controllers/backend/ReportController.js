@@ -21,8 +21,8 @@ class ReportController {
   //override the edit function
   async getReport(req, res) {
     let type = req.query.type
-    var start_date = new Date(req.query.from)
-    var end_date = new Date(req.query.to)
+    var start_date = req.query.from//new Date(req.query.from)
+    var end_date = req.query.to//new Date(req.query.to)
     let company_portal_id = req.headers.site_id
     let d_time = Math.abs(end_date - start_date);
     let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24));
