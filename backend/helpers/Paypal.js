@@ -64,9 +64,7 @@ class Paypal {
     clientId = paypal_credentials.api_username;
     clientSecret = paypal_credentials.api_password;
 
-    // let clientId = this.clientId;
-    // let clientSecret = this.clientSecret;
-    if(process.ENV.DEV_MODE === '1'){
+    if(parseInt(process.env.DEV_MODE) == 1){
       let environment = new paypal.core.SandboxEnvironment(
         clientId,
         clientSecret
@@ -107,6 +105,7 @@ class Paypal {
    * [{ email: 'sb-vwa0c25891350@business.example.com', member_transaction_id: 0, currency: 'USD',amount: 1.00}]
    */
   async payout(payload) {
+    console.log('payload',payload)
     try {
       let items = payload.map((item) => {
         return {
@@ -123,6 +122,7 @@ class Paypal {
       let request = new paypal.payouts.PayoutsPostRequest();
       request.requestBody(requestBody);
       const resp = await this.createPayouts(request);
+      
       let batch_id = '';
       if (parseInt(resp.statusCode) == 201) {
         batch_id = resp.result.batch_header.payout_batch_id;
@@ -156,8 +156,10 @@ class Paypal {
     const client = await this.getPaypalClient();
     try {
       let response = await client.execute(request);
+      console.log('response',response)
       return response;
     } catch (e) {
+      console.log('error',e)
       var err = {};
       if (e.statusCode) {
         const error = JSON.parse(e.message);
