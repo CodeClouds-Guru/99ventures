@@ -28,7 +28,6 @@ const types = [
 const DashboardContent = () => {
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
-    const [reRenderPicker, setReRenderPicker] = useState(true);
     const [daterangeLessData, setDaterangeLessData] = useState({});
     const [completedSurveys, setCompletedSurveys] = useState({});
     const [ticketsChart, setTicketsChart] = useState({});
@@ -45,10 +44,8 @@ const DashboardContent = () => {
         to: dateRange.endDate
     });
 
-    const toggle = () => setOpen(!open);
-
     const dateRangeSelected = (val) => {
-        toggle();
+        setOpen(!open)
         updateDate(
             moment(val.startDate),
             moment(val.endDate),
@@ -75,7 +72,6 @@ const DashboardContent = () => {
     }, [param])
 
     const clearFilter = () => {
-        setReRenderPicker(false)
         setOpen(false)
         updateDate(
             moment().subtract(7, 'd').startOf('day'),
@@ -211,18 +207,20 @@ const DashboardContent = () => {
             <CardPanel surveys={daterangeLessData.no_of_surveys} users={daterangeLessData.no_of_members} verifiedUsers={daterangeLessData.no_of_verified_members} completedSurveys={daterangeLessData.completed_surveys} withdrawn={daterangeLessData.total_withdrawn} />
                     
             <div className="flex w-full ml-5 my-32 justify-center text-center items-center relative dashboard-datepicker">
-                {reRenderPicker ?
-                    <DateRangePicker
-                        open={open}
-                        toggle={toggle}
-                        onChange={dateRangeSelected}
-                        className="daterangepicker-filter"
-                        maxDate={moment().endOf('day').toDate()}
-                        initialDateRange={{
-                            startDate: dateRange.startDate.toDate(),
-                            endDate: dateRange.endDate.toDate(),
-                        }}
-                    />: ''
+                {
+                    open && (
+                        <DateRangePicker
+                            open={open}
+                            toggle={() => { setOpen(!open) }}
+                            onChange={dateRangeSelected}
+                            className="daterangepicker-filter"
+                            maxDate={moment().endOf('day').toDate()}
+                            initialDateRange={{
+                                startDate: dateRange.startDate.toDate(),
+                                endDate: dateRange.endDate.toDate(),
+                            }}
+                        />
+                    )
                 }
 
                 <FormControl variant="outlined" className="xl:w-3/12 lg:w-4/12 md:w-2/6 mr-10">
@@ -230,7 +228,7 @@ const DashboardContent = () => {
                         id="outlined-adornment-datepicker"
                         type="text"
                         readOnly
-                        onClick={() => { setReRenderPicker(true); toggle(); }}                                
+                        onClick={() => { setOpen(!open) }}                                
                         startAdornment={
                             <InputAdornment position="start">
                                 <IconButton
