@@ -345,7 +345,7 @@ function TicketingSystemPage(props) {
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                            <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {Object.keys(val).length > 0 &&
                                                         <span style={{ fontSize: '12px' }}>
@@ -357,7 +357,7 @@ function TicketingSystemPage(props) {
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
-                                                <div>
+                                                <div className='break-all xl:text-15 lg:text-12 md:text-11 sm:text-10'>
                                                     {parse(val.message)}
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
@@ -383,15 +383,15 @@ function TicketingSystemPage(props) {
                                                 }
                                                 {
                                                     val.user_id && (
-                                                        <div className='flex justify-end my-10 conversation--btn'>
+                                                        <div className='text-right conversation--btn absolute right-3 bottom-3'>
                                                             {/* <Tooltip title="Edit" placement="bottom">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=> handleEditMessage(val.id, val.message)}>
                                                                     <FuseSvgIcon className="text-48 text-gray-50" size={18} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
                                                                 </IconButton>
                                                             </Tooltip> */}
-                                                            <Tooltip title="Delete" placement="bottom">
+                                                            <Tooltip title="Delete" placement="left">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=>handleDeleteMsgAlert(val.id)}>
-                                                                    <FuseSvgIcon className="text-48 text-red-500" size={18} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                    <FuseSvgIcon className="text-48 text-red-500" size={16} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </div>

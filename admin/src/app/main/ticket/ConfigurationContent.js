@@ -45,8 +45,12 @@ function ConfigurationContent() {
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).add(1, 'day')]
+            created_at: [
+                moment(dateRange.startDate.startOf('day')).format("YYYY-MM-DD HH:mm:ss"), 
+                moment(dateRange.endDate.endOf('day')).format("YYYY-MM-DD HH:mm:ss")
+            ]
         }
+        
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
         }
