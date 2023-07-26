@@ -97,7 +97,6 @@ class Paypal {
    * [{ email: 'sb-vwa0c25891350@business.example.com', member_transaction_id: 0, currency: 'USD',amount: 1.00}]
    */
   async payout(payload) {
-    console.log('payload', payload)
     try {
       let items = payload.map((item) => {
         return {
@@ -148,7 +147,6 @@ class Paypal {
     const client = await this.getPaypalClient();
     try {
       let response = await client.execute(request);
-      console.log('response', response)
       return response;
     } catch (e) {
       console.log('error', e)
@@ -160,10 +158,8 @@ class Paypal {
           failure_response: error,
           headers: e.headers,
         };
-        console.log(err);
       } else {
         err.e = e;
-        console.log(e);
       }
       return { status: false, error: err };
     }
