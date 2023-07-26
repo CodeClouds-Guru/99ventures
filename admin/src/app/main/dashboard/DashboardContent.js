@@ -38,12 +38,12 @@ const DashboardContent = () => {
     const [bestPerformers, setBestPerformers] = useState({});
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
-        endDate: moment(),
+        endDate: moment().endOf('day'),
     });
     const [param, setParam] = useState({
-        from: moment(dateRange.startDate).startOf('day'),
-        to: moment(dateRange.endDate).endOf('day')
-    })
+        from: dateRange.startDate,
+        to: dateRange.endDate
+    });
 
     const toggle = () => setOpen(!open);
 
@@ -89,9 +89,9 @@ const DashboardContent = () => {
             endDate: endDate,
         });
         setParam({
-            from: startDate,
-            to: endDate
-        })
+            from: startDate.startOf('day'),
+            to: endDate.endOf('day')
+        });
     }
 
     const getDaterangeLessReport = () => {
@@ -217,7 +217,7 @@ const DashboardContent = () => {
                         toggle={toggle}
                         onChange={dateRangeSelected}
                         className="daterangepicker-filter"
-                        maxDate={moment().toDate()}
+                        maxDate={moment().endOf('day').toDate()}
                         initialDateRange={{
                             startDate: dateRange.startDate.toDate(),
                             endDate: dateRange.endDate.toDate(),
