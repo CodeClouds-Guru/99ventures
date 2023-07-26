@@ -997,7 +997,7 @@ class MemberAuthController {
       return {
         member_status: false,
         member_message:
-          'This payment info has already been used, please reach out to admin',
+          'This payment info has already been used by another account, please reach out to our admin',
       };
     }
     if (member_payment_info.length > 0) {
