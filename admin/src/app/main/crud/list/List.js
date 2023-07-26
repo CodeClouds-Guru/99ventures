@@ -583,8 +583,8 @@ function List(props) {
 	const dateRangeSelected = (val) => {
 		setDatepickerStatus(!datepickerStatus)
 		setDateRange({
-			startDate: val.startDate,
-			endDate: val.endDate
+			startDate: moment(val.startDate),
+			endDate: moment(val.endDate)
 		});
 		const param = module === 'member-transactions' ? {
 			// completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
@@ -747,10 +747,10 @@ function List(props) {
 														open={datepickerStatus}
 														toggle={() => setDatepickerStatus(!datepickerStatus)}
 														onChange={dateRangeSelected}
-														maxDate={moment().toDate()}
+														maxDate={moment().endOf('day').toDate()}
 														initialDateRange={dateRange.startDate && {
-															startDate: dateRange.startDate,
-															endDate: moment(dateRange.endDate).endOf('day').toDate(),
+															startDate: dateRange.startDate.toDate(),
+															endDate: dateRange.endDate.toDate()
 														}}
 													/>
 												</div>
@@ -787,7 +787,7 @@ function List(props) {
 													)
 												}
 												size="small"												
-												placeholder="Select daterange"
+												placeholder="Select daterange (GMT)"
 												value={
 													dateRange && dateRange.startDate
 														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`
