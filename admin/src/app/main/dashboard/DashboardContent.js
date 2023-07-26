@@ -65,8 +65,8 @@ const DashboardContent = () => {
         for(let type of types){
             getDashboardData({
                 type,
-                from: param.from,
-                to: param.to
+                from: new Date(param.from),
+                to: new Date(param.to)
             })
         }
     }, [param])
