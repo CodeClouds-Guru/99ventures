@@ -15,8 +15,8 @@ function ConfigurationContent() {
     const [selectedStatus, setSelectedStatus] = useState('open');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
-        startDate: moment().subtract(7, 'd'),
-        endDate: moment(),        
+        startDate: moment().subtract(7, 'd').startOf('day'),
+        endDate: moment().endOf('day'),
     });
     const [whereClause, setWhereClause] = useState({});
     const [listKey, setListKey] = useState(0);
@@ -27,7 +27,7 @@ function ConfigurationContent() {
         setSelectedStatus('open')
         setDateRange({
             startDate: moment().subtract(7, 'd').startOf('day'),
-            endDate: moment(),
+            endDate: moment().endOf('day'),
         });
     }
 
@@ -45,7 +45,7 @@ function ConfigurationContent() {
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).endOf('day')]
+            created_at: [dateRange.startDate.startOf('day'), dateRange.endDate.endOf('day')]
         }
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
@@ -118,7 +118,7 @@ function ConfigurationContent() {
                                 toggle={toggle}
                                 onChange={dateRangeSelected}
                                 className="daterangepicker-filter"
-                                maxDate={moment().toDate()}
+                                maxDate={moment().endOf('day').toDate()}
                                 initialDateRange={{
                                     startDate: dateRange.startDate.toDate(),
                                     endDate: dateRange.endDate.toDate(),
