@@ -137,6 +137,7 @@ class TicketController extends Controller {
           },
           {
             model: Member,
+            paranoid: false,
             // as: "username",
             attributes: [
               'first_name',
