@@ -27,8 +27,8 @@ const UserDetails = (props) => {
             />
             :
             <FusePageCarded className="sm:p-20"
-                content={<Box className="flex justify-center p-20" >
-                    <Typography variant="h5" color="error"> Member is deleted by  <strong> {deletedMemberData.deleted_by_admin.username} </strong>  at  <strong>{Helper.parseTimeStamp(deletedMemberData.deleted_at)}</strong> </Typography>
+                content={<Box className="flex justify-center p-20 h-full items-center" >
+                    <Typography variant="h5" color="error"> Member is deleted by  <strong> {deletedMemberData.deleted_by_admin.username} </strong>  on  <strong>{Helper.parseTimeStamp(deletedMemberData.deleted_at)}</strong> </Typography>
                 </Box>}
                 rightSidebarOpen={false}
                 scroll={isMobile ? 'normal' : 'content'}

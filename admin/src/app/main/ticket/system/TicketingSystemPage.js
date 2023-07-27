@@ -526,6 +526,18 @@ function TicketingSystemPage(props) {
                                             </Link>
                                         </div>
                                     </div>
+                                    {
+                                        memberDetails.deleted_at && (
+                                            <div className="flex justify-center sm:justify-start">
+                                                <div className="flex pl-10">
+                                                    <Typography component={'h5'} className="pr-5">
+                                                        <b>Status:</b>
+                                                    </Typography>
+                                                    <Typography variant="body1" className="text-red-600 font-bold">Deleted</Typography>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
@@ -543,25 +555,29 @@ function TicketingSystemPage(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col w-1/2 justify-center sm:justify-end">
-                                    <div className="flex justify-center sm:justify-end">
-                                        <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
-                                            <InputLabel id="demo-select-small">Status</InputLabel>
-                                            <Select
-                                                labelId="demo-select-small"
-                                                id="demo-select-small"
-                                                value={memberStatus}
-                                                label="Status"
-                                                onChange={handleMemberStatus}
-                                            >
-                                                <MenuItem value="member">Member</MenuItem>
-                                                <MenuItem value="validating">Validating</MenuItem>
-                                                <MenuItem value="suspended">Suspended</MenuItem>
-                                                <MenuItem value="deleted">Deleted</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-                                </div>
+                                {
+                                    !memberDetails.deleted_at && (
+                                        <div className="flex flex-col w-1/2 justify-center sm:justify-end">
+                                            <div className="flex justify-center sm:justify-end">
+                                                <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
+                                                    <InputLabel id="demo-select-small">Status</InputLabel>
+                                                    <Select
+                                                        labelId="demo-select-small"
+                                                        id="demo-select-small"
+                                                        value={memberStatus}
+                                                        label="Status"
+                                                        onChange={handleMemberStatus}
+                                                    >
+                                                        <MenuItem value="member">Member</MenuItem>
+                                                        <MenuItem value="validating">Validating</MenuItem>
+                                                        <MenuItem value="suspended">Suspended</MenuItem>
+                                                        <MenuItem value="deleted">Deleted</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                    )
+                                }
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
