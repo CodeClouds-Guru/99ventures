@@ -587,20 +587,23 @@ function List(props) {
 			endDate: moment(val.endDate)
 		});
 		const param = module === 'member-transactions' ? {
-			completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			// completed_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			completed_at: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 		} : module === 'withdrawal-requests' ? {
 			created_at: {
-				scripted_99_between: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+				// scripted_99_between: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+				scripted_99_between: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 			}
 		} : {
-			created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			// created_at: [moment(val.startDate), moment(val.endDate).add(1, 'day')]
+			created_at: [moment(val.startDate).startOf('day'), moment(val.endDate).endOf('day')]
 		}
 		setWhere({ ...where, ...param });
 	}
 	const handleClearDateRange = () => {
 		setDateRange({
-			startDate: null,
-			endDate: null
+			startDate: '',
+			endDate: ''
 		});
 		module === 'member-transactions' ? delete where.completed_at : delete where.created_at;
 		setWhere({ ...where });
@@ -663,6 +666,7 @@ function List(props) {
 			dispatch(showMessage({ variant: 'error', message }));
 		})
 	}
+	
 	return (
 		<div>
 
@@ -743,9 +747,10 @@ function List(props) {
 														open={datepickerStatus}
 														toggle={() => setDatepickerStatus(!datepickerStatus)}
 														onChange={dateRangeSelected}
+														maxDate={moment().endOf('day').toDate()}
 														initialDateRange={dateRange.startDate && {
 															startDate: dateRange.startDate.toDate(),
-															endDate: dateRange.endDate.toDate(),
+															endDate: dateRange.endDate.toDate()
 														}}
 													/>
 												</div>
@@ -782,7 +787,7 @@ function List(props) {
 													)
 												}
 												size="small"												
-												placeholder="Select daterange"
+												placeholder="Select daterange (GMT)"
 												value={
 													dateRange && dateRange.startDate
 														? `${moment(dateRange.startDate).format('YYYY/MM/DD')} - ${moment(dateRange.endDate).format('YYYY/MM/DD')}`

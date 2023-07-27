@@ -26,7 +26,6 @@ class ReportController {
     let company_portal_id = req.headers.site_id
     let d_time = Math.abs(end_date - start_date);
     let total_days = Math.ceil(d_time / (1000 * 60 * 60 * 24));
-    // console.log(total_days)
     var query_string = "DATE"
     if (total_days > 15 && total_days <= 31) {
       query_string = "WEEK"
@@ -65,6 +64,9 @@ class ReportController {
       }
     } catch (error) {
       console.error(error);
+    }
+    if(report.names && report.values && report.names.length != report.values.length){
+      
     }
     res.json(report)
   }
@@ -220,8 +222,8 @@ class ReportController {
   }
 
   async loginPerDay(start_date, end_date, company_portal_id, query_string, total_days) {
-    let query = 'SELECT ' + query_string + '(member_activity_logs.created_at) as day,YEAR(member_activity_logs.created_at) as year, COUNT(*) as count FROM member_activity_logs JOIN members on member_activity_logs.member_id = members.id WHERE members.company_portal_id = ? AND action = "Member Logged In" AND member_activity_logs.created_at BETWEEN ? AND ? GROUP BY day,year ORDER BY day ASC, year ASC'
 
+    let query = 'SELECT ' + query_string + '(member_activity_logs.created_at) as day,YEAR(member_activity_logs.created_at) as year, COUNT(*) as count FROM member_activity_logs JOIN members on member_activity_logs.member_id = members.id WHERE members.company_portal_id = ? AND action = "Member Logged In" AND member_activity_logs.created_at BETWEEN ? AND ? GROUP BY day,year ORDER BY day ASC, year ASC'
     let member_activity_logs = await db.sequelize.query(
       query,
       {
@@ -307,7 +309,15 @@ class ReportController {
       let month_str = monthNames[i.day - 1] + ',' + ('' + i.year).substr(2)
       arr_index = days_arr.indexOf(month_str);
     } else if (query_string === 'WEEK') {
-      let start_week = moment(start_date).week();
+      // let start_week = moment(start_date).week();
+      //find the year of the current date  
+      var oneJan =  new Date(start_date.getFullYear(), 0, 1);   
+    
+      // calculating number of days in given year before a given date   
+      var numberOfDays =  Math.floor((start_date - oneJan) / (24 * 60 * 60 * 1000));   
+   
+      // adding 1 since to current date and returns value starting from 0   
+      var start_week = Math.ceil(( start_date.getDay() + 1 + numberOfDays) / 7);  
       arr_index = i.day - start_week
     }
     else if (query_string === 'YEAR') {
@@ -322,7 +332,6 @@ class ReportController {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
-    // console.log(query_string,total_days)
     var dt = new Date(start_date);
     if (query_string === "DATE") {
       while (dt <= end_date) {

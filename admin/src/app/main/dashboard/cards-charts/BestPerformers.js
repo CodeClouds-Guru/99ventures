@@ -7,7 +7,7 @@ const BestPerformers = (props) => {
         (props.bestPerformers).hasOwnProperty('names') ? setData(props.bestPerformers.names) : '';
     }, [props.bestPerformers.names])
     return (
-        <div className="w-1/2 lg:w-full p-5 flex">
+        <div className="xl:w-1/3 lg:w-1/3 md:w-1/2 sm:w-1/2 p-5 flex">
             <Card className="w-full flex justify-center" sx={{ color: '#283593' }}>
                 <CardContent className="w-full">
                     <Typography className="w-full text-left" variant="h6" component="div">Top Performers</Typography>

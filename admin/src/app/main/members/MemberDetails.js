@@ -47,11 +47,11 @@ const iconStyle = {
     fontSize: '20px',
     lineHeight: 20,
     '@media screen and (max-width: 1600px)': {
-        width: '18px',
-        height: '18px',
-        minWidth: '18px',
-        minHeight: '18px',
-        fontSize: '18px',
+        width: '16px',
+        height: '16px',
+        minWidth: '16px',
+        minHeight: '16px',
+        fontSize: '16px',
         lineHeight: 18
     },
     '@media screen and (max-width: 1400px)': {
@@ -100,6 +100,7 @@ const selectStyle = {
 }
 
 const listItemTextStyle = {
+    wordBreak: 'break-all',
     margin: '2px 0',
     '& .MuiListItemText-primary': {
         display: 'flex',
@@ -114,9 +115,14 @@ const listItemTextStyle = {
 
 const chipStyle = {
     '@media screen and (max-width: 1400px)': {
-        fontSize: '1.2rem',
+        fontSize: '1.1rem',
         height: '25px',
+        width: 'auto'
     },
+    '@media screen and (max-width: 1280px)': {
+        fontSize: '1.3rem',
+        height: 'auto',
+    }
 }
 
 const MemberDetails = (props) => {
@@ -727,7 +733,7 @@ const MemberDetails = (props) => {
                                     <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Referral Link:</Typography>
                                 } />
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                    <div className="items-center" style={wordWrap}>
+                                    <div className="items-center">
                                         {
                                             (memberData.referral_link) ? (
                                                 <>
@@ -739,7 +745,7 @@ const MemberDetails = (props) => {
                                                         )
                                                     }
                                                     <Tooltip title={memberData.referral_link} placement="top">
-                                                        <Button variant="contained" size="small" onClick={() => setReflinkMode(!reflinkMode)}>{!reflinkMode ? 'Show' : 'Hide'}</Button>
+                                                        <Button variant="contained" size="small" onClick={() => setReflinkMode(!reflinkMode)} sx={chipStyle}>{!reflinkMode ? 'Show' : 'Hide'}</Button>
                                                     </Tooltip>
                                                     <Tooltip title="Click to copy" placement="right">
                                                         <IconButton color="primary" aria-label="Filter" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => clickToCopy(memberData.referral_link)}>
@@ -759,7 +765,7 @@ const MemberDetails = (props) => {
                                 <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                     (memberData.MemberReferral && memberData.member_referral_id && memberData.member_referrer) ? (
                                         <div className='flex items-center'>
-                                            <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base break-all">
                                                 {memberData.member_referrer} ({memberData.MemberReferral.ip})
                                             </Typography>
                                             <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
@@ -897,7 +903,7 @@ const MemberDetails = (props) => {
                         }}
                     >
                         <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
-                            Balance: ${showBalance('balance')} (Total Earnings: ${showBalance('total')})
+                            Balance($): {showBalance('balance')} <br/> (Total Earnings: ${showBalance('total')})
                         </Typography>
                         {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}

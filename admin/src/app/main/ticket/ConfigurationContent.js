@@ -16,7 +16,7 @@ function ConfigurationContent() {
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
-        endDate: moment(),        
+        endDate: moment().endOf('day'),
     });
     const [whereClause, setWhereClause] = useState({});
     const [listKey, setListKey] = useState(0);
@@ -27,7 +27,7 @@ function ConfigurationContent() {
         setSelectedStatus('open')
         setDateRange({
             startDate: moment().subtract(7, 'd').startOf('day'),
-            endDate: moment(),
+            endDate: moment().endOf('day'),
         });
     }
 
@@ -45,7 +45,7 @@ function ConfigurationContent() {
 
     const constructWhereclause = () => {
         const param = {
-            created_at: [dateRange.startDate.startOf('day'), moment(dateRange.endDate).add(1, 'day')]
+            created_at: [dateRange.startDate.startOf('day'), dateRange.endDate.endOf('day')]
         }
         if (selectedStatus !== '' && selectedStatus !== 'all') {
             param['status'] = selectedStatus
@@ -92,7 +92,7 @@ function ConfigurationContent() {
                             
                     <div className="xl:w-1/3 lg:w-1/2 md:w-1/2 sm:w-2/3 flex items-center justify-between ">
                         <TextField
-                            label="Select a date range"
+                            label="Select a date range (GMT)"
                             onClick={toggle}
                             variant="outlined"
                             readOnly={true}
@@ -118,6 +118,7 @@ function ConfigurationContent() {
                                 toggle={toggle}
                                 onChange={dateRangeSelected}
                                 className="daterangepicker-filter"
+                                maxDate={moment().endOf('day').toDate()}
                                 initialDateRange={{
                                     startDate: dateRange.startDate.toDate(),
                                     endDate: dateRange.endDate.toDate(),

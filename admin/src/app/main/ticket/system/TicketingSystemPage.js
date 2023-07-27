@@ -345,19 +345,22 @@ function TicketingSystemPage(props) {
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-full flex flex-col justify-around p-10 mt-10 rounded-8" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                            <div className="w-full flex flex-col justify-around py-10 pl-10 pr-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
-                                                    {Object.keys(val).length > 0 &&
-                                                        <span style={{ fontSize: '12px' }}>
-                                                            <Link target="_blank" to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
-                                                                <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
-                                                            </Link>
-
-                                                        </span>
+                                                    {
+                                                        Object.keys(val).length > 0 && (
+                                                            val.Member ? (
+                                                                <Link target="_blank" to={`/app/members/${val.Member.id}`}>
+                                                                    <Typography className="font-bold italic" component="p" variant="caption">{val.Member.username}</Typography>
+                                                                </Link>
+                                                            ) : (
+                                                                <Typography sx={{color: '#4f46e5', textDecoration: 'underline'}} component="p" className="font-bold italic" variant="caption">${val.User.alias_name} - More Surveys Support Team</Typography>
+                                                            )
+                                                        )
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
-                                                <div>
+                                                <div className='break-all xl:text-15 lg:text-12 md:text-11 sm:text-10'>
                                                     {parse(val.message)}
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?
@@ -383,15 +386,15 @@ function TicketingSystemPage(props) {
                                                 }
                                                 {
                                                     val.user_id && (
-                                                        <div className='flex justify-end my-10 conversation--btn'>
+                                                        <div className='text-right conversation--btn absolute right-3 bottom-4'>
                                                             {/* <Tooltip title="Edit" placement="bottom">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=> handleEditMessage(val.id, val.message)}>
                                                                     <FuseSvgIcon className="text-48 text-gray-50" size={18} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
                                                                 </IconButton>
                                                             </Tooltip> */}
-                                                            <Tooltip title="Delete" placement="bottom">
+                                                            <Tooltip title="Delete" placement="left">
                                                                 <IconButton size="small" aria-label="fingerprint" color="secondary" onClick={()=>handleDeleteMsgAlert(val.id)}>
-                                                                    <FuseSvgIcon className="text-48 text-red-500" size={18} color="action">heroicons-outline:trash</FuseSvgIcon>
+                                                                    <FuseSvgIcon className="text-48 text-red-500" size={16} color="action">heroicons-outline:trash</FuseSvgIcon>
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </div>
@@ -523,6 +526,18 @@ function TicketingSystemPage(props) {
                                             </Link>
                                         </div>
                                     </div>
+                                    {
+                                        memberDetails.deleted_at && (
+                                            <div className="flex justify-center sm:justify-start">
+                                                <div className="flex pl-10">
+                                                    <Typography component={'h5'} className="pr-5">
+                                                        <b>Status:</b>
+                                                    </Typography>
+                                                    <Typography variant="body1" className="text-red-600 font-bold">Deleted</Typography>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
                                     <div className="flex justify-center sm:justify-start">
                                         <div className="flex pl-10">
                                             <Typography component={'h4'} className="pr-5">
@@ -540,25 +555,29 @@ function TicketingSystemPage(props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col w-1/2 justify-center sm:justify-end">
-                                    <div className="flex justify-center sm:justify-end">
-                                        <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
-                                            <InputLabel id="demo-select-small">Status</InputLabel>
-                                            <Select
-                                                labelId="demo-select-small"
-                                                id="demo-select-small"
-                                                value={memberStatus}
-                                                label="Status"
-                                                onChange={handleMemberStatus}
-                                            >
-                                                <MenuItem value="member">Member</MenuItem>
-                                                <MenuItem value="validating">Validating</MenuItem>
-                                                <MenuItem value="suspended">Suspended</MenuItem>
-                                                <MenuItem value="deleted">Deleted</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-                                </div>
+                                {
+                                    !memberDetails.deleted_at && (
+                                        <div className="flex flex-col w-1/2 justify-center sm:justify-end">
+                                            <div className="flex justify-center sm:justify-end">
+                                                <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
+                                                    <InputLabel id="demo-select-small">Status</InputLabel>
+                                                    <Select
+                                                        labelId="demo-select-small"
+                                                        id="demo-select-small"
+                                                        value={memberStatus}
+                                                        label="Status"
+                                                        onChange={handleMemberStatus}
+                                                    >
+                                                        <MenuItem value="member">Member</MenuItem>
+                                                        <MenuItem value="validating">Validating</MenuItem>
+                                                        <MenuItem value="suspended">Suspended</MenuItem>
+                                                        <MenuItem value="deleted">Deleted</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                    )
+                                }
                             </div>
                             <Divider />
                             {'MemberNotes' in memberDetails ?
