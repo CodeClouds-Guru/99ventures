@@ -259,16 +259,18 @@ const DashboardContent = () => {
             </div>
 
             <div className="flex flex-wrap w-full justify-between">
-                <div className="flex flex-wrap w-full lg:w-2/3 justify-between">
+                <div className="flex flex-wrap w-full xlg:w-2/3 justify-between">
                     <LoginPerDay loginPerDay={loginPerDay} />
                     <CompletedSurveyChart completedSurveys={completedSurveys} />
+                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
                     <MembersChart membersChart={membersChart} />
                     <TicketsChart ticketsChart={ticketsChart} />
-                </div>
-                <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
-                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
                     <BestPerformers bestPerformers={bestPerformers} />
                 </div>
+                {/* <div className="flex flex-wrap w-full lg:w-1/3 justify-between">
+                    <BestPerformingSurveys bestPerformingSurveys={bestPerformingSurveys} />
+                    <BestPerformers bestPerformers={bestPerformers} />
+                </div> */}
             </div>                
         </>
     )

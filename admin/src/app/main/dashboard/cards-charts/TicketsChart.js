@@ -30,7 +30,7 @@ const TicketsChart = (props) => {
     }, [props.ticketsChart.names, props.ticketsChart.values]);
 
     return (
-        <div className="w-1/2 p-5">
+        <div className="xl:w-1/3 lg:w-1/3 md:w-1/2 sm:w-1/2 p-5">
             <Card className="w-full" sx={{ color: '#283593' }}>
                 <CardContent>
                     <Typography variant="h6" component="div">Ticket's Chart</Typography>
