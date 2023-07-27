@@ -345,15 +345,18 @@ function TicketingSystemPage(props) {
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-full flex flex-col justify-around py-12 px-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                            <div className="w-full flex flex-col justify-around py-16 pl-10 pr-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
-                                                    {Object.keys(val).length > 0 &&
-                                                        <span style={{ fontSize: '12px' }}>
-                                                            <Link target="_blank" to={val.Member ? `/app/members/${val.Member.id}` : '#'}>
-                                                                <i> <b>{val.Member ? `${val.Member.username}` : `${val.User.alias_name} - More Surveys Support Team`}</b></i>
-                                                            </Link>
-
-                                                        </span>
+                                                    {
+                                                        Object.keys(val).length > 0 && (
+                                                            val.Member ? (
+                                                                <Link target="_blank" to={`/app/members/${val.Member.id}`}>
+                                                                    <Typography className="font-bold italic" component="p" variant="caption">{val.Member.username}</Typography>
+                                                                </Link>
+                                                            ) : (
+                                                                <Typography sx={{color: '#4f46e5', textDecoration: 'underline'}} component="p" className="font-bold italic" variant="caption">${val.User.alias_name} - More Surveys Support Team</Typography>
+                                                            )
+                                                        )
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
