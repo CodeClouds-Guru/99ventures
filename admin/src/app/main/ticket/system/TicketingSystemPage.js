@@ -345,7 +345,7 @@ function TicketingSystemPage(props) {
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-full flex flex-col justify-around py-16 pl-10 pr-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                            <div className="w-full flex flex-col justify-around py-10 pl-10 pr-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {
                                                         Object.keys(val).length > 0 && (
