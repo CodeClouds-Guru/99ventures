@@ -35,6 +35,7 @@ class TicketController extends Controller {
       {
         model: Member,
         attributes: ['username'],
+        paranoid: false,
       },
     ];
     var new_option = {};
@@ -195,7 +196,10 @@ class TicketController extends Controller {
         });
 
         //Count Opened Tickets
-        let count_opened_tkt = await sequelize.query("SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ?", {replacements: ['open'], type: QueryTypes.SELECT });
+        let count_opened_tkt = await sequelize.query(
+          'SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ?',
+          { replacements: ['open'], type: QueryTypes.SELECT }
+        );
 
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
@@ -381,7 +385,7 @@ class TicketController extends Controller {
         { message: value },
         {
           where: { id: ticket_conversation_id },
-        },
+        }
       );
       // let savedTicketConversation = await TicketConversation.create(data);
       // console.log(user_id);
