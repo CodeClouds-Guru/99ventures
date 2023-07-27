@@ -128,7 +128,13 @@ class TicketController extends Controller {
               {
                 model: Member,
                 paranoid: false,
-                attributes: ['first_name', 'last_name', 'username', 'id'],
+                attributes: [
+                  'first_name',
+                  'last_name',
+                  'username',
+                  'id',
+                  'deleted_at',
+                ],
               },
               {
                 model: User,
@@ -146,6 +152,7 @@ class TicketController extends Controller {
               'email',
               'status',
               'username',
+              'deleted_at',
             ],
             include: [
               {
