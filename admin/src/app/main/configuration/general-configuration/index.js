@@ -11,10 +11,31 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import DragHandleIcon from '@mui/icons-material/DragHandle';
+import DragHandleIcon from '@mui/icons-material/DragIndicator';
 import { arrayMoveImmutable } from "array-move";
 import { Container, Draggable } from "react-smooth-dnd";
 import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
+
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { styled } from '@mui/material/styles';
+import { motion } from 'framer-motion';
+
+const StyledAccordion = styled(Accordion)(({ theme }) => ({
+    borderRadius: '8px!important',
+    marginBottom: 18,
+    '&:before': {
+      display: 'none',
+    },
+}));
+
+  
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 },
+};
 
 const modalStyle = {
     position: 'absolute',
@@ -167,7 +188,7 @@ function GeneralConfiguration(props) {
         return options.map(option => <MenuItem key={Math.random()} value={option.id}>{option.name ?? ''}</MenuItem>)
     }
 
-    const getReplies = (replies) => {
+    /*const getReplies1 = (replies) => {
         return replies.map((reply, indx) => {
             return (
                 <Draggable key={Math.random()}>
@@ -196,13 +217,58 @@ function GeneralConfiguration(props) {
                                 </Typography>
                             }
                         />
-                        {/* <ListItemSecondaryAction>
+                         <ListItemSecondaryAction>
                                 <ListItemIcon className="drag-handle">
                                     <DragHandleIcon />
                                 </ListItemIcon>
-                            </ListItemSecondaryAction> */}
+                            </ListItemSecondaryAction> 
                     </ListItem>
                     <Divider variant="inset" component="li" className="ml-12" key={Math.random()} />
+                </Draggable>
+            )
+        })
+    }*/
+
+    const getReplies = (replies) => {
+        return replies.map((reply, indx) => {
+            return (
+                <Draggable key={Math.random()}>
+                    <StyledAccordion
+                        component={motion.div}
+                        variants={item}
+                        key={Math.random()}
+                        classes={{
+                            root: 'FaqPage-panel shadow-md border',
+                        }}
+                        sx={{'.muiltr-o4b71y-MuiAccordionSummary-content.Mui-expanded': {margin: '10px 0'}}}
+                    >
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                            className="bg-gray-100"
+                            sx={{'& .MuiAccordionSummary-content': {display: 'flex', alignItem: 'center', justifyContent: 'space-between'}}}
+                        >
+                            <div className='flex items-center'>
+                                <div className="drag-handle mr-10 cursor-move">
+                                    <DragHandleIcon />
+                                </div>
+                                <Typography>{reply.name}</Typography>
+                            </div>
+                            <IconButton className="mr-10"  edge="end" aria-label="delete" onClick={() => removeListItem(indx)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography
+                                key={Math.random()}
+                                variant="body2"
+                                color="text.secondary"
+                                dangerouslySetInnerHTML={{__html:reply.body}}
+                            >
+                            </Typography>
+                        </AccordionDetails>
+                    </StyledAccordion>
                 </Draggable>
             )
         })
@@ -485,7 +551,7 @@ function GeneralConfiguration(props) {
                                 </Box>
                             }
                             <Divider className="mt-20 mb-24" />
-                            <h3>
+                            <div className='mb-20'>
                                 Replies
                                 <Button
                                     variant="contained"
@@ -496,16 +562,13 @@ function GeneralConfiguration(props) {
                                 >
                                     Add
                                 </Button>
-                            </h3>
+                            </div>
 
                             {generalReplies.length > 0 &&
-                                <CardContent>
-                                    <List>
-                                        <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                            {getReplies(generalReplies)}
-                                        </Container>
-                                    </List>
-                                </CardContent>}
+                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                    {getReplies(generalReplies)}
+                                </Container>
+                            }
 
                             {
                                 (permission) ?

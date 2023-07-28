@@ -69,7 +69,6 @@ class ScriptParser {
               //     conditions:param_where
               // };
               let where = this.getModuleWhere(script.module, user);
-
               if (param_where)
                 where.where = {
                   ...where.where,
@@ -356,9 +355,7 @@ class ScriptParser {
 
       case 'MemberTransaction':
         return {
-          where: user
-            ? { member_id: user.id, type: 'credited' }
-            : { type: 'credited' },
+          where: { member_id: user.id, status:2 },
           include: [
             { model: Models.Member, required: true },
             {

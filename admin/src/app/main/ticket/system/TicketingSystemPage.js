@@ -503,82 +503,72 @@ function TicketingSystemPage(props) {
                             </div>
                         </div>
                         <div className="h-full w-full md:w-4/12 border-2 rounded-r-2xl">
-                            <div className="flex flex-row  p-0 m-0 pl-5 pr-5 mt-10 mb-5 justify-between">
-                                <Typography component={'h2'}>
-                                    <b>Member details</b>
+                            <div className="flex flex-row p-7 justify-between">
+                                <Typography component={'p'} className="font-bold">
+                                    Member details
                                 </Typography>
-                                <div className="flex">
-                                    <Typography component={'h4'} className="pr-10">
-                                        <b>Total Earnings: ${memberDetails.total_earnings}</b>
-                                    </Typography>
-
-                                </div>
+                                <Typography component={'p'} className="font-bold">
+                                    Total Earnings: ${memberDetails.total_earnings}
+                                </Typography>
                             </div>
-                            <div className="sm:flex flex-row justify-between p-0 m-0 pb-10">
-                                <div className="flex flex-col w-1/2 justify-center sm:justify-start mb-10 sm:mb-0">
-                                    <div className="flex justify-center sm:justify-start">
-                                        <div className="flex pl-10">
-                                            <Typography component={'h4'} className="pr-5">
-                                                <b>Username:</b>
-                                            </Typography>
-                                            <Link target="_blank" to={`/app/members/${memberId}`}>
+                            <div className="flex lg:flex-col sm:flex-row flex-wrap justify-between p-7">
+                                <div className="flex sm:flex-col md:flex-col lg:flex-col sm:w-1/2 lg:w-full md:w-full justify-center sm:justify-start mb-10 sm:mb-0">
+                                    <div className="flex flex-row w-full mb-3">
+                                        <Typography variant="body1" component={'p'} className="mr-5 font-bold">
+                                            Username:
+                                        </Typography>
+                                        <Link target="_blank" to={`/app/members/${memberId}`}>
+                                            <Typography variant="body1" component={'p'}>
                                                 {memberDetails.username}
-                                            </Link>
-                                        </div>
+                                            </Typography>
+                                        </Link>
                                     </div>
                                     {
                                         memberDetails.deleted_at && (
-                                            <div className="flex justify-center sm:justify-start">
-                                                <div className="flex pl-10">
-                                                    <Typography component={'h5'} className="pr-5">
-                                                        <b>Status:</b>
-                                                    </Typography>
-                                                    <Typography variant="body1" className="text-red-600 font-bold">Deleted</Typography>
-                                                </div>
+                                            <div className="flex flex-row w-full">
+                                                <Typography variant="body1" component={'p'} className="mr-5 font-bold">
+                                                    Status:
+                                                </Typography>
+                                                <Typography variant="body1" className="text-red-600 font-bold">Deleted</Typography>
                                             </div>
                                         )
                                     }
-                                    <div className="flex justify-center sm:justify-start">
-                                        <div className="flex pl-10">
-                                            <Typography component={'h4'} className="pr-5">
-                                                <b>Name:</b>
-                                            </Typography>
-                                            {memberDetails.first_name + ' ' + memberDetails.last_name}
-                                        </div>
+                                    <div className="flex flex-row w-full mb-3">
+                                        <Typography component={'p'} variant="body1" className="mr-5 font-bold">
+                                            Name:
+                                        </Typography>
+                                        <Typography variant="body1">{memberDetails.first_name + ' ' + memberDetails.last_name}</Typography>
                                     </div>
-                                    <div className="flex justify-center sm:justify-start">
-                                        <div className="flex pl-10">
-                                            <Typography component={'h4'} className="pr-5">
-                                                <b>Email:</b>
-                                            </Typography>
-                                            {memberDetails.email}
-                                        </div>
+                                    <div className="flex flex-row w-full">
+                                        <Typography component={'h4'} className="mr-5 font-bold">
+                                            Email:
+                                        </Typography>
+                                        <Typography variant="body1">{memberDetails.email}</Typography>
                                     </div>
                                 </div>
                                 {
                                     !memberDetails.deleted_at && (
-                                        <div className="flex flex-col w-1/2 justify-center sm:justify-end">
-                                            <div className="flex justify-center sm:justify-end">
-                                                <FormControl sx={{ m: 1, minWidth: 100, marginBottom: '3rem' }} size="small">
-                                                    <InputLabel id="demo-select-small">Status</InputLabel>
-                                                    <Select
-                                                        labelId="demo-select-small"
-                                                        id="demo-select-small"
-                                                        value={memberStatus}
-                                                        label="Status"
-                                                        onChange={handleMemberStatus}
-                                                    >
-                                                        <MenuItem value="member">Member</MenuItem>
-                                                        <MenuItem value="validating">Validating</MenuItem>
-                                                        <MenuItem value="suspended">Suspended</MenuItem>
-                                                        <MenuItem value="deleted">Deleted</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            </div>
+                                        <div className="mt-12 flex sm:flex-row md:flex-col lg:flex-col w-1/2 lg:justify-start sm:justify-end">
+                                            <FormControl size="small">
+                                                <InputLabel id="demo-select-small">Status</InputLabel>
+                                                <Select
+                                                    labelId="demo-select-small"
+                                                    id="demo-select-small"
+                                                    value={memberStatus}
+                                                    label="Status"
+                                                    onChange={handleMemberStatus}
+                                                >
+                                                    <MenuItem value="member">Member</MenuItem>
+                                                    <MenuItem value="validating">Validating</MenuItem>
+                                                    <MenuItem value="suspended">Suspended</MenuItem>
+                                                    <MenuItem value="deleted">Deleted</MenuItem>
+                                                </Select>
+                                            </FormControl>
                                         </div>
                                     )
                                 }
                             </div>
+
                             <Divider />
                             {'MemberNotes' in memberDetails ?
                                 <div className="flex flex-col justify-start p-0 m-0 px-4" style={{ height: '30rem' }}>
