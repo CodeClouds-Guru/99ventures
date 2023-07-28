@@ -26,7 +26,7 @@ module.exports = async function (req, res, next) {
     where: { company_portal_id: company_portal.id },
   });
   req.session.google_captcha_settings = google_captcha_settings;
-  if ('member' in req.session && req.session.member) {
+  if ('member' in req.session && req.session.member && dev_mode !== '1') {
     let ip = req.ip;
     if (Array.isArray(ip)) {
       ip = ip[0];
