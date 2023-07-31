@@ -101,9 +101,11 @@ class OfferwallPostbackController {
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
               );
+              
             res.send(
-              req.body ? JSON.stringify(req.body) : JSON.stringify(req.query)
+              Object.keys(req.body).length ? JSON.stringify(req.body) : JSON.stringify(req.query)
             );
+            return; 
           }
         }
       } catch (err) {
@@ -114,6 +116,10 @@ class OfferwallPostbackController {
         });
       }
     }
+    res.send({
+      status: true,
+      message: 'Completed'
+    })
   }
 }
 

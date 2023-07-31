@@ -210,7 +210,7 @@ function List(props) {
 	}, [modules])
 
 	useEffect(() => {
-		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('approved') }
+		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('pending') }
 	}, [])
 
 	useEffect(() => {
@@ -407,6 +407,12 @@ function List(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (module, n, field) => {
+		if (module === 'completed-surveys') {
+			if (field.field_name === 'MemberTransaction->Member.username') {
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
+			}
+			return processFieldValue(n[field.field_name], field)
+		}
 		if (module === 'tickets') {
 			if (field.field_name === 'status') {
 				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
@@ -483,7 +489,7 @@ function List(props) {
 			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions' && n.type === 'credited' && (n.status === 'initiated' || n.status === 'processing')) {
+			if (module === 'member-transactions' && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
 				return (
 					<>
 						<IconButton
@@ -666,7 +672,7 @@ function List(props) {
 			dispatch(showMessage({ variant: 'error', message }));
 		})
 	}
-	
+
 	return (
 		<div>
 
@@ -766,27 +772,27 @@ function List(props) {
 												startAdornment={
 													<InputAdornment position="start">
 														<IconButton
-														aria-label="toggle password visibility"
-														edge="start"
+															aria-label="toggle password visibility"
+															edge="start"
 														>
 															<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={18} color="disabled">feather:calendar</FuseSvgIcon>
 														</IconButton>
 													</InputAdornment>
-												}												
+												}
 												endAdornment={
 													(dateRange && dateRange.startDate) && (
 														<InputAdornment position="end">
 															<IconButton
-															aria-label="toggle password visibility"
-															edge="end"
-															onClick={handleClearDateRange}
+																aria-label="toggle password visibility"
+																edge="end"
+																onClick={handleClearDateRange}
 															>
 																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action">material-outline:close</FuseSvgIcon>
 															</IconButton>
 														</InputAdornment>
 													)
 												}
-												size="small"												
+												size="small"
 												placeholder="Select daterange (GMT)"
 												value={
 													dateRange && dateRange.startDate
