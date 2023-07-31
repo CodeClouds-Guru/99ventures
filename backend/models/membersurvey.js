@@ -120,7 +120,7 @@ module.exports = (sequelize, DataTypes) => {
     '$MemberTransaction->Member.username$': {
       field_name: 'MemberTransaction->Member.username',
       db_name: '`MemberTransaction->Member`.`username`',
-      type: 'text',
+      type: 'username',
       placeholder: 'Username',
       listing: true,
       show_in_form: false,
@@ -129,6 +129,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
+    },
+    '$MemberTransaction->Member.id$': {
+      field_name: 'MemberTransaction->Member.id',
+      db_name: '`MemberTransaction->Member`.`id`',
+      type: 'text',
+      placeholder: 'Member Id',
+      listing: false,
+      show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
     },
   };
   sequelizePaginate.paginate(MemberSurvey);
