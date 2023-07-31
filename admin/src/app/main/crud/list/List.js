@@ -210,7 +210,7 @@ function List(props) {
 	}, [modules])
 
 	useEffect(() => {
-		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('approved') }
+		if (module === 'withdrawal-requests') { setWithdrawalRequestStatus('pending') }
 	}, [])
 
 	useEffect(() => {
