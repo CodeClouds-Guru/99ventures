@@ -355,7 +355,7 @@ class ScriptParser {
 
       case 'MemberTransaction':
         return {
-          where: { member_id: user.id, status:2 },
+          where: user ? { member_id: user.id, status:2} : { status:2, type: 'credited',amount_action: { [Op.ne]: 'reversed_transaction',} , },
           include: [
             { model: Models.Member, required: true },
             {
