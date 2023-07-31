@@ -186,10 +186,10 @@ const CreateUpdate = () => {
             return false
         }
         setLoading(true);
-        axios.post(moduleId === 'create' ? jwtServiceConfig.offerwallsSave : jwtServiceConfig.offerwallUpdate + `/${moduleId}`, {
+        const params = {
             campaign_id: null,
             premium_configuration: premium_configuration,
-            name: name,
+            // name: name,
             sub_id_prefix: sub_id_prefix,
             logo: logo,
             log_postback_errors: logPostbackErrors ? 1 : 0,
@@ -211,7 +211,17 @@ const CreateUpdate = () => {
             // currency_max: max
             description: description,
             rating
-        })
+        }
+
+        // In case of update, offerwall name would be disabled
+        if(isNaN(moduleId) && moduleId === 'create'){
+            params.name = name
+        } else {
+            params.name = singleOfferwallData.name
+        }
+
+
+        axios.post(moduleId === 'create' ? jwtServiceConfig.offerwallsSave : jwtServiceConfig.offerwallUpdate + `/${moduleId}`, params)
             .then((response) => {
                 if (response.status === 200) {
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
@@ -307,6 +317,7 @@ const CreateUpdate = () => {
                                         helperText={errors?.name?.message}
                                         variant="outlined"
                                         required
+                                        disabled={!isNaN(moduleId) ? true : false}
                                     />
                                 )}
                             />
