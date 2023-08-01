@@ -152,6 +152,7 @@ const MemberDetails = (props) => {
     const [paymentEmail, setPaymentEmail] = useState('');
     const [memberinfo, setMemberinfo] = useState({});
     const [reflinkMode, setReflinkMode] = useState(false);
+    const [memberStatus, setMemberStatus] = useState('');
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -216,12 +217,13 @@ const MemberDetails = (props) => {
                     // We set the result info to the state. When user click on cancel edit btn then we will set the value on every input fields from this memberinfo state.
                     setMemberinfo(result);
                     if (result.deleted_at && result.deleted_by && result.deleted_by_admin) {
-                        props.setDeletedMemberData({
-                            deleted_at: result.deleted_at,
-                            deleted_by: result.deleted_by,
-                            deleted_by_admin: result.deleted_by_admin
-                        })
-                        props.setIsMemberDeleted(true)
+                        // props.setDeletedMemberData({
+                        //     deleted_at: result.deleted_at,
+                        //     deleted_by: result.deleted_by,
+                        //     deleted_by_admin: result.deleted_by_admin
+                        // })
+                        // props.setIsMemberDeleted(true)
+                        setMemberStatus('deleted')
                     }
                 }
             })
@@ -413,7 +415,10 @@ const MemberDetails = (props) => {
         )
     }
     return (
-        <Box className="sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full" >
+        <Box 
+            className={'sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full ' + ((memberStatus == 'deleted') ? 'border-4' : '')}  
+            style={{borderColor: (memberStatus == 'deleted') ? '#f44336' : 'none' }}   
+        >
             <div className="lg:w-1/3 xl:w-2/5">
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center justify-between'>
