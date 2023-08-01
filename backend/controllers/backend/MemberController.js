@@ -40,6 +40,8 @@ class MemberController extends Controller {
     this.generateFields = this.generateFields.bind(this);
     this.getMembersList = this.getMembersList.bind(this);
     this.permanentlyDeleteMember = this.permanentlyDeleteMember.bind(this);
+    this.softDeleteMember = this.softDeleteMember.bind(this);
+
     this.fieldConfig = {
       id: 'ID',
       username: 'Username',
@@ -844,23 +846,15 @@ class MemberController extends Controller {
       message: 'Action executed successfully',
     };
     try {
-      // switch (req.body.module) {
-      //   case 'member_notes':
-      //     await this.deleteMemberNotes(req);
-      //     break;
-      //   default:
-      //     await super.delete(req);
-      //     break;
-      // }
-
+      var result;
       if(req.body.module === 'member_notes') {
-        await this.deleteMemberNotes(req);
+        result = await this.deleteMemberNotes(req);
       } else if(req.body.permanet_delete === true) {
-        await this.permanentlyDeleteMember(req);
+        result = await this.permanentlyDeleteMember(req);
       } else {
-        await super.delete(req);
+        result = await this.softDeleteMember(req);
       }
-
+      resp.message = result.message;
     } catch (e) {
       console.error(e);
       resp = {
@@ -875,7 +869,9 @@ class MemberController extends Controller {
 
   async deleteMemberNotes(req) {
     await MemberNote.destroy({ where: { id: req.body.ids } });
-    return true;
+    return {
+      message: "Record(s) has been deleted successfully"
+    };
   }
 
   /**
@@ -962,6 +958,24 @@ class MemberController extends Controller {
     catch (error) {
       console.log('error', error)
       await t.rollback();
+    }
+  }
+
+  /**
+   * Soft delete member
+   */
+  async softDeleteMember(req){
+    let modelIds = req.body.model_ids ?? [];
+    if(modelIds.length < 1) {
+      return;
+    }
+
+    try {
+      await this.model.update({ status: 'deleted' }, { where: { id: modelIds } })
+      return await super.delete(req);
+    } 
+    catch (error) {
+      throw error;
     }
   }
 
