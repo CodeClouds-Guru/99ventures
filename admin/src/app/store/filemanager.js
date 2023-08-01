@@ -248,7 +248,8 @@ const initialState = {
     metadata: {},
     metadataLoading: false,
     config: {},
-    allTypes: []
+    allTypes: [],
+    openUploadDialog: false
 }
 
 const fileManagerSlice = createSlice({
@@ -293,6 +294,9 @@ const fileManagerSlice = createSlice({
         },
         setMetaData: (state, action) => {
             state.metadata = action.payload
+        },
+        setUploadDialog: (state, action) => {
+            state.openUploadDialog = action.payload.status
         }
     },
     extraReducers: {
@@ -348,7 +352,8 @@ export const {
     setListData,
     setJsonData,
     setFolderOptions,
-    setMetaData
+    setMetaData,
+    setUploadDialog
 } = fileManagerSlice.actions
 
 export default fileManagerSlice.reducer
