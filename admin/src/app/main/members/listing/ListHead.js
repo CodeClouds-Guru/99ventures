@@ -146,7 +146,7 @@ function ListHead(props) {
                                     onClose={closeSelectedOrdersMenu}
                                 >
                                     <MenuList>
-                                        {/* <MenuItem
+                                        <MenuItem
                                             onClick={() => {
                                                 // props.onMenuItemClick(selectedOrderIds);
                                                 // closeSelectedOrdersMenu();
@@ -157,7 +157,7 @@ function ListHead(props) {
                                                 <FuseSvgIcon>heroicons-outline:trash</FuseSvgIcon>
                                             </ListItemIcon>
                                             <ListItemText primary="Remove" />
-                                        </MenuItem> */}
+                                        </MenuItem>
                                         <MenuItem
                                             onClick={() => {
                                                 setDialogStatus(true)
