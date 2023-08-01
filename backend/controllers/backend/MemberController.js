@@ -844,22 +844,22 @@ class MemberController extends Controller {
       message: 'Action executed successfully',
     };
     try {
-      switch (req.body.module) {
-        case 'member_notes':
-          await this.deleteMemberNotes(req);
-          break;
-        default:
-          await super.delete(req);
-          break;
-      }
-
-      // if(req.body.module === 'member_notes') {
-      //   await this.deleteMemberNotes(req);
-      // } else if(req.body.permanet_delete === true) {
-      //   await this.permanentlyDeleteMember(req);
-      // } else {
-      //   await super.delete(req);
+      // switch (req.body.module) {
+      //   case 'member_notes':
+      //     await this.deleteMemberNotes(req);
+      //     break;
+      //   default:
+      //     await super.delete(req);
+      //     break;
       // }
+
+      if(req.body.module === 'member_notes') {
+        await this.deleteMemberNotes(req);
+      } else if(req.body.permanet_delete === true) {
+        await this.permanentlyDeleteMember(req);
+      } else {
+        await super.delete(req);
+      }
 
     } catch (e) {
       console.error(e);
@@ -882,24 +882,25 @@ class MemberController extends Controller {
    * Permanently delete member
    */
   async permanentlyDeleteMember(req) {
-    // const modelIds = req.body.model_ids || [];
-    // if(modelIds.length < 1) {
-    //   return;
-    // }
-
-    const members = await Member.findAll({
-      attributes: ['avatar'],
-      where: {
-        id: modelIds
+    const modelIds = req.body.model_ids || [];
+    if(modelIds.length < 1) {
+      return;
+    }
+    
+    const members = await sequelize.query(
+      "SELECT avatar FROM members WHERE id IN (:member_ids)",
+      {
+        type: QueryTypes.SELECT, 
+        replacements: {member_ids: modelIds}
       }
-    });
+    );
 
     const t = await sequelize.transaction();
     try {
       await sequelize.query(
         "DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);",
         {
-          type: QueryTypes.SELECT, 
+          type: QueryTypes.DELETE, 
           replacements: {member_ids: modelIds},
           transaction: t
         }
@@ -908,7 +909,16 @@ class MemberController extends Controller {
       await sequelize.query(
         "DELETE member_transactions, member_surveys, withdrawal_requests FROM member_transactions LEFT JOIN member_surveys ON (member_transactions.id = member_surveys.member_transaction_id) LEFT JOIN withdrawal_requests ON (member_transactions.id = withdrawal_requests.member_transaction_id OR withdrawal_requests.member_id = member_transactions.member_id) WHERE member_transactions.member_id IN (:member_ids);",
         {
-          type: QueryTypes.SELECT, 
+          type: QueryTypes.DELETE, 
+          replacements: {member_ids: modelIds},
+          transaction: t
+        }
+      );
+
+      await sequelize.query(
+        "DELETE FROM member_referrals WHERE member_id IN (:member_ids) OR referral_id IN (:member_ids);",
+        {
+          type: QueryTypes.DELETE, 
           replacements: {member_ids: modelIds},
           transaction: t
         }
@@ -926,11 +936,10 @@ class MemberController extends Controller {
         LEFT JOIN member_activity_logs ON (member_balances.member_id = member_activity_logs.member_id)
         LEFT JOIN excluded_member_payment_method ON (excluded_member_payment_method.member_id = member_activity_logs.member_id)
         LEFT JOIN campaign_member ON (excluded_member_payment_method.member_id = campaign_member.member_id)
-        LEFT JOIN member_referrals ON (member_referrals.member_id = campaign_member.member_id OR member_referrals.referral_id = campaign_member.member_id)
-        LEFT JOIN members ON (members.id = member_referrals.member_id)
+        LEFT JOIN members ON (members.id = campaign_member.member_id)
         WHERE shoutboxes.member_id IN (:member_ids);`,
         {
-          type: QueryTypes.SELECT, 
+          type: QueryTypes.DELETE, 
           replacements: {member_ids: modelIds},
           transaction: t
         }
@@ -949,6 +958,7 @@ class MemberController extends Controller {
       };
     }
     catch (error) {
+      console.log('error', error)
       await t.rollback();
     }
   }
