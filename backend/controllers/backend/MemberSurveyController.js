@@ -51,15 +51,9 @@ class MemberSurveyController extends Controller {
           'MemberTransaction->Member.id',
           row.MemberTransaction.Member.id
         );
-        row.setDataValue('MemberTransaction->type', row.MemberTransaction.type);
-        row.setDataValue(
-          'MemberTransaction->status',
-          row.MemberTransaction.status
-        );
-        row.setDataValue(
-          'MemberTransaction->amount_action',
-          row.MemberTransaction.amount_action
-        );
+        row.setDataValue('type', row.MemberTransaction.type);
+        row.setDataValue('status', row.MemberTransaction.status);
+        row.setDataValue('amount_action', row.MemberTransaction.amount_action);
       } else {
         row.setDataValue('MemberTransaction->Member.username', '');
         row.setDataValue('MemberTransaction->Member.id', '');
