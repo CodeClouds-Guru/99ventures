@@ -377,7 +377,7 @@ class SurveycallbackController {
 				transaction_id: providerName + ' #'+surveyNumber,
 				member_id: member.id,
 				amount: amount,
-				note: providerName + 'survey (#' + surveyNumber + ') completion',
+				note: providerName + ' survey (#' + surveyNumber + ') completion',
 				type: 'credited',
 				amount_action: 'survey',
 				created_by: null,
