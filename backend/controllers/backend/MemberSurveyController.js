@@ -19,7 +19,7 @@ class MemberSurveyController extends Controller {
       },
       {
         model: MemberTransaction,
-        attributes: ['transaction_id', 'type', 'status', 'amount_action'],
+        attributes: ['transaction_id', 'type', 'status', 'amount_action', 'id'],
         include: [
           {
             model: Member,
