@@ -152,7 +152,7 @@ const MemberDetails = (props) => {
     const [paymentEmail, setPaymentEmail] = useState('');
     const [memberinfo, setMemberinfo] = useState({});
     const [reflinkMode, setReflinkMode] = useState(false);
-    const [memberStatus, setMemberStatus] = useState('');
+    const [memberDeleted, setMemberDeleted] = useState(false);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -223,7 +223,7 @@ const MemberDetails = (props) => {
                         //     deleted_by_admin: result.deleted_by_admin
                         // })
                         // props.setIsMemberDeleted(true)
-                        setMemberStatus('deleted')
+                        setMemberDeleted(true)
                     }
                 }
             })
@@ -416,8 +416,8 @@ const MemberDetails = (props) => {
     }
     return (
         <Box 
-            className={'sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full ' + ((memberStatus == 'deleted') ? 'border-4' : '')}  
-            style={{borderColor: (memberStatus == 'deleted') ? '#f44336' : 'none' }}   
+            className={'sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full ' + ((memberDeleted) ? 'border-4' : '')}  
+            style={{borderColor: (memberDeleted) ? '#f44336' : 'none' }}   
         >
             <div className="lg:w-1/3 xl:w-2/5">
                 <div className='flex items-start justify-between'>
@@ -468,11 +468,16 @@ const MemberDetails = (props) => {
                                     }}
                                 >
                                     <strong>{memberData.username}</strong>
-                                    <Tooltip title="Click to edit" placement="top-start">
-                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
-                                            <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
-                                        </IconButton>
-                                    </Tooltip>
+                                    {
+                                        !memberDeleted && (
+                                            <Tooltip title="Click to edit" placement="top-start">
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditMode(true)}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-28" size={14} color="action">heroicons-outline:pencil-alt</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>
+                                        )
+                                    }
+                                    
                                 </Typography>
                             )
                         }
@@ -559,11 +564,16 @@ const MemberDetails = (props) => {
                                             ) : (
                                                 <div className='flex'>
                                                     {showStatus(memberData.status)}
-                                                    <Tooltip title="Change Status" placement="top-start">
-                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditStatus(true)}>
-                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    {
+                                                        !memberDeleted && (
+                                                            <Tooltip title="Change Status" placement="top-start">
+                                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditStatus(true)}>
+                                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        )
+                                                    }
+                                                    
                                                 </div>
                                             )
                                         }
@@ -618,11 +628,16 @@ const MemberDetails = (props) => {
                                             ) : (
                                                 <div className='flex'>
                                                     {showAdminStatus(memberData.admin_status)}
-                                                    <Tooltip title="Change Status" placement="top-start">
-                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditAdminStatus(true)}>
-                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    {
+                                                        !memberDeleted && (
+                                                            <Tooltip title="Change Status" placement="top-start">
+                                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditAdminStatus(true)}>
+                                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        )
+                                                    }
+                                                    
                                                 </div>
                                             )
                                         }
@@ -703,11 +718,15 @@ const MemberDetails = (props) => {
                                             <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
                                                 {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
                                             </Typography>
-                                            <Tooltip title="Change Payment Email" placement="top-start">
-                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
-                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
-                                                </IconButton>
-                                            </Tooltip>
+                                            {
+                                                !memberDeleted && (
+                                                    <Tooltip title="Change Payment Email" placement="top-start">
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => setEditPaymentEmail(true)}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:pencil</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )
+                                            }
                                         </div>
                                     )
                                 } />
@@ -913,12 +932,12 @@ const MemberDetails = (props) => {
                         {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                             Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
                         </Typography> */}
-                        <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} />
+                        <Adjustment updateMemberData={updateMemberData} totalEarnings={memberData.total_earnings} memberDeleted={memberDeleted} />
                     </Box>
 
                     <div className='sm:w-1/4 lg:w-full lg:text-left sm:text-center'>
                         <Typography variant="body1" className="mb-5">Login as this account</Typography>
-                        <Button variant="outlined" size="small" color="error" onClick={() => onOpenAlertDialogHandle('delete')} sx={{ padding: '4px 15px' }}>DELETE ACCOUNT</Button>
+                        <Button variant="outlined" size="small" color="error" onClick={() => onOpenAlertDialogHandle('delete')} sx={{ padding: '4px 15px' }}>DELETE PERMANENTLY</Button>
                     </div>
                 </div>
             </div>
@@ -1114,9 +1133,13 @@ const MemberDetails = (props) => {
                     <Divider sx={{ borderWidth: 2 }} className="my-5" />
                     <Box component="div" className="w-full flex flex-col">
                         <Typography variant="body1" className="font-bold flex">Account Notes Section
-                            <Tooltip title="Add Note" placement="right">
-                                <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => { setStatuslessNote(true); setDialogStatus(true) }} >heroicons-solid:plus</FuseSvgIcon>
-                            </Tooltip>
+                        {
+                            !memberDeleted && (
+                                <Tooltip title="Add Note" placement="right">
+                                    <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => { setStatuslessNote(true); setDialogStatus(true) }} >heroicons-solid:plus</FuseSvgIcon>
+                                </Tooltip>
+                            )
+                        }
                         </Typography>
                         {
                             (accountNotes.length != 0) ? (
