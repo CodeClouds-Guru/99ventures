@@ -31,6 +31,7 @@ class MemberTransactionController extends Controller {
       };
     }
     options.where = new_option;
+    options.attributes.push('type');
     options.include = {
       model: Member,
       required: false,
@@ -48,7 +49,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.Member.dataValues.avatar;
       }
       if (record.dataValues.transaction_id === null) {
-        record.dataValues.transaction_id = 'N/A'
+        record.dataValues.transaction_id = 'N/A';
       }
       switch (record.dataValues.status) {
         case 1:

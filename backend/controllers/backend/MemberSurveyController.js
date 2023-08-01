@@ -23,7 +23,7 @@ class MemberSurveyController extends Controller{
                 include:[
                     {
                         model: Member,
-                        attributes: ['username'],
+                        attributes: ['username','id'],
                         where:{company_portal_id:company_portal_id}
                     }
                 ]
@@ -44,8 +44,10 @@ class MemberSurveyController extends Controller{
             }
             if(row.MemberTransaction){
               row.setDataValue('MemberTransaction->Member.username', row.MemberTransaction.Member.username);
+              row.setDataValue('MemberTransaction->Member.id', row.MemberTransaction.Member.id);
             }else{
               row.setDataValue('MemberTransaction->Member.username', '');
+              row.setDataValue('MemberTransaction->Member.id', '');
             }
           })
           return {
