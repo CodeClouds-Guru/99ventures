@@ -13,6 +13,7 @@ import SurveyDetails from './components/SurveyDetails';
 import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
 import CustomerLoader from '../../shared-components/customLoader/Index'
+import StickyMessage from './components/StickyMessage';
 
 const wordWrap = {
     wordBreak: 'break-all'
@@ -416,11 +417,11 @@ const MemberDetails = (props) => {
     }
     return (
         <Box 
-            className={'sm:p-16 lg:p-16 md:p-16 xl:p-16 flex sm:flex-col lg:flex-row h-full ' + ((memberDeleted) ? 'border-4' : '')}  
+            className={'sm:p-16 lg:p-16 md:p-16 flex sm:flex-col lg:flex-col h-full ' + ((memberDeleted) ? 'border-4 lg:pt-0 sm:pt-0 md:pt-0' : '')}  
             style={{borderColor: (memberDeleted) ? '#f44336' : 'none' }}   
         >
-            {memberDeleted && <div className='stick--msg'><p>Member Deleted</p></div>}
-            <div className={'flex xl:flex-row lg:flex-row sm:flex-col w-full '+ ((memberDeleted) ? 'mt-20' : '')}>
+            {memberDeleted && <StickyMessage />}
+            <div className={'flex xl:flex-row lg:flex-row sm:flex-col w-full '+ ((memberDeleted) ? 'lg:mt-10' : '')}>
                 <div className="lg:w-1/3 xl:w-2/5">
                     <div className='flex items-start justify-between'>
                         <div className='flex items-center justify-between'>
