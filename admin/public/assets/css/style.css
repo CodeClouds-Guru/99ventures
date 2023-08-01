@@ -45,9 +45,29 @@ textarea.custom-code-editor-fullscreen::-webkit-scrollbar-thumb{background: #fff
 .date-range-wrapper > div{right: 23px; top: 172px;}
 .member-txn-list.date-range-wrapper > div{right: 67px; top: 112px;}
 .custom-code-editor.scripts-editor{ min-height: 500px;}
-@media screen and (max-width: 768px) {
-    .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
-} 
+.stick--msg{
+    position: absolute;
+    background: rgb(255, 0, 0);
+    left: 43%;
+    right: 43%;
+    top: 0px;
+    text-align: center;
+    padding: 4px 10px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+}
 .dashboard-datepicker div.MuiBox-root{top: 32px; bottom: 100%;}
 .ticket-list .MuiBox-root.muiltr-79elbk{top: 117px}
 .conversation--btn button:hover{background-color: #ff000038 !important;}
+
+@media screen and (max-width: 1400px) {
+    .stick--msg{
+        left: 42%;
+        right: 42%;
+    }
+} 
+@media screen and (max-width: 768px) {
+    .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
+} 
