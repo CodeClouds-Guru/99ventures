@@ -51,15 +51,35 @@ class MemberSurveyController extends Controller {
           'MemberTransaction->Member.id',
           row.MemberTransaction.Member.id
         );
+        switch (row.MemberTransaction.status) {
+          case 1:
+            row.MemberTransaction.status = 'processing';
+            break;
+          case 2:
+            row.MemberTransaction.status = 'completed';
+            break;
+          case 3:
+            row.MemberTransaction.status = 'failed';
+            break;
+          case 4:
+            row.MemberTransaction.status = 'declined';
+            break;
+          case 5:
+            row.MemberTransaction.status = 'reverted';
+            break;
+          default:
+            row.MemberTransaction.status = 'initiated';
+            break;
+        }
         row.setDataValue('type', row.MemberTransaction.type);
         row.setDataValue('status', row.MemberTransaction.status);
         row.setDataValue('amount_action', row.MemberTransaction.amount_action);
       } else {
         row.setDataValue('MemberTransaction->Member.username', '');
         row.setDataValue('MemberTransaction->Member.id', '');
-        row.setDataValue('MemberTransaction->type', '');
-        row.setDataValue('MemberTransaction->status', '');
-        row.setDataValue('MemberTransaction->amount_action', '');
+        row.setDataValue('type', '');
+        row.setDataValue('status', '');
+        row.setDataValue('amount_action', '');
       }
     });
     return {
