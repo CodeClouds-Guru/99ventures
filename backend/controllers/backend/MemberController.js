@@ -950,7 +950,9 @@ class MemberController extends Controller {
       //Avatar Delete
       const fileHelper = new FileHelper(null, null, null);
       for(let member of members) {
-        let file_delete = await fileHelper.deleteFile(member.avatar);
+        if(member.avatar !== null){
+          await fileHelper.deleteFile(member.avatar);
+        }
       }
 
       return {
