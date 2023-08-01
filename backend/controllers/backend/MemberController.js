@@ -39,6 +39,7 @@ class MemberController extends Controller {
     this.export = this.export.bind(this);
     this.generateFields = this.generateFields.bind(this);
     this.getMembersList = this.getMembersList.bind(this);
+    this.permanentlyDeleteMember = this.permanentlyDeleteMember.bind(this);
     this.fieldConfig = {
       id: 'ID',
       username: 'Username',
@@ -523,6 +524,7 @@ class MemberController extends Controller {
     options.distinct = true;
     options.attributes = colums;
     options.group = 'Member.id';
+    options.paranoid = false;
     const relationCols = [];
 
     if (fields.includes('MembershipTier.name')) {
@@ -850,6 +852,15 @@ class MemberController extends Controller {
           await super.delete(req);
           break;
       }
+
+      // if(req.body.module === 'member_notes') {
+      //   await this.deleteMemberNotes(req);
+      // } else if(req.body.permanet_delete === true) {
+      //   await this.permanentlyDeleteMember(req);
+      // } else {
+      //   await super.delete(req);
+      // }
+
     } catch (e) {
       console.error(e);
       resp = {
@@ -865,6 +876,81 @@ class MemberController extends Controller {
   async deleteMemberNotes(req) {
     await MemberNote.destroy({ where: { id: req.body.ids } });
     return true;
+  }
+
+  /**
+   * Permanently delete member
+   */
+  async permanentlyDeleteMember(req) {
+    // const modelIds = req.body.model_ids || [];
+    // if(modelIds.length < 1) {
+    //   return;
+    // }
+
+    const members = await Member.findAll({
+      attributes: ['avatar'],
+      where: {
+        id: modelIds
+      }
+    });
+
+    const t = await sequelize.transaction();
+    try {
+      await sequelize.query(
+        "DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);",
+        {
+          type: QueryTypes.SELECT, 
+          replacements: {member_ids: modelIds},
+          transaction: t
+        }
+      );
+
+      await sequelize.query(
+        "DELETE member_transactions, member_surveys, withdrawal_requests FROM member_transactions LEFT JOIN member_surveys ON (member_transactions.id = member_surveys.member_transaction_id) LEFT JOIN withdrawal_requests ON (member_transactions.id = withdrawal_requests.member_transaction_id OR withdrawal_requests.member_id = member_transactions.member_id) WHERE member_transactions.member_id IN (:member_ids);",
+        {
+          type: QueryTypes.SELECT, 
+          replacements: {member_ids: modelIds},
+          transaction: t
+        }
+      );
+
+      await sequelize.query(
+        `DELETE shoutboxes, member_payment_informations, member_notifications, member_offer_wall, member_notes, member_eligibilities, member_balances, member_activity_logs, excluded_member_payment_method, campaign_member, members 
+        FROM shoutboxes         
+        LEFT JOIN member_payment_informations ON (shoutboxes.member_id = member_payment_informations.member_id)
+        LEFT JOIN member_notifications ON (member_notifications.member_id = member_payment_informations.member_id)
+        LEFT JOIN member_offer_wall ON (member_notifications.member_id = member_offer_wall.member_id)
+        LEFT JOIN member_notes ON (member_notes.member_id = member_offer_wall.member_id)
+        LEFT JOIN member_eligibilities ON (member_notes.member_id = member_eligibilities.member_id)
+        LEFT JOIN member_balances ON (member_balances.member_id = member_eligibilities.member_id)
+        LEFT JOIN member_activity_logs ON (member_balances.member_id = member_activity_logs.member_id)
+        LEFT JOIN excluded_member_payment_method ON (excluded_member_payment_method.member_id = member_activity_logs.member_id)
+        LEFT JOIN campaign_member ON (excluded_member_payment_method.member_id = campaign_member.member_id)
+        LEFT JOIN member_referrals ON (member_referrals.member_id = campaign_member.member_id OR member_referrals.referral_id = campaign_member.member_id)
+        LEFT JOIN members ON (members.id = member_referrals.member_id)
+        WHERE shoutboxes.member_id IN (:member_ids);`,
+        {
+          type: QueryTypes.SELECT, 
+          replacements: {member_ids: modelIds},
+          transaction: t
+        }
+      );
+
+      await t.commit();
+      
+      //Avatar Delete
+      const fileHelper = new FileHelper(null, null, null);
+      for(let member of members) {
+        let file_delete = await fileHelper.deleteFile(member.avatar);
+      }
+
+      return {
+        message: "Record(s) has been deleted successfully",
+      };
+    }
+    catch (error) {
+      await t.rollback();
+    }
   }
 
   /**
