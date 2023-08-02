@@ -6,7 +6,7 @@ const {
 } = require('../../models');
 
 class OfferwallPostbackController {
-  constructor() {}
+  constructor() { }
   async save(req, res) {
     //---- To Generate Log
     const logger1 = require('../../helpers/Logger')(
@@ -27,11 +27,13 @@ class OfferwallPostbackController {
             'campaign_name_variable',
             'sub_id_variable',
             'postback_url',
+            'currency_percent',
           ],
           where: { name: offerwall_name },
         });
-        // console.log('offerwall_details', offerwall_details);
 
+        var currency_percent = offerwall_details.currency_percent || '100';
+        currency_percent = parseFloat(currency_percent);
         if (
           offerwall_details &&
           (offerwall_details.campaign_id_variable in req.query ||
@@ -68,11 +70,11 @@ class OfferwallPostbackController {
                 offerwall_details.campaign_name_variable
               ]
                 ? parseFloat(
-                    req.query[offerwall_details.campaign_name_variable]
-                  )
+                  req.query[offerwall_details.campaign_name_variable]
+                )
                 : parseFloat(
-                    req.body[offerwall_details.campaign_name_variable]
-                  );
+                  req.body[offerwall_details.campaign_name_variable]
+                );
             }
 
             if (
@@ -84,11 +86,12 @@ class OfferwallPostbackController {
                 : req.body[offerwall_details.sub_id_variable];
             }
 
+            payout_amount = (payout_amount * currency_percent) / 100;
             const transaction_obj = {
-              member_id: member ? member.id : null,
+              member_id: member.id,
               amount: payout_amount,
               note: offerwall_name,
-              type: parseFloat(payout_amount) > 0 ? 'credited' : 'withdraw',
+              type: 'credited',
               amount_action: 'survey',
               created_by: null,
               payload: req.body
@@ -101,11 +104,11 @@ class OfferwallPostbackController {
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
               );
-              
+
             res.send(
               Object.keys(req.body).length ? JSON.stringify(req.body) : JSON.stringify(req.query)
             );
-            return; 
+            return;
           }
         }
       } catch (err) {

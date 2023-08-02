@@ -9,6 +9,26 @@ import Helper from 'src/app/helper';
 const UserDetails = (props) => {
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const module = 'Members';
+
+    return (
+        <FusePageCarded
+            className="sm:px-20 member-details-wrapper"
+            header={
+                <PageHeader module={module} button="profile" />
+            }
+            content={
+                <MemberDetails />
+            }
+            rightSidebarOpen={false}
+            scroll={isMobile ? 'normal' : 'content'}
+            sx={{'& .container': {borderRadius: '0'}}}
+        />
+    );
+}
+
+/*const UserDetails = (props) => {
+    const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
+    const module = 'Members';
     const [isMemberDeleted, setIsMemberDeleted] = useState(false);
     const [deletedMemberData, setDeletedMemberData] = useState({});
 
@@ -34,6 +54,6 @@ const UserDetails = (props) => {
                 scroll={isMobile ? 'normal' : 'content'}
             />
     );
-}
+}*/
 
 export default UserDetails;

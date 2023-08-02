@@ -79,7 +79,11 @@ const Adjustment = (props) => {
 
     return (
         <div className='flex items-center'>
-            <Button variant="contained" color="primary" size="small" onClick={() => setDialogStatus(true)}>Adjustment</Button>
+            {
+                !props.memberDeleted && (
+                    <Button variant="contained" color="primary" size="small" onClick={() => setDialogStatus(true)}>Adjustment</Button>
+                )
+            }
             {
                 dialogStatus && (
                     <Dialog open={dialogStatus} onClose={() => setDialogStatus(false)} fullWidth={true}>

@@ -139,7 +139,7 @@ function List(props) {
 		axios.get(endpoint, { params }).then(res => {
 			setListConfigDialog(false);
 			let fields_var = res.data.results.fields;
-			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {
+			['campaigns', 'member-transactions', 'completed-surveys'].includes(module) ? fields_var.actions = {
 				db_name: "actions",
 				field_name: "actions",
 				listing: true,
@@ -302,7 +302,7 @@ function List(props) {
 	}
 
 	function revertMemberTransaction() {
-		axios.post(`${module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
+		axios.post(`${module === 'completed-surveys' ? 'member-transactions' : module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
 			setOpenRevertAlertDialog(false)
 			setTid(0);
 			setMemberID(0)
@@ -479,11 +479,14 @@ function List(props) {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (module === 'campaigns' || module === 'member-transactions') {
+		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
 			if (module === 'campaigns' && field.field_name === 'status') {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 			}
-			if (field.field_name === 'actions' && n.type === 'credited' && (n.status === 'initiated' || n.status === 'processing')) {
+			if (field.field_name === 'MemberTransaction->Member.username') {
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
+			}
+			if (['member-transactions', 'completed-surveys'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
 				return (
 					<>
 						<IconButton
@@ -518,12 +521,13 @@ function List(props) {
 									</ListItemIcon>
 									<ListItemText primary="Report" />
 								</MenuItem>}
-								{module === 'member-transactions' &&
+								{['member-transactions', 'completed-surveys'].includes(module) &&
 									<MenuItem
 										onClick={(event) => {
 											event.stopPropagation();
 											setOpenRevertAlertDialog(true);
-											setTid(n.id); setMemberID(n.Member.id);
+											if (module === 'completed-surveys') { setTid(n.MemberTransaction.id); setMemberID(n.MemberTransaction.Member.id) } else { setTid(n.id); setMemberID(n.Member.id); }
+
 										}}
 									>
 										<ListItemIcon className="min-w-40">
@@ -666,7 +670,7 @@ function List(props) {
 			dispatch(showMessage({ variant: 'error', message }));
 		})
 	}
-	
+
 	return (
 		<div>
 
@@ -766,27 +770,27 @@ function List(props) {
 												startAdornment={
 													<InputAdornment position="start">
 														<IconButton
-														aria-label="toggle password visibility"
-														edge="start"
+															aria-label="toggle password visibility"
+															edge="start"
 														>
 															<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={18} color="disabled">feather:calendar</FuseSvgIcon>
 														</IconButton>
 													</InputAdornment>
-												}												
+												}
 												endAdornment={
 													(dateRange && dateRange.startDate) && (
 														<InputAdornment position="end">
 															<IconButton
-															aria-label="toggle password visibility"
-															edge="end"
-															onClick={handleClearDateRange}
+																aria-label="toggle password visibility"
+																edge="end"
+																onClick={handleClearDateRange}
 															>
 																<FuseSvgIcon className="cursor-pointer text-40" size={18} color="action">material-outline:close</FuseSvgIcon>
 															</IconButton>
 														</InputAdornment>
 													)
 												}
-												size="small"												
+												size="small"
 												placeholder="Select daterange (GMT)"
 												value={
 													dateRange && dateRange.startDate

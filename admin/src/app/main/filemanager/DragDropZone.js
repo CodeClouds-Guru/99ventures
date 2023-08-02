@@ -6,7 +6,7 @@ import FileItems from "./FileItems";
 import FolderItem from "./FolderItem";
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useDispatch, useSelector } from 'react-redux';
-import { getList, setPathObject, setLoading, setListData, setSelectedItem} from 'app/store/filemanager';
+import { getList, setPathObject, setLoading, setListData, setSelectedItem, setUploadDialog} from 'app/store/filemanager';
 import { useNavigate } from "react-router-dom";
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -59,6 +59,7 @@ function DragDropzone(props) {
 	const pathObject = useSelector(state=> state.filemanager.pathObject);
 	const loading = useSelector(state=> state.filemanager.loading);
 	const selectConfig = useSelector(state => state.filemanager.config);
+	const openDialog = useSelector(state => state.filemanager.openUploadDialog);
 	const navigate = useNavigate();
 	const [files, setFiles] = useState([]);
 
@@ -68,7 +69,8 @@ function DragDropzone(props) {
 		isFocused,
 		isDragAccept,
 		isDragReject,
-		acceptedFiles
+		acceptedFiles,
+		open
 	} = useDropzone({
 		noKeyboard: true,
         noClick: true,
@@ -133,6 +135,16 @@ function DragDropzone(props) {
 		listing
 	]);
 
+	/**
+	 * Open file upload dialog box
+	 */
+	useEffect(()=>{
+		if(openDialog){
+			open();
+			dispatch(setUploadDialog({status: false}))
+		}
+	}, [openDialog]);
+
 	/*const thumbs = files.map(file => (
 		<div style={thumb} key={file.name}>
 			<div style={thumbInner}>
@@ -178,6 +190,8 @@ function DragDropzone(props) {
 		};
 	}, [location.pathname]);
 
+	
+
 		
 	const handleFile = (config, files) => {
 		const params = new FormData();
@@ -207,6 +221,8 @@ function DragDropzone(props) {
 			dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
 		});
 	}; 
+
+
 
 	return (
 		<section className={`
