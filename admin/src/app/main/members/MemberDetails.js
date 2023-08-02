@@ -1,6 +1,6 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, } from 'react';
-import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip } from '@mui/material';
+import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip, Popover } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -12,12 +12,10 @@ import Adjustment from './components/Adjustment';
 import SurveyDetails from './components/SurveyDetails';
 import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
-import CustomerLoader from '../../shared-components/customLoader/Index'
 import StickyMessage from './components/StickyMessage';
+import BackdropLoader from 'app/shared-components/BackdropLoader';
 
-const wordWrap = {
-    wordBreak: 'break-all'
-}
+
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
         fontSize: '1.2rem'
@@ -131,29 +129,30 @@ const MemberDetails = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
-    const [editMode, setEditMode] = useState(false);
-    const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const [alertType, setAlertType] = useState('');
     const [msg, setMsg] = useState('');
-    const [memberData, setMemberData] = useState({});
-    const [countryData, setCountryData] = useState([]);
     const [avatar, setAvatar] = useState('');
-    const [avatarFile, setAvatarFile] = useState('');
-    const [accountNotes, setAccountNotes] = useState([]);
-    const [dialogStatus, setDialogStatus] = useState(false);
-    const [editStatus, setEditStatus] = useState(false);
-    const [editAdminStatus, setEditAdminStatus] = useState(false);
-    const [statusNote, setStatusNote] = useState('');
     const [status, setStatus] = useState('');
-    const [adminStatus, setAdminStatus] = useState('');
-    const [surveyDetails, setSurveyDetails] = useState([]);
     const [loader, setLoader] = useState(true);
-    const [statuslessNote, setStatuslessNote] = useState(false);
-    const [editPaymentEmail, setEditPaymentEmail] = useState(false);
-    const [paymentEmail, setPaymentEmail] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [editMode, setEditMode] = useState(false);
+    const [memberData, setMemberData] = useState({});
+    const [avatarFile, setAvatarFile] = useState('');
+    const [statusNote, setStatusNote] = useState('');
     const [memberinfo, setMemberinfo] = useState({});
+    const [countryData, setCountryData] = useState([]);
+    const [adminStatus, setAdminStatus] = useState('');
+    const [editStatus, setEditStatus] = useState(false);
+    const [accountNotes, setAccountNotes] = useState([]);
+    const [paymentEmail, setPaymentEmail] = useState('');
     const [reflinkMode, setReflinkMode] = useState(false);
+    const [actionLoader, setActionLoader] = useState(false);
+    const [surveyDetails, setSurveyDetails] = useState([]);
+    const [dialogStatus, setDialogStatus] = useState(false);
     const [memberDeleted, setMemberDeleted] = useState(false);
+    const [statuslessNote, setStatuslessNote] = useState(false);
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [editAdminStatus, setEditAdminStatus] = useState(false);
+    const [editPaymentEmail, setEditPaymentEmail] = useState(false);
 
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -217,13 +216,15 @@ const MemberDetails = (props) => {
                     setMemberData({ ...result, membership_tier_id: result.MembershipTier.id, avatar: avatarUrl });
                     // We set the result info to the state. When user click on cancel edit btn then we will set the value on every input fields from this memberinfo state.
                     setMemberinfo(result);
-                    if (result.deleted_at && result.deleted_by && result.deleted_by_admin) {
-                        // props.setDeletedMemberData({
-                        //     deleted_at: result.deleted_at,
-                        //     deleted_by: result.deleted_by,
-                        //     deleted_by_admin: result.deleted_by_admin
-                        // })
-                        // props.setIsMemberDeleted(true)
+                    /*if (result.deleted_at && result.deleted_by && result.deleted_by_admin) {
+                        props.setDeletedMemberData({
+                            deleted_at: result.deleted_at,
+                            deleted_by: result.deleted_by,
+                            deleted_by_admin: result.deleted_by_admin
+                        })
+                        props.setIsMemberDeleted(true)
+                    }*/
+                    if(result.is_deleted) {
                         setMemberDeleted(true)
                     }
                 }
@@ -273,10 +274,12 @@ const MemberDetails = (props) => {
     }
 
     const updateMemberData = (formdata, type) => {
+        setActionLoader(true);
         axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, formdata)
             .then(res => {
                 if (res.data.results.message) {
                     dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                    setActionLoader(false);
                     if (type === "member_status") {
                         setEditStatus(false);
                         setDialogStatus(false);
@@ -291,6 +294,7 @@ const MemberDetails = (props) => {
                 }
             })
             .catch(errors => {
+                setActionLoader(false);
                 console.log(errors);
                 dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
             });
@@ -366,9 +370,11 @@ const MemberDetails = (props) => {
      * Delete Account
      */
     const deleteAccount = () => {
+        onCloseAlertDialogHandle();
         axios.delete(jwtServiceConfig.memberDelete, { data: { model_ids: [moduleId], 'permanet_delete': true } })
             .then(res => {
                 if (res.data.results.message) {
+                    setActionLoader(false);
                     dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
                     navigate('/app/members');
                 }
@@ -412,7 +418,7 @@ const MemberDetails = (props) => {
 
     if (loader) {
         return (
-            <CustomerLoader />
+            <BackdropLoader />
         )
     }
     return (
@@ -717,7 +723,7 @@ const MemberDetails = (props) => {
                                                 </Tooltip>
                                             </div>
                                         ) : (
-                                            <div className='flex items-center' style={wordWrap}>
+                                            <div className='flex items-center break-all'>
                                                 <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
                                                     {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
                                                 </Typography>
@@ -1187,6 +1193,9 @@ const MemberDetails = (props) => {
                         </DialogActions>
                     </Dialog>
                 )
+            }
+            {
+                actionLoader && <BackdropLoader />
             }
         </Box>
     )
