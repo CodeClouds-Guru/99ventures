@@ -241,11 +241,12 @@ class MemberController extends Controller {
               where: { status: [1, '1'] },
               limit: 1,
             },
-            {
+            // As we are not showing the Deleted Message to the user that's why this model is not required now
+            /*{
               model: User,
               as: 'deleted_by_admin',
               attributes: ['id', 'username'],
-            },
+            },*/
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
@@ -318,6 +319,7 @@ class MemberController extends Controller {
           result.setDataValue('membership_tier', membership_tier);
           result.setDataValue('member_referrer', member_referrer);
           result.setDataValue('referral_link', referral_link);
+          result.setDataValue('is_deleted', (result.deleted_at && result.deleted_by) ? true : false);
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -524,7 +526,7 @@ class MemberController extends Controller {
     options.offset = offset;
     options.subQuery = false;
     options.distinct = true;
-    options.attributes = colums;
+    options.attributes = [...colums, 'deleted_at', 'deleted_by'];
     options.group = 'Member.id';
     options.paranoid = false;
     const relationCols = [];
@@ -605,6 +607,8 @@ class MemberController extends Controller {
       let isp = '';
       let browser = '';
       let browser_language = '';
+      let is_deleted = (row.deleted_at && row.deleted_by) ? true : false;
+
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
         ip = last_row.ip;
@@ -680,6 +684,10 @@ class MemberController extends Controller {
           row.get('referral_email')
         );
       }
+
+      // In member listing, member is deleted or not is required
+      row.setDataValue('is_deleted', is_deleted);
+
       return row;
     });
 
