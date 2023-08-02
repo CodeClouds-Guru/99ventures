@@ -178,4 +178,10 @@ module.exports = [
       return '/' + value;
     },
   },
+  {
+    name: 'amountDisplay',
+    fn: function (value) {
+      return Math.abs(value)
+    },
+  },
 ];

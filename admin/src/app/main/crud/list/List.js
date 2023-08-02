@@ -139,7 +139,7 @@ function List(props) {
 		axios.get(endpoint, { params }).then(res => {
 			setListConfigDialog(false);
 			let fields_var = res.data.results.fields;
-			module === 'campaigns' || module === 'member-transactions' ? fields_var.actions = {
+			['campaigns', 'member-transactions', 'completed-surveys'].includes(module) ? fields_var.actions = {
 				db_name: "actions",
 				field_name: "actions",
 				listing: true,
@@ -302,7 +302,7 @@ function List(props) {
 	}
 
 	function revertMemberTransaction() {
-		axios.post(`${module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
+		axios.post(`${module === 'completed-surveys' ? 'member-transactions' : module}/update/${tid}`, { member_id: memberID, type: 'revert' }).then((res) => {
 			setOpenRevertAlertDialog(false)
 			setTid(0);
 			setMemberID(0)
@@ -407,12 +407,6 @@ function List(props) {
 	 * Customized any row value
 	 */
 	const customizedField = (module, n, field) => {
-		if (module === 'completed-surveys') {
-			if (field.field_name === 'MemberTransaction->Member.username') {
-				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
-			}
-			return processFieldValue(n[field.field_name], field)
-		}
 		if (module === 'tickets') {
 			if (field.field_name === 'status') {
 				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
@@ -485,11 +479,59 @@ function List(props) {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (module === 'campaigns' || module === 'member-transactions') {
-			if (module === 'campaigns' && field.field_name === 'status') {
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
+			if (module === 'campaigns') {
+				if(field.field_name === 'status'){
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+				}
+				else if(field.field_name === 'actions') {
+					return (
+						<>
+							<IconButton
+								aria-owns={actionsMenu ? `actionsMenu_${n.id}` : null}
+								aria-haspopup="true"
+								onClick={openActionsMenu}
+								size="large"
+								className="listingExtraMenu"
+								sx={{ zIndex: 999 }}
+								id={`actionsMenu_${n.id}`}
+							>
+								<FuseSvgIcon
+									sx={{ pointerEvents: 'none' }}
+									className="listingExtraMenu"
+								>material-outline:settings</FuseSvgIcon>
+							</IconButton>
+							<Menu
+								id={`actionsMenu_${n.id}`}
+								anchorEl={actionsMenu}
+								open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${n.id}`)}
+								onClose={closeActionsMenu}
+							>
+								<MenuList>
+									<MenuItem
+										onClick={(event) => {
+											event.stopPropagation();
+											navigate(`/app/campaigns/${n.id}/report`)
+										}}
+									>
+										<ListItemIcon className="min-w-40">
+											<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+										</ListItemIcon>
+										<ListItemText primary="Report" />
+									</MenuItem>									
+								</MenuList>
+							</Menu>
+						</>
+					)
+				}
 			}
-			if (module === 'member-transactions' && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
+			if (field.field_name === 'MemberTransaction->Member.username') {
+				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
+			}
+			if (['member-transactions', 'completed-surveys'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
+				if((module === 'member-transactions' && n.Member === null) || (module === 'completed-surveys' && n.MemberTransaction.Member === null)){
+					return;
+				}
 				return (
 					<>
 						<IconButton
@@ -513,30 +555,19 @@ function List(props) {
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
-								{module === 'campaigns' && <MenuItem
+								<MenuItem
 									onClick={(event) => {
 										event.stopPropagation();
-										navigate(`/app/campaigns/${n.id}/report`)
+										setOpenRevertAlertDialog(true);
+										if (module === 'completed-surveys') { setTid(n.MemberTransaction.id); setMemberID(n.MemberTransaction.Member.id) } else { setTid(n.id); setMemberID(n.Member.id); }
+
 									}}
 								>
 									<ListItemIcon className="min-w-40">
-										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+										<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
 									</ListItemIcon>
-									<ListItemText primary="Report" />
-								</MenuItem>}
-								{module === 'member-transactions' &&
-									<MenuItem
-										onClick={(event) => {
-											event.stopPropagation();
-											setOpenRevertAlertDialog(true);
-											setTid(n.id); setMemberID(n.Member.id);
-										}}
-									>
-										<ListItemIcon className="min-w-40">
-											<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
-										</ListItemIcon>
-										<ListItemText primary="Revert" />
-									</MenuItem>}
+									<ListItemText primary="Revert" />
+								</MenuItem>
 							</MenuList>
 						</Menu>
 					</>
@@ -671,6 +702,30 @@ function List(props) {
 			}
 			dispatch(showMessage({ variant: 'error', message }));
 		})
+	}
+
+	// Show / Hide Checkbox of each row
+	const tableCheckbox = (isSelected, module, n) => {
+		var checkbox = false;
+		if(actionable && (module === 'withdrawal-requests' && n.status == 'pending')) {
+			checkbox = true;
+		}
+		else if(module === 'pages' && !['500', '404'].includes(n.slug) && isDeletable(n)){
+			checkbox = true;
+		}
+		else if(!['pages', 'withdrawal-requests'].includes(module) && (isDeletable(n) || actionable)){
+			checkbox = true;
+		}
+
+		if(checkbox) {
+			return (
+				<Checkbox
+					checked={isSelected}
+					onClick={(event) => event.stopPropagation()}
+					onChange={(event) => handleCheck(event, n.id)}
+				/>
+			)
+		}
 	}
 
 	return (
@@ -945,12 +1000,15 @@ function List(props) {
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
 											>
-												<TableCell className="w-40 md:w-64 text-center" padding="none">
-													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
-														checked={isSelected}
-														onClick={(event) => event.stopPropagation()}
-														onChange={(event) => handleCheck(event, n.id)}
-													/>}
+												<TableCell className="w-40 md:w-64 text-center" padding="none">	
+													{/*{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
+															checked={isSelected}
+															onClick={(event) => event.stopPropagation()}
+															onChange={(event) => handleCheck(event, n.id)}
+													/>}*/}
+													{
+														tableCheckbox(isSelected, module, n)
+													}
 												</TableCell>
 												{Object.values(fields)
 													.filter(field => field.listing === true)

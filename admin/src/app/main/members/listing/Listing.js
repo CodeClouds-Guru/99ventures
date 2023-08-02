@@ -1,6 +1,6 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, FormControlLabel } from '@mui/material';
+import { Checkbox, Table, TableBody, TableCell, TablePagination, TableRow, Typography, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, FormControlLabel, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -652,8 +652,8 @@ function Listing(props) {
                             </TableRow>
                         </TableBody> :
                             <TableBody>
-                                {data
-                                    .map((n) => {
+                                {
+                                    data.map((n) => {
                                         const isSelected = selected.indexOf(n.id) !== -1;
                                         return (
                                             <TableRow
@@ -667,11 +667,21 @@ function Listing(props) {
                                                 onClick={(event) => handleClick(n)}
                                             >
                                                 <TableCell className="w-40 md:w-64 text-center" padding="none">
-                                                    <Checkbox
-                                                        checked={isSelected}
-                                                        onClick={(event) => event.stopPropagation()}
-                                                        onChange={(event) => handleCheck(event, n.id)}
-                                                    />
+                                                    {
+                                                        n.is_deleted ? (
+                                                            <Tooltip title="Member Deleted" placement="left">
+                                                                <IconButton color="primary" aria-label="Filter" component="span" >
+                                                                    <FuseSvgIcon className="text-48 text-red-600" size={24} color="action">material-outline:error</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        ) : (
+                                                            <Checkbox
+                                                                checked={isSelected}
+                                                                onClick={(event) => event.stopPropagation()}
+                                                                onChange={(event) => handleCheck(event, n.id)}
+                                                            />
+                                                        )
+                                                    }
                                                 </TableCell>
                                                 {Object.values(fields)
                                                     .filter(field => field.listing === true)
@@ -681,7 +691,8 @@ function Listing(props) {
                                                 }
                                             </TableRow>
                                         );
-                                    })}
+                                    })
+                                }
                             </TableBody>}
                     </Table>
                 </FuseScrollbars>
