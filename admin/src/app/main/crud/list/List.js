@@ -480,13 +480,58 @@ function List(props) {
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
-			if (module === 'campaigns' && field.field_name === 'status') {
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+			if (module === 'campaigns') {
+				if(field.field_name === 'status'){
+					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
+				}
+				else if(field.field_name === 'actions') {
+					return (
+						<>
+							<IconButton
+								aria-owns={actionsMenu ? `actionsMenu_${n.id}` : null}
+								aria-haspopup="true"
+								onClick={openActionsMenu}
+								size="large"
+								className="listingExtraMenu"
+								sx={{ zIndex: 999 }}
+								id={`actionsMenu_${n.id}`}
+							>
+								<FuseSvgIcon
+									sx={{ pointerEvents: 'none' }}
+									className="listingExtraMenu"
+								>material-outline:settings</FuseSvgIcon>
+							</IconButton>
+							<Menu
+								id={`actionsMenu_${n.id}`}
+								anchorEl={actionsMenu}
+								open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${n.id}`)}
+								onClose={closeActionsMenu}
+							>
+								<MenuList>
+									<MenuItem
+										onClick={(event) => {
+											event.stopPropagation();
+											navigate(`/app/campaigns/${n.id}/report`)
+										}}
+									>
+										<ListItemIcon className="min-w-40">
+											<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+										</ListItemIcon>
+										<ListItemText primary="Report" />
+									</MenuItem>									
+								</MenuList>
+							</Menu>
+						</>
+					)
+				}
 			}
 			if (field.field_name === 'MemberTransaction->Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
 			}
 			if (['member-transactions', 'completed-surveys'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
+				if((module === 'member-transactions' && n.Member === null) || (module === 'completed-surveys' && n.MemberTransaction.Member === null)){
+					return;
+				}
 				return (
 					<>
 						<IconButton
@@ -510,31 +555,19 @@ function List(props) {
 							onClose={closeActionsMenu}
 						>
 							<MenuList>
-								{module === 'campaigns' && <MenuItem
+								<MenuItem
 									onClick={(event) => {
 										event.stopPropagation();
-										navigate(`/app/campaigns/${n.id}/report`)
+										setOpenRevertAlertDialog(true);
+										if (module === 'completed-surveys') { setTid(n.MemberTransaction.id); setMemberID(n.MemberTransaction.Member.id) } else { setTid(n.id); setMemberID(n.Member.id); }
+
 									}}
 								>
 									<ListItemIcon className="min-w-40">
-										<FuseSvgIcon>heroicons-outline:document-text</FuseSvgIcon>
+										<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
 									</ListItemIcon>
-									<ListItemText primary="Report" />
-								</MenuItem>}
-								{['member-transactions', 'completed-surveys'].includes(module) &&
-									<MenuItem
-										onClick={(event) => {
-											event.stopPropagation();
-											setOpenRevertAlertDialog(true);
-											if (module === 'completed-surveys') { setTid(n.MemberTransaction.id); setMemberID(n.MemberTransaction.Member.id) } else { setTid(n.id); setMemberID(n.Member.id); }
-
-										}}
-									>
-										<ListItemIcon className="min-w-40">
-											<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
-										</ListItemIcon>
-										<ListItemText primary="Revert" />
-									</MenuItem>}
+									<ListItemText primary="Revert" />
+								</MenuItem>
 							</MenuList>
 						</Menu>
 					</>
@@ -669,6 +702,30 @@ function List(props) {
 			}
 			dispatch(showMessage({ variant: 'error', message }));
 		})
+	}
+
+	// Show / Hide Checkbox of each row
+	const tableCheckbox = (isSelected, module, n) => {
+		var checkbox = false;
+		if(actionable && (module === 'withdrawal-requests' && n.status == 'pending')) {
+			checkbox = true;
+		}
+		else if(module === 'pages' && !['500', '404'].includes(n.slug) && isDeletable(n)){
+			checkbox = true;
+		}
+		else if(!['pages', 'withdrawal-requests'].includes(module) && (isDeletable(n) || actionable)){
+			checkbox = true;
+		}
+
+		if(checkbox) {
+			return (
+				<Checkbox
+					checked={isSelected}
+					onClick={(event) => event.stopPropagation()}
+					onChange={(event) => handleCheck(event, n.id)}
+				/>
+			)
+		}
 	}
 
 	return (
@@ -943,12 +1000,15 @@ function List(props) {
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
 											>
-												<TableCell className="w-40 md:w-64 text-center" padding="none">
-													{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
-														checked={isSelected}
-														onClick={(event) => event.stopPropagation()}
-														onChange={(event) => handleCheck(event, n.id)}
-													/>}
+												<TableCell className="w-40 md:w-64 text-center" padding="none">	
+													{/*{((module === 'pages' && (n.slug === '500' || n.slug === '404')) || (module === 'withdrawal-requests' && n.status !== 'pending')) ? '' : (isDeletable(n) || actionable) && <Checkbox
+															checked={isSelected}
+															onClick={(event) => event.stopPropagation()}
+															onChange={(event) => handleCheck(event, n.id)}
+													/>}*/}
+													{
+														tableCheckbox(isSelected, module, n)
+													}
 												</TableCell>
 												{Object.values(fields)
 													.filter(field => field.listing === true)
