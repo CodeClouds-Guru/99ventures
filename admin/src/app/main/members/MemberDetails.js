@@ -165,7 +165,7 @@ const MemberDetails = (props) => {
     const onOpenAlertDialogHandle = (type) => {
         var msg = '';
         if (type === 'delete')
-            msg = 'Do you want to delete this account?';
+            msg = 'Do you want to <strong>permanently</strong> delete this account?';
         else if (type === 'save_profile')
             msg = 'Do you want to save the changes?';
         else if (type === 'adjustment')
@@ -1152,7 +1152,7 @@ const MemberDetails = (props) => {
                             </Typography>
                             {
                                 (accountNotes.length != 0) ? (
-                                    <AccountNotes accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} />
+                                    <AccountNotes  accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} memberDeleted={memberDeleted}/>
                                 ) : (
                                     <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
                                 )
@@ -1164,7 +1164,7 @@ const MemberDetails = (props) => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content={msg}
+                        content={<p dangerouslySetInnerHTML={{__html:msg}}></p>}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
