@@ -595,9 +595,9 @@ class MemberAuthController {
     var member_eligibility = [];
 
     //eligibility entry for gender
-    let nmae_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
+    let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
     let questions = await SurveyQuestion.findAll({
-      where: { name: nmae_list },
+      where: { name: name_list },
     });
 
     if (questions.length) {
@@ -659,6 +659,7 @@ class MemberAuthController {
                 precode: record.survey_provider_question_id,
                 survey_provider_id: record.survey_provider_id,
                 option: precode,
+                country_id: member_details.country_id
               },
             });
             if (survey_answer_precodes) {
