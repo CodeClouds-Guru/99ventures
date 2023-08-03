@@ -371,6 +371,7 @@ const MemberDetails = (props) => {
      */
     const deleteAccount = () => {
         onCloseAlertDialogHandle();
+        setActionLoader(true);
         axios.delete(jwtServiceConfig.memberDelete, { data: { model_ids: [moduleId], 'permanet_delete': true } })
             .then(res => {
                 if (res.data.results.message) {
