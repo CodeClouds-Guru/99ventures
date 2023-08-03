@@ -659,7 +659,7 @@ class MemberAuthController {
                 precode: record.survey_provider_question_id,
                 survey_provider_id: record.survey_provider_id,
                 option: precode,
-                country_id: member_details.country_id
+                // country_id: member_details.country_id
               },
             });
             if (survey_answer_precodes) {
