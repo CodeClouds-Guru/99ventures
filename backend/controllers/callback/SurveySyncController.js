@@ -1,4 +1,4 @@
-const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes } = require('../../models');
+const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes, Country, CountrySurveyQuestion } = require('../../models');
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const TolunaHelper = require('../../helpers/Toluna');
@@ -165,14 +165,27 @@ class SurveySyncController {
      */
     async schlesingerSurveyQuestions(req, res) {
         try {
+            const country = await Country.findOne({
+                attributes: ['id', 'language_id'],
+                where: {
+                    id: req.query.country_id
+                }
+            });
+            if(country === null) {
+                res.json({ status: false, message: 'Country not found!' });
+                return;
+            }
+
             const schObj = new SchlesingerHelper;
-            const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + this.schlesingerLanguageId);
+            const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + country.language_id);
 
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications;
+                const qualificationIds = qualificationData.map(r=> r.qualificationId);
 
-                const params = qualificationData.map(attr => {
-                    return {
+                const insertParams = []
+                for (let attr of qualificationData) {
+                    let params = {
                         question_text: attr.text,
                         name: attr.name,
                         survey_provider_id: this.providerId,
@@ -180,15 +193,9 @@ class SurveySyncController {
                         question_type: schObj.getQuestionType(attr.qualificationTypeId),
                         created_at: new Date()
                     }
-                });
 
-                await SurveyQuestion.bulkCreate(params, {
-                    updateOnDuplicate: ["question_text", "question_type", "name"]
-                });
-
-                const ansPrecode = [];
-                for (let attr of qualificationData) {
-                    const qualificationAnswers = attr.qualificationAnswers;
+                    let ansPrecode = [];
+                    let qualificationAnswers = attr.qualificationAnswers;
                     for (let qa of qualificationAnswers) {
                         /*if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
                             ansPrecode.push({
@@ -201,12 +208,78 @@ class SurveySyncController {
                                 ansPrecode.push({
                                     option: i,
                                     precode: attr.qualificationId,
+                                    country_id: country.id,
+                                    survey_provider_id: this.providerId
                                 });
                             }
                         } else {
                             ansPrecode.push({
                                 option: qa.answerId,
                                 precode: attr.qualificationId,
+                                country_id: country.id,
+                                survey_provider_id: this.providerId
+                            });
+                        }
+
+                    }
+                    insertParams.push({ ...params, SurveyAnswerPrecodes: ansPrecode });
+                }
+
+                // const params1 = [];
+                // params1.push(insertParams[0])
+                // res.send(params1);
+                // return;
+
+                await SurveyQuestion.bulkCreate(insertParams, {
+                    updateOnDuplicate: ["question_text", "question_type", "name"],
+                    include: [{
+                        model: SurveyAnswerPrecodes,
+                        ignoreDuplicates: true
+                    }]
+                });
+
+                const allQuestionsId = await SurveyQuestion.findAll({
+                    attributes: ['id'],
+                    where: {
+                        survey_provider_question_id: qualificationIds,
+                        survey_provider_id: this.providerId,
+                    }
+                });
+
+                const countryParams = allQuestionsId.map(r => {
+                    return {
+                        country_id: country.id,
+                        survey_question_id: r.id
+                    }
+                });
+
+                await CountrySurveyQuestion.bulkCreate(countryParams, {
+                    ignoreDuplicates: true
+                });
+
+                /* const ansPrecode = [];
+                for (let attr of qualificationData) {
+                    const qualificationAnswers = attr.qualificationAnswers;
+                    for (let qa of qualificationAnswers) {
+                        /*if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
+                            ansPrecode.push({
+                                option: null,
+                                precode: attr.qualificationId,
+                            });
+                        } else *
+                        if ([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59) { // Age
+                            for (let i = 15; i <= 99; i++) {
+                                ansPrecode.push({
+                                    option: i,
+                                    precode: attr.qualificationId,
+                                    country_id: country.id
+                                });
+                            }
+                        } else {
+                            ansPrecode.push({
+                                option: qa.answerId,
+                                precode: attr.qualificationId,
+                                country_id: country.id
                             });
                         }
 
@@ -216,7 +289,7 @@ class SurveySyncController {
                     await SurveyAnswerPrecodes.bulkCreate(ansPrecode, {
                         updateOnDuplicate: ['option']
                     });
-                }
+                }*/
 
                 res.json({ status: true, message: 'Updated' });
             } else {

@@ -93,6 +93,7 @@ module.exports = (sequelize, DataTypes) => {
 					model: SurveyAnswerPrecodes,
 					attributes: ['id', 'option', 'precode'],
 					where: {
+						// id: [84094335, 84094129, 84093284]
 						id: params.matching_answer_ids
 					},
 					required: true,
@@ -101,6 +102,7 @@ module.exports = (sequelize, DataTypes) => {
 							model: SurveyQuestion,
 							attributes: ['id'],
 							where: {
+								// id: [ 28594, 28583, 28551, 28612 ]
 								id: params.matching_question_ids
 							}
 						}

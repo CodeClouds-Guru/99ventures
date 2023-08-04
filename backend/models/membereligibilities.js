@@ -13,13 +13,20 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'survey_answer_precode_id'
       });
 
-      MemberEligibilities.belongsTo(models.SurveyQuestion, {
-        foreignKey: 'survey_question_id'
+      // MemberEligibilities.belongsTo(models.SurveyQuestion, {
+      //   foreignKey: 'survey_question_id'
+      // });
+
+      MemberEligibilities.belongsTo(models.CountrySurveyQuestion, {
+        foreignKey: 'country_survey_question_id'
       });
 
       MemberEligibilities.belongsTo(models.Member, {
         foreignKey: 'member_id',
       });
+
+      
+
     }
   }
   MemberEligibilities.init(

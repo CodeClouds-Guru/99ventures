@@ -5,8 +5,10 @@ const {
     SurveyQuestion,
     SurveyQualification,
     SurveyAnswerPrecodes,
-    MemberEligibilities
+    MemberEligibilities,
+    CountrySurveyQuestion
 } = require('../../models');
+
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const { Op } = require('sequelize')
 const Sequelize = require('sequelize');
@@ -17,14 +19,18 @@ class SchlesingerController {
         this.generateEntryLink = this.generateEntryLink.bind(this);
     }
 
-    surveys = async(memberId,params) => {
+    // surveys = async(memberId,params) => {
+    surveys = async(req, res) => {
         try{
-            // const memberId = req.query.user_id;
-            if (!memberId) {
-                return {
+            const member = req.session.member;
+            const memberId = req.query.user_id;
+            
+            if (!memberId ) {
+                res.json({
                     staus: false,
                     message: 'Member id not found!'
-                }
+                });
+                return;
             }
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -38,6 +44,7 @@ class SchlesingerController {
                     message: 'Survey Provider not found!'
                 }
             }
+            const params = {};
             const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'created_at';
@@ -46,18 +53,30 @@ class SchlesingerController {
              * check and get member's eligibility
              */
             const eligibilities = await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'survey_answer_precode_id', 'text', 'id'],
+                attributes: ['country_survey_question_id', 'survey_answer_precode_id', 'text', 'id'],
                 where: {
                     member_id: memberId
                 },
                 include: [
                     {
-                        model: SurveyQuestion,
-                        attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                        model: CountrySurveyQuestion,
+                        attributes: ['country_id', 'survey_question_id', 'id'],
                         where: {
-                            survey_provider_id: provider.id
+                            // country_id: member.country_id
+                            country_id: 225
+                        },
+                        include: {
+                            model: SurveyQuestion,
+                            attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
                         }
                     },
+                    // {
+                    //     model: SurveyQuestion,
+                    //     attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
+                    //     where: {
+                    //         survey_provider_id: provider.id
+                    //     }
+                    // },
                     {
                         model: Member,
                         attributes: ['username']
@@ -66,26 +85,36 @@ class SchlesingerController {
                         model: SurveyAnswerPrecodes,
                         attributes: ['id', 'option', 'precode'],
                         where: {
-                            survey_provider_id: provider.id
+                            survey_provider_id: provider.id,
+                            // country_id: member.country_id
+                            country_id: 225
                         }
                     }
                 ]
             });
-            if (!eligibilities) {
+            if (!eligibilities || eligibilities === null || eligibilities.length < 1) {
                 res.json({
                     status: false,
                     message:'You are not eligible for this survey!'
                 });
                 return;
             }
+            
+            // res.json(eligibilities);
+            // return;
 
-            const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
+
+            const matchingQuestionIds = eligibilities.map(eg => eg.CountrySurveyQuestion.survey_question_id);
             const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
+
+
+            // res.json(matchingAnswerIds);
+            // return;
 
             /** Get Open Ended QnA Start */
             const eligibilityIds = eligibilities.map(eg => eg.id);
             const openEndedData =  await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'open_ended_value'],
+                attributes: ['country_survey_question_id', 'open_ended_value'],
                 where: {
                     member_id: memberId,
                     id: {
@@ -93,28 +122,50 @@ class SchlesingerController {
                     }
                 },
                 include: {
-                    model: SurveyQuestion,
-                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                    model: CountrySurveyQuestion,
+                    attributes: ['country_id', 'survey_question_id', 'id'],
                     where: {
-                        survey_provider_id: provider.id
+                        // country_id: member.country_id
+                        country_id: 225
+                    },
+                    include: {
+                        model: SurveyQuestion,
+                        attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
                     }
                 }
+                // include: {
+                //     model: SurveyQuestion,
+                //     attributes: ['id', 'survey_provider_question_id', 'question_type'],
+                //     where: {
+                //         survey_provider_id: provider.id
+                //     }
+                // }
             });
             /** end */
+
+
+            // res.json(openEndedData);
+            // return;
+
 
             /** Query String Formation Start */
             const queryString = {
                 uid: eligibilities[0].Member.username
             };
             eligibilities.forEach(eg => {
-                queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option;
+                queryString['Q' + eg.CountrySurveyQuestion.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option;
             });
             if(openEndedData && openEndedData.length) {
                 openEndedData.forEach(eg => {
-                    queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
-                    matchingQuestionIds.push(eg.SurveyQuestion.id);
+                    queryString['Q' + eg.CountrySurveyQuestion.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
+                    matchingQuestionIds.push(eg.CountrySurveyQuestion.survey_question_id);
                 });
             }
+
+            console.log(matchingQuestionIds)
+            console.log('--------')
+            console.log(matchingAnswerIds)
+
             /** End */
             const generateQueryString = new URLSearchParams(queryString).toString();
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
@@ -131,6 +182,9 @@ class SchlesingerController {
                         status: "live",
                     }
                 });
+
+                res.send(surveys);
+                return;
 
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = []
@@ -171,10 +225,10 @@ class SchlesingerController {
         }
         catch(error) {
             console.error(error)
-           return{
+           res.send({
                 status: false,
                 message: 'Something went wrong!'
-            }
+            })
         }
     }
 
