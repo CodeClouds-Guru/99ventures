@@ -19,7 +19,14 @@ class MemberSurveyController extends Controller {
       },
       {
         model: MemberTransaction,
-        attributes: ['transaction_id', 'type', 'status', 'amount_action', 'id'],
+        attributes: [
+          'transaction_id',
+          'type',
+          'status',
+          'amount_action',
+          'id',
+          'amount',
+        ],
         include: [
           {
             model: Member,
@@ -37,6 +44,7 @@ class MemberSurveyController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     result.rows.map((row) => {
+      console.log(row.MemberTransaction);
       if (row.SurveyProvider) {
         row.setDataValue('SurveyProvider.name', row.SurveyProvider.name);
       } else {
@@ -74,12 +82,17 @@ class MemberSurveyController extends Controller {
         row.setDataValue('type', row.MemberTransaction.type);
         row.setDataValue('status', row.MemberTransaction.status);
         row.setDataValue('amount_action', row.MemberTransaction.amount_action);
+        row.setDataValue(
+          'MemberTransaction.amount',
+          row.MemberTransaction.amount
+        );
       } else {
         row.setDataValue('MemberTransaction->Member.username', '');
         row.setDataValue('MemberTransaction->Member.id', '');
         row.setDataValue('type', '');
         row.setDataValue('status', '');
         row.setDataValue('amount_action', '');
+        row.setDataValue('MemberTransaction->amount', '');
       }
     });
     return {
