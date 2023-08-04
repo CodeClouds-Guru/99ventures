@@ -63,15 +63,19 @@ const AccountNotes = (props) => {
                                         <Typography variant="caption" className="text-xs italic font-bold">
                                             {!note.User ? 'Declined from browser' : note.User.alias_name} - More Surveys Support Team
                                         </Typography>
-                                        <IconButton
-                                            aria-label="Delete Note"
-                                            size="small"
-                                            onClick={() => deleteButtonClicked(note.id)}
-                                            sx={{ marginLeft: '0px', marginTop: '-6px' }}
-                                            color="error"
-                                        >
-                                            <DeleteIcon fontSize="inherit" />
-                                        </IconButton>
+                                        {
+                                            !props.memberDeleted && (
+                                                <IconButton
+                                                    aria-label="Delete Note"
+                                                    size="small"
+                                                    onClick={() => deleteButtonClicked(note.id)}
+                                                    sx={{ marginLeft: '0px', marginTop: '-6px' }}
+                                                    color="error"
+                                                >
+                                                    <DeleteIcon fontSize="inherit" />
+                                                </IconButton>
+                                            )
+                                        }                                        
                                     </Stack>
 
                                     <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(note.created_at)}</Typography>

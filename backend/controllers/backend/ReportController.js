@@ -301,8 +301,11 @@ class ReportController {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     var arr_index = 0
     if (query_string === 'DATE') {
-      let created_at = new Date(i.day)
-      let diff_time = Math.abs(created_at - start_date);
+      var created_at = moment(i.day).format('YYYY-MM-DD')
+      created_at = new Date(created_at);
+      var start_date_format = moment(start_date).format('YYYY-MM-DD')
+      start_date_format = new Date(start_date_format)
+      let diff_time = Math.abs(created_at - start_date_format);
       let diff_days = Math.ceil(diff_time / (1000 * 60 * 60 * 24));
       arr_index = diff_days
     } else if (query_string === 'MONTH') {
@@ -332,9 +335,12 @@ class ReportController {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
-    var dt = new Date(start_date);
+    var dt = moment(start_date).format('YYYY-MM-DD')
+    dt = new Date(dt);
+    var end_date_format = moment(end_date).format('YYYY-MM-DD')
     if (query_string === "DATE") {
-      while (dt <= end_date) {
+      while (dt <= new Date(end_date_format)) {
+        
         let date = dt.getDate()
         switch (date % 10) {
           case 1: date = date + "st " + monthNames[dt.getMonth()] + "," + ('' + dt.getFullYear()).substr(2); break;
@@ -345,6 +351,11 @@ class ReportController {
         names.push(date)
         values.push(0)
         dt.setDate(dt.getDate() + 1);
+        let dt_m = dt.getDate()+' '+dt.getMonth()
+        let end_dt_m = end_date.getDate()+' '+end_date.getMonth()
+        if(dt_m === end_dt_m){
+          // dt = end_date
+        }
       }
     } else if (query_string === 'WEEK') {
       let total_weeks = Math.ceil(total_days / 7)
