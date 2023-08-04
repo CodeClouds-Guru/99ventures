@@ -71,11 +71,7 @@ class MemberTransactionController extends Controller {
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
         record.dataValues.amount_action === 'member_withdrawal'
       ) {
-        record.dataValues.amount_action =
-          record.dataValues.amount_action +
-          ' (' +
-          record.dataValues.WithdrawalRequest.PaymentMethod.name +
-          ')';
+        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
       switch (record.dataValues.status) {
         case 1:
