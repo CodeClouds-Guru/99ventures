@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
 			}
 		}
 		const surveys = await Survey.findAndCountAll({
-			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'name', 'survey_number', 'created_at'],
+			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'survey_number', 'created_at' /*, [sequelize.json('original_json.LanguageId'), 'alias']*/],
 			distinct: true,
 			where: {
 				survey_provider_id: params.provider_id,
@@ -87,13 +87,12 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			include: {
 				model: SurveyQualification,
-				attributes: ['id', 'survey_id', 'survey_question_id'],
+				attributes: ['id', 'survey_question_id'],
 				required: true,
 				include: {
 					model: SurveyAnswerPrecodes,
 					attributes: ['id', 'option', 'precode'],
 					where: {
-						// id: [84094335, 84094129, 84093284]
 						id: params.matching_answer_ids
 					},
 					required: true,
@@ -102,7 +101,6 @@ module.exports = (sequelize, DataTypes) => {
 							model: SurveyQuestion,
 							attributes: ['id'],
 							where: {
-								// id: [ 28594, 28583, 28551, 28612 ]
 								id: params.matching_question_ids
 							}
 						}
