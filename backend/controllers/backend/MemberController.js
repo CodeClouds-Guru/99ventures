@@ -29,6 +29,8 @@ const util = require('util');
 // const withdrawalrequest = require('../../models/withdrawalrequest');
 const moment = require('moment');
 const CsvHelper = require('../../helpers/CsvHelper');
+const { genarateHash } = require('../../helpers/global');
+
 class MemberController extends Controller {
   constructor() {
     super('Member');
@@ -275,23 +277,21 @@ class MemberController extends Controller {
           //   },
           // });
 
-          let query = "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;"
-          survey_list = await db.sequelize.query(
-            query,
-            {
-              replacements: [member_id],
-              type: QueryTypes.SELECT,
-            }
-          );
-            // for (let i = 0; i < survey_list.length; i++) {
-            //   if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
-            //     survey_list[i].setDataValue(
-            //       'name',
-            //       survey_list[i].Surveys[0].SurveyProvider.name
-            //     );
-            //   else survey_list[i].setDataValue('name', null);
-            //   survey_list[i].Surveys = null;
-            // }
+          let query =
+            "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
+          survey_list = await db.sequelize.query(query, {
+            replacements: [member_id],
+            type: QueryTypes.SELECT,
+          });
+          // for (let i = 0; i < survey_list.length; i++) {
+          //   if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
+          //     survey_list[i].setDataValue(
+          //       'name',
+          //       survey_list[i].Surveys[0].SurveyProvider.name
+          //     );
+          //   else survey_list[i].setDataValue('name', null);
+          //   survey_list[i].Surveys = null;
+          // }
           let membership_tier = await MembershipTier.findAll({
             attributes: ['id', 'name'],
           });
@@ -319,7 +319,10 @@ class MemberController extends Controller {
           result.setDataValue('membership_tier', membership_tier);
           result.setDataValue('member_referrer', member_referrer);
           result.setDataValue('referral_link', referral_link);
-          result.setDataValue('is_deleted', (result.deleted_at && result.deleted_by) ? true : false);
+          result.setDataValue(
+            'is_deleted',
+            result.deleted_at && result.deleted_by ? true : false
+          );
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -346,9 +349,10 @@ class MemberController extends Controller {
     let request_data = req.body;
     try {
       let result = false;
+      let member = await this.model.findOne({ where: { id: req.params.id } });
       if (req.body.type == 'basic_details') {
         delete req.body.type;
-        let member = await this.model.findOne({ where: { id: req.params.id } });
+
         if (!req.body.username) {
           req.body.username = member.username;
         }
@@ -391,6 +395,21 @@ class MemberController extends Controller {
             { field_name: 'email', field_value: req.body.email },
           ],
           // payment_email: req.body.email,
+        });
+        delete req.body.type;
+      } else if (req.body.type == 'resend_verify_email') {
+        const eventBus = require('../../eventBus');
+        let hash_obj = { id: member.id, email: member.email };
+        var buf = genarateHash(JSON.stringify(hash_obj));
+        member.email_confirmation_link =
+          req.session.company_portal.domain + '/email-verify/' + buf;
+        let evntbus = eventBus.emit('send_email', {
+          action: 'Welcome',
+          data: {
+            email: member.email,
+            details: { members: member },
+          },
+          req: req,
         });
         delete req.body.type;
       } else {
@@ -607,7 +626,7 @@ class MemberController extends Controller {
       let isp = '';
       let browser = '';
       let browser_language = '';
-      let is_deleted = (row.deleted_at && row.deleted_by) ? true : false;
+      let is_deleted = row.deleted_at && row.deleted_by ? true : false;
 
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
@@ -855,9 +874,9 @@ class MemberController extends Controller {
     };
     try {
       var result;
-      if(req.body.module === 'member_notes') {
+      if (req.body.module === 'member_notes') {
         result = await this.deleteMemberNotes(req);
-      } else if(req.body.permanet_delete === true) {
+      } else if (req.body.permanet_delete === true) {
         result = await this.permanentlyDeleteMember(req);
       } else {
         result = await this.softDeleteMember(req);
@@ -878,7 +897,7 @@ class MemberController extends Controller {
   async deleteMemberNotes(req) {
     await MemberNote.destroy({ where: { id: req.body.ids } });
     return {
-      message: "Record(s) has been deleted successfully"
+      message: 'Record(s) has been deleted successfully',
     };
   }
 
@@ -887,15 +906,15 @@ class MemberController extends Controller {
    */
   async permanentlyDeleteMember(req) {
     const modelIds = req.body.model_ids || [];
-    if(modelIds.length < 1) {
+    if (modelIds.length < 1) {
       return;
     }
-    
+
     const members = await sequelize.query(
-      "SELECT avatar FROM members WHERE id IN (:member_ids)",
+      'SELECT avatar FROM members WHERE id IN (:member_ids)',
       {
-        type: QueryTypes.SELECT, 
-        replacements: {member_ids: modelIds}
+        type: QueryTypes.SELECT,
+        replacements: { member_ids: modelIds },
       }
     );
 
@@ -914,29 +933,29 @@ class MemberController extends Controller {
         'campaign_member'
       ];
       await sequelize.query(
-        "DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);",
+        'DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);',
         {
-          type: QueryTypes.DELETE, 
-          replacements: {member_ids: modelIds},
-          transaction: t
+          type: QueryTypes.DELETE,
+          replacements: { member_ids: modelIds },
+          transaction: t,
         }
       );
 
       await sequelize.query(
-        "DELETE member_transactions, member_surveys, withdrawal_requests FROM member_transactions LEFT JOIN member_surveys ON (member_transactions.id = member_surveys.member_transaction_id) LEFT JOIN withdrawal_requests ON (member_transactions.id = withdrawal_requests.member_transaction_id OR withdrawal_requests.member_id = member_transactions.member_id) WHERE member_transactions.member_id IN (:member_ids);",
+        'DELETE member_transactions, member_surveys, withdrawal_requests FROM member_transactions LEFT JOIN member_surveys ON (member_transactions.id = member_surveys.member_transaction_id) LEFT JOIN withdrawal_requests ON (member_transactions.id = withdrawal_requests.member_transaction_id OR withdrawal_requests.member_id = member_transactions.member_id) WHERE member_transactions.member_id IN (:member_ids);',
         {
-          type: QueryTypes.DELETE, 
-          replacements: {member_ids: modelIds},
-          transaction: t
+          type: QueryTypes.DELETE,
+          replacements: { member_ids: modelIds },
+          transaction: t,
         }
       );
 
       await sequelize.query(
-        "DELETE FROM member_referrals WHERE member_id IN (:member_ids) OR referral_id IN (:member_ids);",
+        'DELETE FROM member_referrals WHERE member_id IN (:member_ids) OR referral_id IN (:member_ids);',
         {
-          type: QueryTypes.DELETE, 
-          replacements: {member_ids: modelIds},
-          transaction: t
+          type: QueryTypes.DELETE,
+          replacements: { member_ids: modelIds },
+          transaction: t,
         }
       );
 
@@ -953,28 +972,27 @@ class MemberController extends Controller {
       await sequelize.query(
         "DELETE FROM members WHERE id IN (:member_ids);",
         {
-          type: QueryTypes.DELETE, 
-          replacements: {member_ids: modelIds},
-          transaction: t
+          type: QueryTypes.DELETE,
+          replacements: { member_ids: modelIds },
+          transaction: t,
         }
       );
 
       await t.commit();
-      
+
       //Avatar Delete
       const fileHelper = new FileHelper(null, null, null);
-      for(let member of members) {
-        if(member.avatar !== null){
+      for (let member of members) {
+        if (member.avatar !== null) {
           await fileHelper.deleteFile(member.avatar);
         }
       }
 
       return {
-        message: "Record(s) has been deleted successfully",
+        message: 'Record(s) has been deleted successfully',
       };
-    }
-    catch (error) {
-      console.log('error', error)
+    } catch (error) {
+      console.log('error', error);
       await t.rollback();
     }
   }
@@ -982,17 +1000,19 @@ class MemberController extends Controller {
   /**
    * Soft delete member
    */
-  async softDeleteMember(req){
+  async softDeleteMember(req) {
     let modelIds = req.body.model_ids ?? [];
-    if(modelIds.length < 1) {
+    if (modelIds.length < 1) {
       return;
     }
 
     try {
-      await this.model.update({ status: 'deleted' }, { where: { id: modelIds } })
+      await this.model.update(
+        { status: 'deleted' },
+        { where: { id: modelIds } }
+      );
       return await super.delete(req);
-    } 
-    catch (error) {
+    } catch (error) {
       throw error;
     }
   }
