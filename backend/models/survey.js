@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
 			//   console.log('laddu', context, param);
 			// },
 		},
+		country_id:  DataTypes.BIGINT,
 		original_json: DataTypes.JSON,
 		created_at: 'TIMESTAMP',
 		updated_at: 'TIMESTAMP',
@@ -79,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
 			}
 		}
 		const surveys = await Survey.findAndCountAll({
-			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'survey_number', 'created_at' /*, [sequelize.json('original_json.LanguageId'), 'alias']*/],
+			attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'survey_number', 'created_at', 'name' /*, [sequelize.json('original_json.LanguageId'), 'alias']*/],
 			distinct: true,
 			where: {
 				survey_provider_id: params.provider_id,

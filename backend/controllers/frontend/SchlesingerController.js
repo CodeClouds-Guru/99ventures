@@ -20,32 +20,32 @@ class SchlesingerController {
     }
 
     surveys = async(memberId, params) => {
-        // surveys = async(req, res) => {
-        // const eligibilities = await MemberEligibilities.getEligibilities(225, 4, 161);
-        // const matchingQuestionIds = [];
-        // const matchingAnswerIds = [];
-        // eligibilities.forEach(eg => {
-        //     matchingQuestionIds.push(eg.survey_question_id);
-        //     if(eg.survey_answer_precode_id !== null){
-        //         matchingAnswerIds.push(+eg.survey_answer_precode_id);
-        //     }
-        // });
-        // const surveys = await Survey.getSurveysAndCount({
-        //     member_id: 160,
-        //     provider_id: 4,
-        //     matching_answer_ids: matchingAnswerIds,
-        //     matching_question_ids: matchingQuestionIds,
-        //     order: 'desc',
-        //     pageno: 1,
-        //     per_page: 12,
-        //     order_by: 'created_at',
-        //     clause: {
-        //         status: "live",
-        //         country_id: 225
-        //     }
-        // });
-        // res.send(surveys);
-        // return;
+        /*surveys = async(req, res) => {
+        const eligibilities = await MemberEligibilities.getEligibilities(226, 4, 160);
+        const matchingQuestionIds = [];
+        const matchingAnswerIds = [];
+        eligibilities.forEach(eg => {
+            matchingQuestionIds.push(eg.survey_question_id);
+            if(eg.survey_answer_precode_id !== null){
+                matchingAnswerIds.push(+eg.survey_answer_precode_id);
+            }
+        });
+        const surveys = await Survey.getSurveysAndCount({
+            member_id: 160,
+            provider_id: 4,
+            matching_answer_ids: matchingAnswerIds,
+            matching_question_ids: matchingQuestionIds,
+            order: 'desc',
+            pageno: 1,
+            per_page: 12,
+            order_by: 'created_at',
+            clause: {
+                status: "live",
+                country_id: 225
+            }
+        });
+        res.send(eligibilities);
+        return;*/
         try{
             //const memberId = member.id;
             const member = await Member.findOne({
@@ -76,7 +76,6 @@ class SchlesingerController {
                     message: 'Survey Provider not found!'
                 }
             }
-            // const params = {};
             const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'created_at';
@@ -124,15 +123,15 @@ class SchlesingerController {
                         country_id: member.country_id
                     }
                 });
-
-                var page_count = Math.ceil(surveys.count / perPage);
-                var survey_list = []
                 if (!surveys.count) {
                     return {
                         status: false,
                         message: 'No matching surveys!'
                     }
                 }
+                var page_count = Math.ceil(surveys.count / perPage);
+                var survey_list = []
+                
                 if(surveys.rows && surveys.rows.length){
                     for (let survey of surveys.rows) {
                         let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;

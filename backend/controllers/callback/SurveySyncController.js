@@ -94,16 +94,28 @@ class SurveySyncController {
 
     /**
      * Pure Spectrum To create all the questions
+     * URL: http://localhost:4000/callback/survey/purespectrum/question?country_id=225|226
      */
     async pureSpectrumSurveyQuestions(req, res) {
         try {
+            const country = await Country.findOne({
+                attributes: ['id', 'language_code'],
+                where: {
+                    id: req.query.country_id
+                }
+            });
+            if(country === null) {
+                res.json({ status: false, message: 'Country not found!' });
+                return;
+            }
             const psObj = new PurespectrumHelper;
-            const allAttributes = await psObj.fetchAndReturnData('/attributes?localization=en_US&format=true');
+            const allAttributes = await psObj.fetchAndReturnData('/attributes?localization='+country.language_code+'&format=true');
 
             if ('success' === allAttributes.apiStatus) {
                 const qualAttributes = allAttributes.qual_attributes;
-
+                const qualificationIds = [];
                 const questions = [];
+
                 for (let attr of qualAttributes) {
                     let params = {
                         question_text: attr.text,
@@ -118,7 +130,9 @@ class SurveySyncController {
                         for (let op of attr.condition_codes) {
                             precodes.push({
                                 option: op.id,
-                                precode: attr.qualification_code
+                                precode: attr.qualification_code,
+                                country_id: country.id,
+                                survey_provider_id: this.providerId
                             })
                         }
                     } else if (attr.condition_codes.length < 1) {
@@ -127,20 +141,26 @@ class SurveySyncController {
                             for (let op = format.min; op <= format.max; op++) {
                                 precodes.push({
                                     option: op,
-                                    precode: attr.qualification_code
+                                    precode: attr.qualification_code,
+                                    country_id: country.id,
+                                    survey_provider_id: this.providerId
                                 })
                             }
                         } else {
                             precodes.push({
                                 option: '',
-                                precode: attr.qualification_code
+                                precode: attr.qualification_code,
+                                country_id: country.id,
+                                survey_provider_id: this.providerId
                             })
                         }
                     }
 
                     questions.push({ ...params, SurveyAnswerPrecodes: precodes });
+                    qualificationIds.push(attr.qualification_code);
                 };
 
+                // Insert Survey Question & Survey Answer Precode
                 const result = await SurveyQuestion.bulkCreate(questions, {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
@@ -148,6 +168,27 @@ class SurveySyncController {
                         ignoreDuplicates: true
                     }]
                 });
+
+                const allQuestionsId = await SurveyQuestion.findAll({
+                    attributes: ['id'],
+                    where: {
+                        survey_provider_question_id: qualificationIds,
+                        survey_provider_id: this.providerId,
+                    }
+                });
+
+                const countryParams = allQuestionsId.map(r => {
+                    return {
+                        country_id: country.id,
+                        survey_question_id: r.id
+                    }
+                });
+
+                // Insert Country Survey Question
+                await CountrySurveyQuestion.bulkCreate(countryParams, {
+                    ignoreDuplicates: true
+                });
+
                 res.json({ status: true, message: 'Question Updated', total: result.length, result });
             } else {
                 res.json({ status: false, message: 'No record found!' });
@@ -162,6 +203,7 @@ class SurveySyncController {
 
     /**
      * Schlesinger To create all the questions
+     * URL: http://localhost:4000/callback/survey/schlesinger/question?country_id=225|226
      */
     async schlesingerSurveyQuestions(req, res) {
         try {
@@ -224,11 +266,6 @@ class SurveySyncController {
                     }
                     insertParams.push({ ...params, SurveyAnswerPrecodes: ansPrecode });
                 }
-
-                // const params1 = [];
-                // params1.push(insertParams[0])
-                // res.send(params1);
-                // return;
 
                 await SurveyQuestion.bulkCreate(insertParams, {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
@@ -319,7 +356,7 @@ class SurveySyncController {
                 }
 
                 //-- Disabled all the previous surveys
-                const current_datetime = new Date();
+                /*const current_datetime = new Date();
                 await Survey.update({
                     status: psObj.getSurveyStatus(33),
                     deleted_at: new Date()
@@ -331,7 +368,7 @@ class SurveySyncController {
                             [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
                         },
                     }
-                });
+                });*/
                 //----------
 
                 const surveyIds = surveyData.map(sr => sr.survey_id);
@@ -345,26 +382,36 @@ class SurveySyncController {
                     }
                 });
 
-                const insertParams = surveyData.map(sr => {
-                    let data = existingSurveys.find(row => row.survey_number == sr.survey_id);
-                    let params = {
-                        survey_provider_id: this.providerId,
-                        loi: sr.survey_performance.overall.loi,
-                        cpi: sr.cpi,
-                        name: sr.survey_name,
-                        survey_number: sr.survey_id,
-                        status: psObj.getSurveyStatus(sr.survey_status),
-                        original_json: sr,
-                        created_at: new Date()
+                const insertParams = [];
+                for(let sr of surveyData){
+                    const country = await Country.findOne({
+                        attributes: ['id'],
+                        where: {
+                            language_code: sr.surveyLocalization
+                        }
+                    });
+                    if(country && country.id){
+                        let data = existingSurveys.find(row => row.survey_number == sr.survey_id && row.country_id == sr.sr.surveyLocalization);
+                        let params = {
+                            survey_provider_id: this.providerId,
+                            loi: sr.survey_performance.overall.loi,
+                            cpi: sr.cpi,
+                            name: sr.survey_name,
+                            survey_number: sr.survey_id,
+                            status: psObj.getSurveyStatus(sr.survey_status),
+                            original_json: sr,
+                            created_at: new Date(),
+                            country_id: country.id
+                        }
+                        if (data) {
+                            params.id = data.id
+                        }
+                        insertParams.push(params);
                     }
-                    if (data) {
-                        params.id = data.id
-                    }
-                    return params;
-                });
-
+                };
+                
                 const result = await Survey.bulkCreate(insertParams, {
-                    updateOnDuplicate: ["loi", "cpi", "status", "name", "original_json"]
+                    updateOnDuplicate: ["loi", "cpi", "status", "name","country_id", "original_json"]
                 });
                 return result;
             } else {
@@ -395,7 +442,7 @@ class SurveySyncController {
                 }
 
                 //-- Disabled all the previous surveys
-                const current_datetime = new Date();
+                /*const current_datetime = new Date();
                 await Survey.update({
                     status: 'paused',
                     deleted_at: new Date()
@@ -407,43 +454,53 @@ class SurveySyncController {
                             [Op.lt]: current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate()
                         },
                     }
-                });
+                });*/
                 //----------
 
                 for (let survey of surveyData) {
-                    const checkExists = await Survey.count({
+                    const country = await Country.findOne({
+                        attributes: ['id'],
                         where: {
-                            survey_provider_id: this.providerId,
-                            survey_number: survey.SurveyId,
-                        },
+                            language_id: survey.LanguageId
+                        }
                     });
-                    if (!checkExists) {
-                        await Survey.create({
-                            survey_provider_id: this.providerId,
-                            loi: survey.LOI,
-                            cpi: survey.CPI,
-                            name: null,
-                            survey_number: survey.SurveyId,
-                            status: 'live',
-                            original_json: survey,
-                            created_at: new Date()
-                        });
-                    } else {
-                        await Survey.update({
-                            loi: survey.LOI,
-                            cpi: survey.CPI,
-                            name: null,
-                            original_json: survey,
-                            updated_at: new Date()
-                        }, {
+                    if(country && country.id){
+                        const checkExists = await Survey.count({
                             where: {
+                                survey_provider_id: this.providerId,
                                 survey_number: survey.SurveyId,
-                            }
+                                country_id: country.id
+                            },
                         });
+                        if (!checkExists) {                        
+                            await Survey.create({
+                                survey_provider_id: this.providerId,
+                                loi: survey.LOI,
+                                cpi: survey.CPI,
+                                name: null,
+                                survey_number: survey.SurveyId,
+                                status: 'live',
+                                original_json: survey,
+                                created_at: new Date(),
+                                country_id: country.id
+                            });
+                        } else {
+                            await Survey.update({
+                                loi: survey.LOI,
+                                cpi: survey.CPI,
+                                name: null,
+                                original_json: survey,
+                                updated_at: new Date()
+                            }, {
+                                where: {
+                                    survey_number: survey.SurveyId,
+                                }
+                            });
+                        }
                     }
                 }
                 return await Survey.findAll({
-                    attributes: ['id', 'survey_number', 'loi', 'cpi'],
+                    attributes: ['id', 'survey_number', 'loi', 'cpi', 'country_id'],
                     where: {
                         status: 'live',
                         survey_provider_id: this.providerId,
@@ -506,7 +563,7 @@ class SurveySyncController {
                                                 const precodeData = await SurveyAnswerPrecodes.findAll({
                                                     where: {
                                                         precode: qualification.qualification_code,
-                                                        // survey_provider_id: this.providerId,
+                                                        survey_provider_id: this.providerId,
                                                         // option: qualification.condition_codes
                                                         option: {
                                                             [Op.in]: qualification.condition_codes
@@ -521,7 +578,7 @@ class SurveySyncController {
                                                 const precodeData = await SurveyAnswerPrecodes.findAll({
                                                     where: {
                                                         precode: qualification.qualification_code,
-                                                        // survey_provider_id: this.providerId,
+                                                        survey_provider_id: this.providerId,
                                                         option: {
                                                             [Op.between]: [qualification.range_sets[0].from, qualification.range_sets[0].to]
                                                         }
@@ -603,6 +660,7 @@ class SurveySyncController {
                                                 where: {
                                                     precode: ql.QualificationId,
                                                     survey_provider_id: this.providerId,
+                                                    country_id: survey.country_id,
                                                     option: {
                                                         [Op.between]: [start, end]
                                                     }
@@ -616,6 +674,7 @@ class SurveySyncController {
                                                 where: {
                                                     precode: ql.QualificationId,
                                                     survey_provider_id: this.providerId,
+                                                    country_id: survey.country_id,
                                                     option: (['open ended'].includes(questionData.question_type)) ? null : ql.AnswerIds
                                                 }
                                             });
@@ -639,9 +698,9 @@ class SurveySyncController {
                 throw error;
             }
         } 
-        // else {
-        //     return this.schlesingerSurveySaveToSQS(req, res);
-        // }
+        else {
+            return this.schlesingerSurveySaveToSQS(req, res);
+        }
     }
 
     /**
