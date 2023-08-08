@@ -16,8 +16,7 @@ router.get('/test-adgate', (req, res) => {
   res.send(req.query);
 });
 
-
-router.get('/postback/:offerwall', OfferwallPostbackController.save);
+router.all('/postback/:offerwall', OfferwallPostbackController.save);
 router.all('/survey/:provider', SurveycallbackController.syncSurvey);
 router.all('/survey/outcome/:provider', SurveycallbackController.save);
 
@@ -58,35 +57,35 @@ router.get(
 );
 router.get('/test-hbs', (req, res) => {
   var Handlebars = require('handlebars');
-  const template = Handlebars.compile('\
+  const template = Handlebars.compile(
+    '\
   <div class="stickyfooter">\
     <div class="Left Bold">Total:</div>\
       <div class="Right">\
         <span class="Currency">{{PositionsTotal}}</span>\
       </div>\
     <div class="Clear" />\
-  </div>');
+  </div>'
+  );
   const html = template({ PositionsTotal: 34 });
   res.send(html);
-})
-router.all('/confirm-payment/', async (req,res) => {
-  var response = {}
-  const logger1 = require('../helpers/Logger')(
-    `paypal_callback.log`
-  );
+});
+router.all('/confirm-payment/', async (req, res) => {
+  var response = {};
+  const logger1 = require('../helpers/Logger')(`paypal_callback.log`);
   logger1.info(JSON.stringify(req.body));
   try {
-    let company_portal_id = 1
+    let company_portal_id = 1;
     const paypal_class = new Paypal(company_portal_id);
     response = await paypal_class.getPayouts(req);
     // res.send(response)
-  }catch(e) {
+  } catch (e) {
     logger1.error(JSON.stringify(req.body));
     response = {
-      error: e
-    }
-  }finally {
-    res.json(response)
+      error: e,
+    };
+  } finally {
+    res.json(response);
   }
 });
 module.exports = {
