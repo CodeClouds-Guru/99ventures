@@ -360,7 +360,7 @@ class ScriptParser {
             : {
                 status: 2,
                 type: 'withdraw',
-                amount: { [Op.gt]: 0 },
+                // amount: { [Op.gt]: 0 },
                 amount_action: { [Op.ne]: 'reversed_transaction' },
               },
           include: [
