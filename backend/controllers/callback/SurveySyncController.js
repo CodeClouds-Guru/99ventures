@@ -341,6 +341,220 @@ class SurveySyncController {
     }
 
     /**
+     * Lucid Question & Answer Sync
+     * URL: http://localhost:4000/callback/survey/lucid/question?type=question&country_id=225|226
+     */
+    async lucidSurveyQuestions(req, res) {
+        try {
+            const country = await Country.findOne({
+                attributes: ['id', 'lucid_language_id'],
+                where: {
+                    id: req.query.country_id
+                }
+            });
+            if(country === null || country.lucid_language_id == null) {
+                res.json({ status: false, message: 'Country not found!' });
+                return;
+            }
+            const lucidHelper = new LucidHelper();
+            // START Question Syncing
+            if (req.query.type === 'question') {
+                const questions = await lucidHelper.fetchAndReturnData(
+                    'https://api.samplicio.us/Lookup/v1/QuestionLibrary/AllQuestions/' + country.lucid_language_id
+                );
+                let questionsArry = [];
+                const qualificationIds = [];
+                if (questions && questions.ResultCount && questions.ResultCount > 0) {
+                    let allQues = questions.Questions;
+                    for (let element of allQues) {
+                        questionsArry.push({
+                            question_text: element.QuestionText,
+                            name: element.Name,
+                            survey_provider_id: 1,
+                            survey_provider_question_id: element.QuestionID,
+                            question_type: element.QuestionType,
+                            created_at: new Date(),
+                        });
+                        qualificationIds.push(element.QuestionID);
+                    };
+                    const questionData = await SurveyQuestion.bulkCreate(questionsArry, {
+                        updateOnDuplicate: ['survey_provider_question_id'],
+                        ignoreDuplicates: true,
+                    });
+
+                    const allQuestionsId = await SurveyQuestion.findAll({
+                        attributes: ['id'],
+                        where: {
+                            survey_provider_question_id: qualificationIds,
+                            survey_provider_id: 1,
+                        }
+                    });
+                    const countryParams = allQuestionsId.map(r => {
+                        return {
+                            country_id: country.id,
+                            survey_question_id: r.id
+                        }
+                    });
+    
+                    await CountrySurveyQuestion.bulkCreate(countryParams, {
+                        ignoreDuplicates: true
+                    });
+                    res.send({ message: 'Data Updated!', total_record: questionData.length, data: questionData });
+                    return;
+                }
+            } 
+            // START Options Syncing
+            else if (req.query.type === 'options') {
+                let page = req.query.page ? req.query.page : 1;
+                let limit = 40;
+                let offset = (page - 1) * limit;
+
+                let { count, rows } = await SurveyQuestion.findAndCountAll({
+                    attributes: ['survey_provider_question_id', 'question_type'],
+                    where: {
+                        survey_provider_id: 1
+                    },
+                    include: {
+                        model: CountrySurveyQuestion,
+                        attributes: ['country_id'],
+                        where: {
+                            country_id: country.id
+                        }
+                    },
+                    offset: offset,
+                    limit: limit,
+                });
+                
+                let optionsArry = [];
+                let surveyQuestions = rows;
+                if (surveyQuestions.length > 0) {
+                    const lucidHelper = new LucidHelper();
+                    for (let question of surveyQuestions) {
+                        try{
+                            const quesOptions = await lucidHelper.questionOptions(
+                                country.lucid_language_id,
+                                question.survey_provider_question_id
+                            );
+
+                            if (quesOptions.ResultCount > 0 && quesOptions.QuestionOptions) {
+                                let options = quesOptions.QuestionOptions;
+                                if (question.question_type == 'Numeric - Open-end' && question.survey_provider_question_id == 42) {
+                                    for (let i = 15; i <= 99; i++) {
+                                        optionsArry.push({
+                                            option: i,
+                                            precode: question.survey_provider_question_id,
+                                            survey_provider_id: 1,
+                                            country_id: country.id
+                                        });
+                                    }
+                                } else if (question.question_type == 'Numeric - Open-end') {
+                                    optionsArry.push({
+                                        option: null,
+                                        survey_provider_id: 1,
+                                        precode: question.survey_provider_question_id,
+                                        country_id: country.id
+                                    });
+                                } else {
+                                    for (let opt of options) {
+                                        optionsArry.push({
+                                            option: opt.Precode,
+                                            precode: opt.QuestionID,
+                                            survey_provider_id: 1,
+                                            country_id: country.id
+                                        });
+                                    }
+                                }
+                            }
+                        } catch (error) {
+
+                        }
+                    }
+                    if(optionsArry.length) {
+                        const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
+                            updateOnDuplicate: ['option']
+                        });
+                        res.send({ 
+                            message: 'Data Updated!', 
+                            count,
+                            next_page: ((offset + limit)>= count) ? false: true,
+                            data: optionsData
+                        });
+                    }
+                    else {
+                        res.send({ 
+                            message: 'Nothing to import'
+                        })
+                    }
+                    
+                    return;
+                } else {
+                    res.send('No more question available!')
+                    return;
+                }
+            }
+            res.send('Please add type!')
+            return;
+        } catch (error) {
+            const logger = require('../../helpers/Logger')(`lucid-qna-errror.log`);
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * Toluna Question & Answer Sync
+     */
+    async tolunaSurveyQuestions(req, res) {
+        try {
+            const payload = {
+                "CultureIDs": [1],   //1 = "en-us"
+                "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
+                "LastUpdateDate": "",
+                "IncludeComputed": "true",
+                "IncludeRoutables": "true",
+                "IncludeDemographics": "true"
+            }
+            const tObj = new TolunaHelper;
+            const questions = await tObj.getQuestionsAnswer(payload);
+
+            const params = questions.map(qs => {
+                let surveyAnswerPrecodes = qs.TranslatedAnswers.map(ans => {
+                    return {
+                        survey_provider_id: this.providerId,
+                        precode: qs.TranslatedQuestion.QuestionID,
+                        option: ans.AnswerID
+                    }
+                });
+
+                let params = {
+                    question_text: qs.TranslatedQuestion.DisplayNameTranslation,
+                    name: qs.InternalName,
+                    survey_provider_id: this.providerId,
+                    survey_provider_question_id: qs.TranslatedQuestion.QuestionID,
+                    question_type: qs.AnswerType,
+                    created_at: new Date(),
+                    SurveyAnswerPrecodes: surveyAnswerPrecodes
+                };
+
+                return params;
+            });
+
+            await SurveyQuestion.bulkCreate(params, {
+                include: [{
+                    model: SurveyAnswerPrecodes
+                }]
+            });
+            res.send('Data Updated!');
+            return;
+
+        } catch (error) {
+            const logger = require('../../helpers/Logger')(`toluna-qna-errror.log`);
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
      * Pure Spectrum survey
      */
     async pureSpectrumSurvey(req, res) {
@@ -702,158 +916,7 @@ class SurveySyncController {
             return this.schlesingerSurveySaveToSQS(req, res);
         }
     }
-
-    /**
-     * Toluna Question & Answer Sync
-     */
-    async tolunaSurveyQuestions(req, res) {
-        try {
-            const payload = {
-                "CultureIDs": [1],   //1 = "en-us"
-                "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
-                "LastUpdateDate": "",
-                "IncludeComputed": "true",
-                "IncludeRoutables": "true",
-                "IncludeDemographics": "true"
-            }
-            const tObj = new TolunaHelper;
-            const questions = await tObj.getQuestionsAnswer(payload);
-
-            const params = questions.map(qs => {
-                let surveyAnswerPrecodes = qs.TranslatedAnswers.map(ans => {
-                    return {
-                        survey_provider_id: this.providerId,
-                        precode: qs.TranslatedQuestion.QuestionID,
-                        option: ans.AnswerID
-                    }
-                });
-
-                let params = {
-                    question_text: qs.TranslatedQuestion.DisplayNameTranslation,
-                    name: qs.InternalName,
-                    survey_provider_id: this.providerId,
-                    survey_provider_question_id: qs.TranslatedQuestion.QuestionID,
-                    question_type: qs.AnswerType,
-                    created_at: new Date(),
-                    SurveyAnswerPrecodes: surveyAnswerPrecodes
-                };
-
-                return params;
-            });
-
-            await SurveyQuestion.bulkCreate(params, {
-                include: [{
-                    model: SurveyAnswerPrecodes
-                }]
-            });
-            res.send('Data Updated!');
-            return;
-
-        } catch (error) {
-            const logger = require('../../helpers/Logger')(`toluna-qna-errror.log`);
-            logger.error(error);
-            throw error;
-        }
-    }
-
-    /**
-     * Lucid Question & Answer Sync
-     */
-    async lucidSurveyQuestions(req, res) {
-        try {
-            const lucidHelper = new LucidHelper();
-            if (req.query.type === 'question') {
-                const questions = await lucidHelper.fetchAndReturnData(
-                    'https://api.samplicio.us/Lookup/v1/QuestionLibrary/AllQuestions/9'
-                );
-                let questionsArry = [];
-
-                if (questions && questions.ResultCount && questions.ResultCount > 0) {
-                    let allQues = questions.Questions;
-                    for (let element of allQues) {
-                        questionsArry.push({
-                            question_text: element.QuestionText,
-                            name: element.Name,
-                            survey_provider_id: 1,
-                            survey_provider_question_id: element.QuestionID,
-                            question_type: element.QuestionType,
-                            created_at: new Date(),
-                        });
-                    };
-                    const questionData = await SurveyQuestion.bulkCreate(questionsArry, {
-                        updateOnDuplicate: ['survey_provider_question_id'],
-                        ignoreDuplicates: true,
-                    });
-                    res.send({ message: 'Data Updated!', total_record: questionData.length, data: questionData });
-                    return;
-                }
-            } else if (req.query.type === 'options') {
-                let page = req.query.page ? req.query.page : 1;
-                let limit = 40;
-                let offset = (page - 1) * limit;
-
-                let surveyQuestions = await SurveyQuestion.findAll({
-                    attributes: ['survey_provider_question_id', 'question_type'],
-                    where: {
-                        survey_provider_id: 1
-                    },
-                    offset: offset,
-                    limit: limit,
-                });
-
-                let optionsArry = [];
-                if (surveyQuestions.length > 0) {
-                    const lucidHelper = new LucidHelper();
-                    for (let question of surveyQuestions) {
-                        const quesOptions = await lucidHelper.questionOptions(
-                            9,
-                            question.survey_provider_question_id
-                        );
-
-                        if (quesOptions.ResultCount > 0 && quesOptions.QuestionOptions) {
-                            let options = quesOptions.QuestionOptions;
-                            if (question.question_type == 'Numeric - Open-end' && question.survey_provider_question_id == 42) {
-                                for (let i = 15; i <= 99; i++) {
-                                    optionsArry.push({
-                                        option: i,
-                                        precode: question.survey_provider_question_id
-                                    })
-                                }
-                            } else if (question.question_type == 'Numeric - Open-end') {
-                                optionsArry.push({
-                                    option: null,
-                                    precode: question.survey_provider_question_id
-                                })
-                            } else {
-                                for (let opt of options) {
-                                    optionsArry.push({
-                                        option: opt.Precode,
-                                        precode: opt.QuestionID
-                                    })
-                                }
-                            }
-                        }
-                    }
-
-                    const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
-                        updateOnDuplicate: ['option']
-                    });
-
-                    res.send({ message: 'Data Updated!', data: optionsData });
-                    return;
-                } else {
-                    res.send('No more question available!')
-                    return;
-                }
-            }
-            res.send('Please add type!')
-            return;
-        } catch (error) {
-            const logger = require('../../helpers/Logger')(`lucid-qna-errror.log`);
-            logger.error(error);
-            throw error;
-        }
-    }
+    
 
     /****************************************************
      ************* CRON Functions ***********************

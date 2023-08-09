@@ -16,7 +16,9 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: 'survey_provider_question_id',
       });
 
-      SurveyQuestion.hasOne(models.CountrySurveyQuestion)
+      SurveyQuestion.hasOne(models.CountrySurveyQuestion, {
+        foreignKey: 'survey_question_id'
+      })
 
     }
   }

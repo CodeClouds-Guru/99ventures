@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       language_id: DataTypes.STRING,
       language_code: DataTypes.STRING,
       language_name: DataTypes.STRING,
+      lucid_language_id: DataTypes.INTEGER,
     },
     {
       sequelize,
