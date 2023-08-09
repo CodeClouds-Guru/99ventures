@@ -17,6 +17,7 @@ const {
 } = require('../models/index');
 const axios = require('axios');
 const { json } = require('body-parser');
+const { required } = require('joi');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -359,13 +360,14 @@ class ScriptParser {
             ? { member_id: user.id, status: 2 }
             : {
                 status: 2,
-                type: 'credited',
+                type: 'withdraw',
                 amount_action: { [Op.ne]: 'reversed_transaction' },
               },
           include: [
             { model: Models.Member, required: true },
             {
               model: Models.WithdrawalRequest,
+              required: user ? false : true,
               include: {
                 model: Models.PaymentMethod,
               },
