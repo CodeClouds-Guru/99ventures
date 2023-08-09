@@ -92,7 +92,7 @@ class OfferwallPostbackController {
               amount: payout_amount,
               note: offerwall_name,
               type: 'credited',
-              amount_action: 'survey',
+              amount_action: 'offerwall',
               created_by: null,
               payload: req.body
                 ? JSON.stringify(req.body)

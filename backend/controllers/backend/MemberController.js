@@ -19,6 +19,7 @@ const {
   Company,
   WithdrawalRequest,
   sequelize,
+  CompanyPortal,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
@@ -347,6 +348,8 @@ class MemberController extends Controller {
   async update(req, res) {
     let id = req.params.id || null;
     let request_data = req.body;
+    let company_id = req.headers.company_id;
+    let company_portal_id = req.headers.site_id;
     try {
       let result = false;
       let member = await this.model.findOne({ where: { id: req.params.id } });
@@ -401,8 +404,13 @@ class MemberController extends Controller {
         const eventBus = require('../../eventBus');
         let hash_obj = { id: member.id, email: member.email };
         var buf = genarateHash(JSON.stringify(hash_obj));
+        let company_domain = await CompanyPortal.findOne({
+          where: { id: company_portal_id },
+          attributes: ['domain'],
+        });
         member.email_confirmation_link =
-          req.session.company_portal.domain + '/email-verify/' + buf;
+          company_domain.domain + '/email-verify/' + buf;
+        console.log(member);
         let evntbus = eventBus.emit('send_email', {
           action: 'Welcome',
           data: {
@@ -930,7 +938,7 @@ class MemberController extends Controller {
         'member_balances',
         'member_activity_logs',
         'excluded_member_payment_method',
-        'campaign_member'
+        'campaign_member',
       ];
       await sequelize.query(
         'DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);',
@@ -959,24 +967,21 @@ class MemberController extends Controller {
         }
       );
 
-      for(let tbl of tables){
+      for (let tbl of tables) {
         await sequelize.query(
-          "DELETE FROM "+ tbl +" WHERE member_id IN (:member_ids);",
+          'DELETE FROM ' + tbl + ' WHERE member_id IN (:member_ids);',
           {
-            type: QueryTypes.DELETE, 
-            replacements: {member_ids: modelIds},
-            transaction: t
+            type: QueryTypes.DELETE,
+            replacements: { member_ids: modelIds },
+            transaction: t,
           }
         );
       }
-      await sequelize.query(
-        "DELETE FROM members WHERE id IN (:member_ids);",
-        {
-          type: QueryTypes.DELETE,
-          replacements: { member_ids: modelIds },
-          transaction: t,
-        }
-      );
+      await sequelize.query('DELETE FROM members WHERE id IN (:member_ids);', {
+        type: QueryTypes.DELETE,
+        replacements: { member_ids: modelIds },
+        transaction: t,
+      });
 
       await t.commit();
 
