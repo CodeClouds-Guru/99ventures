@@ -359,7 +359,8 @@ class ScriptParser {
             ? { member_id: user.id, status: 2 }
             : {
                 status: 2,
-                type: 'credited',
+                type: 'withdraw',
+                amount: { [Op.gt]: 0 },
                 amount_action: { [Op.ne]: 'reversed_transaction' },
               },
           include: [
