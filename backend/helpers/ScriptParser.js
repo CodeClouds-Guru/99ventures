@@ -355,7 +355,13 @@ class ScriptParser {
 
       case 'MemberTransaction':
         return {
-          where: user ? { member_id: user.id, status:2} : { status:2, type: 'credited',amount_action: { [Op.ne]: 'reversed_transaction',} , },
+          where: user
+            ? { member_id: user.id, status: 2 }
+            : {
+                status: 2,
+                type: 'credited',
+                amount_action: { [Op.ne]: 'reversed_transaction' },
+              },
           include: [
             { model: Models.Member, required: true },
             {
@@ -376,6 +382,7 @@ class ScriptParser {
             'transaction_id',
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
+            'note',
           ],
         };
       case 'Member':

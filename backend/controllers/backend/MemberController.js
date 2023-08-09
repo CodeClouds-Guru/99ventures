@@ -425,7 +425,7 @@ class MemberController extends Controller {
         // console.error(error);
         this.throwCustomError('Type is required', 401);
       }
-      console.error(result);
+      // console.error(result);
       if (result) {
         var message =
           type === 'resend_verify_email'
