@@ -19,7 +19,6 @@ const {
   Company,
   WithdrawalRequest,
   sequelize,
-  CompanyPortal,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
