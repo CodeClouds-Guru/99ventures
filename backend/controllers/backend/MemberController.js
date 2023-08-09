@@ -419,16 +419,19 @@ class MemberController extends Controller {
           req: req,
         });
         delete req.body.type;
+        result = true
       } else {
         // console.error(error);
         this.throwCustomError('Type is required', 401);
       }
+      console.error(result);
       if (result) {
         return {
           status: true,
           message: 'Record has been updated successfully',
         };
       } else {
+        console.error(error);
         this.throwCustomError('Unable to save data', 500);
       }
     } catch (error) {
@@ -514,8 +517,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
 
     // Dynamically generating Model Relationships
@@ -818,7 +821,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1056,8 +1059,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
       company_portal_id: site_id,
     };
 
