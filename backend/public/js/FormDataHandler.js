@@ -165,8 +165,8 @@ $(() => {
       $(location).attr('href').includes('?')
       ? $(location).attr('href').split('#')[1].split('?')[0]
       : $(location).attr('href').includes('#')
-        ? $(location).attr('href').split('#')[1]
-        : '';
+      ? $(location).attr('href').split('#')[1]
+      : '';
   };
   if (getUrlHash() === 'signup') {
     goToRegister();
@@ -525,11 +525,11 @@ $(() => {
         // console.log('resp ', resp);
         if (resp.data.streak > 1) {
           str +=
-            '<p class="m-0">Congrats <strong>' +
+            '<p class="m-0">Congratulations <strong>' +
             resp.data.member_firstname +
-            '</strong>! You have been loggin in <strong>' +
+            '</strong>! You have logged in <strong>' +
             resp.data.streak +
-            '</strong> days in a row! Excellent, keep up the good work!!</p>';
+            '</strong> days in a row! Keep up the good work!</p>';
           str += '</div></div>';
           $('#header_streak_or_refresh').append(str);
         }
@@ -573,11 +573,10 @@ $(() => {
 
   $('input[type="password"]').on({
     keydown: function (e) {
-      if (e.which === 32)
-        return false;
+      if (e.which === 32) return false;
     },
     change: function () {
-      this.value = this.value.replace(/\s/g, "");
-    }
+      this.value = this.value.replace(/\s/g, '');
+    },
   });
 });
