@@ -349,10 +349,11 @@ class MemberController extends Controller {
     let request_data = req.body;
     let company_id = req.headers.company_id;
     let company_portal_id = req.headers.site_id;
+    var type = req.body.type;
     try {
       let result = false;
       let member = await this.model.findOne({ where: { id: req.params.id } });
-      if (req.body.type == 'basic_details') {
+      if (req.body.type === 'basic_details') {
         delete req.body.type;
 
         if (!req.body.username) {
@@ -376,21 +377,21 @@ class MemberController extends Controller {
           this.throwCustomError('Username already exists.', 422);
         }
         result = this.updateBasicDetails(req, member);
-      } else if (req.body.type == 'member_status') {
+      } else if (req.body.type === 'member_status') {
         result = await this.model.changeStatus(req);
         delete req.body.type;
-      } else if (req.body.type == 'admin_status') {
+      } else if (req.body.type === 'admin_status') {
         result = await this.model.changeAdminStatus(req);
         delete req.body.type;
-      } else if (req.body.type == 'admin_adjustment') {
+      } else if (req.body.type === 'admin_adjustment') {
         result = await this.adminAdjustment(req);
         delete req.body.type;
-      } else if (req.body.type == 'email_alerts') {
+      } else if (req.body.type === 'email_alerts') {
         let member_id = req.params.id;
         let email_alerts = req.body.email_alerts;
         result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
         delete req.body.type;
-      } else if (req.body.type == 'payment_email') {
+      } else if (req.body.type === 'payment_email') {
         result = await MemberPaymentInformation.updatePaymentInformation({
           member_id: req.params.id,
           member_payment_info: [
@@ -399,7 +400,7 @@ class MemberController extends Controller {
           // payment_email: req.body.email,
         });
         delete req.body.type;
-      } else if (req.body.type == 'resend_verify_email') {
+      } else if (req.body.type === 'resend_verify_email') {
         const eventBus = require('../../eventBus');
         let hash_obj = { id: member.id, email: member.email };
         var buf = genarateHash(JSON.stringify(hash_obj));
@@ -409,7 +410,7 @@ class MemberController extends Controller {
         });
         member.email_confirmation_link =
           company_domain.domain + '/email-verify/' + buf;
-        console.log(member);
+        // console.log(member);
         let evntbus = eventBus.emit('send_email', {
           action: 'Welcome',
           data: {
@@ -419,20 +420,27 @@ class MemberController extends Controller {
           req: req,
         });
         delete req.body.type;
-        result = true
+        result = true;
       } else {
         // console.error(error);
         this.throwCustomError('Type is required', 401);
       }
       console.error(result);
       if (result) {
+        var message =
+          type === 'resend_verify_email'
+            ? 'Email sent successfully'
+            : 'Record has been updated successfully';
         return {
           status: true,
-          message: 'Record has been updated successfully',
+          message: message,
         };
       } else {
-        console.error(error);
-        this.throwCustomError('Unable to save data', 500);
+        var message =
+          type === 'resend_verify_email'
+            ? 'Unable to send email'
+            : 'Unable to save data';
+        this.throwCustomError(message, 500);
       }
     } catch (error) {
       console.error(error);
@@ -517,8 +525,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
 
     // Dynamically generating Model Relationships
@@ -821,7 +829,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1059,8 +1067,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
       company_portal_id: site_id,
     };
 
