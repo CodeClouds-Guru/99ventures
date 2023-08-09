@@ -224,7 +224,7 @@ const MemberDetails = (props) => {
                         })
                         props.setIsMemberDeleted(true)
                     }*/
-                    if(result.is_deleted) {
+                    if (result.is_deleted) {
                         setMemberDeleted(true)
                     }
                 }
@@ -417,18 +417,31 @@ const MemberDetails = (props) => {
         setMemberData({ ...memberinfo, membership_tier_id: memberinfo.MembershipTier.id, avatar: memberData.avatarUrl });
     }
 
+    const sendVerificationEmail = () => {
+        axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, { type: 'resend_verify_email' })
+            .then(res => {
+                if (res.data.results.message) {
+                    dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+                    setActionLoader(false);
+                }
+            })
+            .catch(errors => {
+                console.log(errors);
+                dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
+            });
+    }
     if (loader) {
         return (
             <BackdropLoader />
         )
     }
     return (
-        <Box 
-            className={'sm:p-16 lg:p-16 md:p-16 flex sm:flex-col lg:flex-col h-full ' + ((memberDeleted) ? 'border-4 lg:pt-0 sm:pt-0 md:pt-0' : '')}  
-            style={{borderColor: (memberDeleted) ? '#f44336' : 'none' }}   
+        <Box
+            className={'sm:p-16 lg:p-16 md:p-16 flex sm:flex-col lg:flex-col h-full ' + ((memberDeleted) ? 'border-4 lg:pt-0 sm:pt-0 md:pt-0' : '')}
+            style={{ borderColor: (memberDeleted) ? '#f44336' : 'none' }}
         >
             {memberDeleted && <StickyMessage />}
-            <div className={'flex xl:flex-row lg:flex-row sm:flex-col w-full '+ ((memberDeleted) ? 'lg:mt-10' : '')}>
+            <div className={'flex xl:flex-row lg:flex-row sm:flex-col w-full ' + ((memberDeleted) ? 'lg:mt-10' : '')}>
                 <div className="lg:w-1/3 xl:w-2/5">
                     <div className='flex items-start justify-between'>
                         <div className='flex items-center justify-between'>
@@ -487,7 +500,7 @@ const MemberDetails = (props) => {
                                                 </Tooltip>
                                             )
                                         }
-                                        
+
                                     </Typography>
                                 )
                             }
@@ -583,7 +596,7 @@ const MemberDetails = (props) => {
                                                                 </Tooltip>
                                                             )
                                                         }
-                                                        
+
                                                     </div>
                                                 )
                                             }
@@ -647,7 +660,7 @@ const MemberDetails = (props) => {
                                                                 </Tooltip>
                                                             )
                                                         }
-                                                        
+
                                                     </div>
                                                 )
                                             }
@@ -697,6 +710,11 @@ const MemberDetails = (props) => {
                                     <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
                                             <a href={`mailto:${memberData.email}`} style={{ textDecoration: 'none', color: '#1e293b' }}>{memberData.email}</a>
+                                            {status === 'validating' && <Tooltip title="Send verification email" placement="top-start" >
+                                                <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => sendVerificationEmail()}>
+                                                    <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">material-outline:email</FuseSvgIcon>
+                                                </IconButton>
+                                            </Tooltip>}
                                         </Typography>
                                     } />
                                 </ListItem>
@@ -937,7 +955,7 @@ const MemberDetails = (props) => {
                             }}
                         >
                             <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
-                                Balance($): {showBalance('balance')} <br/> (Total Earnings: ${showBalance('total')})
+                                Balance($): {showBalance('balance')} <br /> (Total Earnings: ${showBalance('total')})
                             </Typography>
                             {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
                                 Adjustment: {memberData.total_earnings && memberData.total_earnings.total_adjustment ? '$' + memberData.total_earnings.total_adjustment : 0}
@@ -1143,17 +1161,17 @@ const MemberDetails = (props) => {
                         <Divider sx={{ borderWidth: 2 }} className="my-5" />
                         <Box component="div" className="w-full flex flex-col">
                             <Typography variant="body1" className="font-bold flex">Account Notes Section
-                            {
-                                !memberDeleted && (
-                                    <Tooltip title="Add Note" placement="right">
-                                        <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => { setStatuslessNote(true); setDialogStatus(true) }} >heroicons-solid:plus</FuseSvgIcon>
-                                    </Tooltip>
-                                )
-                            }
+                                {
+                                    !memberDeleted && (
+                                        <Tooltip title="Add Note" placement="right">
+                                            <FuseSvgIcon className="text-48 cursor-pointer" size={24} color="action" onClick={() => { setStatuslessNote(true); setDialogStatus(true) }} >heroicons-solid:plus</FuseSvgIcon>
+                                        </Tooltip>
+                                    )
+                                }
                             </Typography>
                             {
                                 (accountNotes.length != 0) ? (
-                                    <AccountNotes  accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} memberDeleted={memberDeleted}/>
+                                    <AccountNotes accountNotes={accountNotes} memberNoteDeleted={memberNoteDeleted} memberDeleted={memberDeleted} />
                                 ) : (
                                     <Typography variant="body1" className="italic text-grey-500">No records found!</Typography>
                                 )
@@ -1165,7 +1183,7 @@ const MemberDetails = (props) => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content={<p dangerouslySetInnerHTML={{__html:msg}}></p>}
+                        content={<p dangerouslySetInnerHTML={{ __html: msg }}></p>}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
