@@ -10,15 +10,16 @@ module.exports = {
       }
     );
     await queryInterface.addIndex('member_eligibilities', {
-      fields: ['member_id'],
+      fields: ['member_id', 'survey_question_id'],
       unique: true,
+      name: 'member_survey',
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn(
-      'member_eligibilities',
-      'country_survey_question_id'
-    );
-    await queryInterface.removeIndex('member_eligibilities', 'member_id');
+    // await queryInterface.removeColumn(
+    //   'member_eligibilities',
+    //   'country_survey_question_id'
+    // );
+    // await queryInterface.removeIndex('member_eligibilities', 'member_id');
   },
 };
