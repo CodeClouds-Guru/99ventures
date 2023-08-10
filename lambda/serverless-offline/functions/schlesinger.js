@@ -27,26 +27,32 @@ class Schlesinger {
         const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId]);
         if (surveyData.length) {
             let surveyId = surveyData[0].id;
-            let dlSql = `DELETE FROM surveys WHERE id = ?`;
-            await this.db.query(dlSql, [surveyId]);
 
-            let qlSql = `DELETE FROM survey_qualifications WHERE survey_id = ?`
-            await this.db.query(qlSql, [surveyId]);
+            // let dlSql = `DELETE FROM surveys WHERE id = ?`;
+            // await this.db.query(dlSql, [surveyId]);
+            // let qlSql = `DELETE FROM survey_qualifications WHERE survey_id = ?`
+            // await this.db.query(qlSql, [surveyId]);
 
-            params = [surveyId, ...params];
-            sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            let deleteSql = `DELETE surveys, survey_qualifications FROM surveys JOIN survey_qualifications ON (surveys.id = survey_qualifications.survey_id) WHERE surveys.id = ?`;
+            await this.db.query(deleteSql, [surveyId]);
+
+            let countrySql = `SELECT id from countries WHERE sago_language_id = ? AND deleted_at IS NULL LIMIT 1`;
+            const country = await this.db.query(countrySql, [this.record.LanguageId]);
+
+            params = [surveyId, ...params, country.id];
+            sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         } else {
-            sql = `INSERT INTO surveys (survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            sql = `INSERT INTO surveys (survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         }
 
         const rows = await this.db.query(sql, params);
         // console.log(rows.insertId)
 
-        await this.surveyQualificationSync(rows.insertId, this.db);
+        await this.surveyQualificationSync(rows.insertId, this.db, rows.country_id);
         return rows;
     }
 
-    surveyQualificationSync = async (surveyId, db) => {
+    surveyQualificationSync = async (surveyId, db, country_id) => {
         if (this.record.qualifications) {
             const qualifications = this.record.qualifications;
             if (qualifications.length) {
@@ -71,8 +77,8 @@ class Schlesinger {
                 let sqlQry = `SELECT sq.id as qualification_id, sq.survey_question_id, qs.survey_provider_question_id, qs.question_type, ap.option, ap.id as answer_precode_id
                 FROM survey_qualifications AS sq JOIN survey_questions AS qs ON (sq.survey_question_id = qs.id)
                 JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
-                WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ?`;
-                const qlData = await db.query(sqlQry, [surveyId]);
+                WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ? AND ap.country_id = ? AND ap.survey_provider_id = ?`;
+                const qlData = await db.query(sqlQry, [surveyId, country_id, this.record.survey_provider_id]);
                 // console.log(qlData)
                 const ansPrecodeParams = []
 

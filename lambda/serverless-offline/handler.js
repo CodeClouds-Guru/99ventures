@@ -10,7 +10,7 @@ const Purespectrum = require('./functions/purespectrum');
  * @param {*} context 
  * @returns 
  */
-module.exports.surveySync = async (event, context) => {	
+/*module.exports.surveySync = async (event, context) => {
     // context.callbackWaitsForEmptyEventLoop = true;
     var surveys = [];
     var db = null;
@@ -67,8 +67,71 @@ module.exports.surveySync = async (event, context) => {
             body: JSON.stringify({ surveys })
         }
     }
-}
+}*/
 
+
+
+module.exports.surveySync = async (context) => {
+    const event = {
+        "Records": [{"IR":2,"CPI":0.57,"LOI":13,"LiveLink":"https://surveys.sample-cube.com?VID=21092&SID=CAA0FE0B-D7D2-4B0E-B9A6-CD576D0A370D&LID=1&pid=[#scid#]&uid=[#scid2#]&zid=[#scid3#]","SurveyId":17987498,"AccountId":1,"UrlTypeId":0,"CollectPII":false,"IndustryId":30,"LanguageId":1,"IsManualInc":false,"StudyTypeId":1,"BillingEntityId":2,"IsMobileAllowed":true,"IsQuotaLevelCPI":false,"IsTabletAllowed":true,"UpdateTimeStamp":"2023-08-08T05:49:17.8341736","IsNonMobileAllowed":true,"IsSurveyGroupExist":true,"Qual_UpdateTimeStamp":"2023-08-08T05:49:17.96","Group_UpdateTimeStamp":"2023-08-07T05:19:15.067","Quota_UpdateTimeStamp":"2023-08-08T05:49:18.153","survey_provider_id":4,"qualifications":[{"QualificationId":59,"UpdateTimeStamp":"2023-08-07T05:19:11.363","AnswerIds":["18-49"],"AnswerCodes":["1"]},{"QualificationId":60,"UpdateTimeStamp":"2023-08-08T06:52:03.597","AnswerIds":["1873","1874"],"AnswerCodes":["1","2"]}]},{"IR":30,"CPI":1.48,"LOI":13,"LiveLink":"https://surveys.sample-cube.com?VID=21092&SID=709EEF9B-FC2B-4AA0-9870-107A4B0DB917&LID=3&pid=[#scid#]&uid=[#scid2#]&zid=[#scid3#]","SurveyId":17916141,"AccountId":1,"UrlTypeId":1,"CollectPII":false,"IndustryId":30,"LanguageId":3,"IsManualInc":false,"StudyTypeId":1,"BillingEntityId":2,"IsMobileAllowed":false,"IsQuotaLevelCPI":false,"IsTabletAllowed":false,"UpdateTimeStamp":"2023-08-08T06:10:30.38","IsNonMobileAllowed":true,"IsSurveyGroupExist":false,"Qual_UpdateTimeStamp":"2023-08-06T03:08:46.423","Group_UpdateTimeStamp":"2023-08-07T06:15:06.98","Quota_UpdateTimeStamp":"2023-08-08T05:29:14.58","survey_provider_id":4,"qualifications":[{"QualificationId":59,"UpdateTimeStamp":"2023-08-06T03:08:46.423","AnswerIds":["40-54","20-29"],"AnswerCodes":["1","1"]},{"QualificationId":60,"UpdateTimeStamp":"2023-08-03T01:45:04.337","AnswerIds":["58","59"],"AnswerCodes":["1","2"]},{"QualificationId":631,"UpdateTimeStamp":"2023-08-10T00:21:51.623","AnswerIds":["54149","54151"],"AnswerCodes":["2","4"]}]}]
+    };
+    var surveys = [];
+    var db = null;
+    try {
+        if(event.Records) {
+            const records = event.Records;
+            var db = createDBConnection();
+            for(let record of records){
+                const surveyData = JSON.parse(record.body);                
+                if ('survey_provider_id' in surveyData) {
+                    try {
+                        await db.beginTransaction();
+                        switch (surveyData.survey_provider_id) {
+                            case 1:
+                            case '1':
+                                const lucid = new Lucid(db, surveyData);
+                                var result = await lucid.surveySync();
+                                surveys.push(result);
+                                break;
+                            case 4:
+                            case '4':
+                                const sch = new Schlesinger(db, surveyData);
+                                var result = await sch.surveySync();
+                                surveys.push(result);
+                                break;
+                            case 3:
+                            case '3':
+                                const psObj = new Purespectrum(db, surveyData);
+                                var result = await psObj.surveySync();
+                                surveys.push(result);
+                                break;
+                            default:
+                                surveys = []
+                        }
+                        console.log('result', result)
+                        surveys.push(result);
+                        await db.commit();
+                    } catch ( err ) {
+                        console.log(err)
+                        await db.rollback();
+                        throw err;
+                    }
+                }
+            }
+        }
+    } catch ( err ) {
+        console.log(err)
+    }
+    finally{
+        if(db){
+            await db.close();
+        }
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ surveys })
+        }
+    }
+}
 
 
 //For testing purpose
