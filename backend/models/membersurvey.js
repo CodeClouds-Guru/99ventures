@@ -1,9 +1,7 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
-const Joi = require('joi')
+const Joi = require('joi');
 
 module.exports = (sequelize, DataTypes) => {
   class MemberSurvey extends Model {
@@ -15,29 +13,32 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       MemberSurvey.belongsTo(models.Survey, {
-        foreignKey: 'survey_number'
+        foreignKey: 'survey_number',
       }),
-      MemberSurvey.belongsTo(models.SurveyProvider, {
-        foreignKey: 'survey_provider_id',
-      }),
-      MemberSurvey.belongsTo(models.MemberTransaction, {
-        foreignKey: 'member_transaction_id',
-      })
+        MemberSurvey.belongsTo(models.SurveyProvider, {
+          foreignKey: 'survey_provider_id',
+        }),
+        MemberSurvey.belongsTo(models.MemberTransaction, {
+          foreignKey: 'member_transaction_id',
+        });
     }
   }
-  MemberSurvey.init({
-    member_transaction_id: DataTypes.INTEGER,
-    survey_number: DataTypes.STRING,
-    survey_provider_id: DataTypes.BIGINT,
-    original_json: DataTypes.JSON,
-    completed_on: 'TIMESTAMP'
-  }, {
-    sequelize,
-    modelName: 'MemberSurvey',
-    timestamps: false,
-    paranoid: false,
-    tableName: 'member_surveys'
-  });
+  MemberSurvey.init(
+    {
+      member_transaction_id: DataTypes.INTEGER,
+      survey_number: DataTypes.STRING,
+      survey_provider_id: DataTypes.BIGINT,
+      original_json: DataTypes.JSON,
+      completed_on: 'TIMESTAMP',
+    },
+    {
+      sequelize,
+      modelName: 'MemberSurvey',
+      timestamps: false,
+      paranoid: false,
+      tableName: 'member_surveys',
+    }
+  );
   MemberSurvey.fields = {
     id: {
       field_name: 'id',
@@ -142,6 +143,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    '$MemberTransaction.amount$': {
+      field_name: 'MemberTransaction.amount',
+      db_name: '`MemberTransaction`.`amount`',
+      type: 'text',
+      placeholder: 'Amount',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
     },
   };
   sequelizePaginate.paginate(MemberSurvey);

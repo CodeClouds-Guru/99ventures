@@ -901,6 +901,18 @@ class MemberController extends Controller {
 
     const t = await sequelize.transaction();
     try {
+      const tables = [
+        'shoutboxes',
+        'member_payment_informations',
+        'member_notifications',
+        'member_offer_wall',
+        'member_notes',
+        'member_eligibilities',
+        'member_balances',
+        'member_activity_logs',
+        'excluded_member_payment_method',
+        'campaign_member'
+      ];
       await sequelize.query(
         "DELETE t, tc, ta FROM tickets AS t LEFT JOIN ticket_conversations AS tc ON (t.id = tc.ticket_id OR t.member_id = tc.member_id) LEFT JOIN ticket_attachments AS ta ON ( tc.id = ta.ticket_conversation_id ) WHERE t.member_id IN (:member_ids);",
         {
@@ -928,20 +940,18 @@ class MemberController extends Controller {
         }
       );
 
+      for(let tbl of tables){
+        await sequelize.query(
+          "DELETE FROM "+ tbl +" WHERE member_id IN (:member_ids);",
+          {
+            type: QueryTypes.DELETE, 
+            replacements: {member_ids: modelIds},
+            transaction: t
+          }
+        );
+      }
       await sequelize.query(
-        `DELETE shoutboxes, member_payment_informations, member_notifications, member_offer_wall, member_notes, member_eligibilities, member_balances, member_activity_logs, excluded_member_payment_method, campaign_member, members 
-        FROM shoutboxes         
-        LEFT JOIN member_payment_informations ON (shoutboxes.member_id = member_payment_informations.member_id)
-        LEFT JOIN member_notifications ON (member_notifications.member_id = member_payment_informations.member_id)
-        LEFT JOIN member_offer_wall ON (member_notifications.member_id = member_offer_wall.member_id)
-        LEFT JOIN member_notes ON (member_notes.member_id = member_offer_wall.member_id)
-        LEFT JOIN member_eligibilities ON (member_notes.member_id = member_eligibilities.member_id)
-        LEFT JOIN member_balances ON (member_balances.member_id = member_eligibilities.member_id)
-        LEFT JOIN member_activity_logs ON (member_balances.member_id = member_activity_logs.member_id)
-        LEFT JOIN excluded_member_payment_method ON (excluded_member_payment_method.member_id = member_activity_logs.member_id)
-        LEFT JOIN campaign_member ON (excluded_member_payment_method.member_id = campaign_member.member_id)
-        LEFT JOIN members ON (members.id = campaign_member.member_id)
-        WHERE shoutboxes.member_id IN (:member_ids);`,
+        "DELETE FROM members WHERE id IN (:member_ids);",
         {
           type: QueryTypes.DELETE, 
           replacements: {member_ids: modelIds},

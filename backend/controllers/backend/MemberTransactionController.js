@@ -1,6 +1,11 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { Member, MemberBalance } = require('../../models/index');
+const {
+  Member,
+  MemberBalance,
+  WithdrawalRequest,
+  PaymentMethod,
+} = require('../../models/index');
 const moment = require('moment');
 const eventBus = require('../../eventBus');
 class MemberTransactionController extends Controller {
@@ -32,11 +37,21 @@ class MemberTransactionController extends Controller {
     }
     options.where = new_option;
     options.attributes.push('type');
-    options.include = {
-      model: Member,
-      required: false,
-      attributes: ['id', 'first_name', 'last_name', 'email', 'avatar'],
-    };
+    options.include = [
+      {
+        model: Member,
+        required: false,
+        attributes: ['id', 'first_name', 'last_name', 'email', 'avatar'],
+      },
+      {
+        model: WithdrawalRequest,
+        attributes: ['member_transaction_id'],
+        include: {
+          model: PaymentMethod,
+          attributes: ['name', 'slug'],
+        },
+      },
+    ];
     const { docs, pages, total } = await this.model.paginate(options);
     let transaction_list = [];
     docs.forEach(function (record, key) {
@@ -50,6 +65,13 @@ class MemberTransactionController extends Controller {
       }
       if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A';
+      }
+      if (
+        record.dataValues.WithdrawalRequest !== null &&
+        record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
+        record.dataValues.amount_action === 'member_withdrawal'
+      ) {
+        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
       switch (record.dataValues.status) {
         case 1:
@@ -71,6 +93,8 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'initiated';
           break;
       }
+
+      // console.log(record.dataValues.amount_action);
       transaction_list.push(record);
     });
 
