@@ -26,10 +26,11 @@ module.exports = (sequelize, DataTypes) => {
       iso3: DataTypes.STRING,
       numcode: DataTypes.TINYINT,
       phonecode: DataTypes.TINYINT,
-      language_id: DataTypes.STRING,
+      sago_language_id: DataTypes.STRING,
       language_code: DataTypes.STRING,
       language_name: DataTypes.STRING,
       lucid_language_id: DataTypes.INTEGER,
+      toluna_culture_id: DataTypes.INTEGER
     },
     {
       sequelize,

@@ -208,7 +208,7 @@ class SurveySyncController {
     async schlesingerSurveyQuestions(req, res) {
         try {
             const country = await Country.findOne({
-                attributes: ['id', 'language_id'],
+                attributes: ['id', 'sago_language_id'],
                 where: {
                     id: req.query.country_id
                 }
@@ -219,7 +219,7 @@ class SurveySyncController {
             }
 
             const schObj = new SchlesingerHelper;
-            const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + country.language_id);
+            const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + country.sago_language_id);
 
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications;
@@ -503,11 +503,23 @@ class SurveySyncController {
 
     /**
      * Toluna Question & Answer Sync
+     * URL: http://localhost:4000/callback/survey/toluna/question?country_id=225|226
      */
     async tolunaSurveyQuestions(req, res) {
         try {
+            const country = await Country.findOne({
+                attributes: ['id', 'toluna_culture_id'],
+                where: {
+                    id: req.query.country_id
+                }
+            });
+            if(country === null || country.toluna_culture_id === null) {
+                res.json({ status: false, message: 'Country not found!' });
+                return;
+            }
+            
             const payload = {
-                "CultureIDs": [1],   //1 = "en-us"
+                "CultureIDs": [country.toluna_culture_id],   //country
                 "CategoryIDs": [2, 3],  // 3=personal, 2=Basic
                 "LastUpdateDate": "",
                 "IncludeComputed": "true",
@@ -516,13 +528,14 @@ class SurveySyncController {
             }
             const tObj = new TolunaHelper;
             const questions = await tObj.getQuestionsAnswer(payload);
-
+            const qualificationIds = [];
             const params = questions.map(qs => {
                 let surveyAnswerPrecodes = qs.TranslatedAnswers.map(ans => {
                     return {
                         survey_provider_id: this.providerId,
                         precode: qs.TranslatedQuestion.QuestionID,
-                        option: ans.AnswerID
+                        option: ans.AnswerID,
+                        country_id: country.id
                     }
                 });
 
@@ -535,16 +548,42 @@ class SurveySyncController {
                     created_at: new Date(),
                     SurveyAnswerPrecodes: surveyAnswerPrecodes
                 };
-
+                qualificationIds.push(qs.TranslatedQuestion.QuestionID);
                 return params;
             });
 
-            await SurveyQuestion.bulkCreate(params, {
+            const result = await SurveyQuestion.bulkCreate(params, {
+                updateOnDuplicate: ["question_text", "question_type", "name"],
                 include: [{
                     model: SurveyAnswerPrecodes
                 }]
             });
-            res.send('Data Updated!');
+
+            const allQuestionsId = await SurveyQuestion.findAll({
+                attributes: ['id'],
+                where: {
+                    survey_provider_question_id: qualificationIds,
+                    survey_provider_id: this.providerId,
+                }
+            });
+
+            const countryParams = allQuestionsId.map(r => {
+                return {
+                    country_id: country.id,
+                    survey_question_id: r.id
+                }
+            });
+            // Insert Country Survey Question
+            if(countryParams.length){
+                await CountrySurveyQuestion.bulkCreate(countryParams, {
+                    ignoreDuplicates: true
+                });
+            }
+
+            res.send({
+                message: 'Data Updated!',
+                data: result
+            });
             return;
 
         } catch (error) {
