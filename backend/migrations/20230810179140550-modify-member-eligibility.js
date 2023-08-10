@@ -9,10 +9,14 @@ module.exports = {
         type: Sequelize.BIGINT,
       }
     );
+    await queryInterface.removeColumn(
+      'member_eligibilities',
+      'survey_question_id'
+    );
     await queryInterface.addIndex('member_eligibilities', {
-      fields: ['member_id', 'survey_question_id'],
+      fields: ['member_id', 'country_survey_question_id'],
       unique: true,
-      name: 'member_survey',
+      // name: 'member_survey',
     });
   },
   async down(queryInterface, Sequelize) {
