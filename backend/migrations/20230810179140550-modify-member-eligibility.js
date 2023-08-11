@@ -9,10 +9,7 @@ module.exports = {
         type: Sequelize.BIGINT,
       }
     );
-    await queryInterface.removeColumn(
-      'member_eligibilities',
-      'survey_question_id'
-    );
+
     await queryInterface.addIndex('member_eligibilities', {
       fields: ['member_id', 'country_survey_question_id'],
       unique: true,
