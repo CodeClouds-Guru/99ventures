@@ -34,8 +34,9 @@ class CintController {
                             let temp_survey = {
                                 survey_number: '',
                                 name: survey.name,
-                                cpi: parseFloat(survey.conversion_rate).toFixed(2),
-                                loi: '',
+                                cpi: survey.cpi,
+                                // cpi: parseFloat(survey.conversion_rate).toFixed(2),
+                                loi: survey.loi,
                                 link:rebuildEntryLink
                             }
                             survey_list.push(temp_survey);
