@@ -23,8 +23,18 @@ class Schlesinger {
         ];
         var sql;
 
-        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL LIMIT 1`;
-        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId]);
+
+        let countrySql = `SELECT id from countries WHERE sago_language_id = ? AND deleted_at IS NULL LIMIT 1`;
+        const country = await this.db.query(countrySql, [this.record.LanguageId]);
+        if(country.length < 1){
+            return {
+                'message': 'Unable to locate country id',
+                'status': false
+            }
+        }
+
+        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND country_id = ? AND deleted_at IS NULL LIMIT 1`;
+        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId, country[0].id]);
         if (surveyData.length) {
             let surveyId = surveyData[0].id;
 
@@ -36,19 +46,17 @@ class Schlesinger {
             let deleteSql = `DELETE surveys, survey_qualifications FROM surveys JOIN survey_qualifications ON (surveys.id = survey_qualifications.survey_id) WHERE surveys.id = ?`;
             await this.db.query(deleteSql, [surveyId]);
 
-            let countrySql = `SELECT id from countries WHERE sago_language_id = ? AND deleted_at IS NULL LIMIT 1`;
-            const country = await this.db.query(countrySql, [this.record.LanguageId]);
-
-            params = [surveyId, ...params, country.id];
+            params = [surveyId, ...params, country[0].id];
             sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         } else {
+            params.push(country[0].id);
             sql = `INSERT INTO surveys (survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         }
 
         const rows = await this.db.query(sql, params);
-        // console.log(rows.insertId)
+        // console.log(rows)
 
-        await this.surveyQualificationSync(rows.insertId, this.db, rows.country_id);
+        await this.surveyQualificationSync(rows.insertId, this.db, country[0].id);
         return rows;
     }
 
@@ -79,7 +87,7 @@ class Schlesinger {
                 JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
                 WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ? AND ap.country_id = ? AND ap.survey_provider_id = ?`;
                 const qlData = await db.query(sqlQry, [surveyId, country_id, this.record.survey_provider_id]);
-                // console.log(qlData)
+                console.log(qlData)
                 const ansPrecodeParams = []
 
                 for (const row of qualifications) {
