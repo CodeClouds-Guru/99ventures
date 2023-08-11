@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       language_code: DataTypes.STRING,
       language_name: DataTypes.STRING,
       lucid_language_id: DataTypes.INTEGER,
+      lucid_language_code:DataTypes.STRING,
       toluna_culture_id: DataTypes.INTEGER
     },
     {
