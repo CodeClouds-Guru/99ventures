@@ -12,7 +12,7 @@ class CintController {
         else {
             try {
                 const ssi = 'ssi' in params ? params.ssi : '';
-                const where = 'where' in params ? JSON.parse(JSON.stringify(params.where)) : '';
+                const where = 'where' in params ? JSON.parse(params.where) : '';
                 const member = await Member.findOne({
                     attributes: ['username', 'gender', 'email', 'zip_code', 'dob'],
                     where: {
