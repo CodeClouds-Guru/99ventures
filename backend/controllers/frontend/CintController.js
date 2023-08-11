@@ -12,7 +12,7 @@ class CintController {
         else {
             try {
                 const ssi = 'ssi' in params ? params.ssi : '';
-                const ip = 'where' in params ? JSON.parse(JSON.stringify(params.where)) : '';
+                const where = 'where' in params ? JSON.parse(JSON.stringify(params.where)) : '';
                 const member = await Member.findOne({
                     attributes: ['username', 'gender', 'email', 'zip_code', 'dob'],
                     where: {
@@ -20,7 +20,7 @@ class CintController {
                     }
                 });
                 if(member){
-                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${ip}&ssi=${member.username}`;
+                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${where.ip}&ssi=${member.username}`;
                     const cintObj = new Cint();
                     const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
                     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
