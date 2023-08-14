@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('countries', 'lucid_language_code', {
-      type: Sequelize.BIGINT,
+      type: Sequelize.STRING,
     });
   },
   async down(queryInterface, Sequelize) {
