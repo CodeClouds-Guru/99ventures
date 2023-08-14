@@ -37,14 +37,10 @@ class Schlesinger {
         const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId, country[0].id]);
         if (surveyData.length) {
             let surveyId = surveyData[0].id;
-
-            // let dlSql = `DELETE FROM surveys WHERE id = ?`;
-            // await this.db.query(dlSql, [surveyId]);
-            // let qlSql = `DELETE FROM survey_qualifications WHERE survey_id = ?`
-            // await this.db.query(qlSql, [surveyId]);
-
-            let deleteSql = `DELETE surveys, survey_qualifications FROM surveys JOIN survey_qualifications ON (surveys.id = survey_qualifications.survey_id) WHERE surveys.id = ?`;
-            await this.db.query(deleteSql, [surveyId]);
+            let surveyIds = surveyData.map(sr => sr.id);
+            
+            let deleteSql = `DELETE surveys, survey_qualifications FROM surveys JOIN survey_qualifications ON (surveys.id = survey_qualifications.survey_id) WHERE surveys.id IN (?)`;
+            await this.db.query(deleteSql, [surveyIds]);
 
             params = [surveyId, ...params, country[0].id];
             sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -87,7 +83,7 @@ class Schlesinger {
                 JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
                 WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ? AND ap.country_id = ? AND ap.survey_provider_id = ?`;
                 const qlData = await db.query(sqlQry, [surveyId, country_id, this.record.survey_provider_id]);
-                console.log(qlData)
+                // console.log(qlData)
                 const ansPrecodeParams = []
 
                 for (const row of qualifications) {
