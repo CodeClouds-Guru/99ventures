@@ -14,7 +14,10 @@ import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
 import StickyMessage from './components/StickyMessage';
 import BackdropLoader from 'app/shared-components/BackdropLoader';
-
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import moment from"moment";
 
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
@@ -132,6 +135,7 @@ const MemberDetails = (props) => {
     const [msg, setMsg] = useState('');
     const [avatar, setAvatar] = useState('');
     const [status, setStatus] = useState('');
+    const [dob, setDob] = useState(moment('1990-01-01'));
     const [loader, setLoader] = useState(true);
     const [alertType, setAlertType] = useState('');
     const [editMode, setEditMode] = useState(false);
@@ -209,6 +213,9 @@ const MemberDetails = (props) => {
                     setStatus(result.status);
                     setAdminStatus(result.admin_status);
                     setSurveyDetails(result.survey);
+                    if(result.dob){
+                        setDob(result.dob);
+                    }
                     result.MemberPaymentInformations.length > 0 ? setPaymentEmail(result.MemberPaymentInformations[0].value) : '';
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
@@ -266,6 +273,7 @@ const MemberDetails = (props) => {
         const formdata = new FormData();
         formdata.append("avatar", avatarFile);
         formdata.append("type", 'basic_details');
+        formdata.append("dob", moment(dob).format("YYYY-MM-DD HH:mm:ss"));
         for (const field of fields) {
             formdata.append(field, memberData[field] ? memberData[field] : '');
         }
@@ -943,6 +951,43 @@ const MemberDetails = (props) => {
                                         )
                                     } />
                                 </ListItem>
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                        <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>DOB:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                        editMode ? (
+                                            <div className='flex lg:flex-col xl:flex-row justify-between w-full'>
+                                                
+                                                <LocalizationProvider dateAdapter={AdapterMoment}>
+                                                    <DatePicker
+                                                        value={dob}
+                                                        maxDate={new Date()}
+                                                        onChange={(newValue) => {
+                                                            setDob(newValue);
+                                                        }}
+                                                        readOnly={false}
+                                                        renderInput={(params) => (
+                                                            <TextField 
+                                                                {...params} 
+                                                                className="xl:w-1/2 md:w-2/5 lg:w-full"
+                                                                id="standard-helperText"
+                                                                variant="standard"
+                                                                sx={textFieldStyle}
+                                                            />
+                                                        )}
+                                                    />
+                                                </LocalizationProvider>
+                                            </div>
+                                        ) : (
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                {
+                                                    memberData.dob ?? '--'
+                                                }
+                                            </Typography>
+                                        )
+                                    } />
+                                </ListItem>
                             </List>
                         </div>
                     </div>
@@ -1183,7 +1228,7 @@ const MemberDetails = (props) => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content={<p dangerouslySetInnerHTML={{ __html: msg }}></p>}
+                        content={<span dangerouslySetInnerHTML={{ __html: msg }}></span>}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
