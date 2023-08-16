@@ -132,7 +132,8 @@ class SurveySyncController {
                                 option: op.id,
                                 precode: attr.qualification_code,
                                 country_id: country.id,
-                                survey_provider_id: this.providerId
+                                survey_provider_id: this.providerId,
+                                text: op.text
                             })
                         }
                     } else if (attr.condition_codes.length < 1) {
@@ -143,7 +144,8 @@ class SurveySyncController {
                                     option: op,
                                     precode: attr.qualification_code,
                                     country_id: country.id,
-                                    survey_provider_id: this.providerId
+                                    survey_provider_id: this.providerId,
+                                    text: null
                                 })
                             }
                         } else {
@@ -151,7 +153,8 @@ class SurveySyncController {
                                 option: '',
                                 precode: attr.qualification_code,
                                 country_id: country.id,
-                                survey_provider_id: this.providerId
+                                survey_provider_id: this.providerId,
+                                text: null
                             })
                         }
                     }
@@ -165,7 +168,8 @@ class SurveySyncController {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
-                        ignoreDuplicates: true
+                        // ignoreDuplicates: true
+                        updateOnDuplicate: ["text"]
                     }]
                 });
 
@@ -220,11 +224,11 @@ class SurveySyncController {
 
             const schObj = new SchlesingerHelper;
             const qualifications = await schObj.fetchDefinitionAPI('/api/v1/definition/qualification-answers/lanaguge/' + country.sago_language_id);
-
+            
             if (qualifications.result.success === true && qualifications.result.totalCount != 0) {
                 const qualificationData = qualifications.qualifications;
                 const qualificationIds = qualificationData.map(r=> r.qualificationId);
-
+                
                 const insertParams = []
                 for (let attr of qualificationData) {
                     let params = {
@@ -251,7 +255,8 @@ class SurveySyncController {
                                     option: i,
                                     precode: attr.qualificationId,
                                     country_id: country.id,
-                                    survey_provider_id: this.providerId
+                                    survey_provider_id: this.providerId,
+                                    text: qa.text
                                 });
                             }
                         } else {
@@ -259,7 +264,8 @@ class SurveySyncController {
                                 option: qa.answerId,
                                 precode: attr.qualificationId,
                                 country_id: country.id,
-                                survey_provider_id: this.providerId
+                                survey_provider_id: this.providerId,
+                                text: qa.text
                             });
                         }
 
@@ -271,7 +277,8 @@ class SurveySyncController {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
-                        ignoreDuplicates: true
+                        // ignoreDuplicates: true
+                        updateOnDuplicate: ["text"],
                     }]
                 });
 
@@ -342,7 +349,7 @@ class SurveySyncController {
 
     /**
      * Lucid Question & Answer Sync
-     * URL: http://localhost:4000/callback/survey/lucid/question?type=question&country_id=225|226
+     * URL: http://localhost:4000/callback/survey/lucid/question?type=question|options&country_id=225|226
      */
     async lucidSurveyQuestions(req, res) {
         try {
@@ -444,7 +451,8 @@ class SurveySyncController {
                                             option: i,
                                             precode: question.survey_provider_question_id,
                                             survey_provider_id: 1,
-                                            country_id: country.id
+                                            country_id: country.id,
+                                            text: null
                                         });
                                     }
                                 } else if (question.question_type == 'Numeric - Open-end') {
@@ -452,7 +460,8 @@ class SurveySyncController {
                                         option: null,
                                         survey_provider_id: 1,
                                         precode: question.survey_provider_question_id,
-                                        country_id: country.id
+                                        country_id: country.id,
+                                        text: null
                                     });
                                 } else {
                                     for (let opt of options) {
@@ -460,7 +469,8 @@ class SurveySyncController {
                                             option: opt.Precode,
                                             precode: opt.QuestionID,
                                             survey_provider_id: 1,
-                                            country_id: country.id
+                                            country_id: country.id,
+                                            text: opt.OptionText
                                         });
                                     }
                                 }
@@ -471,7 +481,7 @@ class SurveySyncController {
                     }
                     if(optionsArry.length) {
                         const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
-                            updateOnDuplicate: ['option']
+                            updateOnDuplicate: ['option', 'text']
                         });
                         res.send({ 
                             message: 'Data Updated!', 
