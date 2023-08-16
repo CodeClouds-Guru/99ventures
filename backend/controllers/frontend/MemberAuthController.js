@@ -21,6 +21,7 @@ const {
   User,
   Group,
   PaymentMethodFieldOption,
+  CountrySurveyQuestion,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -595,9 +596,23 @@ class MemberAuthController {
     var member_eligibility = [];
 
     //eligibility entry for gender
-    let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE'];
+    let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE', 'POSTAL CODE'];
     let questions = await SurveyQuestion.findAll({
       where: { name: name_list },
+      include: [
+        {
+          model: CountrySurveyQuestion,
+          attributes: ['id'],
+          where: { country_id: member_details.country_id },
+          required: true,
+        },
+        {
+          model: SurveyAnswerPrecodes,
+          attributes: ['id', 'option' /*'option_text'*/],
+          where: { country_id: member_details.country_id },
+          required: true,
+        },
+      ],
     });
 
     if (questions.length) {
@@ -610,33 +625,42 @@ class MemberAuthController {
           switch (question_name) {
             //get precodes
             case 'GENDER':
-              if (record.survey_provider_id == 1) {
-                if (member_details.gender == 'male') {
-                  precode = 1;
-                } else if (member_details.gender == 'female') {
-                  precode = 2;
+              // if (record.survey_provider_id == 1) {
+              //   if (member_details.gender == 'male') {
+              //     precode = 1;
+              //   } else if (member_details.gender == 'female') {
+              //     precode = 2;
+              //   }
+              // } else if (record.survey_provider_id == 3) {
+              //   if (member_details.gender == 'male') {
+              //     precode = 111;
+              //   } else if (member_details.gender == 'female') {
+              //     precode = 112;
+              //   }
+              // } else if (record.survey_provider_id == 4) {
+              //   if (member_details.gender == 'male') {
+              //     precode = 58;
+              //   } else if (member_details.gender == 'female') {
+              //     precode = 59;
+              //   }
+              // } else if (record.survey_provider_id == 6) {
+              //   if (member_details.gender == 'male') {
+              //     precode = 2000247;
+              //   } else if (member_details.gender == 'female') {
+              //     precode = 2000246;
+              //   }
+              // }
+              const pre = record.SurveyAnswerPrecodes.find((element) => {
+                if (element.option_text === member_details.gender) {
+                  return true;
                 }
-              } else if (record.survey_provider_id == 3) {
-                if (member_details.gender == 'male') {
-                  precode = 111;
-                } else if (member_details.gender == 'female') {
-                  precode = 112;
-                }
-              } else if (record.survey_provider_id == 4) {
-                if (member_details.gender == 'male') {
-                  precode = 58;
-                } else if (member_details.gender == 'female') {
-                  precode = 59;
-                }
-              } else if (record.survey_provider_id == 6) {
-                if (member_details.gender == 'male') {
-                  precode = 2000247;
-                } else if (member_details.gender == 'female') {
-                  precode = 2000246;
-                }
-              }
+              });
+              precode = pre.id;
               break;
             case 'ZIP':
+              precode = member_details.zip_code;
+              break;
+            case 'POSTAL CODE':
               precode = member_details.zip_code;
               break;
             case 'REGION':
@@ -645,7 +669,13 @@ class MemberAuthController {
             case 'AGE':
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
-                precode = new Date(new Date() - dob).getFullYear() - 1970;
+                dob = new Date(new Date() - dob).getFullYear() - 1970;
+                const pre = record.SurveyAnswerPrecodes.find((element) => {
+                  if (element.option === dob) {
+                    return true;
+                  }
+                });
+                precode = pre.id;
               }
               break;
             case 'STATE':
@@ -654,27 +684,28 @@ class MemberAuthController {
           }
           if (precode) {
             let precode_id = '';
-            let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
-              where: {
-                precode: record.survey_provider_question_id,
-                survey_provider_id: record.survey_provider_id,
-                option: precode,
-                // country_id: member_details.country_id
-              },
-            });
-            if (survey_answer_precodes) {
-              precode_id = survey_answer_precodes.id;
-              precode = '';
-            }
+            // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
+            //   where: {
+            //     precode: record.survey_provider_question_id,
+            //     survey_provider_id: record.survey_provider_id,
+            //     option: precode,
+            //     country_id: member_details.country_id,
+            //   },
+            // });
+            // if (survey_answer_precodes) {
+            //   precode_id = survey_answer_precodes.id;
+            //   precode = '';
+            // }
             member_eligibility.push({
               member_id: member_id,
-              survey_question_id: record.id,
+              open_ended_value: record.CountrySurveyQuestion.id,
               survey_answer_precode_id: precode_id,
               open_ended_value: precode,
             });
           }
         }
-      } //
+      }
+      //
       await MemberEligibilities.destroy({
         where: { member_id: member_id },
         force: true,
