@@ -154,11 +154,11 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    created_at: {
-      field_name: 'created_at',
-      db_name: 'created_at',
+    updated_at: {
+      field_name: 'updated_at',
+      db_name: 'updated_at',
       type: 'text',
-      placeholder: 'Created at',
+      placeholder: 'Updated at',
       listing: true,
       show_in_form: false,
       sort: true,
