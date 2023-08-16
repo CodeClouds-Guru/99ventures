@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       text: DataTypes.STRING,
       survey_provider_id:  DataTypes.BIGINT,
       country_id: DataTypes.INTEGER,
+      option_text: DataTypes.TEXT,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
