@@ -133,7 +133,7 @@ class SurveySyncController {
                                 precode: attr.qualification_code,
                                 country_id: country.id,
                                 survey_provider_id: this.providerId,
-                                text: op.text
+                                option_text: op.text
                             })
                         }
                     } else if (attr.condition_codes.length < 1) {
@@ -145,7 +145,7 @@ class SurveySyncController {
                                     precode: attr.qualification_code,
                                     country_id: country.id,
                                     survey_provider_id: this.providerId,
-                                    text: null
+                                    option_text: null
                                 })
                             }
                         } else {
@@ -154,7 +154,7 @@ class SurveySyncController {
                                 precode: attr.qualification_code,
                                 country_id: country.id,
                                 survey_provider_id: this.providerId,
-                                text: null
+                                option_text: null
                             })
                         }
                     }
@@ -256,7 +256,7 @@ class SurveySyncController {
                                     precode: attr.qualificationId,
                                     country_id: country.id,
                                     survey_provider_id: this.providerId,
-                                    text: qa.text
+                                    option_text: qa.text
                                 });
                             }
                         } else {
@@ -265,7 +265,7 @@ class SurveySyncController {
                                 precode: attr.qualificationId,
                                 country_id: country.id,
                                 survey_provider_id: this.providerId,
-                                text: qa.text
+                                option_text: qa.text
                             });
                         }
 
@@ -452,7 +452,7 @@ class SurveySyncController {
                                             precode: question.survey_provider_question_id,
                                             survey_provider_id: 1,
                                             country_id: country.id,
-                                            text: null
+                                            option_text: null
                                         });
                                     }
                                 } else if (question.question_type == 'Numeric - Open-end') {
@@ -461,7 +461,7 @@ class SurveySyncController {
                                         survey_provider_id: 1,
                                         precode: question.survey_provider_question_id,
                                         country_id: country.id,
-                                        text: null
+                                        option_text: null
                                     });
                                 } else {
                                     for (let opt of options) {
@@ -470,7 +470,7 @@ class SurveySyncController {
                                             precode: opt.QuestionID,
                                             survey_provider_id: 1,
                                             country_id: country.id,
-                                            text: opt.OptionText
+                                            option_text: opt.OptionText
                                         });
                                     }
                                 }

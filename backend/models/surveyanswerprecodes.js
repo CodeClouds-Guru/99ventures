@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       option: DataTypes.STRING,
       precode: DataTypes.STRING,
-      text: DataTypes.STRING,
       survey_provider_id:  DataTypes.BIGINT,
       country_id: DataTypes.INTEGER,
       option_text: DataTypes.TEXT,
