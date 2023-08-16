@@ -1,6 +1,7 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, } from 'react';
 import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip, Popover } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -135,7 +136,6 @@ const MemberDetails = (props) => {
     const [msg, setMsg] = useState('');
     const [avatar, setAvatar] = useState('');
     const [status, setStatus] = useState('');
-    const [dob, setDob] = useState(moment('1990-01-01'));
     const [loader, setLoader] = useState(true);
     const [alertType, setAlertType] = useState('');
     const [editMode, setEditMode] = useState(false);
@@ -145,8 +145,10 @@ const MemberDetails = (props) => {
     const [memberinfo, setMemberinfo] = useState({});
     const [countryData, setCountryData] = useState([]);
     const [adminStatus, setAdminStatus] = useState('');
+    const [btnloading, setBtnLoading] = useState(false);
     const [editStatus, setEditStatus] = useState(false);
     const [accountNotes, setAccountNotes] = useState([]);
+    const [dob, setDob] = useState(moment('1990-01-01'));
     const [paymentEmail, setPaymentEmail] = useState('');
     const [reflinkMode, setReflinkMode] = useState(false);
     const [actionLoader, setActionLoader] = useState(false);
@@ -293,6 +295,7 @@ const MemberDetails = (props) => {
                         setDialogStatus(false);
                         setStatusNote('');
                         setStatuslessNote(false);
+                        setBtnLoading(false);
                     } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
@@ -363,6 +366,7 @@ const MemberDetails = (props) => {
             type: "member_status",
             member_notes: type === 'save' ? statusNote : ''
         }
+        setBtnLoading(true);
         updateMemberData(params, "member_status");
     }
 
@@ -1253,7 +1257,7 @@ const MemberDetails = (props) => {
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={handleCancelStatus}>Cancel</Button>
                             {!statuslessNote && <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); handleChangeStatus('skip') }}>Skip</Button>}
-                            <Button color="primary" variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</Button>
+                            <LoadingButton color="primary" loading={btnloading} variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</LoadingButton>
                         </DialogActions>
                     </Dialog>
                 )
