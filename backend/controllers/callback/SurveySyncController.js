@@ -169,7 +169,7 @@ class SurveySyncController {
                     include: [{
                         model: SurveyAnswerPrecodes,
                         // ignoreDuplicates: true
-                        updateOnDuplicate: ["text"]
+                        updateOnDuplicate: ["option_text"]
                     }]
                 });
 
@@ -256,7 +256,7 @@ class SurveySyncController {
                                     precode: attr.qualificationId,
                                     country_id: country.id,
                                     survey_provider_id: this.providerId,
-                                    option_text: qa.text
+                                    option_text: null
                                 });
                             }
                         } else {
@@ -268,17 +268,17 @@ class SurveySyncController {
                                 option_text: qa.text
                             });
                         }
-
                     }
                     insertParams.push({ ...params, SurveyAnswerPrecodes: ansPrecode });
                 }
 
                 await SurveyQuestion.bulkCreate(insertParams, {
+                    // logging: console.log,
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
                         // ignoreDuplicates: true
-                        updateOnDuplicate: ["text"],
+                        updateOnDuplicate: ["option_text"],
                     }]
                 });
 
@@ -342,7 +342,7 @@ class SurveySyncController {
             return;
         }
         catch (error) {
-            console.error(error);
+            // console.error(error);
             throw error;
         }
     }
@@ -481,7 +481,7 @@ class SurveySyncController {
                     }
                     if(optionsArry.length) {
                         const optionsData = await SurveyAnswerPrecodes.bulkCreate(optionsArry, {
-                            updateOnDuplicate: ['option', 'text']
+                            updateOnDuplicate: ['option', 'option_text']
                         });
                         res.send({ 
                             message: 'Data Updated!', 
