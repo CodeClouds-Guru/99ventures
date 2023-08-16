@@ -168,8 +168,8 @@ class SurveySyncController {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
-                        // ignoreDuplicates: true
-                        updateOnDuplicate: ["option_text"]
+                        ignoreDuplicates: true
+                        // updateOnDuplicate: ["option_text"]
                     }]
                 });
 
@@ -277,8 +277,8 @@ class SurveySyncController {
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
-                        // ignoreDuplicates: true
-                        updateOnDuplicate: ["option_text"],
+                        ignoreDuplicates: true
+                        // updateOnDuplicate: ["option_text"],
                     }]
                 });
 
@@ -545,7 +545,8 @@ class SurveySyncController {
                         survey_provider_id: this.providerId,
                         precode: qs.TranslatedQuestion.QuestionID,
                         option: ans.AnswerID,
-                        country_id: country.id
+                        country_id: country.id,
+                        option_text: ans.AnswerInternalName
                     }
                 });
 
@@ -565,7 +566,8 @@ class SurveySyncController {
             const result = await SurveyQuestion.bulkCreate(params, {
                 updateOnDuplicate: ["question_text", "question_type", "name"],
                 include: [{
-                    model: SurveyAnswerPrecodes
+                    model: SurveyAnswerPrecodes,
+                    updateOnDuplicate: ['option', 'option_text']
                 }]
             });
 
