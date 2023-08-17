@@ -541,6 +541,7 @@ class MemberAuthController {
           if (req.files) {
             request_data.avatar = await Member.updateAvatar(req, member);
           }
+          console.log('==============request_data==============', request_data);
           let model = await Member.update(request_data, {
             where: { id: member_id },
           });
