@@ -273,7 +273,6 @@ class SurveySyncController {
                 }
 
                 await SurveyQuestion.bulkCreate(insertParams, {
-                    // logging: console.log,
                     updateOnDuplicate: ["question_text", "question_type", "name"],
                     include: [{
                         model: SurveyAnswerPrecodes,
@@ -300,40 +299,6 @@ class SurveySyncController {
                 await CountrySurveyQuestion.bulkCreate(countryParams, {
                     ignoreDuplicates: true
                 });
-
-                /* const ansPrecode = [];
-                for (let attr of qualificationData) {
-                    const qualificationAnswers = attr.qualificationAnswers;
-                    for (let qa of qualificationAnswers) {
-                        /*if([3].includes(attr.qualificationTypeId) ){    // Ref to questionType
-                            ansPrecode.push({
-                                option: null,
-                                precode: attr.qualificationId,
-                            });
-                        } else *
-                        if ([6].includes(attr.qualificationTypeId) && attr.qualificationId == 59) { // Age
-                            for (let i = 15; i <= 99; i++) {
-                                ansPrecode.push({
-                                    option: i,
-                                    precode: attr.qualificationId,
-                                    country_id: country.id
-                                });
-                            }
-                        } else {
-                            ansPrecode.push({
-                                option: qa.answerId,
-                                precode: attr.qualificationId,
-                                country_id: country.id
-                            });
-                        }
-
-                    }
-                }
-                if (ansPrecode.length) {
-                    await SurveyAnswerPrecodes.bulkCreate(ansPrecode, {
-                        updateOnDuplicate: ['option']
-                    });
-                }*/
 
                 res.json({ status: true, message: 'Updated' });
             } else {
