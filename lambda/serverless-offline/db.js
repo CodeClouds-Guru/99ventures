@@ -1,7 +1,7 @@
 const mysql = require( 'mysql' );
 const util = require( 'util' );
 
-const configLive = {
+const config = {
     host     : process.env.DB_HOST,
     user     : process.env.DB_USER,
     password : process.env.DB_PASSWORD,
@@ -9,7 +9,7 @@ const configLive = {
     multipleStatements: true,
 }
 
-const config = {
+const configStaging = {
     host     : "nv-db.cw40jczte1ng.us-east-2.rds.amazonaws.com",
     user     : "devadmin",
     password : "99ventures#2020",
