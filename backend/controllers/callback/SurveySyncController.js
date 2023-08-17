@@ -965,7 +965,8 @@ class SurveySyncController {
             const allSurveys = await psObj.fetchSellerAPI('/api/v2/survey/allocated-surveys');
 
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
-                const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
+                const surveyData = allSurveys.Surveys.filter(sr => sr.LOI < 20 && sr.CPI >= 0.5);
+                // const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
 
                 if (!surveyData.length) {
                     // res.json({ status: true, message: 'No survey found for this language!' });
