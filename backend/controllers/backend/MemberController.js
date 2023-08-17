@@ -165,6 +165,8 @@ class MemberController extends Controller {
             'gender',
             'deleted_by',
             'deleted_at',
+            'dob',
+            'state',
           ];
           options.paranoid = false;
           options.where = { id: member_id };

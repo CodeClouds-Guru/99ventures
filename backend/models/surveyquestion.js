@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       SurveyQuestion.hasMany(models.SurveyAnswerPrecodes, {
         foreignKey: 'precode',
         sourceKey: 'survey_provider_question_id',
+      });
+
+      SurveyQuestion.hasOne(models.CountrySurveyQuestion, {
+        foreignKey: 'survey_question_id'
       })
 
     }

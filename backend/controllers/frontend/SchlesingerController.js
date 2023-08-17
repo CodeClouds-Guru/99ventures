@@ -5,8 +5,10 @@ const {
     SurveyQuestion,
     SurveyQualification,
     SurveyAnswerPrecodes,
-    MemberEligibilities
+    MemberEligibilities,
+    CountrySurveyQuestion
 } = require('../../models');
+
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const { Op } = require('sequelize')
 const Sequelize = require('sequelize');
@@ -17,22 +19,58 @@ class SchlesingerController {
         this.generateEntryLink = this.generateEntryLink.bind(this);
     }
 
-    surveys = async(memberId,params) => {
+    surveys = async(memberId, params) => {
+        /*surveys = async(req, res) => {
+        const eligibilities = await MemberEligibilities.getEligibilities(226, 4, 160);
+        const matchingQuestionIds = [];
+        const matchingAnswerIds = [];
+        eligibilities.forEach(eg => {
+            matchingQuestionIds.push(eg.survey_question_id);
+            if(eg.survey_answer_precode_id !== null){
+                matchingAnswerIds.push(+eg.survey_answer_precode_id);
+            }
+        });
+        const surveys = await Survey.getSurveysAndCount({
+            member_id: 160,
+            provider_id: 4,
+            matching_answer_ids: matchingAnswerIds,
+            matching_question_ids: matchingQuestionIds,
+            order: 'desc',
+            pageno: 1,
+            per_page: 12,
+            order_by: 'created_at',
+            clause: {
+                status: "live",
+                country_id: 225
+            }
+        });
+        res.send(eligibilities);
+        return;*/
         try{
-            // const memberId = req.query.user_id;
-            if (!memberId) {
-                return {
+            //const memberId = member.id;
+            const member = await Member.findOne({
+                attributes: ['username', 'country_id'],
+                where: {
+                    id: memberId
+                }
+            });
+            
+            if (!memberId || member === null) {
+                res.json({
                     staus: false,
                     message: 'Member id not found!'
-                }
+                });
+                return;
             }
+            
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
                 where: {
-                    name: 'Schlesinger'
+                    name: 'Schlesinger',
+                    status: 1
                 }
             });
-            if (!provider) {
+            if (!provider || provider == null) {
                 return {
                     status: false,
                     message: 'Survey Provider not found!'
@@ -42,81 +80,34 @@ class SchlesingerController {
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'created_at';
             const order = 'order' in params ? params.order : 'desc';
+
             /**
              * check and get member's eligibility
              */
-            const eligibilities = await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'survey_answer_precode_id', 'text', 'id'],
-                where: {
-                    member_id: memberId
-                },
-                include: [
-                    {
-                        model: SurveyQuestion,
-                        attributes: ['name', 'survey_provider_question_id', 'question_type', 'id'],
-                        where: {
-                            survey_provider_id: provider.id
-                        }
-                    },
-                    {
-                        model: Member,
-                        attributes: ['username']
-                    },
-                    {
-                        model: SurveyAnswerPrecodes,
-                        attributes: ['id', 'option', 'precode'],
-                        where: {
-                            survey_provider_id: provider.id
-                        }
-                    }
-                ]
-            });
-            if (!eligibilities) {
-                res.json({
+            const eligibilities = await MemberEligibilities.getEligibilities(member.country_id, provider.id, memberId);
+            
+            if(eligibilities.length < 1) {
+                return {
                     status: false,
-                    message:'You are not eligible for this survey!'
-                });
-                return;
-            }
-
-            const matchingQuestionIds = eligibilities.map(eg => eg.SurveyQuestion.id);
-            const matchingAnswerIds = eligibilities.map(eg => eg.survey_answer_precode_id);
-
-            /** Get Open Ended QnA Start */
-            const eligibilityIds = eligibilities.map(eg => eg.id);
-            const openEndedData =  await MemberEligibilities.findAll({
-                attributes: ['survey_question_id', 'open_ended_value'],
-                where: {
-                    member_id: memberId,
-                    id: {
-                        [Op.notIn]: eligibilityIds
-                    }
-                },
-                include: {
-                    model: SurveyQuestion,
-                    attributes: ['id', 'survey_provider_question_id', 'question_type'],
-                    where: {
-                        survey_provider_id: provider.id
-                    }
+                    message: 'Sorry! you are not eligible.'
                 }
-            });
-            /** end */
-
+            }
             /** Query String Formation Start */
             const queryString = {
-                uid: eligibilities[0].Member.username
+                uid: member.username
             };
+            const matchingQuestionIds = [];
+            const matchingAnswerIds = [];
             eligibilities.forEach(eg => {
-                queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.SurveyAnswerPrecode.option;
+                queryString['Q' + eg.survey_provider_question_id] = eg.option ? eg.option : eg.open_ended_value;
+                matchingQuestionIds.push(eg.survey_question_id);
+                if(eg.survey_answer_precode_id !== null){
+                    matchingAnswerIds.push(+eg.survey_answer_precode_id);
+                }
             });
-            if(openEndedData && openEndedData.length) {
-                openEndedData.forEach(eg => {
-                    queryString['Q' + eg.SurveyQuestion.survey_provider_question_id] = eg.open_ended_value;
-                    matchingQuestionIds.push(eg.SurveyQuestion.id);
-                });
-            }
-            /** End */
             const generateQueryString = new URLSearchParams(queryString).toString();
+            /** End */
+
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 const surveys = await Survey.getSurveysAndCount({
                     member_id: memberId,
@@ -129,18 +120,18 @@ class SchlesingerController {
                     order_by: orderBy,
                     clause: {
                         status: "live",
+                        country_id: member.country_id
                     }
                 });
-
-                var page_count = Math.ceil(surveys.count / perPage);
-                var survey_list = []
                 if (!surveys.count) {
-                    return{
+                    return {
                         status: false,
                         message: 'No matching surveys!'
                     }
                 }
-                var surveyHtml = '';
+                var page_count = Math.ceil(surveys.count / perPage);
+                var survey_list = []
+                
                 if(surveys.rows && surveys.rows.length){
                     for (let survey of surveys.rows) {
                         let link = `/schlesigner/entrylink?survey_number=${survey.survey_number}&${generateQueryString}`;
@@ -154,6 +145,7 @@ class SchlesingerController {
                         survey_list.push(temp_survey);            
                     }
                 }
+
                 return {
                     status: true,
                     message: 'Success',
@@ -171,7 +163,7 @@ class SchlesingerController {
         }
         catch(error) {
             console.error(error)
-           return{
+            return {
                 status: false,
                 message: 'Something went wrong!'
             }

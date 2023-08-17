@@ -2,7 +2,7 @@ const Cint = require('../../helpers/Cint');
 const { Member } = require('../../models');
 class CintController {
 
-    surveys = async(userId,params) => {        
+    surveys = async(userId,params) => {
         if (!userId) {
             return{
                 staus: false,
@@ -11,17 +11,8 @@ class CintController {
         } 
         else {
             try {
-                // const userId = req.query.user_id;
-                const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
-                const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
-                const orderBy = 'orderby' in params ? params.orderby : 'created_at';
-                const order = 'order' in params ? params.order : 'desc';
                 const ssi = 'ssi' in params ? params.ssi : '';
-                if(!userId) {
-                    return {
-                        staus: false,
-                        message: 'Userid not found!'
-                    }                }
+                const where = 'where' in params ? JSON.parse(params.where) : '';
                 const member = await Member.findOne({
                     attributes: ['username', 'gender', 'email', 'zip_code', 'dob'],
                     where: {
@@ -29,8 +20,7 @@ class CintController {
                     }
                 });
                 if(member){
-                    // const queryString = new URLSearchParams(req.query).toString();
-                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${sc_request.ip}&ssi=${member.username}`
+                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${where.ip}&ssi=${member.username}`;
                     const cintObj = new Cint();
                     const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
                     const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
@@ -38,33 +28,18 @@ class CintController {
                     const surveys = result.surveys;   
                     var survey_list = []             
                     if (surveys.length) {
-                        var surveyHtml = '';
                         for (let survey of surveys) {
                             const entryLink = survey.entry_link;
                             const rebuildEntryLink = entryLink.replace('SUBID', ssi);
                             let temp_survey = {
                                 survey_number: '',
                                 name: survey.name,
-                                cpi: parseFloat(survey.conversion_rate).toFixed(2),
-                                loi: '',
+                                cpi: survey.cpi,
+                                // cpi: parseFloat(survey.conversion_rate).toFixed(2),
+                                loi: survey.loi,
                                 link:rebuildEntryLink
                             }
-                            survey_list.push(temp_survey)
-                            // tbodyData += `
-                            //     <div class="col-6 col-sm-4 col-md-3 col-xl-2">
-                            //         <div class="bg-white card mb-2">
-                            //             <div class="card-body position-relative">
-                            //                 <div class="d-flex justify-content-between">
-                            //                     <h6 class="text-primary m-0">${survey.name}</h6>
-                            //                 </div>
-                            //                 <div class="text-primary small">5 Minutes</div>
-                            //                 <div class="d-grid mt-1">
-                            //                     <a href="${rebuildEntryLink}" class="btn btn-primary text-white rounded-1">Earn $${survey.conversion_rate}</a>
-                            //                 </div>
-                            //             </div>
-                            //         </div>
-                            //     </div>                        
-                            // `;
+                            survey_list.push(temp_survey);
                         }
                         return {
                             status: true,
