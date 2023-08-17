@@ -41,10 +41,11 @@ class TicketController extends Controller {
     var new_option = {};
     var and_query = {
       company_portal_id: company_portal_id,
-      created_at: {
+      updated_at: {
         [Op.between]: query_where.created_at,
       },
     };
+    delete option_where.created_at;
     if ('status' in query_where) {
       and_query.status = query_where.status;
     }
