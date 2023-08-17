@@ -142,7 +142,7 @@ module.exports = function () {
   initializeHandlebars(app);
   chainMiddlewares(app);
   chainRoutes(app);
-  runSchedule();
+  // runSchedule();
   app.enable('trust proxy')
 
   //General exception handler

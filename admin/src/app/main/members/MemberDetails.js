@@ -1,6 +1,7 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, } from 'react';
 import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip, Popover } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
@@ -14,7 +15,10 @@ import Helper from 'src/app/helper';
 import MemberAvatar from './components/MemberAvatar';
 import StickyMessage from './components/StickyMessage';
 import BackdropLoader from 'app/shared-components/BackdropLoader';
-
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import moment from"moment";
 
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
@@ -141,8 +145,10 @@ const MemberDetails = (props) => {
     const [memberinfo, setMemberinfo] = useState({});
     const [countryData, setCountryData] = useState([]);
     const [adminStatus, setAdminStatus] = useState('');
+    const [btnloading, setBtnLoading] = useState(false);
     const [editStatus, setEditStatus] = useState(false);
     const [accountNotes, setAccountNotes] = useState([]);
+    const [dob, setDob] = useState(moment('1990-01-01'));
     const [paymentEmail, setPaymentEmail] = useState('');
     const [reflinkMode, setReflinkMode] = useState(false);
     const [actionLoader, setActionLoader] = useState(false);
@@ -209,6 +215,9 @@ const MemberDetails = (props) => {
                     setStatus(result.status);
                     setAdminStatus(result.admin_status);
                     setSurveyDetails(result.survey);
+                    if(result.dob){
+                        setDob(result.dob);
+                    }
                     result.MemberPaymentInformations.length > 0 ? setPaymentEmail(result.MemberPaymentInformations[0].value) : '';
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
@@ -266,6 +275,7 @@ const MemberDetails = (props) => {
         const formdata = new FormData();
         formdata.append("avatar", avatarFile);
         formdata.append("type", 'basic_details');
+        formdata.append("dob", moment(dob).format("YYYY-MM-DD HH:mm:ss"));
         for (const field of fields) {
             formdata.append(field, memberData[field] ? memberData[field] : '');
         }
@@ -285,6 +295,7 @@ const MemberDetails = (props) => {
                         setDialogStatus(false);
                         setStatusNote('');
                         setStatuslessNote(false);
+                        setBtnLoading(false);
                     } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
@@ -355,6 +366,7 @@ const MemberDetails = (props) => {
             type: "member_status",
             member_notes: type === 'save' ? statusNote : ''
         }
+        setBtnLoading(true);
         updateMemberData(params, "member_status");
     }
 
@@ -943,6 +955,43 @@ const MemberDetails = (props) => {
                                         )
                                     } />
                                 </ListItem>
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                        <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>DOB:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                        editMode ? (
+                                            <div className='flex lg:flex-col xl:flex-row justify-between w-full'>
+                                                
+                                                <LocalizationProvider dateAdapter={AdapterMoment}>
+                                                    <DatePicker
+                                                        value={dob}
+                                                        maxDate={new Date()}
+                                                        onChange={(newValue) => {
+                                                            setDob(newValue);
+                                                        }}
+                                                        readOnly={false}
+                                                        renderInput={(params) => (
+                                                            <TextField 
+                                                                {...params} 
+                                                                className="xl:w-1/2 md:w-2/5 lg:w-full"
+                                                                id="standard-helperText"
+                                                                variant="standard"
+                                                                sx={textFieldStyle}
+                                                            />
+                                                        )}
+                                                    />
+                                                </LocalizationProvider>
+                                            </div>
+                                        ) : (
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                {
+                                                    memberData.dob ?? '--'
+                                                }
+                                            </Typography>
+                                        )
+                                    } />
+                                </ListItem>
                             </List>
                         </div>
                     </div>
@@ -1183,7 +1232,7 @@ const MemberDetails = (props) => {
             {
                 openAlertDialog && (
                     <AlertDialog
-                        content={<p dangerouslySetInnerHTML={{ __html: msg }}></p>}
+                        content={<span dangerouslySetInnerHTML={{ __html: msg }}></span>}
                         open={openAlertDialog}
                         onConfirm={onConfirmAlertDialogHandle}
                         onClose={onCloseAlertDialogHandle}
@@ -1208,7 +1257,7 @@ const MemberDetails = (props) => {
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={handleCancelStatus}>Cancel</Button>
                             {!statuslessNote && <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); handleChangeStatus('skip') }}>Skip</Button>}
-                            <Button color="primary" variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</Button>
+                            <LoadingButton color="primary" loading={btnloading} variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</LoadingButton>
                         </DialogActions>
                     </Dialog>
                 )
