@@ -121,7 +121,7 @@ function initializeSession(app) {
  * Run Cron
  */
 function runSchedule() {
-  if (process.env.DEV_MODE !== '1') {
+  if (process.env.DEV_MODE === '0') {
     const schedules = {}
     jobs.forEach((job, idx) => {
       schedules[idx] = cron.schedule(
@@ -142,7 +142,7 @@ module.exports = function () {
   initializeHandlebars(app);
   chainMiddlewares(app);
   chainRoutes(app);
-  // runSchedule();
+  runSchedule();
   app.enable('trust proxy')
 
   //General exception handler
