@@ -698,7 +698,7 @@ class MemberAuthController {
             // }
             member_eligibility.push({
               member_id: member_id,
-              open_ended_value: record.CountrySurveyQuestion.id,
+              country_survey_question_id: record.CountrySurveyQuestion.id,
               survey_answer_precode_id: precode_id,
               open_ended_value: precode,
             });
