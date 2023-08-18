@@ -493,13 +493,15 @@ class MemberAuthController {
           state: Joi.string().allow('').optional().label('State'),
           email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
-        if (member.profile_completed_on !== null) {
+        if (member.profile_completed_on === null) {
           const { error, value } = schema.validate(req.body);
 
           if (error) {
             member_status = false;
             member_message = error.details.map((err) => err.message);
           }
+        } else {
+          req.body.username = member.username;
         }
         if (
           !member.profile_completed_on &&
