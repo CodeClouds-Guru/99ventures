@@ -780,8 +780,7 @@ class MemberAuthController {
       return;
     } catch (error) {
       console.error(error);
-      member_status = false;
-      member_message = 'Unable to save data';
+
       // res.redirect('back');
     }
   }
