@@ -582,15 +582,12 @@ class MemberAuthController {
       // else {
       //   req.session.flash = { error: member_message };
       // }
-      // if (method === 'POST') {
-      //   res.redirect('back');
-      // } else {
-      res.json({
-        status: member_status,
-        message: member_message,
-        data: request_data,
-      });
-      // }
+      console.log(req);
+      if (method === 'POST') {
+        res.redirect('back');
+      } else {
+        res.json({ status: member_status, message: member_message });
+      }
     }
   }
   //set member eligibility
