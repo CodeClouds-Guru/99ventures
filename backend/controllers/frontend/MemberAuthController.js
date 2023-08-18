@@ -617,6 +617,7 @@ class MemberAuthController {
     });
 
     if (questions.length) {
+      console.log('------------------questions-----------------', questions);
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
         if (record.survey_provider_id) {
@@ -652,7 +653,10 @@ class MemberAuthController {
               //   }
               // }
               const pre = record.SurveyAnswerPrecodes.find((element) => {
-                if (element.option_text === member_details.gender) {
+                if (
+                  element.option_text.toLowerCase() ===
+                  member_details.gender.toLowerCase()
+                ) {
                   return true;
                 }
               });
