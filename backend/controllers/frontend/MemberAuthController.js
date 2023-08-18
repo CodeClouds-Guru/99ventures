@@ -600,7 +600,7 @@ class MemberAuthController {
     try {
       let member_details = await Member.findOne({ where: { id: member_id } });
       var member_eligibility = [];
-
+      var toluna_questions = [];
       //eligibility entry for gender
       let name_list = [
         'GENDER',
@@ -672,6 +672,10 @@ class MemberAuthController {
                   );
                 });
                 console.log('==========pre', pre.id);
+                toluna_questions.push({
+                  QuestionID: record.id,
+                  Answers: [{ AnswerID: pre.id }],
+                });
                 precode_id = pre.id;
                 break;
               case 'ZIP':
@@ -730,18 +734,18 @@ class MemberAuthController {
         await MemberEligibilities.bulkCreate(member_eligibility);
       }
       if (!profile_completed_on) {
-        var toluna_questions = [];
-        if (member_details.gender == 'male') {
-          toluna_questions.push({
-            QuestionID: 1001007,
-            Answers: [{ AnswerID: 2000247 }],
-          });
-        } else if (member_details.gender == 'female') {
-          toluna_questions.push({
-            QuestionID: 1001007,
-            Answers: [{ AnswerID: 2000246 }],
-          });
-        }
+        // var toluna_questions = [];
+        // if (member_details.gender == 'male') {
+        //   toluna_questions.push({
+        //     QuestionID: 1001007,
+        //     Answers: [{ AnswerID: 2000247 }],
+        //   });
+        // } else if (member_details.gender == 'female') {
+        //   toluna_questions.push({
+        //     QuestionID: 1001007,
+        //     Answers: [{ AnswerID: 2000246 }],
+        //   });
+        // }
         // toluna_questions.push({
         //   "QuestionID": 1001042,
         //   "Answers": [{"AnswerValue":member_details.zip_code}]
