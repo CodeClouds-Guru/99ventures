@@ -610,7 +610,7 @@ class MemberAuthController {
         {
           model: SurveyAnswerPrecodes,
           attributes: ['id', 'option' /*'option_text'*/],
-          where: { country_id: member_details.country_id },
+          where: { countrly_id: member_details.country_id },
           required: true,
         },
       ],
