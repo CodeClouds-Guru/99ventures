@@ -1093,7 +1093,14 @@ class SurveySyncController {
             const allSurveys = await psObj.fetchAndReturnData('/surveys');
             if ('success' === allSurveys.apiStatus && allSurveys.surveys) {
                 const surveyIds = allSurveys.surveys.filter(sr => sr.survey_status == 22 && sr.survey_performance.overall.loi < 20 && sr.cpi >= 0.5).map(sr => sr.survey_id);
-            
+                const localizationCodes = allSurveys.surveys.map(r=> r.surveyLocalization);
+                const getCountry = await Country.findAll({
+                    attributes: ['id', 'language_code'],
+                    where: {
+                        language_code: localizationCodes
+                    }
+                });
+
                 const existingSurveys = await Survey.findAll({
                     attributes: ['survey_number'],
                     where: {
@@ -1114,12 +1121,16 @@ class SurveySyncController {
                             if (result.is_active == true) {
                                 let body = {
                                     ...result.data,
-                                    survey_provider_id: providerId,
+                                    survey_provider_id: providerId
                                 };
 
-                                let sendMessage = await sqsHelper.sendData(body);
-                                responses.push(sendMessage);
-                                // responses.push(body);
+                                let countryData = getCountry.find(r=>r.language_code === result.data.surveyLocalization);
+                                if(countryData !== null && countryData.id) {
+                                    body.country_id = countryData.id;
+                                    let sendMessage = await sqsHelper.sendData(body);
+                                    responses.push(sendMessage);
+                                    // responses.push(body);
+                                }                                
                             }
                         }
                         catch(error) {}
