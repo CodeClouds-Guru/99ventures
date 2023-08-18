@@ -652,7 +652,7 @@ class MemberAuthController {
               //     precode = 2000246;
               //   }
               // }
-              const pre = record.SurveyAnswerPrecodes.find((element) => {
+              let pre = record.SurveyAnswerPrecodes.find((element) => {
                 return (
                   element.option_text.toLowerCase() ===
                   member_details.gender.toLowerCase()
@@ -674,10 +674,9 @@ class MemberAuthController {
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
                 dob = new Date(new Date() - dob).getFullYear() - 1970;
-                const pre = record.SurveyAnswerPrecodes.find((element) => {
-                  if (element.option === dob) {
-                    return true;
-                  }
+                console.log('==========dob', dob);
+                let pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return element.option === dob;
                 });
                 console.log('==========pre', pre);
                 precode = pre.id;
