@@ -693,26 +693,26 @@ class MemberAuthController {
                 if (member_details.state) precode = member_details.state;
                 break;
             }
-            if (precode) {
-              // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
-              //   where: {
-              //     precode: record.survey_provider_question_id,
-              //     survey_provider_id: record.survey_provider_id,
-              //     option: precode,
-              //     country_id: member_details.country_id,
-              //   },
-              // });
-              // if (survey_answer_precodes) {
-              //   precode_id = survey_answer_precodes.id;
-              //   precode = '';
-              // }
-              member_eligibility.push({
-                member_id: member_id,
-                country_survey_question_id: record.CountrySurveyQuestion.id,
-                survey_answer_precode_id: precode_id,
-                open_ended_value: precode,
-              });
-            }
+            // if (precode) {
+            // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
+            //   where: {
+            //     precode: record.survey_provider_question_id,
+            //     survey_provider_id: record.survey_provider_id,
+            //     option: precode,
+            //     country_id: member_details.country_id,
+            //   },
+            // });
+            // if (survey_answer_precodes) {
+            //   precode_id = survey_answer_precodes.id;
+            //   precode = '';
+            // }
+            member_eligibility.push({
+              member_id: member_id,
+              country_survey_question_id: record.CountrySurveyQuestion.id,
+              survey_answer_precode_id: precode_id,
+              open_ended_value: precode,
+            });
+            // }
           }
         }
         //
