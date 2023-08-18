@@ -659,7 +659,7 @@ class MemberAuthController {
                 );
               });
               console.log('==========pre', pre);
-              precode = pre.id;
+              precode_id = pre.id;
               break;
             case 'ZIP':
               precode = member_details.zip_code;
@@ -679,7 +679,7 @@ class MemberAuthController {
                   return element.option == dob;
                 });
                 console.log('==========pre', pre);
-                precode = pre.id;
+                precode_id = pre.id;
               }
               break;
             case 'STATE':
