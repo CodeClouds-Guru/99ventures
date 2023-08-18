@@ -599,6 +599,7 @@ class MemberAuthController {
     //eligibility entry for gender
     let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE', 'POSTAL CODE'];
     let questions = await SurveyQuestion.findAll({
+      logging: console.log,
       where: { name: name_list },
       include: [
         {
@@ -610,7 +611,7 @@ class MemberAuthController {
         {
           model: SurveyAnswerPrecodes,
           attributes: ['id', 'option' /*'option_text'*/],
-          where: { countrly_id: member_details.country_id },
+          where: { country_id: member_details.country_id },
           required: true,
         },
       ],
