@@ -958,7 +958,7 @@ class SurveySyncController {
     /** 
     * Schlesiner Survey Sync through SQS
     */
-    async schlesingerSurveySaveToSQS() {
+    async schlesingerSurveySaveToSQS(req, res) {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -989,6 +989,14 @@ class SurveySyncController {
                     // res.json({ status: true, message: 'No survey found for this language!' });
                     return { status: true, message: 'No survey found for this language!' };
                 }
+                const localizationCodes = allSurveys.Surveys.map(r=> r.LanguageId);
+                const getCountry = await Country.findAll({
+                    attributes: ['id', 'sago_language_id'],
+                    where: {
+                        sago_language_id: localizationCodes
+                    }
+                });
+
 
                 const ids = surveyData.map(r=> r.SurveyId);
                 const dbSurveys = await Survey.findAll({
@@ -1001,7 +1009,7 @@ class SurveySyncController {
                 });               
                 const responses = [];
                 const sqsHelper = new SqsHelper();
-                
+               
                 for (let element of surveyData) {
                     var surveyId;
                     var body = {};
@@ -1035,9 +1043,13 @@ class SurveySyncController {
                         }
                     }
                     if('qualifications' in body){
-                        const send_message = await sqsHelper.sendData(body);                        
-                        responses.push(send_message);
-                        // responses.push(body);
+                        let countryData = getCountry.find(r=> +r.sago_language_id === +element.LanguageId);
+                        if(countryData !== null && countryData.id) {
+                            body.country_id = countryData.id;
+                            const send_message = await sqsHelper.sendData(body);                        
+                            responses.push(send_message);
+                            // responses.push(body);
+                        }
                     }
                     
                 };
