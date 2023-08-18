@@ -653,12 +653,10 @@ class MemberAuthController {
               //   }
               // }
               const pre = record.SurveyAnswerPrecodes.find((element) => {
-                if (
+                return (
                   element.option_text.toLowerCase() ===
                   member_details.gender.toLowerCase()
-                ) {
-                  return true;
-                }
+                );
               });
               console.log('==========pre', pre);
               precode = pre.id;
