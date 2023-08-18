@@ -591,167 +591,179 @@ class MemberAuthController {
   }
   //set member eligibility
   async setMemberEligibility(member_id, profile_completed_on) {
-    //gender
-    // console.log('profile_completed_on', profile_completed_on);
-    let member_details = await Member.findOne({ where: { id: member_id } });
-    var member_eligibility = [];
+    try {
+      let member_details = await Member.findOne({ where: { id: member_id } });
+      var member_eligibility = [];
 
-    //eligibility entry for gender
-    let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE', 'POSTAL CODE'];
-    let questions = await SurveyQuestion.findAll({
-      logging: console.log,
-      where: { name: name_list },
-      include: [
-        {
-          model: CountrySurveyQuestion,
-          attributes: ['id'],
-          where: { country_id: member_details.country_id },
-          required: true,
-        },
-        {
-          model: SurveyAnswerPrecodes,
-          attributes: ['id', 'option', 'option_text'],
-          where: { country_id: member_details.country_id },
-          required: true,
-        },
-      ],
-    });
-    // console.log('------------------questions-----------------', questions);
-    if (questions.length) {
-      // questions.forEach(async function (record, key) {
-      for (let record of questions) {
-        if (record.survey_provider_id) {
-          let precode = '';
-          let precode_id = '';
-          var question_name = record.name;
-          question_name = question_name.toUpperCase();
-          switch (question_name) {
-            //get precodes
-            case 'GENDER':
-              // if (record.survey_provider_id == 1) {
-              //   if (member_details.gender == 'male') {
-              //     precode = 1;
-              //   } else if (member_details.gender == 'female') {
-              //     precode = 2;
-              //   }
-              // } else if (record.survey_provider_id == 3) {
-              //   if (member_details.gender == 'male') {
-              //     precode = 111;
-              //   } else if (member_details.gender == 'female') {
-              //     precode = 112;
-              //   }
-              // } else if (record.survey_provider_id == 4) {
-              //   if (member_details.gender == 'male') {
-              //     precode = 58;
-              //   } else if (member_details.gender == 'female') {
-              //     precode = 59;
-              //   }
-              // } else if (record.survey_provider_id == 6) {
-              //   if (member_details.gender == 'male') {
-              //     precode = 2000247;
-              //   } else if (member_details.gender == 'female') {
-              //     precode = 2000246;
-              //   }
-              // }
-              let pre = record.SurveyAnswerPrecodes.find((element) => {
-                return (
-                  element.option_text.toLowerCase() ===
-                  member_details.gender.toLowerCase()
-                );
-              });
-              console.log('==========pre', pre);
-              precode_id = pre.id;
-              break;
-            case 'ZIP':
-              precode = member_details.zip_code;
-              break;
-            case 'POSTAL CODE':
-              precode = member_details.zip_code;
-              break;
-            case 'REGION':
-              precode = member_details.city;
-              break;
-            case 'AGE':
-              if (member_details.dob) {
-                var dob = new Date(member_details.dob);
-                dob = new Date(new Date() - dob).getFullYear() - 1970;
-
+      //eligibility entry for gender
+      let name_list = [
+        'GENDER',
+        'ZIP',
+        'STATE',
+        'REGION',
+        'AGE',
+        'POSTAL CODE',
+      ];
+      let questions = await SurveyQuestion.findAll({
+        logging: console.log,
+        where: { name: name_list },
+        include: [
+          {
+            model: CountrySurveyQuestion,
+            attributes: ['id'],
+            where: { country_id: member_details.country_id },
+            required: true,
+          },
+          {
+            model: SurveyAnswerPrecodes,
+            attributes: ['id', 'option', 'option_text'],
+            where: { country_id: member_details.country_id },
+            required: true,
+          },
+        ],
+      });
+      // console.log('------------------questions-----------------', questions);
+      if (questions.length) {
+        // questions.forEach(async function (record, key) {
+        for (let record of questions) {
+          if (record.survey_provider_id) {
+            let precode = '';
+            let precode_id = '';
+            var question_name = record.name;
+            question_name = question_name.toUpperCase();
+            switch (question_name) {
+              //get precodes
+              case 'GENDER':
+                // if (record.survey_provider_id == 1) {
+                //   if (member_details.gender == 'male') {
+                //     precode = 1;
+                //   } else if (member_details.gender == 'female') {
+                //     precode = 2;
+                //   }
+                // } else if (record.survey_provider_id == 3) {
+                //   if (member_details.gender == 'male') {
+                //     precode = 111;
+                //   } else if (member_details.gender == 'female') {
+                //     precode = 112;
+                //   }
+                // } else if (record.survey_provider_id == 4) {
+                //   if (member_details.gender == 'male') {
+                //     precode = 58;
+                //   } else if (member_details.gender == 'female') {
+                //     precode = 59;
+                //   }
+                // } else if (record.survey_provider_id == 6) {
+                //   if (member_details.gender == 'male') {
+                //     precode = 2000247;
+                //   } else if (member_details.gender == 'female') {
+                //     precode = 2000246;
+                //   }
+                // }
                 let pre = record.SurveyAnswerPrecodes.find((element) => {
-                  return element.option == dob;
+                  return (
+                    element.option_text.toLowerCase() ===
+                    member_details.gender.toLowerCase()
+                  );
                 });
                 console.log('==========pre', pre);
                 precode_id = pre.id;
-              }
-              break;
-            case 'STATE':
-              if (member_details.state) precode = member_details.state;
-              break;
-          }
-          if (precode) {
-            // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
-            //   where: {
-            //     precode: record.survey_provider_question_id,
-            //     survey_provider_id: record.survey_provider_id,
-            //     option: precode,
-            //     country_id: member_details.country_id,
-            //   },
-            // });
-            // if (survey_answer_precodes) {
-            //   precode_id = survey_answer_precodes.id;
-            //   precode = '';
-            // }
-            member_eligibility.push({
-              member_id: member_id,
-              country_survey_question_id: record.CountrySurveyQuestion.id,
-              survey_answer_precode_id: precode_id,
-              open_ended_value: precode,
-            });
+                break;
+              case 'ZIP':
+                precode = member_details.zip_code;
+                break;
+              case 'POSTAL CODE':
+                precode = member_details.zip_code;
+                break;
+              case 'REGION':
+                precode = member_details.city;
+                break;
+              case 'AGE':
+                if (member_details.dob) {
+                  var dob = new Date(member_details.dob);
+                  dob = new Date(new Date() - dob).getFullYear() - 1970;
+
+                  let pre = record.SurveyAnswerPrecodes.find((element) => {
+                    return element.option == dob;
+                  });
+                  console.log('==========pre', pre);
+                  precode_id = pre.id;
+                }
+                break;
+              case 'STATE':
+                if (member_details.state) precode = member_details.state;
+                break;
+            }
+            if (precode) {
+              // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
+              //   where: {
+              //     precode: record.survey_provider_question_id,
+              //     survey_provider_id: record.survey_provider_id,
+              //     option: precode,
+              //     country_id: member_details.country_id,
+              //   },
+              // });
+              // if (survey_answer_precodes) {
+              //   precode_id = survey_answer_precodes.id;
+              //   precode = '';
+              // }
+              member_eligibility.push({
+                member_id: member_id,
+                country_survey_question_id: record.CountrySurveyQuestion.id,
+                survey_answer_precode_id: precode_id,
+                open_ended_value: precode,
+              });
+            }
           }
         }
-      }
-      //
-      await MemberEligibilities.destroy({
-        where: { member_id: member_id },
-        force: true,
-      });
-      console.log('--------member_eligibility--------', member_eligibility);
-      await MemberEligibilities.bulkCreate(member_eligibility);
-    }
-    if (!profile_completed_on) {
-      var toluna_questions = [];
-      if (member_details.gender == 'male') {
-        toluna_questions.push({
-          QuestionID: 1001007,
-          Answers: [{ AnswerID: 2000247 }],
+        //
+        await MemberEligibilities.destroy({
+          where: { member_id: member_id },
+          force: true,
         });
-      } else if (member_details.gender == 'female') {
-        toluna_questions.push({
-          QuestionID: 1001007,
-          Answers: [{ AnswerID: 2000246 }],
-        });
+        console.log('--------member_eligibility--------', member_eligibility);
+        await MemberEligibilities.bulkCreate(member_eligibility);
       }
-      // toluna_questions.push({
-      //   "QuestionID": 1001042,
-      //   "Answers": [{"AnswerValue":member_details.zip_code}]
-      // })
-      try {
-        let tolunaHelper = new TolunaHelper();
-        const payload = {
-          PartnerGUID: process.env.PARTNER_GUID,
-          MemberCode: member_details.id,
-          Email: member_details.email,
-          BirthDate: member_details.dob,
-          PostalCode: member_details.zip_code,
-          // "IsActive": true,
-          // "IsTest": true,
-          RegistrationAnswers: toluna_questions,
-        };
-        let t = await tolunaHelper.addMemebr(payload);
-      } catch (error) {
-        console.log(error);
+      if (!profile_completed_on) {
+        var toluna_questions = [];
+        if (member_details.gender == 'male') {
+          toluna_questions.push({
+            QuestionID: 1001007,
+            Answers: [{ AnswerID: 2000247 }],
+          });
+        } else if (member_details.gender == 'female') {
+          toluna_questions.push({
+            QuestionID: 1001007,
+            Answers: [{ AnswerID: 2000246 }],
+          });
+        }
+        // toluna_questions.push({
+        //   "QuestionID": 1001042,
+        //   "Answers": [{"AnswerValue":member_details.zip_code}]
+        // })
+        try {
+          let tolunaHelper = new TolunaHelper();
+          const payload = {
+            PartnerGUID: process.env.PARTNER_GUID,
+            MemberCode: member_details.id,
+            Email: member_details.email,
+            BirthDate: member_details.dob,
+            PostalCode: member_details.zip_code,
+            // "IsActive": true,
+            // "IsTest": true,
+            RegistrationAnswers: toluna_questions,
+          };
+          let t = await tolunaHelper.addMemebr(payload);
+        } catch (error) {
+          console.log(error);
+        }
       }
+      return;
+    } catch (error) {
+      console.error(error);
+      member_status = false;
+      member_message = 'Unable to save data';
+      // res.redirect('back');
     }
-    return;
   }
   //change password
   async changePassword(req, member) {
