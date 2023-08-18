@@ -199,6 +199,7 @@ class MemberAuthController {
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
+            dob: '1990-01-01 00:00:00',
             // username: `${req.body.email.split('@')[0]}-${new Date().getTime()}`,
             username: new Date().getMilliseconds(),
             created_at: new Date(),
@@ -477,6 +478,7 @@ class MemberAuthController {
       if (method === 'POST') {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
+
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
@@ -492,13 +494,16 @@ class MemberAuthController {
           state: Joi.string().allow('').optional().label('State'),
           email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
-        const { error, value } = schema.validate(req.body);
+        if (member.profile_completed_on === null) {
+          const { error, value } = schema.validate(req.body);
 
-        if (error) {
-          member_status = false;
-          member_message = error.details.map((err) => err.message);
+          if (error) {
+            member_status = false;
+            member_message = error.details.map((err) => err.message);
+          }
+        } else {
+          req.body.username = member.username;
         }
-
         if (
           !member.profile_completed_on &&
           member.username === req.body.username
@@ -506,6 +511,8 @@ class MemberAuthController {
           member_status = false;
           member_message = 'You need to set username to complete your profile';
         }
+        console.log('===============req.body', req.body);
+
         //check member username
         let member_username = await Member.count({
           where: {
@@ -592,9 +599,15 @@ class MemberAuthController {
   //set member eligibility
   async setMemberEligibility(member_id, profile_completed_on) {
     try {
-      let member_details = await Member.findOne({ where: { id: member_id } });
+      let member_details = await Member.findOne({
+        where: { id: member_id },
+        include: {
+          model: CompanyPortal,
+          attributes: ['domain', 'name'],
+        },
+      });
       var member_eligibility = [];
-
+      var toluna_questions = [];
       //eligibility entry for gender
       let name_list = [
         'GENDER',
@@ -665,7 +678,13 @@ class MemberAuthController {
                     member_details.gender.toLowerCase()
                   );
                 });
-                console.log('==========pre', pre.id);
+                // console.log('==========pre', pre.id);
+                if (record.survey_provider_id === 6) {
+                  toluna_questions.push({
+                    QuestionID: record.id,
+                    Answers: [{ AnswerID: pre.id }],
+                  });
+                }
                 precode_id = pre.id;
                 break;
               case 'ZIP':
@@ -685,7 +704,7 @@ class MemberAuthController {
                   let pre = record.SurveyAnswerPrecodes.find((element) => {
                     return element.option == dob;
                   });
-                  console.log('==========pre', pre.id);
+                  // console.log('==========pre', pre.id);
                   precode_id = pre.id;
                 }
                 break;
@@ -720,22 +739,22 @@ class MemberAuthController {
           where: { member_id: member_id },
           force: true,
         });
-        console.log('--------member_eligibility--------', member_eligibility);
+        // console.log('--------member_eligibility--------', member_eligibility);
         await MemberEligibilities.bulkCreate(member_eligibility);
       }
       if (!profile_completed_on) {
-        var toluna_questions = [];
-        if (member_details.gender == 'male') {
-          toluna_questions.push({
-            QuestionID: 1001007,
-            Answers: [{ AnswerID: 2000247 }],
-          });
-        } else if (member_details.gender == 'female') {
-          toluna_questions.push({
-            QuestionID: 1001007,
-            Answers: [{ AnswerID: 2000246 }],
-          });
-        }
+        // var toluna_questions = [];
+        // if (member_details.gender == 'male') {
+        //   toluna_questions.push({
+        //     QuestionID: 1001007,
+        //     Answers: [{ AnswerID: 2000247 }],
+        //   });
+        // } else if (member_details.gender == 'female') {
+        //   toluna_questions.push({
+        //     QuestionID: 1001007,
+        //     Answers: [{ AnswerID: 2000246 }],
+        //   });
+        // }
         // toluna_questions.push({
         //   "QuestionID": 1001042,
         //   "Answers": [{"AnswerValue":member_details.zip_code}]
@@ -744,7 +763,8 @@ class MemberAuthController {
           let tolunaHelper = new TolunaHelper();
           const payload = {
             PartnerGUID: process.env.PARTNER_GUID,
-            MemberCode: member_details.id,
+            MemberCode:
+              member_details.CompanyPortal.name + '_' + member_details.id,
             Email: member_details.email,
             BirthDate: member_details.dob,
             PostalCode: member_details.zip_code,
