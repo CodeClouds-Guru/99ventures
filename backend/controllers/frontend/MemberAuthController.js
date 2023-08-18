@@ -478,10 +478,6 @@ class MemberAuthController {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
 
-        if (member.profile_completed_on) {
-          req.body = member;
-        }
-
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
@@ -497,13 +493,14 @@ class MemberAuthController {
           state: Joi.string().allow('').optional().label('State'),
           email_alerts: Joi.allow('').optional().label('Email Alerts'),
         });
-        const { error, value } = schema.validate(req.body);
+        if (!member.profile_completed_on) {
+          const { error, value } = schema.validate(req.body);
 
-        if (error) {
-          member_status = false;
-          member_message = error.details.map((err) => err.message);
+          if (error) {
+            member_status = false;
+            member_message = error.details.map((err) => err.message);
+          }
         }
-
         if (
           !member.profile_completed_on &&
           member.username === req.body.username
