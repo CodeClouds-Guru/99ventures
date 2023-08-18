@@ -477,6 +477,11 @@ class MemberAuthController {
       if (method === 'POST') {
         req.headers.company_id = req.session.company_portal.company_id;
         req.headers.site_id = req.session.company_portal.id;
+
+        if (member.profile_completed_on) {
+          req.body = member;
+        }
+
         const schema = Joi.object({
           first_name: Joi.string().required().label('First Name'),
           last_name: Joi.string().required().label('Last Name'),
@@ -507,7 +512,7 @@ class MemberAuthController {
           member_message = 'You need to set username to complete your profile';
         }
         console.log('===============req.body', req.body);
-        req.body.username = member.username;
+
         //check member username
         let member_username = await Member.count({
           where: {
