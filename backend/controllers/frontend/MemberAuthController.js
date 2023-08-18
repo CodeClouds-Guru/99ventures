@@ -541,7 +541,7 @@ class MemberAuthController {
           if (req.files) {
             request_data.avatar = await Member.updateAvatar(req, member);
           }
-          console.log('==============request_data==============', request_data);
+          // console.log('==============request_data==============', request_data);
           let model = await Member.update(request_data, {
             where: { id: member_id },
           });
@@ -581,7 +581,7 @@ class MemberAuthController {
       } else {
         req.session.flash = { error: member_message };
       }
-      console.log(req);
+      // console.log(req);
       if (method === 'POST') {
         res.redirect('back');
       } else {
@@ -616,7 +616,7 @@ class MemberAuthController {
         },
       ],
     });
-    console.log('------------------questions-----------------', questions);
+    // console.log('------------------questions-----------------', questions);
     if (questions.length) {
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
@@ -660,6 +660,7 @@ class MemberAuthController {
                   return true;
                 }
               });
+              console.log('==========pre', pre);
               precode = pre.id;
               break;
             case 'ZIP':
@@ -680,6 +681,7 @@ class MemberAuthController {
                     return true;
                   }
                 });
+                console.log('==========pre', pre);
                 precode = pre.id;
               }
               break;
