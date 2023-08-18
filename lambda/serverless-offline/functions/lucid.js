@@ -92,10 +92,13 @@ class Lucid {
             let joinSql = `SELECT sq.id as qualification_id, sq.survey_question_id, qs.survey_provider_question_id, qs.question_type, ap.option, ap.id as answer_precode_id
             FROM survey_qualifications AS sq JOIN survey_questions AS qs ON (sq.survey_question_id = qs.id)
             JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
-            WHERE sq.deleted_at IS NULL AND qs.deleted_at IS NULL AND qs.deleted_at IS NULL AND sq.survey_id = ? AND ap.country_id = ? AND ap.survey_provider_id = ?`;
+            WHERE sq.deleted_at IS NULL 
+            AND qs.deleted_at IS NULL 
+            AND ap.deleted_at IS NULL 
+            AND sq.survey_id = ? 
+            AND ap.country_id = ? 
+            AND ap.survey_provider_id = ?`;
             const qlData = await db.query(joinSql, [surveyId, country_id, this.record.survey_provider_id]);
-
-            // console.log(qlData);
 
             const ansPrecodeParams = []
             for (const item of this.record.survey_qualifications) {
