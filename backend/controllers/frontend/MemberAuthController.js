@@ -615,9 +615,8 @@ class MemberAuthController {
         },
       ],
     });
-
+    console.log('------------------questions-----------------', questions);
     if (questions.length) {
-      console.log('------------------questions-----------------', questions);
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
         if (record.survey_provider_id) {
