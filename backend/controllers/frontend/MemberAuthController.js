@@ -675,6 +675,10 @@ class MemberAuthController {
                 var dob = new Date(member_details.dob);
                 dob = new Date(new Date() - dob).getFullYear() - 1970;
                 console.log('==========dob', dob);
+                console.log(
+                  '==========record.SurveyAnswerPrecodes',
+                  record.SurveyAnswerPrecodes
+                );
                 let pre = record.SurveyAnswerPrecodes.find((element) => {
                   return element.option === dob;
                 });
