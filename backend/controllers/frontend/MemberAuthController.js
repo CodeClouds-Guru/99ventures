@@ -506,6 +506,8 @@ class MemberAuthController {
           member_status = false;
           member_message = 'You need to set username to complete your profile';
         }
+        console.log('===============req.body', req.body);
+        req.body.username = member.username;
         //check member username
         let member_username = await Member.count({
           where: {
