@@ -622,6 +622,7 @@ class MemberAuthController {
       for (let record of questions) {
         if (record.survey_provider_id) {
           let precode = '';
+          let precode_id = '';
           var question_name = record.name;
           question_name = question_name.toUpperCase();
           switch (question_name) {
@@ -687,7 +688,6 @@ class MemberAuthController {
               break;
           }
           if (precode) {
-            let precode_id = '';
             // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
             //   where: {
             //     precode: record.survey_provider_question_id,
