@@ -679,10 +679,12 @@ class MemberAuthController {
                   );
                 });
                 // console.log('==========pre', pre.id);
-                toluna_questions.push({
-                  QuestionID: record.id,
-                  Answers: [{ AnswerID: pre.id }],
-                });
+                if (record.survey_provider_id === 6) {
+                  toluna_questions.push({
+                    QuestionID: record.id,
+                    Answers: [{ AnswerID: pre.id }],
+                  });
+                }
                 precode_id = pre.id;
                 break;
               case 'ZIP':
