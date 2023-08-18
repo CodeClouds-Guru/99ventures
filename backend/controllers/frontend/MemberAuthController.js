@@ -665,7 +665,7 @@ class MemberAuthController {
                     member_details.gender.toLowerCase()
                   );
                 });
-                console.log('==========pre', pre);
+                console.log('==========pre', pre.id);
                 precode_id = pre.id;
                 break;
               case 'ZIP':
@@ -685,7 +685,7 @@ class MemberAuthController {
                   let pre = record.SurveyAnswerPrecodes.find((element) => {
                     return element.option == dob;
                   });
-                  console.log('==========pre', pre);
+                  console.log('==========pre', pre.id);
                   precode_id = pre.id;
                 }
                 break;
