@@ -674,10 +674,8 @@ class MemberAuthController {
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
                 dob = new Date(new Date() - dob).getFullYear() - 1970;
-                console.log('==========dob', dob);
 
                 let pre = record.SurveyAnswerPrecodes.find((element) => {
-                  console.log('==========element', element);
                   return element.option == dob;
                 });
                 console.log('==========pre', pre);
@@ -716,6 +714,7 @@ class MemberAuthController {
         where: { member_id: member_id },
         force: true,
       });
+      console.log('--------member_eligibility--------', member_eligibility);
       await MemberEligibilities.bulkCreate(member_eligibility);
     }
     if (!profile_completed_on) {
