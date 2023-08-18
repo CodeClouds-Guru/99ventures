@@ -541,6 +541,7 @@ class MemberAuthController {
           if (req.files) {
             request_data.avatar = await Member.updateAvatar(req, member);
           }
+          // console.log('==============request_data==============', request_data);
           let model = await Member.update(request_data, {
             where: { id: member_id },
           });
@@ -576,11 +577,11 @@ class MemberAuthController {
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
 
-        // req.session.flash = { message: member_message, success_status: true };
+        req.session.flash = { message: member_message, success_status: true };
+      } else {
+        req.session.flash = { error: member_message };
       }
-      // else {
-      //   req.session.flash = { error: member_message };
-      // }
+      // console.log(req);
       if (method === 'POST') {
         res.redirect('back');
       } else {
@@ -598,6 +599,7 @@ class MemberAuthController {
     //eligibility entry for gender
     let name_list = ['GENDER', 'ZIP', 'STATE', 'REGION', 'AGE', 'POSTAL CODE'];
     let questions = await SurveyQuestion.findAll({
+      logging: console.log,
       where: { name: name_list },
       include: [
         {
@@ -608,13 +610,13 @@ class MemberAuthController {
         },
         {
           model: SurveyAnswerPrecodes,
-          attributes: ['id', 'option' /*'option_text'*/],
+          attributes: ['id', 'option', 'option_text'],
           where: { country_id: member_details.country_id },
           required: true,
         },
       ],
     });
-
+    // console.log('------------------questions-----------------', questions);
     if (questions.length) {
       // questions.forEach(async function (record, key) {
       for (let record of questions) {
@@ -650,11 +652,13 @@ class MemberAuthController {
               //     precode = 2000246;
               //   }
               // }
-              const pre = record.SurveyAnswerPrecodes.find((element) => {
-                if (element.option_text === member_details.gender) {
-                  return true;
-                }
+              let pre = record.SurveyAnswerPrecodes.find((element) => {
+                return (
+                  element.option_text.toLowerCase() ===
+                  member_details.gender.toLowerCase()
+                );
               });
+              console.log('==========pre', pre);
               precode = pre.id;
               break;
             case 'ZIP':
@@ -670,11 +674,13 @@ class MemberAuthController {
               if (member_details.dob) {
                 var dob = new Date(member_details.dob);
                 dob = new Date(new Date() - dob).getFullYear() - 1970;
-                const pre = record.SurveyAnswerPrecodes.find((element) => {
-                  if (element.option === dob) {
-                    return true;
-                  }
+                console.log('==========dob', dob);
+
+                let pre = record.SurveyAnswerPrecodes.find((element) => {
+                  console.log('==========element', element);
+                  return element.option == dob;
                 });
+                console.log('==========pre', pre);
                 precode = pre.id;
               }
               break;
