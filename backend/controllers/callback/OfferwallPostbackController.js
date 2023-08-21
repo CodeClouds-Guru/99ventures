@@ -94,9 +94,10 @@ class OfferwallPostbackController {
               type: 'credited',
               amount_action: 'offerwall',
               created_by: null,
-              payload: req.body
-                ? JSON.stringify(req.body)
-                : JSON.stringify(req.query),
+              payload:
+                req.body !== null && Object.keys(req.body).length
+                  ? JSON.stringify(req.body)
+                  : JSON.stringify(req.query),
               status: 2,
             };
             console.log('transaction_obj', transaction_obj);
