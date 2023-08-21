@@ -16,10 +16,7 @@ class OfferwallPostbackController {
     logger1.info(JSON.stringify(req.body));
 
     var status_arr = ['1', 'approved'];
-    if (
-      status_arr.indexOf(req.query.status) > -1 ||
-      status_arr.indexOf(req.body.status) > -1
-    ) {
+    if (status_arr.includes(req.query.status)) {
       try {
         const offerwall_name = req.params.offerwall;
         let offerwall_details = await OfferWall.findOne({
@@ -34,7 +31,7 @@ class OfferwallPostbackController {
         });
         var currency_percent = offerwall_details.currency_percent || '100';
         currency_percent = parseFloat(currency_percent);
-        console.log(currency_percent);
+        // console.log(currency_percent);
         if (
           offerwall_details &&
           (offerwall_details.campaign_id_variable in req.query ||
@@ -86,7 +83,7 @@ class OfferwallPostbackController {
                 : req.body[offerwall_details.sub_id_variable];
             }
             payout_amount = (payout_amount * currency_percent) / 100;
-            console.log('payout_amount', payout_amount);
+            // console.log('payout_amount', payout_amount);
             const transaction_obj = {
               member_id: member.id,
               amount: payout_amount,
@@ -100,32 +97,34 @@ class OfferwallPostbackController {
                   : JSON.stringify(req.query),
               status: 2,
             };
-            console.log('transaction_obj', transaction_obj);
+            // console.log('transaction_obj', transaction_obj);
             let result =
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
               );
-
-            return res.send(
-              Object.keys(req.body).length
-                ? JSON.stringify(req.body)
-                : JSON.stringify(req.query)
-            );
-            // return;
+            res.status(200).json({
+              status: true,
+              message: 'Success'
+            });            
           }
         }
       } catch (err) {
-        console.log(err.message);
-        return res.status(500).json({
+        //console.log(err.message);
+        const offerwallLog = require('../../helpers/Logger')(
+          `offerwall-error.log`
+        );
+        offerwallLog.error('['+req.params.offerwall+'] - '+err);
+        res.status(500).json({
           status: false,
           errors: 'Unable to save data',
         });
       }
+    } else {
+      res.send({
+        status: true,
+        message: 'Completed',
+      });
     }
-    return res.send({
-      status: true,
-      message: 'Completed',
-    });
   }
 }
 
