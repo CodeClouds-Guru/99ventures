@@ -958,7 +958,7 @@ class SurveySyncController {
     /** 
     * Schlesiner Survey Sync through SQS
     */
-    async schlesingerSurveySaveToSQS(req, res) {
+    async schlesingerSurveySaveToSQS() {
         try {
             const provider = await SurveyProvider.findOne({
                 attributes: ['id'],
@@ -968,10 +968,6 @@ class SurveySyncController {
             });
 
             if(!provider) {
-                // res.send({
-                //     status: false,
-                //     message: 'Invalid provider'
-                // });
                 return {
                     status: false,
                     message: 'Invalid provider'
@@ -986,7 +982,6 @@ class SurveySyncController {
                 // const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
 
                 if (!surveyData.length) {
-                    // res.json({ status: true, message: 'No survey found for this language!' });
                     return { status: true, message: 'No survey found for this language!' };
                 }
                 const localizationCodes = allSurveys.Surveys.map(r=> r.LanguageId);
@@ -1006,11 +1001,20 @@ class SurveySyncController {
                         status: 'live',
                         survey_number: ids
                     }
-                });               
+                });
+                const ageAnswers = await SurveyAnswerPrecodes.findAll({
+                    attributes: ['id', 'country_id', 'option', 'precode'],
+                    where: {
+                        survey_provider_id: providerId,
+                        precode: 59
+                    }
+                });
+                
                 const responses = [];
                 const sqsHelper = new SqsHelper();
+                const surveyData1 = [surveyData[17]]
                
-                for (let element of surveyData) {
+                for (let element of surveyData1) {
                     var surveyId;
                     var body = {};
                     const index = dbSurveys.findIndex(row => +row.survey_number === +element.SurveyId);
@@ -1046,6 +1050,18 @@ class SurveySyncController {
                         let countryData = getCountry.find(r=> +r.sago_language_id === +element.LanguageId);
                         if(countryData !== null && countryData.id) {
                             body.country_id = countryData.id;
+                            body.db_qualication_codes = [];
+                            
+                            // This block of codes will check the Age is exists of the qualifications or not. If [yes] then the range calculation checked and find the ids from the DB records and append the ids in the Surveya array.
+                            // The plan is to reduce the CPU utilization of RDS when checking same things on SQS.
+                            let checkAgeQualification = body.qualifications.find(q=> q.QualificationId == 59);
+                            if(checkAgeQualification && checkAgeQualification.AnswerIds && checkAgeQualification.AnswerIds.length) {
+                                let range = checkAgeQualification.AnswerIds[0].split('-');
+                                body.db_qualication_codes.push({
+                                    qualification_id: checkAgeQualification.QualificationId,
+                                    answer_ids: ageAnswers.filter(r=> +r.country_id === +countryData.id && +range[0] <= +r.option && +range[1] >= +r.option).map(r=>r.id)
+                                });
+                            }
                             const send_message = await sqsHelper.sendData(body);                        
                             responses.push(send_message);
                             // responses.push(body);
