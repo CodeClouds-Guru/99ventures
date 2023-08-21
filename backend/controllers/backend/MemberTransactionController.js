@@ -73,6 +73,9 @@ class MemberTransactionController extends Controller {
       ) {
         record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
+      if(record.dataValues.amount_action === 'offerwall'){
+        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.note})`;
+      }
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';

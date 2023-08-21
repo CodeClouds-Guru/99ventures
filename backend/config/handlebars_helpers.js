@@ -110,6 +110,12 @@ module.exports = [
     },
   },
   {
+    name: 'default',
+    fn: function (value, options) {
+      return true
+    },
+  },
+  {
     name: 'toLower',
     fn: function (value) {
       return value.toLowerCase();
