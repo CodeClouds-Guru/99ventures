@@ -493,6 +493,7 @@ class MemberAuthController {
           address_2: Joi.string().allow('').optional().label('Address 2'),
           state: Joi.string().allow('').optional().label('State'),
           email_alerts: Joi.allow('').optional().label('Email Alerts'),
+          dob: Joi.string().required().label('DOB'),
         });
         if (member.profile_completed_on === null) {
           const { error, value } = schema.validate(req.body);
@@ -647,31 +648,6 @@ class MemberAuthController {
             switch (question_name) {
               //get precodes
               case 'GENDER':
-                // if (record.survey_provider_id == 1) {
-                //   if (member_details.gender == 'male') {
-                //     precode = 1;
-                //   } else if (member_details.gender == 'female') {
-                //     precode = 2;
-                //   }
-                // } else if (record.survey_provider_id == 3) {
-                //   if (member_details.gender == 'male') {
-                //     precode = 111;
-                //   } else if (member_details.gender == 'female') {
-                //     precode = 112;
-                //   }
-                // } else if (record.survey_provider_id == 4) {
-                //   if (member_details.gender == 'male') {
-                //     precode = 58;
-                //   } else if (member_details.gender == 'female') {
-                //     precode = 59;
-                //   }
-                // } else if (record.survey_provider_id == 6) {
-                //   if (member_details.gender == 'male') {
-                //     precode = 2000247;
-                //   } else if (member_details.gender == 'female') {
-                //     precode = 2000246;
-                //   }
-                // }
                 let pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
                     element.option_text.toLowerCase() ===
