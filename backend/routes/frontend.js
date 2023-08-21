@@ -135,6 +135,7 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
   });
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
+// router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;
