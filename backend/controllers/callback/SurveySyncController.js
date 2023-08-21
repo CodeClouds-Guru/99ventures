@@ -1011,10 +1011,8 @@ class SurveySyncController {
                 });
                 
                 const responses = [];
-                const sqsHelper = new SqsHelper();
-                const surveyData1 = [surveyData[17]]
-               
-                for (let element of surveyData1) {
+                const sqsHelper = new SqsHelper();               
+                for (let element of surveyData) {
                     var surveyId;
                     var body = {};
                     const index = dbSurveys.findIndex(row => +row.survey_number === +element.SurveyId);
