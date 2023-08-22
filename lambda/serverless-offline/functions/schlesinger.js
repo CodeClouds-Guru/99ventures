@@ -9,6 +9,21 @@ class Schlesinger {
     }
 
     surveySync = async () => {
+        console.log('Sago');
+        console.log(this.record);
+        if(this.record.country_id == null){
+            return {
+                'message': 'Unable to locate country id!',
+                'status': false
+            }
+        }
+        if(typeof this.record.db_qualication_codes === 'undefined'){
+            return {
+                'message': 'Unable to proceed!',
+                'status': false
+            }
+        }
+        const {db_qualication_codes, ...surveyJson} = this.record;
         var params = [
             this.record.survey_provider_id,
             this.record.LOI,
@@ -18,23 +33,14 @@ class Schlesinger {
             new Date(),
             this.record.SurveyId,
             'live',
-            JSON.stringify(this.record),
+            JSON.stringify(surveyJson),
             null
         ];
         var sql;
 
-
-        let countrySql = `SELECT id from countries WHERE sago_language_id = ? AND deleted_at IS NULL LIMIT 1`;
-        const country = await this.db.query(countrySql, [this.record.LanguageId]);
-        if(country.length < 1){
-            return {
-                'message': 'Unable to locate country id',
-                'status': false
-            }
-        }
-
-        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND country_id = ? AND deleted_at IS NULL LIMIT 1`;
-        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId, country[0].id]);
+        const countryId = this.record.country_id;
+        const chkSql = `SELECT id FROM surveys WHERE survey_provider_id = ? AND survey_number = ? AND deleted_at IS NULL LIMIT 1`;
+        const surveyData = await this.db.query(chkSql, [this.record.survey_provider_id, this.record.SurveyId]);
         if (surveyData.length) {
             let surveyId = surveyData[0].id;
             let surveyIds = surveyData.map(sr => sr.id);
@@ -42,23 +48,22 @@ class Schlesinger {
             let deleteSql = `DELETE surveys, survey_qualifications FROM surveys JOIN survey_qualifications ON (surveys.id = survey_qualifications.survey_id) WHERE surveys.id IN (?)`;
             await this.db.query(deleteSql, [surveyIds]);
 
-            params = [surveyId, ...params, country[0].id];
+            params = [surveyId, ...params, countryId];
             sql = `INSERT INTO surveys (id, survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         } else {
-            params.push(country[0].id);
+            params.push(countryId);
             sql = `INSERT INTO surveys (survey_provider_id, loi, cpi, name, created_at, updated_at, survey_number, status, original_json, url, country_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         }
 
         const rows = await this.db.query(sql, params);
-        // console.log(rows)
-
-        await this.surveyQualificationSync(rows.insertId, this.db, country[0].id);
+        await this.surveyQualificationSync(rows.insertId, this.db, countryId);
         return rows;
     }
 
     surveyQualificationSync = async (surveyId, db, country_id) => {
         if (this.record.qualifications) {
             const qualifications = this.record.qualifications;
+            const dbQualifications = this.record.db_qualication_codes;
             if (qualifications.length) {
                 const qualificationIds = qualifications.map(ql => ql.QualificationId);
                 let sql = `SELECT sq.id, sq.question_type, sq.survey_provider_question_id FROM survey_questions AS sq  WHERE sq.deleted_at IS NULL AND sq.survey_provider_id = ? AND sq.survey_provider_question_id IN (?)`;
@@ -75,48 +80,78 @@ class Schlesinger {
                     return params;
                 });
 
-                let qlSql = `INSERT INTO survey_qualifications (survey_id, survey_question_id, logical_operator, created_at, updated_at)  VALUES ?`;
-                const qlRows = await db.query(qlSql, [params]);
+                await db.query(
+                    `INSERT INTO survey_qualifications (survey_id, survey_question_id, logical_operator, created_at, updated_at)  VALUES ?`,
+                    [params]
+                );
 
-                let sqlQry = `SELECT sq.id as qualification_id, sq.survey_question_id, qs.survey_provider_question_id, qs.question_type, ap.option, ap.id as answer_precode_id
-                FROM survey_qualifications AS sq JOIN survey_questions AS qs ON (sq.survey_question_id = qs.id)
-                JOIN survey_answer_precodes AS ap ON (ap.precode = qs.survey_provider_question_id)
+                let sqlQry = `SELECT sq.id as qualification_id, sq.survey_question_id, qs.survey_provider_question_id, qs.question_type
+                FROM survey_qualifications AS sq JOIN survey_questions AS qs ON (sq.survey_question_id = qs.id)                
                 WHERE sq.deleted_at IS NULL 
-                AND qs.deleted_at IS NULL 
-                AND ap.deleted_at IS NULL 
-                AND sq.survey_id = ? 
-                AND ap.country_id = ? 
-                AND ap.survey_provider_id = ?`;
+                AND qs.deleted_at IS NULL                 
+                AND sq.survey_id = ?`;
+                const qlData = await db.query(sqlQry, [surveyId]);
 
-                const qlData = await db.query(sqlQry, [surveyId, country_id, this.record.survey_provider_id]);
-                const ansPrecodeParams = []
+                const ansPrecodeParams = [];
+                for (const row of qualifications) 
+                {
+                    var answerIds = [];
+                    if (!row.AnswerIds[0].includes('-')) {      // Not Range
+                        let data = qlData.find(r => +row.QualificationId === +r.survey_provider_question_id && r.question_type !== 'range');
+                        let ansQl = `SELECT id FROM survey_answer_precodes AS ap WHERE ap.precode = ? AND ap.country_id = ? AND ap.survey_provider_id = ? AND ap.option IN (?)`;
+                        answerIds = await db.query(ansQl, [
+                            row.QualificationId, 
+                            country_id, 
+                            this.record.survey_provider_id, 
+                            row.AnswerIds
+                        ]);
 
-                for (const row of qualifications) {
-                    let data = qlData.filter(r => +row.QualificationId === +r.survey_provider_question_id);
-                    if (!row.AnswerIds[0].includes('-')) {
-                        data.filter(r => row.AnswerIds.includes(r.option) && r.question_type !== 'range')
-                            .filter(opt => row.AnswerIds.includes(opt.option))
-                            .forEach(row => {
-                                ansPrecodeParams.push([
-                                    row.qualification_id,
-                                    row.answer_precode_id
-                                ]);
-                            });
-                    } else {
+                        for(let ans of answerIds) {
+                            ansPrecodeParams.push([
+                                data.qualification_id,
+                                ans.id
+                            ]);
+                        }
+                    } else {    // Range
                         let range = row.AnswerIds[0].split('-');
-                        data.filter(r => r.question_type === 'range' && +range[0] <= +r.option && +range[1] >= +r.option)
-                            .forEach(row => {
+                        console.log('dbQualifications', dbQualifications)
+                        const dbQualifiedIds = (typeof dbQualifications !== 'undefined' && dbQualifications.length) ? dbQualifications.find(r=> +r.qualification_id === +row.QualificationId) : {};
+                        if(dbQualifiedIds !== null && ('answer_ids' in dbQualifiedIds) && dbQualifiedIds.answer_ids.length) {
+                            let data = qlData.find(r => +dbQualifiedIds.qualification_id === +r.survey_provider_question_id && r.question_type === 'range');
+                            for(let ansId of dbQualifiedIds.answer_ids) {
                                 ansPrecodeParams.push([
-                                    row.qualification_id,
-                                    row.answer_precode_id
+                                    data.qualification_id,
+                                    ansId
                                 ]);
-                            });
+                            }
+                        } 
+                        else if(+row.QualificationId !== 59){
+                            let data = qlData.find(r => r.question_type === 'range' && +row.QualificationId === +r.survey_provider_question_id);
+                            // let data = qlData.find(r => r.question_type === 'range' && +range[0] <= +r.option && +range[1] >= +r.option);
+                            let ansQl = `SELECT id from survey_answer_precodes as ap where ap.precode = ? and ap.country_id = ? and ap.survey_provider_id = ? and ap.option BETWEEN ? AND ?`;
+                            answerIds = await db.query(ansQl, [
+                                row.QualificationId, 
+                                country_id, 
+                                this.record.survey_provider_id, 
+                                range[0],
+                                range[1]
+                            ]);
+
+                            for(let ans of answerIds) {
+                                ansPrecodeParams.push([
+                                    data.qualification_id,
+                                    ans.id
+                                ]);
+                            }
+                        }
+                        
                     }
                 };
-                // console.log('------------s' + surveyId)
-                let sapSql = `INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES ?`;
-                const result = await db.query(sapSql, [ansPrecodeParams]);
-                // console.log(result)
+
+                await db.query(
+                    `INSERT INTO survey_answer_precode_survey_qualifications (survey_qualification_id, survey_answer_precode_id) VALUES ?`,
+                    [ansPrecodeParams]
+                );
             }
         }
         return true;
