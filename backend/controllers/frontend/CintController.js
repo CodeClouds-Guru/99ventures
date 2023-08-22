@@ -1,5 +1,5 @@
 const Cint = require('../../helpers/Cint');
-const { Member } = require('../../models');
+const { Member, Country } = require('../../models');
 class CintController {
 
     surveys = async(userId,params) => {
@@ -11,30 +11,48 @@ class CintController {
         } 
         else {
             try {
-                const ssi = 'ssi' in params ? params.ssi : '';
+                // const ssi = 'ssi' in params ? params.ssi : '';
                 const where = 'where' in params ? JSON.parse(params.where) : '';
                 const member = await Member.findOne({
-                    attributes: ['username', 'gender', 'email', 'zip_code', 'dob'],
+                    attributes: ['id', 'username', 'gender', 'email', 'zip_code', 'dob', 'country_id'],
                     where: {
                         id: userId
+                    },
+                    include: {
+                        model: Country,
+                        attributes: ['cint_country_code']
                     }
                 });
                 if(member){
-                    const queryString = `user_id=${member.id}&gender=${member.gender}&email=${member.email}&zip_code=${member.zip_code}&date_of_birth=${member.dob}&ip_address=${where.ip}&ssi=${member.username}`;
+                    let gender = member.gender === 'male' ? 'm' : 'f';
+                    let country = (member.Country !== null && member.Country.cint_country_code) ? member.Country.cint_country_code : null;
+                    const params = {
+                        basic:1,
+                        limit: 100,
+                        user_id: member.id,
+                        email: member.email,
+                        zip_code: member.zip_code.replace(/\s/g, ''),
+                        date_of_birth: member.dob,
+                        ip_address: where.ip,
+                        // ip_address: '103.50.82.95',
+                        ssi: member.username,
+                        country,
+                        gender
+                    } 
+                    const queryString = new URLSearchParams(params).toString();
                     const cintObj = new Cint();
-                    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys/user';
-                    const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);
-                
+                    const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys';
+                    const result = await cintObj.fetchAndReturnData(`${partUrl}?${queryString}`);                
                     const surveys = result.surveys;   
                     var survey_list = []             
                     if (surveys.length) {
                         for (let survey of surveys) {
                             const entryLink = survey.entry_link;
-                            const rebuildEntryLink = entryLink.replace('SUBID', ssi);
+                            const rebuildEntryLink = entryLink.replace('SUBID', member.username);
                             let temp_survey = {
                                 survey_number: '',
                                 name: survey.name,
-                                cpi: survey.cpi,
+                                cpi: parseFloat(survey.cpi).toFixed(2),
                                 // cpi: parseFloat(survey.conversion_rate).toFixed(2),
                                 loi: survey.loi,
                                 link:rebuildEntryLink

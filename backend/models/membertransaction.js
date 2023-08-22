@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
           return this.amount_action.replaceAll('_', ' ');
         },
       },
-
+      payload: DataTypes.JSON,
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
