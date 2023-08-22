@@ -102,10 +102,14 @@ class OfferwallPostbackController {
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
               );
-            res.status(200).json({
-              status: true,
-              message: 'Success'
-            });            
+
+            // return res.send(
+            //   Object.keys(req.body).length
+            //     ? JSON.stringify(req.body)
+            //     : JSON.stringify(req.query)
+            // );
+
+            return res.status(200).json(1);
           }
         }
       } catch (err) {
@@ -113,7 +117,7 @@ class OfferwallPostbackController {
         const offerwallLog = require('../../helpers/Logger')(
           `offerwall-error.log`
         );
-        offerwallLog.error('['+req.params.offerwall+'] - '+err);
+        offerwallLog.error('[' + req.params.offerwall + '] - ' + err);
         res.status(500).json({
           status: false,
           errors: 'Unable to save data',
