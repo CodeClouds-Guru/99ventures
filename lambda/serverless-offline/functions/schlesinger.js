@@ -114,7 +114,6 @@ class Schlesinger {
                         }
                     } else {    // Range
                         let range = row.AnswerIds[0].split('-');
-                        console.log('dbQualifications', dbQualifications)
                         const dbQualifiedIds = (typeof dbQualifications !== 'undefined' && dbQualifications.length) ? dbQualifications.find(r=> +r.qualification_id === +row.QualificationId) : {};
                         if(dbQualifiedIds !== null && ('answer_ids' in dbQualifiedIds) && dbQualifiedIds.answer_ids.length) {
                             let data = qlData.find(r => +dbQualifiedIds.qualification_id === +r.survey_provider_question_id && r.question_type === 'range');
