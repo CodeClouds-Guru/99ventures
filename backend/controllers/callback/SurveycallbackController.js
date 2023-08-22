@@ -155,7 +155,7 @@ class SurveycallbackController {
 				const survey = {
 					cpi: reward
 				}
-				await this.memberTransaction( survey, 'Cint', txnId, member, req.params, req);				
+				await this.memberTransaction( survey, 'Cint', txnId, member, req.query, req);				
 			}
 		} catch (error) {
 			const logger = require('../../helpers/Logger')(
