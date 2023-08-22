@@ -146,9 +146,9 @@ class SurveycallbackController {
 	 */
 	async cintPostBack(req, res) {
 		try {
-			const username = req.params.ssi;
-			const reward = req.params.reward;
-			const txnId = req.params.txn_id;
+			const username = req.query.ssi;
+			const reward = req.query.reward;
+			const txnId = req.query.txn_id;
 
 			let member = await this.getMember({username});
 			if (member) {
