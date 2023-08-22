@@ -980,7 +980,7 @@ class SurveySyncController {
             if (allSurveys.Result.Success && allSurveys.Result.TotalCount != 0) {
                 const surveyData = allSurveys.Surveys.filter(sr => sr.LOI < 20 && sr.CPI >= 0.5);
                 // const surveyData = allSurveys.Surveys.filter(sr => sr.LanguageId === this.schlesingerLanguageId && sr.LOI < 20 && sr.CPI >= 0.5);
-
+                
                 if (!surveyData.length) {
                     return { status: true, message: 'No survey found for this language!' };
                 }
@@ -1009,9 +1009,9 @@ class SurveySyncController {
                         precode: 59
                     }
                 });
-                
+
                 const responses = [];
-                const sqsHelper = new SqsHelper();               
+                const sqsHelper = new SqsHelper();
                 for (let element of surveyData) {
                     var surveyId;
                     var body = {};
@@ -1046,7 +1046,7 @@ class SurveySyncController {
                     }
                     if('qualifications' in body){
                         let countryData = getCountry.find(r=> +r.sago_language_id === +element.LanguageId);
-                        if(countryData !== null && countryData.id) {
+                        if(countryData !== null && typeof countryData !== 'undefined' && ('id' in countryData) && countryData.id) {
                             body.country_id = countryData.id;
                             body.db_qualication_codes = [];
                             
@@ -1060,6 +1060,7 @@ class SurveySyncController {
                                     answer_ids: ageAnswers.filter(r=> +r.country_id === +countryData.id && +range[0] <= +r.option && +range[1] >= +r.option).map(r=>r.id)
                                 });
                             }
+                            
                             const send_message = await sqsHelper.sendData(body);                        
                             responses.push(send_message);
                             // responses.push(body);
@@ -1069,6 +1070,7 @@ class SurveySyncController {
                 };
                 // res.send({
                 //     message: 'Sending to SQS',
+                //     total: responses.length,
                 //     data: responses
                 // })
                 return {
@@ -1083,8 +1085,10 @@ class SurveySyncController {
             }
         }
         catch (error) {
+            console.error(error)
             const logger = require('../../helpers/Logger')(`schlesinger-sync-errror.log`);
             logger.error(error);
+            // res.send(error);
             return {
                 error: error.message
             }
@@ -1108,11 +1112,6 @@ class SurveySyncController {
                     status: false,
                     message: 'Invalid provider'
                 }
-                // res.send({
-                //     status: false,
-                //     message: 'Invalid provider'
-                // });
-                // return;
             }
             const providerId = provider.id;
             const psObj = new PurespectrumHelper;
@@ -1137,7 +1136,14 @@ class SurveySyncController {
                 });
 
                 const allowedIds = existingSurveys.length ? surveyIds.filter(id => existingSurveys.some(r => +r.survey_number !== +id)) : surveyIds;
-
+                const ageAnswers = await SurveyAnswerPrecodes.findAll({
+                    attributes: ['id', 'country_id', 'option', 'precode'],
+                    where: {
+                        survey_provider_id: providerId,
+                        precode: 212
+                    }
+                });
+                
                 const responses = [];
                 if(allowedIds.length) {
                     const sqsHelper = new SqsHelper();
@@ -1151,8 +1157,21 @@ class SurveySyncController {
                                 };
 
                                 let countryData = getCountry.find(r=>r.language_code === result.data.surveyLocalization);
-                                if(countryData !== null && countryData.id) {
-                                    body.country_id = countryData.id;
+                                if(countryData !== null && typeof countryData !== 'undefined' && ('id' in countryData) && countryData.id) {
+                                    body.country_id = countryData.id;                                    
+                                    body.db_qualication_codes = [];
+                            
+                                    // This block of codes will check the Age is exists of the qualifications or not. If [yes] then the range calculation checked and find the ids from the DB records and append the ids in the Surveya array.
+                                    // The plan is to reduce the CPU utilization of RDS when checking same things on SQS.
+                                    let checkAgeQualification = body.qualifications.find(q=> q.qualification_code == 212);
+                                    if(checkAgeQualification && checkAgeQualification.range_sets && checkAgeQualification.range_sets.length) {
+                                        let range = checkAgeQualification.range_sets[0];
+                                        body.db_qualication_codes.push({
+                                            qualification_id: checkAgeQualification.qualification_code,
+                                            answer_ids: ageAnswers.filter(r=> +r.country_id === +countryData.id && +range.from <= +r.option && +range.to >= +r.option).map(r=>r.id)
+                                        });
+                                    }
+
                                     let sendMessage = await sqsHelper.sendData(body);
                                     responses.push(sendMessage);
                                     // responses.push(body);
@@ -1180,8 +1199,10 @@ class SurveySyncController {
 
         }
         catch (error) {
+            console.error(error);
             const logger = require('../../helpers/Logger')(`purespectrum-sync-errror.log`);
             logger.error(error);
+            // res.send(error);
             return {
                 message: error.message
             }
