@@ -70,7 +70,7 @@ class CintController {
                     } else {
                         return{
                             status: false,
-                            message: 'Sorry! no surveys have been matched now! Please try again later.'
+                            message: 'Sorry! you are not eligible.'
                         }
                     }
                 } else {
