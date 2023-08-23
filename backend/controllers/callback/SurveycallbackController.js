@@ -349,7 +349,7 @@ class SurveycallbackController {
 				if (survey) {
 					let member = await this.getMember({username: queryData.uid});
 					if (member) {
-						await this.memberTransaction( survey, 'Schlesinger', surveyNumber, member, queryData, req);
+						await this.memberTransaction( survey, 'SAGO', surveyNumber, member, queryData, req);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`schlesinger-postback-errror.log`
