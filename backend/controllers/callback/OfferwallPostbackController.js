@@ -109,7 +109,7 @@ class OfferwallPostbackController {
             //     : JSON.stringify(req.query)
             // );
 
-            return res.send(1);
+            return res.send('1');
           }
         }
       } catch (err) {
@@ -122,14 +122,14 @@ class OfferwallPostbackController {
         //   status: false,
         //   errors: 'Unable to save data',
         // });
-        res.send(0);
+        return res.send('0');
       }
     } else {
       // res.send({
       //   status: true,
       //   message: 'Completed',
       // });
-      res.send(0);
+      return res.send('0');
     }
   }
 }
