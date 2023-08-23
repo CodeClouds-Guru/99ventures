@@ -1,4 +1,5 @@
 const {
+	Country,
 	MemberSurvey,
 	MemberTransaction,
 	MemberEligibilities,
@@ -64,6 +65,93 @@ class SurveycallbackController {
 					attributes: ['id'],
 					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
 				});
+				//country fetch
+				let countryData = await Country.findAll({
+					attributes: ['id', 'lucid_language_code'],
+					where: {
+						lucid_language_code: {
+							[Op.ne]: null
+						}
+					}
+				});
+				
+
+				survey.forEach(async (element) => {
+					const quota = await lcObj.showQuota(element.survey_id);
+					if('SurveyStillLive' in quota && quota.SurveyStillLive == true) {						
+						// Obj create to push in SQS
+						let lucid_data = {
+							...element,
+							survey_provider_id: survey_provider.id,
+							// country_id: country.id,
+							// db_qualication_codes: []
+						};
+
+						if(countryData.length && element.country_language) {
+							let country = countryData.find(row=> row.lucid_language_code === element.country_language);
+							if(country !== null && ('id' in country)) {
+								lucid_data.country_id = country.id;
+								await sqsHelper.sendData(lucid_data);
+							}
+						}
+
+						// let allQuestionIds = element.survey_qualifications.map(r=> r.question_id);
+
+						// Get answer id of all qualifications
+						// let answerCodes = await SurveyAnswerPrecodes.findAll({
+						// 	attributes: ['id', 'country_id', 'option', 'precode'],
+						// 	where: {
+						// 		survey_provider_id: survey_provider.id,
+						// 		country_id: country.id,
+						// 		precode: allQuestionIds
+						// 	}
+						// });
+						// for(let ans of answerCodes) {
+						// 	lucid_data.db_qualication_codes.push({
+						// 		qualification_id: checkAgeQualification.question_id,
+						// 		answer_ids
+						// 	});
+						// }
+
+						// let checkAgeQualification = element.survey_qualifications.find(q=> q.question_id == 42);
+						// if(checkAgeQualification && checkAgeQualification.precodes && checkAgeQualification.precodes.length) {
+						// 	let answer_ids = answerCodes.filter(row=> checkAgeQualification.precodes.includes(row.option));
+						// 	lucid_data.db_qualication_codes.push({
+						// 		qualification_id: checkAgeQualification.question_id,
+						// 		answer_ids
+						// 	});
+						// }
+
+						// const send_message = await sqsHelper.sendData(lucid_data);
+						// console.log(send_message);
+					}
+				});
+			}
+			
+		} catch (error) {
+			const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
+			logger1.error(error);
+		} finally {
+			res.status(200).json({
+				status: true,
+				message: 'Data synced.',
+			});
+		}
+	}
+
+	/*async syncSurvey(req, res) {
+		let survey = req.body;
+		try {
+			//SQS
+			const sqsHelper = new SqsHelper();
+			const lcObj = new LucidHelper;
+			if (survey.length > 0) {
+				const provider = req.params.provider;
+				//get survey provider
+				let survey_provider = await SurveyProvider.findOne({
+					attributes: ['id'],
+					where: { name: provider.charAt(0).toUpperCase() + provider.slice(1) },
+				});
 
 				// console.log(survey_provider.id);
 				survey.forEach(async (element) => {
@@ -91,7 +179,7 @@ class SurveycallbackController {
 				message: 'Data synced.',
 			});
 		}
-	}
+	}*/
 
 	//function to store survey qualifications
 	async storeSurveyQualifications(record, model, survey_questions, req) {
@@ -248,10 +336,10 @@ class SurveycallbackController {
 	 */
 	async schlesingerPostBack(req, res) {
 		const queryData = req.query;		
-		const tmpVar = queryData.pid.split('-');
-		const surveyNumber = tmpVar[1];
 		if (queryData.status === 'complete') {
 			try {
+				const tmpVar = queryData.pid.split('-');
+				const surveyNumber = tmpVar[1];
 				const survey = await Survey.findOne({
 					attributes: ['cpi'],
 					where: {
@@ -276,6 +364,8 @@ class SurveycallbackController {
 				logger1.error(error);
 			}
 			res.json({ message: 'success' });
+		} else {
+			res.json({ message: 'Unable to process!' });
 		}
 	}
 
