@@ -74,11 +74,11 @@ class SurveycallbackController {
 						}
 					}
 				});
-				
+
 
 				survey.forEach(async (element) => {
 					const quota = await lcObj.showQuota(element.survey_id);
-					if('SurveyStillLive' in quota && quota.SurveyStillLive == true) {						
+					if ('SurveyStillLive' in quota && quota.SurveyStillLive == true) {
 						// Obj create to push in SQS
 						let lucid_data = {
 							...element,
@@ -87,9 +87,9 @@ class SurveycallbackController {
 							// db_qualication_codes: []
 						};
 
-						if(countryData.length && element.country_language) {
-							let country = countryData.find(row=> row.lucid_language_code === element.country_language);
-							if(country !== null && ('id' in country)) {
+						if (countryData.length && element.country_language) {
+							let country = countryData.find(row => row.lucid_language_code === element.country_language);
+							if (country !== null && ('id' in country)) {
 								lucid_data.country_id = country.id;
 								await sqsHelper.sendData(lucid_data);
 							}
@@ -127,7 +127,7 @@ class SurveycallbackController {
 					}
 				});
 			}
-			
+
 		} catch (error) {
 			const logger1 = require('../../helpers/Logger')(`lucid-sync-errror.log`);
 			logger1.error(error);
@@ -238,12 +238,12 @@ class SurveycallbackController {
 			const reward = req.query.reward;
 			const txnId = req.query.txn_id;
 
-			let member = await this.getMember({username});
+			let member = await this.getMember({ username });
 			if (member) {
 				const survey = {
 					cpi: reward
 				}
-				await this.memberTransaction( survey, 'Cint', txnId, member, req.query, req);				
+				await this.memberTransaction(survey, 'Cint', txnId, member, req.query, req);
 			}
 		} catch (error) {
 			const logger = require('../../helpers/Logger')(
@@ -305,9 +305,9 @@ class SurveycallbackController {
 					},
 				});
 				if (survey) {
-					let member = await this.getMember({username: requestParam.ps_supplier_respondent_id});
+					let member = await this.getMember({ username: requestParam.ps_supplier_respondent_id });
 					if (member) {
-						await this.memberTransaction( survey, 'Purespectrum', surveyNumber, member, requestParam, req);				
+						await this.memberTransaction(survey, 'Purespectrum', surveyNumber, member, requestParam, req);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`purespectrum-postback-errror.log`
@@ -335,7 +335,7 @@ class SurveycallbackController {
 	 * Schlesinger Callback details integration
 	 */
 	async schlesingerPostBack(req, res) {
-		const queryData = req.query;		
+		const queryData = req.query;
 		if (queryData.status === 'complete') {
 			try {
 				const tmpVar = queryData.pid.split('-');
@@ -347,9 +347,9 @@ class SurveycallbackController {
 					}
 				});
 				if (survey) {
-					let member = await this.getMember({username: queryData.uid});
+					let member = await this.getMember({ username: queryData.uid });
 					if (member) {
-						await this.memberTransaction( survey, 'SAGO', surveyNumber, member, queryData, req);
+						await this.memberTransaction(survey, 'Schlesinger', surveyNumber, member, queryData, req);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`schlesinger-postback-errror.log`
@@ -384,9 +384,9 @@ class SurveycallbackController {
 					}
 				});
 				if (survey) {
-					let member = await this.getMember({username: requestParam.pid});
+					let member = await this.getMember({ username: requestParam.pid });
 					if (member) {
-						await this.memberTransaction( survey, 'Lucid', surveyNumber, member, requestParam, req);
+						await this.memberTransaction(survey, 'Lucid', surveyNumber, member, requestParam, req);
 						await this.memberEligibitityUpdate(requestParam);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
@@ -422,12 +422,12 @@ class SurveycallbackController {
 			const surveyRef = requestBody.SurveyRef;
 			const partnerAmount = requestBody.Revenue;  // the amount already converted to cent
 			try {
-				let member = await this.getMember({id: userId});
+				let member = await this.getMember({ id: userId });
 				if (member) {
 					const survey = {
 						cpi: (partnerAmount / 100)
 					}
-					await this.memberTransaction( survey, 'Toluna', surveyId, member, requestBody, req);
+					await this.memberTransaction(survey, 'Toluna', surveyId, member, requestBody, req);
 				} else {
 					const tolunaLog = require('../../helpers/Logger')(
 						`toluna-postback-errror.log`
@@ -449,38 +449,40 @@ class SurveycallbackController {
 	/**
 	 * Sync Member Transaction & Member Survey
 	 */
-	async memberTransaction( survey, providerName, surveyNumber, member, payload, req) {
-		try{
+	async memberTransaction(survey, providerName, surveyNumber, member, payload, req) {
+		try {
 			const provider = await SurveyProvider.findOne({
 				attributes: ['currency_percent', 'id'],
 				where: {
 					name: providerName
 				}
 			});
-			
+			var pname = providerName === 'Schlesinger' ? 'SAGO' : providerName;
+
 			const partnerAmount = survey.cpi;
-			let amount = survey.cpi;			
+			let amount = survey.cpi;
 			if (partnerAmount != 0 && provider.currency_percent && parseInt(provider.currency_percent) != 0) {
 				amount = (partnerAmount * parseInt(provider.currency_percent)) / 100;
 			}
+			amount = amount.toFixed(2);
 			const params = {
-				transaction_id: providerName + ' #'+surveyNumber,
+				transaction_id: pname + ' #' + surveyNumber,
 				member_id: member.id,
 				amount: amount,
-				note: providerName + ' survey (#' + surveyNumber + ') completion',
+				note: pname + ' survey (#' + surveyNumber + ') completion',
 				type: 'credited',
 				amount_action: 'survey',
 				created_by: null,
 				payload: JSON.stringify(payload),
 				survey_provider_id: provider.id,
-				status:2
-			};			
+				status: 2
+			};
 
 			const txn = await MemberTransaction.updateMemberTransactionAndBalance(
 				params
 			);
-			
-			if(txn.status && txn.transaction_id){
+
+			if (txn.status && txn.transaction_id) {
 				await MemberSurvey.create({
 					member_transaction_id: txn.transaction_id,
 					survey_provider_id: params.survey_provider_id,
@@ -529,7 +531,7 @@ class SurveycallbackController {
 				});
 			}
 		} catch (error) {
-			console.error(error)
+			throw error;
 		} finally {
 			return true;
 		}
@@ -540,16 +542,16 @@ class SurveycallbackController {
 	 * @param {query String} queryObj 
 	 * @returns 
 	 */
-	async memberEligibitityUpdate(queryObj){
-		try{
+	async memberEligibitityUpdate(queryObj) {
+		try {
 			// const queryObj = req.query;
-			if((queryObj.pid).toLowerCase() === 'test') {
+			if ((queryObj.pid).toLowerCase() === 'test') {
 				return;
 			}
 			const queryKeys = Object.keys(queryObj);
 			const obj = {}
 			for (let key of queryKeys) {
-				if(!isNaN(key) && queryObj[key] != '' && queryObj.termed_qualification_id != key){
+				if (!isNaN(key) && queryObj[key] != '' && queryObj.termed_qualification_id != key) {
 					obj[key] = queryObj[key];
 				}
 			}
@@ -577,23 +579,23 @@ class SurveycallbackController {
 			});
 
 			const params = [];
-			for(let precode of precodes) {
-				let matchedQuest = surveyQuestions.find(row => row.survey_provider_question_id === +precode);			
-				let answerPrecode = matchedQuest.SurveyAnswerPrecodes.find(r=> +r.option === +obj[precode] && +r.precode === +precode);
-				if(matchedQuest && answerPrecode){
+			for (let precode of precodes) {
+				let matchedQuest = surveyQuestions.find(row => row.survey_provider_question_id === +precode);
+				let answerPrecode = matchedQuest.SurveyAnswerPrecodes.find(r => +r.option === +obj[precode] && +r.precode === +precode);
+				if (matchedQuest && answerPrecode) {
 					params.push({
 						member_id: queryObj.pid,
 						survey_question_id: matchedQuest.id,
 						survey_answer_precode_id: answerPrecode.id
 					});
-				}			
+				}
 			}
 			const result = await MemberEligibilities.bulkCreate(params, {
-				updateOnDuplicate:['survey_answer_precode_id']
+				updateOnDuplicate: ['survey_answer_precode_id']
 			});
 
 			return result;
-		} 
+		}
 		catch (err) {
 			const logger = require('../../helpers/Logger')(
 				`lucid-postback-errror.log`
@@ -609,7 +611,7 @@ class SurveycallbackController {
 	/**
 	 * Get Member Data
 	 */
-	async getMember(clause){
+	async getMember(clause) {
 		return await Member.findOne({
 			attributes: {
 				exclude: ['password', 'created_by', 'updated_by', 'deleted_by', 'deleted_at', 'updated_at', 'last_active_on', 'email_verified_on', 'profile_completed_on', 'avatar', 'dob']
