@@ -319,7 +319,7 @@ class LucidController {
             delete params.uid
             
             var entrylink;
-            if(quota.SurveyStillLive == true || quota.SurveyStillLive == 'true') {                
+            if(quota.SurveyStillLive == true || quota.SurveyStillLive == 'true') {
                 const survey = await Survey.findOne({
                     attributes: ['url'],
                     where: {
@@ -327,15 +327,19 @@ class LucidController {
                     }
                 });
             
-                if(survey && survey.url){
+                if(survey && survey.url !== null){
                     entrylink = survey.url;
+                    let URL = this.rebuildEntryLink(entrylink, params);
+                    console.log('Lucid entry link', URL);
+                    res.redirect(URL);
+                    return;
                 } else {
                     try{
                         //Sometimes the survey entrylink not created and API sending 404 response.
                         //That's why making this survey to draft as catch block
                         const result = await lcObj.createEntryLink(surveyNumber);
                         if(result.data && result.data.SupplierLink) {
-                            const url = (process.env.DEV_MODE == 1) ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
+                            const url = (process.env.DEV_MODE == '1') ? result.data.SupplierLink.TestLink : result.data.SupplierLink.LiveLink;
                             await Survey.update({
                                 url: url
                             }, {
@@ -344,15 +348,15 @@ class LucidController {
                                 }
                             });
                             entrylink = url;
+                            let URL = this.rebuildEntryLink(entrylink, params);
+                            console.log('Lucid entry link', URL);
+                            res.redirect(URL);
+                            return;
                         }
                     } catch(error) {
                         throw {survey_number: surveyNumber, message: 'Sorry! Survey not found.'};
                     }
-                }
-                
-                const URL = this.rebuildEntryLink(entrylink, params);
-                res.redirect(URL);
-                return;
+                }                
             } else {
                 throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
             }
@@ -369,8 +373,6 @@ class LucidController {
                 });
             }
             res.redirect('/survey-notavailable');
-            // req.session.flash = { notice: error.message, redirect_url: '/lucid' };
-            // res.redirect('/notice');
         }
     }
 
@@ -379,15 +381,16 @@ class LucidController {
      * NOTE: When hashing URLs the base string should include the entire URL, up to and including the `&` preceding the hashing parameter.
      */
     rebuildEntryLink = (url, queryParams) => {
-        if(process.env.DEV_MODE == 1) {
+        if(process.env.DEV_MODE == '1') {
             delete queryParams.PID;
             const params = new URLSearchParams(queryParams).toString();
             const urlTobeHashed = url+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);            
             return url +'&'+params+'&hash='+hash;
         } else {
+            var url = url.replace('&PID=', '');
             const params = new URLSearchParams(queryParams).toString();
-            const urlTobeHashed = url+'&PID='+queryParams.PID+'&'+params+'&';
+            const urlTobeHashed = url+'&'+params+'&';
             const hash = generateHashForLucid(urlTobeHashed);
             return url +'&'+params+'&hash='+hash;
         }
