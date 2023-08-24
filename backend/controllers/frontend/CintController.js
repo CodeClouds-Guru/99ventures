@@ -12,6 +12,7 @@ class CintController {
         else {
             try {
                 // const ssi = 'ssi' in params ? params.ssi : '';
+                const perPage = 'perpage' in params ? parseInt(params.perpage) : 100;
                 const where = 'where' in params ? JSON.parse(params.where) : '';
                 const member = await Member.findOne({
                     attributes: ['id', 'username', 'gender', 'email', 'zip_code', 'dob', 'country_id'],
@@ -28,17 +29,17 @@ class CintController {
                     let country = (member.Country !== null && member.Country.cint_country_code) ? member.Country.cint_country_code : null;
                     const params = {
                         basic:1,
-                        limit: 100,
+                        limit: perPage,
                         user_id: member.id,
                         email: member.email,
                         zip_code: member.zip_code.replace(/\s/g, ''),
                         date_of_birth: member.dob,
                         ip_address: where.ip,
-                        // ip_address: '103.50.82.95',
                         ssi: member.username,
                         country,
                         gender
                     } 
+
                     const queryString = new URLSearchParams(params).toString();
                     const cintObj = new Cint();
                     const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys';
