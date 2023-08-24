@@ -9,15 +9,13 @@ class Schlesinger {
     }
 
     surveySync = async () => {
-        console.log('Sago');
-        console.log(this.record);
         if(this.record.country_id == null){
             return {
                 'message': 'Unable to locate country id!',
                 'status': false
             }
         }
-        if(typeof this.record.db_qualication_codes === 'undefined'){
+        if(!('db_qualication_codes' in this.record)){
             return {
                 'message': 'Unable to proceed!',
                 'status': false
@@ -114,8 +112,8 @@ class Schlesinger {
                         }
                     } else {    // Range
                         let range = row.AnswerIds[0].split('-');
-                        const dbQualifiedIds = (typeof dbQualifications !== 'undefined' && dbQualifications.length) ? dbQualifications.find(r=> +r.qualification_id === +row.QualificationId) : {};
-                        if(dbQualifiedIds !== null && ('answer_ids' in dbQualifiedIds) && dbQualifiedIds.answer_ids.length) {
+                        const dbQualifiedIds = (dbQualifications.length) ? dbQualifications.find(r=> +r.qualification_id === +row.QualificationId) : undefined;
+                        if(dbQualifiedIds !== undefined && ('answer_ids' in dbQualifiedIds) && dbQualifiedIds.answer_ids.length) {
                             let data = qlData.find(r => +dbQualifiedIds.qualification_id === +r.survey_provider_question_id && r.question_type === 'range');
                             for(let ansId of dbQualifiedIds.answer_ids) {
                                 ansPrecodeParams.push([

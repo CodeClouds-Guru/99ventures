@@ -75,55 +75,22 @@ class SurveycallbackController {
 					}
 				});
 
-
 				survey.forEach(async (element) => {
 					const quota = await lcObj.showQuota(element.survey_id);
 					if ('SurveyStillLive' in quota && quota.SurveyStillLive == true) {
 						// Obj create to push in SQS
 						let lucid_data = {
 							...element,
-							survey_provider_id: survey_provider.id,
-							// country_id: country.id,
-							// db_qualication_codes: []
+							survey_provider_id: survey_provider.id
 						};
 
 						if (countryData.length && element.country_language) {
 							let country = countryData.find(row => row.lucid_language_code === element.country_language);
-							if (country !== null && ('id' in country)) {
+							if (country !== undefined && ('id' in country)) {
 								lucid_data.country_id = country.id;
 								await sqsHelper.sendData(lucid_data);
 							}
 						}
-
-						// let allQuestionIds = element.survey_qualifications.map(r=> r.question_id);
-
-						// Get answer id of all qualifications
-						// let answerCodes = await SurveyAnswerPrecodes.findAll({
-						// 	attributes: ['id', 'country_id', 'option', 'precode'],
-						// 	where: {
-						// 		survey_provider_id: survey_provider.id,
-						// 		country_id: country.id,
-						// 		precode: allQuestionIds
-						// 	}
-						// });
-						// for(let ans of answerCodes) {
-						// 	lucid_data.db_qualication_codes.push({
-						// 		qualification_id: checkAgeQualification.question_id,
-						// 		answer_ids
-						// 	});
-						// }
-
-						// let checkAgeQualification = element.survey_qualifications.find(q=> q.question_id == 42);
-						// if(checkAgeQualification && checkAgeQualification.precodes && checkAgeQualification.precodes.length) {
-						// 	let answer_ids = answerCodes.filter(row=> checkAgeQualification.precodes.includes(row.option));
-						// 	lucid_data.db_qualication_codes.push({
-						// 		qualification_id: checkAgeQualification.question_id,
-						// 		answer_ids
-						// 	});
-						// }
-
-						// const send_message = await sqsHelper.sendData(lucid_data);
-						// console.log(send_message);
 					}
 				});
 			}
@@ -387,7 +354,7 @@ class SurveycallbackController {
 					let member = await this.getMember({ username: requestParam.pid });
 					if (member) {
 						await this.memberTransaction(survey, 'Lucid', surveyNumber, member, requestParam, req);
-						await this.memberEligibitityUpdate(requestParam);
+						// await this.memberEligibitityUpdate(requestParam);
 					} else {
 						const logger1 = require('../../helpers/Logger')(
 							`lucid-postback-errror.log`
@@ -570,12 +537,12 @@ class SurveycallbackController {
 					survey_provider_question_id: precodes,
 					survey_provider_id: provider
 				},
-				include: {
+				include: [{
 					model: SurveyAnswerPrecodes,
 					where: {
 						option: Object.values(obj)
 					}
-				}
+				}]
 			});
 
 			const params = [];
