@@ -513,7 +513,7 @@ class MemberAuthController {
           member_status = false;
           member_message = 'You need to set username to complete your profile';
         }
-        console.log('===============req.body', req.body);
+        // console.log('===============req.body', req.body);
 
         //check member username
         let member_username = await Member.count({
@@ -639,7 +639,7 @@ class MemberAuthController {
         'POSTAL CODE',
       ];
       let questions = await SurveyQuestion.findAll({
-        logging: console.log,
+        // logging: console.log,
         where: { name: name_list },
         include: [
           {
