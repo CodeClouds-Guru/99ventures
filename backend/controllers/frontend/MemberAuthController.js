@@ -755,23 +755,23 @@ class MemberAuthController {
         //   "QuestionID": 1001042,
         //   "Answers": [{"AnswerValue":member_details.zip_code}]
         // })
-        try {
-          let tolunaHelper = new TolunaHelper();
-          const payload = {
-            PartnerGUID: process.env.PARTNER_GUID,
-            MemberCode:
-              member_details.CompanyPortal.name + '_' + member_details.id,
-            Email: member_details.email,
-            BirthDate: member_details.dob,
-            PostalCode: member_details.zip_code,
-            // "IsActive": true,
-            // "IsTest": true,
-            RegistrationAnswers: toluna_questions,
-          };
-          let t = await tolunaHelper.addMemebr(payload);
-        } catch (error) {
-          console.log(error);
-        }
+        // try {
+        //   let tolunaHelper = new TolunaHelper();
+        //   const payload = {
+        //     PartnerGUID: process.env.PARTNER_GUID,
+        //     MemberCode:
+        //       member_details.CompanyPortal.name + '_' + member_details.id,
+        //     Email: member_details.email,
+        //     BirthDate: member_details.dob,
+        //     PostalCode: member_details.zip_code,
+        //     // "IsActive": true,
+        //     // "IsTest": true,
+        //     RegistrationAnswers: toluna_questions,
+        //   };
+        //   let t = await tolunaHelper.addMemebr(payload);
+        // } catch (error) {
+        //   console.log(error);
+        // }
       }
       return;
     } catch (error) {

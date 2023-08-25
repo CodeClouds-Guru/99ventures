@@ -5,9 +5,10 @@ require('fs')
   .readdirSync(normalizedPath)
   .forEach(function (file) {
     const { event, classname } = require('./listeners/' + file);
-    // console.log(event, eval(`new ${classname}`));
+    // console.log('---------------', event, eval(`new ${classname}`));
     globalListner.on(event, function (data) {
       const obj = eval(`new ${classname}`);
+      // console.log(globalListner);
       obj.listen(data);
     });
   });
