@@ -129,6 +129,8 @@ exports.capitalizeFirstLetter = (string) =>
   string.charAt(0).toUpperCase() + string.slice(1);
 
 exports.generateHashForLucid = (url) => {
-  const hash = crypto.createHmac('sha1', process.env.LUCID_API_KEY).update(url, 'utf-8').digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
+  const secretKey = '6DnzZ47SP5h2a2z4E86898Vz4Y2k484u879YQs8o5VuDXN375ahb7Y37co7R9P3a4Zx0lP4b0lACy7Q348GP3';
+  const hash = crypto.createHmac('sha1', secretKey).update(url, 'utf-8').digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
+  // const hash = crypto.createHmac('sha1', process.env.LUCID_API_KEY).update(url, 'utf-8').digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
   return encodeURIComponent(hash);
 }
