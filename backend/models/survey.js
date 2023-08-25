@@ -37,13 +37,14 @@ module.exports = (sequelize, DataTypes) => {
 		name: DataTypes.STRING,
 		survey_number: DataTypes.STRING,
 		status: DataTypes.STRING,
-		url: {
+		url: DataTypes.TEXT,
+		/*{
 			type: DataTypes.STRING,
 			// get(param, context) {
 			//   console.log(this.query)
 			//   console.log('laddu', context, param);
 			// },
-		},
+		},*/
 		country_id:  DataTypes.BIGINT,
 		original_json: DataTypes.JSON,
 		created_at: 'TIMESTAMP',

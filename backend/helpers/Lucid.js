@@ -478,6 +478,28 @@ class Lucid {
   }
   /*------------------- Entry Link Create End ----------------*/
 
+
+/*------------------- Entry Link Get Start ----------------*/
+async getEntryLink(surveyNumber) {
+  const instance = {
+    headers: {
+      'Authorization': process.env.LUCID_API_KEY,
+      'Content-Type': 'application/json',
+    }
+  };
+
+  const response = await axios.get(
+    'https://api.samplicio.us/Supply/v1/SupplierLinks/BySurveyNumber/' + surveyNumber + '/6373',
+    instance
+  )
+  .catch(err => {
+    throw err;
+  });
+  return response.data;
+
+}
+/*------------------- Entry Link Get End ----------------*/
+
   /*------------------- Supply Integration - Quotas ---------------------*/
   async showQuota(surveyNumber) {
     // console.log(surveyNumber)
