@@ -4,10 +4,12 @@ const {
   OfferWall,
   CompanyPortal,
 } = require('../../models');
+const eventBus = require('../../eventBus');
 
 class OfferwallPostbackController {
   constructor() {}
   async save(req, res) {
+    // console.log(req.query);
     const logger1 = require('../../helpers/Logger')(
       `outcome-${req.params.offerwall}.log`
     );
@@ -29,6 +31,7 @@ class OfferwallPostbackController {
           ],
           where: { name: offerwall_name },
         });
+        // console.log(offerwall_details);
         var currency_percent = offerwall_details.currency_percent || '100';
         currency_percent = parseFloat(currency_percent);
         // console.log(currency_percent);
@@ -42,7 +45,7 @@ class OfferwallPostbackController {
             : req.body[offerwall_details.campaign_id_variable];
 
           let member = await Member.findOne({
-            attributes: ['id', 'username'],
+            // attributes: ['id', 'username', 'company_id', 'company_portal_id'],
             where: {
               username: username,
             },
@@ -56,6 +59,7 @@ class OfferwallPostbackController {
             },
           });
 
+          // console.log(member);
           if (member) {
             let payout_amount = 0;
             let note = '';
@@ -109,11 +113,51 @@ class OfferwallPostbackController {
             //     : JSON.stringify(req.query)
             // );
 
+            //event for shoutbox
+            // console.log('eventBus', eventBus);
+            eventBus.emit('happening_now', {
+              action: 'survey-and-offer-completions',
+              company_portal_id: member.company_portal_id,
+              company_id: member.company_id,
+              data: {
+                members: member,
+                amount: '$' + payout_amount,
+                surveys: { name: offerwall_name },
+              },
+            });
+
+            //event for email
+            // eventBus.emit('send_email', {
+            //   action: 'Survey Completed',
+            //   data: {
+            //     email: member.email,
+            //     details: {
+            //       members: {
+            //         first_name: member.first_name,
+            //       },
+            //       survey: {
+            //         amount: amount,
+            //         survey_number: surveyNumber,
+            //         provider: providerName,
+            //       },
+            //     },
+            //   },
+            //   req: {
+            //     ...req,
+            //     headers: {
+            //       ...req.headers,
+            //       company_id: member.company_id,
+            //       site_id: member.company_portal_id,
+            //     },
+            //     user: member,
+            //   },
+            // });
+
             return res.send('1');
           }
         }
       } catch (err) {
-        //console.log(err.message);
+        // console.log(err);
         const offerwallLog = require('../../helpers/Logger')(
           `offerwall-error.log`
         );
