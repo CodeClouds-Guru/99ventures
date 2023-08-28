@@ -53,6 +53,7 @@ class LucidController {
             }
             
             const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+            //const perPage = 100;
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'created_at';
             const order = 'order' in params ? params.order : 'desc';
@@ -74,14 +75,14 @@ class LucidController {
             const matchingAnswerIds = [];
             eligibilities.forEach(eg => {
                 queryString[eg.survey_provider_question_id] = eg.option ? eg.option : eg.open_ended_value;
-                if(eg.survey_answer_precode_id !== null){
-                    matchingQuestionIds.push(eg.survey_question_id);
+                matchingQuestionIds.push(eg.survey_question_id);
+                if(eg.survey_answer_precode_id !== null){                    
                     matchingAnswerIds.push(+eg.survey_answer_precode_id);
                 }
             });
             const generateQueryString = new URLSearchParams(queryString).toString();
             /** End */
-
+            
             if (matchingAnswerIds.length && matchingQuestionIds.length) {
                 const acceptedSurveys = await Member.acceptedSurveys(memberId, provider.id);
                 var clause = {};
@@ -140,170 +141,11 @@ class LucidController {
                         }
                     }
                 })
+
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = [];                
                 if(surveyData && surveyData.length){
                     for (let survey of surveyData) {
-                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${generateQueryString}`;
-                        let temp_survey = {
-                            survey_number: survey.survey_number,
-                            name: survey.name,
-                            cpi: parseFloat(survey.cpi).toFixed(2),
-                            loi: survey.loi,
-                            link:link
-                        }
-                        survey_list.push(temp_survey);            
-                    }
-                }
-
-                return {
-                    status: true,
-                    message: 'Success',
-                    result: {
-                        surveys:survey_list,
-                        page_count:page_count
-                    }
-                }
-            } else {
-                return{
-                    status: false,
-                    message: 'Sorry! no surveys have been matched now! Please try again later.'
-                }
-            }
-        }
-        catch(error) {
-            console.error(error)
-            return {
-                status: false,
-                message: 'Something went wrong!'
-            }
-        }
-    }
-
-
-    surveys1 = async (req, res) => {
-        const eligibilities = await MemberEligibilities.getEligibilities(226, 1, 160);
-        const survey_answer_precode_survey_qualifications = [];
-        eligibilities.forEach(row => {
-            survey_answer_precode_survey_qualifications.push({
-                "survey_answer_id": row.survey_answer_precode_id,
-                "survey_question_id": row.survey_question_id
-            });
-        })
-        const surveys = await Survey.getSurveysAndCount({
-            member_id: 160,
-            provider_id: 1,
-            matching_answer_ids: [5558287, 5558211],
-            matching_question_ids: [109011, 109010, 109012],
-            order: 'desc',
-            pageno: 1,
-            per_page: 10,
-            order_by: 'created_at',
-            clause: {
-                status: "active",
-                country_id: 226
-            }
-        });
-        const surveyData = [];
-        surveys.rows.forEach((record, index) => {
-            const qual = record.SurveyQualifications.find(r => [109011, 109010].includes(r.survey_question_id));
-            if(qual !== undefined) {
-                let answerPrecode = qual.SurveyAnswerPrecodes.some(r=> [5558287, 5558211].includes(r.id));
-                if(answerPrecode) {
-                    surveyData.push(record)
-                }
-            }
-        })
-
-        
-        res.send(surveyData);
-        return;
-        try{
-            const member = await Member.findOne({
-                attributes: ['username', 'country_id'],
-                where: {
-                    id: memberId
-                }
-            });
-            
-            if (!memberId || member === null) {
-                res.json({
-                    staus: false,
-                    message: 'Member id not found!'
-                });
-                return;
-            }
-            
-            const provider = await SurveyProvider.findOne({
-                attributes: ['id'],
-                where: {
-                    name: 'Lucid',
-                    status: 1
-                }
-            });
-            if (!provider || provider == null) {
-                return {
-                    status: false,
-                    message: 'Survey Provider not found!'
-                }
-            }
-            
-            const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
-            const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
-            const orderBy = 'orderby' in params ? params.orderby : 'created_at';
-            const order = 'order' in params ? params.order : 'desc';
-
-            /**
-             * check and get member's eligibility
-             */
-            const eligibilities = await MemberEligibilities.getEligibilities(member.country_id, provider.id, memberId);
-            
-            if(eligibilities.length < 1) {
-                return {
-                    status: false,
-                    message: 'Sorry! you are not eligible.'
-                }
-            }
-            /** Query String Formation Start */
-            const queryString = {};
-            const matchingQuestionIds = [];
-            const matchingAnswerIds = [];
-            eligibilities.forEach(eg => {
-                queryString[eg.survey_provider_question_id] = eg.option ? eg.option : eg.open_ended_value;
-                matchingQuestionIds.push(eg.survey_question_id);
-                if(eg.survey_answer_precode_id !== null){
-                    matchingAnswerIds.push(+eg.survey_answer_precode_id);
-                }
-            });
-            const generateQueryString = new URLSearchParams(queryString).toString();
-            /** End */
-
-            if (matchingAnswerIds.length && matchingQuestionIds.length) {
-                const surveys = await Survey.getSurveysAndCount({
-                    member_id: memberId,
-                    provider_id: provider.id,
-                    matching_answer_ids: matchingAnswerIds,
-                    matching_question_ids: matchingQuestionIds,
-                    order,
-                    pageno: pageNo,
-                    per_page: perPage,
-                    order_by: orderBy,
-                    clause: {
-                        status: "active",
-                        country_id: member.country_id
-                    }
-                });
-                if (!surveys.count) {
-                    return {
-                        status: false,
-                        message: 'No matching surveys!'
-                    }
-                }
-
-                var page_count = Math.ceil(surveys.count / perPage);
-                var survey_list = [];                
-                if(surveys.rows && surveys.rows.length){
-                    for (let survey of surveys.rows) {
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${generateQueryString}`;
                         let temp_survey = {
                             survey_number: survey.survey_number,
