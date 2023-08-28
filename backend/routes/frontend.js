@@ -69,11 +69,8 @@ router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
 router.get('/purespectrum/entrylink', PureSpectrumController.generateEntryLink);
 router.get('/schlesigner/entrylink', SchlesingerController.generateEntryLink);
-
-// router.get('/schlesigner/survey', SchlesingerController.surveys);
-// router.get('/purespectrum/survey', PureSpectrumController.surveys);
-
 router.get('/lucid/entrylink', LucidController.generateEntryLink);
+router.get('/lucid/surveys', LucidController.surveys);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
