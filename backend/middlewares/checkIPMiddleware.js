@@ -13,7 +13,7 @@ const messageBox = {
     },
     UNAVAILABLE_COUNTRY: {
         error_code: 'ACCX003',
-        error_message: 'You are accessing this site from a country where we are unavailable right now'
+        error_message: "Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience."
     },
     VPN_DETECTED: {
         error_code: 'ACCX004',
