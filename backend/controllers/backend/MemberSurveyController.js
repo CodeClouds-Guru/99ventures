@@ -44,7 +44,7 @@ class MemberSurveyController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     result.rows.map((row) => {
-      console.log(row.MemberTransaction);
+      // console.log(row.MemberTransaction);
       if (row.SurveyProvider) {
         row.setDataValue('SurveyProvider.name', row.SurveyProvider.name);
       } else {
