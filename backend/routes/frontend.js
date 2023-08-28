@@ -19,7 +19,7 @@ const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddlew
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
 //commented for testing uk/us surveys, should be uncommented later
-// router.use(checkIPMiddleware);
+router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
