@@ -9,6 +9,7 @@ const {
 	SurveyQuestion,
 	SurveyQualification,
 	SurveyAnswerPrecodes,
+	CountrySurveyQuestion
 } = require('../../models');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
@@ -509,19 +510,28 @@ class SurveycallbackController {
 	 * @param {query String} queryObj 
 	 * @returns 
 	 */
-	async memberEligibitityUpdate(queryObj) {
+	// async memberEligibitityUpdate(queryObj) {
+	async memberEligibitityUpdate(req, res) {
 		try {
 			// const queryObj = req.query;
-			if ((queryObj.pid).toLowerCase() === 'test') {
-				return;
-			}
+			// if ((queryObj.pid).toLowerCase() === 'test') {
+			// 	return;
+			// }
+			const queryObj = {"42":"33","43":"1","47":"1","96":"alabama","97":"698","113":"2","122":"3","632":"2","634":"1","643":"000000000000000000000000001000000000000000000000000","645":"1","646":"2","1249":"0001000000000000000000000110000000000","2189":"1","3546":"","5729":"30","7064":"0100","14785":"17","15297":"3","22467":"6","43501":"1","48741":"4","61076":"4","137510":"","157547":"","157550":"","status":"security","pid":",cdquorips","mid":"1692835988165","cpi":"","survey_id":"40038326","marketplace_status":"131","client_status":"-1","termed_qualification_id":"","termed_quota_id":"","hash":"_o2bnAkvsJxlvKvPYFR_B8M7i0M"}
+
 			const queryKeys = Object.keys(queryObj);
-			const obj = {}
-			for (let key of queryKeys) {
-				if (!isNaN(key) && queryObj[key] != '' && queryObj.termed_qualification_id != key) {
-					obj[key] = queryObj[key];
-				}
-			}
+			const obj = [];
+			queryKeys
+				.filter(key => !isNaN(key) && queryObj[key] != '' && !isNaN(queryObj[key]) && queryObj.termed_qualification_id != key)
+				.forEach(r => {
+					obj.push({
+						option: queryObj[r],
+						precode: r
+					})
+				})
+			// res.send(obj);
+			// return;
+
 
 			const provider = await SurveyProvider.findOne({
 				attributes: ['id'],
@@ -530,20 +540,63 @@ class SurveycallbackController {
 				}
 			});
 
-			const precodes = Object.keys(obj);
+			/*const precodes = Object.keys(obj);
 			const surveyQuestions = await SurveyQuestion.findAll({
 				attributes: ['id', 'survey_provider_question_id', 'question_type'],
 				where: {
 					survey_provider_question_id: precodes,
-					survey_provider_id: provider
-				},
-				include: [{
-					model: SurveyAnswerPrecodes,
-					where: {
-						option: Object.values(obj)
+					survey_provider_id: provider.id,
+					question_type: {
+						[Op.ne]: 'Multi Punch'
 					}
-				}]
+				},
+				include: [
+					{
+						model: CountrySurveyQuestion,
+						where:{
+							country_id: 226
+						}
+					},
+					// {
+					// 	model: SurveyAnswerPrecodes,
+					// 	where: {
+					// 		option: Object.values(obj)
+					// 	}
+					// }
+				]
+			});*/
+
+			const rs = await SurveyAnswerPrecodes.findAll({
+				logging: console.log,
+				attributes: ['id', 'option', 'precode'],
+				where: {
+					survey_provider_id: 1,
+					country_id: 226,
+					[Op.or]: obj
+				},
+				include: {
+					model: SurveyQuestion,
+					attributes: ['id', 'survey_provider_question_id'],
+					where: {
+						survey_provider_id: 1,
+						question_type: {
+							[Op.ne]: 'Multi Punch'
+						}
+					},
+					include: {
+						model: CountrySurveyQuestion,
+						attributes: ['id'],
+						where: {
+							country_id: 226
+						}
+					}
+				}
 			});
+
+
+			res.send(rs);
+			return;
+
 
 			const params = [];
 			for (let precode of precodes) {
@@ -568,10 +621,11 @@ class SurveycallbackController {
 				`lucid-postback-errror.log`
 			);
 			logger.error(err);
-			return {
-				status: false,
-				message: err.message
-			};
+			res.send(err);
+			// return {
+			// 	status: false,
+			// 	message: err.message
+			// };
 		}
 	}
 
