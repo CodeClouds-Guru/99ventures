@@ -15,11 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'survey_qualification_id',
         otherKey: 'survey_answer_precode_id',
       })
-      
-      SurveyQualification.belongsTo(models.SurveyQuestion, {
-        foreignKey: 'survey_question_id'
-      })
-
     }
   }
   SurveyQualification.init(
