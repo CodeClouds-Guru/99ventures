@@ -389,7 +389,7 @@ class SurveycallbackController {
               requestParam,
               req
             );
-            //await this.memberEligibitityUpdate(requestParam, member);
+            // await this.memberEligibitityUpdate(requestParam, member);
           } else {
             const logger1 = require('../../helpers/Logger')(
               `lucid-postback-errror.log`
@@ -568,9 +568,9 @@ class SurveycallbackController {
   async memberEligibitityUpdate(queryObj, member) {
     try {
       // const queryObj = req.query;
-      // if ((queryObj.pid).toLowerCase() === 'test') {
-      // 	return;
-      // }
+      if (queryObj.pid.toLowerCase() === 'test') {
+        return;
+      }
       //   const queryObj = {
       //     42: '33',
       //     43: '1',
@@ -666,7 +666,7 @@ class SurveycallbackController {
         attributes: ['id', 'option', 'precode'],
         where: {
           survey_provider_id: 1,
-          country_id: 226,
+          country_id: member.country_id,
           [Op.or]: obj,
         },
         include: {
@@ -682,7 +682,7 @@ class SurveycallbackController {
             model: CountrySurveyQuestion,
             attributes: ['id'],
             where: {
-              country_id: 226,
+              country_id: member.country_id,
             },
           },
         },
