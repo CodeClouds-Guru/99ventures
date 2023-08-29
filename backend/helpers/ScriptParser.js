@@ -75,7 +75,7 @@ class ScriptParser {
                   ...where.where,
                   ...param_where,
                 };
-              // console.log(where);
+
               data = await Models[script.module].findAll({
                 subQuery: false,
                 order: [[Sequelize.literal(orderBy), order]],
@@ -86,7 +86,6 @@ class ScriptParser {
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
               }
-              // console.log('data', JSON.parse(JSON.stringify(data)));
 
               var data_count = await Models[script.module].findAndCountAll({
                 ...where,
@@ -201,7 +200,14 @@ class ScriptParser {
 
             var total_unapproved_withdrawal_amount = 0;
             data.forEach(function (payment, key) {
-              // console.log('payment', payment);
+              payment.WithdrawalRequests.forEach(function (requests, key) {
+                if (
+                  ['pending', 'approved'].includes(requests.dataValues.status)
+                ) {
+                  total_unapproved_withdrawal_amount += requests.amount;
+                }
+              });
+
               var date1 = new Date();
               var withdraw_redo_interval = payment.withdraw_redo_interval;
               data[key].setDataValue(
@@ -211,22 +217,14 @@ class ScriptParser {
               data[key].setDataValue('redo_diff_calculation', 0);
               if (withdraw_redo_interval > 0) {
                 var date2 = new Date();
-                if (payment.WithdrawalRequests.length > 0) {
-                  // console.log(payment.WithdrawalRequests[0]);
-                  date2 = new Date(payment.WithdrawalRequests[0].created_at);
 
+                if (payment.WithdrawalRequests.length > 0) {
                   var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
-                  // console.log(withdraw_redo_interval, hours, date1, date2);
                   data[key].setDataValue('redo_diff', parseFloat(hours));
                   data[key].setDataValue(
                     'redo_diff_calculation',
                     parseFloat(withdraw_redo_interval) - parseFloat(hours)
                   );
-                }
-                for (let req of payment.WithdrawalRequests) {
-                  if (['pending', 'approved'].includes(req.status)) {
-                    total_unapproved_withdrawal_amount += req.amount;
-                  }
                 }
               }
               var past_withdrawal_symbol = '';
@@ -250,18 +248,10 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            data.setDataValue(
-              'total_unapproved_withdrawal_amount',
-              total_unapproved_withdrawal_amount
-            );
-            console.log(
-              '===================',
-              JSON.parse(JSON.stringify(data))
-            );
-            // console.log(
-            //   '===================',
-            //   JSON.parse(JSON.stringify(other_details))
-            // );
+            data['total_unapproved_withdrawal_amount'] =
+              total_unapproved_withdrawal_amount;
+
+            console.log(data.total_unapproved_withdrawal_amount);
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';
@@ -482,9 +472,11 @@ class ScriptParser {
                 'member_transaction_id',
                 'created_at',
                 'requested_on',
+                'status',
+                'amount',
               ],
               required: false,
-              // where: { member_id: user.id },
+              where: { member_id: user.id },
               include: {
                 model: Models.MemberTransaction,
                 attributes: ['completed_at'],
