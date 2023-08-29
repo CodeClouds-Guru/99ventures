@@ -199,9 +199,9 @@ class ScriptParser {
 
             data = await Models[script.module].findAll(condition);
 
+            var total_unapproved_withdrawal_amount = 0;
             data.forEach(function (payment, key) {
               // console.log('payment', payment);
-              var total_unapproved_withdrawal_amount = 0;
               var date1 = new Date();
               var withdraw_redo_interval = payment.withdraw_redo_interval;
               data[key].setDataValue(
