@@ -21,76 +21,6 @@ class LucidController {
         this.addEntryLink = this.addEntryLink.bind(this);
     }
 
-    /*surveys1 = async (req, res) => {
-        const eligibilities = await MemberEligibilities.getEligibilities(226, 1, 160);
-        const surveys = await Survey.findAndCountAll({
-            attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'survey_number', 'created_at', 'name'],
-            distinct: true,
-            where: {
-                survey_provider_id: 1,
-                status: "active",
-                country_id: 226
-            },
-            include: {
-                model: SurveyQualification,
-                attributes: ['id', 'survey_question_id'],
-                where: {
-                    survey_question_id: [109011, 109010, 109012, 109013]
-                },
-                required: true,
-                include: {
-                    model: SurveyAnswerPrecodes,
-                    attributes: ['id', 'option', 'precode'],
-                    required: true,
-                    // include: [
-                    //     {
-                    //         model: SurveyQuestion,
-                    //         attributes: ['id'],
-                    //         where: {
-                    //             id: [109011, 109010, 109012]
-                    //         }
-                    //     }
-                    // ],
-                }
-            },
-            order: [[sequelize.literal('created_at'), 'desc']],
-            limit: 100,
-            offset: (1 - 1) * 10,
-        });
-
-        const surveyData = [];
-
-        surveys.rows.forEach((record, index) => {
-            let findAnsResult = [];
-            record.SurveyQualifications.forEach(r=> {
-                let findQs = eligibilities.find(t=> t.survey_question_id == r.survey_question_id);
-                if(findQs !== undefined){
-                    let findAns = r.SurveyAnswerPrecodes.find(j=> findQs.survey_answer_precode_id == j.id);
-                    if(findAns === undefined){
-                        findAnsResult = [];
-                    } else 
-                        findAnsResult.push(findAns);                    
-                }                
-            });
-            // console.log(findAnsResult.length +'==='+ record.SurveyQualifications.length)
-            if(findAnsResult.length === record.SurveyQualifications.length)
-                surveyData.push(record);
-        });
-        const queryString = {};
-        for (let survey of surveyData) {
-            survey.SurveyQualifications.find(r=> {
-                let findEl = eligibilities.find(el => el.survey_question_id == r.survey_question_id);
-                if(findEl !== undefined) {
-                    queryString[findEl.survey_provider_question_id] = findEl.option
-                }
-            });
-            console.log(queryString)
-        }
-        res.send(surveyData);
-        return;
-
-    }*/
-
     surveys = async (memberId, params) => {
         try{
             const member = await Member.findOne({
@@ -228,13 +158,14 @@ class LucidController {
                 var survey_list = [];                
                 if(surveyData && surveyData.length){
                     for (let survey of surveyData) {
+                        let quesStr = {};
                         survey.SurveyQualifications.find(r=> {
                             let findEl = eligibilities.find(el => el.survey_question_id == r.survey_question_id);
                             if(findEl !== undefined) {
-                                queryString[findEl.survey_provider_question_id] = findEl.option
+                                quesStr[findEl.survey_provider_question_id] = findEl.option
                             }
                         });
-                        let generateQueryString = new URLSearchParams(queryString).toString();
+                        let generateQueryString = new URLSearchParams({...queryString, ...quesStr}).toString();
                         let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${generateQueryString}`;
                         let temp_survey = {
                             survey_number: survey.survey_number,
