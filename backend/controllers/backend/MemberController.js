@@ -132,8 +132,6 @@ class MemberController extends Controller {
     let company_portal_id = req.headers.site_id;
     let member_id = req.params.id || null;
     let type = req.query.type || null;
-    // console.log(type);
-    // let type = req.body.type || null;
     if (member_id) {
       let country_list = [];
       let email_alerts = [];
@@ -225,20 +223,20 @@ class MemberController extends Controller {
                 attributes: ['name', 'value'],
               },
             },
-            {
-              model: MemberReferral,
-              attributes: ['referral_email', 'ip', 'member_id'],
-              include: {
-                model: Member,
-                as: 'member_referrer',
-                attributes: [
-                  'referral_code',
-                  'first_name',
-                  'last_name',
-                  'email',
-                ],
-              },
-            },
+            // {
+            //   model: MemberReferral,
+            //   attributes: ['referral_email', 'ip', 'member_id'],
+            //   include: {
+            //     model: Member,
+            //     as: 'member_referrer',
+            //     attributes: [
+            //       'referral_code',
+            //       'first_name',
+            //       'last_name',
+            //       'email',
+            //     ],
+            //   },
+            // },
             {
               model: MemberPaymentInformation,
               attributes: ['name', 'value'],
@@ -299,15 +297,14 @@ class MemberController extends Controller {
           });
           //get member referrer name
           var member_referrer = '';
+          var referral_row = null;
           if (result.member_referral_id) {
             member_referrer = await this.model.findOne({
               where: { id: result.member_referral_id },
               paranoid: false,
             });
-            // console.log(member_referrer);
-            member_referrer =
-              member_referrer.first_name + ' ' + member_referrer.last_name;
-            // console.log(referrer_name);
+            member_referrer = member_referrer.name;
+            referral_row = await MemberReferral.findOne({ where: { referral_id: member_id, member_id: result.member_referral_id } });
           }
           // console.log(req.headers);
           var referral_link =
@@ -321,6 +318,7 @@ class MemberController extends Controller {
           result.setDataValue('membership_tier', membership_tier);
           result.setDataValue('member_referrer', member_referrer);
           result.setDataValue('referral_link', referral_link);
+          result.setDataValue('MemberReferral', referral_row);
           result.setDataValue(
             'is_deleted',
             result.deleted_at && result.deleted_by ? true : false
@@ -527,8 +525,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
 
     // Dynamically generating Model Relationships
@@ -831,7 +829,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1069,8 +1067,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
       company_portal_id: site_id,
     };
 
