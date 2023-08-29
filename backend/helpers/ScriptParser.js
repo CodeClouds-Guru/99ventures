@@ -248,7 +248,7 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            data['total_unapproved_withdrawal_amount'] =
+            other_details.total_unapproved_withdrawal_amount =
               total_unapproved_withdrawal_amount;
 
             console.log(data.total_unapproved_withdrawal_amount);
