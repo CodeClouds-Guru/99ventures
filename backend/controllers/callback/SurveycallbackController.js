@@ -389,7 +389,7 @@ class SurveycallbackController {
               requestParam,
               req
             );
-            await this.memberEligibitityUpdate(requestParam, member);
+            //await this.memberEligibitityUpdate(requestParam, member);
           } else {
             const logger1 = require('../../helpers/Logger')(
               `lucid-postback-errror.log`
