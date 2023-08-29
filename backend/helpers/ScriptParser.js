@@ -250,7 +250,7 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            data[key].setDataValue(
+            data.setDataValue(
               'total_unapproved_withdrawal_amount',
               total_unapproved_withdrawal_amount
             );
