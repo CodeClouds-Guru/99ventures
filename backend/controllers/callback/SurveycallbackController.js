@@ -82,21 +82,25 @@ class SurveycallbackController {
         survey.forEach(async (element) => {
           const quota = await lcObj.showQuota(element.survey_id);
           if ('SurveyStillLive' in quota && quota.SurveyStillLive == true) {
-            // Obj create to push in SQS
-            let lucid_data = {
-              ...element,
-              survey_provider_id: survey_provider.id,
-            };
+            // let quotaObj = quota.SurveyQuotas;
+            // let quotaCheck = quotaObj.some(q=>q.NumberOfRespondents < 1);
+            // if(quotaCheck === false){
+              // Obj create to push in SQS
+              let lucid_data = {
+                ...element,
+                survey_provider_id: survey_provider.id,
+              };
 
-            if (countryData.length && element.country_language) {
-              let country = countryData.find(
-                (row) => row.lucid_language_code === element.country_language
-              );
-              if (country !== undefined && 'id' in country) {
-                lucid_data.country_id = country.id;
-                await sqsHelper.sendData(lucid_data);
+              if (countryData.length && element.country_language) {
+                let country = countryData.find(
+                  (row) => row.lucid_language_code === element.country_language
+                );
+                if (country !== undefined && 'id' in country) {
+                  lucid_data.country_id = country.id;
+                  await sqsHelper.sendData(lucid_data);
+                }
               }
-            }
+            // }
           }
         });
       }
@@ -376,6 +380,7 @@ class SurveycallbackController {
           attributes: ['cpi'],
           where: {
             survey_number: surveyNumber,
+            survey_provider_id: 1
           },
         });
         if (survey) {
@@ -389,7 +394,7 @@ class SurveycallbackController {
               requestParam,
               req
             );
-            // await this.memberEligibitityUpdate(requestParam, member);
+            await this.memberEligibitityUpdate(requestParam, member);
           } else {
             const logger1 = require('../../helpers/Logger')(
               `lucid-postback-errror.log`
@@ -564,52 +569,11 @@ class SurveycallbackController {
    * @param {query String} queryObj
    * @returns
    */
-  // async memberEligibitityUpdate(queryObj) {
   async memberEligibitityUpdate(queryObj, member) {
     try {
-      // const queryObj = req.query;
       if (queryObj.pid.toLowerCase() === 'test') {
-        return;
+        return true;
       }
-      //   const queryObj = {
-      //     42: '33',
-      //     43: '1',
-      //     47: '1',
-      //     96: 'alabama',
-      //     97: '698',
-      //     113: '2',
-      //     122: '3',
-      //     632: '2',
-      //     634: '1',
-      //     643: '000000000000000000000000001000000000000000000000000',
-      //     645: '1',
-      //     646: '2',
-      //     1249: '0001000000000000000000000110000000000',
-      //     2189: '1',
-      //     3546: '',
-      //     5729: '30',
-      //     7064: '0100',
-      //     14785: '17',
-      //     15297: '3',
-      //     22467: '6',
-      //     43501: '1',
-      //     48741: '4',
-      //     61076: '4',
-      //     137510: '',
-      //     157547: '',
-      //     157550: '',
-      //     status: 'security',
-      //     pid: 'DebosmitaDeyCC',
-      //     mid: '1692835988165',
-      //     cpi: '',
-      //     survey_id: '40038326',
-      //     marketplace_status: '131',
-      //     client_status: '-1',
-      //     termed_qualification_id: '',
-      //     termed_quota_id: '',
-      //     hash: '_o2bnAkvsJxlvKvPYFR_B8M7i0M',
-      //   };
-      //   let member = await this.getMember({ username: queryObj.pid });
 
       const queryKeys = Object.keys(queryObj);
       const obj = [];
@@ -628,41 +592,14 @@ class SurveycallbackController {
           });
         });
 
-      const provider = await SurveyProvider.findOne({
-        attributes: ['id'],
-        where: {
-          name: 'Lucid',
-        },
-      });
-
-      /*const precodes = Object.keys(obj);
-			const surveyQuestions = await SurveyQuestion.findAll({
-				attributes: ['id', 'survey_provider_question_id', 'question_type'],
-				where: {
-					survey_provider_question_id: precodes,
-					survey_provider_id: provider.id,
-					question_type: {
-						[Op.ne]: 'Multi Punch'
-					}
-				},
-				include: [
-					{
-						model: CountrySurveyQuestion,
-						where:{
-							country_id: 226
-						}
-					},
-					// {
-					// 	model: SurveyAnswerPrecodes,
-					// 	where: {
-					// 		option: Object.values(obj)
-					// 	}
-					// }
-				]
-			});*/
+      // const provider = await SurveyProvider.findOne({
+      //   attributes: ['id'],
+      //   where: {
+      //     name: 'Lucid',
+      //   },
+      // });
 
       const records = await SurveyAnswerPrecodes.findAll({
-        logging: console.log,
         attributes: ['id', 'option', 'precode'],
         where: {
           survey_provider_id: 1,
@@ -671,11 +608,11 @@ class SurveycallbackController {
         },
         include: {
           model: SurveyQuestion,
-          attributes: ['id', 'survey_provider_question_id'],
+          attributes: ['id', 'survey_provider_question_id', 'name'],
           where: {
             survey_provider_id: 1,
             question_type: {
-              [Op.ne]: 'Multi Punch',
+              [Op.notIn]: ['Multi Punch'],
             },
           },
           include: {
@@ -688,55 +625,25 @@ class SurveycallbackController {
         },
       });
 
-      //   console.log('DebosmitaDeyCC', records);
-      //   res.send(records);
-      //   return;
-
-      //   const params = [];
-      //   for (let precode of precodes) {
-      //     let matchedQuest = surveyQuestions.find(
-      //       (row) => row.survey_provider_question_id === +precode
-      //     );
-      //     let answerPrecode = matchedQuest.SurveyAnswerPrecodes.find(
-      //       (r) => +r.option === +obj[precode] && +r.precode === +precode
-      //     );
-      //     if (matchedQuest && answerPrecode) {
-      //       params.push({
-      //         member_id: queryObj.pid,
-      //         survey_question_id: matchedQuest.id,
-      //         survey_answer_precode_id: answerPrecode.id,
-      //       });
-      //     }
-      //   }
       let member_eligibility = [];
       for (let record of records) {
-        // console.log(record.SurveyQuestions);
-        // console.log(record.SurveyQuestions[0].CountrySurveyQuestion);
         member_eligibility.push({
           member_id: member.id,
-          country_survey_question_id:
-            record.SurveyQuestions[0].CountrySurveyQuestion.id,
+          country_survey_question_id: record.SurveyQuestions[0].CountrySurveyQuestion.id,
           survey_answer_precode_id: record.id,
-          open_ended_value: '',
+          text: record.SurveyQuestions[0].name,
+          open_ended_value: null,
         });
       }
-      //   console.log('member_eligibility', member_eligibility);
-      const result = await MemberEligibilities.bulkCreate(member_eligibility, {
-        updateOnDuplicate: ['survey_answer_precode_id'],
+
+      await MemberEligibilities.bulkCreate(member_eligibility, {
+        updateOnDuplicate: ['survey_answer_precode_id', 'text'],
       });
-      //   return res.send(result);
-      return result;
+
+      return true;
     } catch (err) {
       console.log(err);
-      const logger = require('../../helpers/Logger')(
-        `lucid-postback-errror.log`
-      );
-      logger.error(err);
-      res.send(err);
-      // return {
-      // 	status: false,
-      // 	message: err.message
-      // };
+      throw err;
     }
   }
 
