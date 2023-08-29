@@ -27,10 +27,6 @@ const SurveySyncControllerClass = require('../controllers/callback/SurveySyncCon
 const SurveySyncController = new SurveySyncControllerClass();
 router.get('/survey/:provider/:action', SurveySyncController.index);
 //------------------------
-router.get(
-  '/member-eligibility-update',
-  SurveycallbackController.memberEligibitityUpdate
-);
 
 // router.all('/survey/outcome/:provider', async (req, res) => {
 //   //   console.log('===================outcome', req);
