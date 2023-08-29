@@ -200,6 +200,8 @@ class ScriptParser {
             data = await Models[script.module].findAll(condition);
 
             data.forEach(function (payment, key) {
+              // console.log('payment', payment);
+              var total_unapproved_withdrawal_amount = 0;
               var date1 = new Date();
               var withdraw_redo_interval = payment.withdraw_redo_interval;
               data[key].setDataValue(
@@ -208,10 +210,6 @@ class ScriptParser {
               );
               data[key].setDataValue('redo_diff_calculation', 0);
               if (withdraw_redo_interval > 0) {
-                // var date2 = new Date(
-                //   payment.WithdrawalRequests[0].MemberTransaction.completed_at
-                // );
-
                 var date2 = new Date();
                 if (payment.WithdrawalRequests.length > 0) {
                   // console.log(payment.WithdrawalRequests[0]);
@@ -224,6 +222,11 @@ class ScriptParser {
                     'redo_diff_calculation',
                     parseFloat(withdraw_redo_interval) - parseFloat(hours)
                   );
+                }
+                for (let req of payment.WithdrawalRequests) {
+                  if (['pending', 'approved'].includes(req.status)) {
+                    total_unapproved_withdrawal_amount += req.amount;
+                  }
                 }
               }
               var past_withdrawal_symbol = '';
@@ -247,10 +250,14 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            // console.log(
-            //   '===================',
-            //   JSON.parse(JSON.stringify(data))
-            // );
+            data[key].setDataValue(
+              'total_unapproved_withdrawal_amount',
+              total_unapproved_withdrawal_amount
+            );
+            console.log(
+              '===================',
+              JSON.parse(JSON.stringify(data))
+            );
             // console.log(
             //   '===================',
             //   JSON.parse(JSON.stringify(other_details))
