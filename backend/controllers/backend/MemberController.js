@@ -823,14 +823,27 @@ class MemberController extends Controller {
       }
     );
     let total_earnings_credited = await db.sequelize.query(
-      "SELECT SUM(amount) as total FROM `member_transactions` WHERE type='credited' AND member_id=?",
+      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='credited' AND member_id=?",
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
       }
     );
+    let total_reversed = await db.sequelize.query(
+      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    // console.log(total_reversed, total_earnings_credited);
+    var total_credited_minus_reversed =
+      parseFloat(total_earnings_credited[0].total) -
+      parseFloat(total_reversed[0].total);
+    // console.log(total_credited_minus_reversed);
     result.earnings = total_earnings;
-    result.total = total_earnings_credited[0].total;
+    // result.total = total_earnings_credited[0].total;
+    result.total = total_credited_minus_reversed;
 
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
