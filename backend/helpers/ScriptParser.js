@@ -198,15 +198,30 @@ class ScriptParser {
 
             data = await Models[script.module].findAll(condition);
 
-            var total_unapproved_withdrawal_amount = 0;
-            data.forEach(function (payment, key) {
-              payment.WithdrawalRequests.forEach(function (requests, key) {
-                if (
-                  ['pending', 'approved'].includes(requests.dataValues.status)
-                ) {
-                  total_unapproved_withdrawal_amount += requests.amount;
-                }
+            // var total_unapproved_withdrawal_amount = 0;
+            let pending_withdrawal_req_amount =
+              await Models.WithdrawalRequest.findOne({
+                attributes: [
+                  [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+                ],
+                where: {
+                  status: {
+                    [Op.or]: ['pending', 'approved'],
+                  },
+                  member_id: user.id,
+                },
               });
+            other_details.total_unapproved_withdrawal_amount =
+              pending_withdrawal_req_amount.dataValues.total;
+
+            data.forEach(function (payment, key) {
+              // payment.WithdrawalRequests.forEach(function (requests, key) {
+              //   if (
+              //     ['pending', 'approved'].includes(requests.dataValues.status)
+              //   ) {
+              //     total_unapproved_withdrawal_amount += requests.amount;
+              //   }
+              // });
 
               var date1 = new Date();
               var withdraw_redo_interval = payment.withdraw_redo_interval;
@@ -248,10 +263,7 @@ class ScriptParser {
                 past_withdrawal_symbol
               );
             });
-            other_details.total_unapproved_withdrawal_amount =
-              total_unapproved_withdrawal_amount;
 
-            console.log(data.total_unapproved_withdrawal_amount);
             break;
           case 'survey':
             const survey = 'survey' in params ? params.survey : '1';

@@ -1,10 +1,6 @@
 [
   {
     "type": "script",
-    "src": "/js/SiteLock.js"
-  },
-  {
-    "type": "script",
     "src": "/js/jquery-v1.min.js"
   },
   {
