@@ -303,8 +303,14 @@ class MemberController extends Controller {
               where: { id: result.member_referral_id },
               paranoid: false,
             });
-            member_referrer = member_referrer.name;
-            referral_row = await MemberReferral.findOne({ where: { referral_id: member_id, member_id: result.member_referral_id } });
+            // member_referrer = member_referrer.name;
+            member_referrer = member_referrer.username;
+            referral_row = await MemberReferral.findOne({
+              where: {
+                referral_id: member_id,
+                member_id: result.member_referral_id,
+              },
+            });
           }
           // console.log(req.headers);
           var referral_link =
@@ -525,8 +531,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
 
     // Dynamically generating Model Relationships
@@ -829,7 +835,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1067,8 +1073,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
       company_portal_id: site_id,
     };
 
