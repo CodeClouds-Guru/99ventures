@@ -203,6 +203,7 @@ class ScriptParser {
               await Models.WithdrawalRequest.findOne({
                 attributes: [
                   [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+                  [sequelize.fn('COUNT', sequelize.col('id')), 'total_count'],
                 ],
                 where: {
                   status: {
@@ -213,7 +214,9 @@ class ScriptParser {
               });
             other_details.total_unapproved_withdrawal_amount =
               pending_withdrawal_req_amount.dataValues.total;
-
+            other_details.total_unapproved_withdrawal_count =
+              pending_withdrawal_req_amount.dataValues.total_count;
+            console.log(other_details);
             data.forEach(function (payment, key) {
               // payment.WithdrawalRequests.forEach(function (requests, key) {
               //   if (
