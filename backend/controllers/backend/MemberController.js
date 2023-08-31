@@ -313,11 +313,13 @@ class MemberController extends Controller {
             });
           }
           // console.log(req.headers);
+          // var referral_link =
+          //   req.headers.host +
+          //   '/login?referral_code=' +
+          //   result.referral_code +
+          //   '#signup';
           var referral_link =
-            req.headers.host +
-            '/login?referral_code=' +
-            result.referral_code +
-            '#signup';
+            req.headers.host + '?referral_code=' + result.referral_code;
           result.setDataValue('country_list', country_list);
           result.setDataValue('total_earnings', total_earnings);
           result.setDataValue('survey', survey_list);
