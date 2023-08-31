@@ -29,7 +29,7 @@ class ScriptParser {
     // this.getOfferWallList = this.getOfferWallList.bind(this);
     // this.getTicketList = this.getTicketList.bind(this);
   }
-  async parseScript(script_id, user, params) {
+  async parseScript(script_id, user, params, req) {
     var data = [];
     const client_timezone =
       'timezone' in params
@@ -43,6 +43,7 @@ class ScriptParser {
       message: '',
       timezone: client_timezone,
     };
+
     var page_count = 0;
     var script_html = '';
     let script = await Models.Script.findOne({ where: { code: script_id } });
@@ -274,7 +275,8 @@ class ScriptParser {
               user,
               survey,
               script.module,
-              params
+              params,
+              req
             );
 
             if (temp_survey_list.status) {
@@ -314,7 +316,7 @@ class ScriptParser {
   }
   //get all matched surveys
   //get survey
-  async getSurveys(user, survey_provider_id, script_module, params) {
+  async getSurveys(user, survey_provider_id, script_module, params, req) {
     let memberId = user.id;
     if (!memberId) {
       return {
@@ -358,7 +360,7 @@ class ScriptParser {
     }
     const ProviderControllerClass = require(`../controllers/frontend/${file_name}`);
     const ProviderController = new ProviderControllerClass();
-    let response = await ProviderController.surveys(memberId, params);
+    let response = await ProviderController.surveys(memberId, params, req);
     return response;
   }
   getModuleWhere(module, user) {

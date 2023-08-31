@@ -85,21 +85,21 @@ class SurveycallbackController {
             // let quotaObj = quota.SurveyQuotas;
             // let quotaCheck = quotaObj.some(q=>q.NumberOfRespondents < 1);
             // if(quotaCheck === false){
-              // Obj create to push in SQS
-              let lucid_data = {
-                ...element,
-                survey_provider_id: survey_provider.id,
-              };
+            // Obj create to push in SQS
+            let lucid_data = {
+              ...element,
+              survey_provider_id: survey_provider.id,
+            };
 
-              if (countryData.length && element.country_language) {
-                let country = countryData.find(
-                  (row) => row.lucid_language_code === element.country_language
-                );
-                if (country !== undefined && 'id' in country) {
-                  lucid_data.country_id = country.id;
-                  await sqsHelper.sendData(lucid_data);
-                }
+            if (countryData.length && element.country_language) {
+              let country = countryData.find(
+                (row) => row.lucid_language_code === element.country_language
+              );
+              if (country !== undefined && 'id' in country) {
+                lucid_data.country_id = country.id;
+                await sqsHelper.sendData(lucid_data);
               }
+            }
             // }
           }
         });
@@ -373,49 +373,52 @@ class SurveycallbackController {
    */
   async lucidPostback(req, res) {
     const requestParam = req.query;
-    if (requestParam.status === 'complete') {
-      try {
+    const member = await this.getMember({ username: requestParam.pid });
+    if(member === null) {
+      const logger1 = require('../../helpers/Logger')(
+        `lucid-postback-errror.log`
+      );
+      logger1.error('Unable to find member!');
+      res.redirect('/survey-' + requestParam.status);
+      return
+    }
+    try {
+      if (requestParam.status === 'complete') {
         const surveyNumber = requestParam.survey_id;
         const survey = await Survey.findOne({
           attributes: ['cpi'],
           where: {
             survey_number: surveyNumber,
-            survey_provider_id: 1
+            survey_provider_id: 1,
           },
         });
         if (survey) {
-          let member = await this.getMember({ username: requestParam.pid });
-          if (member) {
-            await this.memberTransaction(
-              survey,
-              'Lucid',
-              surveyNumber,
-              member,
-              requestParam,
-              req
-            );
-            await this.memberEligibitityUpdate(requestParam, member);
-          } else {
-            const logger1 = require('../../helpers/Logger')(
-              `lucid-postback-errror.log`
-            );
-            logger1.error('Unable to find member!');
-          }
+          await this.memberTransaction(
+            survey,
+            'Lucid',
+            surveyNumber,
+            member,
+            requestParam,
+            req
+          );
+          
         } else {
           const logger1 = require('../../helpers/Logger')(
             `lucid-postback-errror.log`
           );
           logger1.error('Survey not found!');
         }
-      } catch (error) {
-        const logger1 = require('../../helpers/Logger')(
-          `lucid-postback-errror.log`
-        );
-        logger1.error(error);
       }
+    } catch (error) {
+      const logger1 = require('../../helpers/Logger')(
+        `lucid-postback-errror.log`
+      );
+      logger1.error(error);
+    } finally {
+      await this.memberEligibitityUpdate(requestParam, member);
+      res.redirect('/survey-' + requestParam.status);
+      return;
     }
-    res.redirect('/survey-' + requestParam.status);
-    return;
   }
 
   /**
@@ -629,7 +632,8 @@ class SurveycallbackController {
       for (let record of records) {
         member_eligibility.push({
           member_id: member.id,
-          country_survey_question_id: record.SurveyQuestions[0].CountrySurveyQuestion.id,
+          country_survey_question_id:
+            record.SurveyQuestions[0].CountrySurveyQuestion.id,
           survey_answer_precode_id: record.id,
           text: record.SurveyQuestions[0].name,
           open_ended_value: null,

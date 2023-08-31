@@ -19,7 +19,7 @@ const Index = (props) => {
     }, []);
     useEffect(() => {
         !withdrawalTypeID ? '' : setListElem(<List module={module}
-            where={{ withdrawal_type_id: withdrawalTypeID, status: 'pending' }}
+            where={{ withdrawal_type_id: withdrawalTypeID, status: 'completed' }}
             editable={false}
             addable={false}
             deletable={false}
