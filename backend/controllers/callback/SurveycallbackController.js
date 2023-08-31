@@ -374,8 +374,9 @@ class SurveycallbackController {
   async lucidPostback(req, res) {
     const requestParam = req.query;
     let member = await this.getMember({ username: requestParam.pid });
-    if (requestParam.status === 'complete') {
-      try {
+
+    try {
+      if (requestParam.status === 'complete') {
         const surveyNumber = requestParam.survey_id;
         const survey = await Survey.findOne({
           attributes: ['cpi'],
@@ -408,16 +409,16 @@ class SurveycallbackController {
           );
           logger1.error('Survey not found!');
         }
-      } catch (error) {
-        const logger1 = require('../../helpers/Logger')(
-          `lucid-postback-errror.log`
-        );
-        logger1.error(error);
-      } finally {
-        await this.memberEligibitityUpdate(requestParam, member);
-        res.redirect('/survey-' + requestParam.status);
-        return;
       }
+    } catch (error) {
+      const logger1 = require('../../helpers/Logger')(
+        `lucid-postback-errror.log`
+      );
+      logger1.error(error);
+    } finally {
+      await this.memberEligibitityUpdate(requestParam, member);
+      res.redirect('/survey-' + requestParam.status);
+      return;
     }
   }
 
