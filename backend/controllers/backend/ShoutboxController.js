@@ -12,16 +12,15 @@ class ShoutboxController extends Controller {
     options.include = [
       {
         model: Member,
-        attributes: ['first_name', 'last_name', 'email', 'status'],
+        attributes: ['id', 'email', 'status', 'username'],
       },
     ];
     const { docs, pages, total } = await this.model.paginate(options);
     docs.forEach(function (record, key) {
       if (record.dataValues.Member != null) {
-        record.dataValues['Member.first_name'] =
-          record.dataValues.Member.dataValues.first_name +
-          ' ' +
-          record.dataValues.Member.dataValues.last_name;
+        record.dataValues['Member.username'] =
+          record.dataValues.Member.username;
+        // record.dataValues['member_id'] = record.dataValues.Member.id;
       }
     });
     return {

@@ -5,7 +5,7 @@ const Handlebars = require('handlebars');
 const util = require('util');
 
 class StaticPageController {
-  constructor() { }
+  constructor() {}
 
   /**
    * Show Survey Status
@@ -76,13 +76,14 @@ class StaticPageController {
         var user = await Member.findOne({ where: { id: req.query.member } });
         // console.log('===========', user);
       } else {
-        var user = req.session.member
+        var user = req.session.member;
       }
       const scriptParser = new ScriptParser();
       const parsed = await scriptParser.parseScript(
         req.query.script,
         user,
-        params
+        params,
+        req
       );
       const template = Handlebars.compile(parsed.script_html);
       // console.log('other_details', parsed.other_details)
@@ -90,11 +91,21 @@ class StaticPageController {
         data: parsed.data,
         page_count: parsed.page_count,
         other_details: parsed.other_details,
+        sc_request: {
+          base_url: req.baseUrl,
+          hostname: req.hostname,
+          ip: req.ip,
+          original_url: req.originalUrl,
+          path: req.path,
+          query: req.query,
+          xhr: req.xhr,
+        },
       });
+      // console.log('html', req.sc_request);
       resp = {
         ...resp,
         status: true,
-        html
+        html,
       };
     } catch (e) {
       console.error(e);

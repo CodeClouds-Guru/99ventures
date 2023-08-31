@@ -383,9 +383,9 @@ function List(props) {
 		setActionsMenu(null);
 	}
 	const processFieldValue = (value, fieldConfig) => {
-		if (value && (fieldConfig.field_name === 'completed_at' || fieldConfig.field_name === 'completed' || fieldConfig.field_name === 'activity_date')) {
+		if (value && (['completed_at','completed','activity_date', 'join_date', 'activity_date'].includes(fieldConfig.field_name))) {
 			value = Helper.parseTimeStamp(value)
-		} else if ((fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'requested_on') && value) {
+		} else if ((['updated_at','requested_on'].includes(fieldConfig.field_name)) && value) {
 			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
 		}
 		return value;
@@ -441,7 +441,7 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
-		} else if (module === 'withdrawal-requests') {
+		} else if (['withdrawal-requests', 'shoutbox', 'member-referrals'].includes(module)) {
 			const status = processFieldValue(n[field.field_name], field);
 			if (field.field_name === 'Member.status') {
 				if (status === 'member')

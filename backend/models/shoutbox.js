@@ -95,11 +95,11 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    '$Member.first_name$': {
-      field_name: 'Member.first_name',
-      db_name: 'Member.first_name',
+    '$Member.username$': {
+      field_name: 'Member.username',
+      db_name: 'Member.username',
       type: 'text',
-      placeholder: 'Member Name',
+      placeholder: 'Username',
       listing: true,
       show_in_form: true,
       sort: true,

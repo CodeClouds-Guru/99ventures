@@ -203,6 +203,10 @@ class PageParser {
       path: req.path,
       query: req.query,
       xhr: req.xhr,
+      // url_query:
+      //   'referral_code' in req.query
+      //     ? `?${new URLSearchParams(req.query).toString()}`
+      //     : '',
     };
     layout_html = template({
       user,
