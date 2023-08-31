@@ -843,7 +843,7 @@ class MemberController extends Controller {
     // console.log(total_credited_minus_reversed);
     result.earnings = total_earnings;
     // result.total = total_earnings_credited[0].total;
-    result.total = total_credited_minus_reversed;
+    result.total = total_credited_minus_reversed.toFixed(2);
 
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
