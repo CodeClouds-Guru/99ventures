@@ -19,7 +19,89 @@ class LucidController {
         this.surveys = this.surveys.bind(this);
         this.rebuildEntryLink =  this.rebuildEntryLink.bind(this);
         this.addEntryLink = this.addEntryLink.bind(this);
+        this.generateQueryString = this.generateQueryString.bind(this);
     }
+
+    /*surveys1 = async (req, res) => {
+        const eligibilities = await MemberEligibilities.getEligibilities(226, 1, 160);
+        const matchingQuestionIds = [];
+        eligibilities.forEach(eg => {
+            matchingQuestionIds.push(eg.survey_question_id);
+        });
+
+        const surveys = await Survey.findAndCountAll({
+            attributes: ['id', 'survey_provider_id', 'loi', 'cpi', 'survey_number', 'created_at', 'name'],
+            distinct: true,
+            where: {
+                survey_provider_id: 1,
+                status: "active",
+                country_id: 226
+            },
+            include: {
+                model: SurveyQualification,
+                attributes: ['id', 'survey_question_id'],
+                where: {
+                    survey_question_id: matchingQuestionIds //[109011, 109010, 109012, 109013]
+                },
+                required: true,
+                include: {
+                    model: SurveyAnswerPrecodes,
+                    attributes: ['id', 'option', 'precode'],
+                    required: true,
+                    // include: [
+                    //     {
+                    //         model: SurveyQuestion,
+                    //         attributes: ['id'],
+                    //         where: {
+                    //             id: [109011, 109010, 109012]
+                    //         }
+                    //     }
+                    // ],
+                }
+            },
+            order: [[sequelize.literal('created_at'), 'desc']],
+            limit: 100,
+            offset: (1 - 1) * 10,
+        });
+
+        const surveyData = [];
+
+        surveys.rows.forEach((record, index) => {
+            let findAnsResult = [];
+            record.SurveyQualifications.forEach(r=> {
+                let findQs = eligibilities.find(t=> t.survey_question_id == r.survey_question_id);
+                if(findQs !== undefined){
+                    let findAns = r.SurveyAnswerPrecodes.find(j=> findQs.survey_answer_precode_id == j.id);
+                    if(findAns === undefined){
+                        findAnsResult = [];
+                    } else 
+                        findAnsResult.push(findAns);                    
+                }                
+            });
+            // console.log(findAnsResult.length +'==='+ record.SurveyQualifications.length)
+            if(findAnsResult.length === record.SurveyQualifications.length){
+                surveyData.push(record);
+            }
+        });
+        // for (let survey of surveyData) {
+        //     const queryString = {};
+        //     for(let qual of survey.SurveyQualifications) {
+        //         let findEl = eligibilities.find(el => el.survey_question_id == qual.survey_question_id);
+        //         if(findEl !== undefined) {
+        //             queryString[findEl.survey_provider_question_id] = findEl.option
+        //         }
+
+        //         if(Object.keys(queryString).length == 2) {
+        //             break;
+        //         }
+        //     }
+
+        //     console.log(queryString)
+        // }
+        res.send(surveyData);
+        return;
+
+    }*/
 
     surveys = async (memberId, params) => {
         try{
@@ -144,29 +226,13 @@ class LucidController {
                         surveyData.push(record);
                     }
                 });
-                // surveys.rows.forEach((record, index) => {
-                //     const qual = record.SurveyQualifications.find(r => matchingQuestionIds.includes(r.survey_question_id));
-                //     if(qual !== undefined) {
-                //         let answerPrecode = qual.SurveyAnswerPrecodes.some(r=> matchingAnswerIds.includes(r.id));
-                //         if(answerPrecode) {
-                //             surveyData.push(record)
-                //         }
-                //     }
-                // })
 
                 var page_count = Math.ceil(surveys.count / perPage);
                 var survey_list = [];                
                 if(surveyData && surveyData.length){
                     for (let survey of surveyData) {
-                        let quesStr = {};
-                        survey.SurveyQualifications.find(r=> {
-                            let findEl = eligibilities.find(el => el.survey_question_id == r.survey_question_id);
-                            if(findEl !== undefined) {
-                                quesStr[findEl.survey_provider_question_id] = findEl.option
-                            }
-                        });
-                        let generateQueryString = new URLSearchParams({...queryString, ...quesStr}).toString();
-                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${generateQueryString}`;
+                        let eligibilityStr = this.generateQueryString(queryString, survey.SurveyQualifications, eligibilities);
+                        let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${eligibilityStr}`;
                         let temp_survey = {
                             survey_number: survey.survey_number,
                             name: survey.name,
@@ -230,11 +296,9 @@ class LucidController {
                     }
                 });
             
+                var entryLink;
                 if(survey && survey.url !== null){
-                    let URL = this.rebuildEntryLink(survey.url, params);
-                    console.log('Lucid entry link', URL);
-                    res.redirect(URL);
-                    return;
+                    entryLink = survey.url;                 
                 } else {
                     try{
                         //Sometimes the survey entrylink not created and API sending 404 response.
@@ -243,9 +307,7 @@ class LucidController {
                         if(result.data && result.data.SupplierLink) {
                             const url = (process.env.DEV_MODE == '0') ? result.data.SupplierLink.LiveLink : result.data.SupplierLink.TestLink;
                             await this.addEntryLink(surveyNumber, url);
-                            let URL = this.rebuildEntryLink(url, params);
-                            console.log('Lucid entry link', URL);
-                            res.redirect(URL);
+                            entryLink = url;
                         }
                     } catch(error) {
                         //If entry link already created but unable to find from DB
@@ -255,20 +317,22 @@ class LucidController {
                             if(result.ResultCount !== null && result.SupplierLink) {
                                 const url = (process.env.DEV_MODE == '0') ? result.SupplierLink.LiveLink : result.SupplierLink.TestLink;
                                 await this.addEntryLink(surveyNumber, url);
-                                let URL = this.rebuildEntryLink(url, params);
-                                console.log('Lucid entry link', URL);
-                                res.redirect(URL);
+                                entryLink = url;
                             }
                         } else {
                             throw {survey_number: surveyNumber, message: 'Sorry! Survey not found.'};
                         }
                     }
                 }
+                let URL = this.rebuildEntryLink(entryLink, params);
+                console.log('Lucid entry link', URL);
+                res.redirect(URL);
+                return;
             } else {
                 throw {survey_number: surveyNumber, message: 'Sorry! Survey is not live now.'};
             }
         }
-        catch(error) { 
+        catch(error) {
             if('survey_number' in error && error.survey_number) {
                 await Survey.update({
                     status: 'draft',
@@ -315,22 +379,22 @@ class LucidController {
         return true;
     }
 
-    /*generateEntryLink1 = async (req, res) => {
-        try{
-        const result = await sequelize.query(
-            'UPDATE surveys SET url = :url WHERE survey_number = :survey_number AND survey_provider_id = :provider_id',
-            {
-              replacements: { url: "https://www.samplicio.us/s/default.aspx?SID=4619aed6-5607-493c-aad0-f20d11542486&PID=", survey_number: 39886004, provider_id: 1},
-              type: QueryTypes.UPDATE
+    generateQueryString = (queryString, qualifications, eligibilities) => {
+        let quesStr = {};
+        let limit = 5;      // 5 is set because Lucid have a limitation to set the querystring in the URL.
+        let countStr = Object.keys(queryString).length;
+        for(let qual of qualifications) {
+            let findEl = eligibilities.find(el => el.survey_question_id == qual.survey_question_id);
+            if(findEl !== undefined) {
+                quesStr[findEl.survey_provider_question_id] = findEl.option
             }
-        );
-        res.send(result);
+
+            if((Object.keys(quesStr).length + countStr) === limit ) {
+                break;
+            }
         }
-        catch(error) {
-            console.log(error)
-            res.send(error)
-        }
-    }*/
+        return new URLSearchParams({...queryString, ...quesStr}).toString();
+    }
 }
 
 module.exports = LucidController
