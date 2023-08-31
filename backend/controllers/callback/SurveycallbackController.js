@@ -373,8 +373,15 @@ class SurveycallbackController {
    */
   async lucidPostback(req, res) {
     const requestParam = req.query;
-    let member = await this.getMember({ username: requestParam.pid });
-
+    const member = await this.getMember({ username: requestParam.pid });
+    if(member === null) {
+      const logger1 = require('../../helpers/Logger')(
+        `lucid-postback-errror.log`
+      );
+      logger1.error('Unable to find member!');
+      res.redirect('/survey-' + requestParam.status);
+      return
+    }
     try {
       if (requestParam.status === 'complete') {
         const surveyNumber = requestParam.survey_id;
@@ -386,23 +393,15 @@ class SurveycallbackController {
           },
         });
         if (survey) {
-          //   let member = await this.getMember({ username: requestParam.pid });
-          if (member) {
-            await this.memberTransaction(
-              survey,
-              'Lucid',
-              surveyNumber,
-              member,
-              requestParam,
-              req
-            );
-            // await this.memberEligibitityUpdate(requestParam, member);
-          } else {
-            const logger1 = require('../../helpers/Logger')(
-              `lucid-postback-errror.log`
-            );
-            logger1.error('Unable to find member!');
-          }
+          await this.memberTransaction(
+            survey,
+            'Lucid',
+            surveyNumber,
+            member,
+            requestParam,
+            req
+          );
+          
         } else {
           const logger1 = require('../../helpers/Logger')(
             `lucid-postback-errror.log`
