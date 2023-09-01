@@ -601,5 +601,18 @@ $(() => {
         );
       });
     }
+
+    let signup_element = document.getElementById('scripteed_signup_form');
+
+    if (signup_element !== null) {
+      const signup_search_params = new URLSearchParams(window.location.search);
+      if (!signup_search_params.has('referral_code')) {
+        let signup_hash_params = window.location.hash;
+        signup_hash_params = signup_hash_params.split('referral_code=');
+        if (signup_hash_params.length > 1) {
+          $('#referral_code').val(signup_hash_params[1]);
+        }
+      }
+    }
   });
 });

@@ -1,8 +1,8 @@
-const { Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes, Country, CountrySurveyQuestion } = require('../../models');
+const { sequelize, Survey, SurveyProvider, SurveyQuestion, SurveyQualification, SurveyAnswerPrecodes, Country, CountrySurveyQuestion } = require('../../models');
 const SchlesingerHelper = require('../../helpers/Schlesinger');
 const PurespectrumHelper = require('../../helpers/Purespectrum');
 const TolunaHelper = require('../../helpers/Toluna');
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const { capitalizeFirstLetter } = require('../../helpers/global')
 const SqsHelper = require('../../helpers/SqsHelper');
 const LucidHelper = require('../../helpers/Lucid');
@@ -1512,6 +1512,43 @@ class SurveySyncController {
         }
     }
 
+    /**
+     * Delete survey from DB
+     */
+    async removeSurvey(){
+        try {
+            const sql = 
+            `DELETE surveys, survey_qualifications 
+            FROM
+                surveys
+            JOIN survey_qualifications ON(
+                    surveys.id = survey_qualifications.survey_id
+                )
+            WHERE NOT
+                EXISTS(
+                    SELECT
+                        survey_number
+                    FROM
+                        member_surveys
+                    JOIN member_transactions ON(
+                        member_transactions.id = member_surveys.member_transaction_id
+                    )
+                    WHERE
+                        surveys.survey_number = member_surveys.survey_number AND member_transactions.amount_action = :amount_action 
+                ) 
+            AND surveys.deleted_at IS NOT NULL AND surveys.status IN (:status);`;
+
+            await sequelize.query(sql, { type: QueryTypes.DELETE, replacements: {status: ['closed', 'draft'], amount_action: 'survey' } });
+            return {status: true, message: 'Success'};
+        } catch (error) {
+            const logger = require('../../helpers/Logger')(`cron.log`);
+            logger.error(error);
+            return {
+                status: false,
+                message: 'error'
+            }
+        }
+    }
 }
 
 module.exports = SurveySyncController
