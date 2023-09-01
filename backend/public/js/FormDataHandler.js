@@ -579,4 +579,27 @@ $(() => {
       this.value = this.value.replace(/\s/g, '');
     },
   });
+
+  function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+  }
+
+  jQuery(document).ready(function ($) {
+    var persistedQueryParam = getParameterByName('referral_code');
+
+    if (persistedQueryParam && persistedQueryParam.length > 0) {
+      $('a[href]').each(function () {
+        var elem = $(this);
+        var href = elem.attr('href');
+        elem.attr(
+          'href',
+          href +
+            (href.indexOf('?') != -1 ? '&' : '?') +
+            'referral_code=' +
+            persistedQueryParam
+        );
+      });
+    }
+  });
 });
