@@ -1147,9 +1147,10 @@ class MemberAuthController {
             // console.log(info);
             paypal_request[0][info.field_name] = info.field_value;
           }
-          // console.log(paypal_request);
-          const create_resp = await paypal_class.payout(paypal_request);
+          console.log('paypal_request', paypal_request);
+          // const create_resp = await paypal_class.payout(paypal_request);
           // console.log('create_resp', create_resp);
+          const create_resp = { status: true, batch_id: 'test' };
           if (create_resp.status) {
             await MemberTransaction.update(
               {
