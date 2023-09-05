@@ -291,9 +291,12 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
+
+    console.log('before modification', data);
+
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
-
+    console.log('after modification', data);
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       modified_total_earnings =
         modified_total_earnings + parseFloat(data.amount);
@@ -305,7 +308,7 @@ module.exports = (sequelize, DataTypes) => {
     let transaction = JSON.parse(
       JSON.stringify(await MemberTransaction.insertTransaction(data))
     );
-    // console.log(transaction);
+
     let balance = true;
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       balance = await MemberTransaction.updateMemberBalance({
