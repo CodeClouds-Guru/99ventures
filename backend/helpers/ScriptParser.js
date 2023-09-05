@@ -207,9 +207,7 @@ class ScriptParser {
                   [sequelize.fn('COUNT', sequelize.col('id')), 'total_count'],
                 ],
                 where: {
-                  status: {
-                    [Op.or]: ['pending', 'approved'],
-                  },
+                  status: 'pending',
                   member_id: user.id,
                 },
               });
