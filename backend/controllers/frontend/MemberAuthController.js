@@ -1107,6 +1107,13 @@ class MemberAuthController {
         withdrawal_req_data.transaction_made_by = request_data.member_id;
         withdrawal_req_data.status = 'approved';
 
+        var transaction_status = 1;
+        if (
+          payment_method_details.slug !== 'instant_paypal' &&
+          payment_method_details.slug !== 'paypal' &&
+          payment_method_details.payment_type === 'Auto'
+        )
+          transaction_status = 2;
         //Insert into member transaction and update balance
         transaction_resp =
           await MemberTransaction.updateMemberTransactionAndBalance({
@@ -1116,7 +1123,8 @@ class MemberAuthController {
             type: 'withdraw',
             amount_action: 'member_withdrawal',
             created_by: request_data.member_id,
-            status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+            // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+            status: transaction_status,
           });
         // console.log(withdrawal_req_data);
         if (payment_method_details.slug == 'instant_paypal') {
