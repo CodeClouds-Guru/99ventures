@@ -1,5 +1,5 @@
 const Cint = require('../../helpers/Cint');
-const { Member, Country } = require('../../models');
+const { Member, Country, SurveyProvider } = require('../../models');
 class CintController {
   surveys = async (userId, params, req) => {
     if (!userId) {
@@ -11,7 +11,7 @@ class CintController {
       try {
         // const ssi = 'ssi' in params ? params.ssi : '';
         const perPage = 'perpage' in params ? parseInt(params.perpage) : 100;
-        const where = 'where' in params ? JSON.parse(params.where) : '';
+        // const where = 'where' in params ? JSON.parse(params.where) : '';
         const member = await Member.findOne({
           attributes: [
             'id',
@@ -49,6 +49,14 @@ class CintController {
             gender,
           };
 
+          const provider = await SurveyProvider.findOne({
+            attributes: ['currency_percent'],
+            where: {
+              name: 'Cint',
+              status: 1,
+            },
+          });
+
           const queryString = new URLSearchParams(params).toString();
           const cintObj = new Cint();
           const partUrl = 'https://www.your-surveys.com/suppliers_api/surveys';
@@ -64,10 +72,11 @@ class CintController {
                 'SUBID',
                 member.username
               );
+              let cpiValue = (+survey.cpi * +provider.currency_percent)/100;
               let temp_survey = {
                 survey_number: '',
                 name: survey.name,
-                cpi: parseFloat(survey.cpi).toFixed(2),
+                cpi: cpiValue.toFixed(2),
                 // cpi: parseFloat(survey.conversion_rate).toFixed(2),
                 loi: survey.loi,
                 link: rebuildEntryLink,

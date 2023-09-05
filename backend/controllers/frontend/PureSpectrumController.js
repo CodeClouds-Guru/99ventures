@@ -206,7 +206,7 @@ class PureSpectrumController {
       }
 
       const provider = await SurveyProvider.findOne({
-        attributes: ['id'],
+        attributes: ['id', 'currency_percent'],
         where: {
           name: 'Purespectrum',
           status: 1,
@@ -287,10 +287,11 @@ class PureSpectrumController {
             let link = `/purespectrum/entrylink?survey_number=${
               survey.survey_number
             }${generateQueryString ? '&' + generateQueryString : ''}`;
+            let cpiValue = (+survey.cpi * +provider.currency_percent)/100;
             let temp_survey = {
               survey_number: survey.survey_number,
               name: survey.name,
-              cpi: parseFloat(survey.cpi).toFixed(2),
+              cpi: cpiValue.toFixed(2),
               loi: survey.loi,
               link: link,
             };

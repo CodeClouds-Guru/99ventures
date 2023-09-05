@@ -120,7 +120,7 @@ class LucidController {
       }
 
       const provider = await SurveyProvider.findOne({
-        attributes: ['id'],
+        attributes: ['id', 'currency_percent'],
         where: {
           name: 'Lucid',
           status: 1,
@@ -256,10 +256,11 @@ class LucidController {
               eligibilities
             );
             let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${eligibilityStr}`;
+            let cpiValue = (+survey.cpi * +provider.currency_percent) / 100;
             let temp_survey = {
               survey_number: survey.survey_number,
               name: survey.name,
-              cpi: parseFloat(survey.cpi).toFixed(2),
+              cpi: cpiValue.toFixed(2),
               loi: survey.loi,
               link: link,
             };
