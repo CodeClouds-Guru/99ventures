@@ -1107,7 +1107,26 @@ class MemberAuthController {
         withdrawal_req_data.transaction_made_by = request_data.member_id;
         withdrawal_req_data.status = 'approved';
 
+        var transaction_status = 1;
+        if (
+          payment_method_details.slug !== 'instant_paypal' &&
+          payment_method_details.slug !== 'paypal' &&
+          payment_method_details.payment_type === 'Auto'
+        )
+          transaction_status = 2;
         //Insert into member transaction and update balance
+
+        // console.log('updateMemberTransactionAndBalance-----', {
+        //   member_id: request_data.member_id,
+        //   amount: -withdrawal_amount,
+        //   note: 'Withdrawal request for $' + withdrawal_amount,
+        //   type: 'withdraw',
+        //   amount_action: 'member_withdrawal',
+        //   created_by: request_data.member_id,
+        //   // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+        //   status: transaction_status,
+        // });
+
         transaction_resp =
           await MemberTransaction.updateMemberTransactionAndBalance({
             member_id: request_data.member_id,
@@ -1116,9 +1135,10 @@ class MemberAuthController {
             type: 'withdraw',
             amount_action: 'member_withdrawal',
             created_by: request_data.member_id,
-            status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+            // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+            status: transaction_status,
           });
-        // console.log(withdrawal_req_data);
+
         if (payment_method_details.slug == 'instant_paypal') {
           const paypal_class = new Paypal(
             req.session.company_portal.id,
@@ -1139,28 +1159,29 @@ class MemberAuthController {
             // console.log(info);
             paypal_request[0][info.field_name] = info.field_value;
           }
-          // console.log(paypal_request);
+          // console.log('paypal_request', paypal_request);
           const create_resp = await paypal_class.payout(paypal_request);
           // console.log('create_resp', create_resp);
+          // const create_resp = { status: true, batch_id: 'test' };
           if (create_resp.status) {
             await MemberTransaction.update(
               {
                 batch_id: create_resp.batch_id,
-                status: 2,
-                balance:
-                  parseFloat(member.member_amounts[0].amount) -
-                  parseFloat(withdrawal_amount),
+                // status: transaction_status,
+                // balance:
+                //   parseFloat(member.member_amounts[0].amount) -
+                //   parseFloat(withdrawal_amount),
               },
               { where: { id: transaction_resp.transaction_id } }
             );
-            await MemberTransaction.updateMemberBalance({
-              amount:
-                parseFloat(member.member_amounts[0].amount) -
-                parseFloat(withdrawal_amount),
-              transaction_amount: withdrawal_amount,
-              action: 'member_withdrawal',
-              member_id: request_data.member_id,
-            });
+            // await MemberTransaction.updateMemberBalance({
+            //   amount:
+            //     parseFloat(member.member_amounts[0].amount) -
+            //     parseFloat(withdrawal_amount),
+            //   transaction_amount: withdrawal_amount,
+            //   action: 'member_withdrawal',
+            //   member_id: request_data.member_id,
+            // });
           }
         }
         //paypal payment section
