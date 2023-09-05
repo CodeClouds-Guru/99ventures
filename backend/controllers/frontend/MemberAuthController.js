@@ -1115,6 +1115,18 @@ class MemberAuthController {
         )
           transaction_status = 2;
         //Insert into member transaction and update balance
+
+        console.log('updateMemberTransactionAndBalance-----', {
+          member_id: request_data.member_id,
+          amount: -withdrawal_amount,
+          note: 'Withdrawal request for $' + withdrawal_amount,
+          type: 'withdraw',
+          amount_action: 'member_withdrawal',
+          created_by: request_data.member_id,
+          // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+          status: transaction_status,
+        });
+
         transaction_resp =
           await MemberTransaction.updateMemberTransactionAndBalance({
             member_id: request_data.member_id,
@@ -1126,16 +1138,7 @@ class MemberAuthController {
             // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
             status: transaction_status,
           });
-        console.log({
-          member_id: request_data.member_id,
-          amount: -withdrawal_amount,
-          note: 'Withdrawal request for $' + withdrawal_amount,
-          type: 'withdraw',
-          amount_action: 'member_withdrawal',
-          created_by: request_data.member_id,
-          // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
-          status: transaction_status,
-        });
+
         if (payment_method_details.slug == 'instant_paypal') {
           const paypal_class = new Paypal(
             req.session.company_portal.id,
