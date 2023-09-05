@@ -1167,21 +1167,21 @@ class MemberAuthController {
             await MemberTransaction.update(
               {
                 batch_id: create_resp.batch_id,
-                status: 2,
-                balance:
-                  parseFloat(member.member_amounts[0].amount) -
-                  parseFloat(withdrawal_amount),
+                // status: transaction_status,
+                // balance:
+                //   parseFloat(member.member_amounts[0].amount) -
+                //   parseFloat(withdrawal_amount),
               },
               { where: { id: transaction_resp.transaction_id } }
             );
-            await MemberTransaction.updateMemberBalance({
-              amount:
-                parseFloat(member.member_amounts[0].amount) -
-                parseFloat(withdrawal_amount),
-              transaction_amount: withdrawal_amount,
-              action: 'member_withdrawal',
-              member_id: request_data.member_id,
-            });
+            // await MemberTransaction.updateMemberBalance({
+            //   amount:
+            //     parseFloat(member.member_amounts[0].amount) -
+            //     parseFloat(withdrawal_amount),
+            //   transaction_amount: withdrawal_amount,
+            //   action: 'member_withdrawal',
+            //   member_id: request_data.member_id,
+            // });
           }
         }
         //paypal payment section
