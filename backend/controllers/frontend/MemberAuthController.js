@@ -1001,9 +1001,7 @@ class MemberAuthController {
       attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
         // status: 'pending',
-        status: {
-          [Op.or]: ['pending', 'approved'],
-        },
+        status: 'pending',
         member_id: request_data.member_id,
       },
     });
