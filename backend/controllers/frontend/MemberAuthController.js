@@ -1116,16 +1116,16 @@ class MemberAuthController {
           transaction_status = 2;
         //Insert into member transaction and update balance
 
-        console.log('updateMemberTransactionAndBalance-----', {
-          member_id: request_data.member_id,
-          amount: -withdrawal_amount,
-          note: 'Withdrawal request for $' + withdrawal_amount,
-          type: 'withdraw',
-          amount_action: 'member_withdrawal',
-          created_by: request_data.member_id,
-          // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
-          status: transaction_status,
-        });
+        // console.log('updateMemberTransactionAndBalance-----', {
+        //   member_id: request_data.member_id,
+        //   amount: -withdrawal_amount,
+        //   note: 'Withdrawal request for $' + withdrawal_amount,
+        //   type: 'withdraw',
+        //   amount_action: 'member_withdrawal',
+        //   created_by: request_data.member_id,
+        //   // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+        //   status: transaction_status,
+        // });
 
         transaction_resp =
           await MemberTransaction.updateMemberTransactionAndBalance({
@@ -1159,10 +1159,10 @@ class MemberAuthController {
             // console.log(info);
             paypal_request[0][info.field_name] = info.field_value;
           }
-          console.log('paypal_request', paypal_request);
-          // const create_resp = await paypal_class.payout(paypal_request);
+          // console.log('paypal_request', paypal_request);
+          const create_resp = await paypal_class.payout(paypal_request);
           // console.log('create_resp', create_resp);
-          const create_resp = { status: true, batch_id: 'test' };
+          // const create_resp = { status: true, batch_id: 'test' };
           if (create_resp.status) {
             await MemberTransaction.update(
               {
