@@ -2,9 +2,6 @@ const {
   Member,
   Survey,
   SurveyProvider,
-  SurveyQuestion,
-  SurveyQualification,
-  SurveyAnswerPrecodes,
   MemberEligibilities,
   CountrySurveyQuestion,
 } = require('../../models');
@@ -19,34 +16,7 @@ class SchlesingerController {
   }
 
   surveys = async (memberId, params, req) => {
-    /*surveys = async(req, res) => {
-        const eligibilities = await MemberEligibilities.getEligibilities(226, 4, 160);
-        const matchingQuestionIds = [];
-        const matchingAnswerIds = [];
-        eligibilities.forEach(eg => {
-            matchingQuestionIds.push(eg.survey_question_id);
-            if(eg.survey_answer_precode_id !== null){
-                matchingAnswerIds.push(+eg.survey_answer_precode_id);
-            }
-        });
-        const surveys = await Survey.getSurveysAndCount({
-            member_id: 160,
-            provider_id: 4,
-            matching_answer_ids: matchingAnswerIds,
-            matching_question_ids: matchingQuestionIds,
-            order: 'desc',
-            pageno: 1,
-            per_page: 12,
-            order_by: 'created_at',
-            clause: {
-                status: "live",
-                country_id: 225
-            }
-        });
-        res.send(eligibilities);
-        return;*/
     try {
-      //const memberId = member.id;
       const member = await Member.findOne({
         attributes: ['username', 'country_id'],
         where: {
