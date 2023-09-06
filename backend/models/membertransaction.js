@@ -327,7 +327,10 @@ module.exports = (sequelize, DataTypes) => {
             company_portal_id: member.company_portal_id,
           },
         });
-        if (parseInt(config_data.dataValues.settings_value) == 1) {
+        if (
+          parseInt(config_data.dataValues.settings_value) == 1 &&
+          data.amount_action !== 'admin_adjustment'
+        ) {
           let referral_data = await MemberTransaction.referralAmountUpdate(
             data.member_id,
             data.amount,
