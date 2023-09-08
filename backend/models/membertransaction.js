@@ -27,6 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'member_transaction_id',
         otherKey: 'survey_number',
       });
+      //Self association for parent transaction id
+      MemberTransaction.belongsTo(models.MemberTransaction, {
+        foreignKey: 'parent_transaction_id',
+        as: 'ParentTransaction',
+      });
     }
   }
   MemberTransaction.init(

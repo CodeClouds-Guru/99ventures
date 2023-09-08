@@ -36,7 +36,8 @@ class MemberTransactionController extends Controller {
       };
     }
     options.where = new_option;
-    options.attributes.push('type');
+    options.attributes.push('type', 'parent_transaction_id');
+    //options.logging = console.log;
     options.include = [
       {
         model: Member,
@@ -49,6 +50,16 @@ class MemberTransactionController extends Controller {
         include: {
           model: PaymentMethod,
           attributes: ['name', 'slug'],
+        },
+      },
+      {
+        model: this.model,
+        as: 'ParentTransaction',
+        attributes: ['member_id'],
+        include: {
+          model: Member,
+          required: false,
+          attributes: ['id', 'first_name', 'last_name', 'username'],
         },
       },
     ];
@@ -73,9 +84,18 @@ class MemberTransactionController extends Controller {
       ) {
         record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
-      if(record.dataValues.amount_action === 'offerwall'){
+      if (record.dataValues.amount_action === 'offerwall') {
         record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.note})`;
       }
+
+      if (
+        record.dataValues.amount_action === 'referral' &&
+        record.dataValues.ParentTransaction !== null &&
+        record.dataValues.ParentTransaction.Member !== null
+      ) {
+        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.ParentTransaction.Member.username})`;
+      }
+
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';
