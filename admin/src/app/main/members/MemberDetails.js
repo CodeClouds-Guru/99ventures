@@ -992,6 +992,16 @@ const MemberDetails = (props) => {
                                         )
                                     } />
                                 </ListItem>
+                                <ListItem disablePadding>
+                                    <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                        <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Joining Date:</Typography>
+                                    } />
+                                    <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            { memberData.created_at }
+                                        </Typography>
+                                    } />
+                                </ListItem>
                             </List>
                         </div>
                     </div>
