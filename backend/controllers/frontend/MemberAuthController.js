@@ -997,14 +997,26 @@ class MemberAuthController {
     }
 
     //check pending withdrawal request
+
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      logging: console.log,
       attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
       where: {
         // status: 'pending',
         status: 'pending',
         member_id: request_data.member_id,
       },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: [0, 1],
+        },
+        required: true,
+      },
     });
+
+    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
       member.member_amounts[0].amount <
