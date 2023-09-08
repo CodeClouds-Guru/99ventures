@@ -1000,7 +1000,12 @@ class MemberAuthController {
 
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
       logging: console.log,
-      attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
+      attributes: [
+        [
+          sequelize.fn('SUM', sequelize.col('withdrawal_request.amount')),
+          'total',
+        ],
+      ],
       where: {
         // status: 'pending',
         status: 'pending',
