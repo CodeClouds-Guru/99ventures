@@ -1002,7 +1002,7 @@ class MemberAuthController {
       logging: console.log,
       attributes: [
         [
-          sequelize.fn('SUM', sequelize.col('withdrawal_requests.amount')),
+          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
           'total',
         ],
       ],
