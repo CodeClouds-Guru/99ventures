@@ -44,7 +44,8 @@ function getIp(req) {
 }
 
 function getBrowser(req) {
-    return req['user-agent'] || 'Unable to fetch user-agent';
+    console.log('user agent', req.headers['user-agent'])
+    return req.headers['user-agent'] || 'Unable to fetch user-agent';
 }
 
 function getMemberOfThisSession(req) {
@@ -117,9 +118,9 @@ async function logIP(req, ip, geo) {
                 geo_location: geo.report.country_code + ',' + geo.report.region + ',' + geo.report.city,
                 isp: geo.report.ISP,
                 fraud_score: geo.report.fraud_score,
-                vpn: geo.report.vpn,
+                vpn: geo.report.active_vpn,
                 proxy: geo.report.proxy,
-                tor: geo.report.tor,
+                tor: geo.report.active_tor,
                 bot_status: geo.report.bot_status,
                 latitude: geo.report.latitude,
                 longitude: geo.report.longitude,

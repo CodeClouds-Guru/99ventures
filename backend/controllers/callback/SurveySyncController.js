@@ -1518,27 +1518,25 @@ class SurveySyncController {
     async removeSurvey(){
         try {
             const sql = 
-            `DELETE surveys, survey_qualifications 
-            FROM
-                surveys
-            JOIN survey_qualifications ON(
-                    surveys.id = survey_qualifications.survey_id
-                )
-            WHERE NOT
-                EXISTS(
+                `DELETE
+                    surveys,
+                    survey_qualifications
+                FROM
+                    surveys
+                JOIN survey_qualifications ON(
+                        surveys.id = survey_qualifications.survey_id
+                    )
+                WHERE
+                    surveys.survey_number NOT IN(
                     SELECT
                         survey_number
                     FROM
                         member_surveys
-                    JOIN member_transactions ON(
-                        member_transactions.id = member_surveys.member_transaction_id
-                    )
                     WHERE
-                        surveys.survey_number = member_surveys.survey_number AND member_transactions.amount_action = :amount_action 
-                ) 
-            AND surveys.deleted_at IS NOT NULL AND surveys.status IN (:status);`;
+                        survey_provider_id IN(1, 3, 4)
+                ) AND surveys.deleted_at IS NOT NULL AND surveys.status IN (:status);`;
 
-            await sequelize.query(sql, { type: QueryTypes.DELETE, replacements: {status: ['closed', 'draft'], amount_action: 'survey' } });
+            await sequelize.query(sql, { type: QueryTypes.DELETE, replacements: {status: ['closed', 'draft'] } });
             return {status: true, message: 'Success'};
         } catch (error) {
             const logger = require('../../helpers/Logger')(`cron.log`);

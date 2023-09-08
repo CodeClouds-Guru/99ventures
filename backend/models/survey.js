@@ -1,7 +1,8 @@
 'use strict';
 const {
 	Op,
-	Model
+	Model,
+	QueryTypes
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
@@ -115,6 +116,72 @@ module.exports = (sequelize, DataTypes) => {
 		});
 
 		return surveys;
+	}
+
+	//For Lucid Provider
+	Survey.getAndCountLucidSurveys = async(params) => {
+		var rawSql = `
+          SELECT
+            s.survey_number,
+            s.cpi,
+            s.loi,
+            s.name,
+            COUNT(sq.survey_id) AS qual_count,
+            sq.survey_id
+          FROM
+              survey_qualifications AS sq
+          JOIN survey_answer_precode_survey_qualifications AS ap
+          ON (sq.id = ap.survey_qualification_id)
+          JOIN surveys as s ON (s.id = sq.survey_id)
+          WHERE
+              sq.survey_question_id IN(:survey_question_ids) AND sq.deleted_at IS NULL 
+              AND ap.survey_answer_precode_id IN(:answer_precode_ids)
+              AND s.deleted_at IS NULL AND s.survey_provider_id = 1
+              AND s.status = :status
+              AND s.country_id = :country_id
+              AND s.survey_number NOT IN (
+                SELECT survey_number FROM member_surveys AS ms JOIN member_transactions AS mt 
+				ON (ms.member_transaction_id = mt.id) 
+				WHERE mt.member_id = :member_id
+              )
+          GROUP BY
+              sq.survey_id
+          HAVING
+              qual_count =(
+              SELECT
+                  COUNT(survey_id)
+              FROM
+                survey_qualifications
+              WHERE
+                survey_qualifications.survey_id = sq.survey_id AND 
+                survey_qualifications.survey_question_id IN(:survey_question_ids) AND 
+                survey_qualifications.deleted_at IS NULL
+          ) ORDER BY s.${params.orderBy} ${params.order}`;
+
+		const allSurveys = await sequelize.query(`${rawSql} LIMIT ${params.offset}, ${params.limit}`, {
+            type: QueryTypes.SELECT, 
+            replacements: {
+				member_id: params.member_id,
+				country_id: params.country_id,
+				status: params.status,
+				survey_question_ids: params.survey_question_ids,
+				answer_precode_ids: params.answer_precode_ids
+            }
+		});
+		const countSurveys = await sequelize.query(rawSql, {
+            type: QueryTypes.SELECT, 
+            replacements: {
+				member_id: params.member_id,
+				country_id: params.country_id,
+				status: params.status,
+				survey_question_ids: params.survey_question_ids,
+				answer_precode_ids: params.answer_precode_ids
+            }
+		});
+		return {
+			count_survey: countSurveys.length,
+			survey_rows: allSurveys
+		};
 	}
 
 	return Survey;
