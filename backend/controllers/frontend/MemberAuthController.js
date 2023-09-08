@@ -351,7 +351,7 @@ class MemberAuthController {
     await MemberTransaction.updateMemberTransactionAndBalance({
       member_id: member_details.id,
       amount: registration_bonus.settings_value,
-      note: '',
+      note: 'Registration Bonus',
       status: '2',
       type: 'credited',
       amount_action: 'registration_bonus',
@@ -997,14 +997,30 @@ class MemberAuthController {
     }
 
     //check pending withdrawal request
+
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      attributes: [[sequelize.fn('SUM', sequelize.col('amount')), 'total']],
+      // logging: console.log,
+      attributes: [
+        [
+          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+          'total',
+        ],
+      ],
       where: {
         // status: 'pending',
-        status: 'pending',
         member_id: request_data.member_id,
       },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: [0, 1],
+        },
+        required: true,
+      },
     });
+
+    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
       member.member_amounts[0].amount <
