@@ -101,8 +101,146 @@ class LucidController {
         return;
 
     }*/
+  
+  surveys = async(memberId, params, req) => {
+      try {
+        const member = await Member.findOne({
+          attributes: ['username', 'country_id'],
+          where: {
+            id: memberId,
+          },
+        });
+  
+        if (!memberId || member === null) {
+          res.json({
+            staus: false,
+            message: 'Member id not found!',
+          });
+          return;
+        }
+  
+        const provider = await SurveyProvider.findOne({
+          attributes: ['id', 'currency_percent'],
+          where: {
+            name: 'Lucid',
+            status: 1,
+          },
+        });
+        if (!provider || provider == null) {
+          return {
+            status: false,
+            message: 'Survey Provider not found!',
+          };
+        }
+  
+        const pageNo = 'pageno' in params ? parseInt(params.pageno) : 1;
+        const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
+        const orderBy = 'orderby' in params ? params.orderby : 'created_at';
+        const order = 'order' in params ? params.order : 'desc';
+  
+        /**
+         * check and get member's eligibility
+         */
+        const eligibilities = await MemberEligibilities.getEligibilities(
+          member.country_id,
+          provider.id,
+          memberId
+        );
+  
+        if (eligibilities.length < 1) {
+          return {
+            status: false,
+            message: 'Sorry! you are not eligible.',
+          };
+        }
+        /** Query String Formation Start */
+        const queryString = {};
+        const matchingQuestionIds = [];
+        const matchingAnswerIds = [];
+        eligibilities.forEach((eg) => {
+          // queryString[eg.survey_provider_question_id] = eg.option ? eg.option : eg.open_ended_value;
+          matchingQuestionIds.push(eg.survey_question_id);
+          if (eg.survey_answer_precode_id !== null) {
+            matchingAnswerIds.push(+eg.survey_answer_precode_id);
+          }
+          if (eg.open_ended_value) {
+            queryString[eg.survey_provider_question_id] = eg.open_ended_value;
+          }
+        });
+        /** End */
+  
+        if (matchingAnswerIds.length && matchingQuestionIds.length) {
+          const {count_survey, survey_rows} = await Survey.getAndCountLucidSurveys({
+            member_id: memberId,
+            country_id: member.country_id,
+            status: 'active',
+            survey_question_ids: matchingQuestionIds,
+            answer_precode_ids: matchingAnswerIds,
+            limit: perPage,
+            offset: (pageNo - 1) * perPage,
+            orderBy,
+            order
+          });
+          if (!survey_rows.length) {
+            return {
+              status: false,
+              message: 'No matching surveys!',
+            };
+          }
+          const surveyIds = survey_rows.map(r=> r.survey_id);
+          const qualifications = await SurveyQualification.findAll({
+            attributes: ['id', 'survey_id', 'survey_question_id'],
+            where: {
+              survey_id: surveyIds
+            }
+          });
+          var survey_list = [];
+          if (survey_rows && count_survey) {
+            for (let survey of survey_rows) {
+              let surveyQual = qualifications.filter(r=> +r.survey_id === +survey.survey_id);
+              let eligibilityStr = this.generateQueryString(
+                queryString,
+                surveyQual,
+                eligibilities
+              );
+              let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${eligibilityStr}`;
+              let cpiValue = (+survey.cpi * +provider.currency_percent) / 100;
+              let temp_survey = {
+                survey_number: survey.survey_number,
+                name: survey.name,
+                cpi: cpiValue.toFixed(2),
+                loi: survey.loi,
+                link,
+              };
+              survey_list.push(temp_survey);
+            }
+          }
+          let pageCount = Math.ceil(count_survey / perPage);
+          return {
+            status: true,
+            message: 'Success',
+            result: {
+              surveys: survey_list,
+              page_count: pageCount,
+            },
+          };  
+        } else {
+          return {
+            status: false,
+            message:
+              'Sorry! no surveys have been matched now! Please try again later.',
+          };
+        }
+      } catch (error) {
+        console.error(error);
+        return {
+          status: false,
+          message: 'Something went wrong!',
+        };
+      }
+  };
 
-  surveys = async (memberId, params, req) => {
+  surveysOld = async (memberId, params, req) => {
     try {
       const member = await Member.findOne({
         attributes: ['username', 'country_id'],
