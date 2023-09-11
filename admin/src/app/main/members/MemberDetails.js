@@ -998,7 +998,7 @@ const MemberDetails = (props) => {
                                     } />
                                     <ListItemText className="sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
-                                            { memberData.created_at }
+                                            { moment(memberData.created_at).format('MMMM Do YYYY, HH:mm:ss') }
                                         </Typography>
                                     } />
                                 </ListItem>

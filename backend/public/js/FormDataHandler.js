@@ -307,6 +307,7 @@ $(() => {
     const confirm_password = $(signupForm)
       .find('input[name="confirm_password"]')
       .get(0);
+    const terms_checkbox = $(signupForm).find('.more_survey_terms_field');
     if ($(first_name).val().trim().length === 0) {
       errorsArray.push({
         field: $(first_name),
@@ -346,6 +347,12 @@ $(() => {
       errorsArray.push({
         field: $(confirm_password),
         message: 'Password mismatched',
+      });
+    }
+    if($(signupForm).find('input[name=more_survey_terms]').is(':checked') === false) {
+      errorsArray.push({
+        field: $(terms_checkbox),
+        message: 'Please check the terms & conditions',
       });
     }
   };
@@ -510,6 +517,14 @@ $(() => {
       .attr('method', 'post');
     $('#scripteed_logout_form').submit();
   });
+
+  $('.more_survey_terms').on('change', function(){
+    if($(this).is(':checked') === true) {
+      $('.btn-submit').removeAttr('disabled')
+    } else {
+      $('.btn-submit').attr('disabled', true)
+    }
+  })
 
   var pathname = window.location.pathname;
   pathname = pathname.replace('/', '');
