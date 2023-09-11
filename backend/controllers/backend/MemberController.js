@@ -69,6 +69,7 @@ class MemberController extends Controller {
       'WithdrawalRequests.amount': 'Withdrawal - total paid',
       'WithdrawalRequests.created_at': 'Withdrawal - last cash out (date)',
       admin_status: 'Verified/unverified',
+      country_id: 'Country',
     };
   }
   async save(req, res) {
@@ -506,6 +507,12 @@ class MemberController extends Controller {
         model_name: 'MemberReferral',
         status: false,
       },
+      {
+        model: Country,
+        model_name: 'Country',
+        attributes: ['nicename'],
+        status: true,
+      },
     ];
 
     if (query_where) {
@@ -572,7 +579,15 @@ class MemberController extends Controller {
     options.offset = offset;
     options.subQuery = false;
     options.distinct = true;
-    options.attributes = [...colums, 'deleted_at', 'deleted_by'];
+    options.attributes = [
+      ...colums,
+      'deleted_at',
+      'deleted_by',
+      'country_id',
+      'address_1',
+      'address_2',
+      'zip_code',
+    ];
     options.group = 'Member.id';
     options.paranoid = false;
     const relationCols = [];
@@ -612,7 +627,7 @@ class MemberController extends Controller {
     if (fields.includes('WithdrawalRequests.created_at')) {
       relationCols.push([
         sequelize.literal(
-          "(SELECT created_at from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id ORDER BY created_at DESC LIMIT 1)"
+          "(SELECT created_at from withdrawal_requests WHERE status IN ('approved','completed') AND member_id = Member.id ORDER BY created_at DESC LIMIT 1)"
         ),
         'last_cashout_date',
       ]);
@@ -644,9 +659,10 @@ class MemberController extends Controller {
 
     options.attributes = [...options.attributes, ...relationCols];
 
+    options.logging = console.log;
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
-
+    // console.log('result.rows=', result.rows);
     result.rows.map((row) => {
       let ip = '';
       let geo_location = '';
@@ -669,6 +685,9 @@ class MemberController extends Controller {
       }
       if (fields.includes('IpLogs.geo_location')) {
         row.setDataValue('IpLogs.geo_location', geo_location);
+        req.query.fields.push('country_id');
+        if (row.Country) row.setDataValue('country_id', row.Country.nicename);
+        else row.setDataValue('country_id', '');
       }
       if (fields.includes('IpLogs.isp')) {
         row.setDataValue('IpLogs.isp', isp);
@@ -760,7 +779,8 @@ class MemberController extends Controller {
   async export(req, res) {
     req.query.show = 100000;
     let { fields, result } = await this.list(req);
-    // console.log(result);
+    console.log('export result=', result);
+    // return;
     var header = [];
     for (const head of Object.values(fields)) {
       header.push({ id: head.field_name, title: head.placeholder });
