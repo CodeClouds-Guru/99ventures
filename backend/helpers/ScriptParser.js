@@ -215,7 +215,7 @@ class ScriptParser {
               pending_withdrawal_req_amount.dataValues.total;
             other_details.total_unapproved_withdrawal_count =
               pending_withdrawal_req_amount.dataValues.total_count;
-            console.log(other_details);
+            // console.log(other_details);
             data.forEach(function (payment, key) {
               // payment.WithdrawalRequests.forEach(function (requests, key) {
               //   if (
@@ -225,17 +225,17 @@ class ScriptParser {
               //   }
               // });
 
-              var date1 = new Date();
-              var withdraw_redo_interval = payment.withdraw_redo_interval;
+              const withdraw_redo_interval = payment.withdraw_redo_interval;
               data[key].setDataValue(
                 'redo_diff',
-                parseFloat(withdraw_redo_interval)
+                parseFloat(payment.withdraw_redo_interval)
               );
               data[key].setDataValue('redo_diff_calculation', 0);
               if (withdraw_redo_interval > 0) {
                 var date2 = new Date();
 
                 if (payment.WithdrawalRequests.length > 0) {
+                  var date2 = new Date(payment.WithdrawalRequests.created_at);
                   var hours = (Math.abs(date2 - date1) / 36e5).toFixed(2);
                   data[key].setDataValue('redo_diff', parseFloat(hours));
                   data[key].setDataValue(

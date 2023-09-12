@@ -82,7 +82,7 @@ function Listing(props) {
         "WithdrawalRequests.amount": "Withdrawal - total paid",
         "WithdrawalRequests.created_at": "Withdrawal - last cash out (date)",
         "admin_status": "Verified/unverified",
-        "country_id":"Country Id",
+        "country_id":"Country",
     }
     const column_object = {
         'address_1': 'Billing Street Address',
