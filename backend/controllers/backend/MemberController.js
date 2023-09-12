@@ -635,7 +635,7 @@ class MemberController extends Controller {
     if (fields.includes('WithdrawalRequests.amount')) {
       relationCols.push([
         sequelize.literal(
-          "(SELECT SUM(amount) from withdrawal_requests WHERE status = 'approved' AND member_id = Member.id)"
+          "(SELECT SUM(amount) from withdrawal_requests WHERE status IN ('approved','completed') AND member_id = Member.id)"
         ),
         'total_paid',
       ]);
