@@ -685,9 +685,6 @@ class MemberController extends Controller {
       }
       if (fields.includes('IpLogs.geo_location')) {
         row.setDataValue('IpLogs.geo_location', geo_location);
-        req.query.fields.push('country_id');
-        if (row.Country) row.setDataValue('country_id', row.Country.nicename);
-        else row.setDataValue('country_id', '');
       }
       if (fields.includes('IpLogs.isp')) {
         row.setDataValue('IpLogs.isp', isp);
@@ -748,6 +745,12 @@ class MemberController extends Controller {
           'MemberReferral.referral_email',
           row.get('referral_email')
         );
+      }
+
+      if (fields.includes('country_id')) {
+        // req.query.fields.push('country_id');
+        if (row.Country) row.setDataValue('country_id', row.Country.nicename);
+        else row.setDataValue('country_id', '');
       }
 
       // In member listing, member is deleted or not is required
