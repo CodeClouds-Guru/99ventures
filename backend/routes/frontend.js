@@ -58,6 +58,7 @@ router.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+router.get('/impersonate', StaticPageController.validateImpersonation);
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);

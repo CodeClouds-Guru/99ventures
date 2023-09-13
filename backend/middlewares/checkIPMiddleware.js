@@ -56,6 +56,10 @@ function getMemberOfThisSession(req) {
     return member;
 }
 
+function isImpersonated(req) {
+    return 'impersonation' in req.session;
+}
+
 async function getCompanyPortalId(req) {
     var company_portal_id = 1;
     const existing_portal = await CompanyPortal.findOne({
@@ -142,7 +146,7 @@ async function checkIfCountryChanged(req, country_code) {
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if (!(['/notice', '/404', '/503', '/500', '/faq', '/logout'].includes(partial_path))) {
+    if (!['/notice', '/404', '/503', '/500', '/faq', '/logout'].includes(partial_path) && !isImpersonated(req)) {
         const company_portal_id = await getCompanyPortalId(req)
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {

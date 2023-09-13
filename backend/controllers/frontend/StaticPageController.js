@@ -3,9 +3,10 @@ const ScriptParser = require('../../helpers/ScriptParser');
 const { Member } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
+const jwt = require('jsonwebtoken');
 
 class StaticPageController {
-  constructor() {}
+  constructor() { }
 
   /**
    * Show Survey Status
@@ -112,6 +113,40 @@ class StaticPageController {
       resp.error = e.message;
     } finally {
       res.json(resp);
+    }
+  }
+
+
+  /**
+   * Validate Admin User Token Passed for Impersonation
+   * Starts Member Auth By Using Session
+   * Sets Impersonation Mode
+   * @param {} req 
+   * @param {*} res 
+   */
+  async validateImpersonation(req, res) {
+    try {
+      var token = req.query.hashKey || null;
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.APP_SECRET)
+          const member_id = decoded.member_id;
+          const member = await Member.findOne({ where: { id: member_id } });
+          if (!member) {
+            throw new Error("Member Not Found or Soft Deleted")
+          }
+          req.session.member = member;
+          req.session.impersonation = 1;
+          return res.redirect('/dashboard');
+        } catch (e) {
+          throw new Error("Invalid hashKey");
+        }
+      } else {
+        throw new Error("hashKey missing in the query");
+      }
+    } catch (e) {
+      console.error('Impersonation error', e);
+      return res.render('impersonation_error', { error: e.message });
     }
   }
 }
