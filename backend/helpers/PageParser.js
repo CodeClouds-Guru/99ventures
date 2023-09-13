@@ -115,7 +115,7 @@ class PageParser {
     const page_descriptions = this.page.descriptions;
     const page_meta_code = this.page.meta_code || '';
     const user = this.getSessionUser();
-    const impersonated = 'impersonation' in req.session;
+    const impersonated = 'impersonation' in req.session && req.session.impersonation === 1;
     const error_message = this.getFlashMessage() || '';
     let layout_keywords = await CompanyPortalMetaTag.findOne({
       where: {
