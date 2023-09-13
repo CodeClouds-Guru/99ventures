@@ -641,7 +641,7 @@ class MemberAuthController {
         'POSTAL CODE',
       ];
       let questions = await SurveyQuestion.findAll({
-        // logging: console.log,
+        logging: console.log,
         where: { name: name_list },
         include: [
           {
@@ -1028,7 +1028,7 @@ class MemberAuthController {
     if (
       member.member_amounts[0].amount <
       parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-      withdrawal_amount
+        withdrawal_amount
     ) {
       return {
         member_status: false,
