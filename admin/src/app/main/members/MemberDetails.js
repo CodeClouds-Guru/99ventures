@@ -449,6 +449,7 @@ const MemberDetails = (props) => {
     }
 
     const impersonateAccount = () => {
+        onCloseAlertDialogHandle();
         window.open('//'+memberData.impersonation_link, "_blank");
     };
 
