@@ -7,7 +7,7 @@ import AlertDialog from 'app/shared-components/AlertDialog';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import AccountNotes from './components/AccountNotes';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios'
 import Adjustment from './components/Adjustment';
 import SurveyDetails from './components/SurveyDetails';
@@ -19,6 +19,7 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from"moment";
+import { selectUser } from 'app/store/userSlice';
 
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
@@ -43,11 +44,11 @@ const textFieldStyle = {
 }
 
 const iconStyle = {
-    width: '20px',
-    height: '20px',
-    minWidth: '20px',
-    minHeight: '20px',
-    fontSize: '20px',
+    width: '18px',
+    height: '18px',
+    minWidth: '18px',
+    minHeight: '18px',
+    fontSize: '18px',
     lineHeight: 20,
     '@media screen and (max-width: 1600px)': {
         width: '16px',
@@ -159,7 +160,8 @@ const MemberDetails = (props) => {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [editAdminStatus, setEditAdminStatus] = useState(false);
     const [editPaymentEmail, setEditPaymentEmail] = useState(false);
-
+    const user = useSelector(selectUser);
+    
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
             dispatch(showMessage({ variant: 'success', message: 'Copied' }));
@@ -176,6 +178,8 @@ const MemberDetails = (props) => {
             msg = 'Do you want to save the changes?';
         else if (type === 'adjustment')
             msg = 'Do you want to adjust the amount?'
+        else if (type === 'impersonate')
+            msg = 'Please note that this action will cause termination to any active session on the front-end. Do you really want to proceed?'
 
         setAlertType(type);
         setMsg(msg);
@@ -193,7 +197,8 @@ const MemberDetails = (props) => {
             handleFormSubmit();
         } else if (alertType === 'delete') {
             deleteAccount();
-        }
+        } else if (alertType === 'impersonate')
+            impersonateAccount();
     }
 
     const memberNoteDeleted = () => {
@@ -442,6 +447,11 @@ const MemberDetails = (props) => {
                 dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
             });
     }
+
+    const impersonateAccount = () => {
+        window.open('//'+memberData.impersonation_link, "_blank");
+    };
+
     if (loader) {
         return (
             <BackdropLoader />
@@ -457,7 +467,6 @@ const MemberDetails = (props) => {
                 <div className="lg:w-1/3 xl:w-2/5">
                     <div className='flex items-start justify-between'>
                         <div className='flex items-center justify-between'>
-
                             {
                                 editMode ? (
                                     <>
@@ -545,8 +554,19 @@ const MemberDetails = (props) => {
                                     <ListItemText className="sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
                                         <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>ID:</Typography>
                                     } />
-                                    <ListItemText className="sm:w-3/4 md:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-base xl:text-base">{memberData.id}</Typography>
+                                    <ListItemText component="div" className="sm:w-3/4 md:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                        <div className='flex items-center'>
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-base xl:text-base">{memberData.id}</Typography>
+                                            {
+                                                (user.role.includes('super-admin') && memberData.deleted_at === null) && (
+                                                    <Tooltip title="Impersonate me" placement="top-start" >
+                                                        <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={()=>onOpenAlertDialogHandle('impersonate')}>
+                                                            <FuseSvgIcon sx={iconStyle} className="text-48" size={14} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )
+                                            }
+                                        </div>
                                     } />
                                 </ListItem>
                                 <ListItem disablePadding>
