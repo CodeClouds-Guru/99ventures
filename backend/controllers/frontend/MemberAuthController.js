@@ -842,6 +842,7 @@ class MemberAuthController {
   }
   async logout(req, res) {
     req.session.member = null;
+    req.session.impersonation = null;
     res.redirect('/');
   }
 
@@ -1025,7 +1026,7 @@ class MemberAuthController {
     if (
       member.member_amounts[0].amount <
       parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+      withdrawal_amount
     ) {
       return {
         member_status: false,
