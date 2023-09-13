@@ -52,7 +52,7 @@ class MemberAuthController {
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
-    // this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
+    this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
@@ -599,23 +599,25 @@ class MemberAuthController {
     }
   }
 
-  // async manualMemberEligibility(req, res) {
-  //   let members = await Member.findAll({
-  //     // attributes: ['id'],
-  //     where: {
-  //       // id: 161,
-  //       profile_completed_on: {
-  //         [Op.ne]: null,
-  //       },
-  //       status: 'member',
-  //     },
-  //   });
-  //   // res.json({ data: members });
-  //   for (const member of members) {
-  //     await this.setMemberEligibility(member.id, member.profile_completed_on);
-  //   }
-  //   res.json({ data: members });
-  // }
+  //Start - Api to insert Member Eligibility manually
+  async manualMemberEligibility(req, res) {
+    let members = await Member.findAll({
+      // attributes: ['id'],
+      where: {
+        id: 1,
+        // profile_completed_on: {
+        //   [Op.ne]: null,
+        // },
+        status: 'member',
+      },
+    });
+    // res.json({ data: members });
+    for (const member of members) {
+      await this.setMemberEligibility(member.id, member.profile_completed_on);
+    }
+    res.json({ data: members });
+  }
+  //Start - Api to insert Member Eligibility manually
 
   //set member eligibility
   async setMemberEligibility(member_id, profile_completed_on) {
@@ -652,7 +654,7 @@ class MemberAuthController {
             model: SurveyAnswerPrecodes,
             attributes: ['id', 'option', 'option_text'],
             where: { country_id: member_details.country_id },
-            required: true,
+            // required: true,
           },
         ],
       });
