@@ -224,7 +224,7 @@ class ScriptParser {
               //     total_unapproved_withdrawal_amount += requests.amount;
               //   }
               // });
-
+              var date1 = new Date();
               const withdraw_redo_interval = payment.withdraw_redo_interval;
               data[key].setDataValue(
                 'redo_diff',
