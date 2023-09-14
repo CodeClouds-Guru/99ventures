@@ -755,7 +755,7 @@ class MemberAuthController {
             //   precode_id = survey_answer_precodes.id;
             //   precode = '';
             // }
-            if (precode_id !== null || precode !== null) {
+            if (precode_id || precode) {
               member_eligibility.push({
                 member_id: member_id,
                 country_survey_question_id: record.CountrySurveyQuestion.id,
