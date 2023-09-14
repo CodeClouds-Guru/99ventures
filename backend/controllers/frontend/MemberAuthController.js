@@ -687,14 +687,14 @@ class MemberAuthController {
                     member_details.gender.toLowerCase()
                   );
                 });
-                console.log('==========pre', pre);
-                if (record.survey_provider_id === 6) {
-                  toluna_questions.push({
-                    QuestionID: record.id,
-                    Answers: [{ AnswerID: pre.id }],
-                  });
-                }
-                precode_id = pre.id;
+                // console.log('==========pre', pre.dataValues);
+                // if (record.survey_provider_id === 6) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
+                precode_id = pre ? pre.id : null;
                 break;
               case 'ZIP':
                 precode = member_details.zip_code;
@@ -714,7 +714,7 @@ class MemberAuthController {
                     return element.option == dob;
                   });
                   // console.log('==========pre', pre.id);
-                  precode_id = pre.id;
+                  precode_id = pre ? pre.id : null;
                 }
                 break;
               case 'STATE':
@@ -740,12 +740,14 @@ class MemberAuthController {
             //   precode_id = survey_answer_precodes.id;
             //   precode = '';
             // }
-            member_eligibility.push({
-              member_id: member_id,
-              country_survey_question_id: record.CountrySurveyQuestion.id,
-              survey_answer_precode_id: precode_id,
-              open_ended_value: precode,
-            });
+            if (precode_id !== null || precode !== null) {
+              member_eligibility.push({
+                member_id: member_id,
+                country_survey_question_id: record.CountrySurveyQuestion.id,
+                survey_answer_precode_id: precode_id,
+                open_ended_value: precode,
+              });
+            }
             // }
           }
         }
