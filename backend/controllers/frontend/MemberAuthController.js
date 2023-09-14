@@ -604,11 +604,12 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        id: 179,
-        // profile_completed_on: {
-        //   [Op.ne]: null,
-        // },
+        // id: {[Op.in] : []},
+        profile_completed_on: {
+          [Op.ne]: null,
+        },
         status: 'member',
+        deleted_at: null,
       },
     });
     // res.json({ data: members });
@@ -740,9 +741,9 @@ class MemberAuthController {
                   precode_id = pre ? pre.id : '';
                 }
                 break;
-              case 'STATE':
-                if (member_details.state) precode = member_details.state;
-                break;
+              // case 'STATE':
+              //   if (member_details.state) precode = member_details.state;
+              //   break;
             }
             // if (precode) {
             // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
