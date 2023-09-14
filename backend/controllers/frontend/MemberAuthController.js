@@ -642,7 +642,12 @@ class MemberAuthController {
         'POSTAL CODE',
         'STANDARD_Postal_Code_GB',
         'STANDARD_Postal_Area',
+        'Zipcode',
       ];
+      // let question_id_list = [
+      //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
+      //   237, 79362, 79388, 79335, 79336, 12452, 12453,
+      // ];
       let questions = await SurveyQuestion.findAll({
         logging: console.log,
         attributes: [
@@ -653,6 +658,7 @@ class MemberAuthController {
           'survey_provider_question_id',
           'question_type',
         ],
+        // where: { survey_provider_question_id: { [Op.in]: question_id_list } },
         where: { name: { [Op.in]: name_list } },
         include: [
           {
@@ -681,7 +687,7 @@ class MemberAuthController {
             switch (question_name) {
               //get precodes
               case 'GENDER':
-                let pre = record.SurveyAnswerPrecodes.find((element) => {
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
                     element.option_text.toLowerCase() ===
                     member_details.gender.toLowerCase()
@@ -694,23 +700,32 @@ class MemberAuthController {
                 //     Answers: [{ AnswerID: pre.id }],
                 //   });
                 // }
-                precode_id = pre ? pre.id : null;
+                if (record.survey_provider_id !== 6)
+                  precode_id = pre ? pre.id : null;
                 break;
               case 'ZIP':
+                precode = member_details.zip_code;
+                break;
+              case 'Zipcode':
                 precode = member_details.zip_code;
                 break;
               case 'POSTAL CODE':
                 precode = member_details.zip_code;
                 break;
               case 'REGION':
-                precode = member_details.city;
+                // precode = member_details.city;
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return element.option == member_details.city;
+                });
+                // console.log('==========pre', pre.id);
+                precode_id = pre ? pre.id : null;
                 break;
               case 'AGE':
                 if (member_details.dob) {
                   var dob = new Date(member_details.dob);
                   dob = new Date(new Date() - dob).getFullYear() - 1970;
 
-                  let pre = record.SurveyAnswerPrecodes.find((element) => {
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
                     return element.option == dob;
                   });
                   // console.log('==========pre', pre.id);
