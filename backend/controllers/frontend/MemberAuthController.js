@@ -604,7 +604,7 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        id: 1,
+        id: 179,
         // profile_completed_on: {
         //   [Op.ne]: null,
         // },
