@@ -645,6 +645,14 @@ class MemberAuthController {
       ];
       let questions = await SurveyQuestion.findAll({
         logging: console.log,
+        attributes: [
+          'id',
+          'question_text',
+          'name',
+          'survey_provider_id',
+          'survey_provider_question_id',
+          'question_type',
+        ],
         where: { name: { [Op.in]: name_list } },
         include: [
           {
@@ -711,6 +719,12 @@ class MemberAuthController {
                 break;
               case 'STATE':
                 if (member_details.state) precode = member_details.state;
+                break;
+              case 'STANDARD_POSTAL_CODE_GB':
+                precode = member_details.zip_code;
+                break;
+              case 'STANDARD_POSTAL_AREA':
+                precode = member_details.zip_code;
                 break;
             }
             // if (precode) {
