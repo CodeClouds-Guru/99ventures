@@ -723,7 +723,7 @@ class MemberAuthController {
               case 'STANDARD_REGION_GB':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
-                  return element.option == member_details.city;
+                  return element.option_text == member_details.city;
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
