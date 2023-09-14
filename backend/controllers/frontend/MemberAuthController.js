@@ -704,13 +704,13 @@ class MemberAuthController {
                   precode_id = pre ? pre.id : null;
                 break;
               case 'ZIP':
-                precode = member_details.zip_code;
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'Zipcode':
-                precode = member_details.zip_code;
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'POSTAL CODE':
-                precode = member_details.zip_code;
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'REGION':
                 // precode = member_details.city;
@@ -736,10 +736,10 @@ class MemberAuthController {
                 if (member_details.state) precode = member_details.state;
                 break;
               case 'STANDARD_POSTAL_CODE_GB':
-                precode = member_details.zip_code;
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'STANDARD_POSTAL_AREA':
-                precode = member_details.zip_code;
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
             }
             // if (precode) {
