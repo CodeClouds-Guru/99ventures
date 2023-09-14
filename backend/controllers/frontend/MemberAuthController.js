@@ -643,6 +643,11 @@ class MemberAuthController {
         'STANDARD_Postal_Code_GB',
         'STANDARD_Postal_Area',
         'Zipcode',
+        'Region 1',
+        'Region 2',
+        'Fulcrum_Region_UK_NUTS_I',
+        'Fulcrum_Region_UK_NUTS_II',
+        'STANDARD_Region_GB',
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -704,15 +709,18 @@ class MemberAuthController {
                   precode_id = pre ? pre.id : '';
                 break;
               case 'ZIP':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
-                break;
               case 'ZIPCODE':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
-                break;
               case 'POSTAL CODE':
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'STANDARD_POSTAL_AREA':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'REGION':
+              case 'REGION 1':
+              case 'REGION 2':
+              case 'FULCRUM_REGION_UK_NUTS_I':
+              case 'FULCRUM_REGION_UK_NUTS_II':
+              case 'STANDARD_REGION_GB':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return element.option == member_details.city;
@@ -734,12 +742,6 @@ class MemberAuthController {
                 break;
               case 'STATE':
                 if (member_details.state) precode = member_details.state;
-                break;
-              case 'STANDARD_POSTAL_CODE_GB':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
-                break;
-              case 'STANDARD_POSTAL_AREA':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
             }
             // if (precode) {
