@@ -52,7 +52,7 @@ class MemberAuthController {
     this.sendMailEvent = this.sendMailEvent.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
-    // this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
+    this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
@@ -599,23 +599,26 @@ class MemberAuthController {
     }
   }
 
-  // async manualMemberEligibility(req, res) {
-  //   let members = await Member.findAll({
-  //     // attributes: ['id'],
-  //     where: {
-  //       // id: 161,
-  //       profile_completed_on: {
-  //         [Op.ne]: null,
-  //       },
-  //       status: 'member',
-  //     },
-  //   });
-  //   // res.json({ data: members });
-  //   for (const member of members) {
-  //     await this.setMemberEligibility(member.id, member.profile_completed_on);
-  //   }
-  //   res.json({ data: members });
-  // }
+  //Start - Api to insert Member Eligibility manually
+  async manualMemberEligibility(req, res) {
+    let members = await Member.findAll({
+      // attributes: ['id'],
+      where: {
+        // id: {[Op.in] : []},
+        profile_completed_on: {
+          [Op.ne]: null,
+        },
+        status: 'member',
+        deleted_at: null,
+      },
+    });
+    // res.json({ data: members });
+    for (const member of members) {
+      await this.setMemberEligibility(member.id, member.profile_completed_on);
+    }
+    res.json({ data: members });
+  }
+  //Start - Api to insert Member Eligibility manually
 
   //set member eligibility
   async setMemberEligibility(member_id, profile_completed_on) {
@@ -630,6 +633,7 @@ class MemberAuthController {
       var member_eligibility = [];
       var toluna_questions = [];
       //eligibility entry for gender
+
       let name_list = [
         'GENDER',
         'ZIP',
@@ -637,10 +641,31 @@ class MemberAuthController {
         'REGION',
         'AGE',
         'POSTAL CODE',
+        'STANDARD_Postal_Code_GB',
+        'STANDARD_Postal_Area',
+        'Zipcode',
+        'Region 1',
+        'Region 2',
+        'Fulcrum_Region_UK_NUTS_I',
+        'Fulcrum_Region_UK_NUTS_II',
+        'STANDARD_Region_GB',
       ];
+      // let question_id_list = [
+      //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
+      //   237, 79362, 79388, 79335, 79336, 12452, 12453,
+      // ];
       let questions = await SurveyQuestion.findAll({
-        // logging: console.log,
-        where: { name: name_list },
+        logging: console.log,
+        attributes: [
+          'id',
+          'question_text',
+          'name',
+          'survey_provider_id',
+          'survey_provider_question_id',
+          'question_type',
+        ],
+        // where: { survey_provider_question_id: { [Op.in]: question_id_list } },
+        where: { name: { [Op.in]: name_list } },
         include: [
           {
             model: CountrySurveyQuestion,
@@ -652,7 +677,7 @@ class MemberAuthController {
             model: SurveyAnswerPrecodes,
             attributes: ['id', 'option', 'option_text'],
             where: { country_id: member_details.country_id },
-            required: true,
+            required: false,
           },
         ],
       });
@@ -668,45 +693,57 @@ class MemberAuthController {
             switch (question_name) {
               //get precodes
               case 'GENDER':
-                let pre = record.SurveyAnswerPrecodes.find((element) => {
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
                     element.option_text.toLowerCase() ===
                     member_details.gender.toLowerCase()
                   );
                 });
-                // console.log('==========pre', pre.id);
-                if (record.survey_provider_id === 6) {
-                  toluna_questions.push({
-                    QuestionID: record.id,
-                    Answers: [{ AnswerID: pre.id }],
-                  });
-                }
-                precode_id = pre.id;
+                // console.log('==========pre', pre.dataValues);
+                // if (record.survey_provider_id === 6) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
+                if (record.survey_provider_id !== 6)
+                  precode_id = pre ? pre.id : '';
                 break;
               case 'ZIP':
-                precode = member_details.zip_code;
-                break;
+              case 'ZIPCODE':
               case 'POSTAL CODE':
-                precode = member_details.zip_code;
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'STANDARD_POSTAL_AREA':
+                precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'REGION':
-                precode = member_details.city;
+              case 'REGION 1':
+              case 'REGION 2':
+              case 'FULCRUM_REGION_UK_NUTS_I':
+              case 'FULCRUM_REGION_UK_NUTS_II':
+              case 'STANDARD_REGION_GB':
+                // precode = member_details.city;
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return element.option_text == member_details.city;
+                });
+                // console.log('==========pre', pre.id);
+                precode_id = pre ? pre.id : '';
                 break;
               case 'AGE':
                 if (member_details.dob) {
                   var dob = new Date(member_details.dob);
                   dob = new Date(new Date() - dob).getFullYear() - 1970;
 
-                  let pre = record.SurveyAnswerPrecodes.find((element) => {
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
                     return element.option == dob;
                   });
                   // console.log('==========pre', pre.id);
-                  precode_id = pre.id;
+                  precode_id = pre ? pre.id : '';
                 }
                 break;
-              case 'STATE':
-                if (member_details.state) precode = member_details.state;
-                break;
+              // case 'STATE':
+              //   if (member_details.state) precode = member_details.state;
+              //   break;
             }
             // if (precode) {
             // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
@@ -721,12 +758,14 @@ class MemberAuthController {
             //   precode_id = survey_answer_precodes.id;
             //   precode = '';
             // }
-            member_eligibility.push({
-              member_id: member_id,
-              country_survey_question_id: record.CountrySurveyQuestion.id,
-              survey_answer_precode_id: precode_id,
-              open_ended_value: precode,
-            });
+            if (precode_id || precode) {
+              member_eligibility.push({
+                member_id: member_id,
+                country_survey_question_id: record.CountrySurveyQuestion.id,
+                survey_answer_precode_id: precode_id,
+                open_ended_value: precode,
+              });
+            }
             // }
           }
         }
@@ -842,6 +881,7 @@ class MemberAuthController {
   }
   async logout(req, res) {
     req.session.member = null;
+    req.session.impersonation = null;
     res.redirect('/');
   }
 

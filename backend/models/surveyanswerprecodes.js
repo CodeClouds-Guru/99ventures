@@ -20,14 +20,14 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false,
         foreignKey: 'survey_answer_precode_id',
         otherKey: 'survey_qualification_id',
-      })
+      });
     }
   }
   SurveyAnswerPrecodes.init(
     {
       option: DataTypes.STRING,
       precode: DataTypes.STRING,
-      survey_provider_id:  DataTypes.BIGINT,
+      survey_provider_id: DataTypes.BIGINT,
       country_id: DataTypes.INTEGER,
       option_text: DataTypes.TEXT,
       created_at: 'TIMESTAMP',

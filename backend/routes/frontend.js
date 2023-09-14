@@ -58,6 +58,7 @@ router.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+router.get('/impersonate', StaticPageController.validateImpersonation);
 router.post('/login', MemberAuthController.login);
 router.post('/signup', MemberAuthController.signup);
 router.get('/email-verify/:hash', MemberAuthController.emailVerify);
@@ -131,7 +132,9 @@ router.get('/confirm-payment/:batchid', async (req, res) => {
   });
 });
 router.get('/get-login-streak', MemberAuthController.getLoginStreak);
-// router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
+
+//test api for manual insertion of member survye eligibilities
+router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

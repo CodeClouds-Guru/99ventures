@@ -360,7 +360,7 @@ function TicketingSystemPage(props) {
                                                     }
                                                     <div className="flex justify-end pl-5" style={{ fontSize: '10px' }}> <i> {Helper.parseTimeStamp(val.created_at)}</i> </div>
                                                 </div>
-                                                <div className='break-all xl:text-15 lg:text-12 md:text-11 sm:text-10'>
+                                                <div className='break-words xl:text-15 lg:text-12 md:text-11 sm:text-10'>
                                                     {parse(val.message)}
                                                 </div>
                                                 {val.TicketAttachments.length > 0 ?

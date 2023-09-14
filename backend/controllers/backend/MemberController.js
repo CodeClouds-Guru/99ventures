@@ -23,7 +23,7 @@ const {
 const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
-const { cryptoEncryption, cryptoDecryption } = require('../../helpers/global');
+const { cryptoEncryption, cryptoDecryption, generateToken } = require('../../helpers/global');
 // const membertransaction = require('../../models/membertransaction');
 const util = require('util');
 // const withdrawalrequest = require('../../models/withdrawalrequest');
@@ -225,59 +225,26 @@ class MemberController extends Controller {
                 attributes: ['name', 'value'],
               },
             },
-            // {
-            //   model: MemberReferral,
-            //   attributes: ['referral_email', 'ip', 'member_id'],
-            //   include: {
-            //     model: Member,
-            //     as: 'member_referrer',
-            //     attributes: [
-            //       'referral_code',
-            //       'first_name',
-            //       'last_name',
-            //       'email',
-            //     ],
-            //   },
-            // },
             {
               model: MemberPaymentInformation,
               attributes: ['name', 'value'],
               where: { status: [1, '1'] },
               limit: 1,
             },
-            // As we are not showing the Deleted Message to the user that's why this model is not required now
-            /*{
-              model: User,
-              as: 'deleted_by_admin',
-              attributes: ['id', 'username'],
-            },*/
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
           let admin_status = result.admin_status.replaceAll(' ', '_');
 
+          /**
+           * Impersonation token generation with link (SAAS Based)
+           */
+          const company_portal = await CompanyPortal.findOne({ where: { id: company_portal_id } });
+          const domain = company_portal ? company_portal.domain : '';
+          const impersonation_token = generateToken({ member_id: result.id, user_id: req.user.id });
+
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
-
-          // survey_list = await MemberTransaction.findAll({
-          //   attributes: ['amount', 'completed_at'],
-          //   limit: 5,
-          //   order: [['completed_at', 'DESC']],
-          //   where: {
-          //     type: 'credited',
-          //     status: 2,
-          //     amount_action: 'survey',
-          //     member_id: member_id,
-          //   },
-          //   include: {
-          //     model: Survey,
-          //     attributes: ['id'],
-          //     through: {
-          //       attributes: ['survey_number', 'member_transaction_id','survey_provider_id'],
-          //     },
-          //     include: { model: SurveyProvider, attributes: ['name'] },
-          //   },
-          // });
 
           let query =
             "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
@@ -285,15 +252,7 @@ class MemberController extends Controller {
             replacements: [member_id],
             type: QueryTypes.SELECT,
           });
-          // for (let i = 0; i < survey_list.length; i++) {
-          //   if (survey_list[i].Surveys && survey_list[i].Surveys.length > 0)
-          //     survey_list[i].setDataValue(
-          //       'name',
-          //       survey_list[i].Surveys[0].SurveyProvider.name
-          //     );
-          //   else survey_list[i].setDataValue('name', null);
-          //   survey_list[i].Surveys = null;
-          // }
+
           let membership_tier = await MembershipTier.findAll({
             attributes: ['id', 'name'],
           });
@@ -314,12 +273,7 @@ class MemberController extends Controller {
               },
             });
           }
-          // console.log(req.headers);
-          // var referral_link =
-          //   req.headers.host +
-          //   '/login?referral_code=' +
-          //   result.referral_code +
-          //   '#signup';
+
           var referral_link =
             req.headers.host + '?referral_code=' + result.referral_code;
           result.setDataValue('country_list', country_list);
@@ -333,6 +287,7 @@ class MemberController extends Controller {
             'is_deleted',
             result.deleted_at && result.deleted_by ? true : false
           );
+          result.setDataValue('impersonation_link', `${domain}/impersonate?hashKey=${impersonation_token}`);
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -541,8 +496,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
     };
 
     // Dynamically generating Model Relationships
@@ -874,7 +829,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-      total_adjustment[0].total_adjustment == null
+        total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1112,8 +1067,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-          status: { [Op.in]: query_where.status },
-        }),
+        status: { [Op.in]: query_where.status },
+      }),
       company_portal_id: site_id,
     };
 
