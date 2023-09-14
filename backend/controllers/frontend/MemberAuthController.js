@@ -706,7 +706,7 @@ class MemberAuthController {
               case 'ZIP':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
-              case 'Zipcode':
+              case 'ZIPCODE':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'POSTAL CODE':
