@@ -632,6 +632,7 @@ class MemberAuthController {
       var member_eligibility = [];
       var toluna_questions = [];
       //eligibility entry for gender
+
       let name_list = [
         'GENDER',
         'ZIP',
@@ -639,10 +640,12 @@ class MemberAuthController {
         'REGION',
         'AGE',
         'POSTAL CODE',
+        'STANDARD_Postal_Code_GB',
+        'STANDARD_Postal_Area',
       ];
       let questions = await SurveyQuestion.findAll({
         logging: console.log,
-        where: { name: name_list },
+        where: { name: { [Op.in]: name_list } },
         include: [
           {
             model: CountrySurveyQuestion,
@@ -654,7 +657,7 @@ class MemberAuthController {
             model: SurveyAnswerPrecodes,
             attributes: ['id', 'option', 'option_text'],
             where: { country_id: member_details.country_id },
-            // required: true,
+            required: false,
           },
         ],
       });
