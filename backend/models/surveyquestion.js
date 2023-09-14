@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       SurveyQuestion.hasMany(models.SurveyAnswerPrecodes, {
         foreignKey: 'precode',
-        otherKey: 'survey_provider_question_id',
+        sourceKey: 'survey_provider_question_id',
       });
 
       SurveyQuestion.hasOne(models.CountrySurveyQuestion, {
