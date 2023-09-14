@@ -701,7 +701,7 @@ class MemberAuthController {
                 //   });
                 // }
                 if (record.survey_provider_id !== 6)
-                  precode_id = pre ? pre.id : null;
+                  precode_id = pre ? pre.id : '';
                 break;
               case 'ZIP':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
@@ -718,7 +718,7 @@ class MemberAuthController {
                   return element.option == member_details.city;
                 });
                 // console.log('==========pre', pre.id);
-                precode_id = pre ? pre.id : null;
+                precode_id = pre ? pre.id : '';
                 break;
               case 'AGE':
                 if (member_details.dob) {
@@ -729,7 +729,7 @@ class MemberAuthController {
                     return element.option == dob;
                   });
                   // console.log('==========pre', pre.id);
-                  precode_id = pre ? pre.id : null;
+                  precode_id = pre ? pre.id : '';
                 }
                 break;
               case 'STATE':
