@@ -687,7 +687,7 @@ class MemberAuthController {
                     member_details.gender.toLowerCase()
                   );
                 });
-                // console.log('==========pre', pre.id);
+                console.log('==========pre', pre);
                 if (record.survey_provider_id === 6) {
                   toluna_questions.push({
                     QuestionID: record.id,
