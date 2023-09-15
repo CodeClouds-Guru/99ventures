@@ -732,7 +732,10 @@ class MemberAuthController {
               case 'STANDARD_UK_REGION_PLACE':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
-                  return element.option_text == member_details.city;
+                  return (
+                    element.option_text.toLowerCase() ==
+                    member_details.city.toLowerCase()
+                  );
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
@@ -751,7 +754,10 @@ class MemberAuthController {
                 break;
               case 'STATE':
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
-                  return element.option_text == member_details.state;
+                  return (
+                    element.option_text.toLowerCase() ==
+                    member_details.state.toLowerCase()
+                  );
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
