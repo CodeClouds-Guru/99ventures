@@ -653,6 +653,7 @@ class MemberAuthController {
         'STANDARD_Region_GB',
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
+        'city',
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -722,7 +723,25 @@ class MemberAuthController {
               case 'STANDARD_POSTAL_CODE_GB':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
-
+              case 'REGION':
+              case 'REGION 1':
+              case 'REGION 2':
+              case 'FULCRUM_REGION_UK_NUTS_I':
+              case 'FULCRUM_REGION_UK_NUTS_II':
+              case 'STANDARD_REGION_GB':
+              case 'REGION_UK_NUTS_I':
+              case 'STANDARD_UK_REGION_PLACE':
+              case 'CITY':
+                // precode = member_details.city;
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() ==
+                    member_details.city.toLowerCase()
+                  );
+                });
+                // console.log('==========pre', pre.id);
+                precode_id = pre ? pre.id : '';
+                break;
               case 'AGE':
                 if (member_details.dob) {
                   var dob = new Date(member_details.dob);
@@ -736,23 +755,13 @@ class MemberAuthController {
                 }
                 break;
               case 'STATE':
-              case 'REGION':
-              case 'REGION 1':
-              case 'REGION 2':
-              case 'FULCRUM_REGION_UK_NUTS_I':
-              case 'FULCRUM_REGION_UK_NUTS_II':
-              case 'STANDARD_REGION_GB':
-              case 'REGION_UK_NUTS_I':
-              case 'STANDARD_UK_REGION_PLACE':
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
                     element.option_text.toLowerCase() ==
                     member_details.state.toLowerCase()
                   );
                 });
-                // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
-                // if (member_details.state) precode = member_details.state;
                 break;
             }
 
