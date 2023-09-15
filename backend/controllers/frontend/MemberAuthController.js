@@ -643,12 +643,16 @@ class MemberAuthController {
         'POSTAL CODE',
         'STANDARD_Postal_Code_GB',
         'STANDARD_Postal_Area',
+        'SAMPLECUBE_ZIP_UK',
+        'STANDARD_POSTAL_CODE_GB',
         'Zipcode',
         'Region 1',
         'Region 2',
         'Fulcrum_Region_UK_NUTS_I',
         'Fulcrum_Region_UK_NUTS_II',
         'STANDARD_Region_GB',
+        'REGION_UK_NUTS_I',
+        'STANDARD_UK_REGION_PLACE',
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -714,6 +718,8 @@ class MemberAuthController {
               case 'POSTAL CODE':
               case 'STANDARD_POSTAL_CODE_GB':
               case 'STANDARD_POSTAL_AREA':
+              case 'SAMPLECUBE_ZIP_UK':
+              case 'STANDARD_POSTAL_CODE_GB':
                 precode = member_details.zip_code.replaceAll(/ /g, '');
                 break;
               case 'REGION':
@@ -722,6 +728,8 @@ class MemberAuthController {
               case 'FULCRUM_REGION_UK_NUTS_I':
               case 'FULCRUM_REGION_UK_NUTS_II':
               case 'STANDARD_REGION_GB':
+              case 'REGION_UK_NUTS_I':
+              case 'STANDARD_UK_REGION_PLACE':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return element.option_text == member_details.city;
@@ -741,9 +749,14 @@ class MemberAuthController {
                   precode_id = pre ? pre.id : '';
                 }
                 break;
-              // case 'STATE':
-              //   if (member_details.state) precode = member_details.state;
-              //   break;
+              case 'STATE':
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return element.option_text == member_details.state;
+                });
+                // console.log('==========pre', pre.id);
+                precode_id = pre ? pre.id : '';
+                // if (member_details.state) precode = member_details.state;
+                break;
             }
             // if (precode) {
             // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
