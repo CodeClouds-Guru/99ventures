@@ -653,6 +653,7 @@ class MemberAuthController {
         'STANDARD_Region_GB',
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
+        'city',
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -730,6 +731,7 @@ class MemberAuthController {
               case 'STANDARD_REGION_GB':
               case 'REGION_UK_NUTS_I':
               case 'STANDARD_UK_REGION_PLACE':
+              case 'CITY':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
@@ -759,24 +761,10 @@ class MemberAuthController {
                     member_details.state.toLowerCase()
                   );
                 });
-                // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
-                // if (member_details.state) precode = member_details.state;
                 break;
             }
-            // if (precode) {
-            // let survey_answer_precodes = await SurveyAnswerPrecodes.findOne({
-            //   where: {
-            //     precode: record.survey_provider_question_id,
-            //     survey_provider_id: record.survey_provider_id,
-            //     option: precode,
-            //     country_id: member_details.country_id,
-            //   },
-            // });
-            // if (survey_answer_precodes) {
-            //   precode_id = survey_answer_precodes.id;
-            //   precode = '';
-            // }
+
             if (precode_id || precode) {
               member_eligibility.push({
                 member_id: member_id,
