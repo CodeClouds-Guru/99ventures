@@ -499,7 +499,7 @@ class SurveySyncController {
                                 precode: attr.qualification_code,
                                 country_id: country.id,
                                 survey_provider_id: this.providerId,
-                                option_text: op.text
+                                option_text: op.text ? op.text : op.name
                             })
                         }
                     } else if (attr.condition_codes.length < 1) {
