@@ -81,20 +81,20 @@ const schedules = [
 		},
 		options: [null, true],
 	},
-	{
-		name: 'remove those surveys which have been disabled and not used by any user',
-		pattern: '0 * * * *',	//Once per hour
-		// pattern: '0 0 * * *',	//Once per day
-		function: async () => {
-			try {
-				let cronJob = new SurveySyncClass();
-				await cronJob.removeSurvey();
-			} catch (e) {
-				console.log(e.message)
-			}
-		},
-		options: [null, true],
-	}
+	// {
+	// 	name: 'remove those surveys which have been disabled and not used by any user',
+	// 	pattern: '0 * * * *',	//Once per hour
+	// 	// pattern: '0 0 * * *',	//Once per day
+	// 	function: async () => {
+	// 		try {
+	// 			let cronJob = new SurveySyncClass();
+	// 			await cronJob.removeSurvey();
+	// 		} catch (e) {
+	// 			console.log(e.message)
+	// 		}
+	// 	},
+	// 	options: [null, true],
+	// }
 ]
 
 module.exports = schedules;

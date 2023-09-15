@@ -23,7 +23,11 @@ const {
 const queryInterface = sequelize.getQueryInterface();
 const db = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
-const { cryptoEncryption, cryptoDecryption, generateToken } = require('../../helpers/global');
+const {
+  cryptoEncryption,
+  cryptoDecryption,
+  generateToken,
+} = require('../../helpers/global');
 // const membertransaction = require('../../models/membertransaction');
 const util = require('util');
 // const withdrawalrequest = require('../../models/withdrawalrequest');
@@ -239,9 +243,14 @@ class MemberController extends Controller {
           /**
            * Impersonation token generation with link (SAAS Based)
            */
-          const company_portal = await CompanyPortal.findOne({ where: { id: company_portal_id } });
+          const company_portal = await CompanyPortal.findOne({
+            where: { id: company_portal_id },
+          });
           const domain = company_portal ? company_portal.domain : '';
-          const impersonation_token = generateToken({ member_id: result.id, user_id: req.user.id });
+          const impersonation_token = generateToken({
+            member_id: result.id,
+            user_id: req.user.id,
+          });
 
           //get total earnings
           total_earnings = await this.getTotalEarnings(member_id);
@@ -287,7 +296,10 @@ class MemberController extends Controller {
             'is_deleted',
             result.deleted_at && result.deleted_by ? true : false
           );
-          result.setDataValue('impersonation_link', `${domain}/impersonate?hashKey=${impersonation_token}`);
+          result.setDataValue(
+            'impersonation_link',
+            `${domain}/impersonate?hashKey=${impersonation_token}`
+          );
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -374,7 +386,7 @@ class MemberController extends Controller {
           attributes: ['domain'],
         });
         member.email_confirmation_link =
-          company_domain.domain + '/email-verify/' + buf;
+          'https://' + company_domain.domain + '/email-verify/' + buf;
         // console.log(member);
         let evntbus = eventBus.emit('send_email', {
           action: 'Welcome',
@@ -496,8 +508,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
 
     // Dynamically generating Model Relationships
@@ -829,7 +841,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -1067,8 +1079,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
       company_portal_id: site_id,
     };
 
