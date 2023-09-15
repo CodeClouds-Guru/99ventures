@@ -236,7 +236,10 @@ class MemberAuthController {
           let hash_obj = { id: member_details.id, email: req.body.email };
           var buf = genarateHash(JSON.stringify(hash_obj));
           member_details.email_confirmation_link =
-            req.session.company_portal.domain + '/email-verify/' + buf;
+            'https://' +
+            req.session.company_portal.domain +
+            '/email-verify/' +
+            buf;
           let evntbus = eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
