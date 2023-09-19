@@ -306,7 +306,7 @@ class ScriptParser {
         }
       }
     }
-
+    // console.log(JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
@@ -384,6 +384,16 @@ class ScriptParser {
               required: user ? false : true,
               include: {
                 model: Models.PaymentMethod,
+              },
+            },
+            {
+              model: Models.MemberTransaction,
+              as: 'ParentTransaction',
+              attributes: ['member_id'],
+              include: {
+                model: Models.Member,
+                required: false,
+                attributes: ['id', 'first_name', 'last_name', 'username'],
               },
             },
           ],
