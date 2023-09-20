@@ -94,7 +94,7 @@ class MemberTransactionController extends Controller {
         record.dataValues.ParentTransaction !== null &&
         record.dataValues.ParentTransaction.dataValues.Member !== null
       ) {
-        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.ParentTransaction.Member.username})`;
+        // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.ParentTransaction.Member.username})`;
         record.setDataValue(
           'ParentTransaction->Member.username',
           record.dataValues.ParentTransaction.Member.username || 'N/A'

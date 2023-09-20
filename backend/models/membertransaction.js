@@ -109,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  MemberTransaction.extra_fields = ['transaction_action'];
+  // MemberTransaction.extra_fields = ['transaction_action'];
   //fields
   MemberTransaction.fields = {
     id: {
