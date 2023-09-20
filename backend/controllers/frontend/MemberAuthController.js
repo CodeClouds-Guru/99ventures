@@ -1065,11 +1065,11 @@ class MemberAuthController {
         where: {
           status: { [Op.ne]: 2 },
         },
-        required: true,
+        required: false,
       },
     });
 
-    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
       member.member_amounts[0].amount <
