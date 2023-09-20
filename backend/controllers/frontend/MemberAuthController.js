@@ -1046,8 +1046,7 @@ class MemberAuthController {
       };
     }
 
-    //check pending withdrawal request
-
+    //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
       // logging: console.log,
       attributes: [
@@ -1057,14 +1056,14 @@ class MemberAuthController {
         ],
       ],
       where: {
-        // status: 'pending',
+        status: 'pending',
         member_id: request_data.member_id,
       },
       include: {
         model: MemberTransaction,
         attributes: ['id'],
         where: {
-          status: [0, 1],
+          status: { [Op.ne]: 2 },
         },
         required: true,
       },
@@ -1083,6 +1082,49 @@ class MemberAuthController {
           'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
       };
     }
+    //End - check pending withdrawal request
+
+    //Start - check approved withdrawal request
+    let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      logging: console.log,
+      attributes: [
+        [
+          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+          'total',
+        ],
+      ],
+      where: {
+        status: 'approved',
+        member_id: request_data.member_id,
+      },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: { [Op.ne]: 2 },
+        },
+        required: true,
+      },
+    });
+
+    console.log(
+      'approved_withdrawal_req_amount',
+      approved_withdrawal_req_amount
+    );
+
+    if (
+      member.member_amounts[0].amount <
+      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
+        parseFloat(approved_withdrawal_req_amount.dataValues.total) +
+        withdrawal_amount
+    ) {
+      return {
+        member_status: false,
+        member_message:
+          'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.',
+      };
+    }
+
     var payment_field = [];
     var member_payment_info = [];
     for (const option of payment_method_details.PaymentMethodFieldOptions) {

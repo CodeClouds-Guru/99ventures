@@ -84,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_action: {
         type: DataTypes.VIRTUAL,
         get() {
+          // console.log(this.amount_action.replaceAll('_', ' '));
           return this.amount_action.replaceAll('_', ' ');
         },
       },
@@ -108,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  // MemberTransaction.extra_fields = ['transaction_action'];
+  MemberTransaction.extra_fields = ['transaction_action'];
   //fields
   MemberTransaction.fields = {
     id: {
@@ -279,6 +280,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    '$ParentTransaction->Member.username$': {
+      field_name: 'ParentTransaction->Member.username',
+      db_name: '`ParentTransaction->Member`.`username`',
+      type: 'username',
+      placeholder: 'Referral Username',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
     },
   };
   sequelizePaginate.paginate(MemberTransaction);
