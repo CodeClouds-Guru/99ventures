@@ -56,6 +56,7 @@ class Paypal {
     let clientSecret = '';
     clientId = paypal_credentials.api_username;
     clientSecret = paypal_credentials.api_password;
+    console.log(clientId, '=================', clientSecret);
     var environment = null;
     if (process.env.DEV_MODE === '1') {
       environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
