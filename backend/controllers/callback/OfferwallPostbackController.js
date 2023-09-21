@@ -88,6 +88,10 @@ class OfferwallPostbackController {
             }
             payout_amount = (payout_amount * currency_percent) / 100;
             // console.log('payout_amount', payout_amount);
+            payout_amount = payout_amount.toFixed(2);
+            if(payout_amount <= 0){
+              return res.send('1');
+            }
             const transaction_obj = {
               member_id: member.id,
               amount: payout_amount,
@@ -101,7 +105,7 @@ class OfferwallPostbackController {
                   : JSON.stringify(req.query),
               status: 2,
             };
-            // console.log('transaction_obj', transaction_obj);
+
             let result =
               await MemberTransaction.updateMemberTransactionAndBalance(
                 transaction_obj
