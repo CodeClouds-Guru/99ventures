@@ -36,8 +36,8 @@ class MemberTransactionController extends Controller {
       };
     }
     options.where = new_option;
-    options.attributes.push('type', 'parent_transaction_id');
-    //options.logging = console.log;
+    options.attributes.push('type', 'parent_transaction_id', 'amount_action');
+    // options.logging = console.log;
     options.include = [
       {
         model: Member,
@@ -65,6 +65,7 @@ class MemberTransactionController extends Controller {
     ];
     const { docs, pages, total } = await this.model.paginate(options);
     let transaction_list = [];
+    // console.log(docs);
     docs.forEach(function (record, key) {
       if (
         record.dataValues.Member != null &&
@@ -91,9 +92,15 @@ class MemberTransactionController extends Controller {
       if (
         record.dataValues.amount_action === 'referral' &&
         record.dataValues.ParentTransaction !== null &&
-        record.dataValues.ParentTransaction.Member !== null
+        record.dataValues.ParentTransaction.dataValues.Member !== null
       ) {
-        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.ParentTransaction.Member.username})`;
+        // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.ParentTransaction.Member.username})`;
+        record.setDataValue(
+          'ParentTransaction->Member.username',
+          record.dataValues.ParentTransaction.Member.username || 'N/A'
+        );
+        // record.dataValues.username =
+        //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
 
       switch (record.dataValues.status) {
@@ -117,7 +124,6 @@ class MemberTransactionController extends Controller {
           break;
       }
 
-      // console.log(record.dataValues.amount_action);
       transaction_list.push(record);
     });
 

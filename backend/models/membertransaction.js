@@ -84,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_action: {
         type: DataTypes.VIRTUAL,
         get() {
+          // console.log(this.amount_action.replaceAll('_', ' '));
           return this.amount_action.replaceAll('_', ' ');
         },
       },
@@ -280,6 +281,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
+    '$ParentTransaction->Member.username$': {
+      field_name: 'ParentTransaction->Member.username',
+      db_name: '`ParentTransaction->Member`.`username`',
+      type: 'username',
+      placeholder: 'Referral Username',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
   };
   sequelizePaginate.paginate(MemberTransaction);
 
@@ -315,6 +329,17 @@ module.exports = (sequelize, DataTypes) => {
     );
 
     let balance = true;
+    const logger1 = require('../helpers/Logger')(
+      `member-transaction-${data.member_id}.log`
+    );
+    logger1.info({
+      member_id: data.member_id,
+      action: data.amount_action,
+      status: data.status,
+      type: data.type,
+      prev_balance: total_earnings[0].total_amount,
+      curr_balance: modified_total_earnings,
+    });
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       balance = await MemberTransaction.updateMemberBalance({
         amount: modified_total_earnings,
@@ -554,8 +579,9 @@ module.exports = (sequelize, DataTypes) => {
 
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
+
     await MemberBalance.update(
-      { amount: data.amount },
+      { amount: data.amount <= 0 ? 0 : data.amount },
       {
         where: {
           member_id: data.member_id,

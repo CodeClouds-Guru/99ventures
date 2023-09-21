@@ -22,6 +22,7 @@ const {
   Group,
   PaymentMethodFieldOption,
   CountrySurveyQuestion,
+  SurveyProvider,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -607,12 +608,12 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        // id: {[Op.in] : []},
-        profile_completed_on: {
-          [Op.ne]: null,
-        },
-        status: 'member',
-        deleted_at: null,
+        id: 1,
+        // profile_completed_on: {
+        //   [Op.ne]: null,
+        // },
+        // status: 'member',
+        // deleted_at: null,
       },
     });
     // res.json({ data: members });
@@ -687,6 +688,11 @@ class MemberAuthController {
             where: { country_id: member_details.country_id },
             required: false,
           },
+          {
+            model: SurveyProvider,
+            attributes: ['name'],
+            required: false,
+          },
         ],
       });
       // console.log('------------------questions-----------------', questions);
@@ -724,7 +730,11 @@ class MemberAuthController {
               case 'STANDARD_POSTAL_AREA':
               case 'SAMPLECUBE_ZIP_UK':
               case 'STANDARD_POSTAL_CODE_GB':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
+                if (record.SurveyProvider.name === 'Purespectrum') {
+                  precode = member_details.zip_code.split(' ')[0];
+                } else {
+                  precode = member_details.zip_code.replaceAll(/ /g, '');
+                }
                 break;
               case 'REGION':
               case 'REGION 1':
@@ -1046,8 +1056,7 @@ class MemberAuthController {
       };
     }
 
-    //check pending withdrawal request
-
+    //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
       // logging: console.log,
       attributes: [
@@ -1057,20 +1066,20 @@ class MemberAuthController {
         ],
       ],
       where: {
-        // status: 'pending',
+        status: 'pending',
         member_id: request_data.member_id,
       },
       include: {
         model: MemberTransaction,
         attributes: ['id'],
         where: {
-          status: [0, 1],
+          status: { [Op.ne]: 2 },
         },
-        required: true,
+        required: false,
       },
     });
 
-    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
       member.member_amounts[0].amount <
@@ -1083,6 +1092,49 @@ class MemberAuthController {
           'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
       };
     }
+    //End - check pending withdrawal request
+
+    //Start - check approved withdrawal request
+    let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      logging: console.log,
+      attributes: [
+        [
+          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+          'total',
+        ],
+      ],
+      where: {
+        status: 'approved',
+        member_id: request_data.member_id,
+      },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: { [Op.ne]: 2 },
+        },
+        required: true,
+      },
+    });
+
+    console.log(
+      'approved_withdrawal_req_amount',
+      approved_withdrawal_req_amount
+    );
+
+    if (
+      member.member_amounts[0].amount <
+      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
+        parseFloat(approved_withdrawal_req_amount.dataValues.total) +
+        withdrawal_amount
+    ) {
+      return {
+        member_status: false,
+        member_message:
+          'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.',
+      };
+    }
+
     var payment_field = [];
     var member_payment_info = [];
     for (const option of payment_method_details.PaymentMethodFieldOptions) {

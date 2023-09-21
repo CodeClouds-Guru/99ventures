@@ -56,17 +56,12 @@ class Paypal {
     let clientSecret = '';
     clientId = paypal_credentials.api_username;
     clientSecret = paypal_credentials.api_password;
-    var environment = null
+    // console.log(clientId, '=================', clientSecret);
+    var environment = null;
     if (process.env.DEV_MODE === '1') {
-      environment = new paypal.core.SandboxEnvironment(
-        clientId,
-        clientSecret
-      );
+      environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
     } else {
-      environment = new paypal.core.LiveEnvironment(
-        clientId,
-        clientSecret
-      );
+      environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
     }
     return new paypal.core.PayPalHttpClient(environment);
   }
@@ -149,7 +144,7 @@ class Paypal {
       let response = await client.execute(request);
       return response;
     } catch (e) {
-      console.log('error', e)
+      console.log('error', e);
       var err = {};
       if (e.statusCode) {
         const error = JSON.parse(e.message);
@@ -197,6 +192,15 @@ class Paypal {
             //   body: req.body,
             //   company_portal_id:this.company_portal_id
             // })
+            const logger1 = require('../helpers/Logger')(`paypal-log.log`);
+            logger1.info({
+              member_transaction_id: member_transaction_id,
+              transaction_id: record.transaction_id,
+              status: status,
+              amount: record.payout_item.amount.value,
+              body: req.body,
+              company_portal_id: this.company_portal_id,
+            });
             await MemberTransaction.updateMemberWithdrawalRequest({
               member_transaction_id: member_transaction_id,
               transaction_id: record.transaction_id,
