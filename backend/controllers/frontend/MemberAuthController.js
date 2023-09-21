@@ -22,6 +22,7 @@ const {
   Group,
   PaymentMethodFieldOption,
   CountrySurveyQuestion,
+  SurveyProvider,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -607,12 +608,12 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        // id: {[Op.in] : []},
-        profile_completed_on: {
-          [Op.ne]: null,
-        },
-        status: 'member',
-        deleted_at: null,
+        id: 1,
+        // profile_completed_on: {
+        //   [Op.ne]: null,
+        // },
+        // status: 'member',
+        // deleted_at: null,
       },
     });
     // res.json({ data: members });
@@ -687,6 +688,11 @@ class MemberAuthController {
             where: { country_id: member_details.country_id },
             required: false,
           },
+          {
+            model: SurveyProvider,
+            attributes: ['name'],
+            required: false,
+          },
         ],
       });
       // console.log('------------------questions-----------------', questions);
@@ -724,7 +730,11 @@ class MemberAuthController {
               case 'STANDARD_POSTAL_AREA':
               case 'SAMPLECUBE_ZIP_UK':
               case 'STANDARD_POSTAL_CODE_GB':
-                precode = member_details.zip_code.replaceAll(/ /g, '');
+                if (record.SurveyProvider.name === 'Purespectrum') {
+                  precode = member_details.zip_code.split(' ')[0];
+                } else {
+                  precode = member_details.zip_code.replaceAll(/ /g, '');
+                }
                 break;
               case 'REGION':
               case 'REGION 1':
