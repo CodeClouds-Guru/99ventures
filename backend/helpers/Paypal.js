@@ -58,11 +58,11 @@ class Paypal {
     clientSecret = paypal_credentials.api_password;
     // console.log(clientId, '=================', clientSecret);
     var environment = null;
-    if (process.env.DEV_MODE === '1') {
-      environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
-    } else {
-      environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
-    }
+    // if (process.env.DEV_MODE === '1') {
+    environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    // } else {
+    //   environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
+    // }
     return new paypal.core.PayPalHttpClient(environment);
   }
 
