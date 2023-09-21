@@ -329,6 +329,17 @@ module.exports = (sequelize, DataTypes) => {
     );
 
     let balance = true;
+    const logger1 = require('../helpers/Logger')(
+      `member-transaction-${data.member_id}.log`
+    );
+    logger1.info({
+      member_id: data.member_id,
+      action: data.amount_action,
+      status: data.status,
+      type: data.type,
+      prev_balance: total_earnings[0].total_amount,
+      curr_balance: modified_total_earnings,
+    });
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       balance = await MemberTransaction.updateMemberBalance({
         amount: modified_total_earnings,
@@ -568,8 +579,9 @@ module.exports = (sequelize, DataTypes) => {
 
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
+
     await MemberBalance.update(
-      { amount: data.amount },
+      { amount: data.amount <= 0 ? 0 : data.amount },
       {
         where: {
           member_id: data.member_id,
