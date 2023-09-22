@@ -9,10 +9,10 @@ const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
 
-router.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  res.send('User-agent: *\nDisallow: /');
-});
+// router.get('/robots.txt', (req, res) => {
+//   res.type('text/plain');
+//   res.send('User-agent: *\nDisallow: /');
+// });
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
 const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
@@ -42,6 +42,7 @@ router.get('/sitemap.xml', async (req, res) => {
   const SiteMapController = new SiteMapControllerClass();
   res.header('Content-Type', 'application/xml');
   res.header('Content-Encoding', 'gzip');
+  console.log('baseurl', req.baseUrl);
   try {
     const smStream = await SiteMapController.generate(
       process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : req.baseUrl

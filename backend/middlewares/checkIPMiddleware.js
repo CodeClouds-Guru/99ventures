@@ -44,7 +44,6 @@ function getIp(req) {
 }
 
 function getBrowser(req) {
-    console.log('user agent', req.headers['user-agent'])
     return req.headers['user-agent'] || 'Unable to fetch user-agent';
 }
 
