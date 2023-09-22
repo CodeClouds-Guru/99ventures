@@ -42,10 +42,10 @@ router.get('/sitemap.xml', async (req, res) => {
   const SiteMapController = new SiteMapControllerClass();
   res.header('Content-Type', 'application/xml');
   res.header('Content-Encoding', 'gzip');
-  console.log('baseurl', req.baseUrl);
+  console.log('baseurl', `${req.protocol}://${req.hostname}`);
   try {
     const smStream = await SiteMapController.generate(
-      process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : req.baseUrl
+      process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : `${req.protocol}://${req.hostname}`
     );
     const pipeline = smStream.pipe(createGzip());
     streamToPromise(pipeline).then((sm) => (sitemap = sm));
