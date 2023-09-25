@@ -1,5 +1,5 @@
 const IpQualityScoreClass = require("../helpers/IpQualityScore");
-const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member, BrowserConfiguration } = require("../models");
+const { CompanyPortal, IpConfiguration, IspConfiguration, CountryConfiguration, IpLog, MemberNote, Country, Member, BrowserConfiguration, Page } = require("../models");
 const { Op } = require("sequelize");
 const { detect } = require('detect-browser');
 const messageBox = {
@@ -142,11 +142,25 @@ async function checkIfCountryChanged(req, country_code) {
     return existing_country && member && member.country_id && existing_country.id !== member.country_id
 }
 
+async function getExceptRoutes(company_portal_id) {
+    const excepts = ['/logout'];
+    const pages = await Page.findAll({
+        where: { auth_required: 0, status: 'published', },
+        attributes: ['slug']
+    });
+    pages.forEach(item => {
+        excepts.push(item.slug !== '/' ? `/${item.slug}` : item.slug)
+    });
+    console.log(excepts);
+    return excepts;
+}
+
 module.exports = async function (req, res, next) {
     const ip = getIp(req);
     let partial_path = req.path
-    if (!['/notice', '/404', '/503', '/500', '/faq', '/logout'].includes(partial_path) && !isImpersonated(req)) {
-        const company_portal_id = await getCompanyPortalId(req)
+    const company_portal_id = await getCompanyPortalId(req)
+    const excepts = await getExceptRoutes(company_portal_id)
+    if (!excepts.includes(partial_path) && !isImpersonated(req)) {
         const is_blacklisted_ip = await IpConfiguration.count({
             where: {
                 company_portal_id: company_portal_id,
