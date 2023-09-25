@@ -37,6 +37,7 @@ const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
 const TolunaHelper = require('../../helpers/Toluna');
+const IpQualityScoreClass = require('../helpers/IpQualityScore');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -54,6 +55,8 @@ class MemberAuthController {
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
     this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
+    this.checkCountryBlacklistedFromIp =
+      this.checkCountryBlacklistedFromIp.bind(this);
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
@@ -169,6 +172,19 @@ class MemberAuthController {
       //check if IP is blacklisted
       const ipHelper = new IpHelper();
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
+
+      //check if country is blacklisted
+      const balcklisted_country = this.checkCountryBlacklistedFromIp(
+        ip,
+        company_portal_id
+      );
+      if (balcklisted_country > 0) {
+        req.session.flash = {
+          error:
+            'Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
+        };
+        res.redirect('back');
+      }
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
@@ -1518,6 +1534,20 @@ class MemberAuthController {
       res.redirect('back');
     }
   }
+
+  //Start - Check country blacklisted
+  async checkCountryBlacklistedFromIp(ip, company_portal_id) {
+    const reportObj = new IpQualityScoreClass();
+    const geo = await reportObj.getIpReport(ip);
+    return await CountryConfiguration.count({
+      where: {
+        company_portal_id: company_portal_id,
+        status: 0,
+        iso: geo.report.country_code || '',
+      },
+    });
+  }
+  //End - Check country blacklisted
 
   //payment information update
   // async updatePaymentInformation(data) {
