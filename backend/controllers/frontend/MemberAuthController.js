@@ -184,7 +184,7 @@ class MemberAuthController {
           error:
             'Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
         };
-        res.redirect('back');
+        return res.redirect('back');
       }
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
@@ -288,10 +288,10 @@ class MemberAuthController {
             notice: member_message,
           };
           // res.redirect('/notice');
-          res.redirect('/alert');
+          return res.redirect('/alert');
         } else {
           req.session.flash = { error: member_message };
-          res.redirect('back');
+          return res.redirect('back');
         }
       }
     } catch (error) {
