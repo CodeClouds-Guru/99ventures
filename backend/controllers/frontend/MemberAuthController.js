@@ -175,7 +175,7 @@ class MemberAuthController {
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
 
       //check if country is blacklisted
-      const balcklisted_country = this.checkCountryBlacklistedFromIp(
+      const balcklisted_country = await this.checkCountryBlacklistedFromIp(
         ip,
         company_portal_id
       );
