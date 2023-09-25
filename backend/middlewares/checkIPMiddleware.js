@@ -151,7 +151,6 @@ async function getExceptRoutes(company_portal_id) {
     pages.forEach(item => {
         excepts.push(item.slug !== '/' ? `/${item.slug}` : item.slug)
     });
-    console.log(excepts);
     return excepts;
 }
 
