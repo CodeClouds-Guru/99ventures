@@ -1540,6 +1540,7 @@ class MemberAuthController {
   async checkCountryBlacklistedFromIp(ip, company_portal_id) {
     const reportObj = new IpQualityScoreClass();
     const geo = await reportObj.getIpReport(ip);
+    console.log('geo=', geo);
     return await CountryConfiguration.count({
       where: {
         company_portal_id: company_portal_id,
