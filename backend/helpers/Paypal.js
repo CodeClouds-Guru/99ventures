@@ -193,14 +193,16 @@ class Paypal {
             //   company_portal_id:this.company_portal_id
             // })
             const logger1 = require('../helpers/Logger')(`paypal-log.log`);
-            logger1.info({
-              member_transaction_id: member_transaction_id,
-              transaction_id: record.transaction_id,
-              status: status,
-              amount: record.payout_item.amount.value,
-              body: req.body,
-              company_portal_id: this.company_portal_id,
-            });
+            logger1.info(
+              JSON.stringify({
+                member_transaction_id: member_transaction_id,
+                transaction_id: record.transaction_id,
+                status: status,
+                amount: record.payout_item.amount.value,
+                body: req.body,
+                company_portal_id: this.company_portal_id,
+              })
+            );
             await MemberTransaction.updateMemberWithdrawalRequest({
               member_transaction_id: member_transaction_id,
               transaction_id: record.transaction_id,

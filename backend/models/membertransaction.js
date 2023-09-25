@@ -281,19 +281,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    '$ParentTransaction->Member.username$': {
-      field_name: 'ParentTransaction->Member.username',
-      db_name: '`ParentTransaction->Member`.`username`',
-      type: 'username',
-      placeholder: 'Referral Username',
-      listing: true,
-      show_in_form: false,
-      sort: true,
-      required: false,
-      value: '',
-      width: '50',
-      searchable: true,
-    },
+    // '$ParentTransaction->Member.username$': {
+    //   field_name: 'ParentTransaction->Member.username',
+    //   db_name: '`ParentTransaction->Member`.`username`',
+    //   type: 'username',
+    //   placeholder: 'Referral Username',
+    //   listing: true,
+    //   show_in_form: false,
+    //   sort: true,
+    //   required: false,
+    //   value: '',
+    //   width: '50',
+    //   searchable: true,
+    // },
   };
   sequelizePaginate.paginate(MemberTransaction);
 
@@ -643,7 +643,9 @@ module.exports = (sequelize, DataTypes) => {
         );
 
         await MemberBalance.update(
-          { amount: modified_total_earnings },
+          {
+            amount: modified_total_earnings <= 0 ? 0 : modified_total_earnings,
+          },
           {
             where: { id: total_earnings[0].id },
           }
