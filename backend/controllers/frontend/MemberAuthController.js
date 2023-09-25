@@ -23,6 +23,7 @@ const {
   PaymentMethodFieldOption,
   CountrySurveyQuestion,
   SurveyProvider,
+  CountryConfiguration,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
