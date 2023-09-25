@@ -37,7 +37,7 @@ const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
 const TolunaHelper = require('../../helpers/Toluna');
-const IpQualityScoreClass = require('../helpers/IpQualityScore');
+// const IpQualityScoreClass = require('../helpers/IpQualityScore');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
