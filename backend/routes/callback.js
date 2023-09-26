@@ -74,18 +74,19 @@ router.all('/confirm-payment/', async (req, res) => {
   var response = {};
   const logger1 = require('../helpers/Logger')(`paypal_callback.log`);
   logger1.info(JSON.stringify(req.body));
+  var status_code = 200;
   try {
     let company_portal_id = 1;
     const paypal_class = new Paypal(company_portal_id);
     response = await paypal_class.getPayouts(req);
-    // res.send(response)
   } catch (e) {
     logger1.error(JSON.stringify(req.body));
     response = {
       error: e,
     };
+    status_code = 500;
   } finally {
-    res.json(response);
+    res.status(status_code).json(response);
   }
 });
 module.exports = {
