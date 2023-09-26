@@ -133,6 +133,8 @@ class ScriptParser {
             data.setDataValue('email_alerts', email_alerts);
             let country_list = await Models.Country.getAllCountryList();
             data.setDataValue('country_list', country_list);
+            let state_list = await Models.State.getAllStates();
+            data.setDataValue('state_list', state_list);
             break;
           case 'member_withdrawal':
             let transaction_data = {};
