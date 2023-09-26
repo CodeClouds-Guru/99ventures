@@ -23,6 +23,7 @@ const {
   PaymentMethodFieldOption,
   CountrySurveyQuestion,
   SurveyProvider,
+  CountryConfiguration,
   State
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
@@ -38,6 +39,7 @@ const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
 const TolunaHelper = require('../../helpers/Toluna');
+// const IpQualityScoreClass = require('../helpers/IpQualityScore');
 class MemberAuthController {
   constructor() {
     this.geoTrack = this.geoTrack.bind(this);
@@ -55,6 +57,8 @@ class MemberAuthController {
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
     this.manualMemberEligibility = this.manualMemberEligibility.bind(this);
+    this.checkCountryBlacklistedFromIp =
+      this.checkCountryBlacklistedFromIp.bind(this);
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
@@ -170,6 +174,19 @@ class MemberAuthController {
       //check if IP is blacklisted
       const ipHelper = new IpHelper();
       let ip_ckeck = await ipHelper.checkIp(ip, company_portal_id);
+
+      //check if country is blacklisted
+      const balcklisted_country = await this.checkCountryBlacklistedFromIp(
+        ip,
+        company_portal_id
+      );
+      if (balcklisted_country > 0) {
+        req.session.flash = {
+          error:
+            'Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
+        };
+        return res.redirect('back');
+      }
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
@@ -272,10 +289,10 @@ class MemberAuthController {
             notice: member_message,
           };
           // res.redirect('/notice');
-          res.redirect('/alert');
+          return res.redirect('/alert');
         } else {
           req.session.flash = { error: member_message };
-          res.redirect('back');
+          return res.redirect('back');
         }
       }
     } catch (error) {
@@ -1090,9 +1107,12 @@ class MemberAuthController {
       };
     }
 
+    let total_approved_amount = 0;
+    let total_pending_amount = 0;
+
     //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
+      logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1113,12 +1133,13 @@ class MemberAuthController {
       },
     });
 
-    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    total_pending_amount = pending_withdrawal_req_amount.dataValues.total
+      ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
+      : 0;
 
     if (
       member.member_amounts[0].amount <
-      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+      total_pending_amount + withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -1126,9 +1147,7 @@ class MemberAuthController {
           'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
       };
     }
-    //End - check pending withdrawal request
 
-    //Start - check approved withdrawal request
     let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
       logging: console.log,
       attributes: [
@@ -1151,16 +1170,19 @@ class MemberAuthController {
       },
     });
 
+    total_approved_amount = approved_withdrawal_req_amount.dataValues.total
+      ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
+      : 0;
     console.log(
-      'approved_withdrawal_req_amount',
-      approved_withdrawal_req_amount
+      'warning check',
+      member.member_amounts[0].amount,
+      total_approved_amount,
+      total_pending_amount,
+      withdrawal_amount
     );
-
     if (
       member.member_amounts[0].amount <
-      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        parseFloat(approved_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+      total_pending_amount + total_approved_amount + withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -1332,6 +1354,8 @@ class MemberAuthController {
             //   action: 'member_withdrawal',
             //   member_id: request_data.member_id,
             // });
+          } else {
+            console.log('create_resp', create_resp);
           }
         }
         //paypal payment section
@@ -1552,6 +1576,21 @@ class MemberAuthController {
       res.redirect('back');
     }
   }
+
+  //Start - Check country blacklisted
+  async checkCountryBlacklistedFromIp(ip, company_portal_id) {
+    const reportObj = new IpQualityScoreClass();
+    const geo = await reportObj.getIpReport(ip);
+    // console.log('geo=', geo);
+    return await CountryConfiguration.count({
+      where: {
+        company_portal_id: company_portal_id,
+        status: 0,
+        iso: geo.report.country_code || '',
+      },
+    });
+  }
+  //End - Check country blacklisted
 
   //payment information update
   // async updatePaymentInformation(data) {

@@ -56,13 +56,13 @@ class Paypal {
     let clientSecret = '';
     clientId = paypal_credentials.api_username;
     clientSecret = paypal_credentials.api_password;
-    console.log(clientId, '=================', clientSecret);
+    // console.log(clientId, '=================', clientSecret);
     var environment = null;
-    // if (process.env.DEV_MODE === '1') {
-    environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
-    // } else {
-    //   environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
-    // }
+    if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
+      environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+    } else {
+      environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
+    }
     return new paypal.core.PayPalHttpClient(environment);
   }
 
@@ -192,17 +192,17 @@ class Paypal {
             //   body: req.body,
             //   company_portal_id:this.company_portal_id
             // })
-            const logger1 = require('../helpers/Logger')(
-              `paypal-log-${data.member_transaction_id}.log`
+            const logger1 = require('../helpers/Logger')(`paypal-log.log`);
+            logger1.info(
+              JSON.stringify({
+                member_transaction_id: member_transaction_id,
+                transaction_id: record.transaction_id,
+                status: status,
+                amount: record.payout_item.amount.value,
+                body: req.body,
+                company_portal_id: this.company_portal_id,
+              })
             );
-            logger1.info({
-              member_transaction_id: member_transaction_id,
-              transaction_id: record.transaction_id,
-              status: status,
-              amount: record.payout_item.amount.value,
-              body: req.body,
-              company_portal_id: this.company_portal_id,
-            });
             await MemberTransaction.updateMemberWithdrawalRequest({
               member_transaction_id: member_transaction_id,
               transaction_id: record.transaction_id,

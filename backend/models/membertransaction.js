@@ -177,19 +177,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    // type: {
-    //   field_name: 'type',
-    //   db_name: 'type',
-    //   type: 'text',
-    //   placeholder: 'Type',
-    //   listing: true,
-    //   show_in_form: true,
-    //   sort: true,
-    //   required: true,
-    //   value: '',
-    //   width: '50',
-    //   searchable: true,
-    // },
+    type: {
+      field_name: 'type',
+      db_name: 'type',
+      type: 'text',
+      placeholder: 'Type',
+      listing: false,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
     amount: {
       field_name: 'amount',
       db_name: 'amount',
@@ -281,19 +281,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: false,
     },
-    '$ParentTransaction->Member.username$': {
-      field_name: 'ParentTransaction->Member.username',
-      db_name: '`ParentTransaction->Member`.`username`',
-      type: 'username',
-      placeholder: 'Referral Username',
-      listing: true,
-      show_in_form: false,
-      sort: true,
-      required: false,
-      value: '',
-      width: '50',
-      searchable: true,
-    },
+    // '$ParentTransaction->Member.username$': {
+    //   field_name: 'ParentTransaction->Member.username',
+    //   db_name: '`ParentTransaction->Member`.`username`',
+    //   type: 'username',
+    //   placeholder: 'Referral Username',
+    //   listing: true,
+    //   show_in_form: false,
+    //   sort: true,
+    //   required: false,
+    //   value: '',
+    //   width: '50',
+    //   searchable: true,
+    // },
   };
   sequelizePaginate.paginate(MemberTransaction);
 
@@ -329,17 +329,17 @@ module.exports = (sequelize, DataTypes) => {
     );
 
     let balance = true;
-    const logger1 = require('../helpers/Logger')(
-      `member-transaction-${data.member_id}.log`
-    );
-    logger1.info({
-      member_id: data.member_id,
-      action: data.amount_action,
-      status: data.status,
-      type: data.type,
-      prev_balance: total_earnings[0].total_amount,
-      curr_balance: modified_total_earnings,
-    });
+    // const logger1 = require('../helpers/Logger')(
+    //   `member-transaction-${data.member_id}.log`
+    // );
+    // logger1.info({
+    //   member_id: data.member_id,
+    //   action: data.amount_action,
+    //   status: data.status,
+    //   type: data.type,
+    //   prev_balance: total_earnings[0].total_amount,
+    //   curr_balance: modified_total_earnings,
+    // });
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       balance = await MemberTransaction.updateMemberBalance({
         amount: modified_total_earnings,
@@ -630,61 +630,64 @@ module.exports = (sequelize, DataTypes) => {
       if (data.status == 2) {
         let modified_total_earnings =
           parseFloat(total_earnings[0].total_amount) - parseFloat(data.amount);
-
-        await MemberTransaction.update(
-          {
-            transaction_id: transaction_id,
-            status: data.status,
-            completed_at: new Date(),
-            payment_gateway_json: data.body,
-            balance: modified_total_earnings,
-          },
-          { where: { id: data.member_transaction_id } }
-        );
-
-        await MemberBalance.update(
-          { amount: modified_total_earnings },
-          {
-            where: { id: total_earnings[0].id },
-          }
-        );
-        //update withdrawal req status
-        await WithdrawalRequest.update(
-          { status: 'completed' },
-          { where: { member_transaction_id: data.member_transaction_id } }
-        );
-        //send mail to member
-        let member_details = await Member.findOne({
-          where: { id: transaction_record.member_id },
-        });
-        let req = {
-          headers: {
-            site_id: data.company_portal_id,
-          },
-        };
-        let evntbus = eventBus.emit('send_email', {
-          action: 'Payment Confirmation',
-          data: {
-            email: member_details.email,
-            details: {
-              members: member_details,
-              withdraw_requests: withdraw_requests,
+        if (modified_total_earnings >= 0) {
+          await MemberTransaction.update(
+            {
+              transaction_id: transaction_id,
+              status: data.status,
+              completed_at: new Date(),
+              payment_gateway_json: data.body,
+              balance: modified_total_earnings,
             },
-          },
-          req: req,
-        });
-        //send notification
-        let notify_data = {
-          member_id: transaction_record.member_id,
-          verbose:
-            'Withdrawal request for ' +
-            withdraw_requests.amount +
-            ' has been completed.',
-          action: 'payment_confirmation',
-          is_read: '0',
-          read_on: new Date(),
-        };
-        await MemberNotification.create(notify_data);
+            { where: { id: data.member_transaction_id } }
+          );
+
+          await MemberBalance.update(
+            {
+              amount: modified_total_earnings,
+            },
+            {
+              where: { id: total_earnings[0].id },
+            }
+          );
+          //update withdrawal req status
+          await WithdrawalRequest.update(
+            { status: 'completed' },
+            { where: { member_transaction_id: data.member_transaction_id } }
+          );
+          //send mail to member
+          let member_details = await Member.findOne({
+            where: { id: transaction_record.member_id },
+          });
+          let req = {
+            headers: {
+              site_id: data.company_portal_id,
+            },
+          };
+          let evntbus = eventBus.emit('send_email', {
+            action: 'Payment Confirmation',
+            data: {
+              email: member_details.email,
+              details: {
+                members: member_details,
+                withdraw_requests: withdraw_requests,
+              },
+            },
+            req: req,
+          });
+          //send notification
+          let notify_data = {
+            member_id: transaction_record.member_id,
+            verbose:
+              'Withdrawal request for ' +
+              withdraw_requests.amount +
+              ' has been completed.',
+            action: 'payment_confirmation',
+            is_read: '0',
+            read_on: new Date(),
+          };
+          await MemberNotification.create(notify_data);
+        }
       } else if (data.status == 4) {
         await WithdrawalRequest.update(
           { status: 'declined' },
