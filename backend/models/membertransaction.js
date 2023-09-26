@@ -630,7 +630,7 @@ module.exports = (sequelize, DataTypes) => {
       if (data.status == 2) {
         let modified_total_earnings =
           parseFloat(total_earnings[0].total_amount) - parseFloat(data.amount);
-        if (modified_total_earnings > 0) {
+        if (modified_total_earnings >= 0) {
           await MemberTransaction.update(
             {
               transaction_id: transaction_id,
