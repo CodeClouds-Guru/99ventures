@@ -676,9 +676,9 @@ class MemberAuthController {
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
         'city',
-        'PostalCodeVal',
-        'City of residence',
-        'States NEW!'
+        // 'PostalCodeVal',
+        // 'City of residence',
+        // 'States NEW!'
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -744,12 +744,12 @@ class MemberAuthController {
                 // if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
 
-                  if (record.survey_provider_id === 6 && pre !== undefined) {
-                    toluna_questions.push({
-                      QuestionID: record.id,
-                      Answers: [{ AnswerID: pre.id }],
-                    });
-                  }
+                  // if (record.survey_provider_id === 6 && pre !== undefined) {
+                  //   toluna_questions.push({
+                  //     QuestionID: record.id,
+                  //     Answers: [{ AnswerID: pre.id }],
+                  //   });
+                  // }
                 break;
               case 'ZIP':
               case 'ZIPCODE':
@@ -765,12 +765,12 @@ class MemberAuthController {
                   precode = member_details.zip_code.replaceAll(/ /g, '');
                 }
 
-                if (record.survey_provider_id === 6) {
-                  toluna_questions.push({
-                    QuestionID: record.id,
-                    Answers: [{ AnswerValue: precode }],
-                  });
-                }
+                // if (record.survey_provider_id === 6) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerValue: precode }],
+                //   });
+                // }
                 break;
               case 'REGION':
               case 'REGION 1':
@@ -792,12 +792,12 @@ class MemberAuthController {
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
 
-                if (record.survey_provider_id === 6 && pre !== undefined) {
-                  toluna_questions.push({
-                    QuestionID: record.id,
-                    Answers: [{ AnswerId: pre.id }],
-                  });
-                }
+                // if (record.survey_provider_id === 6 && pre !== undefined) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerId: pre.id }],
+                //   });
+                // }
                 break;
               case 'AGE':
                 if (member_details.dob) {
@@ -821,12 +821,12 @@ class MemberAuthController {
                 });
                 precode_id = pre ? pre.id : '';
 
-                if (record.survey_provider_id === 6 && pre !== undefined) {
-                  toluna_questions.push({
-                    QuestionID: record.id,
-                    Answers: [{ AnswerId: pre.id }],
-                  });
-                }
+                // if (record.survey_provider_id === 6 && pre !== undefined) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerId: pre.id }],
+                //   });
+                // }
                 break;
             }
 
@@ -866,22 +866,22 @@ class MemberAuthController {
         //   "QuestionID": 1001042,
         //   "Answers": [{"AnswerValue":member_details.zip_code}]
         // })
-        try {
-          let tolunaHelper = new TolunaHelper();
-          const payload = {
-            PartnerGUID: process.env.PARTNER_GUID,
-            MemberCode: member_details.CompanyPortal.name + '_' + member_details.id,
-            Email: (member_details.email).toLowerCase(),
-            BirthDate: moment(member_details.dob).format('MM/DD/YYYY'),
-            PostalCode: member_details.zip_code,
-            // "IsActive": true,  // Default is True
-            // "IsTest": true,
-            RegistrationAnswers: toluna_questions,
-          };
-          let t = await tolunaHelper.addMemebr(payload);
-        } catch (error) {
-          console.log(error);
-        }
+        // try {
+        //   let tolunaHelper = new TolunaHelper();
+        //   const payload = {
+        //     PartnerGUID: process.env.PARTNER_GUID,
+        //     MemberCode: member_details.CompanyPortal.name + '_' + member_details.id,
+        //     Email: (member_details.email).toLowerCase(),
+        //     BirthDate: moment(member_details.dob).format('MM/DD/YYYY'),
+        //     PostalCode: member_details.zip_code,
+        //     // "IsActive": true,  // Default is True
+        //     // "IsTest": true,
+        //     RegistrationAnswers: toluna_questions,
+        //   };
+        //   let t = await tolunaHelper.addMemebr(payload);
+        // } catch (error) {
+        //   console.log(error);
+        // }
       }
       return;
     } catch (error) {
