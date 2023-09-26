@@ -1138,7 +1138,13 @@ class MemberAuthController {
       'approved_withdrawal_req_amount',
       approved_withdrawal_req_amount
     );
-
+    console.log(
+      'warning check',
+      member.member_amounts[0].amount,
+      parseFloat(pending_withdrawal_req_amount.dataValues.total),
+      parseFloat(approved_withdrawal_req_amount.dataValues.total),
+      withdrawal_amount
+    );
     if (
       member.member_amounts[0].amount <
       parseFloat(pending_withdrawal_req_amount.dataValues.total) +
