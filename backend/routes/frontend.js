@@ -8,11 +8,34 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
+if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
+  router.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send('User-agent: *\nDisallow: /');
+  });
+}
+router.get('/sitemap.xml', async (req, res) => {
+  const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
+  const SiteMapController = new SiteMapControllerClass();
+  res.header('Content-Type', 'application/xml');
+  res.header('Content-Encoding', 'gzip');
+  console.log('baseurl', `${req.protocol}://${req.hostname}`);
+  try {
+    const smStream = await SiteMapController.generate(
+      process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : `${req.protocol}://${req.hostname}`
+    );
+    const pipeline = smStream.pipe(createGzip());
+    streamToPromise(pipeline).then((sm) => (sitemap = sm));
+    smStream.end();
+    pipeline.pipe(res).on('error', (e) => {
+      throw e;
+    });
+  } catch (e) {
+    console.error('Sitemap generation error', e);
+    res.status(500).send('Something went wrong');
+  }
+});
 
-// router.get('/robots.txt', (req, res) => {
-//   res.type('text/plain');
-//   res.send('User-agent: *\nDisallow: /');
-// });
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
 const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
@@ -37,27 +60,6 @@ const LucidControllerClass = require('../controllers/frontend/LucidController');
 const LucidController = new LucidControllerClass();
 const NotificationControllerClass = require('../controllers/frontend/NotificationController');
 const NotificationController = new NotificationControllerClass();
-router.get('/sitemap.xml', async (req, res) => {
-  const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
-  const SiteMapController = new SiteMapControllerClass();
-  res.header('Content-Type', 'application/xml');
-  res.header('Content-Encoding', 'gzip');
-  console.log('baseurl', `${req.protocol}://${req.hostname}`);
-  try {
-    const smStream = await SiteMapController.generate(
-      process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : `${req.protocol}://${req.hostname}`
-    );
-    const pipeline = smStream.pipe(createGzip());
-    streamToPromise(pipeline).then((sm) => (sitemap = sm));
-    smStream.end();
-    pipeline.pipe(res).on('error', (e) => {
-      throw e;
-    });
-  } catch (e) {
-    console.error('Sitemap generation error', e);
-    res.status(500).send('Something went wrong');
-  }
-});
 
 router.get('/impersonate', StaticPageController.validateImpersonation);
 router.post('/login', MemberAuthController.login);
