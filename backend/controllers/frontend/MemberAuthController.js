@@ -1075,7 +1075,7 @@ class MemberAuthController {
 
     //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      logging: console.log,
+      // logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1096,7 +1096,7 @@ class MemberAuthController {
       },
     });
 
-    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
       pending_withdrawal_req_amount.dataValues.total &&
@@ -1114,7 +1114,7 @@ class MemberAuthController {
 
     //Start - check approved withdrawal request
     let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      logging: console.log,
+      // logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1135,17 +1135,17 @@ class MemberAuthController {
       },
     });
 
-    console.log(
-      'approved_withdrawal_req_amount',
-      approved_withdrawal_req_amount
-    );
-    console.log(
-      'warning check',
-      member.member_amounts[0].amount,
-      parseFloat(pending_withdrawal_req_amount.dataValues.total),
-      parseFloat(approved_withdrawal_req_amount.dataValues.total),
-      withdrawal_amount
-    );
+    // console.log(
+    //   'approved_withdrawal_req_amount',
+    //   approved_withdrawal_req_amount
+    // );
+    // console.log(
+    //   'warning check',
+    //   member.member_amounts[0].amount,
+    //   parseFloat(pending_withdrawal_req_amount.dataValues.total),
+    //   parseFloat(approved_withdrawal_req_amount.dataValues.total),
+    //   withdrawal_amount
+    // );
     if (
       member.member_amounts[0].amount <
       pending_withdrawal_req_amount.dataValues.total
