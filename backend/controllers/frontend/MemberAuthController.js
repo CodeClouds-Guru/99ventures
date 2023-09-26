@@ -23,6 +23,7 @@ const {
   PaymentMethodFieldOption,
   CountrySurveyQuestion,
   SurveyProvider,
+  State
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -658,13 +659,16 @@ class MemberAuthController {
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
         'city',
+        'PostalCodeVal',
+        'City of residence',
+        'States NEW!'
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
       //   237, 79362, 79388, 79335, 79336, 12452, 12453,
       // ];
       let questions = await SurveyQuestion.findAll({
-        logging: console.log,
+        // logging: console.log,
         attributes: [
           'id',
           'question_text',
@@ -720,8 +724,15 @@ class MemberAuthController {
                 //     Answers: [{ AnswerID: pre.id }],
                 //   });
                 // }
-                if (record.survey_provider_id !== 6)
+                // if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
+
+                  if (record.survey_provider_id === 6 && pre !== undefined) {
+                    toluna_questions.push({
+                      QuestionID: record.id,
+                      Answers: [{ AnswerID: pre.id }],
+                    });
+                  }
                 break;
               case 'ZIP':
               case 'ZIPCODE':
@@ -730,10 +741,18 @@ class MemberAuthController {
               case 'STANDARD_POSTAL_AREA':
               case 'SAMPLECUBE_ZIP_UK':
               case 'STANDARD_POSTAL_CODE_GB':
+              case 'PostalCodeVal':
                 if (record.SurveyProvider.name === 'Purespectrum') {
                   precode = member_details.zip_code.split(' ')[0];
                 } else {
                   precode = member_details.zip_code.replaceAll(/ /g, '');
+                }
+
+                if (record.survey_provider_id === 6) {
+                  toluna_questions.push({
+                    QuestionID: record.id,
+                    Answers: [{ AnswerValue: precode }],
+                  });
                 }
                 break;
               case 'REGION':
@@ -745,6 +764,7 @@ class MemberAuthController {
               case 'REGION_UK_NUTS_I':
               case 'STANDARD_UK_REGION_PLACE':
               case 'CITY':
+              case 'City of residence':
                 // precode = member_details.city;
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
@@ -754,6 +774,13 @@ class MemberAuthController {
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
+
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.id,
+                    Answers: [{ AnswerId: pre.id }],
+                  });
+                }
                 break;
               case 'AGE':
                 if (member_details.dob) {
@@ -768,6 +795,7 @@ class MemberAuthController {
                 }
                 break;
               case 'STATE':
+              case 'States NEW!':
                 var pre = record.SurveyAnswerPrecodes.find((element) => {
                   return (
                     element.option_text.toLowerCase() ==
@@ -775,6 +803,13 @@ class MemberAuthController {
                   );
                 });
                 precode_id = pre ? pre.id : '';
+
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.id,
+                    Answers: [{ AnswerId: pre.id }],
+                  });
+                }
                 break;
             }
 
@@ -814,23 +849,22 @@ class MemberAuthController {
         //   "QuestionID": 1001042,
         //   "Answers": [{"AnswerValue":member_details.zip_code}]
         // })
-        // try {
-        //   let tolunaHelper = new TolunaHelper();
-        //   const payload = {
-        //     PartnerGUID: process.env.PARTNER_GUID,
-        //     MemberCode:
-        //       member_details.CompanyPortal.name + '_' + member_details.id,
-        //     Email: member_details.email,
-        //     BirthDate: member_details.dob,
-        //     PostalCode: member_details.zip_code,
-        //     // "IsActive": true,
-        //     // "IsTest": true,
-        //     RegistrationAnswers: toluna_questions,
-        //   };
-        //   let t = await tolunaHelper.addMemebr(payload);
-        // } catch (error) {
-        //   console.log(error);
-        // }
+        try {
+          let tolunaHelper = new TolunaHelper();
+          const payload = {
+            PartnerGUID: process.env.PARTNER_GUID,
+            MemberCode: member_details.CompanyPortal.name + '_' + member_details.id,
+            Email: (member_details.email).toLowerCase(),
+            BirthDate: moment(member_details.dob).format('MM/DD/YYYY'),
+            PostalCode: member_details.zip_code,
+            // "IsActive": true,  // Default is True
+            // "IsTest": true,
+            RegistrationAnswers: toluna_questions,
+          };
+          let t = await tolunaHelper.addMemebr(payload);
+        } catch (error) {
+          console.log(error);
+        }
       }
       return;
     } catch (error) {
@@ -1553,5 +1587,30 @@ class MemberAuthController {
   //   }
   //   return true;
   // }
+
+  async getStateList(req, res){
+    try {
+      let options = {
+        attributes: ['id', 'country_id', 'state']
+      }
+      if(req.query.country_id) {
+        options.where = {
+          country_id: req.query.country_id
+        }
+      }
+      let data = await State.findAll(options);
+      res.json({
+        status: true,
+        data
+      })
+    }
+    catch(e) {
+      console.log(e);
+      res.status(500).json({
+        status: false,
+        message: 'Unable to get data'
+      })
+    }
+  }
 }
 module.exports = MemberAuthController;
