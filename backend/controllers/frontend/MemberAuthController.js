@@ -1073,9 +1073,12 @@ class MemberAuthController {
       };
     }
 
+    let total_approved_amount = 0;
+    let total_pending_amount = 0;
+
     //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
+      logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1096,13 +1099,13 @@ class MemberAuthController {
       },
     });
 
-    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    total_pending_amount = pending_withdrawal_req_amount.dataValues.total
+      ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
+      : 0;
 
     if (
-      pending_withdrawal_req_amount.dataValues.total &&
       member.member_amounts[0].amount <
-        parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-          withdrawal_amount
+      total_pending_amount + withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -1110,11 +1113,9 @@ class MemberAuthController {
           'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
       };
     }
-    //End - check pending withdrawal request
 
-    //Start - check approved withdrawal request
     let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
+      logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1135,24 +1136,19 @@ class MemberAuthController {
       },
     });
 
-    // console.log(
-    //   'approved_withdrawal_req_amount',
-    //   approved_withdrawal_req_amount
-    // );
-    // console.log(
-    //   'warning check',
-    //   member.member_amounts[0].amount,
-    //   parseFloat(pending_withdrawal_req_amount.dataValues.total),
-    //   parseFloat(approved_withdrawal_req_amount.dataValues.total),
-    //   withdrawal_amount
-    // );
+    total_approved_amount = approved_withdrawal_req_amount.dataValues.total
+      ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
+      : 0;
+    console.log(
+      'warning check',
+      member.member_amounts[0].amount,
+      total_approved_amount,
+      total_pending_amount,
+      withdrawal_amount
+    );
     if (
       member.member_amounts[0].amount <
-      pending_withdrawal_req_amount.dataValues.total
-        ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
-        : 0 + approved_withdrawal_req_amount.dataValues.total
-        ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
-        : 0 + withdrawal_amount
+      total_pending_amount + total_approved_amount + withdrawal_amount
     ) {
       return {
         member_status: false,
