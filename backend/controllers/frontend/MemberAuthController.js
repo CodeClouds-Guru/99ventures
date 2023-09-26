@@ -1099,9 +1099,10 @@ class MemberAuthController {
     console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
 
     if (
+      pending_withdrawal_req_amount.dataValues.total &&
       member.member_amounts[0].amount <
-      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+        parseFloat(pending_withdrawal_req_amount.dataValues.total) +
+          withdrawal_amount
     ) {
       return {
         member_status: false,
@@ -1147,9 +1148,11 @@ class MemberAuthController {
     );
     if (
       member.member_amounts[0].amount <
-      parseFloat(pending_withdrawal_req_amount.dataValues.total) +
-        parseFloat(approved_withdrawal_req_amount.dataValues.total) +
-        withdrawal_amount
+      pending_withdrawal_req_amount.dataValues.total
+        ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
+        : 0 + approved_withdrawal_req_amount.dataValues.total
+        ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
+        : 0 + withdrawal_amount
     ) {
       return {
         member_status: false,
