@@ -46,7 +46,7 @@ class TicketController extends Controller {
         [Op.between]: query_where.created_at,
       },
     };
-    console.log(option_where);
+    // console.log(option_where);
     if ('search' in req.query && req.query.search !== '') {
       delete option_where[Op.and].created_at;
     } else {
@@ -58,7 +58,7 @@ class TicketController extends Controller {
     //   delete option_where[Op.and].created_at;
     // }
 
-    console.log(option_where);
+    // console.log(option_where);
     if ('status' in query_where) {
       and_query.status = query_where.status;
     }
@@ -82,7 +82,7 @@ class TicketController extends Controller {
     options.limit = limit;
     options.offset = offset;
     options.subQuery = false;
-    options.logging = console.log;
+    // options.logging = console.log;
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
@@ -504,14 +504,14 @@ class TicketController extends Controller {
       attributes: ['id'],
     };
     let result = await Ticket.findAll(options);
-
+    console.log('delete tickets', result);
     let ticket_conv_ids = [];
     result.forEach(function (record, key) {
       if (record.TicketConversations.length > 0) {
         ticket_conv_ids = record.TicketConversations.map((record) => record.id);
       }
     });
-
+    console.log('ticket_conv_ids', ticket_conv_ids);
     if (ticket_conv_ids.length > 0) {
       let response = await this.deleteTicketConversations(ticket_conv_ids);
     }
