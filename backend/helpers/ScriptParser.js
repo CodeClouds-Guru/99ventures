@@ -133,7 +133,13 @@ class ScriptParser {
             data.setDataValue('email_alerts', email_alerts);
             let country_list = await Models.Country.getAllCountryList();
             data.setDataValue('country_list', country_list);
-            let state_list = await Models.State.getAllStates();
+            var clause = {};
+            if(user.country_id){
+              clause.where = {
+                country_id: user.country_id
+              }
+            }
+            let state_list = await Models.State.getAllStates(clause);
             data.setDataValue('state_list', state_list);
             break;
           case 'member_withdrawal':

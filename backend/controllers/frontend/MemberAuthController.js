@@ -1630,14 +1630,14 @@ class MemberAuthController {
   async getStateList(req, res){
     try {
       let options = {
-        attributes: ['id', 'country_id', 'state']
+        attributes: ['state']
       }
       if(req.query.country_id) {
         options.where = {
           country_id: req.query.country_id
         }
       }
-      let data = await State.findAll(options);
+      let data = await State.getAllStates(options);
       res.json({
         status: true,
         data

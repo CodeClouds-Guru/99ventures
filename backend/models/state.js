@@ -29,13 +29,20 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	);
 
-	State.getAllStates = async () => {
-		let state_list = await State.findAll({
+	State.getAllStates = async (clause) => {
+		var options = {
 			attributes: ['id', 'state', 'country_id'],
 			order: [
 				['state', 'ASC']
 			]
-		});
+		};
+		if(Object.keys(clause).length) {
+			options = {
+				...options,
+				...clause
+			}
+		}
+		let state_list = await State.findAll(options);
 		return state_list;
 	};
 
