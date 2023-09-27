@@ -18,11 +18,12 @@ const moment = require('moment');
 const FileHelper = require('../../helpers/fileHelper');
 const mime = require('mime-types');
 const path = require('path');
+const { query } = require('express');
 
 class TicketController extends Controller {
   constructor() {
     super('Ticket');
-    // this.changeStatus = this.changeStatus.bind(this);
+    this.deleteTicket = this.deleteTicket.bind(this);
   }
 
   async list(req, res) {
@@ -45,7 +46,19 @@ class TicketController extends Controller {
         [Op.between]: query_where.created_at,
       },
     };
-    delete option_where.created_at;
+    // console.log(option_where);
+    if ('search' in req.query && req.query.search !== '') {
+      delete option_where[Op.and].created_at;
+    } else {
+      delete option_where.created_at;
+    }
+    // if (option_where.created_at) {
+    //   delete option_where.created_at;
+    // } else {
+    //   delete option_where[Op.and].created_at;
+    // }
+
+    // console.log(option_where);
     if ('status' in query_where) {
       and_query.status = query_where.status;
     }
@@ -69,17 +82,11 @@ class TicketController extends Controller {
     options.limit = limit;
     options.offset = offset;
     options.subQuery = false;
+    // options.logging = console.log;
 
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     for (let i = 0; i < result.rows.length; i++) {
-      // console.log(
-      //   util.inspect(result.rows[i], {
-      //     showHidden: false,
-      //     depth: null,
-      //     colors: true,
-      //   })
-      // );
       if (result.rows[i].Member)
         result.rows[i].setDataValue(
           'username',
@@ -190,7 +197,6 @@ class TicketController extends Controller {
         //final query to get ticket details
         let result = await Ticket.findOne(options);
         result.Member.setDataValue('total_earnings', 0);
-        // console.log(result);
 
         //previous tickets
         let prev_tickets = await Ticket.findAll({
@@ -236,12 +242,8 @@ class TicketController extends Controller {
   //update for all type of updation
   async update(req, res) {
     const member_id = req.body.member_id || null;
-    // const user_id = req.body.user_id || null;
-    // const attachments = req.files ? req.files.attachments : [];
     const type = req.body.type || '';
-
     let change = false;
-    // console.log(req.files);
     try {
       switch (type) {
         case 'is_read':
@@ -251,7 +253,6 @@ class TicketController extends Controller {
           change = await this.changeStatus(req);
           break;
         case 'member_status':
-          // console.log("-----------------------member", member);
           change = await Member.changeStatus(req);
           break;
         case 'ticket_chat':
@@ -261,7 +262,9 @@ class TicketController extends Controller {
           change = await this.updateTicketConversations(req);
           break;
         case 'ticket_chat_delete':
-          change = await this.deleteTicketConversations(req);
+          change = await this.deleteTicketConversations(
+            req.body.ticket_conversation_id
+          );
           break;
         default:
           const errorObj = new Error('Request failed.');
@@ -278,7 +281,7 @@ class TicketController extends Controller {
     }
   }
 
-  // //update for all type of updation
+  //update for all type of updation
 
   async changeStatus(req) {
     try {
@@ -445,9 +448,10 @@ class TicketController extends Controller {
       throw error;
     }
   }
-  async deleteTicketConversations(req) {
+  async deleteTicketConversations(ticket_conversation_ids) {
     try {
-      const ticket_conversation_id = req.body.ticket_conversation_id || null;
+      const ticket_conversation_id = ticket_conversation_ids || null;
+
       let resp = await TicketConversation.destroy({
         where: { id: ticket_conversation_id },
       });
@@ -461,6 +465,66 @@ class TicketController extends Controller {
     } catch (error) {
       throw error;
     }
+  }
+  /**
+   * Soft delete tickets
+   */
+  async delete(req, res) {
+    var resp = {
+      status: true,
+      message: 'Action executed successfully',
+    };
+    try {
+      var result;
+      result = await this.deleteTicket(req);
+      resp.message = result.message;
+    } catch (e) {
+      console.error(e);
+      resp = {
+        status: false,
+        message: 'Oops! Something went wrong',
+        error: e,
+      };
+    } finally {
+      return resp;
+    }
+  }
+
+  async deleteTicket(req) {
+    let ticket_ids = req.body.model_ids ?? [];
+
+    if (ticket_ids.length < 1) {
+      return;
+    }
+    let options = {};
+    options.where = { id: ticket_ids };
+    options.attributes = ['id'];
+    options.include = {
+      model: TicketConversation,
+      attributes: ['id'],
+    };
+    let result = await Ticket.findAll(options);
+    // console.log('delete tickets', result);
+    let ticket_conv_ids = [];
+    result.forEach(function (record, key) {
+      if (record.TicketConversations.length > 0) {
+        ticket_conv_ids = record.TicketConversations.map((record) => record.id);
+      }
+    });
+    // console.log('ticket_conv_ids', ticket_conv_ids);
+    if (ticket_conv_ids.length > 0) {
+      let response = await this.deleteTicketConversations(ticket_conv_ids);
+    }
+    await Ticket.destroy({
+      where: {
+        id: ticket_ids,
+      },
+      //force: true
+    });
+    return {
+      status: true,
+      message: 'Action executed successfully',
+    };
   }
 }
 

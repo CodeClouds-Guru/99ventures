@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
   Country.getAllCountryList = async () => {
     let country_list = await Country.findAll({
       attributes: ['id', ['nicename', 'name'], 'phonecode'],
+      order: [
+        ['nicename', 'ASC']
+      ]
     });
     return country_list;
   };
