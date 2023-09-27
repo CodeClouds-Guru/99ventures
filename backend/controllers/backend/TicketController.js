@@ -504,14 +504,14 @@ class TicketController extends Controller {
       attributes: ['id'],
     };
     let result = await Ticket.findAll(options);
-    console.log('delete tickets', result);
+    // console.log('delete tickets', result);
     let ticket_conv_ids = [];
     result.forEach(function (record, key) {
       if (record.TicketConversations.length > 0) {
         ticket_conv_ids = record.TicketConversations.map((record) => record.id);
       }
     });
-    console.log('ticket_conv_ids', ticket_conv_ids);
+    // console.log('ticket_conv_ids', ticket_conv_ids);
     if (ticket_conv_ids.length > 0) {
       let response = await this.deleteTicketConversations(ticket_conv_ids);
     }
@@ -521,6 +521,10 @@ class TicketController extends Controller {
       },
       //force: true
     });
+    return {
+      status: true,
+      message: 'Action executed successfully',
+    };
   }
 }
 
