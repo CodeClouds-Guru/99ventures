@@ -24,7 +24,7 @@ const {
   CountrySurveyQuestion,
   SurveyProvider,
   CountryConfiguration,
-  State
+  State,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -744,12 +744,12 @@ class MemberAuthController {
                 if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
 
-                  // if (record.survey_provider_id === 6 && pre !== undefined) {
-                  //   toluna_questions.push({
-                  //     QuestionID: record.id,
-                  //     Answers: [{ AnswerID: pre.id }],
-                  //   });
-                  // }
+                // if (record.survey_provider_id === 6 && pre !== undefined) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
                 break;
               case 'ZIP':
               case 'ZIPCODE':
@@ -1342,22 +1342,23 @@ class MemberAuthController {
       });
 
       // Start - email body for member
-      // if (payment_method_details.payment_type === 'Auto') {
-      //   let member_mail = await this.sendMailEvent({
-      //     action: 'Member Cash Withdrawal',
-      //     data: {
-      //       email: member.email,
-      //       details: {
-      //         members: member,
-      //         withdraw_requests: {
-      //           amount: withdrawal_amount,
-      //           date: moment(new Date()).format('llll'),
-      //         },
-      //       },
-      //     },
-      //     req: req,
-      //   });
-      // } else {
+      if (payment_method_details.payment_type === 'Auto') {
+        let member_mail = await this.sendMailEvent({
+          action: 'Member Cash Withdrawal',
+          data: {
+            email: member.email,
+            details: {
+              members: member,
+              withdraw_requests: {
+                amount: withdrawal_amount,
+                date: moment(new Date()).format('llll'),
+              },
+            },
+          },
+          req: req,
+        });
+      }
+      // else {
       //   let member_mail = await this.sendMailEvent({
       //     action: 'Withdraw Request Member',
       //     data: {
@@ -1576,28 +1577,27 @@ class MemberAuthController {
   //   return true;
   // }
 
-  async getStateList(req, res){
+  async getStateList(req, res) {
     try {
       let options = {
-        attributes: ['state']
-      }
-      if(req.query.country_id) {
+        attributes: ['state'],
+      };
+      if (req.query.country_id) {
         options.where = {
-          country_id: req.query.country_id
-        }
+          country_id: req.query.country_id,
+        };
       }
       let data = await State.getAllStates(options);
       res.json({
         status: true,
-        data
-      })
-    }
-    catch(e) {
+        data,
+      });
+    } catch (e) {
       console.log(e);
       res.status(500).json({
         status: false,
-        message: 'Unable to get data'
-      })
+        message: 'Unable to get data',
+      });
     }
   }
 }
