@@ -977,12 +977,6 @@ class MemberAuthController {
       member_status = false;
       member_message = 'Error occured';
     } finally {
-      // if (member_status) {
-      //   req.session.flash = { message: member_message, success_status: true };
-      //   // res.redirect('/');
-      // } else {
-      //   req.session.flash = { error: member_message };
-      // }
       if (member_status === true) {
         req.session.flash = {
           message: member_message,
@@ -1067,7 +1061,6 @@ class MemberAuthController {
     });
     payment_method_details = JSON.parse(JSON.stringify(payment_method_details));
 
-    // console.log(payment_method_details);
     //check all conditions for amount
     if (
       parseFloat(payment_method_details.minimum_amount) > 0 &&
@@ -1099,7 +1092,7 @@ class MemberAuthController {
           'Amount must be fixed to $' + payment_method_details.max_amount,
       };
     }
-    // console.log(JSON.parse(JSON.stringify(member)));
+
     if (withdrawal_amount > parseFloat(member.member_amounts[0].amount)) {
       return {
         member_status: false,
@@ -1112,7 +1105,7 @@ class MemberAuthController {
 
     //Start - check pending withdrawal request
     let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      logging: console.log,
+      // logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1147,9 +1140,11 @@ class MemberAuthController {
           'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
       };
     }
+    //End - check pending withdrawal request
 
+    //Start - check approved withdrawal request
     let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      logging: console.log,
+      // logging: console.log,
       attributes: [
         [
           sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
@@ -1173,13 +1168,7 @@ class MemberAuthController {
     total_approved_amount = approved_withdrawal_req_amount.dataValues.total
       ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
       : 0;
-    console.log(
-      'warning check',
-      member.member_amounts[0].amount,
-      total_approved_amount,
-      total_pending_amount,
-      withdrawal_amount
-    );
+
     if (
       member.member_amounts[0].amount <
       total_pending_amount + total_approved_amount + withdrawal_amount
@@ -1190,7 +1179,9 @@ class MemberAuthController {
           'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.',
       };
     }
+    //End - check approved withdrawal request
 
+    //Start - Withdrawal form validation
     var payment_field = [];
     var member_payment_info = [];
     for (const option of payment_method_details.PaymentMethodFieldOptions) {
@@ -1226,6 +1217,9 @@ class MemberAuthController {
         }
       }
     }
+    //End - Withdrawal form validation
+
+    //Start - check for same payment info
     let check_same_acc = await WithdrawalRequest.count({
       where: {
         payment_email: payment_field,
@@ -1239,6 +1233,8 @@ class MemberAuthController {
           'This payment info has already been used by another account, please reach out to our admin',
       };
     }
+    //End - check for same payment info
+
     if (member_payment_info.length > 0) {
       await MemberPaymentInformation.updatePaymentInformation({
         member_id: request_data.member_id,
@@ -1270,10 +1266,7 @@ class MemberAuthController {
         ip: ip,
       };
       let transaction_resp = {};
-      // if (
-      //   payment_method_details.slug == 'instant_paypal' ||
-      //   payment_method_details.slug == 'skrill'
-      // ) {
+
       if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
@@ -1286,19 +1279,8 @@ class MemberAuthController {
           payment_method_details.payment_type === 'Auto'
         )
           transaction_status = 2;
+
         //Insert into member transaction and update balance
-
-        // console.log('updateMemberTransactionAndBalance-----', {
-        //   member_id: request_data.member_id,
-        //   amount: -withdrawal_amount,
-        //   note: 'Withdrawal request for $' + withdrawal_amount,
-        //   type: 'withdraw',
-        //   amount_action: 'member_withdrawal',
-        //   created_by: request_data.member_id,
-        //   // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
-        //   status: transaction_status,
-        // });
-
         transaction_resp =
           await MemberTransaction.updateMemberTransactionAndBalance({
             member_id: request_data.member_id,
@@ -1328,32 +1310,18 @@ class MemberAuthController {
             },
           ];
           for (const info of member_payment_info) {
-            // console.log(info);
             paypal_request[0][info.field_name] = info.field_value;
           }
-          // console.log('paypal_request', paypal_request);
+
           const create_resp = await paypal_class.payout(paypal_request);
-          // console.log('create_resp', create_resp);
-          // const create_resp = { status: true, batch_id: 'test' };
+
           if (create_resp.status) {
             await MemberTransaction.update(
               {
                 batch_id: create_resp.batch_id,
-                // status: transaction_status,
-                // balance:
-                //   parseFloat(member.member_amounts[0].amount) -
-                //   parseFloat(withdrawal_amount),
               },
               { where: { id: transaction_resp.transaction_id } }
             );
-            // await MemberTransaction.updateMemberBalance({
-            //   amount:
-            //     parseFloat(member.member_amounts[0].amount) -
-            //     parseFloat(withdrawal_amount),
-            //   transaction_amount: withdrawal_amount,
-            //   action: 'member_withdrawal',
-            //   member_id: request_data.member_id,
-            // });
           } else {
             console.log('create_resp', create_resp);
           }
@@ -1372,59 +1340,40 @@ class MemberAuthController {
         member_id: request_data.member_id,
         action: 'Member cash withdrawal request',
       });
-      // console.log(withdrawal_type, member);
-      if (payment_method_details.payment_type === 'Auto') {
-        // email body for member
-        let member_mail = await this.sendMailEvent({
-          action: 'Member Cash Withdrawal',
-          data: {
-            email: member.email,
-            details: {
-              members: member,
-              withdraw_requests: {
-                amount: withdrawal_amount,
-                date: moment(new Date()).format('llll'),
-              },
-            },
-          },
-          req: req,
-        });
-      } else {
-        let member_mail = await this.sendMailEvent({
-          action: 'Withdraw Request Member',
-          data: {
-            email: member.email,
-            details: {
-              members: member,
-              withdraw_requests: {
-                amount: withdrawal_amount,
-                date: moment(new Date()).format('llll'),
-              },
-            },
-          },
-          req: req,
-        });
-      }
 
-      // email body for admin
-      // let admin_mail = await this.sendMailEvent({
-      //   action: 'Withdraw Request Admin',
-      //   data: {
-      //     email: result,
-      //     details: {
-      //       members: {
-      //         ...member,
-      //         amount: withdrawal_amount,
-      //         requested_on: moment(new Date()).format('llll'),
-      //       },
-      //       withdraw_requests: {
-      //         amount: withdrawal_amount,
-      //         requested_on: moment(new Date()).format('llll'),
+      // Start - email body for member
+      // if (payment_method_details.payment_type === 'Auto') {
+      //   let member_mail = await this.sendMailEvent({
+      //     action: 'Member Cash Withdrawal',
+      //     data: {
+      //       email: member.email,
+      //       details: {
+      //         members: member,
+      //         withdraw_requests: {
+      //           amount: withdrawal_amount,
+      //           date: moment(new Date()).format('llll'),
+      //         },
       //       },
       //     },
-      //   },
-      //   req: req,
-      // });
+      //     req: req,
+      //   });
+      // } else {
+      //   let member_mail = await this.sendMailEvent({
+      //     action: 'Withdraw Request Member',
+      //     data: {
+      //       email: member.email,
+      //       details: {
+      //         members: member,
+      //         withdraw_requests: {
+      //           amount: withdrawal_amount,
+      //           date: moment(new Date()).format('llll'),
+      //         },
+      //       },
+      //     },
+      //     req: req,
+      //   });
+      // }
+      // End - email body for member
     } else {
       return {
         member_status: false,
