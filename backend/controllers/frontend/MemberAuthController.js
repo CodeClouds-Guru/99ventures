@@ -741,7 +741,7 @@ class MemberAuthController {
                 //     Answers: [{ AnswerID: pre.id }],
                 //   });
                 // }
-                // if (record.survey_provider_id !== 6)
+                if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
 
                   // if (record.survey_provider_id === 6 && pre !== undefined) {
