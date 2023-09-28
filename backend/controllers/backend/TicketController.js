@@ -207,7 +207,7 @@ class TicketController extends Controller {
 
         //Count Opened Tickets
         let count_opened_tkt = await sequelize.query(
-          'SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ?',
+          'SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ? AND deleted_at IS NULL',
           { replacements: ['open'], type: QueryTypes.SELECT }
         );
 
