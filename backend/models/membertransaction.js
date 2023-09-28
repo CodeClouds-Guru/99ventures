@@ -311,7 +311,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
 
-    // console.log('before modification', data);
+    console.log('before modification', data);
 
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
