@@ -1342,22 +1342,22 @@ class MemberAuthController {
       });
 
       // Start - email body for member
-      if (payment_method_details.payment_type === 'Auto') {
-        let member_mail = await this.sendMailEvent({
-          action: 'Member Cash Withdrawal',
-          data: {
-            email: member.email,
-            details: {
-              members: member,
-              withdraw_requests: {
-                amount: withdrawal_amount,
-                date: moment(new Date()).format('llll'),
-              },
-            },
-          },
-          req: req,
-        });
-      }
+      // if (payment_method_details.payment_type === 'Auto') {
+      //   let member_mail = await this.sendMailEvent({
+      //     action: 'Member Cash Withdrawal',
+      //     data: {
+      //       email: member.email,
+      //       details: {
+      //         members: member,
+      //         withdraw_requests: {
+      //           amount: withdrawal_amount,
+      //           date: moment(new Date()).format('llll'),
+      //         },
+      //       },
+      //     },
+      //     req: req,
+      //   });
+      // }
       // else {
       //   let member_mail = await this.sendMailEvent({
       //     action: 'Withdraw Request Member',
