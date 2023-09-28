@@ -1273,12 +1273,14 @@ class MemberAuthController {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
 
+        //for skrill status should be completed
         withdrawal_req_data.status = 'approved';
         if (
           payment_method_details.api_username === '' &&
           payment_method_details.api_password === ''
         )
           withdrawal_req_data.status = 'completed';
+        //for skrill status should be completed
 
         var transaction_status = 1;
         if (
