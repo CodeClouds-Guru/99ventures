@@ -311,7 +311,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
 
-    console.log('before modification', data);
+    // console.log('before modification', data);
 
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
@@ -579,10 +579,10 @@ module.exports = (sequelize, DataTypes) => {
 
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
-    console.log('data.amount', data.amount);
+    // console.log('data.amount', data.amount);
     if (data.amount > 0) {
       await MemberBalance.update(
-        { amount: data.amount <= 0 ? 0 : data.amount },
+        { amount: data.amount },
         {
           where: {
             member_id: data.member_id,

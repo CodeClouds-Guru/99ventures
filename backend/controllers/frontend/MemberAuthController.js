@@ -24,7 +24,7 @@ const {
   CountrySurveyQuestion,
   SurveyProvider,
   CountryConfiguration,
-  State
+  State,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -744,12 +744,12 @@ class MemberAuthController {
                 if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
 
-                  // if (record.survey_provider_id === 6 && pre !== undefined) {
-                  //   toluna_questions.push({
-                  //     QuestionID: record.id,
-                  //     Answers: [{ AnswerID: pre.id }],
-                  //   });
-                  // }
+                // if (record.survey_provider_id === 6 && pre !== undefined) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
                 break;
               case 'ZIP':
               case 'ZIPCODE':
@@ -1052,6 +1052,8 @@ class MemberAuthController {
         'past_withdrawal_options',
         'past_withdrawal_count',
         'payment_type',
+        'api_username',
+        'api_password',
       ],
       include: {
         model: PaymentMethodFieldOption,
@@ -1270,7 +1272,13 @@ class MemberAuthController {
       if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
+
         withdrawal_req_data.status = 'approved';
+        if (
+          payment_method_details.api_username !== '' &&
+          payment_method_details.api_password !== ''
+        )
+          withdrawal_req_data.status = 'completed';
 
         var transaction_status = 1;
         if (
@@ -1576,28 +1584,27 @@ class MemberAuthController {
   //   return true;
   // }
 
-  async getStateList(req, res){
+  async getStateList(req, res) {
     try {
       let options = {
-        attributes: ['state']
-      }
-      if(req.query.country_id) {
+        attributes: ['state'],
+      };
+      if (req.query.country_id) {
         options.where = {
-          country_id: req.query.country_id
-        }
+          country_id: req.query.country_id,
+        };
       }
       let data = await State.getAllStates(options);
       res.json({
         status: true,
-        data
-      })
-    }
-    catch(e) {
+        data,
+      });
+    } catch (e) {
       console.log(e);
       res.status(500).json({
         status: false,
-        message: 'Unable to get data'
-      })
+        message: 'Unable to get data',
+      });
     }
   }
 }
