@@ -1275,8 +1275,8 @@ class MemberAuthController {
 
         withdrawal_req_data.status = 'approved';
         if (
-          payment_method_details.api_username !== '' &&
-          payment_method_details.api_password !== ''
+          payment_method_details.api_username === '' &&
+          payment_method_details.api_password === ''
         )
           withdrawal_req_data.status = 'completed';
 
