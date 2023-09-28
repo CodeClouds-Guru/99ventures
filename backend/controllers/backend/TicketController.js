@@ -512,7 +512,6 @@ class TicketController extends Controller {
         ...record.TicketConversations.map((record) => record.id),
       ];
     });
-    // console.log('ticket_conv_ids', ticket_conv_ids);
 
     let response = await this.deleteTicketConversations(ticket_conv_ids);
 
