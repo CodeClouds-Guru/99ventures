@@ -579,7 +579,7 @@ module.exports = (sequelize, DataTypes) => {
 
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
-
+    console.log('data.amount', data.amount);
     await MemberBalance.update(
       { amount: data.amount <= 0 ? 0 : data.amount },
       {
