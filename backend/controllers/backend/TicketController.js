@@ -508,12 +508,11 @@ class TicketController extends Controller {
     let ticket_conv_ids = [];
     result.forEach(function (record, key) {
       if (record.TicketConversations.length > 0) {
-        ticket_conv_ids = record.TicketConversations.map((record) => record.id);
+        ticket_conv_ids = [...ticket_conv_ids, ...record.TicketConversations.map((record) => record.id)];
       }
     });
 
     let response = await this.deleteTicketConversations(ticket_conv_ids);
-
     await Ticket.destroy({
       where: {
         id: ticket_ids,
