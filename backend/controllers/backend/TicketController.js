@@ -507,19 +507,19 @@ class TicketController extends Controller {
     // console.log('delete tickets', result);
     let ticket_conv_ids = [];
     result.forEach(function (record, key) {
-      ticket_conv_ids = [
-        ...ticket_conv_ids,
-        ...record.TicketConversations.map((record) => record.id),
-      ];
+      if (record.TicketConversations.length > 0) {
+        ticket_conv_ids = record.TicketConversations.map((record) => record.id);
+      }
     });
     // console.log('ticket_conv_ids', ticket_conv_ids);
-
-    let response = await this.deleteTicketConversations(ticket_conv_ids);
-
+    if (ticket_conv_ids.length > 0) {
+      let response = await this.deleteTicketConversations(ticket_conv_ids);
+    }
     await Ticket.destroy({
       where: {
         id: ticket_ids,
       },
+      //force: true
     });
     return {
       status: true,
