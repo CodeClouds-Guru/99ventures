@@ -675,10 +675,7 @@ class MemberAuthController {
         'STANDARD_Region_GB',
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
-        'city',
-        // 'PostalCodeVal',
-        // 'City of residence',
-        // 'States NEW!'
+        'city'
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -743,13 +740,6 @@ class MemberAuthController {
                 // }
                 if (record.survey_provider_id !== 6)
                   precode_id = pre ? pre.id : '';
-
-                // if (record.survey_provider_id === 6 && pre !== undefined) {
-                //   toluna_questions.push({
-                //     QuestionID: record.id,
-                //     Answers: [{ AnswerID: pre.id }],
-                //   });
-                // }
                 break;
               case 'ZIP':
               case 'ZIPCODE':
@@ -764,13 +754,6 @@ class MemberAuthController {
                 } else {
                   precode = member_details.zip_code.replaceAll(/ /g, '');
                 }
-
-                // if (record.survey_provider_id === 6) {
-                //   toluna_questions.push({
-                //     QuestionID: record.id,
-                //     Answers: [{ AnswerValue: precode }],
-                //   });
-                // }
                 break;
               case 'REGION':
               case 'REGION 1':
@@ -791,13 +774,7 @@ class MemberAuthController {
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
-
-                // if (record.survey_provider_id === 6 && pre !== undefined) {
-                //   toluna_questions.push({
-                //     QuestionID: record.id,
-                //     Answers: [{ AnswerId: pre.id }],
-                //   });
-                // }
+                
                 break;
               case 'AGE':
                 if (member_details.dob) {
@@ -820,13 +797,6 @@ class MemberAuthController {
                   );
                 });
                 precode_id = pre ? pre.id : '';
-
-                // if (record.survey_provider_id === 6 && pre !== undefined) {
-                //   toluna_questions.push({
-                //     QuestionID: record.id,
-                //     Answers: [{ AnswerId: pre.id }],
-                //   });
-                // }
                 break;
             }
 
