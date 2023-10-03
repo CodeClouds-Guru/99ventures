@@ -184,5 +184,19 @@ module.exports = (sequelize, DataTypes) => {
 		};
 	}
 
+	// Check Survey Attempted or Not
+	Survey.checkMemberSurvey =  async(username, surveyNumber) => {
+		const sqlQuery = `SELECT survey_number FROM member_surveys AS ms JOIN member_transactions AS mt ON 
+		(ms.member_transaction_id = mt.id) JOIN members AS m ON (m.id = mt.member_id) WHERE m.username = :username AND ms.survey_number = :survey_number AND ms.survey_provider_id = 1`;
+		const memberSurveys = await sequelize.query(sqlQuery, {
+		  type: QueryTypes.SELECT,
+		  replacements: { 
+			username,
+			survey_number: surveyNumber
+		  },
+		});
+
+		return memberSurveys;
+	}
 	return Survey;
 };
