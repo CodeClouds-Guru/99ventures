@@ -375,45 +375,52 @@ class SurveycallbackController {
     const requestParam = req.query;
     const member = await this.getMember({ username: requestParam.pid });
     if(member === null) {
-      const logger1 = require('../../helpers/Logger')(
+      const logger = require('../../helpers/Logger')(
         `lucid-postback-errror.log`
       );
-      logger1.error('Unable to find member!');
+      logger.error(`Unable to find member (${requestParam.pid})!`);
       res.redirect('/survey-' + requestParam.status);
-      return
+      return;
     }
     try {
       if (requestParam.status === 'complete') {
-        const surveyNumber = requestParam.survey_id;
+        const surveyNumber = requestParam.survey_id;        
         const survey = await Survey.findOne({
           attributes: ['cpi'],
           where: {
             survey_number: surveyNumber,
             survey_provider_id: 1,
-          },
+          }
         });
         if (survey) {
-          await this.memberTransaction(
-            survey,
-            'Lucid',
-            surveyNumber,
-            member,
-            requestParam,
-            req
-          );
-          
+          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber);
+          if(memberSurveys.length < 1) {
+            await this.memberTransaction(
+              survey,
+              'Lucid',
+              surveyNumber,
+              member,
+              requestParam,
+              req
+            );
+          } else {
+            const logger = require('../../helpers/Logger')(
+              `lucid-postback-errror.log`
+            );
+            logger.error(`Already attempted (#${surveyNumber}) - (${member.username})`);
+          }
         } else {
-          const logger1 = require('../../helpers/Logger')(
+          const logger = require('../../helpers/Logger')(
             `lucid-postback-errror.log`
           );
-          logger1.error('Survey not found!');
+          logger.error(`Survey (#${surveyNumber}) not found!`);
         }
       }
     } catch (error) {
-      const logger1 = require('../../helpers/Logger')(
+      const logger = require('../../helpers/Logger')(
         `lucid-postback-errror.log`
       );
-      logger1.error(error);
+      logger.error(error);
     } finally {
       await this.memberEligibitityUpdate(requestParam, member);
       res.redirect('/survey-' + requestParam.status);
