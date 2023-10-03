@@ -358,7 +358,7 @@ class LucidController {
       const lcObj = new LucidHelper();
       const surveyNumber = req.query.survey_number;
       // This block will check whether the member has already attempted to this survey or not
-      const memberSurveys = await Survey.checkMemberSurvey(req.query.uid, surveyNumber);
+      const memberSurveys = await Survey.checkMemberSurvey(req.query.uid, surveyNumber, 1);
       if(memberSurveys.length) {
         req.session.flash = { error: 'You have already attempted to this survey!' };
         res.redirect('back');

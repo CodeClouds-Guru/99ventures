@@ -393,7 +393,7 @@ class SurveycallbackController {
           }
         });
         if (survey) {
-          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber);
+          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber, 1);
           if(memberSurveys.length < 1) {
             await this.memberTransaction(
               survey,
