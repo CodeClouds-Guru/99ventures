@@ -175,17 +175,17 @@ class MemberTransactionController extends Controller {
           });
 
           //Email for member
-          let member_mail = await this.sendMailEvent({
-            action: 'Transaction Reversed',
-            data: {
-              email: member.email,
-              details: {
-                members: member,
-                transaction,
-              },
-            },
-            req: req,
-          });
+          // let member_mail = await this.sendMailEvent({
+          //   action: 'Transaction Reversed',
+          //   data: {
+          //     email: member.email,
+          //     details: {
+          //       members: member,
+          //       transaction,
+          //     },
+          //   },
+          //   req: req,
+          // });
 
           //referral transaction
           // if (transaction.parent_transaction_id) {
@@ -213,17 +213,17 @@ class MemberTransactionController extends Controller {
             });
 
             //Email for referral member
-            let referral_member_mail = await this.sendMailEvent({
-              action: 'Transaction Reversed',
-              data: {
-                email: referral_member.email,
-                details: {
-                  members: referral_member,
-                  transaction: referral_transactions,
-                },
-              },
-              req: req,
-            });
+            // let referral_member_mail = await this.sendMailEvent({
+            //   action: 'Transaction Reversed',
+            //   data: {
+            //     email: referral_member.email,
+            //     details: {
+            //       members: referral_member,
+            //       transaction: referral_transactions,
+            //     },
+            //   },
+            //   req: req,
+            // });
           }
 
           return {
