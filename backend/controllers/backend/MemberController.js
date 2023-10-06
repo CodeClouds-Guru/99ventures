@@ -847,28 +847,60 @@ class MemberController extends Controller {
 
     return result;
   }
-  //get transaction details
+  //admin Adjustment
   async adminAdjustment(req) {
     try {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
       let admin_note = req.body.admin_note || '';
-      // let total_earnings = await this.getTotalEarnings(member_id);
 
-      let result = await MemberTransaction.updateMemberTransactionAndBalance({
-        member_id,
-        amount: admin_amount,
-        note: admin_note,
+      //get total earnings of member
+      let total_earnings = await db.sequelize.query(
+        "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
+        {
+          replacements: [member_id],
+          type: QueryTypes.SELECT,
+        }
+      );
+      //modified_total_earnings
+      let modified_total_earnings =
+        parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
+      let transaction_data = {
         type: parseFloat(admin_amount) > 0 ? 'credited' : 'withdraw',
-        amount_action: 'admin_adjustment',
-        created_by: req.user.id,
+        amount: parseFloat(admin_amount),
         status: 2,
+        note: admin_note,
+        created_by: req.user.id || null,
+        member_id: member_id,
+        amount_action: 'admin_adjustment',
+        completed_at: new Date(),
+        transaction_id: null,
+        balance: modified_total_earnings,
+        payload: null,
+        currency: 'USD',
+        parent_transaction_id: null,
+      };
+      //transaction insert
+      await MemberTransaction.create(transaction_data, {
+        silent: true,
       });
-      if (result.status) {
-        return true;
-      } else {
-        return false;
-      }
+      //member balance update
+      await MemberBalance.update(
+        { amount: modified_total_earnings },
+        {
+          where: {
+            member_id: member_id,
+            amount_type: 'cash',
+          },
+        }
+      );
+      //Notify member
+      await MemberNotification.addMemberNotification({
+        member_id: member_id,
+        action: 'admin_adjustment',
+        amount: admin_amount,
+      });
+      return true;
     } catch (error) {
       console.error(error);
       this.throwCustomError('Unable to get data', 500);
