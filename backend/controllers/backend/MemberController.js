@@ -18,6 +18,7 @@ const {
   SurveyProvider,
   Company,
   WithdrawalRequest,
+  MemberNotification,
   sequelize,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
