@@ -196,9 +196,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${
-                this.city || ''
-              }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
+            }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -426,8 +425,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -437,10 +436,17 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       });
+      var update_data = {
+        [field_name]: value,
+      };
+      if (value === 'deleted' && field_name === 'status') {
+        update_data = { ...update_data, deleted_at: new Date() }
+      } else if (field_name === 'status' && value !== 'deleted') {
+        update_data = { ...update_data, deleted_at: null }
+      }
+      console.log('updated_data', update_data);
       let result = await Member.update(
-        {
-          [field_name]: value,
-        },
+        update_data,
         {
           where: {
             id: {
@@ -448,7 +454,8 @@ module.exports = (sequelize, DataTypes) => {
             },
           },
           return: true,
-        }
+          paranoid: false,
+        },
       );
       if (notes) {
         let data = [];
@@ -479,8 +486,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let result = await Member.update(
         {
