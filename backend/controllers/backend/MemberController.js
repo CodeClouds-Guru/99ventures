@@ -295,7 +295,7 @@ class MemberController extends Controller {
           result.setDataValue('MemberReferral', referral_row);
           result.setDataValue(
             'is_deleted',
-            result.deleted_at && result.deleted_by ? true : false
+            result.deleted_at ? true : false
           );
           result.setDataValue(
             'impersonation_link',
@@ -637,7 +637,7 @@ class MemberController extends Controller {
       let isp = '';
       let browser = '';
       let browser_language = '';
-      let is_deleted = row.deleted_at && row.deleted_by ? true : false;
+      let is_deleted = row.deleted_at ? true : false;
 
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
