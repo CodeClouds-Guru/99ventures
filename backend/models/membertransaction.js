@@ -591,9 +591,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       );
 
-      const logger = require('../helpers/Logger')(
-        `member-balance.log`
-      );
+      const logger = require('../helpers/Logger')(`member-balance.log`);
       logger.info(JSON.stringify(data));
 
       //Notify member
@@ -617,7 +615,7 @@ module.exports = (sequelize, DataTypes) => {
       Member,
     } = require('../models/index');
     const eventBus = require('../eventBus');
-
+    // console.log(data);
     let transaction_record = await MemberTransaction.findOne({
       where: { id: data.member_transaction_id },
     });
