@@ -1,6 +1,6 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member } = require('../../models');
+const { Member, SurveyProvider } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
@@ -147,6 +147,33 @@ class StaticPageController {
     } catch (e) {
       console.error('Impersonation error', e);
       return res.render('impersonation_error', { error: e.message });
+    }
+  }
+
+  async getsurveys(req, res) {
+    const provider = req.params.provider;
+    const getProvider = await SurveyProvider.findOne({
+      attributes: ['id', 'name'],
+      where: {
+        name: provider,
+        status: 1
+      }
+    });
+    if(getProvider === null) {
+      res.redirect('/404');
+      return;
+    }
+
+    try{
+      var pagePerser = new PageParser(getProvider.name, '');
+      var page_content = await pagePerser.preview(req);
+      res.render('page', { page_content });
+    }
+    catch(error){
+      console.error(error)
+      if('statusCode' in error && error.statusCode === 401) {
+        res.redirect('/login');
+      }
     }
   }
 }
