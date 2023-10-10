@@ -3,19 +3,19 @@ const TicketControllerClass = require('../controllers/backend/TicketController')
 
 
 const schedules = [
-	{
-		name: 'purespectrum survey',
-		pattern: '*/5 * * * *',
-		function: async () => {
-			try {
-				let cronJob = new SurveySyncClass()
-				await cronJob.pureSpectrumSurveySaveToSQS();
-			} catch (e) {
-				console.log(e.message)
-			}
-		},
-		options: [null, true],
-	},
+	// {
+	// 	name: 'purespectrum survey',
+	// 	pattern: '*/5 * * * *',
+	// 	function: async () => {
+	// 		try {
+	// 			let cronJob = new SurveySyncClass()
+	// 			await cronJob.pureSpectrumSurveySaveToSQS();
+	// 		} catch (e) {
+	// 			console.log(e.message)
+	// 		}
+	// 	},
+	// 	options: [null, true],
+	// },
 	{
 		name: 'sago survey',
 		pattern: '*/5 * * * *',
@@ -42,19 +42,19 @@ const schedules = [
 		},
 		options: [null, true],
 	},
-	{
-		name: 'purespectrum survey status check and update',
-		pattern: '*/20 * * * *',
-		function: async () => {
-			try {
-				let cronJob = new SurveySyncClass();
-				await cronJob.pureSpectrumSurveyUpdate();
-			} catch (e) {
-				console.log(e.message)
-			}
-		},
-		options: [null, true],
-	},
+	// {
+	// 	name: 'purespectrum survey status check and update',
+	// 	pattern: '*/20 * * * *',
+	// 	function: async () => {
+	// 		try {
+	// 			let cronJob = new SurveySyncClass();
+	// 			await cronJob.pureSpectrumSurveyUpdate();
+	// 		} catch (e) {
+	// 			console.log(e.message)
+	// 		}
+	// 	},
+	// 	options: [null, true],
+	// },
 	{
 		name: 'lucid survey status check and update',
 		pattern: '*/20 * * * *',
