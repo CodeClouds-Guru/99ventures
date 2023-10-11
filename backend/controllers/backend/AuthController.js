@@ -142,7 +142,7 @@ class AuthController {
 
   async login(req, res) {
     const schema = Joi.object({
-      password: Joi.string()
+      password: Joi.string()``
         .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required()
         .messages({
