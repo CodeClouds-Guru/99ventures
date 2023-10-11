@@ -142,7 +142,7 @@ class AuthController {
 
   async login(req, res) {
     const schema = Joi.object({
-      password: Joi.string()``
+      password: Joi.string()
         .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required()
         .messages({
@@ -301,7 +301,7 @@ class AuthController {
         email: value.email,
         details: {
           reset_password_link:
-            process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
+            '//' + req.get('Origin') + '/reset-password?hash=' + base64String,
         },
       },
       req: req,
@@ -310,7 +310,7 @@ class AuthController {
     res.status(200).json({
       status: true,
       reset_link:
-        process.env.CLIENT_ORIGIN + '/reset-password?hash=' + base64String,
+        '//' + req.get('Origin') + '/reset-password?hash=' + base64String,
       message: 'Reset password mail has been sent to your email',
     });
   }
