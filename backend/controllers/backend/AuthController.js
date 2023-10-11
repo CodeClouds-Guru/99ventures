@@ -301,7 +301,7 @@ class AuthController {
         email: value.email,
         details: {
           reset_password_link:
-            '//' + req.get('Origin') + '/reset-password?hash=' + base64String,
+            req.get('Origin') + '/reset-password?hash=' + base64String,
         },
       },
       req: req,
@@ -310,7 +310,7 @@ class AuthController {
     res.status(200).json({
       status: true,
       reset_link:
-        '//' + req.get('Origin') + '/reset-password?hash=' + base64String,
+        req.get('Origin') + '/reset-password?hash=' + base64String,
       message: 'Reset password mail has been sent to your email',
     });
   }
