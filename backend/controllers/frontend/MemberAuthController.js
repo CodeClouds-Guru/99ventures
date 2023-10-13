@@ -1041,13 +1041,15 @@ class MemberAuthController {
         request_data.member_id,
         member
       );
+    console.log(amountValidationResp);
     if (!amountValidationResp.member_status) {
       return amountValidationResp;
     }
     //call for field validation
     var fieldValidationResp =
       await WithdrawalRequest.withdrawalRequestFieldValidation(
-        payment_method_details
+        payment_method_details,
+        req.body
       );
     if (!fieldValidationResp.member_status) {
       return fieldValidationResp;
@@ -1057,6 +1059,7 @@ class MemberAuthController {
       fieldValidationResp.payment_field,
       request_data.member_id
     );
+    console.log(samePaymentInfoResp);
     if (!samePaymentInfoResp.member_status) {
       return samePaymentInfoResp;
     }
@@ -1067,6 +1070,15 @@ class MemberAuthController {
         member_id: request_data.member_id,
         member_payment_info: fieldValidationResp.member_payment_info,
       });
+      var ip = req.ip;
+      if (Array.isArray(ip)) {
+        ip = ip[0];
+      } else {
+        ip = ip.replace('::ffff:', '');
+      }
+      var index = fieldValidationResp.member_payment_info.findIndex(
+        (info) => info.field_name === 'email'
+      );
 
       let withdrawal_req_data = {
         member_id: request_data.member_id,
@@ -1082,12 +1094,28 @@ class MemberAuthController {
             : fieldValidationResp.member_payment_info[0].field_value,
         withdrawal_type_id: parseInt(request_data.payment_method_id),
         ip: ip,
+        note: 'Withdrawal request processed and waiting for approval',
+        transaction_made_by: request_data.member_id,
       };
-
+      var transaction_status =
+        payment_method_details.api_username !== '' ? 1 : 2;
+      let transaction_data = {
+        member_id: request_data.member_id,
+        amount: -withdrawal_amount,
+        note: 'Withdrawal request for $' + withdrawal_amount,
+        type: 'withdraw',
+        amount_action: 'member_withdrawal',
+        created_by: request_data.member_id,
+        // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+        status: transaction_status,
+      };
+      var transaction_resp = await MemberTransaction.insertTransaction(
+        transaction_data
+      );
       if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
-        var transaction_status = 1;
+
         if (
           payment_method_details.api_username !== '' &&
           payment_method_details.api_password !== ''
@@ -1106,7 +1134,7 @@ class MemberAuthController {
                 // email: request_data.payment_field,
                 first_name: member.first_name,
                 last_name: member.last_name,
-                member_transaction_id: transaction_resp.transaction_id,
+                member_transaction_id: transaction_resp.id,
               },
             ];
             for (const info of fieldValidationResp.member_payment_info) {
@@ -1120,7 +1148,7 @@ class MemberAuthController {
                 {
                   batch_id: create_resp.batch_id,
                 },
-                { where: { id: transaction_resp.transaction_id } }
+                { where: { id: transaction_resp.id } }
               );
             } else {
               console.log('create_resp', create_resp);
@@ -1128,7 +1156,6 @@ class MemberAuthController {
           }
         } else {
           withdrawal_req_data.status = 'completed';
-          transaction_status = 2;
         }
       }
       if (payment_method_details.payment_type === 'Manual') {
@@ -1139,20 +1166,21 @@ class MemberAuthController {
         } else {
         }
       }
-      let transaction_data = {
-        member_id: request_data.member_id,
-        amount: -withdrawal_amount,
-        note: 'Withdrawal request for $' + withdrawal_amount,
-        type: 'withdraw',
-        amount_action: 'member_withdrawal',
-        created_by: request_data.member_id,
-        // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
-        status: transaction_status,
-      };
-
-      await MemberTransaction.insertTransaction(transaction_data);
+      withdrawal_req_data.member_transaction_id = transaction_resp.id;
       await WithdrawalRequest.create(withdrawal_req_data);
-      await MemberTransaction.updateMemberBalance({});
+      await MemberTransaction.updateMemberBalance({
+        amount:
+          parseFloat(member.member_amounts[0].amount) -
+          parseFloat(withdrawal_amount),
+        member_id: request_data.member_id,
+        action: 'member_withdrawal',
+        transaction_amount: withdrawal_amount,
+      });
+      //member activity
+      const activityEventbus = eventBus.emit('member_activity', {
+        member_id: request_data.member_id,
+        action: 'Member cash withdrawal request',
+      });
     } else {
       return {
         member_status: false,
