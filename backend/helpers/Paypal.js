@@ -214,18 +214,19 @@ class Paypal {
             //   body: req.body,
             //   company_portal_id: this.company_portal_id,
             // });
-            transaction_ids.transaction_id.push(member_transaction_id);
-            transaction_ids.req_body.push(req.body);
+            transaction_ids.push(member_transaction_id);
+            // transaction_ids.req_body.push(req.body);
             var withdraw_requests = await WithdrawalRequest.findAll({
               where: { member_transaction_id: record.transaction_id },
               attributes: ['id'],
             });
             withdraw_requests = withdraw_requests.map((x) => x.id);
+            await WithdrawalRequest.approvedAndCompletedReqs(
+              transaction_ids,
+              withdraw_requests,
+              req.body
+            );
           }
-          await WithdrawalRequest.approvedAndCompletedReqs(
-            transaction_ids,
-            withdraw_requests
-          );
         }
       }
       return {

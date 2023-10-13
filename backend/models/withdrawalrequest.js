@@ -600,7 +600,8 @@ module.exports = (sequelize, DataTypes) => {
   //Approved and completed withdrawal req
   WithdrawalRequest.approvedAndCompletedReqs = async (
     transaction_ids,
-    withdrawal_ids
+    withdrawal_ids,
+    req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
     console.log(transaction_ids);
@@ -608,7 +609,7 @@ module.exports = (sequelize, DataTypes) => {
       await MemberTransaction.update(
         {
           status: 2,
-          payload: transaction_ids.req_body,
+          payload: req_body,
         },
         { where: { id: transaction_ids.transaction_id } }
       );
