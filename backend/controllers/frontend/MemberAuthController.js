@@ -1106,6 +1106,9 @@ class MemberAuthController {
         type: 'withdraw',
         amount_action: 'member_withdrawal',
         created_by: request_data.member_id,
+        modified_total_earnings:
+          parseFloat(member.member_amounts[0].amount) -
+          parseFloat(withdrawal_amount),
         // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
         status: transaction_status,
       };
