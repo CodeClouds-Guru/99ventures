@@ -157,7 +157,7 @@ class OfferwallPostbackController {
             //   },
             // });
 
-            return res.send('1');
+            res.status(200).send('1');
           }
         }
       } catch (err) {

@@ -214,19 +214,27 @@ class SurveycallbackController {
       const reward = req.query.reward;
       const txnId = req.query.txn_id;
 
-      let member = await this.getMember({ username });
-      if (member) {
-        const survey = {
-          cpi: reward,
-        };
-        await this.memberTransaction(
-          survey,
-          'Cint',
-          txnId,
-          member,
-          req.query,
-          req
+      const memberSurveys = await Survey.checkMemberSurvey(username, txnId, 2);
+      if(memberSurveys.length < 1) {
+        let member = await this.getMember({ username });
+        if (member) {
+          const survey = {
+            cpi: reward,
+          };
+          await this.memberTransaction(
+            survey,
+            'Cint',
+            txnId,
+            member,
+            req.query,
+            req
+          );
+        }
+      } else {
+        const logger = require('../../helpers/Logger')(
+          `cint-postback-errror.log`
         );
+        logger.error(`Already attempted (#${txnId}) - (${username})`);
       }
     } catch (error) {
       const logger = require('../../helpers/Logger')(
@@ -292,14 +300,22 @@ class SurveycallbackController {
             username: requestParam.ps_supplier_respondent_id,
           });
           if (member) {
-            await this.memberTransaction(
-              survey,
-              'Purespectrum',
-              surveyNumber,
-              member,
-              requestParam,
-              req
-            );
+            const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber, 3);
+            if(memberSurveys.length < 1) {
+              await this.memberTransaction(
+                survey,
+                'Purespectrum',
+                surveyNumber,
+                member,
+                requestParam,
+                req
+              );
+            } else {
+              const logger = require('../../helpers/Logger')(
+                `purespectrum-postback-errror.log`
+              );
+              logger.error(`Already attempted (#${surveyNumber}) - (${member.username})`);
+            }
           } else {
             const logger1 = require('../../helpers/Logger')(
               `purespectrum-postback-errror.log`
@@ -328,6 +344,7 @@ class SurveycallbackController {
    */
   async schlesingerPostBack(req, res) {
     const queryData = req.query;
+    const username = queryData.uid;
     if (queryData.status === 'complete') {
       try {
         const tmpVar = queryData.pid.split('-');
@@ -338,17 +355,25 @@ class SurveycallbackController {
             survey_number: surveyNumber,
           },
         });
-        if (survey) {
-          let member = await this.getMember({ username: queryData.uid });
+        if (survey) {          
+          let member = await this.getMember({ username: username });
           if (member) {
-            await this.memberTransaction(
-              survey,
-              'Schlesinger',
-              surveyNumber,
-              member,
-              queryData,
-              req
-            );
+            const memberSurveys = await Survey.checkMemberSurvey(username, surveyNumber, 4);
+            if(memberSurveys.length < 1) {
+              await this.memberTransaction(
+                survey,
+                'Schlesinger',
+                surveyNumber,
+                member,
+                queryData,
+                req
+              );
+            } else {
+              const logger = require('../../helpers/Logger')(
+                `schlesinger-postback-errror.log`
+              );
+              logger.error(`Already attempted (#${surveyNumber}) - (${username})`);
+            }
           } else {
             const logger1 = require('../../helpers/Logger')(
               `schlesinger-postback-errror.log`

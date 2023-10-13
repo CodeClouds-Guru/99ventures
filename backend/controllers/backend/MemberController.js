@@ -295,7 +295,7 @@ class MemberController extends Controller {
           result.setDataValue('MemberReferral', referral_row);
           result.setDataValue(
             'is_deleted',
-            result.deleted_at && result.deleted_by ? true : false
+            result.deleted_at ? true : false
           );
           result.setDataValue(
             'impersonation_link',
@@ -637,7 +637,7 @@ class MemberController extends Controller {
       let isp = '';
       let browser = '';
       let browser_language = '';
-      let is_deleted = row.deleted_at && row.deleted_by ? true : false;
+      let is_deleted = row.deleted_at ? true : false;
 
       if (row.IpLogs && row.IpLogs.length > 0) {
         let last_row = row.IpLogs[0];
@@ -848,13 +848,15 @@ class MemberController extends Controller {
 
     return result;
   }
-  //get transaction details
+  //admin Adjustment
   async adminAdjustment(req) {
     try {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
       let admin_note = req.body.admin_note || '';
 
+
+      //get total earnings of member
       let total_earnings = await db.sequelize.query(
         "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
         {
@@ -862,6 +864,8 @@ class MemberController extends Controller {
           type: QueryTypes.SELECT,
         }
       );
+
+      //modified_total_earnings
       let modified_total_earnings =
         parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
       let transaction_data = {
@@ -879,9 +883,12 @@ class MemberController extends Controller {
         currency: 'USD',
         parent_transaction_id: null,
       };
+
+      //transaction insert
       await MemberTransaction.create(transaction_data, {
         silent: true,
       });
+      //member balance update
       await MemberBalance.update(
         { amount: modified_total_earnings },
         {
