@@ -1041,7 +1041,7 @@ class MemberAuthController {
         request_data.member_id,
         member
       );
-    console.log(amountValidationResp);
+    // console.log(amountValidationResp);
     if (!amountValidationResp.member_status) {
       return amountValidationResp;
     }
@@ -1059,7 +1059,7 @@ class MemberAuthController {
       fieldValidationResp.payment_field,
       request_data.member_id
     );
-    console.log(samePaymentInfoResp);
+    // console.log(samePaymentInfoResp);
     if (!samePaymentInfoResp.member_status) {
       return samePaymentInfoResp;
     }

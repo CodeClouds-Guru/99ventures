@@ -323,7 +323,7 @@ module.exports = (sequelize, DataTypes) => {
     member_id,
     member
   ) => {
-    console.log(payment_method_details, withdrawal_amount, member_id, member);
+    // console.log(payment_method_details, withdrawal_amount, member_id, member);
     const { MemberTransaction } = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
     //check all conditions for amount
@@ -390,7 +390,7 @@ module.exports = (sequelize, DataTypes) => {
         required: false,
       },
     });
-    console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
     total_pending_amount = pending_withdrawal_req_amount.dataValues.total
       ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
       : 0;
@@ -406,7 +406,7 @@ module.exports = (sequelize, DataTypes) => {
 
     //Start - check approved withdrawal request
     let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      logging: console.log,
+      // logging: console.log,
       attributes: [
         [
           sequelize.fn(
@@ -430,10 +430,10 @@ module.exports = (sequelize, DataTypes) => {
         required: true,
       },
     });
-    console.log(
-      'approved_withdrawal_req_amount',
-      approved_withdrawal_req_amount
-    );
+    // console.log(
+    //   'approved_withdrawal_req_amount',
+    //   approved_withdrawal_req_amount
+    // );
     total_approved_amount = approved_withdrawal_req_amount.dataValues.total
       ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
       : 0;
@@ -505,7 +505,7 @@ module.exports = (sequelize, DataTypes) => {
         member_id: { [Op.ne]: member_id },
       },
     });
-    console.log(check_same_acc);
+    // console.log(check_same_acc);
     if (check_same_acc > 0) {
       return {
         member_status: false,
@@ -559,12 +559,12 @@ module.exports = (sequelize, DataTypes) => {
     let transaction_data = [];
     let withdrawal_ids = [];
     for (let record of withdrawal_reqs) {
-      console.log(record);
-      console.log(record.Member.member_amounts);
+      // console.log(record);
+      // console.log(record.Member.member_amounts);
       let updated_amount =
         parseFloat(record.Member.member_amounts[0].amount) +
         parseFloat(record.amount);
-      console.log(updated_amount);
+      // console.log(updated_amount);
       withdrawal_ids.push(record.id);
       transaction_data.push({
         member_id: record.member_id,
@@ -604,14 +604,19 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    console.log(transaction_ids);
+    console.log(
+      '------approvedAndCompletedReqs',
+      transaction_ids,
+      withdrawal_ids,
+      req_body
+    );
     if (transaction_ids.length > 0) {
       await MemberTransaction.update(
         {
           status: 2,
           payload: req_body,
         },
-        { where: { id: transaction_ids.transaction_id } }
+        { where: { id: transaction_ids } }
       );
     }
     if (withdrawal_ids.length > 0) {
