@@ -619,12 +619,12 @@ module.exports = (sequelize, DataTypes) => {
         { where: { id: transaction_ids } }
       );
     }
-    if (withdrawal_ids.length > 0) {
-      await WithdrawalRequest.update(
-        { status: 'completed' },
-        { where: { id: withdrawal_ids } }
-      );
-    }
+    // if (withdrawal_ids.length > 0) {
+    await WithdrawalRequest.update(
+      { status: 'completed' },
+      { where: { id: withdrawal_ids } }
+    );
+    // }
   };
   return WithdrawalRequest;
 };
