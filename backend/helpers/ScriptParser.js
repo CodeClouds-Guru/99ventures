@@ -77,13 +77,14 @@ class ScriptParser {
                   ...where.where,
                   ...param_where,
                 };
-
+              console.log('where', where);
               data = await Models[script.module].findAll({
                 subQuery: false,
                 order: [[Sequelize.literal(orderBy), order]],
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
+                logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
@@ -134,10 +135,10 @@ class ScriptParser {
             let country_list = await Models.Country.getAllCountryList();
             data.setDataValue('country_list', country_list);
             var clause = {};
-            if(user.country_id){
+            if (user.country_id) {
               clause.where = {
-                country_id: user.country_id
-              }
+                country_id: user.country_id,
+              };
             }
             let state_list = await Models.State.getAllStates(clause);
             data.setDataValue('state_list', state_list);
@@ -575,74 +576,84 @@ class ScriptParser {
   async appendPaginationNew(script_html, script_id, page_no, total_page_count) {
     var indx = 0;
     var start = page_no;
-    const show = 3
-    if(page_no == 1 || total_page_count <= show) {
+    const show = 3;
+    if (page_no == 1 || total_page_count <= show) {
       start = 2;
-    }
-    else if((total_page_count > show) && (page_no === total_page_count || ((total_page_count - page_no) <= show))) {
+    } else if (
+      total_page_count > show &&
+      (page_no === total_page_count || total_page_count - page_no <= show)
+    ) {
       start = total_page_count - show;
     }
 
-    script_html +=`<div class="pagination-sec d-flex justify-content-center justify-content-md-end pb-2 pt-0 pb-xl-4 pt-xl-2 px-3 px-lg-4 rounded-bottom">
+    script_html += `<div class="pagination-sec d-flex justify-content-center justify-content-md-end pb-2 pt-0 pb-xl-4 pt-xl-2 px-3 px-lg-4 rounded-bottom">
       <input type="hidden" id="filter_where">
       <nav aria-label="Page navigation example">
         <ul class="pagination mb-0">`;
-        if(page_no > 1){
-          script_html += `
-            <li class="page-item" data-page="${page_no-1}">
+    if (page_no > 1) {
+      script_html += `
+            <li class="page-item" data-page="${page_no - 1}">
               <a href="javascript:void(0)" aria-label="Previous" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-left">
               <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" fill-rule="evenodd">
               </path>
               </svg></a>
             </li>`;
-        }
+    }
 
-        script_html += `
-            <li data-page="1" class="page-item ${1 === page_no ? 'active' : ''}" data-id="${script_id}-1">
+    script_html += `
+            <li data-page="1" class="page-item ${
+              1 === page_no ? 'active' : ''
+            }" data-id="${script_id}-1">
               <a href="javascript:void(0)" class="page-link">1</a>
             </li>
         `;
-        if( page_no > show ) {
-          script_html += `
-            <li data-page="2" class="page-item ${2 === page_no ? 'active' : ''}" data-id="${script_id}-2">
+    if (page_no > show) {
+      script_html += `
+            <li data-page="2" class="page-item ${
+              2 === page_no ? 'active' : ''
+            }" data-id="${script_id}-2">
               <a href="javascript:void(0)" class="page-link">2</a>
             </li>
         `;
-        }
-        if( page_no >= show && total_page_count > show) {
-          script_html += `<li><a href="javascript:void(0)" class="page-link pe-none">...</a></li>`
-        }
-      
-        for(let i=start; i<=(total_page_count-1); i++){
-          script_html += `
-            <li data-page="${i}" class="page-item ${i=== page_no ? 'active' : ''}" data-id="${script_id}-${i}">
+    }
+    if (page_no >= show && total_page_count > show) {
+      script_html += `<li><a href="javascript:void(0)" class="page-link pe-none">...</a></li>`;
+    }
+
+    for (let i = start; i <= total_page_count - 1; i++) {
+      script_html += `
+            <li data-page="${i}" class="page-item ${
+        i === page_no ? 'active' : ''
+      }" data-id="${script_id}-${i}">
               <a href="javascript:void(0)" class="page-link">${i}</a>
             </li>
           `;
-          indx++
-          if(indx == show){
-              break;
-          }
-        }
-        if( (show+page_no) < total_page_count) {
-          script_html += `<li><a href="javascript:void(0)" class="page-link pe-none">...</a></li>`
-        }
-        script_html += `
-            <li data-page="${total_page_count}" class="page-item ${ total_page_count === page_no ? 'active' : ''}" data-id="${script_id}-${total_page_count}">
+      indx++;
+      if (indx == show) {
+        break;
+      }
+    }
+    if (show + page_no < total_page_count) {
+      script_html += `<li><a href="javascript:void(0)" class="page-link pe-none">...</a></li>`;
+    }
+    script_html += `
+            <li data-page="${total_page_count}" class="page-item ${
+      total_page_count === page_no ? 'active' : ''
+    }" data-id="${script_id}-${total_page_count}">
               <a href="javascript:void(0)" class="page-link">${total_page_count}</a>
             </li>
         `;
 
-        if(page_no !== total_page_count){
-          script_html += `<li class="page-item" data-page="${page_no+1}">
+    if (page_no !== total_page_count) {
+      script_html += `<li class="page-item" data-page="${page_no + 1}">
             <a href="javascript:void(0)" aria-label="Next" class="page-link"><svg fill="#D6D6D6" width="16" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" class="bi bi-chevron-right">
             <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" fill-rule="evenodd">
             </path>
             </svg></a>
           </li>`;
-        }
+    }
 
-        script_html +=`</ul>
+    script_html += `</ul>
       </nav>
     </div>`;
 
@@ -696,7 +707,7 @@ class ScriptParser {
               return str;
             }
           });
-      </script>`
+      </script>`;
 
     return script_html;
   }
