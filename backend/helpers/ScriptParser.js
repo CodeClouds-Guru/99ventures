@@ -419,6 +419,7 @@ class ScriptParser {
             'currency',
             'balance',
             'transaction_id',
+            'type',
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
             'note',
