@@ -51,9 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         get() {
           const amount = this.getDataValue('amount');
           const currency = this.getDataValue('currency');
-          if (
-            (['usd', 'USD', '$'].includes(currency)) && amount
-          ) {
+          if (['usd', 'USD', '$'].includes(currency) && amount) {
             return '$' + amount;
           } else {
             return amount;
@@ -317,6 +315,316 @@ module.exports = (sequelize, DataTypes) => {
       subQuery: false,
     });
     return result.count;
+  };
+  //check approved withdrawal request
+  WithdrawalRequest.withdrawalRequestAmountValidation = async (
+    payment_method_details,
+    withdrawal_amount,
+    member_id,
+    member
+  ) => {
+    // console.log(payment_method_details, withdrawal_amount, member_id, member);
+    const { MemberTransaction } = require('../models/index');
+    const { QueryTypes, Op } = require('sequelize');
+    //check all conditions for amount
+    var resp = {
+      member_status: true,
+      member_message: '',
+    };
+    if (
+      parseFloat(payment_method_details.minimum_amount) > 0 &&
+      withdrawal_amount < parseFloat(payment_method_details.minimum_amount)
+    ) {
+      resp.member_status = false;
+      resp.member_message =
+        'Amount must be more than $' + payment_method_details.minimum_amount;
+    }
+    if (
+      parseFloat(payment_method_details.maximum_amount) > 0 &&
+      withdrawal_amount > parseFloat(payment_method_details.maximum_amount)
+    ) {
+      resp.member_status = false;
+      resp.member_message =
+        'Amount must be less than $' + payment_method_details.maximum_amount;
+    }
+    if (
+      parseFloat(payment_method_details.fixed_amount) > 0 &&
+      withdrawal_amount !== parseFloat(payment_method_details.fixed_amount)
+    ) {
+      resp.member_status = false;
+      resp.member_message =
+        'Amount must be fixed to $' + payment_method_details.fixed_amount;
+    }
+
+    if (withdrawal_amount > parseFloat(member.member_amounts[0].amount)) {
+      resp.member_status = false;
+      resp.member_message = 'Please check your balance';
+    }
+
+    let total_approved_amount = 0;
+    let total_pending_amount = 0;
+
+    //Start - check pending withdrawal request
+    let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      // logging: console.log,
+      attributes: [
+        [
+          sequelize.fn(
+            'IFNULL',
+            sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+            0
+          ),
+          'total',
+        ],
+      ],
+      where: {
+        status: 'pending',
+        member_id: member_id,
+      },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: { [Op.ne]: 2 },
+        },
+        required: false,
+      },
+    });
+    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    total_pending_amount = pending_withdrawal_req_amount.dataValues.total
+      ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
+      : 0;
+    if (
+      member.member_amounts[0].amount <
+      total_pending_amount + withdrawal_amount
+    ) {
+      resp.member_status = false;
+      resp.member_message =
+        'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.';
+    }
+    //End - check pending withdrawal request
+
+    //Start - check approved withdrawal request
+    let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
+      // logging: console.log,
+      attributes: [
+        [
+          sequelize.fn(
+            'IFNULL',
+            sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+            0
+          ),
+          'total',
+        ],
+      ],
+      where: {
+        status: 'approved',
+        member_id: member_id,
+      },
+      include: {
+        model: MemberTransaction,
+        attributes: ['id'],
+        where: {
+          status: { [Op.ne]: 2 },
+        },
+        required: true,
+      },
+    });
+    // console.log(
+    //   'approved_withdrawal_req_amount',
+    //   approved_withdrawal_req_amount
+    // );
+    total_approved_amount = approved_withdrawal_req_amount.dataValues.total
+      ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
+      : 0;
+    if (
+      member.member_amounts[0].amount <
+      total_pending_amount + total_approved_amount + withdrawal_amount
+    ) {
+      resp.member_status = false;
+      resp.member_message =
+        'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.';
+    }
+    return resp;
+    //End - check approved withdrawal request
+  };
+  //Withdrawal form validation
+  WithdrawalRequest.withdrawalRequestFieldValidation = async (
+    payment_method_details,
+    request_data
+  ) => {
+    //Start - Withdrawal form validation
+    var payment_field = [];
+    var member_payment_info = [];
+    for (const option of payment_method_details.PaymentMethodFieldOptions) {
+      var field_name = option.field_name.toLowerCase().replaceAll(' ', '');
+      const option_arr = ['email', 'phone', 'username'];
+      if (option_arr.includes(field_name)) {
+        payment_field.push(request_data[field_name]);
+        member_payment_info.push({
+          field_name: field_name,
+          field_value: request_data[field_name],
+        });
+      }
+      if (request_data[field_name] === '') {
+        return {
+          member_status: false,
+          member_message: 'Please enter ' + option.field_name.toLowerCase(),
+        };
+      }
+      if (option.field_type !== 'input') {
+        var regex = '';
+        if (option.field_type === 'email')
+          regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (option.field_type === 'number')
+          regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+        if (!regex.test(request_data[field_name])) {
+          // if (!request_data.payment_field.match(regex)) {
+          return {
+            member_status: false,
+            member_message:
+              'Please enter valid ' + option.field_name.toLowerCase(),
+          };
+        }
+      }
+    }
+    //End - Withdrawal form validation
+
+    return { member_status: true, payment_field, member_payment_info };
+  };
+  //check for same payment info
+  WithdrawalRequest.checkIfSamePaymentInfo = async (
+    payment_field,
+    member_id
+  ) => {
+    const { Op } = require('sequelize');
+    let check_same_acc = await WithdrawalRequest.count({
+      where: {
+        payment_email: payment_field,
+        member_id: { [Op.ne]: member_id },
+      },
+    });
+    // console.log(check_same_acc);
+    if (check_same_acc > 0) {
+      return {
+        member_status: false,
+        member_message:
+          'This payment info has already been used by another account, please reach out to our admin',
+      };
+    }
+    return {
+      member_status: true,
+      member_message: '',
+    };
+  };
+  //Rejected or failed withdrawal req
+  WithdrawalRequest.rejectedOrFailedRequest = async (
+    model_ids,
+    user_id,
+    withdrawal_status
+  ) => {
+    const { Op } = require('sequelize');
+    const {
+      MemberTransaction,
+      Member,
+      MemberBalance,
+    } = require('../models/index');
+    var withdrawal_reqs = await WithdrawalRequest.findAll({
+      where: {
+        id: {
+          [Op.in]: model_ids,
+        },
+      },
+      attributes: [
+        'id',
+        'member_id',
+        'amount',
+        'currency',
+        'payment_email',
+        'member_transaction_id',
+        'withdrawal_type_id',
+      ],
+      include: {
+        model: Member,
+        attributes: ['first_name', 'last_name', 'username'],
+        include: {
+          model: MemberBalance,
+          as: 'member_amounts',
+          attributes: ['amount', 'member_id'],
+          where: { amount_type: 'cash' },
+        },
+      },
+    });
+    let transaction_data = [];
+    let withdrawal_ids = [];
+    for (let record of withdrawal_reqs) {
+      // console.log(record);
+      // console.log(record.Member.member_amounts);
+      let updated_amount =
+        parseFloat(record.Member.member_amounts[0].amount) +
+        parseFloat(record.amount);
+      // console.log(updated_amount);
+      withdrawal_ids.push(record.id);
+      transaction_data.push({
+        member_id: record.member_id,
+        amount: record.amount,
+        note: 'Rejected Withdrawal request for $' + record.amount,
+        type: 'withdraw',
+        amount_action: 'member_withdrawal',
+        created_by: user_id || '',
+        status: withdrawal_status == 'rejected' ? 4 : 3,
+        parent_transaction_id: record.member_transaction_id,
+        completed_at: new Date(),
+        balance: updated_amount,
+        payload: null,
+        currency: 'USD',
+      });
+      await MemberBalance.update(
+        { amount: updated_amount },
+        { where: { member_id: record.member_id, amount_type: 'cash' } }
+      );
+    }
+    if (transaction_data.length > 0) {
+      var transaction_resp = await MemberTransaction.bulkCreate(
+        transaction_data
+      );
+    }
+    if (withdrawal_ids.length > 0) {
+      await WithdrawalRequest.update(
+        { status: withdrawal_status },
+        { where: { id: withdrawal_ids } }
+      );
+    }
+  };
+  //Approved and completed withdrawal req
+  WithdrawalRequest.approvedAndCompletedReqs = async (
+    transaction_ids,
+    withdrawal_ids,
+    req_body = ''
+  ) => {
+    const { MemberTransaction } = require('../models/index');
+    console.log(
+      '------approvedAndCompletedReqs',
+      transaction_ids,
+      withdrawal_ids,
+      req_body
+    );
+    if (transaction_ids.length > 0) {
+      await MemberTransaction.update(
+        {
+          status: 2,
+          payload: req_body,
+        },
+        { where: { id: transaction_ids } }
+      );
+    }
+    // if (withdrawal_ids.length > 0) {
+    await WithdrawalRequest.update(
+      { status: 'completed' },
+      { where: { id: withdrawal_ids } }
+    );
+    // }
   };
   return WithdrawalRequest;
 };

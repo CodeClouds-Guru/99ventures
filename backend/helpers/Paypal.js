@@ -180,8 +180,11 @@ class Paypal {
         } else if (req.body.event_type === 'PAYMENT.PAYOUTSBATCH.PROCESSING') {
           status = 1;
         }
-        if (parseInt(response.statusCode) == 200 && status != 1) {
+        if (parseInt(response.statusCode) == 200 && status == 2) {
           let items = response.result.items;
+          var withdraw_requests = [];
+          var transaction_ids = [];
+
           for (let record of items) {
             let member_transaction_id = record.payout_item.sender_item_id;
             // console.log({
@@ -203,14 +206,19 @@ class Paypal {
                 company_portal_id: this.company_portal_id,
               })
             );
-            await MemberTransaction.updateMemberWithdrawalRequest({
-              member_transaction_id: member_transaction_id,
-              transaction_id: record.transaction_id,
-              status: status,
-              amount: record.payout_item.amount.value,
-              body: req.body,
-              company_portal_id: this.company_portal_id,
+
+            transaction_ids.push(member_transaction_id);
+            // transaction_ids.req_body.push(req.body);
+            var withdraw_requests = await WithdrawalRequest.findOne({
+              where: { member_transaction_id: member_transaction_id },
+              attributes: ['id'],
             });
+            // withdraw_requests = withdraw_requests.map((x) => x.id);
+            await WithdrawalRequest.approvedAndCompletedReqs(
+              transaction_ids,
+              withdraw_requests.id,
+              req.body
+            );
           }
         }
       }
