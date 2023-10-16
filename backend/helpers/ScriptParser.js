@@ -381,7 +381,7 @@ class ScriptParser {
       case 'MemberTransaction':
         return {
           where: user
-            ? { member_id: user.id, status: 2 }
+            ? { member_id: user.id, status: [2, 1] }
             : {
                 status: 2,
                 type: 'withdraw',
@@ -392,6 +392,9 @@ class ScriptParser {
             {
               model: Models.WithdrawalRequest,
               required: user ? false : true,
+              where: {
+                status: ['approved', 'pending', 'completed'],
+              },
               include: {
                 model: Models.PaymentMethod,
               },
