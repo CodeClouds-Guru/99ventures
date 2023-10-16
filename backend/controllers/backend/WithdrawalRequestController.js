@@ -403,7 +403,11 @@ class WithdrawalRequestController extends Controller {
         // response = await paypal_class.successPayment(req, res);
         response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request rejected';
-        await this.model.rejectedOrFailedRequest(model_ids, req.user.id);
+        await this.model.rejectedOrFailedRequest(
+          model_ids,
+          req.user.id,
+          'rejected'
+        );
         break;
       case 'approved':
         response = await this.changeStatus(model_ids, note, action_type);

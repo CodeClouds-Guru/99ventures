@@ -5,6 +5,7 @@ const {
   MemberBalance,
   WithdrawalRequest,
   PaymentMethod,
+  MemberNotification,
 } = require('../../models/index');
 const moment = require('moment');
 const eventBus = require('../../eventBus');
@@ -264,11 +265,27 @@ class MemberTransactionController extends Controller {
       parent_transaction_id: data.transaction_id,
     });
 
-    await this.model.updateMemberBalance({
-      amount: updated_balance,
+    // await this.model.updateMemberBalance({
+    //   amount: updated_balance,
+    //   member_id: data.member_id,
+    //   action: 'reversed_transaction',
+    //   transaction_amount: parseFloat(data.transaction_amount),
+    // });
+    await MemberBalance.update(
+      { amount: updated_balance },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
+
+    //Notify member
+    await MemberNotification.addMemberNotification({
       member_id: data.member_id,
       action: 'reversed_transaction',
-      transaction_amount: parseFloat(data.transaction_amount),
+      amount: parseFloat(data.transaction_amount),
     });
     return true;
   }
