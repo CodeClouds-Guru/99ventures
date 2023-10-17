@@ -156,6 +156,7 @@ const MemberDetails = (props) => {
     const [surveyDetails, setSurveyDetails] = useState([]);
     const [dialogStatus, setDialogStatus] = useState(false);
     const [memberDeleted, setMemberDeleted] = useState(false);
+    const [skipBtnLoading, setSkipBtnLoading] = useState(false);
     const [statuslessNote, setStatuslessNote] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [editAdminStatus, setEditAdminStatus] = useState(false);
@@ -301,6 +302,7 @@ const MemberDetails = (props) => {
                         setStatusNote('');
                         setStatuslessNote(false);
                         setBtnLoading(false);
+                        setSkipBtnLoading(false);
                     } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
@@ -371,7 +373,10 @@ const MemberDetails = (props) => {
             type: "member_status",
             member_notes: type === 'save' ? statusNote : ''
         }
-        setBtnLoading(true);
+        if(type === 'save')
+            setBtnLoading(true);
+        else
+            setSkipBtnLoading(true);
         updateMemberData(params, "member_status");
     }
 
@@ -1287,7 +1292,11 @@ const MemberDetails = (props) => {
                         </DialogContent>
                         <DialogActions className="px-32 py-20">
                             <Button className="mr-auto" variant="outlined" color="error" onClick={handleCancelStatus}>Cancel</Button>
-                            {!statuslessNote && <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); handleChangeStatus('skip') }}>Skip</Button>}
+                            {
+                                !statuslessNote && (
+                                    <LoadingButton variant="outlined" color="primary" loading={skipBtnLoading} onClick={(e) => { e.preventDefault(); handleChangeStatus('skip') }}>Skip & Save</LoadingButton>
+                                )
+                            }
                             <LoadingButton color="primary" loading={btnloading} variant="contained" onClick={(e) => { e.preventDefault(); handleChangeStatus('save') }} disabled={statusNote ? false : true}>Save</LoadingButton>
                         </DialogActions>
                     </Dialog>
