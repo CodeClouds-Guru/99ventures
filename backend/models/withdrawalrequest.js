@@ -570,12 +570,12 @@ module.exports = (sequelize, DataTypes) => {
       transaction_ids.push(record.member_transaction_id);
       transaction_data.push({
         member_id: record.member_id,
-        amount: -record.amount,
+        amount: record.amount,
         note: 'Rejected Withdrawal request for $' + record.amount,
-        type: 'withdraw',
+        type: 'credited',
         amount_action: 'member_withdrawal',
         created_by: user_id || '',
-        status: withdrawal_status == 'rejected' ? 4 : 3,
+        status: withdrawal_status == 'rejected' ? 2 : 3,
         parent_transaction_id: record.member_transaction_id,
         completed_at: new Date(),
         balance: updated_amount,
