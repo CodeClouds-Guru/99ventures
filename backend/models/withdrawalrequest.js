@@ -557,6 +557,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     });
     let transaction_data = [];
+    let transaction_ids = [];
     let withdrawal_ids = [];
     for (let record of withdrawal_reqs) {
       // console.log(record);
@@ -566,6 +567,7 @@ module.exports = (sequelize, DataTypes) => {
         parseFloat(record.amount);
       // console.log(updated_amount);
       withdrawal_ids.push(record.id);
+      transaction_ids.push(record.member_transaction_id);
       transaction_data.push({
         member_id: record.member_id,
         amount: record.amount,
@@ -585,9 +587,16 @@ module.exports = (sequelize, DataTypes) => {
         { where: { member_id: record.member_id, amount_type: 'cash' } }
       );
     }
+    console.log(transaction_data, transaction_ids, withdrawal_ids);
     if (transaction_data.length > 0) {
       var transaction_resp = await MemberTransaction.bulkCreate(
         transaction_data
+      );
+    }
+    if (transaction_ids.length > 0) {
+      await MemberTransaction.update(
+        { status: withdrawal_status },
+        { where: { id: transaction_ids } }
       );
     }
     if (withdrawal_ids.length > 0) {
