@@ -17,6 +17,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import LoadingButton from '@mui/lab/LoadingButton';
+import LinearProgress from '@mui/material/LinearProgress';
+
 
 const initialColumns = ['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at'];
 
@@ -56,6 +58,7 @@ function Listing(props) {
     const [listConfigDialog, setListConfigDialog] = useState(false);
     const [displayColumnArray, setDisplayColumnArray] = useState(initialColumns);
     const [columnArray, setColumnArray] = useState(initialColumns);
+    const [loadingStatus, setLoadingStatus] = useState(false);
 
     const display_column_object = {
         "id": "ID",
@@ -123,6 +126,7 @@ function Listing(props) {
     }
 
     const fetchModules = () => {
+        setLoadingStatus(true);
         setColumnArray(displayColumnArray)
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
@@ -151,6 +155,7 @@ function Listing(props) {
             setApplyLoading(false);
             setExportLoading(false);
             setFirstCall(false);
+            setLoadingStatus(false);
         }).catch(error => {
             setListConfigDialog(false);
             let message = 'Something went wrong!'
@@ -413,7 +418,7 @@ function Listing(props) {
         setPage(0);
     }
     const handleChangeFilter = (event, key, field) => {
-        filters[key][field] = event.target.value;
+        filters[key][field] = event.target.value.trim();
         setFilters([...filters]);
     }
     const handleApplyFilters = () => {
@@ -629,6 +634,7 @@ function Listing(props) {
                 </div>}
             {/* // body */}
             <div className="w-full flex flex-col min-h-full">
+                {loadingStatus && <LinearProgress />}
                 <FuseScrollbars className="grow overflow-x-auto">
                     <Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
                         <ListHead
