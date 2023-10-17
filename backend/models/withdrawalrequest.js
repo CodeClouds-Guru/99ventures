@@ -593,6 +593,12 @@ module.exports = (sequelize, DataTypes) => {
       transaction_ids,
       withdrawal_ids
     );
+    console.log(
+      '-------------------------',
+      transaction_data.length,
+      transaction_ids.length,
+      withdrawal_ids.length
+    );
     if (transaction_data.length > 0) {
       var transaction_resp = await MemberTransaction.bulkCreate(
         transaction_data
