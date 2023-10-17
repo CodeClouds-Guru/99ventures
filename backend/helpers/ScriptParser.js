@@ -381,7 +381,7 @@ class ScriptParser {
       case 'MemberTransaction':
         return {
           where: user
-            ? { member_id: user.id, status: [2, 1] }
+            ? { member_id: user.id }
             : {
                 status: 2,
                 type: 'withdraw',

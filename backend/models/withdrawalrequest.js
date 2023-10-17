@@ -557,6 +557,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     });
     let transaction_data = [];
+    let transaction_ids = [];
     let withdrawal_ids = [];
     for (let record of withdrawal_reqs) {
       // console.log(record);
@@ -566,14 +567,15 @@ module.exports = (sequelize, DataTypes) => {
         parseFloat(record.amount);
       // console.log(updated_amount);
       withdrawal_ids.push(record.id);
+      transaction_ids.push(record.member_transaction_id);
       transaction_data.push({
         member_id: record.member_id,
         amount: record.amount,
         note: 'Rejected Withdrawal request for $' + record.amount,
-        type: 'withdraw',
+        type: 'credited',
         amount_action: 'member_withdrawal',
         created_by: user_id || '',
-        status: withdrawal_status == 'rejected' ? 4 : 3,
+        status: withdrawal_status == 'rejected' ? 2 : 3,
         parent_transaction_id: record.member_transaction_id,
         completed_at: new Date(),
         balance: updated_amount,
@@ -585,9 +587,27 @@ module.exports = (sequelize, DataTypes) => {
         { where: { member_id: record.member_id, amount_type: 'cash' } }
       );
     }
+    console.log(
+      '-------------------------',
+      transaction_data,
+      transaction_ids,
+      withdrawal_ids
+    );
+    console.log(
+      '-------------------------',
+      transaction_data.length,
+      transaction_ids.length,
+      withdrawal_ids.length
+    );
     if (transaction_data.length > 0) {
       var transaction_resp = await MemberTransaction.bulkCreate(
         transaction_data
+      );
+    }
+    if (transaction_ids.length > 0) {
+      await MemberTransaction.update(
+        { status: 4 },
+        { where: { id: transaction_ids } }
       );
     }
     if (withdrawal_ids.length > 0) {
