@@ -570,7 +570,7 @@ module.exports = (sequelize, DataTypes) => {
       transaction_ids.push(record.member_transaction_id);
       transaction_data.push({
         member_id: record.member_id,
-        amount: record.amount,
+        amount: -record.amount,
         note: 'Rejected Withdrawal request for $' + record.amount,
         type: 'withdraw',
         amount_action: 'member_withdrawal',
@@ -600,7 +600,7 @@ module.exports = (sequelize, DataTypes) => {
     }
     if (transaction_ids.length > 0) {
       await MemberTransaction.update(
-        { status: withdrawal_status },
+        { status: 4 },
         { where: { id: transaction_ids } }
       );
     }
