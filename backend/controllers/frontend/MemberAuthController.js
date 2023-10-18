@@ -1161,14 +1161,14 @@ class MemberAuthController {
           withdrawal_req_data.status = 'completed';
         }
       }
-      if (payment_method_details.payment_type === 'Manual') {
-        if (
-          payment_method_details.api_username !== '' &&
-          payment_method_details.api_password !== ''
-        ) {
-        } else {
-        }
-      }
+      // if (payment_method_details.payment_type === 'Manual') {
+      //   if (
+      //     payment_method_details.api_username !== '' &&
+      //     payment_method_details.api_password !== ''
+      //   ) {
+      //   } else {
+      //   }
+      // }
       withdrawal_req_data.member_transaction_id = transaction_resp.id;
       await WithdrawalRequest.create(withdrawal_req_data);
       await MemberTransaction.updateMemberBalance({
