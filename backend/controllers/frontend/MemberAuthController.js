@@ -1100,6 +1100,9 @@ class MemberAuthController {
       };
       var transaction_status =
         payment_method_details.api_username !== '' ? 1 : 2;
+      if (payment_method_details.payment_type === 'Manual') {
+        transaction_status = 1;
+      }
       let transaction_data = {
         member_id: request_data.member_id,
         amount: -withdrawal_amount,
@@ -1162,14 +1165,7 @@ class MemberAuthController {
           withdrawal_req_data.status = 'completed';
         }
       }
-      if (payment_method_details.payment_type === 'Manual') {
-        if (
-          payment_method_details.api_username !== '' &&
-          payment_method_details.api_password !== ''
-        ) {
-        } else {
-        }
-      }
+
       withdrawal_req_data.member_transaction_id = transaction_resp.id;
       await WithdrawalRequest.create(withdrawal_req_data);
       await MemberTransaction.updateMemberBalance({

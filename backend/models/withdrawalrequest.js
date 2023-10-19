@@ -587,18 +587,18 @@ module.exports = (sequelize, DataTypes) => {
         { where: { member_id: record.member_id, amount_type: 'cash' } }
       );
     }
-    console.log(
-      '-------------------------',
-      transaction_data,
-      transaction_ids,
-      withdrawal_ids
-    );
-    console.log(
-      '-------------------------',
-      transaction_data.length,
-      transaction_ids.length,
-      withdrawal_ids.length
-    );
+    // console.log(
+    //   '-------------------------',
+    //   transaction_data,
+    //   transaction_ids,
+    //   withdrawal_ids
+    // );
+    // console.log(
+    //   '-------------------------',
+    //   transaction_data.length,
+    //   transaction_ids.length,
+    //   withdrawal_ids.length
+    // );
     if (transaction_data.length > 0) {
       var transaction_resp = await MemberTransaction.bulkCreate(
         transaction_data

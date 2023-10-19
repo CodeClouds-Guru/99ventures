@@ -450,13 +450,14 @@ class WithdrawalRequestController extends Controller {
         var withdrawal_ids_without_creds = [];
         var member_ids = [];
         let transaction_id = '';
+        // var transaction_status = 1;
         for (let record of all_withdrawal_req) {
           // console.log('-------------record', record);
           if (
             record.PaymentMethod.api_username === '' &&
             record.PaymentMethod.api_password === ''
           ) {
-            transaction_status = 2;
+            // transaction_status = 2;
             transaction_ids_without_creds.push(record.member_transaction_id);
             withdrawal_ids_without_creds.push(record.id);
             await this.model.approvedAndCompletedReqs(
