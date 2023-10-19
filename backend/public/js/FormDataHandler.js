@@ -630,4 +630,11 @@ $(() => {
       }
     }
   });
+
+  // To remove space from all input type of email field
+  if($('input[name=email]').length) {
+    $('input[name=email]').on('keyup', function(){
+      $(this).val($(this).val().replace(/\s+/g, ''));
+    })
+  }
 });
