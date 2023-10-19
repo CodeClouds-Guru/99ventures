@@ -409,14 +409,15 @@ class SurveycallbackController {
     }
     try {
       if (requestParam.status === 'complete') {
-        const surveyNumber = requestParam.survey_id;        
-        const survey = await Survey.findOne({
+        const surveyNumber = requestParam.survey_id;
+        /*const survey = await Survey.findOne({
           attributes: ['cpi'],
           where: {
             survey_number: surveyNumber,
             survey_provider_id: 1,
           }
-        });
+        });*/
+        const survey = requestParam;
         if (survey) {
           const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber, 1);
           if(memberSurveys.length < 1) {
