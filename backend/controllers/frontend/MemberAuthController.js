@@ -190,10 +190,11 @@ class MemberAuthController {
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
+        const email = req.body.email.trim().toLowerCase();
         let existing_email_or_username = await Member.count({
           where: {
             company_portal_id: company_portal_id,
-            email: req.body.email,
+            email,
           },
         });
         let member_details = [];
@@ -209,11 +210,11 @@ class MemberAuthController {
           //   const file_name = await fileHelper.upload();
           //   req.body.avatar = file_name.files[0].filename;
           // }
-
+          
           let data = {
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email: req.body.email,
+            first_name: req.body.first_name.trim(),
+            last_name: req.body.last_name.trim(),
+            email: email,
             password: password,
             membership_tier_id: 1,
             company_portal_id: company_portal_id,
@@ -241,7 +242,7 @@ class MemberAuthController {
           //send mail
           const eventBus = require('../../eventBus');
           member_details = await Member.findOne({
-            where: { email: req.body.email },
+            where: { email: email },
           });
           let model = await Member.update(
             {
@@ -252,7 +253,7 @@ class MemberAuthController {
             }
           );
 
-          let hash_obj = { id: member_details.id, email: req.body.email };
+          let hash_obj = { id: member_details.id, email: email };
           var buf = genarateHash(JSON.stringify(hash_obj));
           member_details.email_confirmation_link =
             'https://' +
@@ -262,7 +263,7 @@ class MemberAuthController {
           let evntbus = eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
-              email: req.body.email,
+              email: email,
               details: { members: member_details },
             },
             req: req,
