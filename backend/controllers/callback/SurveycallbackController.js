@@ -799,6 +799,7 @@ class SurveycallbackController {
             transaction_amount: transaction.MemberTransaction.amount,
             member_id: member.id,
             transaction_id: transaction.member_transaction_id,
+            note: 'Survey reversed #' + survey_number,
           });
 
           //referral transaction
