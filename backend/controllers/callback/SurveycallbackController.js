@@ -757,7 +757,7 @@ class SurveycallbackController {
     } catch (e) {
       console.log(e);
     } finally {
-      if (resp)
+      if (resp.status)
         return res.status(200).json({
           status: true,
           message: 'Data synced.',
