@@ -11,7 +11,6 @@ const {
   SurveyAnswerPrecodes,
   CountrySurveyQuestion,
   MemberBalance,
-  MemberSurvey,
 } = require('../../models');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
@@ -753,7 +752,9 @@ class SurveycallbackController {
       } else {
         res.send('Provider not found!');
       }
-      await this.reverseSurveyTransaction(survey_number, username);
+      let resp = await this.reverseSurveyTransaction(survey_number, username);
+      if (resp) res.send('Survey Reversed');
+      else res.send('Survey not reversed');
     } catch (e) {
       console.log(e);
       this.throwCustomError(e, 404);
