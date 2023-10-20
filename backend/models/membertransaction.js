@@ -732,7 +732,7 @@ module.exports = (sequelize, DataTypes) => {
     await MemberTransaction.insertTransaction({
       type: 'withdraw',
       amount: parseFloat(data.transaction_amount),
-      note: 'Reverse transaction',
+      note: data.note || 'Reverse transaction',
       member_id: data.member_id,
       amount_action: 'reversed_transaction',
       status: 5,
