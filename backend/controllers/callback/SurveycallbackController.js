@@ -584,7 +584,7 @@ class SurveycallbackController {
           data: {
             members: member,
             amount: '$' + amount,
-            surveys: { name: providerName },
+            surveys: { name: pname },
           },
         });
 
@@ -600,7 +600,7 @@ class SurveycallbackController {
               survey: {
                 amount: amount,
                 survey_number: surveyNumber,
-                provider: providerName,
+                provider: pname,
               },
             },
           },
