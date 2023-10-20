@@ -735,7 +735,7 @@ class SurveycallbackController {
    * Api for Survey Reversal
    */
   async reverseSurvey(req, res) {
-    const logger1 = require('../helpers/Logger')(
+    const logger1 = require('../../helpers/Logger')(
       `${req.params.status}-${req.params.provider}.log`
     );
 
