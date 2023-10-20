@@ -787,47 +787,55 @@ class SurveycallbackController {
             model: MemberTransaction,
             where: {
               member_id: member.id,
+              status: { [Op.ne]: 5 },
             },
           },
         });
         console.log('transaction', transaction);
-        //current transaction
-        await MemberTransaction.reverseTransactionUpdate({
-          member_balance_amount: member.member_amounts[0].amount,
-          transaction_amount: transaction.MemberTransaction.amount,
-          member_id: member.id,
-          transaction_id: transaction.member_transaction_id,
-        });
+        if (transaction) {
+          //current transaction
+          await MemberTransaction.reverseTransactionUpdate({
+            member_balance_amount: member.member_amounts[0].amount,
+            transaction_amount: transaction.MemberTransaction.amount,
+            member_id: member.id,
+            transaction_id: transaction.member_transaction_id,
+          });
 
-        //referral transaction
-        let referral_transactions = await MemberTransaction.findOne({
-          where: {
-            parent_transaction_id: transaction.member_transaction_id,
-            amount_action: 'referral',
-          },
-        });
-        console.log('referral_transactions', referral_transactions);
-        if (referral_transactions) {
-          let referral_member = await Member.findOne({
-            where: { id: referral_transactions.member_id },
-            include: {
-              model: MemberBalance,
-              as: 'member_amounts',
-              where: { amount_type: 'cash' },
+          //referral transaction
+          let referral_transactions = await MemberTransaction.findOne({
+            where: {
+              parent_transaction_id: transaction.member_transaction_id,
+              amount_action: 'referral',
             },
           });
+          console.log('referral_transactions', referral_transactions);
+          if (referral_transactions) {
+            let referral_member = await Member.findOne({
+              where: { id: referral_transactions.member_id },
+              include: {
+                model: MemberBalance,
+                as: 'member_amounts',
+                where: { amount_type: 'cash' },
+              },
+            });
 
-          await MemberTransaction.reverseTransactionUpdate({
-            member_balance_amount: referral_member.member_amounts[0].amount,
-            transaction_amount: referral_transactions.amount,
-            member_id: referral_transactions.member_id,
-            transaction_id: referral_transactions.id,
-          });
+            await MemberTransaction.reverseTransactionUpdate({
+              member_balance_amount: referral_member.member_amounts[0].amount,
+              transaction_amount: referral_transactions.amount,
+              member_id: referral_transactions.member_id,
+              transaction_id: referral_transactions.id,
+            });
+          }
+          return {
+            status: true,
+            message: 'Record Updated',
+          };
+        } else {
+          return {
+            status: false,
+            message: 'Transaction already reverted',
+          };
         }
-        return {
-          status: true,
-          message: 'Record Updated',
-        };
       } else {
         return {
           status: false,
