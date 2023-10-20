@@ -780,7 +780,7 @@ class SurveycallbackController {
         },
       });
       console.log('member', member);
-      if (member.length > 0) {
+      if (member) {
         let transaction = await MemberSurvey.findOne({
           where: { survey_number: survey_number },
           include: {
