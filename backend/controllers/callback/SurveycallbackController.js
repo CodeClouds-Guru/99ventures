@@ -742,6 +742,7 @@ class SurveycallbackController {
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
     res.send(req.query);
+    let resp = {};
     try {
       var username = '';
       var survey_number = '';
@@ -750,14 +751,18 @@ class SurveycallbackController {
         username = req.query.ssi;
         survey_number = req.query.txn_id;
       } else {
-        res.send('Provider not found!');
+        return res.send('Provider not found!');
       }
-      let resp = await this.reverseSurveyTransaction(survey_number, username);
-      if (resp) res.send('Survey Reversed');
-      else res.send('Survey not reversed');
+      resp = await this.reverseSurveyTransaction(survey_number, username);
     } catch (e) {
       console.log(e);
-      this.throwCustomError(e, 404);
+    } finally {
+      if (resp)
+        return res.status(200).json({
+          status: true,
+          message: 'Data synced.',
+        });
+      else return res.send('Survey not reversed');
     }
   }
 
@@ -830,8 +835,10 @@ class SurveycallbackController {
         };
       }
     } catch (e) {
-      console.log(e);
-      this.throwCustomError(e, 404);
+      const logger1 = require('../../helpers/Logger')(
+        `reverseSurveyTransaction.log`
+      );
+      logger1.error(error);
     }
   }
 }
