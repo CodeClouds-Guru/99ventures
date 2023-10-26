@@ -693,7 +693,7 @@ function Listing(props) {
                                                 {Object.values(fields)
                                                     .filter(field => field.listing === true)
                                                     .map((field, i) => {
-                                                        return <TableCell key={i} className="p-4 md:p-16" component="th" scope="row">{customizedRowValue(n, field)}</TableCell>
+                                                        return <TableCell key={i} className="p-2 md:p-16 text-md" component="th" scope="row">{customizedRowValue(n, field)}</TableCell>
                                                     })
                                                 }
                                             </TableRow>

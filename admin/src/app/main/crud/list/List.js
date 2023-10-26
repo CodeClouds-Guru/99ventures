@@ -411,7 +411,7 @@ function List(props) {
 	const customizedField = (module, n, field) => {
 		if (module === 'tickets') {
 			if (field.field_name === 'status') {
-				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} size="small" />
 			}
 			if (field.field_name === 'username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['username']}</a>
@@ -993,7 +993,7 @@ function List(props) {
 										return (
 
 											<TableRow
-												className="h-72 cursor-pointer"
+												className="h-60 cursor-pointer"
 												hover
 												role="checkbox"
 												aria-checked={isSelected}
@@ -1016,7 +1016,7 @@ function List(props) {
 													.filter(field => field.listing === true)
 													.map((field, i) => {
 														return <Fragment key={i}>
-															<TableCell className="p-4 md:p-16" component="th" scope="row">
+															<TableCell className="p-2 md:p-16 text-md" component="th" scope="row">
 																{
 																	customizedField(module, n, field)
 																}
