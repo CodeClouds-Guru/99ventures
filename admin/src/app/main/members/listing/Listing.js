@@ -407,7 +407,7 @@ function Listing(props) {
     }
     const addFilterRow = () => {
         // All the values will be blank while adding new row.
-        setFilters(filters.concat({ column: '', match: '', search: '' }))
+        setFilters(filters.concat({ column: '', match: 'substring', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
