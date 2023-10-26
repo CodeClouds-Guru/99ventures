@@ -107,6 +107,10 @@ class ScriptParser {
                     }
                     if (transaction.status === 2) {
                       var replicated_transaction = { ...transaction };
+                      console.log(
+                        '---------------replicated_transaction',
+                        replicated_transaction
+                      );
                       data.splice(key - 1, 0, replicated_transaction);
                     }
                   }
