@@ -25,6 +25,11 @@ const buttonStyle = {
     '@media screen and (max-width: 768px)': {
         fontSize: '1rem',
         width: '90px',
+    },
+    '@media screen and (max-width: 575px)': {
+        fontSize: '1rem',
+        width: '100%',
+        marginBottom: '0.6rem'
     }
 }
 
@@ -38,7 +43,7 @@ function PageHeader(props) {
     const activeBtn = props.button;
 
     return (
-        <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-12 ">
+        <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col flex-1 w-full items-center justify-between space-y-8 sm:space-y-0 py-12 sm:px-0 px-12">
             <div className="flex flex-col items-center sm:items-start space-y-8 sm:space-y-0  sm:mb-16 mb-0 mr-auto">
                 <motion.div
                     initial={{ x: 20, opacity: 0 }}
@@ -73,7 +78,7 @@ function PageHeader(props) {
                     </motion.div>
                 </div>
             </div>
-            <Stack spacing={{ sm: 1, lg: 2 }} direction="row" className="justify-between ml-auto">
+            <Stack spacing={{ sm: 1, lg: 2 }} direction="row" className="justify-between ml-auto flex-wrap flex-col sm:flex-row sm:flex-nowrap w-full sm:w-auto">
                 <Button variant={(activeBtn === 'profile') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId)}>Profile</Button>
                 <Button variant={(activeBtn === 'history') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/history')}>History</Button>
                 <Button variant={(activeBtn === 'downline') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/downline')}>Downline</Button>
