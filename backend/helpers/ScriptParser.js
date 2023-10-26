@@ -77,17 +77,40 @@ class ScriptParser {
                   ...where.where,
                   ...param_where,
                 };
-              console.log('where', where);
+              // console.log('where', where);
               data = await Models[script.module].findAll({
                 subQuery: false,
                 order: [[Sequelize.literal(orderBy), order]],
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
-                logging: console.log,
+                // logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
+              }
+              // To format Earning history list to manipulate withdrawal data
+              if (script.module == 'MemberTransaction') {
+                data.forEach(function (transaction, key) {
+                  if (transaction.amount_action == 'member_withdrawal') {
+                    if (
+                      transaction.transaction_id &&
+                      transaction.ParentTransaction.status in [4, 3]
+                    ) {
+                      data[key].setDataValue(
+                        transaction.status,
+                        transaction.ParentTransaction.status
+                      );
+                    }
+                    if (transaction.status in [3, 4]) {
+                      data[key].setDataValue(transaction.status, 'pending');
+                    }
+                    if (transaction.status === 2) {
+                      var replicated_transaction = { ...transaction };
+                      data.splice(key - 1, 0, replicated_transaction);
+                    }
+                  }
+                });
               }
 
               var data_count = await Models[script.module].findAndCountAll({
@@ -423,6 +446,7 @@ class ScriptParser {
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
             'note',
+            'parent_transaction_id',
           ],
         };
       case 'Member':
