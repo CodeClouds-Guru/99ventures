@@ -481,29 +481,37 @@ class SurveycallbackController {
   async tolunaPostback(req, res) {
     if (req.query.status === 'complete') {
       const requestBody = req.body;
-      const userId = requestBody.UniqueCode;
+      const username = requestBody.UniqueCode;
       const surveyId = requestBody.SurveyId;
       const surveyRef = requestBody.SurveyRef;
-      const partnerAmount = requestBody.Revenue; // the amount already converted to cent
+      const partnerAmount = requestBody.Revenue; // the amount multiplied by 100
       try {
-        let member = await this.getMember({ id: userId });
+        let member = await this.getMember({ username });
         if (member) {
-          const survey = {
-            cpi: partnerAmount / 100,
-          };
-          await this.memberTransaction(
-            survey,
-            'Toluna',
-            surveyId,
-            member,
-            requestBody,
-            req
-          );
+          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyId, 6);
+          if(memberSurveys.length < 1){
+            const survey = {
+              cpi: partnerAmount / 100,
+            };
+            await this.memberTransaction(
+              survey,
+              'Toluna',
+              surveyId,
+              member,
+              requestBody,
+              req
+            );
+          } else {
+            const tolunaLog = require('../../helpers/Logger')(
+              `toluna-postback-errror.log`
+            );
+            tolunaLog.error(`Already attempted (#${surveyNumber}) - (${username})`);
+          }
         } else {
           const tolunaLog = require('../../helpers/Logger')(
             `toluna-postback-errror.log`
           );
-          tolunaLog.error('Unable to find member!');
+          tolunaLog.error(`Unable to find member ${username}!`);
         }
       } catch (error) {
         const tolunaLog = require('../../helpers/Logger')(
