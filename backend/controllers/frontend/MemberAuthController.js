@@ -934,7 +934,6 @@ class MemberAuthController {
         ],
       });
       if (questions.length) {
-        // questions.forEach(async function (record, key) {
         for (let record of questions) {
           if (record.survey_provider_id) {
             let precode = '';
@@ -1041,7 +1040,7 @@ class MemberAuthController {
                 open_ended_value: precode,
               });
             }
-            // }
+
           }
         }
         //
