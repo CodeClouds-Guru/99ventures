@@ -96,7 +96,7 @@ class ScriptParser {
                   if (transaction.amount_action == 'Member withdrawal') {
                     console.log(
                       'transaction.ParentTransaction.status',
-                      transaction.ParentTransaction.status
+                      transaction.ParentTransaction
                     );
                     var status_arr = [3, 4];
                     if (
