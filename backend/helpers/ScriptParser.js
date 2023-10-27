@@ -95,9 +95,10 @@ class ScriptParser {
                   if (transaction.amount_action == 'member_withdrawal') {
                     var status_arr = [3, 4];
                     if (
-                      transaction.transaction_id &&
+                      transaction.parent_transaction_id &&
                       status_arr.includes(transaction.ParentTransaction.status)
                     ) {
+                      console.log('transaction', transaction);
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
@@ -105,14 +106,6 @@ class ScriptParser {
                     }
                     if (status_arr.includes(transaction.status)) {
                       data[key].setDataValue(transaction.status, 'pending');
-                    }
-                    if (transaction.status === 2) {
-                      var replicated_transaction = { ...transaction };
-                      console.log(
-                        '---------------replicated_transaction',
-                        replicated_transaction
-                      );
-                      data.splice(key - 1, 0, replicated_transaction);
                     }
                   }
                 });
