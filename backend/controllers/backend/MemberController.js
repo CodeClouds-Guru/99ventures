@@ -257,7 +257,7 @@ class MemberController extends Controller {
           total_earnings = await this.getTotalEarnings(member_id);
 
           let query =
-            "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
+            "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at`, `member_transactions`.`transaction_id` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
           survey_list = await db.sequelize.query(query, {
             replacements: [member_id],
             type: QueryTypes.SELECT,
