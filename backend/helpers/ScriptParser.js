@@ -427,7 +427,7 @@ class ScriptParser {
             {
               model: Models.MemberTransaction,
               as: 'ParentTransaction',
-              attributes: ['member_id'],
+              attributes: ['member_id', 'status', 'created_at'],
               include: {
                 model: Models.Member,
                 required: false,
@@ -449,6 +449,7 @@ class ScriptParser {
             [Sequelize.literal('Member.username'), 'username'],
             'note',
             'parent_transaction_id',
+            'created_at',
           ],
         };
       case 'Member':
