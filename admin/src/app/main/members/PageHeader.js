@@ -71,7 +71,7 @@ function PageHeader(props) {
                         initial={{ x: -20 }}
                         animate={{ x: 0, transition: { delay: 0.3 } }}
                     >
-                        <Typography variant="h5" className="truncate font-semibold">
+                        <Typography variant="h5" className="truncate font-semibold text-xl sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl">
                             {props.module}
                         </Typography>
 

@@ -63,8 +63,8 @@ const MemberAvatar = (props) => {
                     height: '15rem',
                 },
                 '@media screen and (max-width: 575px)': {
-                    width: '7rem',
-                    height: '7rem'
+                    width: '6rem',
+                    height: '6rem'
                 }
             }}
             className="shadow-md relative rounded-full overflow-hidden"

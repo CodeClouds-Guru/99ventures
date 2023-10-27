@@ -772,7 +772,7 @@ function List(props) {
 
 			{
 				(showModuleHeading || searchable || addable || customHeading) && (
-					<div className='w-full flex py-32 px-24 md:px-32'>
+					<div className='w-full flex py-32 px-24 md:px-32 flex-wrap sm:flex-nowrap'>
 						{
 							showModuleHeading && (
 								<Typography
@@ -802,7 +802,7 @@ function List(props) {
 								</Typography>
 							)
 						}
-						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
+						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto flex-wrap sm:flex-nowrap">
 							{module === 'withdrawal-requests' &&
 								<Tooltip title="Configure" placement="top">
 									<Button
@@ -834,7 +834,7 @@ function List(props) {
 												</div>
 											) : (<div></div>)
 										}
-										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3">
+										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3 w-full sm:w-auto">
 											<OutlinedInput
 												id="outlined-adornment-datepicker"
 												type="text"
@@ -874,7 +874,7 @@ function List(props) {
 											/>
 										</FormControl>
 										{(module === 'member-transactions' && location.pathname.includes('history')) &&
-											<FormControl sx={{ minWidth: 120 }} size="small">
+											<FormControl sx={{ minWidth: 120 }} size="small" className="w-full sm:w-auto p-3">
 												<InputLabel id="demo-simple-select-label">Type</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"
@@ -901,7 +901,7 @@ function List(props) {
 												</Select>
 											</FormControl>}
 										{module === 'withdrawal-requests' &&
-											<FormControl sx={{ minWidth: 120 }} size="small">
+											<FormControl sx={{ minWidth: 120 }} size="small" className="p-3 sm:w-auto w-full">
 												<InputLabel id="demo-simple-select-label">Status</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"

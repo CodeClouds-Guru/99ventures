@@ -30,6 +30,9 @@ const labelStyling = {
     },
     '@media screen and (max-width: 768px)': {
         fontSize: '1.4rem'
+    },
+    '@media screen and (max-width: 575px)': {
+        fontSize: '1.2rem'
     }
 }
 
@@ -73,6 +76,14 @@ const iconStyle = {
         minHeight: '20px',
         fontSize: '20px',
         lineHeight: 20
+    },
+    '@media screen and (max-width: 575px)': {
+        width: '15px',
+        height: '15px',
+        minWidth: '15px',
+        minHeight: '15px',
+        fontSize: '15px',
+        lineHeight:15
     }
 }
 
@@ -126,6 +137,9 @@ const chipStyle = {
     '@media screen and (max-width: 1280px)': {
         fontSize: '1.3rem',
         height: 'auto',
+    },
+    '@media screen and (max-width: 575px)': {
+        fontSize: '1rem'
     }
 }
 
@@ -514,6 +528,9 @@ const MemberDetails = (props) => {
                                             },
                                             '@media screen and (max-width: 768px)': {
                                                 fontSize: '3rem'
+                                            },
+                                            '@media screen and (max-width: 575px)': {
+                                                fontSize: '2rem'
                                             }
                                         }}
                                     >
@@ -562,7 +579,7 @@ const MemberDetails = (props) => {
                                     } />
                                     <ListItemText component="div" className="w-1/2 sm:w-3/4 md:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                         <div className='flex items-center'>
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-base xl:text-base">{memberData.id}</Typography>
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-base xl:text-base text-sm">{memberData.id}</Typography>
                                             {
                                                 (user.role.includes('super-admin') && memberData.deleted_at === null) && (
                                                     <Tooltip title="Impersonate me" placement="top-start" >
@@ -737,7 +754,7 @@ const MemberDetails = (props) => {
                                                 />
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.first_name + ' ' + memberData.last_name}</Typography>
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.first_name + ' ' + memberData.last_name}</Typography>
                                         )
                                     } />
                                 </ListItem>
@@ -746,7 +763,7 @@ const MemberDetails = (props) => {
                                         <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Email:</Typography>
                                     } />
                                     <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" primary={
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                             <a href={`mailto:${memberData.email}`} style={{ textDecoration: 'none', color: '#1e293b' }}>{memberData.email}</a>
                                             {status === 'validating' && <Tooltip title="Send verification email" placement="top-start" >
                                                 <IconButton color="primary" aria-label="Filter" component="span" sx={iconLabel} onClick={() => sendVerificationEmail()}>
@@ -781,7 +798,7 @@ const MemberDetails = (props) => {
                                             </div>
                                         ) : (
                                             <div className='flex items-center break-all'>
-                                                <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base">
+                                                <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base text-sm">
                                                     {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
                                                 </Typography>
                                                 {
@@ -803,7 +820,7 @@ const MemberDetails = (props) => {
                                     } />
                                     <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                         <div className="flex items-center">
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                 {memberData.referral_code ?? '--'}
                                             </Typography>
                                             {
@@ -855,7 +872,7 @@ const MemberDetails = (props) => {
                                     <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                         (memberData.MemberReferral && memberData.member_referral_id && memberData.member_referrer) ? (
                                             <div className='flex items-center'>
-                                                <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base break-all">
+                                                <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base  text-sm break-all">
                                                     {memberData.member_referrer} ({memberData.MemberReferral.ip})
                                                 </Typography>
                                                 <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
@@ -902,7 +919,7 @@ const MemberDetails = (props) => {
                                                 </TextField>
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.MembershipTier ? memberData.MembershipTier.name : ''}</Typography>
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.MembershipTier ? memberData.MembershipTier.name : ''}</Typography>
                                         )
 
                                     } />
@@ -937,7 +954,7 @@ const MemberDetails = (props) => {
                                                 />
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                 {
                                                     memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no
                                                 }
@@ -975,7 +992,7 @@ const MemberDetails = (props) => {
                                                 </TextField>
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="capitalize sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="capitalize sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                 {memberData.gender}
                                             </Typography>
                                         )
@@ -1010,7 +1027,7 @@ const MemberDetails = (props) => {
                                                 </LocalizationProvider>
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                 {
                                                     memberData.dob ?? '--'
                                                 }
@@ -1023,7 +1040,7 @@ const MemberDetails = (props) => {
                                         <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Joining Date:</Typography>
                                     } />
                                     <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
-                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                        <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                             { moment(memberData.created_at).format('MMMM Do YYYY, HH:mm:ss') }
                                         </Typography>
                                     } />
@@ -1039,7 +1056,7 @@ const MemberDetails = (props) => {
                                 p: 1.8
                             }}
                         >
-                            <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
+                            <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium text-sm sm:text-base md:text-lg lg:text-lg">
                                 Balance($): {showBalance('balance')} <br /> (Total Earnings: ${showBalance('total')})
                             </Typography>
                             {/* <Typography variant="body1" className="lg:mb-5 sm:mb-10 xl:mb-10 font-medium">
@@ -1054,8 +1071,8 @@ const MemberDetails = (props) => {
                         </div>
                     </div>
                 </div>
-                <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className="my-10 sm:mx-10 lg:mx-10 xl:24 sm:hidden lg:flex" />
-                <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2 }} className="md:my-16 sm:my-16 xl:24 lg:hidden" />
+                <Divider orientation="vertical" flexItem sx={{ borderRightWidth: 3 }} className="my-10 sm:mx-10 lg:mx-10 xl:24 hidden md:flex" />
+                <Divider orientation="horizontal" flexItem sx={{ borderWidth: 2 }} className="md:my-16 sm:my-16 xl:24 lg:hidden my-5" />
                 <div className="lg:w-2/3 xl:w-3/5">
                     <div className='flex flex-col'>
                         <div className='flex sm:flex-row flex-col'>
@@ -1071,7 +1088,7 @@ const MemberDetails = (props) => {
                                                 <Typography variant="subtitle" sx={labelStyling}>Geo Location:</Typography>
                                             } />
                                             <ListItemText className="w-1/2 sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'}</Typography>
+                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].geo_location : '--'}</Typography>
                                             } />
                                         </ListItem>
                                         <ListItem disablePadding>
@@ -1079,7 +1096,7 @@ const MemberDetails = (props) => {
                                                 <Typography variant="subtitle" sx={labelStyling}>IP:</Typography>
                                             } />
                                             <ListItemText className="w-1/2 sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'}</Typography>
+                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].ip : '--'}</Typography>
                                             } />
                                         </ListItem>
                                         <ListItem disablePadding>
@@ -1087,7 +1104,7 @@ const MemberDetails = (props) => {
                                                 <Typography variant="subtitle" sx={labelStyling}>Browser:</Typography>
                                             } />
                                             <ListItemText className="w-1/2 sm:w-3/5 md:3/5 lg:w-3/5 xl:w-2/3" sx={listItemTextStyle} primary={
-                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'}</Typography>
+                                                <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{(memberData.IpLogs && memberData.IpLogs.length) ? memberData.IpLogs[0].browser : '--'}</Typography>
                                             } />
                                         </ListItem>
                                     </List>
@@ -1117,7 +1134,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.address_1}</Typography>
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.address_1}</Typography>
                                                         )
                                                     }
                                                 </>
@@ -1142,7 +1159,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                                 {memberData.address_2 ? memberData.address_2 : '--'}
                                                             </Typography>
                                                         )
@@ -1169,7 +1186,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg  md:text-lg lg:text-sm xl:text-base">
+                                                            <Typography variant="body1" className="sm:text-lg  md:text-lg lg:text-sm xl:text-base text-sm">
                                                                 {memberData.city ? memberData.city : '--'}
                                                             </Typography>
                                                         )
@@ -1196,7 +1213,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">{memberData.zip_code}</Typography>
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.zip_code}</Typography>
                                                         )
                                                     }
                                                 </>
@@ -1226,7 +1243,7 @@ const MemberDetails = (props) => {
                                                             />
 
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base">
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                                 {memberData.country_id && getCountryName(memberData.country_id)}
                                                             </Typography>
                                                         )
@@ -1262,7 +1279,7 @@ const MemberDetails = (props) => {
                                 )
                             }
                         </Box>
-                        <Divider sx={{ borderWidth: 2 }} className="my-10 sm:hidden" />
+                        <Divider sx={{ borderWidth: 2 }} className="mt-5 sm:hidden" />
                         <div className='w-full sm:hidden'>
                             <SurveyDetails surveyData={surveyDetails} />
                         </div>

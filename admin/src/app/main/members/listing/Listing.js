@@ -513,8 +513,8 @@ function Listing(props) {
                         <DialogContent>
                             {Object.values(filters).map((val, key) => {
                                 return (
-                                    <div key={key} className="flex w-full justify-between my-10">
-                                        <FormControl className="w-4/12" size="large">
+                                    <div key={key} className="flex w-full justify-between my-10 sm:flex-wrap flex-col sm:flex-row">
+                                        <FormControl className="sm:w-4/12 w-full mb-10 sm:mb-0" size="large">
                                             <InputLabel id="demo-simple-select-label">Column</InputLabel>
                                             <Select
                                                 labelId="demo-simple-select-label"
@@ -531,7 +531,7 @@ function Listing(props) {
                                                 }
                                             </Select>
                                         </FormControl>
-                                        <FormControl className="w-3/12 px-5" size="large">
+                                        <FormControl className="sm:w-3/12 w-full px-0 sm:px-5 mb-10 sm:mb-0" size="large">
                                             <InputLabel id="demo-simple-select-label">Match</InputLabel>
                                             <Select
                                                 labelId="demo-simple-select-label"
@@ -545,7 +545,7 @@ function Listing(props) {
                                                 }
                                             </Select>
                                         </FormControl>
-                                        <FormControl className="w-4/12" size="large">
+                                        <FormControl className="w-full sm:w-4/12" size="large">
                                             <TextField
                                                 type="text"
                                                 label="Search"
