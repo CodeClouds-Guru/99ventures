@@ -77,17 +77,38 @@ class ScriptParser {
                   ...where.where,
                   ...param_where,
                 };
-              console.log('where', where);
+              // console.log('where', where);
               data = await Models[script.module].findAll({
                 subQuery: false,
                 order: [[Sequelize.literal(orderBy), order]],
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
-                logging: console.log,
+                // logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
+              }
+              // To format Earning history list to manipulate withdrawal data
+              if (script.module == 'MemberTransaction') {
+                data.forEach(function (transaction, key) {
+                  if (transaction.amount_action == 'member_withdrawal') {
+                    var status_arr = [3, 4];
+                    if (
+                      transaction.parent_transaction_id &&
+                      status_arr.includes(transaction.ParentTransaction.status)
+                    ) {
+                      console.log('transaction', transaction);
+                      data[key].setDataValue(
+                        transaction.status,
+                        transaction.ParentTransaction.status
+                      );
+                    }
+                    if (status_arr.includes(transaction.status)) {
+                      data[key].setDataValue(transaction.status, 'pending');
+                    }
+                  }
+                });
               }
 
               var data_count = await Models[script.module].findAndCountAll({
@@ -423,6 +444,7 @@ class ScriptParser {
             [Sequelize.literal('Member.avatar'), 'avatar'],
             [Sequelize.literal('Member.username'), 'username'],
             'note',
+            'parent_transaction_id',
           ],
         };
       case 'Member':
