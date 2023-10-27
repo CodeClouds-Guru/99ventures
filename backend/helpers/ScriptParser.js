@@ -92,7 +92,7 @@ class ScriptParser {
               // To format Earning history list to manipulate withdrawal data
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
-                  if (transaction.amount_action == 'member_withdrawal') {
+                  if (transaction.amount_action == 'Member withdrawal') {
                     var status_arr = [3, 4];
                     if (
                       transaction.parent_transaction_id &&
