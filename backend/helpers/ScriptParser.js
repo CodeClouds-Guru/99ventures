@@ -92,12 +92,8 @@ class ScriptParser {
               // To format Earning history list to manipulate withdrawal data
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
-                  console.log('transaction', transaction);
                   if (transaction.amount_action == 'member_withdrawal') {
-                    console.log(
-                      'transaction.ParentTransaction.status',
-                      transaction.ParentTransaction
-                    );
+                    console.log('transaction', transaction);
                     var status_arr = [3, 4];
                     if (status_arr.includes(transaction.status)) {
                       data[key].setDataValue(transaction.status, 'pending');
