@@ -431,11 +431,23 @@ class ScriptParser {
               model: Models.MemberTransaction,
               as: 'ParentTransaction',
               attributes: ['member_id', 'status', 'created_at'],
-              include: {
-                model: Models.Member,
-                required: false,
-                attributes: ['id', 'first_name', 'last_name', 'username'],
-              },
+              include: [
+                {
+                  model: Models.Member,
+                  required: false,
+                  attributes: ['id', 'first_name', 'last_name', 'username'],
+                },
+                {
+                  model: Models.WithdrawalRequest,
+                  required: user ? false : true,
+                  where: {
+                    status: ['approved', 'pending', 'completed'],
+                  },
+                  include: {
+                    model: Models.PaymentMethod,
+                  },
+                },
+              ],
             },
           ],
           attributes: [
