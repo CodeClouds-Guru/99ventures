@@ -439,10 +439,10 @@ class ScriptParser {
                 },
                 {
                   model: Models.WithdrawalRequest,
-                  required: user ? false : true,
-                  where: {
-                    status: ['approved', 'pending', 'completed'],
-                  },
+                  // required: user ? false : true,
+                  // where: {
+                  //   status: ['approved', 'pending', 'completed'],
+                  // },
                   include: {
                     model: Models.PaymentMethod,
                   },
