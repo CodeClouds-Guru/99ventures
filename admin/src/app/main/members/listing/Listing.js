@@ -18,7 +18,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import LoadingButton from '@mui/lab/LoadingButton';
 import LinearProgress from '@mui/material/LinearProgress';
-
+import AnchorLink from '@mui/material/Link';
 
 const initialColumns = ['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at'];
 
@@ -388,6 +388,8 @@ function Listing(props) {
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
             else if (status === 'not_verified')
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
+        } else if (field.field_name === 'username') {
+            return <AnchorLink href={`/app/members/${processFieldValue(n['id'], field)}`}>{processFieldValue(n[field.field_name], field)}</AnchorLink>
         } else {
             return status
         }
