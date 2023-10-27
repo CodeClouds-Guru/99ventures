@@ -92,24 +92,27 @@ class ScriptParser {
               // To format Earning history list to manipulate withdrawal data
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
-                  console.log('transaction', transaction);
-                  if (transaction.amount_action == 'Member withdrawal') {
-                    console.log(
-                      'transaction.ParentTransaction.status',
-                      transaction.ParentTransaction
-                    );
+                  if (
+                    transaction.amount_action == 'member_withdrawal' ||
+                    transaction.amount_action == 'Member withdrawal'
+                  ) {
                     var status_arr = [3, 4];
+                    if (transaction.status == 3 || transaction.status == 4) {
+                      data[key].setDataValue(transaction.status, 'pending');
+                      transaction.status = 'pending';
+                    }
                     if (
                       transaction.parent_transaction_id &&
-                      status_arr.includes(transaction.ParentTransaction.status)
+                      transaction.status == 2
                     ) {
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
                       );
+                      transaction.status = transaction.ParentTransaction.status;
                     }
-                    if (status_arr.includes(transaction.status)) {
-                      data[key].setDataValue(transaction.status, 'pending');
+                    if (transaction.status == 1) {
+                      transaction.status = transaction.WithdrawalRequest.status;
                     }
                   }
                 });
