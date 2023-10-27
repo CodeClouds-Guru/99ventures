@@ -82,7 +82,7 @@ function PageHeader(props) {
                 <Button variant={(activeBtn === 'profile') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId)}>Profile</Button>
                 <Button variant={(activeBtn === 'history') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/history')}>History</Button>
                 <Button variant={(activeBtn === 'downline') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/downline')}>Downline</Button>
-                <Button variant={(activeBtn === 'iplogs') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/iplogs')}>IP Log</Button>
+                <Button variant={(activeBtn === 'security') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/security')}>Security</Button>
                 <Button variant={(activeBtn === 'withdraws') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/withdraws')}>Withdraws</Button>
                 <Button variant={(activeBtn === 'alerts') ? 'outlined' : 'contained'} size="large" sx={buttonStyle} onClick={() => navigate('/app/members/' + moduleId + '/alerts')}>Alerts</Button>
             </Stack>

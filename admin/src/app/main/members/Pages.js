@@ -38,7 +38,7 @@ const Pages = ()=>{
             return <MemberTransaction/>
         } else if(module === 'downline'){
            return <Downline/>
-        } else if(module === 'iplogs'){
+        } else if(module === 'security'){
             return <IPLogs/>
         } else if(module === 'withdraws'){
             return <Withdraws/>

@@ -11,7 +11,7 @@ const UserDetails = () => {
             addable={ false }
             deletable={ false }
             moduleHeading={ false }
-            customHeading="IP Log"
+            customHeading="Security"
         />
     );
 }
