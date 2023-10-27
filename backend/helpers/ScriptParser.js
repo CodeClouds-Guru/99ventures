@@ -93,23 +93,23 @@ class ScriptParser {
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
                   console.log('transaction', transaction);
-                  if (transaction.amount_action == 'Member withdrawal') {
+                  if (transaction.amount_action == 'member_withdrawal') {
                     console.log(
                       'transaction.ParentTransaction.status',
                       transaction.ParentTransaction
                     );
                     var status_arr = [3, 4];
+                    if (status_arr.includes(transaction.status)) {
+                      data[key].setDataValue(transaction.status, 'pending');
+                    }
                     if (
                       transaction.parent_transaction_id &&
-                      status_arr.includes(transaction.ParentTransaction.status)
+                      transaction.status == 2
                     ) {
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
                       );
-                    }
-                    if (status_arr.includes(transaction.status)) {
-                      data[key].setDataValue(transaction.status, 'pending');
                     }
                   }
                 });
