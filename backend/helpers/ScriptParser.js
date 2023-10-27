@@ -92,13 +92,17 @@ class ScriptParser {
               // To format Earning history list to manipulate withdrawal data
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
-                  if (transaction.amount_action == 'member_withdrawal') {
+                  console.log('transaction', transaction);
+                  if (transaction.amount_action == 'Member withdrawal') {
+                    console.log(
+                      'transaction.ParentTransaction.status',
+                      transaction.ParentTransaction
+                    );
                     var status_arr = [3, 4];
                     if (
                       transaction.parent_transaction_id &&
                       status_arr.includes(transaction.ParentTransaction.status)
                     ) {
-                      console.log('transaction', transaction);
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
@@ -423,7 +427,7 @@ class ScriptParser {
             {
               model: Models.MemberTransaction,
               as: 'ParentTransaction',
-              attributes: ['member_id'],
+              attributes: ['member_id', 'status', 'created_at'],
               include: {
                 model: Models.Member,
                 required: false,
@@ -445,6 +449,7 @@ class ScriptParser {
             [Sequelize.literal('Member.username'), 'username'],
             'note',
             'parent_transaction_id',
+            'created_at',
           ],
         };
       case 'Member':
