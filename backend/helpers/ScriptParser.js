@@ -98,7 +98,6 @@ class ScriptParser {
                   ) {
                     var status_arr = [3, 4];
                     if (transaction.status == 3 || transaction.status == 4) {
-                      console.log('transaction3/4', transaction);
                       data[key].setDataValue(transaction.status, 'pending');
                       transaction.status = 'pending';
                     }
@@ -106,12 +105,14 @@ class ScriptParser {
                       transaction.parent_transaction_id &&
                       transaction.status == 2
                     ) {
-                      console.log('transaction2', transaction);
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
                       );
                       transaction.status = transaction.ParentTransaction.status;
+                    }
+                    if (transaction.status == 1) {
+                      transaction.status = transaction.WithdrawalRequest.status;
                     }
                   }
                 });
