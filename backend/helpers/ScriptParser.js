@@ -93,15 +93,16 @@ class ScriptParser {
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
                   if (transaction.amount_action == 'member_withdrawal') {
-                    console.log('transaction', transaction);
                     var status_arr = [3, 4];
                     if (status_arr.includes(transaction.status)) {
+                      console.log('transaction3/4', transaction);
                       data[key].setDataValue(transaction.status, 'pending');
                     }
                     if (
                       transaction.parent_transaction_id &&
                       transaction.status == 2
                     ) {
+                      console.log('transaction2', transaction);
                       data[key].setDataValue(
                         transaction.status,
                         transaction.ParentTransaction.status
