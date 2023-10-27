@@ -100,6 +100,7 @@ class ScriptParser {
                     if (transaction.status == 3 || transaction.status == 4) {
                       console.log('transaction3/4', transaction);
                       data[key].setDataValue(transaction.status, 'pending');
+                      transaction.status = 'pending';
                     }
                     if (
                       transaction.parent_transaction_id &&
@@ -110,6 +111,7 @@ class ScriptParser {
                         transaction.status,
                         transaction.ParentTransaction.status
                       );
+                      transaction.status = transaction.ParentTransaction.status;
                     }
                   }
                 });
