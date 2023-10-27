@@ -34,6 +34,7 @@ function List(props) {
 	const addable = props.addable ?? true;
 	const deletable = props.deletable ?? true;
 	const actionable = props.actionable ?? false;
+	const customHeading = props.customHeading ?? ''
 	// const where = props.where ?? {};
 	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
@@ -770,7 +771,7 @@ function List(props) {
 			{/* // header */}
 
 			{
-				(showModuleHeading || searchable || addable) && (
+				(showModuleHeading || searchable || addable || customHeading) && (
 					<div className='w-full flex py-32 px-24 md:px-32'>
 						{
 							showModuleHeading && (
@@ -784,6 +785,20 @@ function List(props) {
 								>
 									{module !== 'offer-walls' ? module.split('-').join(' ') : 'Offerwalls'}
 									{(!_.isEmpty(programsList)) ? virtualIncentiveInfo() : ''}
+								</Typography>
+							)
+						}
+						{
+							customHeading && (
+								<Typography
+									component={motion.span}
+									initial={{ x: -20 }}
+									animate={{ x: 0, transition: { delay: 0.2 } }}
+									delay={300}
+									className="w-2/3 lg:w-1/3 font-extrabold tracking-tight capitalize"
+									variant="h5"
+								>
+									{customHeading}
 								</Typography>
 							)
 						}
