@@ -90,7 +90,7 @@ class WithdrawalRequestController extends Controller {
       let pages = Math.ceil(results.count / limit);
 
       results.rows.map(async (row) => {
-        let [payment_method_name, username, status, admin_status, warning] = [
+        let [payment_method_name, username, status, admin_status] = [
           '',
           '',
           '',
@@ -308,6 +308,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].searchable = false;
       }
       */
+      console.log(fields);
       return {
         result: { data: results.rows, pages, total: results.count },
         fields: this.generateFields(fields),
