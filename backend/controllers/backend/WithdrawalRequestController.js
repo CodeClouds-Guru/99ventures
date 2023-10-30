@@ -88,7 +88,7 @@ class WithdrawalRequestController extends Controller {
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
-      results.rows.map((row) => {
+      results.rows.map(async (row) => {
         let [payment_method_name, username, status, admin_status] = [
           '',
           '',
@@ -103,6 +103,17 @@ class WithdrawalRequestController extends Controller {
         if (row.PaymentMethod) {
           payment_method_name = row.PaymentMethod.name;
         }
+
+        //check if any reversal happened after withdraw req
+        let reversal_transaction = await MemberTransaction.count({
+          where: {
+            id: { [Op.gt]: row.id },
+            amount_action: 'reversed_transaction',
+            status: 5,
+          },
+          logging: console.log,
+        });
+        console.log('reversal_transaction', reversal_transaction);
         row.setDataValue('Member.username', username);
         row.setDataValue('Member.status', status);
         row.setDataValue('Member.admin_status', admin_status);
