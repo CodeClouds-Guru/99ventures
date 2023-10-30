@@ -34,7 +34,8 @@ module.exports = (sequelize, DataTypes) => {
         get() {
           let header = '';
           if (this.action) {
-            this.action == 'member_withdrawal' ? 'Withdrawal' : this.action;
+            this.action =
+              this.action == 'member_withdrawal' ? 'Withdrawal' : this.action;
             header = this.action.replaceAll('_', ' ').toUpperCase();
           }
           return header;
