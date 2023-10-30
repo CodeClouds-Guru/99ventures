@@ -138,8 +138,7 @@ module.exports = (sequelize, DataTypes) => {
       //   notification_action = 'referral_bonus';
       //   break;
       case 'member_withdrawal':
-        notification_verbose =
-          'Successful withdrawal of $' + amount + ' on ' + updated_on;
+        notification_verbose = 'You requested $' + amount + ' on ' + updated_on;
         notification_action = 'member_withdrawal';
         break;
       // case 'reversed_transaction':
