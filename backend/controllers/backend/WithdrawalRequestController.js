@@ -115,7 +115,7 @@ class WithdrawalRequestController extends Controller {
         let query =
           'SELECT COUNT(id) from member_transactions where member_id =? and amount_action = "reversed_transaction" and status = 5 and created_at > (select created_at from withdrawal_requests where member_id = ? and status = "pending" order by created_at limit 0,1)';
         let reversal_transaction = await db.sequelize.query(query, {
-          replacements: [row.member_id],
+          replacements: [row.member_id, row.member_id],
           type: QueryTypes.SELECT,
         });
         console.log('reversal_transaction', reversal_transaction);
