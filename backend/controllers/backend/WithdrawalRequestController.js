@@ -30,6 +30,7 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
+      warning: 'Warning',
     };
   }
 
@@ -89,7 +90,7 @@ class WithdrawalRequestController extends Controller {
       let pages = Math.ceil(results.count / limit);
 
       results.rows.map(async (row) => {
-        let [payment_method_name, username, status, admin_status] = [
+        let [payment_method_name, username, status, admin_status, warning] = [
           '',
           '',
           '',
@@ -103,6 +104,11 @@ class WithdrawalRequestController extends Controller {
         if (row.PaymentMethod) {
           payment_method_name = row.PaymentMethod.name;
         }
+
+        row.setDataValue('Member.username', username);
+        row.setDataValue('Member.status', status);
+        row.setDataValue('Member.admin_status', admin_status);
+        row.setDataValue('PaymentMethod.name', payment_method_name);
 
         //check if any reversal happened after withdraw req
         let reversal_transaction = await MemberTransaction.count({
@@ -119,11 +125,6 @@ class WithdrawalRequestController extends Controller {
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
-        row.setDataValue('Member.username', username);
-        row.setDataValue('Member.status', status);
-        row.setDataValue('Member.admin_status', admin_status);
-        row.setDataValue('PaymentMethod.name', payment_method_name);
-
         row.setDataValue('warning', warning_text);
       });
 
