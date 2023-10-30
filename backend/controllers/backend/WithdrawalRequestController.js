@@ -120,7 +120,8 @@ class WithdrawalRequestController extends Controller {
         });
         console.log('reversal_transaction', reversal_transaction[0]);
         let warning_text =
-          reversal_transaction > 0
+          reversal_transaction.length > 0 &&
+          reversal_transaction[0].reverse_count > 0
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
