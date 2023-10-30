@@ -1,9 +1,9 @@
-const { Member, SurveyProvider, MemberEligibilities } = require('../../models');
+const { Member, SurveyProvider, CompanyPortal } = require('../../models');
 const TolunaHelper = require('../../helpers/Toluna');
 
 class TolunaController {
   constructor() {
-    this.registerMember = this.registerMember.bind(this);
+    // this.registerMember = this.registerMember.bind(this);
     this.surveys = this.surveys.bind(this);
   }
 
@@ -11,7 +11,7 @@ class TolunaController {
    * To register a member with profile data
    * @param {*} req
    * @param {*} res
-   */
+   *
   async registerMember(req, res) {
     try {
       const tObj = new TolunaHelper();
@@ -57,7 +57,7 @@ class TolunaController {
     } catch (error) {
       res.send(error);
     }
-  }
+  }*/
 
   /**
    * To get the surveys
@@ -72,7 +72,7 @@ class TolunaController {
         message: 'Unauthorized!',
       };
     }
-    // const memberId = req.query.user_id;
+
     if (!memberId) {
       return {
         status: false,
@@ -80,10 +80,14 @@ class TolunaController {
       };
     }
     const member = await Member.findOne({
-      attributes: ['username', 'id'],
+      attributes: ['username', 'id', 'country_id'],
       where: {
         id: memberId,
       },
+      include: {
+        model: CompanyPortal,
+        attributes: ['domain', 'name'],
+      }
     });
 
     if (member) {
@@ -91,26 +95,33 @@ class TolunaController {
         attributes: ['currency_percent'],
         where: {
           name: 'Toluna',
-        },
+        }
       });
       const centAmt = provider.currency_percent ? provider.currency_percent : 0;
       const tObj = new TolunaHelper();
       try {
-        const surveys = await tObj.getSurveys(member.id);
+        var envType = '_';
+        if(process.env.DEV_MODE == "0")
+          envType = '_live_';
+        else if(process.env.DEV_MODE == "1")
+          envType = '_development_';
+        else if(process.env.DEV_MODE == "2")
+          envType = '_staging_';
+
+        const surveys = await tObj.getSurveys(
+          member.CompanyPortal.name + envType + member.id,
+          member.country_id
+        );
         var survey_list = [];
         if (surveys && surveys.length) {
-          var surveyHtml = '';
           for (let survey of surveys) {
-            let memberAmount =
-              centAmt != 0 && survey.PartnerAmount != 0
-                ? (survey.PartnerAmount * centAmt) / 100
-                : 0;
+            let memberAmount = (centAmt != 0 && survey.PartnerAmount != 0) ? (survey.PartnerAmount * centAmt) / 100 : 0;
             let temp_survey = {
               survey_number: '',
               name: survey.Name,
               cpi: parseFloat(memberAmount).toFixed(2),
               loi: survey.Duration,
-              link: survey.URL,
+              link: survey.URL, 
             };
             survey_list.push(temp_survey);
           }
@@ -125,11 +136,11 @@ class TolunaController {
         } else {
           return {
             status: false,
-            message:
-              'Sorry! no surveys have been matched now! Please try again later.',
+            message: 'Sorry! no surveys have been matched now! Please try again later.',
           };
         }
       } catch (error) {
+        console.error(error)
         return {
           status: false,
           message: 'Unable to get survey now! Please try again later.',

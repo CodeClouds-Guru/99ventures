@@ -58,8 +58,8 @@ const AccountNotes = (props) => {
                     <ListItemText className="bg-gray-300 p-10 rounded" primary={
                         <>
                             <>
-                                <div className='flex justify-between mb-2'>
-                                    <Stack direction="row">
+                                <div className='flex justify-between mb-2 flex-col sm:flex-row'>
+                                    <Stack direction="row" className="justify-between sm:justify-start">
                                         <Typography variant="caption" className="text-xs italic font-bold">
                                             {!note.User ? 'Declined from browser' : note.User.alias_name} - More Surveys Support Team
                                         </Typography>

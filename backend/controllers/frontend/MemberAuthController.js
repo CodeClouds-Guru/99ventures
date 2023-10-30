@@ -39,6 +39,7 @@ const { QueryTypes, Op } = require('sequelize');
 const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
 const TolunaHelper = require('../../helpers/Toluna');
+const TolunaAge = require('../../config/toluna_age.json');
 // const IpQualityScoreClass = require('../helpers/IpQualityScore');
 class MemberAuthController {
   constructor() {
@@ -190,10 +191,11 @@ class MemberAuthController {
       if (ip_ckeck.status) {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
+        const email = req.body.email.trim().toLowerCase();
         let existing_email_or_username = await Member.count({
           where: {
             company_portal_id: company_portal_id,
-            email: req.body.email,
+            email,
           },
         });
         let member_details = [];
@@ -209,11 +211,11 @@ class MemberAuthController {
           //   const file_name = await fileHelper.upload();
           //   req.body.avatar = file_name.files[0].filename;
           // }
-
+          
           let data = {
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email: req.body.email,
+            first_name: req.body.first_name.trim(),
+            last_name: req.body.last_name.trim(),
+            email: email,
             password: password,
             membership_tier_id: 1,
             company_portal_id: company_portal_id,
@@ -241,7 +243,7 @@ class MemberAuthController {
           //send mail
           const eventBus = require('../../eventBus');
           member_details = await Member.findOne({
-            where: { email: req.body.email },
+            where: { email: email },
           });
           let model = await Member.update(
             {
@@ -252,7 +254,7 @@ class MemberAuthController {
             }
           );
 
-          let hash_obj = { id: member_details.id, email: req.body.email };
+          let hash_obj = { id: member_details.id, email: email };
           var buf = genarateHash(JSON.stringify(hash_obj));
           member_details.email_confirmation_link =
             'https://' +
@@ -262,7 +264,7 @@ class MemberAuthController {
           let evntbus = eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
-              email: req.body.email,
+              email: email,
               details: { members: member_details },
             },
             req: req,
@@ -643,7 +645,7 @@ class MemberAuthController {
   //Start - Api to insert Member Eligibility manually
 
   //set member eligibility
-  async setMemberEligibility(member_id, profile_completed_on) {
+  /*async setMemberEligibility(member_id, profile_completed_on) {
     try {
       let member_details = await Member.findOne({
         where: { id: member_id },
@@ -675,7 +677,7 @@ class MemberAuthController {
         'STANDARD_Region_GB',
         'REGION_UK_NUTS_I',
         'STANDARD_UK_REGION_PLACE',
-        'city'
+        'city',
       ];
       // let question_id_list = [
       //   229, 45, 143, 726, 29532, 211, 60, 43, 5784, 631, 247, 212, 59, 42, 290,
@@ -774,7 +776,7 @@ class MemberAuthController {
                 });
                 // console.log('==========pre', pre.id);
                 precode_id = pre ? pre.id : '';
-                
+
                 break;
               case 'AGE':
                 if (member_details.dob) {
@@ -859,7 +861,205 @@ class MemberAuthController {
 
       // res.redirect('back');
     }
+  }*/
+
+  async setMemberEligibility(member_id, profile_completed_on) {
+    try {
+      let member_details = await Member.findOne({
+        where: { id: member_id },
+        include: {
+          model: CompanyPortal,
+          attributes: ['domain', 'name'],
+        },
+      });
+      var member_eligibility = [];
+      var toluna_questions = [];
+      let name_list = [
+        'GENDER',
+        'ZIP',
+        'STATE',
+        'REGION',
+        'AGE',
+        'POSTAL CODE',
+        'STANDARD_Postal_Code_GB',
+        'STANDARD_Postal_Area',
+        'SAMPLECUBE_ZIP_UK',
+        'STANDARD_POSTAL_CODE_GB',
+        'Zipcode',
+        'Region 1',
+        'Region 2',
+        'Fulcrum_Region_UK_NUTS_I',
+        'Fulcrum_Region_UK_NUTS_II',
+        'STANDARD_Region_GB',
+        'REGION_UK_NUTS_I',
+        'STANDARD_UK_REGION_PLACE',
+        'city',
+        'PostalCodeVal',
+        'City of residence'
+      ];
+
+      let questions = await SurveyQuestion.findAll({
+        attributes: [
+          'id',
+          'question_text',
+          'name',
+          'survey_provider_id',
+          'survey_provider_question_id',
+          'question_type',
+        ],
+        where: { 
+          name: { [Op.in]: name_list },
+          question_type: {
+            [Op.ne]: 'ComputedType'   // Computed Type questions are not supported by Toluna
+          }
+        },
+        include: [
+          {
+            model: CountrySurveyQuestion,
+            attributes: ['id'],
+            where: { country_id: member_details.country_id },
+            required: true,
+          },
+          {
+            model: SurveyAnswerPrecodes,
+            attributes: ['id', 'option', 'option_text'],
+            where: { country_id: member_details.country_id },
+            required: false,
+          },
+          {
+            model: SurveyProvider,
+            attributes: ['name'],
+            required: false,
+          },
+        ],
+      });
+      if (questions.length) {
+        for (let record of questions) {
+          if (record.survey_provider_id) {
+            let precode = '';
+            let precode_id = '';
+            var question_name = record.name;
+            question_name = question_name.toUpperCase();
+            switch (question_name) {
+              case 'GENDER':
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() ===
+                    member_details.gender.toLowerCase()
+                  );
+                });
+                // if (record.survey_provider_id === 6) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
+                // if (record.survey_provider_id !== 6)
+                  precode_id = pre ? pre.id : '';
+
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.survey_provider_question_id,
+                    Answers: [{ AnswerID: pre.option }],
+                  });
+                }
+                break;
+              case 'ZIP':
+              case 'ZIPCODE':
+              case 'POSTAL CODE':
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'STANDARD_POSTAL_AREA':
+              case 'SAMPLECUBE_ZIP_UK':
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'POSTALCODEVAL':
+                if (record.SurveyProvider.name === 'Purespectrum') {
+                  precode = member_details.zip_code.split(' ')[0];
+                } else {
+                  precode = member_details.zip_code.replaceAll(/ /g, '');
+                }
+                break;
+              case 'REGION':
+              case 'REGION 1':
+              case 'REGION 2':
+              case 'FULCRUM_REGION_UK_NUTS_I':
+              case 'FULCRUM_REGION_UK_NUTS_II':
+              case 'STANDARD_REGION_GB':
+              case 'REGION_UK_NUTS_I':
+              case 'STANDARD_UK_REGION_PLACE':
+              case 'CITY':
+              case 'City OF RESIDENCE':
+                // precode = member_details.city;
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() ==
+                    member_details.city.toLowerCase()
+                  );
+                });
+                precode_id = pre ? pre.id : '';
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.survey_provider_question_id,
+                    Answers: [{ AnswerId: pre.option }],
+                  });
+                }
+                break;
+              case 'AGE':
+                if (member_details.dob) {
+                  var dob = new Date(member_details.dob);
+                  dob = new Date(new Date() - dob).getFullYear() - 1970;
+
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
+                    return element.option == dob;
+                  });
+                  precode_id = pre ? pre.id : '';
+                }
+                break;
+              case 'STATE':
+              // case 'STATES NEW!':
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() == member_details.state.toLowerCase()
+                  );
+                });
+                precode_id = pre ? pre.id : '';
+
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.survey_provider_question_id,
+                    Answers: [{ AnswerId: pre.option }],
+                  });
+                }
+                break;
+            }
+
+            if (precode_id || precode) {
+              member_eligibility.push({
+                member_id: member_id,
+                country_survey_question_id: record.CountrySurveyQuestion.id,
+                survey_answer_precode_id: precode_id,
+                open_ended_value: precode,
+              });
+            }
+
+          }
+        }
+        //
+        await MemberEligibilities.destroy({
+          where: { member_id: member_id },
+          force: true,
+        });
+        await MemberEligibilities.bulkCreate(member_eligibility);
+      }
+      if (!profile_completed_on) {        
+        MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
+      }
+      return;
+    } catch (error) {
+      console.error(error);
+      // res.redirect('back');
+    }
   }
+
   //change password
   async changePassword(req, member) {
     let member_status = true;
@@ -962,7 +1162,7 @@ class MemberAuthController {
     }
   }
 
-  //Add Payment Credentials
+  //Withdrawal request main function - new
   async withdraw(req) {
     let request_data = req.body;
     var withdrawal_amount = parseFloat(request_data.amount);
@@ -1033,195 +1233,53 @@ class MemberAuthController {
     });
     payment_method_details = JSON.parse(JSON.stringify(payment_method_details));
 
-    //check all conditions for amount
-    if (
-      parseFloat(payment_method_details.minimum_amount) > 0 &&
-      withdrawal_amount < parseFloat(payment_method_details.minimum_amount)
-    ) {
-      return {
-        member_status: false,
-        member_message:
-          'Amount must be more than $' + payment_method_details.min_amount,
-      };
+    //call for withdrawal req validation
+    var amountValidationResp =
+      await WithdrawalRequest.withdrawalRequestAmountValidation(
+        payment_method_details,
+        withdrawal_amount,
+        request_data.member_id,
+        member
+      );
+    // console.log(amountValidationResp);
+    if (!amountValidationResp.member_status) {
+      return amountValidationResp;
     }
-    if (
-      parseFloat(payment_method_details.maximum_amount) > 0 &&
-      withdrawal_amount > parseFloat(payment_method_details.maximum_amount)
-    ) {
-      return {
-        member_status: false,
-        member_message:
-          'Amount must be less than $' + payment_method_details.max_amount,
-      };
+    //call for field validation
+    var fieldValidationResp =
+      await WithdrawalRequest.withdrawalRequestFieldValidation(
+        payment_method_details,
+        req.body
+      );
+    if (!fieldValidationResp.member_status) {
+      return fieldValidationResp;
     }
-    if (
-      parseFloat(payment_method_details.fixed_amount) > 0 &&
-      withdrawal_amount !== parseFloat(payment_method_details.fixed_amount)
-    ) {
-      return {
-        member_status: false,
-        member_message:
-          'Amount must be fixed to $' + payment_method_details.max_amount,
-      };
-    }
-
-    if (withdrawal_amount > parseFloat(member.member_amounts[0].amount)) {
-      return {
-        member_status: false,
-        member_message: 'Please check your balance',
-      };
+    //check for same payment info
+    var samePaymentInfoResp = await WithdrawalRequest.checkIfSamePaymentInfo(
+      fieldValidationResp.payment_field,
+      request_data.member_id
+    );
+    // console.log(samePaymentInfoResp);
+    if (!samePaymentInfoResp.member_status) {
+      return samePaymentInfoResp;
     }
 
-    let total_approved_amount = 0;
-    let total_pending_amount = 0;
-
-    //Start - check pending withdrawal request
-    let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
-      attributes: [
-        [
-          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
-          'total',
-        ],
-      ],
-      where: {
-        status: 'pending',
-        member_id: request_data.member_id,
-      },
-      include: {
-        model: MemberTransaction,
-        attributes: ['id'],
-        where: {
-          status: { [Op.ne]: 2 },
-        },
-        required: false,
-      },
-    });
-
-    total_pending_amount = pending_withdrawal_req_amount.dataValues.total
-      ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
-      : 0;
-
-    if (
-      member.member_amounts[0].amount <
-      total_pending_amount + withdrawal_amount
-    ) {
-      return {
-        member_status: false,
-        member_message:
-          'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.',
-      };
-    }
-    //End - check pending withdrawal request
-
-    //Start - check approved withdrawal request
-    let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
-      attributes: [
-        [
-          sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
-          'total',
-        ],
-      ],
-      where: {
-        status: 'approved',
-        member_id: request_data.member_id,
-      },
-      include: {
-        model: MemberTransaction,
-        attributes: ['id'],
-        where: {
-          status: { [Op.ne]: 2 },
-        },
-        required: true,
-      },
-    });
-
-    total_approved_amount = approved_withdrawal_req_amount.dataValues.total
-      ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
-      : 0;
-
-    if (
-      member.member_amounts[0].amount <
-      total_pending_amount + total_approved_amount + withdrawal_amount
-    ) {
-      return {
-        member_status: false,
-        member_message:
-          'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.',
-      };
-    }
-    //End - check approved withdrawal request
-
-    //Start - Withdrawal form validation
-    var payment_field = [];
-    var member_payment_info = [];
-    for (const option of payment_method_details.PaymentMethodFieldOptions) {
-      var field_name = option.field_name.toLowerCase().replaceAll(' ', '');
-      const option_arr = ['email', 'phone', 'username'];
-      if (option_arr.includes(field_name)) {
-        payment_field.push(request_data[field_name]);
-        member_payment_info.push({
-          field_name: field_name,
-          field_value: request_data[field_name],
-        });
-      }
-      if (request_data[field_name] === '') {
-        return {
-          member_status: false,
-          member_message: 'Please enter ' + option.field_name.toLowerCase(),
-        };
-      }
-      if (option.field_type !== 'input') {
-        var regex = '';
-        if (option.field_type === 'email')
-          regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        if (option.field_type === 'number')
-          regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-
-        if (!regex.test(request_data[field_name])) {
-          // if (!request_data.payment_field.match(regex)) {
-          return {
-            member_status: false,
-            member_message:
-              'Please enter valid ' + option.field_name.toLowerCase(),
-          };
-        }
-      }
-    }
-    //End - Withdrawal form validation
-
-    //Start - check for same payment info
-    let check_same_acc = await WithdrawalRequest.count({
-      where: {
-        payment_email: payment_field,
-        member_id: { [Op.ne]: request_data.member_id },
-      },
-    });
-    if (check_same_acc > 0) {
-      return {
-        member_status: false,
-        member_message:
-          'This payment info has already been used by another account, please reach out to our admin',
-      };
-    }
-    //End - check for same payment info
-
-    if (member_payment_info.length > 0) {
+    //withdrawal process
+    if (fieldValidationResp.member_payment_info.length > 0) {
       await MemberPaymentInformation.updatePaymentInformation({
         member_id: request_data.member_id,
-        member_payment_info,
+        member_payment_info: fieldValidationResp.member_payment_info,
       });
-
       var ip = req.ip;
       if (Array.isArray(ip)) {
         ip = ip[0];
       } else {
         ip = ip.replace('::ffff:', '');
       }
-      var index = member_payment_info.findIndex(
+      var index = fieldValidationResp.member_payment_info.findIndex(
         (info) => info.field_name === 'email'
       );
+
       let withdrawal_req_data = {
         member_id: request_data.member_id,
         amount: withdrawal_amount,
@@ -1232,128 +1290,96 @@ class MemberAuthController {
         // payment_email: request_data.payment_field,
         payment_email:
           index !== -1
-            ? member_payment_info[index].field_value
-            : member_payment_info[0].field_value,
+            ? fieldValidationResp.member_payment_info[index].field_value
+            : fieldValidationResp.member_payment_info[0].field_value,
         withdrawal_type_id: parseInt(request_data.payment_method_id),
         ip: ip,
+        note: 'Withdrawal request processed and waiting for approval',
+        transaction_made_by: request_data.member_id,
       };
-      let transaction_resp = {};
-
+      var transaction_status =
+        payment_method_details.api_username !== '' ? 1 : 2;
+      if (payment_method_details.payment_type === 'Manual') {
+        transaction_status = 1;
+      }
+      let transaction_data = {
+        member_id: request_data.member_id,
+        amount: -withdrawal_amount,
+        note: 'Withdrawal request for $' + withdrawal_amount,
+        type: 'withdraw',
+        amount_action: 'member_withdrawal',
+        created_by: request_data.member_id,
+        modified_total_earnings:
+          parseFloat(member.member_amounts[0].amount) -
+          parseFloat(withdrawal_amount),
+        // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
+        status: transaction_status,
+      };
+      var transaction_resp = await MemberTransaction.insertTransaction(
+        transaction_data
+      );
       if (payment_method_details.payment_type === 'Auto') {
         withdrawal_req_data.note = 'Withdrawal request auto approved';
         withdrawal_req_data.transaction_made_by = request_data.member_id;
 
-        //for skrill status should be completed
-        withdrawal_req_data.status = 'approved';
         if (
-          payment_method_details.api_username === '' &&
-          payment_method_details.api_password === ''
-        )
-          withdrawal_req_data.status = 'completed';
-        //for skrill status should be completed
-
-        var transaction_status = 1;
-        if (
-          payment_method_details.slug !== 'instant_paypal' &&
-          payment_method_details.slug !== 'paypal' &&
-          payment_method_details.payment_type === 'Auto'
-        )
-          transaction_status = 2;
-
-        //Insert into member transaction and update balance
-        transaction_resp =
-          await MemberTransaction.updateMemberTransactionAndBalance({
-            member_id: request_data.member_id,
-            amount: -withdrawal_amount,
-            note: 'Withdrawal request for $' + withdrawal_amount,
-            type: 'withdraw',
-            amount_action: 'member_withdrawal',
-            created_by: request_data.member_id,
-            // status: payment_method_details.payment_type === 'Auto' ? 2 : 1,
-            status: transaction_status,
-          });
-
-        if (payment_method_details.slug == 'instant_paypal') {
-          const paypal_class = new Paypal(
-            req.session.company_portal.id,
-            'instant_paypal'
-          );
-          var paypal_request = [
-            {
-              amount: withdrawal_amount,
-              currency: 'USD',
-              member_id: request_data.member_id,
-              // email: request_data.payment_field,
-              first_name: member.first_name,
-              last_name: member.last_name,
-              member_transaction_id: transaction_resp.transaction_id,
-            },
-          ];
-          for (const info of member_payment_info) {
-            paypal_request[0][info.field_name] = info.field_value;
-          }
-
-          const create_resp = await paypal_class.payout(paypal_request);
-
-          if (create_resp.status) {
-            await MemberTransaction.update(
-              {
-                batch_id: create_resp.batch_id,
-              },
-              { where: { id: transaction_resp.transaction_id } }
+          payment_method_details.api_username !== '' &&
+          payment_method_details.api_password !== ''
+        ) {
+          withdrawal_req_data.status = 'approved';
+          if (payment_method_details.slug == 'instant_paypal') {
+            const paypal_class = new Paypal(
+              req.session.company_portal.id,
+              'instant_paypal'
             );
-          } else {
-            console.log('create_resp', create_resp);
-          }
-        }
-        //paypal payment section
-      }
-      if (transaction_resp.status)
-        withdrawal_req_data.member_transaction_id =
-          transaction_resp.transaction_id;
-      // Insert in WithdrawalRequest
-      // console.log('====================', withdrawal_req_data);
-      const res = await WithdrawalRequest.create(withdrawal_req_data);
+            var paypal_request = [
+              {
+                amount: withdrawal_amount,
+                currency: 'USD',
+                member_id: request_data.member_id,
+                // email: request_data.payment_field,
+                first_name: member.first_name,
+                last_name: member.last_name,
+                member_transaction_id: transaction_resp.id,
+              },
+            ];
+            for (const info of fieldValidationResp.member_payment_info) {
+              paypal_request[0][info.field_name] = info.field_value;
+            }
 
+            const create_resp = await paypal_class.payout(paypal_request);
+
+            if (create_resp.status) {
+              await MemberTransaction.update(
+                {
+                  batch_id: create_resp.batch_id,
+                },
+                { where: { id: transaction_resp.id } }
+              );
+            } else {
+              console.log('create_resp', create_resp);
+            }
+          }
+        } else {
+          withdrawal_req_data.status = 'completed';
+        }
+      }
+
+      withdrawal_req_data.member_transaction_id = transaction_resp.id;
+      await WithdrawalRequest.create(withdrawal_req_data);
+      await MemberTransaction.updateMemberBalance({
+        amount:
+          parseFloat(member.member_amounts[0].amount) -
+          parseFloat(withdrawal_amount),
+        member_id: request_data.member_id,
+        action: 'member_withdrawal',
+        transaction_amount: withdrawal_amount,
+      });
       //member activity
       const activityEventbus = eventBus.emit('member_activity', {
         member_id: request_data.member_id,
         action: 'Member cash withdrawal request',
       });
-
-      // Start - email body for member
-      // if (payment_method_details.payment_type === 'Auto') {
-      //   let member_mail = await this.sendMailEvent({
-      //     action: 'Member Cash Withdrawal',
-      //     data: {
-      //       email: member.email,
-      //       details: {
-      //         members: member,
-      //         withdraw_requests: {
-      //           amount: withdrawal_amount,
-      //           date: moment(new Date()).format('llll'),
-      //         },
-      //       },
-      //     },
-      //     req: req,
-      //   });
-      // } else {
-      //   let member_mail = await this.sendMailEvent({
-      //     action: 'Withdraw Request Member',
-      //     data: {
-      //       email: member.email,
-      //       details: {
-      //         members: member,
-      //         withdraw_requests: {
-      //           amount: withdrawal_amount,
-      //           date: moment(new Date()).format('llll'),
-      //         },
-      //       },
-      //     },
-      //     req: req,
-      //   });
-      // }
-      // End - email body for member
     } else {
       return {
         member_status: false,
@@ -1361,7 +1387,8 @@ class MemberAuthController {
           'Your request can not be processed right now. Please try again later',
       };
     }
-    //check for payment type
+
+    //response structure
     let member_message = '';
     if (
       payment_method_details &&
@@ -1578,6 +1605,73 @@ class MemberAuthController {
         message: 'Unable to get data',
       });
     }
+  }
+
+  /**
+   * To create an account on Toluna.
+   * The idea behind this, first of all we checked if the member account has created or not. 
+   * If created, we are updating the account otherwise create an account
+   * 
+   * @param {Object} member 
+   * @param {Array of Object} questionAnswer 
+   */
+  async tolunaProfileCreateAndUpdate(member, questionAnswer){
+    const tolunaHelper = new TolunaHelper();
+    var envType = '_';
+    if(process.env.DEV_MODE == "0")
+      envType = '_live_';
+    else if(process.env.DEV_MODE == "1")
+      envType = '_development_';
+    else if(process.env.DEV_MODE == "2")
+      envType = '_staging_';
+
+    const memberCode = member.CompanyPortal.name + envType +  member.id;
+    if(member.country_id === 226)   // US Country
+    {
+      var dob = new Date(member.dob);
+      dob = new Date(new Date() - dob).getFullYear() - 1970;  
+      let ageData = TolunaAge.find((element) => {
+        return element.option == dob;
+      });
+      if(ageData !== undefined){
+        questionAnswer.push({
+          QuestionID: 1001538,  // Age
+          Answers: [{ AnswerId: ageData.answer_id }],
+        });
+      }
+    }
+
+    const payload = {
+      MemberCountryId: member.country_id,
+      MemberCode: memberCode,
+      Email: (member.email).toLowerCase(),
+      BirthDate: moment(member.dob).format('MM/DD/YYYY'),
+      PostalCode: member.zip_code,
+      // "IsActive": true,  // Default is True
+      RegistrationAnswers: questionAnswer
+    };
+    if(process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
+      payload.IsTest = true;
+    }
+
+    try {
+      let checkMember = await tolunaHelper.getMember(memberCode, member.country_id);
+      if('MemberCode' in checkMember) {
+        await tolunaHelper.updateMember(payload);
+      }
+    } catch (error) {
+      if('status' in error.response && error.response.status === 400) {
+        try{
+          await tolunaHelper.addMemebr(payload);
+        } catch(err){
+          console.log('Toluna Member Add')
+          console.error(err)
+        }
+      } else {
+        console.log(error);
+      }
+    }
+    return true;
   }
 }
 module.exports = MemberAuthController;

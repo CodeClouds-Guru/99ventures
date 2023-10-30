@@ -17,6 +17,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import LoadingButton from '@mui/lab/LoadingButton';
+import LinearProgress from '@mui/material/LinearProgress';
+import AnchorLink from '@mui/material/Link';
 
 const initialColumns = ['username', 'id', 'status', 'admin_status', 'IpLogs.ip', 'email', 'created_at'];
 
@@ -56,6 +58,7 @@ function Listing(props) {
     const [listConfigDialog, setListConfigDialog] = useState(false);
     const [displayColumnArray, setDisplayColumnArray] = useState(initialColumns);
     const [columnArray, setColumnArray] = useState(initialColumns);
+    const [loadingStatus, setLoadingStatus] = useState(false);
 
     const display_column_object = {
         "id": "ID",
@@ -123,6 +126,7 @@ function Listing(props) {
     }
 
     const fetchModules = () => {
+        setLoadingStatus(true);
         setColumnArray(displayColumnArray)
         var ordered_fields = displayColumnArray.sort((a, b) =>
             Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
@@ -151,6 +155,7 @@ function Listing(props) {
             setApplyLoading(false);
             setExportLoading(false);
             setFirstCall(false);
+            setLoadingStatus(false);
         }).catch(error => {
             setListConfigDialog(false);
             let message = 'Something went wrong!'
@@ -383,6 +388,8 @@ function Listing(props) {
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field)} className="capitalize" color="warning" size="small" />
             else if (status === 'not_verified')
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
+        } else if (field.field_name === 'username') {
+            return <AnchorLink href={`/app/members/${processFieldValue(n['id'], field)}`}>{processFieldValue(n[field.field_name], field)}</AnchorLink>
         } else {
             return status
         }
@@ -402,7 +409,7 @@ function Listing(props) {
     }
     const addFilterRow = () => {
         // All the values will be blank while adding new row.
-        setFilters(filters.concat({ column: '', match: '', search: '' }))
+        setFilters(filters.concat({ column: '', match: 'substring', search: '' }))
     }
     const cancelFilter = () => {
         setOpenAlertDialog(false);
@@ -413,7 +420,7 @@ function Listing(props) {
         setPage(0);
     }
     const handleChangeFilter = (event, key, field) => {
-        filters[key][field] = event.target.value;
+        filters[key][field] = event.target.value.trim();
         setFilters([...filters]);
     }
     const handleApplyFilters = () => {
@@ -506,8 +513,8 @@ function Listing(props) {
                         <DialogContent>
                             {Object.values(filters).map((val, key) => {
                                 return (
-                                    <div key={key} className="flex w-full justify-between my-10">
-                                        <FormControl className="w-4/12" size="large">
+                                    <div key={key} className="flex w-full justify-between my-10 sm:flex-wrap flex-col sm:flex-row">
+                                        <FormControl className="sm:w-4/12 w-full mb-10 sm:mb-0" size="large">
                                             <InputLabel id="demo-simple-select-label">Column</InputLabel>
                                             <Select
                                                 labelId="demo-simple-select-label"
@@ -524,7 +531,7 @@ function Listing(props) {
                                                 }
                                             </Select>
                                         </FormControl>
-                                        <FormControl className="w-3/12 px-5" size="large">
+                                        <FormControl className="sm:w-3/12 w-full px-0 sm:px-5 mb-10 sm:mb-0" size="large">
                                             <InputLabel id="demo-simple-select-label">Match</InputLabel>
                                             <Select
                                                 labelId="demo-simple-select-label"
@@ -538,7 +545,7 @@ function Listing(props) {
                                                 }
                                             </Select>
                                         </FormControl>
-                                        <FormControl className="w-4/12" size="large">
+                                        <FormControl className="w-full sm:w-4/12" size="large">
                                             <TextField
                                                 type="text"
                                                 label="Search"
@@ -629,6 +636,7 @@ function Listing(props) {
                 </div>}
             {/* // body */}
             <div className="w-full flex flex-col min-h-full">
+                {loadingStatus && <LinearProgress />}
                 <FuseScrollbars className="grow overflow-x-auto">
                     <Table stickyHeader className="min-w-xl" aria-labelledby="tableTitle">
                         <ListHead
@@ -687,7 +695,7 @@ function Listing(props) {
                                                 {Object.values(fields)
                                                     .filter(field => field.listing === true)
                                                     .map((field, i) => {
-                                                        return <TableCell key={i} className="p-4 md:p-16" component="th" scope="row">{customizedRowValue(n, field)}</TableCell>
+                                                        return <TableCell key={i} className="p-2 md:p-16 text-md" component="th" scope="row">{customizedRowValue(n, field)}</TableCell>
                                                     })
                                                 }
                                             </TableRow>

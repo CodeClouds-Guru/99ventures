@@ -22,7 +22,9 @@ router.get('/sitemap.xml', async (req, res) => {
   console.log('baseurl', `${req.protocol}://${req.hostname}`);
   try {
     const smStream = await SiteMapController.generate(
-      process.env.DEV_MODE === '1' ? 'https://moresurveys.com' : `${req.protocol}://${req.hostname}`
+      process.env.DEV_MODE === '1'
+        ? 'https://moresurveys.com'
+        : `${req.protocol}://${req.hostname}`
     );
     const pipeline = smStream.pipe(createGzip());
     streamToPromise(pipeline).then((sm) => (sitemap = sm));
@@ -78,7 +80,7 @@ router.get('/paid-surveys/:provider', StaticPageController.getsurveys);
 
 router.post('/profile/update', MemberAuthController.profileUpdate);
 router.put('/profile/update', MemberAuthController.profileUpdate);
-router.get('/state-list', MemberAuthController.getStateList)
+router.get('/state-list', MemberAuthController.getStateList);
 
 router.post('/member/withdraw', MemberAuthController.memberWithdrawal);
 router.post('/member-forgot-password', MemberAuthController.forgotPassword);

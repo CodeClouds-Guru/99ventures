@@ -182,8 +182,8 @@ const CreateUpdate = () => {
         setAllData(allData => ({
             ...allData,
             name: event.target.value,
-            slug: Helper.stringToSlug(event.target.value),
-            permalink: `${domain}${Helper.stringToSlug(event.target.value)}`
+            // slug: Helper.stringToSlug(event.target.value),
+            // permalink: `${domain}${Helper.stringToSlug(event.target.value)}`
         }));
         dynamicErrorMsg('name', event.target.value.trim());
     }

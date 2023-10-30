@@ -34,6 +34,7 @@ function List(props) {
 	const addable = props.addable ?? true;
 	const deletable = props.deletable ?? true;
 	const actionable = props.actionable ?? false;
+	const customHeading = props.customHeading ?? ''
 	// const where = props.where ?? {};
 	const showModuleHeading = props.moduleHeading ?? true;
 	const customAddURL = props.customAddURL ?? `/app/${module}/create`;
@@ -411,7 +412,7 @@ function List(props) {
 	const customizedField = (module, n, field) => {
 		if (module === 'tickets') {
 			if (field.field_name === 'status') {
-				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} />
+				return <Chip className="capitalize" label={processFieldValue(n[field.field_name], field)} color={processFieldValue(n[field.field_name], field) === 'open' ? 'warning' : processFieldValue(n[field.field_name], field) === 'closed' ? 'success' : 'primary'} size="small" />
 			}
 			if (field.field_name === 'username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.member_id}`}>{n['username']}</a>
@@ -770,8 +771,8 @@ function List(props) {
 			{/* // header */}
 
 			{
-				(showModuleHeading || searchable || addable) && (
-					<div className='w-full flex py-32 px-24 md:px-32'>
+				(showModuleHeading || searchable || addable || customHeading) && (
+					<div className='w-full flex py-32 px-24 md:px-32 flex-wrap sm:flex-nowrap'>
 						{
 							showModuleHeading && (
 								<Typography
@@ -787,7 +788,21 @@ function List(props) {
 								</Typography>
 							)
 						}
-						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto">
+						{
+							customHeading && (
+								<Typography
+									component={motion.span}
+									initial={{ x: -20 }}
+									animate={{ x: 0, transition: { delay: 0.2 } }}
+									delay={300}
+									className="w-2/3 lg:w-1/3 font-extrabold tracking-tight capitalize"
+									variant="h5"
+								>
+									{customHeading}
+								</Typography>
+							)
+						}
+						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto flex-wrap sm:flex-nowrap">
 							{module === 'withdrawal-requests' &&
 								<Tooltip title="Configure" placement="top">
 									<Button
@@ -819,7 +834,7 @@ function List(props) {
 												</div>
 											) : (<div></div>)
 										}
-										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3">
+										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3 w-full sm:w-auto">
 											<OutlinedInput
 												id="outlined-adornment-datepicker"
 												type="text"
@@ -859,7 +874,7 @@ function List(props) {
 											/>
 										</FormControl>
 										{(module === 'member-transactions' && location.pathname.includes('history')) &&
-											<FormControl sx={{ minWidth: 120 }} size="small">
+											<FormControl sx={{ minWidth: 120 }} size="small" className="w-full sm:w-auto p-3">
 												<InputLabel id="demo-simple-select-label">Type</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"
@@ -886,7 +901,7 @@ function List(props) {
 												</Select>
 											</FormControl>}
 										{module === 'withdrawal-requests' &&
-											<FormControl sx={{ minWidth: 120 }} size="small">
+											<FormControl sx={{ minWidth: 120 }} size="small" className="p-3 sm:w-auto w-full">
 												<InputLabel id="demo-simple-select-label">Status</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"
@@ -993,7 +1008,7 @@ function List(props) {
 										return (
 
 											<TableRow
-												className="h-72 cursor-pointer"
+												className="h-60 cursor-pointer"
 												hover
 												role="checkbox"
 												aria-checked={isSelected}
@@ -1016,7 +1031,7 @@ function List(props) {
 													.filter(field => field.listing === true)
 													.map((field, i) => {
 														return <Fragment key={i}>
-															<TableCell className="p-4 md:p-16" component="th" scope="row">
+															<TableCell className="p-2 md:p-16 text-md" component="th" scope="row">
 																{
 																	customizedField(module, n, field)
 																}

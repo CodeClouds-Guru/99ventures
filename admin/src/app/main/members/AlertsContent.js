@@ -72,10 +72,10 @@ const AlertsContent = () => {
         <div className="lg:w-full">
             <Divider textAlign="left"><h3>E-mail Alerts</h3></Divider>
             <Box className="mt-10 p-16 w-full border-2 rounded-2xl">
-                <div className="w-full pt-10 flex flex-wrap">
+                <div className="w-full pt-10 flex flex-col">
                     {alertsData.map((row) => {
                         return (
-                            <div className="w-1/3 px-28 py-10 flex justify-between" key={row.id}>
+                            <div className="w-full md:w-1/3 px-28 py-10 flex justify-between" key={row.id}>
                                 <div className="w-auto">
                                     <b>{row.name}</b>
                                 </div>

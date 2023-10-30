@@ -10,6 +10,7 @@ const {
   SurveyQualification,
   SurveyAnswerPrecodes,
   CountrySurveyQuestion,
+  MemberBalance,
 } = require('../../models');
 const db = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
@@ -25,6 +26,8 @@ class SurveycallbackController {
     this.memberTransaction = this.memberTransaction.bind(this);
     this.memberEligibitityUpdate = this.memberEligibitityUpdate.bind(this);
     this.getMember = this.getMember.bind(this);
+    this.reverseSurvey = this.reverseSurvey.bind(this);
+    this.reverseSurveyTransaction = this.reverseSurveyTransaction.bind(this);
   }
 
   async save(req, res) {
@@ -215,7 +218,7 @@ class SurveycallbackController {
       const txnId = req.query.txn_id;
 
       const memberSurveys = await Survey.checkMemberSurvey(username, txnId, 2);
-      if(memberSurveys.length < 1) {
+      if (memberSurveys.length < 1) {
         let member = await this.getMember({ username });
         if (member) {
           const survey = {
@@ -300,8 +303,12 @@ class SurveycallbackController {
             username: requestParam.ps_supplier_respondent_id,
           });
           if (member) {
-            const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber, 3);
-            if(memberSurveys.length < 1) {
+            const memberSurveys = await Survey.checkMemberSurvey(
+              member.username,
+              surveyNumber,
+              3
+            );
+            if (memberSurveys.length < 1) {
               await this.memberTransaction(
                 survey,
                 'Purespectrum',
@@ -314,7 +321,9 @@ class SurveycallbackController {
               const logger = require('../../helpers/Logger')(
                 `purespectrum-postback-errror.log`
               );
-              logger.error(`Already attempted (#${surveyNumber}) - (${member.username})`);
+              logger.error(
+                `Already attempted (#${surveyNumber}) - (${member.username})`
+              );
             }
           } else {
             const logger1 = require('../../helpers/Logger')(
@@ -355,11 +364,15 @@ class SurveycallbackController {
             survey_number: surveyNumber,
           },
         });
-        if (survey) {          
+        if (survey) {
           let member = await this.getMember({ username: username });
           if (member) {
-            const memberSurveys = await Survey.checkMemberSurvey(username, surveyNumber, 4);
-            if(memberSurveys.length < 1) {
+            const memberSurveys = await Survey.checkMemberSurvey(
+              username,
+              surveyNumber,
+              4
+            );
+            if (memberSurveys.length < 1) {
               await this.memberTransaction(
                 survey,
                 'Schlesinger',
@@ -372,7 +385,9 @@ class SurveycallbackController {
               const logger = require('../../helpers/Logger')(
                 `schlesinger-postback-errror.log`
               );
-              logger.error(`Already attempted (#${surveyNumber}) - (${username})`);
+              logger.error(
+                `Already attempted (#${surveyNumber}) - (${username})`
+              );
             }
           } else {
             const logger1 = require('../../helpers/Logger')(
@@ -399,7 +414,7 @@ class SurveycallbackController {
   async lucidPostback(req, res) {
     const requestParam = req.query;
     const member = await this.getMember({ username: requestParam.pid });
-    if(member === null) {
+    if (member === null) {
       const logger = require('../../helpers/Logger')(
         `lucid-postback-errror.log`
       );
@@ -409,17 +424,22 @@ class SurveycallbackController {
     }
     try {
       if (requestParam.status === 'complete') {
-        const surveyNumber = requestParam.survey_id;        
-        const survey = await Survey.findOne({
+        const surveyNumber = requestParam.survey_id;
+        /*const survey = await Survey.findOne({
           attributes: ['cpi'],
           where: {
             survey_number: surveyNumber,
             survey_provider_id: 1,
           }
-        });
+        });*/
+        const survey = requestParam;
         if (survey) {
-          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyNumber, 1);
-          if(memberSurveys.length < 1) {
+          const memberSurveys = await Survey.checkMemberSurvey(
+            member.username,
+            surveyNumber,
+            1
+          );
+          if (memberSurveys.length < 1) {
             await this.memberTransaction(
               survey,
               'Lucid',
@@ -432,7 +452,9 @@ class SurveycallbackController {
             const logger = require('../../helpers/Logger')(
               `lucid-postback-errror.log`
             );
-            logger.error(`Already attempted (#${surveyNumber}) - (${member.username})`);
+            logger.error(
+              `Already attempted (#${surveyNumber}) - (${member.username})`
+            );
           }
         } else {
           const logger = require('../../helpers/Logger')(
@@ -459,29 +481,37 @@ class SurveycallbackController {
   async tolunaPostback(req, res) {
     if (req.query.status === 'complete') {
       const requestBody = req.body;
-      const userId = requestBody.UniqueCode;
+      const username = requestBody.UniqueCode;
       const surveyId = requestBody.SurveyId;
       const surveyRef = requestBody.SurveyRef;
-      const partnerAmount = requestBody.Revenue; // the amount already converted to cent
+      const partnerAmount = requestBody.Revenue; // the amount multiplied by 100
       try {
-        let member = await this.getMember({ id: userId });
+        let member = await this.getMember({ username });
         if (member) {
-          const survey = {
-            cpi: partnerAmount / 100,
-          };
-          await this.memberTransaction(
-            survey,
-            'Toluna',
-            surveyId,
-            member,
-            requestBody,
-            req
-          );
+          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyId, 6);
+          if(memberSurveys.length < 1){
+            const survey = {
+              cpi: partnerAmount / 100,
+            };
+            await this.memberTransaction(
+              survey,
+              'Toluna',
+              surveyId,
+              member,
+              requestBody,
+              req
+            );
+          } else {
+            const tolunaLog = require('../../helpers/Logger')(
+              `toluna-postback-errror.log`
+            );
+            tolunaLog.error(`Already attempted (#${surveyNumber}) - (${username})`);
+          }
         } else {
           const tolunaLog = require('../../helpers/Logger')(
             `toluna-postback-errror.log`
           );
-          tolunaLog.error('Unable to find member!');
+          tolunaLog.error(`Unable to find member ${username}!`);
         }
       } catch (error) {
         const tolunaLog = require('../../helpers/Logger')(
@@ -561,7 +591,7 @@ class SurveycallbackController {
           data: {
             members: member,
             amount: '$' + amount,
-            surveys: { name: providerName },
+            surveys: { name: pname },
           },
         });
 
@@ -577,7 +607,7 @@ class SurveycallbackController {
               survey: {
                 amount: amount,
                 survey_number: surveyNumber,
-                provider: providerName,
+                provider: pname,
               },
             },
           },
@@ -707,6 +737,126 @@ class SurveycallbackController {
         ...clause,
       },
     });
+  }
+
+  /**
+   * Api for Survey Reversal
+   */
+  async reverseSurvey(req, res) {
+    const logger1 = require('../../helpers/Logger')(
+      `${req.params.status}-${req.params.provider}.log`
+    );
+
+    logger1.info(JSON.stringify(req.query));
+    logger1.info(JSON.stringify(req.body));
+    res.send(req.query);
+    let resp = {};
+    try {
+      var username = '';
+      var survey_number = '';
+      const provider = req.params.provider;
+      if (provider === 'cint') {
+        username = req.query.ssi;
+        survey_number = req.query.txn_id;
+      } else {
+        return res.send('Provider not found!');
+      }
+      resp = await this.reverseSurveyTransaction(survey_number, username);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      if (resp.status)
+        return res.status(200).json({
+          status: true,
+          message: 'Data synced.',
+        });
+      else return res.send('Survey not reversed');
+    }
+  }
+
+  /**
+   * Api for Reversal Survey Transaction store
+   */
+  async reverseSurveyTransaction(survey_number, member_username) {
+    try {
+      let member = await Member.findOne({
+        where: { username: member_username, status: 'member' },
+        include: {
+          model: MemberBalance,
+          as: 'member_amounts',
+          where: { amount_type: 'cash' },
+        },
+      });
+      console.log('member', member);
+      if (member) {
+        let transaction = await MemberSurvey.findOne({
+          where: { survey_number: survey_number },
+          include: {
+            model: MemberTransaction,
+            where: {
+              member_id: member.id,
+              status: { [Op.ne]: 5 },
+            },
+          },
+        });
+        console.log('transaction', transaction);
+        if (transaction) {
+          //current transaction
+          await MemberTransaction.reverseTransactionUpdate({
+            member_balance_amount: member.member_amounts[0].amount,
+            transaction_amount: transaction.MemberTransaction.amount,
+            member_id: member.id,
+            transaction_id: transaction.member_transaction_id,
+            note: 'Survey reversed #' + survey_number,
+          });
+
+          //referral transaction
+          let referral_transactions = await MemberTransaction.findOne({
+            where: {
+              parent_transaction_id: transaction.member_transaction_id,
+              amount_action: 'referral',
+            },
+          });
+          console.log('referral_transactions', referral_transactions);
+          if (referral_transactions) {
+            let referral_member = await Member.findOne({
+              where: { id: referral_transactions.member_id },
+              include: {
+                model: MemberBalance,
+                as: 'member_amounts',
+                where: { amount_type: 'cash' },
+              },
+            });
+
+            await MemberTransaction.reverseTransactionUpdate({
+              member_balance_amount: referral_member.member_amounts[0].amount,
+              transaction_amount: referral_transactions.amount,
+              member_id: referral_transactions.member_id,
+              transaction_id: referral_transactions.id,
+            });
+          }
+          return {
+            status: true,
+            message: 'Record Updated',
+          };
+        } else {
+          return {
+            status: false,
+            message: 'Transaction already reverted',
+          };
+        }
+      } else {
+        return {
+          status: false,
+          message: 'Member not found',
+        };
+      }
+    } catch (e) {
+      const logger1 = require('../../helpers/Logger')(
+        `reverseSurveyTransaction.log`
+      );
+      logger1.error(error);
+    }
   }
 }
 

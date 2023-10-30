@@ -8,9 +8,11 @@ const {
   PaymentMethod,
   MemberTransaction,
   WithdrawalRequest,
+  MemberBalance,
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
+const db = require('../../models/index');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -29,6 +31,7 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
+      // warning: 'Warning',
     };
   }
 
@@ -81,14 +84,19 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['id', 'amount', 'currency', ...fields];
+      options.attributes = ['id', 'amount', 'currency', 'member_id', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
-      results.rows.map((row) => {
-        let [payment_method_name, username, status, admin_status] = ['', '', '', ''];
+      results.rows.map(async (row) => {
+        let [payment_method_name, username, status, admin_status] = [
+          '',
+          '',
+          '',
+          '',
+        ];
         if (row.Member) {
           username = row.Member.username;
           status = row.Member.status;
@@ -97,10 +105,27 @@ class WithdrawalRequestController extends Controller {
         if (row.PaymentMethod) {
           payment_method_name = row.PaymentMethod.name;
         }
+
         row.setDataValue('Member.username', username);
         row.setDataValue('Member.status', status);
         row.setDataValue('Member.admin_status', admin_status);
         row.setDataValue('PaymentMethod.name', payment_method_name);
+
+        //check if any reversal happened after withdraw req
+        let query =
+          'SELECT COUNT(id) as reverse_count from member_transactions where member_id =? and amount_action = "reversed_transaction" and status = 5 and created_at > (select created_at from withdrawal_requests where member_id = ? and status = "pending" order by created_at limit 0,1)';
+        let reversal_transaction = await db.sequelize.query(query, {
+          replacements: [row.member_id, row.member_id],
+          type: QueryTypes.SELECT,
+        });
+        console.log('reversal_transaction', reversal_transaction[0]);
+        let warning_text =
+          reversal_transaction.length > 0 &&
+          reversal_transaction[0].reverse_count > 0
+            ? 'This user received a reversed transaction. Please be carefull before approving the request!'
+            : '';
+        // console.log('reversal_transaction', reversal_transaction);
+        row.setDataValue('reverse_count', warning_text);
       });
 
       /**
@@ -283,6 +308,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].searchable = false;
       }
       */
+      console.log(fields);
       return {
         result: { data: results.rows, pages, total: results.count },
         fields: this.generateFields(fields),
@@ -397,9 +423,13 @@ class WithdrawalRequestController extends Controller {
         // response = await paypal_class.successPayment(req, res);
         response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request rejected';
+        await this.model.rejectedOrFailedRequest(
+          model_ids,
+          req.user.id,
+          'rejected'
+        );
         break;
       case 'approved':
-        // response = await paypal_class.successPayment(req, res);
         response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request approved';
         let all_withdrawal_req = await this.model.findAll({
@@ -424,60 +454,45 @@ class WithdrawalRequestController extends Controller {
             },
             {
               model: PaymentMethod,
-              attributes: ['slug', 'id', 'payment_type'],
+              attributes: [
+                'slug',
+                'id',
+                'payment_type',
+                'api_username',
+                'api_password',
+              ],
             },
           ],
         });
         var items = [];
         var transaction_ids = [];
+        var transaction_ids_without_creds = [];
+        var withdrawal_ids_without_creds = [];
+        var member_ids = [];
         let transaction_id = '';
+        // var transaction_status = 1;
         for (let record of all_withdrawal_req) {
           // console.log('-------------record', record);
-          //insert in transaction table
-          if (record.member_transaction_id) {
-            transaction_ids.push(record.member_transaction_id);
-            transaction_id = record.member_transaction_id;
-          } else {
-            let transaction_status = 2;
-            if (
-              record.PaymentMethod.slug === 'paypal' ||
-              record.PaymentMethod.slug === 'instant_paypal'
-            ) {
-              transaction_status = 1;
-            }
-
-            let transaction =
-              await MemberTransaction.updateMemberTransactionAndBalance({
-                member_id: record.member_id,
-                amount: -record.amount,
-                note: '',
-                status: transaction_status,
-                type: 'withdraw',
-                amount_action: 'member_withdrawal',
-                currency: record.currency,
-                created_by: req.user.id,
-              });
-            // let transaction = await MemberTransaction.create({
-            //   type:'withdraw',
-            //   amount: record.amount,
-            //   status: '1',
-            //   member_id: record.member_id,
-            //   amount_action: 'member_withdrawal',
-            //   currency: record.currency,
-            //   completed_at: new Date()
-            // })
-            transaction_ids.push(transaction.transaction_id);
-            transaction_id = transaction.transaction_id;
-            await WithdrawalRequest.update(
-              { member_transaction_id: transaction_id },
-              { where: { id: record.id } }
+          if (
+            record.PaymentMethod.api_username === '' &&
+            record.PaymentMethod.api_password === ''
+          ) {
+            // transaction_status = 2;
+            transaction_ids_without_creds.push(record.member_transaction_id);
+            withdrawal_ids_without_creds.push(record.id);
+            await this.model.approvedAndCompletedReqs(
+              transaction_ids_without_creds,
+              withdrawal_ids_without_creds
             );
           }
+
           if (
             record.PaymentMethod.slug === 'paypal' ||
             record.PaymentMethod.slug === 'instant_paypal'
           ) {
             //paypal payload
+            transaction_ids.push(record.member_transaction_id);
+            transaction_id = record.member_transaction_id;
             var record_currency = '';
             if (record.currency === '$') {
               record_currency = 'USD';

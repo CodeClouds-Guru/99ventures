@@ -257,7 +257,7 @@ class MemberController extends Controller {
           total_earnings = await this.getTotalEarnings(member_id);
 
           let query =
-            "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
+            "SELECT `member_surveys`.`survey_number`,`survey_providers`.`name`, `member_transactions`.`amount`,`member_transactions`.`completed_at`, `member_transactions`.`transaction_id` FROM `member_surveys` JOIN `survey_providers` ON `member_surveys`.`survey_provider_id` = `survey_providers`.`id` JOIN `member_transactions` ON `member_surveys`.`member_transaction_id` = `member_transactions`.`id` WHERE `member_transactions`.`member_id` = ? AND `member_transactions`.`type` = 'credited' AND `member_transactions`.`status` = 2  ORDER BY `member_transactions`.`completed_at` DESC LIMIT 0, 5;";
           survey_list = await db.sequelize.query(query, {
             replacements: [member_id],
             type: QueryTypes.SELECT,
@@ -855,6 +855,7 @@ class MemberController extends Controller {
       let admin_amount = req.body.admin_amount || 0;
       let admin_note = req.body.admin_note || '';
 
+
       //get total earnings of member
       let total_earnings = await db.sequelize.query(
         "SELECT id, amount as total_amount, amount_type FROM `member_balances` WHERE member_id=? AND amount_type='cash'",
@@ -863,6 +864,7 @@ class MemberController extends Controller {
           type: QueryTypes.SELECT,
         }
       );
+
       //modified_total_earnings
       let modified_total_earnings =
         parseFloat(total_earnings[0].total_amount) + parseFloat(admin_amount);
@@ -881,6 +883,7 @@ class MemberController extends Controller {
         currency: 'USD',
         parent_transaction_id: null,
       };
+
       //transaction insert
       await MemberTransaction.create(transaction_data, {
         silent: true,

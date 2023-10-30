@@ -21,9 +21,8 @@ const SurveyDetails = (props) => {
                                             <>
                                                 <div className='flex justify-between mb-2'>
                                                     <Typography variant="caption" className="text-xs italic font-bold">
-                                                        {
-                                                            item.name ? item.name +' - #'+item.survey_number : '#'+item.survey_number
-                                                        }                                                        
+                                                        {/*item.name ? item.name +' - #'+item.survey_number : '#'+item.survey_number*/}       
+                                                        {item.transaction_id}                                                 
                                                     </Typography>
                                                     <Typography variant="caption" className="text-xs italic">{Helper.parseTimeStamp(item.completed_at)}</Typography>
                                                 </div>

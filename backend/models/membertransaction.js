@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
+          rawValue = rawValue == 'member_withdrawal' ? 'withdrawal' : rawValue;
           rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
           return rawValue
             .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
@@ -580,7 +581,7 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
     // console.log('data.amount', data.amount);
-    if (data.amount > 0) {
+    if (data.amount >= 0) {
       await MemberBalance.update(
         { amount: data.amount },
         {
@@ -591,9 +592,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       );
 
-      const logger = require('../helpers/Logger')(
-        `member-balance.log`
-      );
+      const logger = require('../helpers/Logger')(`member-balance.log`);
       logger.info(JSON.stringify(data));
 
       //Notify member
@@ -617,7 +616,7 @@ module.exports = (sequelize, DataTypes) => {
       Member,
     } = require('../models/index');
     const eventBus = require('../eventBus');
-
+    // console.log(data);
     let transaction_record = await MemberTransaction.findOne({
       where: { id: data.member_transaction_id },
     });
@@ -713,6 +712,57 @@ module.exports = (sequelize, DataTypes) => {
         await MemberNotification.create(notify_data);
       }
     }
+    return true;
+  };
+
+  MemberTransaction.reverseTransactionUpdate = async (data) => {
+    const { MemberBalance, MemberNotification } = require('../models/index');
+    let updated_balance =
+      parseFloat(data.member_balance_amount) -
+      parseFloat(data.transaction_amount);
+
+    await MemberTransaction.update(
+      { status: 5 },
+      {
+        where: {
+          id: data.transaction_id, //1
+        },
+      }
+    );
+
+    await MemberTransaction.insertTransaction({
+      type: 'withdraw',
+      amount: parseFloat(data.transaction_amount),
+      note: data.note || 'Reverse transaction',
+      member_id: data.member_id,
+      amount_action: 'reversed_transaction',
+      status: 5,
+      modified_total_earnings: updated_balance,
+      parent_transaction_id: data.transaction_id,
+    });
+
+    // await this.model.updateMemberBalance({
+    //   amount: updated_balance,
+    //   member_id: data.member_id,
+    //   action: 'reversed_transaction',
+    //   transaction_amount: parseFloat(data.transaction_amount),
+    // });
+    await MemberBalance.update(
+      { amount: updated_balance },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
+
+    //Notify member
+    await MemberNotification.addMemberNotification({
+      member_id: data.member_id,
+      action: 'reversed_transaction',
+      amount: parseFloat(data.transaction_amount),
+    });
     return true;
   };
   return MemberTransaction;

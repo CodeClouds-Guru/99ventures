@@ -39,16 +39,20 @@ router.get('/survey/:provider/:action', SurveySyncController.index);
 //   res.send(req.query);
 // });
 
-router.all('/survey/other/:provider/:status', async (req, res) => {
-  //   console.log('===================outcome', req);
-  const logger1 = require('../helpers/Logger')(
-    `${req.params.status}-${req.params.provider}.log`
-  );
+// router.all('/survey/other/:provider/:status', async (req, res) => {
+//   //   console.log('===================outcome', req);
+//   const logger1 = require('../helpers/Logger')(
+//     `${req.params.status}-${req.params.provider}.log`
+//   );
 
-  logger1.info(JSON.stringify(req.query));
-  logger1.info(JSON.stringify(req.body));
-  res.send(req.query);
-});
+//   logger1.info(JSON.stringify(req.query));
+//   logger1.info(JSON.stringify(req.body));
+//   res.send(req.query);
+// });
+router.all(
+  '/survey/other/:provider/:status',
+  SurveycallbackController.reverseSurvey
+);
 //survey question
 router.get('/survey-questions/', SurveyQuestionsController.save);
 router.get(

@@ -21,23 +21,57 @@ const db = {};
 //   port: process.env.DB_PORT || 3306,
 // });
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST || '127.0.0.1',
-    dialect: 'mysql',
-    port: process.env.DB_PORT || 3306,
-    logging: false,
-    operatorsAliases: {
-      scripted_99_between: Sequelize.Op.between,
-      scripted_99_like: Sequelize.Op.like,
-      scripted_99_substring: Sequelize.Op.substring,
-      scripted_99_or: Sequelize.Op.or,
-    },
-  }
-);
+
+var sequelize = ''
+if(process.env.DEV_MODE === '0'){
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    null,
+    null,
+    {
+      dialect: 'mysql',
+      port: process.env.DB_PORT || 3306,
+      logging: false,
+      operatorsAliases: {
+        scripted_99_between: Sequelize.Op.between,
+        scripted_99_like: Sequelize.Op.like,
+        scripted_99_substring: Sequelize.Op.substring,
+        scripted_99_or: Sequelize.Op.or,
+      },
+      replication: {
+        write: {
+          host: 'nv-db-live.cluster-cw40jczte1ng.us-east-2.rds.amazonaws.com',
+          username: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
+        },
+        read: {
+          host: 'nv-db-live.cluster-ro-cw40jczte1ng.us-east-2.rds.amazonaws.com',
+          username: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
+        }
+      }
+    }
+  );
+}
+else {
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST || '127.0.0.1',
+      dialect: 'mysql',
+      port: process.env.DB_PORT || 3306,
+      logging: false,
+      operatorsAliases: {
+        scripted_99_between: Sequelize.Op.between,
+        scripted_99_like: Sequelize.Op.like,
+        scripted_99_substring: Sequelize.Op.substring,
+        scripted_99_or: Sequelize.Op.or,
+      },
+    }
+  );
+}
 
 fs.readdirSync(__dirname)
   .filter((file) => {
