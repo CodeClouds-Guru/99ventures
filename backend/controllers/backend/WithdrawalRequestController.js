@@ -82,7 +82,7 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['id', 'amount', 'currency', ...fields];
+      options.attributes = ['id', 'amount', 'currency', 'member_id', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
@@ -110,6 +110,7 @@ class WithdrawalRequestController extends Controller {
             id: { [Op.gt]: row.id },
             amount_action: 'reversed_transaction',
             status: 5,
+            member_id: row.member_id,
           },
           logging: console.log,
         });
