@@ -68,7 +68,12 @@ module.exports = (sequelize, DataTypes) => {
       note: DataTypes.TEXT,
       payment_email: DataTypes.STRING,
       ip: DataTypes.STRING,
-      warning: DataTypes.VIRTUAL,
+      warning: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.getDataValue('waring');
+        },
+      },
     },
     {
       sequelize,
