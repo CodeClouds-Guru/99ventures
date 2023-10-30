@@ -112,13 +112,19 @@ class WithdrawalRequestController extends Controller {
             status: 5,
             member_id: row.member_id,
           },
-          logging: console.log,
+          // logging: console.log,
         });
-        console.log('reversal_transaction', reversal_transaction);
+        let warning_text =
+          reversal_transaction > 0
+            ? 'This user received a reversed transaction. Please be carefull before approving the request!'
+            : '';
+        // console.log('reversal_transaction', reversal_transaction);
         row.setDataValue('Member.username', username);
         row.setDataValue('Member.status', status);
         row.setDataValue('Member.admin_status', admin_status);
         row.setDataValue('PaymentMethod.name', payment_method_name);
+
+        row.setDataValue('warning', warning_text);
       });
 
       /**
