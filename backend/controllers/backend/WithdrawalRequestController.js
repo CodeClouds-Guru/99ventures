@@ -12,6 +12,7 @@ const {
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
+const db = require('../../models/index');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
