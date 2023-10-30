@@ -68,12 +68,6 @@ module.exports = (sequelize, DataTypes) => {
       note: DataTypes.TEXT,
       payment_email: DataTypes.STRING,
       ip: DataTypes.STRING,
-      warning: {
-        type: DataTypes.VIRTUAL,
-        get() {
-          return this.getDataValue('waring');
-        },
-      },
     },
     {
       sequelize,
@@ -296,19 +290,6 @@ module.exports = (sequelize, DataTypes) => {
       show_in_form: true,
       sort: true,
       required: true,
-      value: '',
-      width: '50',
-      searchable: false,
-    },
-    warning: {
-      field_name: 'warning',
-      db_name: 'warning',
-      type: 'text',
-      placeholder: 'Warning',
-      listing: true,
-      show_in_form: false,
-      sort: false,
-      required: false,
       value: '',
       width: '50',
       searchable: false,

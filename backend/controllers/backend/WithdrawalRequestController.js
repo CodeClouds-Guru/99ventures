@@ -30,7 +30,7 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
-      warning: 'Warning',
+      // warning: 'Warning',
     };
   }
 
@@ -125,7 +125,7 @@ class WithdrawalRequestController extends Controller {
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
-        row.setDataValue('warning', warning_text);
+        row.setDataValue('reverse_count', warning_text);
       });
 
       /**
