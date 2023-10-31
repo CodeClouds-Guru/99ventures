@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         ),
         get() {
           let rawValue = this.getDataValue('amount_action') || null;
+          rawValue = rawValue == 'member_withdrawal' ? 'withdrawal' : rawValue;
           rawValue = rawValue ? rawValue.replaceAll('_', ' ') : '';
           return rawValue
             .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {

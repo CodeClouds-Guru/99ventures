@@ -18,7 +18,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       member_id: DataTypes.BIGINT,
       verbose: DataTypes.STRING,
-      action: DataTypes.STRING,
+      action: {
+        type: DataTypes.STRING,
+        // get() {
+        //   return this.action == 'member_withdrawal' ? 'Withdrawal' : '';
+        // },
+      },
       is_read: DataTypes.TINYINT,
       read_on: 'TIMESTAMP',
       created_at: 'TIMESTAMP',
@@ -27,9 +32,16 @@ module.exports = (sequelize, DataTypes) => {
       header: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.action
-            ? this.action.replaceAll('_', ' ').toUpperCase()
-            : '';
+          let header = '';
+          if (this.action) {
+            this.action =
+              this.action == 'member_withdrawal' ? 'Withdrawal' : this.action;
+            header = this.action.replaceAll('_', ' ').toUpperCase();
+          }
+          return header;
+          // return this.action
+          //   ? this.action.replaceAll('_', ' ').toUpperCase()
+          //   : '';
         },
         set(value) {
           throw new Error('Do not try to set `header` value!');
@@ -126,8 +138,7 @@ module.exports = (sequelize, DataTypes) => {
       //   notification_action = 'referral_bonus';
       //   break;
       case 'member_withdrawal':
-        notification_verbose =
-          'Successful withdrawal of $' + amount + ' on ' + updated_on;
+        notification_verbose = 'You requested $' + amount + ' on ' + updated_on;
         notification_action = 'member_withdrawal';
         break;
       // case 'reversed_transaction':
@@ -155,7 +166,8 @@ module.exports = (sequelize, DataTypes) => {
         notification_action = 'profile_completion_bonus';
         break;
       case 'ticket_reply':
-        notification_verbose = 'You have a new message on a ticket you had created';
+        notification_verbose =
+          'You have a new message on a ticket you had created';
         notification_action = 'ticket_reply';
         break;
       default:

@@ -83,6 +83,7 @@ module.exports = (sequelize, DataTypes) => {
     'Member.first_name',
     'User.alias_name',
     'Member.username',
+    'warning',
   ];
   WithdrawalRequest.fields = {
     id: {

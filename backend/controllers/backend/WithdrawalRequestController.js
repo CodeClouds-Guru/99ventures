@@ -12,6 +12,7 @@ const {
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
+const db = require('../../models/index');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -30,6 +31,7 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
+      // warning: 'Warning',
     };
   }
 
@@ -82,13 +84,13 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['id', 'amount', 'currency', ...fields];
+      options.attributes = ['id', 'amount', 'currency', 'member_id', ...fields];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
-      results.rows.map((row) => {
+      results.rows.map(async (row) => {
         let [payment_method_name, username, status, admin_status] = [
           '',
           '',
@@ -103,10 +105,27 @@ class WithdrawalRequestController extends Controller {
         if (row.PaymentMethod) {
           payment_method_name = row.PaymentMethod.name;
         }
+
         row.setDataValue('Member.username', username);
         row.setDataValue('Member.status', status);
         row.setDataValue('Member.admin_status', admin_status);
         row.setDataValue('PaymentMethod.name', payment_method_name);
+
+        //check if any reversal happened after withdraw req
+        let query =
+          'SELECT COUNT(id) as reverse_count from member_transactions where member_id =? and amount_action = "reversed_transaction" and status = 5 and created_at > (select created_at from withdrawal_requests where member_id = ? and status = "pending" order by created_at limit 0,1)';
+        let reversal_transaction = await db.sequelize.query(query, {
+          replacements: [row.member_id, row.member_id],
+          type: QueryTypes.SELECT,
+        });
+        console.log('reversal_transaction', reversal_transaction[0]);
+        let warning_text =
+          reversal_transaction.length > 0 &&
+          reversal_transaction[0].reverse_count > 0
+            ? 'This user received a reversed transaction. Please be carefull before approving the request!'
+            : '';
+        // console.log('reversal_transaction', reversal_transaction);
+        row.setDataValue('reverse_count', warning_text);
       });
 
       /**
@@ -289,6 +308,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].searchable = false;
       }
       */
+      console.log(fields);
       return {
         result: { data: results.rows, pages, total: results.count },
         fields: this.generateFields(fields),
