@@ -93,13 +93,17 @@ class ScriptParser {
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
                   if (
-                    transaction.amount_action == 'member_withdrawal' ||
-                    transaction.amount_action == 'Member withdrawal'
+                    transaction.amount_action == 'withdrawal' ||
+                    transaction.amount_action == 'Withdrawal'
                   ) {
                     var status_arr = [3, 4];
                     if (transaction.status == 3 || transaction.status == 4) {
                       data[key].setDataValue(transaction.status, 'pending');
                       transaction.status = 'pending';
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        'pending'
+                      );
                     }
                     if (
                       transaction.parent_transaction_id &&
@@ -110,9 +114,21 @@ class ScriptParser {
                         transaction.ParentTransaction.status
                       );
                       transaction.status = transaction.ParentTransaction.status;
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        transaction.ParentTransaction.status
+                      );
                     }
                     if (transaction.status == 1) {
+                      data[key].setDataValue(
+                        transaction.status,
+                        transaction.WithdrawalRequest.status
+                      );
                       transaction.status = transaction.WithdrawalRequest.status;
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        transaction.WithdrawalRequest.status
+                      );
                     }
                   }
                 });

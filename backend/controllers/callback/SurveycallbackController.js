@@ -488,8 +488,12 @@ class SurveycallbackController {
       try {
         let member = await this.getMember({ username });
         if (member) {
-          const memberSurveys = await Survey.checkMemberSurvey(member.username, surveyId, 6);
-          if(memberSurveys.length < 1){
+          const memberSurveys = await Survey.checkMemberSurvey(
+            member.username,
+            surveyId,
+            6
+          );
+          if (memberSurveys.length < 1) {
             const survey = {
               cpi: partnerAmount / 100,
             };
@@ -505,7 +509,9 @@ class SurveycallbackController {
             const tolunaLog = require('../../helpers/Logger')(
               `toluna-postback-errror.log`
             );
-            tolunaLog.error(`Already attempted (#${surveyNumber}) - (${username})`);
+            tolunaLog.error(
+              `Already attempted (#${surveyNumber}) - (${username})`
+            );
           }
         } else {
           const tolunaLog = require('../../helpers/Logger')(
@@ -749,7 +755,7 @@ class SurveycallbackController {
 
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
-    res.send(req.query);
+    // res.send(req.query);
     let resp = {};
     try {
       var username = '';
@@ -787,7 +793,7 @@ class SurveycallbackController {
           where: { amount_type: 'cash' },
         },
       });
-      console.log('member', member);
+      // console.log('member', member);
       if (member) {
         let transaction = await MemberSurvey.findOne({
           where: { survey_number: survey_number },
@@ -799,7 +805,7 @@ class SurveycallbackController {
             },
           },
         });
-        console.log('transaction', transaction);
+        // console.log('transaction', transaction);
         if (transaction) {
           //current transaction
           await MemberTransaction.reverseTransactionUpdate({
@@ -817,7 +823,7 @@ class SurveycallbackController {
               amount_action: 'referral',
             },
           });
-          console.log('referral_transactions', referral_transactions);
+          // console.log('referral_transactions', referral_transactions);
           if (referral_transactions) {
             let referral_member = await Member.findOne({
               where: { id: referral_transactions.member_id },
