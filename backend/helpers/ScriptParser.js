@@ -100,6 +100,10 @@ class ScriptParser {
                     if (transaction.status == 3 || transaction.status == 4) {
                       data[key].setDataValue(transaction.status, 'pending');
                       transaction.status = 'pending';
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        'pending'
+                      );
                     }
                     if (
                       transaction.parent_transaction_id &&
@@ -110,6 +114,10 @@ class ScriptParser {
                         transaction.ParentTransaction.status
                       );
                       transaction.status = transaction.ParentTransaction.status;
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        transaction.ParentTransaction.status
+                      );
                     }
                     if (transaction.status == 1) {
                       data[key].setDataValue(
@@ -117,6 +125,10 @@ class ScriptParser {
                         transaction.WithdrawalRequest.status
                       );
                       transaction.status = transaction.WithdrawalRequest.status;
+                      data[key].setDataValue(
+                        'transaction_status_display',
+                        transaction.WithdrawalRequest.status
+                      );
                     }
                   }
                 });
