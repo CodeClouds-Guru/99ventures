@@ -93,8 +93,8 @@ class ScriptParser {
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
                   if (
-                    transaction.amount_action == 'member_withdrawal' ||
-                    transaction.amount_action == 'Member withdrawal'
+                    transaction.amount_action == 'withdrawal' ||
+                    transaction.amount_action == 'Withdrawal'
                   ) {
                     var status_arr = [3, 4];
                     if (transaction.status == 3 || transaction.status == 4) {
