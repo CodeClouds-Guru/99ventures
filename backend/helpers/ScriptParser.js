@@ -112,6 +112,10 @@ class ScriptParser {
                       transaction.status = transaction.ParentTransaction.status;
                     }
                     if (transaction.status == 1) {
+                      data[key].setDataValue(
+                        transaction.status,
+                        transaction.WithdrawalRequest.status
+                      );
                       transaction.status = transaction.WithdrawalRequest.status;
                     }
                   }
