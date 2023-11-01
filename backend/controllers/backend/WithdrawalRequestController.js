@@ -90,7 +90,7 @@ class WithdrawalRequestController extends Controller {
       let results = await this.model.findAndCountAll(options);
       let pages = Math.ceil(results.count / limit);
 
-      results.rows.map(async (row) => {
+      results.rows.map(async (row, key) => {
         let [payment_method_name, username, status, admin_status] = [
           '',
           '',
@@ -125,7 +125,7 @@ class WithdrawalRequestController extends Controller {
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
-        row.setDataValue('reverse_count', warning_text);
+        results.rows[key].setDataValue('reverse_count', warning_text);
       });
 
       /**
