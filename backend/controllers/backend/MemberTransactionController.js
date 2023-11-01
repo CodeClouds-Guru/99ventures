@@ -84,10 +84,12 @@ class MemberTransactionController extends Controller {
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
         record.dataValues.amount_action === 'member_withdrawal'
       ) {
-        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
+        record.dataValues.amount_action = `Withdrawl (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
+        // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
       if (record.dataValues.amount_action === 'offerwall') {
-        record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.note})`;
+        record.dataValues.amount_action = record.dataValues.note;
+        // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.note})`;
       }
 
       if (

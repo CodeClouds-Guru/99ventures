@@ -628,7 +628,7 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        id: 1,
+        id: 365,
         // profile_completed_on: {
         //   [Op.ne]: null,
         // },
@@ -1016,19 +1016,20 @@ class MemberAuthController {
                 break;
               case 'STATE':
               // case 'STATES NEW!':
-                var pre = record.SurveyAnswerPrecodes.find((element) => {
-                  return (
-                    element.option_text.toLowerCase() == member_details.state.toLowerCase()
-                  );
-                });
-                precode_id = pre ? pre.id : '';
-
-                if (record.survey_provider_id === 6 && pre !== undefined) {
-                  toluna_questions.push({
-                    QuestionID: record.survey_provider_question_id,
-                    Answers: [{ AnswerId: pre.option }],
+                if(member_details.state !== null) {
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
+                    return (
+                      element.option_text.toLowerCase() == member_details.state.toLowerCase()
+                    );
                   });
-                }
+                  precode_id = pre ? pre.id : '';
+                  if (record.survey_provider_id === 6 && pre !== undefined) {
+                    toluna_questions.push({
+                      QuestionID: record.survey_provider_question_id,
+                      Answers: [{ AnswerId: pre.option }],
+                    });
+                  }
+                }                
                 break;
             }
 
@@ -1050,9 +1051,9 @@ class MemberAuthController {
         });
         await MemberEligibilities.bulkCreate(member_eligibility);
       }
-      if (!profile_completed_on) {        
+      //if (profile_completed_on) {        
         MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
-      }
+      //}
       return;
     } catch (error) {
       console.error(error);
@@ -1653,7 +1654,7 @@ class MemberAuthController {
     if(process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
       payload.IsTest = true;
     }
-
+    
     try {
       let checkMember = await tolunaHelper.getMember(memberCode, member.country_id);
       if('MemberCode' in checkMember) {
@@ -1666,6 +1667,10 @@ class MemberAuthController {
         } catch(err){
           console.log('Toluna Member Add')
           console.error(err)
+          const logger = require('../../helpers/Logger')(
+            `toluna-errror.log`
+          );
+          logger.error(err);
         }
       } else {
         console.log(error);
