@@ -125,7 +125,7 @@ class WithdrawalRequestController extends Controller {
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
-        results[key].setDataValue('reverse_count', warning_text);
+        results.rows[key].setDataValue('reverse_count', warning_text);
       });
 
       /**
