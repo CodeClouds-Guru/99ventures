@@ -1666,6 +1666,10 @@ class MemberAuthController {
         } catch(err){
           console.log('Toluna Member Add')
           console.error(err)
+          const logger = require('../../helpers/Logger')(
+            `toluna-errror.log`
+          );
+          logger.error(err);
         }
       } else {
         console.log(error);
