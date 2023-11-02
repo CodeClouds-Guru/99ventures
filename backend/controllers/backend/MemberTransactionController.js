@@ -76,7 +76,7 @@ class MemberTransactionController extends Controller {
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
-      console.log('record.dataValues.status', record.dataValues.status);
+      console.log('record.dataValues.status===', record.dataValues.status);
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -152,10 +152,10 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'reverted';
           break;
         case 'pending':
-          'pending';
+          record.dataValues.status = 'pending';
           break;
         case 'approved':
-          'completed';
+          record.dataValues.status = 'completed';
           break;
         default:
           record.dataValues.status = 'initiated';
