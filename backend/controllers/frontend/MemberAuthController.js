@@ -628,17 +628,18 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        id: 365,
+        id: 249,
         // profile_completed_on: {
         //   [Op.ne]: null,
         // },
         // status: 'member',
         // deleted_at: null,
+        // country_id: 226
       },
     });
     // res.json({ data: members });
     for (const member of members) {
-      await this.setMemberEligibility(member.id, member.profile_completed_on);
+      await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
     }
     res.json({ data: members });
   }
@@ -907,7 +908,7 @@ class MemberAuthController {
           'survey_provider_question_id',
           'question_type',
         ],
-        where: { 
+        where: {
           name: { [Op.in]: name_list },
           question_type: {
             [Op.ne]: 'ComputedType'   // Computed Type questions are not supported by Toluna
@@ -1015,7 +1016,6 @@ class MemberAuthController {
                 }
                 break;
               case 'STATE':
-              // case 'STATES NEW!':
                 if(member_details.state !== null) {
                   var pre = record.SurveyAnswerPrecodes.find((element) => {
                     return (
@@ -1041,19 +1041,20 @@ class MemberAuthController {
                 open_ended_value: precode,
               });
             }
-
           }
         }
-        //
+
         await MemberEligibilities.destroy({
           where: { member_id: member_id },
           force: true,
         });
-        await MemberEligibilities.bulkCreate(member_eligibility);
+        if(profile_completed_on !== null){
+          await MemberEligibilities.bulkCreate(member_eligibility);
+          if (toluna_questions.length) {
+            MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
+          }
+        }
       }
-      //if (profile_completed_on) {        
-        MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
-      //}
       return;
     } catch (error) {
       console.error(error);
@@ -1677,6 +1678,208 @@ class MemberAuthController {
       }
     }
     return true;
+  }
+
+  /**
+   * Temp function
+   */
+  async updateMemberEligibility(member_id, profile_completed_on) {
+    try {
+      let member_details = await Member.findOne({
+        where: { id: member_id },
+        include: {
+          model: CompanyPortal,
+          attributes: ['domain', 'name'],
+        },
+      });
+      var member_eligibility = [];
+      var toluna_questions = [];
+      let name_list = [
+        'GENDER',
+        'ZIP',
+        'STATE',
+        'REGION',
+        'AGE',
+        'POSTAL CODE',
+        'STANDARD_Postal_Code_GB',
+        'STANDARD_Postal_Area',
+        'SAMPLECUBE_ZIP_UK',
+        'STANDARD_POSTAL_CODE_GB',
+        'Zipcode',
+        'Region 1',
+        'Region 2',
+        'Fulcrum_Region_UK_NUTS_I',
+        'Fulcrum_Region_UK_NUTS_II',
+        'STANDARD_Region_GB',
+        'REGION_UK_NUTS_I',
+        'STANDARD_UK_REGION_PLACE',
+        'city',
+        'PostalCodeVal',
+        'City of residence'
+      ];
+
+      let questions = await SurveyQuestion.findAll({
+        attributes: [
+          'id',
+          'question_text',
+          'name',
+          'survey_provider_id',
+          'survey_provider_question_id',
+          'question_type',
+        ],
+        where: { 
+          survey_provider_id: 6,
+          name: { [Op.in]: name_list },
+          question_type: {
+            [Op.ne]: 'ComputedType'   // Computed Type questions are not supported by Toluna
+          }
+        },
+        include: [
+          {
+            model: CountrySurveyQuestion,
+            attributes: ['id'],
+            where: { country_id: member_details.country_id },
+            required: true,
+          },
+          {
+            model: SurveyAnswerPrecodes,
+            attributes: ['id', 'option', 'option_text'],
+            where: { country_id: member_details.country_id },
+            required: false,
+          },
+          {
+            model: SurveyProvider,
+            attributes: ['name'],
+            required: false,
+          },
+        ],
+      });
+      if (questions.length) {
+        for (let record of questions) {
+          if (record.survey_provider_id) {
+            let precode = '';
+            let precode_id = '';
+            var question_name = record.name;
+            question_name = question_name.toUpperCase();
+            switch (question_name) {
+              case 'GENDER':
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() ===
+                    member_details.gender.toLowerCase()
+                  );
+                });
+                // if (record.survey_provider_id === 6) {
+                //   toluna_questions.push({
+                //     QuestionID: record.id,
+                //     Answers: [{ AnswerID: pre.id }],
+                //   });
+                // }
+                // if (record.survey_provider_id !== 6)
+                  precode_id = pre ? pre.id : '';
+
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.survey_provider_question_id,
+                    Answers: [{ AnswerID: pre.option }],
+                  });
+                }
+                break;
+              case 'ZIP':
+              case 'ZIPCODE':
+              case 'POSTAL CODE':
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'STANDARD_POSTAL_AREA':
+              case 'SAMPLECUBE_ZIP_UK':
+              case 'STANDARD_POSTAL_CODE_GB':
+              case 'POSTALCODEVAL':
+                if (record.SurveyProvider.name === 'Purespectrum') {
+                  precode = member_details.zip_code.split(' ')[0];
+                } else {
+                  precode = member_details.zip_code.replaceAll(/ /g, '');
+                }
+                break;
+              case 'REGION':
+              case 'REGION 1':
+              case 'REGION 2':
+              case 'FULCRUM_REGION_UK_NUTS_I':
+              case 'FULCRUM_REGION_UK_NUTS_II':
+              case 'STANDARD_REGION_GB':
+              case 'REGION_UK_NUTS_I':
+              case 'STANDARD_UK_REGION_PLACE':
+              case 'CITY':
+              case 'City OF RESIDENCE':
+                // precode = member_details.city;
+                var pre = record.SurveyAnswerPrecodes.find((element) => {
+                  return (
+                    element.option_text.toLowerCase() ==
+                    member_details.city.toLowerCase()
+                  );
+                });
+                precode_id = pre ? pre.id : '';
+                if (record.survey_provider_id === 6 && pre !== undefined) {
+                  toluna_questions.push({
+                    QuestionID: record.survey_provider_question_id,
+                    Answers: [{ AnswerId: pre.option }],
+                  });
+                }
+                break;
+              case 'AGE':
+                if (member_details.dob) {
+                  var dob = new Date(member_details.dob);
+                  dob = new Date(new Date() - dob).getFullYear() - 1970;
+
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
+                    return element.option == dob;
+                  });
+                  precode_id = pre ? pre.id : '';
+                }
+                break;
+              case 'STATE':
+                if(member_details.state !== null) {
+                  var pre = record.SurveyAnswerPrecodes.find((element) => {
+                    return (
+                      element.option_text.toLowerCase() == member_details.state.toLowerCase()
+                    );
+                  });
+                  precode_id = pre ? pre.id : '';
+                  if (record.survey_provider_id === 6 && pre !== undefined) {
+                    toluna_questions.push({
+                      QuestionID: record.survey_provider_question_id,
+                      Answers: [{ AnswerId: pre.option }],
+                    });
+                  }
+                }                
+                break;
+            }
+
+            if (precode_id || precode) {
+              member_eligibility.push({
+                member_id: member_id,
+                country_survey_question_id: record.CountrySurveyQuestion.id,
+                survey_answer_precode_id: precode_id,
+                open_ended_value: precode,
+              });
+            }
+          }
+        }
+
+        // await MemberEligibilities.destroy({
+        //   where: { member_id: member_id },
+        //   force: true,
+        // });
+        if(profile_completed_on !== null){
+          await MemberEligibilities.bulkCreate(member_eligibility);
+          if (toluna_questions.length) {
+            MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
+          }
+        }
+      }
+      return;
+    } catch (error) {
+      console.error(error);
+      // res.redirect('back');
+    }
   }
 }
 module.exports = MemberAuthController;
