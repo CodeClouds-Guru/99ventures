@@ -118,7 +118,7 @@ class WithdrawalRequestController extends Controller {
           replacements: [row.member_id, row.member_id],
           type: QueryTypes.SELECT,
         });
-        console.log('reversal_transaction', reversal_transaction[0]);
+        console.log('reversal_transaction', reversal_transaction.length);
         let warning_text =
           reversal_transaction.length > 0 &&
           reversal_transaction[0].reverse_count > 0
