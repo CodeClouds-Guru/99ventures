@@ -93,11 +93,7 @@ class MemberTransactionController extends Controller {
       }
 
       //status manipulation
-      if (
-        record.dataValues.amount_action === 'member_withdrawal' ||
-        record.dataValues.amount_action == 'withdrawal' ||
-        record.dataValues.amount_action == 'Withdrawal'
-      ) {
+      if (record.dataValues.amount_action === 'member_withdrawal') {
         var status_arr = [3, 4];
         if (record.dataValues.status == 3 || record.dataValues.status == 4) {
           // data[key].setDataValue(record.dataValues.status, 'pending');
@@ -117,9 +113,7 @@ class MemberTransactionController extends Controller {
       if (
         record.dataValues.WithdrawalRequest !== null &&
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
-        (record.dataValues.amount_action === 'member_withdrawal' ||
-          record.dataValues.amount_action == 'withdrawal' ||
-          record.dataValues.amount_action == 'Withdrawal')
+        record.dataValues.amount_action === 'member_withdrawal'
       ) {
         record.dataValues.amount_action = `Withdrawal (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
         // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
@@ -145,7 +139,10 @@ class MemberTransactionController extends Controller {
 
       switch (record.dataValues.status) {
         case 1:
-          record.dataValues.status = 'processing';
+          record.dataValues.status =
+            record.dataValues.amount_action !== 'member_withdrawal'
+              ? 'processing'
+              : 'Pending';
           break;
         case 2:
           record.dataValues.status = 'completed';
