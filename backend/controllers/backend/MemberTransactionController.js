@@ -76,6 +76,10 @@ class MemberTransactionController extends Controller {
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
+      console.log(
+        'record.dataValues.amount_action',
+        record.dataValues.amount_action
+      );
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -104,26 +108,10 @@ class MemberTransactionController extends Controller {
           record.dataValues.parent_transaction_id &&
           record.dataValues.status == 2
         ) {
-          // data[key].setDataValue(
-          //   record.dataValues.status,
-          //   record.dataValues.ParentTransaction.status
-          // );
           record.dataValues.status = record.dataValues.ParentTransaction.status;
-          // data[key].setDataValue(
-          //   'transaction_status_display',
-          //   record.dataValues.ParentTransaction.status
-          // );
         }
         if (record.dataValues.status == 1) {
-          // data[key].setDataValue(
-          //   record.dataValues.status,
-          //   record.dataValues.WithdrawalRequest.status
-          // );
           record.dataValues.status = record.dataValues.WithdrawalRequest.status;
-          // data[key].setDataValue(
-          //   'transaction_status_display',
-          //   record.dataValues.WithdrawalRequest.status
-          // );
         }
       }
       if (
@@ -170,6 +158,12 @@ class MemberTransactionController extends Controller {
           break;
         case 5:
           record.dataValues.status = 'reverted';
+          break;
+        case 'pending':
+          'Pending';
+          break;
+        case 'approved':
+          'Completed';
           break;
         default:
           record.dataValues.status = 'initiated';
