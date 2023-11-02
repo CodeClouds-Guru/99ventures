@@ -47,7 +47,7 @@ class MemberTransactionController extends Controller {
       },
       {
         model: WithdrawalRequest,
-        attributes: ['member_transaction_id'],
+        // attributes: ['member_transaction_id', 'status'],
         include: {
           model: PaymentMethod,
           attributes: ['name', 'slug'],
@@ -96,9 +96,7 @@ class MemberTransactionController extends Controller {
       if (record.dataValues.amount_action === 'member_withdrawal') {
         var status_arr = [3, 4];
         if (record.dataValues.status == 3 || record.dataValues.status == 4) {
-          // data[key].setDataValue(record.dataValues.status, 'pending');
           record.dataValues.status = 'pending';
-          // data[key].setDataValue('transaction_status_display', 'pending');
         }
         if (
           record.dataValues.parent_transaction_id &&
