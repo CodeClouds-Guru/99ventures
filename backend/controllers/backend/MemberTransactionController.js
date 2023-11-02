@@ -142,7 +142,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.status =
             record.dataValues.amount_action !== 'member_withdrawal'
               ? 'processing'
-              : 'Pending';
+              : 'pending';
           break;
         case 2:
           record.dataValues.status = 'completed';
@@ -157,10 +157,10 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'reverted';
           break;
         case 'pending':
-          'Pending';
+          'pending';
           break;
         case 'approved':
-          'Completed';
+          'completed';
           break;
         default:
           record.dataValues.status = 'initiated';

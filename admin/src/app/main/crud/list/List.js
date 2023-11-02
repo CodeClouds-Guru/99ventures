@@ -444,6 +444,8 @@ function List(props) {
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
 			else if (status === 'reverted')
 				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+			else if (status === 'pending')
+				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
 		} else if (['withdrawal-requests', 'shoutbox', 'member-referrals'].includes(module)) {
 			const status = processFieldValue(n[field.field_name], field);
 			if (field.field_name === 'Member.status') {
