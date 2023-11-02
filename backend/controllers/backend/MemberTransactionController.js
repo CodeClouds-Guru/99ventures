@@ -76,10 +76,7 @@ class MemberTransactionController extends Controller {
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
-      console.log(
-        'record.dataValues.amount_action',
-        record.dataValues.amount_action
-      );
+      console.log('record.dataValues.status', record.dataValues.status);
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -134,7 +131,7 @@ class MemberTransactionController extends Controller {
         // record.dataValues.username =
         //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
-
+      console.log('record.dataValues.status', record.dataValues.status);
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status =
