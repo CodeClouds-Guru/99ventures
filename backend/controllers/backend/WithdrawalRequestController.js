@@ -126,7 +126,7 @@ class WithdrawalRequestController extends Controller {
             : '';
         // console.log('reversal_transaction', reversal_transaction);
         results.rows[key].setDataValue('reverse_count', warning_text);
-        results.rows[key].reverse_count = warning_text;
+        results.rows[key]['reverse_count'] = warning_text;
         row.reverse_count = warning_text;
       });
 
