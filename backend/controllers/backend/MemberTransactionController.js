@@ -102,7 +102,7 @@ class MemberTransactionController extends Controller {
         }
         if (
           record.dataValues.parent_transaction_id &&
-          transaction.status == 2
+          record.dataValues.status == 2
         ) {
           // data[key].setDataValue(
           //   record.dataValues.status,
