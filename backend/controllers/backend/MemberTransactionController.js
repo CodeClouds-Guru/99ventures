@@ -56,12 +56,20 @@ class MemberTransactionController extends Controller {
       {
         model: this.model,
         as: 'ParentTransaction',
-        attributes: ['member_id'],
-        include: {
-          model: Member,
-          required: false,
-          attributes: ['id', 'first_name', 'last_name', 'username'],
-        },
+        attributes: ['member_id', 'status', 'created_at'],
+        include: [
+          {
+            model: Member,
+            required: false,
+            attributes: ['id', 'first_name', 'last_name', 'username'],
+          },
+          {
+            model: WithdrawalRequest,
+            include: {
+              model: PaymentMethod,
+            },
+          },
+        ],
       },
     ];
     const { docs, pages, total } = await this.model.paginate(options);
@@ -80,9 +88,11 @@ class MemberTransactionController extends Controller {
         record.dataValues.transaction_id = 'N/A';
       }
       if (
-        record.dataValues.WithdrawalRequest !== null &&
-        record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
-        record.dataValues.amount_action === 'member_withdrawal'
+        (record.dataValues.WithdrawalRequest !== null &&
+          record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
+          record.dataValues.amount_action === 'member_withdrawal') ||
+        record.dataValues.amount_action == 'withdrawal' ||
+        record.dataValues.amount_action == 'Withdrawal'
       ) {
         record.dataValues.amount_action = `Withdrawl (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
         // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
@@ -125,6 +135,43 @@ class MemberTransactionController extends Controller {
         default:
           record.dataValues.status = 'initiated';
           break;
+      }
+
+      if (
+        record.dataValues.amount_action == 'withdrawal' ||
+        record.dataValues.amount_action == 'Withdrawal'
+      ) {
+        var status_arr = [3, 4];
+        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+          data[key].setDataValue(record.dataValues.status, 'pending');
+          record.dataValues.status = 'pending';
+          data[key].setDataValue('transaction_status_display', 'pending');
+        }
+        if (
+          record.dataValues.parent_transaction_id &&
+          transaction.status == 2
+        ) {
+          data[key].setDataValue(
+            record.dataValues.status,
+            record.dataValues.ParentTransaction.status
+          );
+          record.dataValues.status = record.dataValues.ParentTransaction.status;
+          data[key].setDataValue(
+            'transaction_status_display',
+            record.dataValues.ParentTransaction.status
+          );
+        }
+        if (record.dataValues.status == 1) {
+          data[key].setDataValue(
+            record.dataValues.status,
+            record.dataValues.WithdrawalRequest.status
+          );
+          record.dataValues.status = record.dataValues.WithdrawalRequest.status;
+          data[key].setDataValue(
+            'transaction_status_display',
+            record.dataValues.WithdrawalRequest.status
+          );
+        }
       }
 
       transaction_list.push(record);
