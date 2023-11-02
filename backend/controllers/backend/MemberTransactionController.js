@@ -87,14 +87,53 @@ class MemberTransactionController extends Controller {
       if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A';
       }
+
+      //status manipulation
       if (
-        (record.dataValues.WithdrawalRequest !== null &&
-          record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
-          record.dataValues.amount_action === 'member_withdrawal') ||
+        record.dataValues.amount_action === 'member_withdrawal' ||
         record.dataValues.amount_action == 'withdrawal' ||
         record.dataValues.amount_action == 'Withdrawal'
       ) {
-        record.dataValues.amount_action = `Withdrawl (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
+        var status_arr = [3, 4];
+        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+          data[key].setDataValue(record.dataValues.status, 'pending');
+          record.dataValues.status = 'pending';
+          data[key].setDataValue('transaction_status_display', 'pending');
+        }
+        if (
+          record.dataValues.parent_transaction_id &&
+          transaction.status == 2
+        ) {
+          data[key].setDataValue(
+            record.dataValues.status,
+            record.dataValues.ParentTransaction.status
+          );
+          record.dataValues.status = record.dataValues.ParentTransaction.status;
+          data[key].setDataValue(
+            'transaction_status_display',
+            record.dataValues.ParentTransaction.status
+          );
+        }
+        if (record.dataValues.status == 1) {
+          data[key].setDataValue(
+            record.dataValues.status,
+            record.dataValues.WithdrawalRequest.status
+          );
+          record.dataValues.status = record.dataValues.WithdrawalRequest.status;
+          data[key].setDataValue(
+            'transaction_status_display',
+            record.dataValues.WithdrawalRequest.status
+          );
+        }
+      }
+      if (
+        record.dataValues.WithdrawalRequest !== null &&
+        record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
+        (record.dataValues.amount_action === 'member_withdrawal' ||
+          record.dataValues.amount_action == 'withdrawal' ||
+          record.dataValues.amount_action == 'Withdrawal')
+      ) {
+        record.dataValues.amount_action = `Withdrawal (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
         // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
       if (record.dataValues.amount_action === 'offerwall') {
@@ -135,43 +174,6 @@ class MemberTransactionController extends Controller {
         default:
           record.dataValues.status = 'initiated';
           break;
-      }
-
-      if (
-        record.dataValues.amount_action == 'withdrawal' ||
-        record.dataValues.amount_action == 'Withdrawal'
-      ) {
-        var status_arr = [3, 4];
-        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
-          data[key].setDataValue(record.dataValues.status, 'pending');
-          record.dataValues.status = 'pending';
-          data[key].setDataValue('transaction_status_display', 'pending');
-        }
-        if (
-          record.dataValues.parent_transaction_id &&
-          transaction.status == 2
-        ) {
-          data[key].setDataValue(
-            record.dataValues.status,
-            record.dataValues.ParentTransaction.status
-          );
-          record.dataValues.status = record.dataValues.ParentTransaction.status;
-          data[key].setDataValue(
-            'transaction_status_display',
-            record.dataValues.ParentTransaction.status
-          );
-        }
-        if (record.dataValues.status == 1) {
-          data[key].setDataValue(
-            record.dataValues.status,
-            record.dataValues.WithdrawalRequest.status
-          );
-          record.dataValues.status = record.dataValues.WithdrawalRequest.status;
-          data[key].setDataValue(
-            'transaction_status_display',
-            record.dataValues.WithdrawalRequest.status
-          );
-        }
       }
 
       transaction_list.push(record);
