@@ -90,21 +90,21 @@ class MemberTransactionController extends Controller {
       }
 
       //status manipulation
-      if (record.dataValues.amount_action === 'member_withdrawal') {
-        var status_arr = [3, 4];
-        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
-          record.dataValues.status = 'pending';
-        }
-        if (
-          record.dataValues.parent_transaction_id &&
-          record.dataValues.status == 2
-        ) {
-          record.dataValues.status = record.dataValues.ParentTransaction.status;
-        }
-        if (record.dataValues.status == 1) {
-          record.dataValues.status = record.dataValues.WithdrawalRequest.status;
-        }
-      }
+      // if (record.dataValues.amount_action === 'member_withdrawal') {
+      //   var status_arr = [3, 4];
+      //   if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+      //     record.dataValues.status = 'pending';
+      //   }
+      //   if (
+      //     record.dataValues.parent_transaction_id &&
+      //     record.dataValues.status == 2
+      //   ) {
+      //     record.dataValues.status = record.dataValues.ParentTransaction.status;
+      //   }
+      //   if (record.dataValues.status == 1) {
+      //     record.dataValues.status = record.dataValues.WithdrawalRequest.status;
+      //   }
+      // }
       if (
         record.dataValues.WithdrawalRequest !== null &&
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
@@ -134,10 +134,7 @@ class MemberTransactionController extends Controller {
       console.log('record.dataValues.status', record.dataValues.status);
       switch (record.dataValues.status) {
         case 1:
-          record.dataValues.status =
-            record.dataValues.amount_action !== 'member_withdrawal'
-              ? 'processing'
-              : 'pending';
+          record.dataValues.status = 'processing';
           break;
         case 2:
           record.dataValues.status = 'completed';
@@ -150,12 +147,6 @@ class MemberTransactionController extends Controller {
           break;
         case 5:
           record.dataValues.status = 'reverted';
-          break;
-        case 'pending':
-          record.dataValues.status = 'pending';
-          break;
-        case 'approved':
-          record.dataValues.status = 'completed';
           break;
         default:
           record.dataValues.status = 'initiated';

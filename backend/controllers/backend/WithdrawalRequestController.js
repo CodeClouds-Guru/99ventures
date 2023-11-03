@@ -31,7 +31,6 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
-      // warning: 'Warning',
     };
   }
 
