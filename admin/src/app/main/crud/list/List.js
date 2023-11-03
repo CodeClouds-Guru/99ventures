@@ -542,8 +542,8 @@ function List(props) {
 			if (field.field_name === 'MemberTransaction->Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
 			}
-			if (['member-transactions', 'completed-surveys'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
-				if((module === 'member-transactions' && n.Member === null) || (module === 'completed-surveys' && n.MemberTransaction.Member === null)){
+			if (['completed-surveys'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && ['processing', 'completed'].includes(n.status)) {
+				if( (module === 'completed-surveys' && n.MemberTransaction.Member === null)){
 					return;
 				}
 				return (
@@ -575,6 +575,50 @@ function List(props) {
 										setOpenRevertAlertDialog(true);
 										if (module === 'completed-surveys') { setTid(n.MemberTransaction.id); setMemberID(n.MemberTransaction.Member.id) } else { setTid(n.id); setMemberID(n.Member.id); }
 
+									}}
+								>
+									<ListItemIcon className="min-w-40">
+										<FuseSvgIcon>heroicons-outline:receipt-refund</FuseSvgIcon>
+									</ListItemIcon>
+									<ListItemText primary="Revert" />
+								</MenuItem>
+							</MenuList>
+						</Menu>
+					</>
+				)
+			}
+			if (['member-transactions'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && (['completed'].includes(n.status) ||['completed'].includes(n.new_status))) {
+				if((module === 'member-transactions' && n.Member === null) ){
+					return;
+				}
+				return (
+					<>
+						<IconButton
+							aria-owns={actionsMenu ? `actionsMenu_${n.id}` : null}
+							aria-haspopup="true"
+							onClick={openActionsMenu}
+							size="large"
+							className="listingExtraMenu"
+							sx={{ zIndex: 999 }}
+							id={`actionsMenu_${n.id}`}
+						>
+							<FuseSvgIcon
+								sx={{ pointerEvents: 'none' }}
+								className="listingExtraMenu"
+							>material-outline:settings</FuseSvgIcon>
+						</IconButton>
+						<Menu
+							id={`actionsMenu_${n.id}`}
+							anchorEl={actionsMenu}
+							open={Boolean(actionsMenu && actionsMenu.id === `actionsMenu_${n.id}`)}
+							onClose={closeActionsMenu}
+						>
+							<MenuList>
+								<MenuItem
+									onClick={(event) => {
+										event.stopPropagation();
+										setOpenRevertAlertDialog(true);
+										setTid(n.id); setMemberID(n.Member.id);
 									}}
 								>
 									<ListItemIcon className="min-w-40">
