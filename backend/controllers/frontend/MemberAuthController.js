@@ -624,7 +624,7 @@ class MemberAuthController {
   }
 
   //Start - Api to insert Member Eligibility manually
-  /*async manualMemberEligibility(req, res) {
+  async manualMemberEligibility(req, res) {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
@@ -643,10 +643,11 @@ class MemberAuthController {
     });
 
     for (const member of members) {
-      await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
+      // await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
+      this.setMemberEligibility(member.id, member.profile_completed_on);
     }
     res.json({ data: members });
-  }*/
+  }
   //Start - Api to insert Member Eligibility manually
 
   //set member eligibility
