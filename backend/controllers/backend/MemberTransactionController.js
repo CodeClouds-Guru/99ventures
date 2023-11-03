@@ -47,7 +47,7 @@ class MemberTransactionController extends Controller {
       },
       {
         model: WithdrawalRequest,
-        attributes: ['member_transaction_id'],
+        // attributes: ['member_transaction_id', 'status'],
         include: {
           model: PaymentMethod,
           attributes: ['name', 'slug'],
@@ -56,18 +56,27 @@ class MemberTransactionController extends Controller {
       {
         model: this.model,
         as: 'ParentTransaction',
-        attributes: ['member_id'],
-        include: {
-          model: Member,
-          required: false,
-          attributes: ['id', 'first_name', 'last_name', 'username'],
-        },
+        attributes: ['member_id', 'status', 'created_at'],
+        include: [
+          {
+            model: Member,
+            required: false,
+            attributes: ['id', 'first_name', 'last_name', 'username'],
+          },
+          {
+            model: WithdrawalRequest,
+            include: {
+              model: PaymentMethod,
+            },
+          },
+        ],
       },
     ];
     const { docs, pages, total } = await this.model.paginate(options);
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
+      console.log('record.dataValues.status===', record.dataValues.status);
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -79,12 +88,29 @@ class MemberTransactionController extends Controller {
       if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A';
       }
+
+      //status manipulation
+      // if (record.dataValues.amount_action === 'member_withdrawal') {
+      //   var status_arr = [3, 4];
+      //   if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+      //     record.dataValues.status = 'pending';
+      //   }
+      //   if (
+      //     record.dataValues.parent_transaction_id &&
+      //     record.dataValues.status == 2
+      //   ) {
+      //     record.dataValues.status = record.dataValues.ParentTransaction.status;
+      //   }
+      //   if (record.dataValues.status == 1) {
+      //     record.dataValues.status = record.dataValues.WithdrawalRequest.status;
+      //   }
+      // }
       if (
         record.dataValues.WithdrawalRequest !== null &&
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
         record.dataValues.amount_action === 'member_withdrawal'
       ) {
-        record.dataValues.amount_action = `Withdrawl (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
+        record.dataValues.amount_action = `Withdrawal (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
         // record.dataValues.amount_action = `${record.dataValues.amount_action} (${record.dataValues.WithdrawalRequest.PaymentMethod.name})`;
       }
       if (record.dataValues.amount_action === 'offerwall') {
@@ -105,7 +131,7 @@ class MemberTransactionController extends Controller {
         // record.dataValues.username =
         //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
-
+      console.log('record.dataValues.status', record.dataValues.status);
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';

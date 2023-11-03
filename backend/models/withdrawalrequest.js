@@ -362,90 +362,90 @@ module.exports = (sequelize, DataTypes) => {
       resp.member_message = 'Please check your balance';
     }
 
-    let total_approved_amount = 0;
-    let total_pending_amount = 0;
+    // let total_approved_amount = 0;
+    // let total_pending_amount = 0;
 
     //Start - check pending withdrawal request
-    let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
-      attributes: [
-        [
-          sequelize.fn(
-            'IFNULL',
-            sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
-            0
-          ),
-          'total',
-        ],
-      ],
-      where: {
-        status: 'pending',
-        member_id: member_id,
-      },
-      include: {
-        model: MemberTransaction,
-        attributes: ['id'],
-        where: {
-          status: { [Op.ne]: 2 },
-        },
-        required: false,
-      },
-    });
-    // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
-    total_pending_amount = pending_withdrawal_req_amount.dataValues.total
-      ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
-      : 0;
-    if (
-      member.member_amounts[0].amount <
-      total_pending_amount + withdrawal_amount
-    ) {
-      resp.member_status = false;
-      resp.member_message =
-        'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.';
-    }
-    //End - check pending withdrawal request
+    // let pending_withdrawal_req_amount = await WithdrawalRequest.findOne({
+    //   // logging: console.log,
+    //   attributes: [
+    //     [
+    //       sequelize.fn(
+    //         'IFNULL',
+    //         sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+    //         0
+    //       ),
+    //       'total',
+    //     ],
+    //   ],
+    //   where: {
+    //     status: 'pending',
+    //     member_id: member_id,
+    //   },
+    //   include: {
+    //     model: MemberTransaction,
+    //     attributes: ['id'],
+    //     where: {
+    //       status: { [Op.ne]: 2 },
+    //     },
+    //     required: false,
+    //   },
+    // });
+    // // console.log('pending_withdrawal_req_amount', pending_withdrawal_req_amount);
+    // total_pending_amount = pending_withdrawal_req_amount.dataValues.total
+    //   ? parseFloat(pending_withdrawal_req_amount.dataValues.total)
+    //   : 0;
+    // if (
+    //   member.member_amounts[0].amount <
+    //   total_pending_amount + withdrawal_amount
+    // ) {
+    //   resp.member_status = false;
+    //   resp.member_message =
+    //     'You already have pending withdrawal requests. This request might exceed your balance. Please contact to admin.';
+    // }
+    // //End - check pending withdrawal request
 
-    //Start - check approved withdrawal request
-    let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
-      // logging: console.log,
-      attributes: [
-        [
-          sequelize.fn(
-            'IFNULL',
-            sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
-            0
-          ),
-          'total',
-        ],
-      ],
-      where: {
-        status: 'approved',
-        member_id: member_id,
-      },
-      include: {
-        model: MemberTransaction,
-        attributes: ['id'],
-        where: {
-          status: { [Op.ne]: 2 },
-        },
-        required: true,
-      },
-    });
-    // console.log(
-    //   'approved_withdrawal_req_amount',
-    //   approved_withdrawal_req_amount
-    // );
-    total_approved_amount = approved_withdrawal_req_amount.dataValues.total
-      ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
-      : 0;
-    if (
-      member.member_amounts[0].amount <
-      total_pending_amount + total_approved_amount + withdrawal_amount
-    ) {
-      resp.member_status = false;
-      resp.member_message =
-        'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.';
-    }
+    // //Start - check approved withdrawal request
+    // let approved_withdrawal_req_amount = await WithdrawalRequest.findOne({
+    //   // logging: console.log,
+    //   attributes: [
+    //     [
+    //       sequelize.fn(
+    //         'IFNULL',
+    //         sequelize.fn('SUM', sequelize.col('WithdrawalRequest.amount')),
+    //         0
+    //       ),
+    //       'total',
+    //     ],
+    //   ],
+    //   where: {
+    //     status: 'approved',
+    //     member_id: member_id,
+    //   },
+    //   include: {
+    //     model: MemberTransaction,
+    //     attributes: ['id'],
+    //     where: {
+    //       status: { [Op.ne]: 2 },
+    //     },
+    //     required: true,
+    //   },
+    // });
+    // // console.log(
+    // //   'approved_withdrawal_req_amount',
+    // //   approved_withdrawal_req_amount
+    // // );
+    // total_approved_amount = approved_withdrawal_req_amount.dataValues.total
+    //   ? parseFloat(approved_withdrawal_req_amount.dataValues.total)
+    //   : 0;
+    // if (
+    //   member.member_amounts[0].amount <
+    //   total_pending_amount + total_approved_amount + withdrawal_amount
+    // ) {
+    //   resp.member_status = false;
+    //   resp.member_message =
+    //     'You already have some approved withdrawal requests which are still under process. This request might exceed your balance. Please contact to admin.';
+    // }
     return resp;
     //End - check approved withdrawal request
   };
