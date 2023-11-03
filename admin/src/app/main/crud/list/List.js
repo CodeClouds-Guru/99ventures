@@ -214,6 +214,12 @@ function List(props) {
 		if (module === 'withdrawal-requests') {
 			setWithdrawalRequestStatus(where.status) 
 		}
+		if (module === 'member-transactions') {
+			setDateRange({
+				startDate: moment().startOf('month'),
+				endDate: moment()
+			});
+		}
 	}, [])
 
 	useEffect(() => {
@@ -640,13 +646,24 @@ function List(props) {
 		}
 		setWhere({ ...where, ...param });
 	}
+
 	const handleClearDateRange = () => {
-		setDateRange({
-			startDate: '',
-			endDate: ''
-		});
-		module === 'member-transactions' ? delete where.completed_at : delete where.created_at;
-		setWhere({ ...where });
+		if(module === 'member-transactions') {
+			const val = {
+				startDate: moment().startOf('month'),
+				endDate: moment()
+			};
+			setDateRange(val);
+			setDatepickerStatus(false);
+			setWhere({ ...where, completed_at: [val.startDate, val.endDate] });
+		} else {
+			setDateRange({
+				startDate: '',
+				endDate: ''
+			});
+			delete where.created_at;
+			setWhere({ ...where });
+		}
 	}
 
 	/**
@@ -838,14 +855,14 @@ function List(props) {
 											<OutlinedInput
 												id="outlined-adornment-datepicker"
 												type="text"
-												readOnly
-												onClick={() => setDatepickerStatus(!datepickerStatus)}
+												readOnly												
 												className="datepicker--input cursor-pointer rounded-full"
 												startAdornment={
 													<InputAdornment position="start">
 														<IconButton
 															aria-label="toggle password visibility"
 															edge="start"
+															onClick={() => setDatepickerStatus(!datepickerStatus)}
 														>
 															<FuseSvgIcon className="text-48 cursor-pointer flex justify-start" size={18} color="disabled">feather:calendar</FuseSvgIcon>
 														</IconButton>
@@ -874,7 +891,7 @@ function List(props) {
 											/>
 										</FormControl>
 										{(module === 'member-transactions' && location.pathname.includes('history')) &&
-											<FormControl sx={{ minWidth: 120 }} size="small" className="w-full sm:w-auto p-3">
+											<FormControl sx={{ minWidth: 150 }} size="small" className="w-full sm:w-auto p-3">
 												<InputLabel id="demo-simple-select-label">Type</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"
