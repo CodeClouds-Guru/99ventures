@@ -89,6 +89,9 @@ module.exports = (sequelize, DataTypes) => {
           return this.amount_action.replaceAll('_', ' ');
         },
       },
+      new_status: {
+        type: DataTypes.VIRTUAL,
+      },
       payload: DataTypes.JSON,
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
@@ -295,6 +298,19 @@ module.exports = (sequelize, DataTypes) => {
     //   width: '50',
     //   searchable: true,
     // },
+    new_status: {
+      field_name: 'new_status',
+      db_name: 'new_status',
+      type: 'text',
+      placeholder: 'Status',
+      listing: false,
+      show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
   };
   sequelizePaginate.paginate(MemberTransaction);
 

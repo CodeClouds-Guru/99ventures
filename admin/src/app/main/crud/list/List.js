@@ -437,23 +437,24 @@ function List(props) {
 				</Tooltip>
 			) : '--'
 		} else if (module === 'member-transactions' && field.field_name === 'status') {
-			const status = processFieldValue(n[field.field_name], field);
+			const status = processFieldValue(n['new_status'], field) ? processFieldValue(n['new_status'], field) : processFieldValue(n[field.field_name], field);
+			
 			if (status === 'initiated')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="primary" />
+				return <Chip label={status} className="capitalize" size="small" color="primary" />
 			else if (status === 'processing')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="secondary" />
+				return <Chip label={status} className="capitalize" size="small" color="secondary" />
 			else if (status === 'completed')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="success" />
+				return <Chip label={status} className="capitalize" size="small" color="success" />
 			else if (status === 'failed')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+				return <Chip label={status} className="capitalize" size="small" color="error" />
 			else if (status === 'declined')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="error" />
+				return <Chip label={status} className="capitalize" size="small" color="error" />
 			else if (status === 'reverted')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				return <Chip label={status} className="capitalize" size="small" color="warning" />
 			else if (status === 'pending')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				return <Chip label={status} className="capitalize" size="small" sx={{backgroundColor : '#e6c31b', color: '#352222'}} />
 			else if (status === 'approved')
-				return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color="warning" />
+				return <Chip label={status} className="capitalize" size="small" color="success" />
 		} else if (['withdrawal-requests', 'shoutbox', 'member-referrals'].includes(module)) {
 			const status = processFieldValue(n[field.field_name], field);
 			if (field.field_name === 'Member.status') {

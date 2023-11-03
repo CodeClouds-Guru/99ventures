@@ -88,23 +88,25 @@ class MemberTransactionController extends Controller {
       if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A';
       }
-
+      record.dataValues.new_status = '';
       //status manipulation
-      // if (record.dataValues.amount_action === 'member_withdrawal') {
-      //   var status_arr = [3, 4];
-      //   if (record.dataValues.status == 3 || record.dataValues.status == 4) {
-      //     record.dataValues.status = 'pending';
-      //   }
-      //   if (
-      //     record.dataValues.parent_transaction_id &&
-      //     record.dataValues.status == 2
-      //   ) {
-      //     record.dataValues.status = record.dataValues.ParentTransaction.status;
-      //   }
-      //   if (record.dataValues.status == 1) {
-      //     record.dataValues.status = record.dataValues.WithdrawalRequest.status;
-      //   }
-      // }
+      if (record.dataValues.amount_action === 'member_withdrawal') {
+        var status_arr = [3, 4];
+        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+          record.dataValues.new_status = 'pending';
+        }
+        if (
+          record.dataValues.parent_transaction_id &&
+          record.dataValues.status == 2
+        ) {
+          record.dataValues.new_status =
+            record.dataValues.ParentTransaction.status;
+        }
+        if (record.dataValues.status == 1) {
+          record.dataValues.new_status =
+            record.dataValues.WithdrawalRequest.status;
+        }
+      }
       if (
         record.dataValues.WithdrawalRequest !== null &&
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
@@ -131,7 +133,7 @@ class MemberTransactionController extends Controller {
         // record.dataValues.username =
         //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
-      console.log('record.dataValues.status', record.dataValues.status);
+      console.log('record.dataValues.new_status', record.dataValues.new_status);
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';
@@ -152,6 +154,36 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'initiated';
           break;
       }
+      switch (record.dataValues.new_status) {
+        case 1:
+          record.dataValues.new_status = 'processing';
+          break;
+        case 2:
+          record.dataValues.new_status = 'completed';
+          break;
+        case 3:
+          record.dataValues.new_status = 'failed';
+          break;
+        case 4:
+          record.dataValues.new_status = 'declined';
+          break;
+        case 5:
+          record.dataValues.new_status = 'reverted';
+          break;
+        case 'pending':
+          record.dataValues.new_status = 'pending';
+          break;
+        case 'approved':
+          record.dataValues.new_status = 'completed';
+          break;
+        default:
+          record.dataValues.new_status = record.dataValues.new_status;
+          break;
+      }
+      console.log(
+        'record.dataValues.new_status after',
+        record.dataValues.new_status
+      );
 
       transaction_list.push(record);
     });
