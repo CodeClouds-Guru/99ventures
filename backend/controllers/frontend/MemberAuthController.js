@@ -565,8 +565,9 @@ class MemberAuthController {
             });
           }
           req.body.country_id = req.body.country;
-          req.body.zip_code = req.body.zipcode;
+          req.body.zip_code = req.body.zipcode.trim();
           request_data = req.body;
+          request_data.city = req.body.city.trim();
           request_data.updated_by = member_id;
 
           // request_data.username = member.username;
