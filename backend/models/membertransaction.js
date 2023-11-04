@@ -597,29 +597,29 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
     // console.log('data.amount', data.amount);
-    if (data.amount >= 0) {
-      await MemberBalance.update(
-        { amount: data.amount },
-        {
-          where: {
-            member_id: data.member_id,
-            amount_type: 'cash',
-          },
-        }
-      );
+    // if (data.amount >= 0) {
+    await MemberBalance.update(
+      { amount: data.amount },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
 
-      const logger = require('../helpers/Logger')(`member-balance.log`);
-      logger.info(JSON.stringify(data));
+    const logger = require('../helpers/Logger')(`member-balance.log`);
+    logger.info(JSON.stringify(data));
 
-      //Notify member
-      await MemberNotification.addMemberNotification({
-        member_id: data.member_id,
-        action: data.action,
-        amount: data.transaction_amount,
-      });
+    //Notify member
+    await MemberNotification.addMemberNotification({
+      member_id: data.member_id,
+      action: data.action,
+      amount: data.transaction_amount,
+    });
 
-      return true;
-    }
+    return true;
+    // }
   };
 
   MemberTransaction.updateMemberWithdrawalRequest = async (data) => {

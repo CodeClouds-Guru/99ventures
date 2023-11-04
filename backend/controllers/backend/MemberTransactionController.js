@@ -76,7 +76,6 @@ class MemberTransactionController extends Controller {
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
-      console.log('record.dataValues.status===', record.dataValues.status);
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -133,7 +132,7 @@ class MemberTransactionController extends Controller {
         // record.dataValues.username =
         //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
-      console.log('record.dataValues.new_status', record.dataValues.new_status);
+
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';
@@ -177,13 +176,9 @@ class MemberTransactionController extends Controller {
           record.dataValues.new_status = 'completed';
           break;
         default:
-          record.dataValues.new_status = record.dataValues.new_status;
+          record.dataValues.new_status = record.dataValues.status;
           break;
       }
-      console.log(
-        'record.dataValues.new_status after',
-        record.dataValues.new_status
-      );
 
       transaction_list.push(record);
     });
@@ -233,6 +228,7 @@ class MemberTransactionController extends Controller {
             transaction_amount: transaction.amount,
             member_id: member_id,
             transaction_id: transaction_id,
+            created_by: req.user.id,
           });
 
           //Email for member
@@ -271,6 +267,7 @@ class MemberTransactionController extends Controller {
               transaction_amount: referral_transactions.amount,
               member_id: referral_transactions.member_id,
               transaction_id: referral_transactions.id,
+              created_by: req.user.id,
             });
 
             //Email for referral member
@@ -306,7 +303,7 @@ class MemberTransactionController extends Controller {
       parseFloat(data.transaction_amount);
 
     await this.model.update(
-      { status: 5 },
+      { status: 5, updated_by: data.created_by },
       {
         where: {
           id: data.transaction_id, //1
@@ -323,6 +320,7 @@ class MemberTransactionController extends Controller {
       status: 5,
       modified_total_earnings: updated_balance,
       parent_transaction_id: data.transaction_id,
+      created_by: data.created_by,
     });
 
     // await this.model.updateMemberBalance({

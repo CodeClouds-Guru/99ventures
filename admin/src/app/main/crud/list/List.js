@@ -587,7 +587,7 @@ function List(props) {
 					</>
 				)
 			}
-			if (['member-transactions'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && (['completed'].includes(n.status) ||['completed'].includes(n.new_status))) {
+			if (['member-transactions'].includes(module) && field.field_name === 'actions' && n.type === 'credited' && (['completed'].includes(n.status) && ['completed'].includes(n.new_status))) {
 				if((module === 'member-transactions' && n.Member === null) ){
 					return;
 				}
