@@ -481,12 +481,14 @@ class SurveycallbackController {
   async tolunaPostback(req, res) {
     if (req.query.status === 'complete') {
       const requestBody = req.body;
-      const username = requestBody.UniqueCode;
+      const UniqueCode = requestBody.UniqueCode;
       const surveyId = requestBody.SurveyId;
       const surveyRef = requestBody.SurveyRef;
       const partnerAmount = requestBody.Revenue; // the amount multiplied by 100
       try {
-        let member = await this.getMember({ username });
+        const strArry = UniqueCode.split('_');
+        const memberId = strArry[2];
+        let member = await this.getMember({ id: memberId });
         if (member) {
           const memberSurveys = await Survey.checkMemberSurvey(
             member.username,
