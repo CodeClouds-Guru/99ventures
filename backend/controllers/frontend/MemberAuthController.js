@@ -453,10 +453,15 @@ class MemberAuthController {
       );
       req.session.member = member_details;
       //set member eligibility
-      await this.setMemberEligibility(
-        member_details.id,
-        member_details.profile_completed_on
-      );
+      if(member_details.profile_completed_on){
+        await this.setMemberEligibility(
+          member_details.id
+        );
+      }
+      // await this.setMemberEligibility(
+      //   member_details.id,
+      //   member_details.profile_completed_on
+      // );
       let activityEventbus = eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
@@ -579,12 +584,23 @@ class MemberAuthController {
           let model = await Member.update(request_data, {
             where: { id: member_id },
           });
-          //set eligibility
-          await this.setMemberEligibility(
-            member_id,
-            member.profile_completed_on
-          );
 
+          //set eligibility
+          const getmember = await Member.findOne({ 
+            attributes: ['id', 'profile_completed_on'],
+            where: { 
+              id: member_id
+            } 
+          });
+          if(getmember.profile_completed_on !== null) {
+            await this.setMemberEligibility(
+              member_id
+            );
+          }
+          // await this.setMemberEligibility(
+          //   member_id,
+          //   member.profile_completed_on
+          // );
           let email_alerts = req.body.email_alerts || null;
 
           member_status = await EmailAlert.saveEmailAlerts(
@@ -645,7 +661,7 @@ class MemberAuthController {
 
     for (const member of members) {
       // await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
-      this.setMemberEligibility(member.id, member.profile_completed_on);
+      this.setMemberEligibility(member.id);
     }
     res.json({ data: members });
   }
@@ -870,8 +886,8 @@ class MemberAuthController {
     }
   }*/
 
-  async setMemberEligibility(member_id, profile_completed_on) {
-    try {
+  async setMemberEligibility(member_id) {
+    try {      
       let member_details = await Member.findOne({
         where: { id: member_id },
         include: {
@@ -1054,12 +1070,12 @@ class MemberAuthController {
           where: { member_id: member_id },
           force: true,
         });
-        //if(profile_completed_on !== null){
-          await MemberEligibilities.bulkCreate(member_eligibility);
-          if (toluna_questions.length) {
-            MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
-          }
-        //}
+        
+        await MemberEligibilities.bulkCreate(member_eligibility);
+        if (toluna_questions.length) {
+          MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
+        }
+        
       }
       return;
     } catch (error) {
@@ -1672,12 +1688,11 @@ class MemberAuthController {
         try{
           await tolunaHelper.addMemebr(payload);
         } catch(err){
-          console.log('Toluna Member Add')
-          console.error(err)
           const logger = require('../../helpers/Logger')(
             `toluna-errror.log`
           );
           logger.error(err);
+          logger.error(JSON.stringify(payload));
         }
       } else {
         console.log(error);
