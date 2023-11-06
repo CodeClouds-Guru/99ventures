@@ -209,7 +209,7 @@ const FileItems = (props) => {
                 
                 <div className={`flex shrink flex-col justify-center text-left ${style[viewType].title}`}>
                     <Tooltip title={ props.file.name } placement="bottom-start">
-                        <Typography className="pr-5 truncate text-12 font-medium" onClick={()=> dispatch(setSelectedItem(props.file))}>{ props.file.name }</Typography>
+                        <Typography className="pr-5 truncate text-12 font-medium" onClick={ handleViewFile }>{ props.file.name }</Typography>
                     </Tooltip>
                     <div className="item-list-icon">
                         <IconButton color="primary" aria-label="Filter" component="label"  onClick={ handleMenuClick }>
@@ -224,7 +224,7 @@ const FileItems = (props) => {
                             >
                             <MenuItem 
                                 onClick={()=> {
-                                    dispatch(setSelectedItem(props.file));
+                                    handleViewFile();
                                     handleMenuClose();
                                 }}>
                                 <ListItemIcon className="min-w-40">
