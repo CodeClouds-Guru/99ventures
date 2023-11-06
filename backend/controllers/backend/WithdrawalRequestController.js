@@ -31,7 +31,6 @@ class WithdrawalRequestController extends Controller {
       created_at: 'Date',
       'Member.username': 'Username',
       amount_with_currency: 'Cash',
-      // warning: 'Warning',
     };
   }
 
@@ -118,14 +117,21 @@ class WithdrawalRequestController extends Controller {
           replacements: [row.member_id, row.member_id],
           type: QueryTypes.SELECT,
         });
-        console.log('reversal_transaction', reversal_transaction[0]);
+        console.log(
+          'reversal_transaction',
+          reversal_transaction.length,
+          reversal_transaction[0].reverse_count
+        );
+        row.setDataValue('reverse_count', '');
         let warning_text =
           reversal_transaction.length > 0 &&
           reversal_transaction[0].reverse_count > 0
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
             : '';
         // console.log('reversal_transaction', reversal_transaction);
-        results.rows[key].setDataValue('reverse_count', warning_text);
+        row.setDataValue('reverse_count', warning_text);
+        results.rows[key]['reverse_count'] = warning_text;
+        row.reverse_count = warning_text;
       });
 
       /**

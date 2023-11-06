@@ -89,6 +89,9 @@ module.exports = (sequelize, DataTypes) => {
           return this.amount_action.replaceAll('_', ' ');
         },
       },
+      new_status: {
+        type: DataTypes.VIRTUAL,
+      },
       payload: DataTypes.JSON,
       parent_transaction_id: DataTypes.BIGINT,
       created_by: DataTypes.BIGINT,
@@ -295,6 +298,19 @@ module.exports = (sequelize, DataTypes) => {
     //   width: '50',
     //   searchable: true,
     // },
+    new_status: {
+      field_name: 'new_status',
+      db_name: 'new_status',
+      type: 'text',
+      placeholder: 'Status',
+      listing: false,
+      show_in_form: false,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
   };
   sequelizePaginate.paginate(MemberTransaction);
 
@@ -581,29 +597,29 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.updateMemberBalance = async (data) => {
     const { MemberBalance, MemberNotification } = require('../models/index');
     // console.log('data.amount', data.amount);
-    if (data.amount >= 0) {
-      await MemberBalance.update(
-        { amount: data.amount },
-        {
-          where: {
-            member_id: data.member_id,
-            amount_type: 'cash',
-          },
-        }
-      );
+    // if (data.amount >= 0) {
+    await MemberBalance.update(
+      { amount: data.amount },
+      {
+        where: {
+          member_id: data.member_id,
+          amount_type: 'cash',
+        },
+      }
+    );
 
-      const logger = require('../helpers/Logger')(`member-balance.log`);
-      logger.info(JSON.stringify(data));
+    const logger = require('../helpers/Logger')(`member-balance.log`);
+    logger.info(JSON.stringify(data));
 
-      //Notify member
-      await MemberNotification.addMemberNotification({
-        member_id: data.member_id,
-        action: data.action,
-        amount: data.transaction_amount,
-      });
+    //Notify member
+    await MemberNotification.addMemberNotification({
+      member_id: data.member_id,
+      action: data.action,
+      amount: data.transaction_amount,
+    });
 
-      return true;
-    }
+    return true;
+    // }
   };
 
   MemberTransaction.updateMemberWithdrawalRequest = async (data) => {

@@ -565,8 +565,9 @@ class MemberAuthController {
             });
           }
           req.body.country_id = req.body.country;
-          req.body.zip_code = req.body.zipcode;
+          req.body.zip_code = req.body.zipcode.trim();
           request_data = req.body;
+          request_data.city = req.body.city.trim();
           request_data.updated_by = member_id;
 
           // request_data.username = member.username;
@@ -628,18 +629,23 @@ class MemberAuthController {
     let members = await Member.findAll({
       // attributes: ['id'],
       where: {
-        id: 249,
-        // profile_completed_on: {
-        //   [Op.ne]: null,
-        // },
-        // status: 'member',
-        // deleted_at: null,
-        // country_id: 226
+        // id: 249,
+        profile_completed_on: {
+          [Op.ne]: null,
+        },
+        status: 'member',
+        deleted_at: null,
+        country_id: 226,
+        created_at: {
+          [Op.lt]: '2023-10-01'
+        }
       },
+      limit: 10
     });
-    // res.json({ data: members });
+
     for (const member of members) {
-      await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
+      // await MemberAuthController.prototype.updateMemberEligibility(member.id, member.profile_completed_on);
+      this.setMemberEligibility(member.id, member.profile_completed_on);
     }
     res.json({ data: members });
   }
@@ -1048,12 +1054,12 @@ class MemberAuthController {
           where: { member_id: member_id },
           force: true,
         });
-        if(profile_completed_on !== null){
+        //if(profile_completed_on !== null){
           await MemberEligibilities.bulkCreate(member_eligibility);
           if (toluna_questions.length) {
             MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
           }
-        }
+        //}
       }
       return;
     } catch (error) {
@@ -1683,7 +1689,7 @@ class MemberAuthController {
   /**
    * Temp function
    */
-  async updateMemberEligibility(member_id, profile_completed_on) {
+  /*async updateMemberEligibility(member_id, profile_completed_on) {
     try {
       let member_details = await Member.findOne({
         where: { id: member_id },
@@ -1880,6 +1886,6 @@ class MemberAuthController {
       console.error(error);
       // res.redirect('back');
     }
-  }
+  }*/
 }
 module.exports = MemberAuthController;
