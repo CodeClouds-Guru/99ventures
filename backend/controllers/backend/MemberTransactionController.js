@@ -76,7 +76,6 @@ class MemberTransactionController extends Controller {
     let transaction_list = [];
     // console.log(docs);
     docs.forEach(function (record, key) {
-      console.log('record.dataValues.status===', record.dataValues.status);
       if (
         record.dataValues.Member != null &&
         record.dataValues.Member.dataValues.avatar != ''
@@ -88,23 +87,25 @@ class MemberTransactionController extends Controller {
       if (record.dataValues.transaction_id === null) {
         record.dataValues.transaction_id = 'N/A';
       }
-
+      record.dataValues.new_status = '';
       //status manipulation
-      // if (record.dataValues.amount_action === 'member_withdrawal') {
-      //   var status_arr = [3, 4];
-      //   if (record.dataValues.status == 3 || record.dataValues.status == 4) {
-      //     record.dataValues.status = 'pending';
-      //   }
-      //   if (
-      //     record.dataValues.parent_transaction_id &&
-      //     record.dataValues.status == 2
-      //   ) {
-      //     record.dataValues.status = record.dataValues.ParentTransaction.status;
-      //   }
-      //   if (record.dataValues.status == 1) {
-      //     record.dataValues.status = record.dataValues.WithdrawalRequest.status;
-      //   }
-      // }
+      if (record.dataValues.amount_action === 'member_withdrawal') {
+        var status_arr = [3, 4];
+        if (record.dataValues.status == 3 || record.dataValues.status == 4) {
+          record.dataValues.new_status = 'pending';
+        }
+        if (
+          record.dataValues.parent_transaction_id &&
+          record.dataValues.status == 2
+        ) {
+          record.dataValues.new_status =
+            record.dataValues.ParentTransaction.status;
+        }
+        if (record.dataValues.status == 1) {
+          record.dataValues.new_status =
+            record.dataValues.WithdrawalRequest.status;
+        }
+      }
       if (
         record.dataValues.WithdrawalRequest !== null &&
         record.dataValues.WithdrawalRequest.PaymentMethod !== null &&
@@ -131,7 +132,7 @@ class MemberTransactionController extends Controller {
         // record.dataValues.username =
         //   record.dataValues.ParentTransaction.Member.username || 'N/A';
       }
-      console.log('record.dataValues.status', record.dataValues.status);
+
       switch (record.dataValues.status) {
         case 1:
           record.dataValues.status = 'processing';
@@ -150,6 +151,32 @@ class MemberTransactionController extends Controller {
           break;
         default:
           record.dataValues.status = 'initiated';
+          break;
+      }
+      switch (record.dataValues.new_status) {
+        case 1:
+          record.dataValues.new_status = 'processing';
+          break;
+        case 2:
+          record.dataValues.new_status = 'completed';
+          break;
+        case 3:
+          record.dataValues.new_status = 'failed';
+          break;
+        case 4:
+          record.dataValues.new_status = 'declined';
+          break;
+        case 5:
+          record.dataValues.new_status = 'reverted';
+          break;
+        case 'pending':
+          record.dataValues.new_status = 'pending';
+          break;
+        case 'approved':
+          record.dataValues.new_status = 'completed';
+          break;
+        default:
+          record.dataValues.new_status = record.dataValues.status;
           break;
       }
 
@@ -201,6 +228,7 @@ class MemberTransactionController extends Controller {
             transaction_amount: transaction.amount,
             member_id: member_id,
             transaction_id: transaction_id,
+            created_by: req.user.id,
           });
 
           //Email for member
@@ -239,6 +267,7 @@ class MemberTransactionController extends Controller {
               transaction_amount: referral_transactions.amount,
               member_id: referral_transactions.member_id,
               transaction_id: referral_transactions.id,
+              created_by: req.user.id,
             });
 
             //Email for referral member
@@ -274,7 +303,7 @@ class MemberTransactionController extends Controller {
       parseFloat(data.transaction_amount);
 
     await this.model.update(
-      { status: 5 },
+      { status: 5, updated_by: data.created_by },
       {
         where: {
           id: data.transaction_id, //1
@@ -291,6 +320,7 @@ class MemberTransactionController extends Controller {
       status: 5,
       modified_total_earnings: updated_balance,
       parent_transaction_id: data.transaction_id,
+      created_by: data.created_by,
     });
 
     // await this.model.updateMemberBalance({
