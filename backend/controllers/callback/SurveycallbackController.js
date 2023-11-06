@@ -756,6 +756,7 @@ class SurveycallbackController {
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
     // res.send(req.query);
+    // console.log(req);
     let resp = {};
     try {
       var username = '';
@@ -767,7 +768,12 @@ class SurveycallbackController {
       } else {
         return res.send('Provider not found!');
       }
-      resp = await this.reverseSurveyTransaction(survey_number, username);
+      // console.log(survey_number, username, provider);
+      resp = await this.reverseSurveyTransaction(
+        survey_number,
+        username,
+        provider
+      );
     } catch (e) {
       console.log(e);
     } finally {
@@ -783,7 +789,7 @@ class SurveycallbackController {
   /**
    * Api for Reversal Survey Transaction store
    */
-  async reverseSurveyTransaction(survey_number, member_username) {
+  async reverseSurveyTransaction(survey_number, member_username, provider) {
     try {
       let member = await Member.findOne({
         where: { username: member_username, status: 'member' },
@@ -797,8 +803,11 @@ class SurveycallbackController {
       if (member) {
         let transaction = await MemberSurvey.findOne({
           where: { survey_number: survey_number },
+          attributes: ['member_transaction_id'],
+          // logging: console.log,
           include: {
             model: MemberTransaction,
+            attributes: ['amount'],
             where: {
               member_id: member.id,
               status: { [Op.ne]: 5 },
@@ -813,7 +822,11 @@ class SurveycallbackController {
             transaction_amount: transaction.MemberTransaction.amount,
             member_id: member.id,
             transaction_id: transaction.member_transaction_id,
-            note: 'Survey reversed #' + survey_number,
+            note:
+              'Survey reversed ' +
+              provider.toUpperCase() +
+              ' #' +
+              survey_number,
           });
 
           //referral transaction
