@@ -24,7 +24,7 @@ router.get('/sitemap.xml', async (req, res) => {
     const smStream = await SiteMapController.generate(
       process.env.DEV_MODE === '1'
         ? 'https://moresurveys.com'
-        : `${req.protocol}://${req.hostname}`
+        : `https://${req.hostname}`
     );
     const pipeline = smStream.pipe(createGzip());
     streamToPromise(pipeline).then((sm) => (sitemap = sm));
