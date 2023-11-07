@@ -491,7 +491,8 @@ function List(props) {
 			}
 			if (field.field_name === 'Member.username') {
 				return (
-					<>
+					<>							
+						<a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
 						{
 							n.reverse_count && (
 								<Tooltip title={n.reverse_count} placement="top">
@@ -500,8 +501,7 @@ function List(props) {
 									</IconButton>
 								</Tooltip>
 							)
-						}						
-						<a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
+						}
 					</>
 				)
 			}
