@@ -91,10 +91,13 @@ class WithdrawalRequestController extends Controller {
       let member_ids = results.rows.map((item) => item.member_id);
       let query =
         'SELECT distinct member_id, created_at from member_transactions where member_id in ? and amount_action = "reversed_transaction" and status = 5 order by created_at desc limit 0,1';
-      let reversal_transactions = await db.sequelize.query(query, {
-        replacements: [[member_ids]],
-        type: QueryTypes.SELECT,
-      });
+      let reversal_transactions =
+        member_ids.length > 0
+          ? await db.sequelize.query(query, {
+              replacements: [[member_ids]],
+              type: QueryTypes.SELECT,
+            })
+          : null;
       console.log(reversal_transactions);
       results.rows.map((row, key) => {
         let [payment_method_name, username, status, admin_status] = [
