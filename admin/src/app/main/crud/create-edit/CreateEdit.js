@@ -125,7 +125,8 @@ function CreateEdit(props) {
             <div className={` ${module_arr.includes(module) ? 'w-full' : 'max-w-3xl p-16 sm:p-24'}`} >
               {errors && <Alert severity="error">{errors}</Alert>}
               {/* <CreateEditForm moduleOnSave={moduleOnSaveHandler} /> */}
-              {(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
+              {
+                //(module === 'tickets' && moduleId !== 'create') ? <TicketingSystemPage ticketId={moduleId} /> :
                 // module === 'components' ? <ComponentsCreateUpdate /> :
                 module === 'layouts' ? <LayoutsCreateUpdate /> :
                   module === 'pages' ? <PagesCreateUpdate /> :
