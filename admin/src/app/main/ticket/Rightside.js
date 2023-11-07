@@ -103,7 +103,7 @@ const Rightside = (props) => {
     }, [props]);
 
     return (
-        <div className="flex flex-col px-7">
+        <div className="flex flex-col px-10">
             <div className="flex flex-row my-0 md:my-10 justify-between w-full">
                 <Typography component={'p'} className="font-bold">
                     Member details

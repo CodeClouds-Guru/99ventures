@@ -56,7 +56,7 @@ function TicketDetails() {
                         updateTicket({
                             value: 1,
                             field_name: 'is_read',
-                            id: props.ticketId,
+                            id: ticketId,
                             type: 'is_read'
                         });
                     }
