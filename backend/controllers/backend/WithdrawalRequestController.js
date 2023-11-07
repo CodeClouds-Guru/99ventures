@@ -136,9 +136,10 @@ class WithdrawalRequestController extends Controller {
             )
           : null;
         console.log('obj', obj);
-        let warning_text = obj
-          ? 'This user received a reversed transaction. Please be carefull before approving the request!'
-          : null;
+        let warning_text =
+          obj && row.status == 'pending'
+            ? 'This user received a reversed transaction. Please be carefull before approving the request!'
+            : null;
         // console.log('reversal_transaction', reversal_transaction);
         row.setDataValue('reverse_count', warning_text);
         results.rows[key]['reverse_count'] = warning_text;
