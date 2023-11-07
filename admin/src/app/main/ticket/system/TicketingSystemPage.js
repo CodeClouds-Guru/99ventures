@@ -22,6 +22,7 @@ import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
 import parse from 'html-react-parser';
 import { EditorState, convertFromHTML, ContentState } from 'draft-js';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import AnchorLink from '@mui/material/Link';
 
 function TicketingSystemPage(props) {
     const dispatch = useDispatch();
@@ -341,20 +342,20 @@ function TicketingSystemPage(props) {
                                     </FormControl>
                                 </div>
                             </div>
-                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '30rem', }} id="main_chat">
+                            <div className="flex-row w-full px-10" style={{ minHeight: '13.7rem', overflowY: 'scroll', overflowX: 'hidden', height: '33rem', }} id="main_chat">
                                 {ticketConversations.map((val, key) => {
                                     return (
                                         <div key={key} className="w-full flex" style={val.user_id ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }}>
-                                            <div className="w-full flex flex-col justify-around py-10 pl-10 pr-28 mt-10 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginBottom: '1rem', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
+                                            <div className="w-full flex flex-col justify-around py-5 pl-10 pr-28 mb-5 xmt-5 rounded-8 relative" style={val.user_id ? { background: '#111827', color: '#FFFFFF', float: 'right', marginLeft: '1rem' } : { background: '#dcdcdc', marginRight: '1rem' }}>
                                                 <div className="flex flex-row justify-between pb-8">
                                                     {
                                                         Object.keys(val).length > 0 && (
                                                             val.Member ? (
                                                                 <Link target="_blank" to={`/app/members/${val.Member.id}`}>
-                                                                    <Typography className="font-bold italic" component="p" variant="caption">{val.Member.username}</Typography>
+                                                                    <Typography sx={{fontSize: '0.9rem'}} className="font-bold italic" component="p" variant="caption">{val.Member.username}</Typography>
                                                                 </Link>
                                                             ) : (
-                                                                <Typography sx={{color: '#4f46e5', textDecoration: 'underline'}} component="p" className="font-bold italic" variant="caption">${val.User.alias_name} - More Surveys Support Team</Typography>
+                                                                <Typography sx={{color: '#4f46e5', textDecoration: 'underline', fontSize: '0.9rem'}} component="p" className="font-bold italic" variant="caption">${val.User.alias_name} - More Surveys Support Team</Typography>
                                                             )
                                                         )
                                                     }
@@ -612,14 +613,14 @@ function TicketingSystemPage(props) {
                                 <div style={{ overflowY: 'scroll', overflowX: 'hidden', height: '34rem' }} className="px-4">
                                     {previousTickets.map((val, key) => {
                                         return (
-                                            <div key={key} className="w-auto flex flex-col justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} onClick={() => { navigate(`/app/tickets/${val.id}`); }}>
-                                                <div className="flex flex-row justify-end" style={{ fontSize: '10px' }}>
-                                                    {Helper.parseTimeStamp(val.created_at)}
+                                            <div key={key} className="w-auto flex flex-row justify-between md:flex-col lg:flex-row lg:justify-between md:justify-start p-5 px-10 pb-8 mt-10 rounded-8" style={{ background: '#dcdcdc', cursor: 'pointer' }} >                                                
+                                                <div className='sm:w-full lg:w-4/5 md:text-sm lg:text-base'>
+                                                    <AnchorLink href={`/app/tickets/${val.id}`} target="_blank">
+                                                        <p>{val.subject}</p>
+                                                    </AnchorLink>
                                                 </div>
-                                                <div>
-                                                    <p>
-                                                        {val.subject}
-                                                    </p>
+                                                <div className="sm:w-full lg:w-1/5 text-xs sm:text-right lg:text-left">
+                                                    {Helper.parseTimeStamp(val.created_at)}
                                                 </div>
                                             </div>
                                         )

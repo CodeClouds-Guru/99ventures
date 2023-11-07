@@ -1,6 +1,7 @@
 import { React, lazy } from 'react';
 import settingsConfig from 'app/configs/settingsConfig';
 import Configuration from './Configuration';
+import TicketDetails from './TicketDetails';
 
 const ConfigurationConfig = {
   settings: {
@@ -28,6 +29,11 @@ const ConfigurationConfig = {
     {
       path: 'app/tickets',
       element: <Configuration />,
+      auth: settingsConfig.defaultAuth
+    },
+    {
+      path: 'app/tickets/:ticketId',
+      element: <TicketDetails />,
       auth: settingsConfig.defaultAuth
     },
   ],

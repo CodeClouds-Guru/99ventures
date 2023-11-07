@@ -16,7 +16,7 @@ const Root = styled('div')({
   },
   '& .rdw-editor-main': {
     padding: '8px 12px',
-    height: `${256}px!important`,
+    height: '230px!important',
   },
 });
 
@@ -41,7 +41,19 @@ const WYSIWYGEditor = forwardRef((props, ref) => {
 
   return (
     <Root className={clsx('rounded-4 border-1 overflow-hidden w-full', props.className)}>
-      <Editor ref={ref} {...mutatedProps} editorState={editorState} onEditorStateChange={onEditorStateChange} />
+      <Editor 
+        ref={ref} 
+        {...mutatedProps} 
+        editorState={editorState} 
+        onEditorStateChange={onEditorStateChange} 
+        toolbarCustomButtons={ (props.toolbarCustomButtons && props.toolbarCustomButtons.length) ? props.toolbarCustomButtons : [] } 
+        toolbar={{
+          options: ['emoji', 'inline', 'blockType', 'fontSize', 'fontFamily', 'list', 'textAlign', 'colorPicker', 'link', 'embedded', 'remove', 'history'],
+          inline: {
+            options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace'],
+          }
+        }}
+      />
     </Root>
   );
 });

@@ -53,7 +53,8 @@ export const { setNavigation, resetNavigation } = navigationSlice.actions;
 
 const getUserRole = (state) => state.user.role;
 const getUserPermissions = (state) => state.user.permissions;
-const unreadTicketCount = (state) => state.user.unread_tickets;
+// const unreadTicketCount = (state) => state.user.unread_tickets;
+const unreadTicketCount = (state) => state.tickets.total_unread_ticket;
 const pendingWithdrawalRequestsCount = (state) => state.user.pending_withrawal_request;
 
 export const selectNavigation = createSelector(
