@@ -6,8 +6,11 @@ import { setInitialSettings } from 'app/store/fuse/settingsSlice';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import settingsConfig from 'app/configs/settingsConfig';
 import jwtService from '../auth/services/jwtService';
+import { updateUnreadTicketCount } from './tickets'
+
 
 export const setUser = createAsyncThunk('user/setUser', async (user, { dispatch, getState }) => {
+  dispatch(updateUnreadTicketCount(user.unread_tickets))
   /*
     You can redirect the logged-in user to a specific route depending on his role
     */

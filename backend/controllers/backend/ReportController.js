@@ -65,8 +65,8 @@ class ReportController {
     } catch (error) {
       console.error(error);
     }
-    if(report.names && report.values && report.names.length != report.values.length){
-      
+    if (report.names && report.values && report.names.length != report.values.length) {
+
     }
     res.json(report)
   }
@@ -78,7 +78,7 @@ class ReportController {
     //no of verified members
     let verified_member = await Member.count({ where: { admin_status: 'verified', company_portal_id: company_portal_id } })
     //total withdrawal amount 
-    let query ="SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status='approved'"
+    let query = "SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status in ('approved', 'completed')"
 
     let total_withdrawn = await db.sequelize.query(query,
       {
@@ -94,7 +94,7 @@ class ReportController {
         no_of_members: member_list,
         no_of_verified_members: verified_member,
         total_withdrawn: total_withdrawn ? parseFloat(total_withdrawn).toFixed(2) : 0,
-        completed_surveys:completed_surveys
+        completed_surveys: completed_surveys
       }
     }
   }
@@ -255,7 +255,7 @@ class ReportController {
     let names = []
     if (top_surveys.length) {
       for (let i of top_surveys) {
-        names.push('#'+i.survey_number + " (" + i.provider_name + ")")
+        names.push('#' + i.survey_number + " (" + i.provider_name + ")")
       }
     }
     return {
@@ -314,13 +314,13 @@ class ReportController {
     } else if (query_string === 'WEEK') {
       // let start_week = moment(start_date).week();
       //find the year of the current date  
-      var oneJan =  new Date(start_date.getFullYear(), 0, 1);   
-    
+      var oneJan = new Date(start_date.getFullYear(), 0, 1);
+
       // calculating number of days in given year before a given date   
-      var numberOfDays =  Math.floor((start_date - oneJan) / (24 * 60 * 60 * 1000));   
-   
+      var numberOfDays = Math.floor((start_date - oneJan) / (24 * 60 * 60 * 1000));
+
       // adding 1 since to current date and returns value starting from 0   
-      var start_week = Math.ceil(( start_date.getDay() + 1 + numberOfDays) / 7);  
+      var start_week = Math.ceil((start_date.getDay() + 1 + numberOfDays) / 7);
       arr_index = i.day - start_week
     }
     else if (query_string === 'YEAR') {
@@ -340,7 +340,7 @@ class ReportController {
     var end_date_format = moment(end_date).format('YYYY-MM-DD')
     if (query_string === "DATE") {
       while (dt <= new Date(end_date_format)) {
-        
+
         let date = dt.getDate()
         switch (date % 10) {
           case 1: date = date + "st " + monthNames[dt.getMonth()] + "," + ('' + dt.getFullYear()).substr(2); break;
@@ -351,9 +351,9 @@ class ReportController {
         names.push(date)
         values.push(0)
         dt.setDate(dt.getDate() + 1);
-        let dt_m = dt.getDate()+' '+dt.getMonth()
-        let end_dt_m = end_date.getDate()+' '+end_date.getMonth()
-        if(dt_m === end_dt_m){
+        let dt_m = dt.getDate() + ' ' + dt.getMonth()
+        let end_dt_m = end_date.getDate() + ' ' + end_date.getMonth()
+        if (dt_m === end_dt_m) {
           // dt = end_date
         }
       }

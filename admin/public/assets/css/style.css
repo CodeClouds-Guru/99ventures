@@ -64,6 +64,29 @@ textarea.custom-code-editor-fullscreen::-webkit-scrollbar-thumb{background: #fff
 .ticket-list .MuiBox-root.muiltr-79elbk{top: 117px}
 .member-txn-list .MuiBox-root.muiltr-79elbk{z-index: 9999;}
 .conversation--btn button:hover{background-color: #ff000038 !important;}
+.ticket-leftside{width: 68%;}
+.ticket-rightside{width: 31%;}
+.ticket-status-dropdown .muiltr-f4jugh-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root{
+    min-height: 30px
+}
+.ticket-status-dropdown .muiltr-1kd9u3t-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
+    padding: 6.5px 14px;
+    font-size: 12px;
+}
+.ticket-conversation .muiltr-1d3z3hw-MuiOutlinedInput-notchedOutline{border-color: #F1F1F1;}
+.ticket-conversation .muiltr-y3ahi9-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input{padding: 3px 2px}
+.ticket-conversation .muiltr-1i4cxnc-MuiAutocomplete-root .MuiOutlinedInput-root{padding: 6px;}
+.ticket-conversation .muiltr-1i4cxnc-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input {
+    padding: 4.5px 4px 4.5px 6px;
+}
+@media screen and (max-width: 950px) {
+    .ticket-leftside{width: 100%;}
+    .ticket-rightside{width: 100%;}
+} 
 @media screen and (max-width: 768px) {
     .member-txn-list.date-range-wrapper > div{ top: 96px; right: 12px; left: 9px !important;}
 } 
+@media screen and (max-width: 575px) {
+    .ticket-leftside{width: 100%;}
+    .ticket-rightside{width: 100%;}
+}

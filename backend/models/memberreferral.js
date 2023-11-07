@@ -184,7 +184,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'amount',
       type: 'text',
       placeholder: 'Cash',
-      listing: true,
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,

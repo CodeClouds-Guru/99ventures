@@ -490,7 +490,20 @@ function List(props) {
 					return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
 			}
 			if (field.field_name === 'Member.username') {
-				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
+				return (
+					<>							
+						<a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
+						{
+							n.reverse_count && (
+								<Tooltip title={n.reverse_count} placement="top">
+									<IconButton color="primary" aria-label="Filter" component="span" >
+										<FuseSvgIcon className="text-48" size={18} color="action">material-outline:info</FuseSvgIcon>
+									</IconButton>
+								</Tooltip>
+							)
+						}
+					</>
+				)
 			}
 			return processFieldValue(n[field.field_name], field)
 		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
