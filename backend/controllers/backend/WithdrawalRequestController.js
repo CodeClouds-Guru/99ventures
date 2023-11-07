@@ -91,10 +91,13 @@ class WithdrawalRequestController extends Controller {
       let member_ids = results.rows.map((item) => item.member_id);
       let query =
         'SELECT distinct member_id, created_at from member_transactions where member_id in ? and amount_action = "reversed_transaction" and status = 5 order by created_at desc limit 0,1';
-      let reversal_transactions = await db.sequelize.query(query, {
-        replacements: [[member_ids]],
-        type: QueryTypes.SELECT,
-      });
+      let reversal_transactions =
+        member_ids.length > 0
+          ? await db.sequelize.query(query, {
+              replacements: [[member_ids]],
+              type: QueryTypes.SELECT,
+            })
+          : null;
       console.log(reversal_transactions);
       results.rows.map((row, key) => {
         let [payment_method_name, username, status, admin_status] = [
@@ -133,9 +136,10 @@ class WithdrawalRequestController extends Controller {
             )
           : null;
         console.log('obj', obj);
-        let warning_text = obj
-          ? 'This user received a reversed transaction. Please be carefull before approving the request!'
-          : null;
+        let warning_text =
+          obj && row.status == 'pending'
+            ? 'This user received a reversed transaction. Please be carefull before approving the request!'
+            : null;
         // console.log('reversal_transaction', reversal_transaction);
         row.setDataValue('reverse_count', warning_text);
         results.rows[key]['reverse_count'] = warning_text;
