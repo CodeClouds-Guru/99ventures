@@ -389,7 +389,16 @@ function Listing(props) {
             else if (status === 'not_verified')
                 return <Chip component="span" label={processFieldValue(n[field.field_name], field).split('_').join(' ')} className="capitalize" color="error" size="small" />
         } else if (field.field_name === 'username') {
-            return <AnchorLink href={`/app/members/${processFieldValue(n['id'], field)}`}>{processFieldValue(n[field.field_name], field)}</AnchorLink>
+            return (
+                <>
+                    <AnchorLink href={`/app/members/${processFieldValue(n['id'], field)}`}>{processFieldValue(n[field.field_name], field)}</AnchorLink>
+                    <Tooltip title="Open in new window" placement="top-start" >
+                        <IconButton color="primary" aria-label="External Link" component="span" onClick={()=>{window.open(`/app/${module}/${n['id']}`, '_blank')}}>
+                            <FuseSvgIcon className="text-48" size={14} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                        </IconButton>
+                    </Tooltip>
+                </>
+            )
         } else {
             return status
         }
@@ -673,7 +682,7 @@ function Listing(props) {
                                                 tabIndex={-1}
                                                 key={n.id}
                                                 selected={isSelected}
-                                                onClick={(event) => handleClick(n)}
+                                                
                                             >
                                                 <TableCell className="w-40 md:w-64 text-center" padding="none">
                                                     {
@@ -695,7 +704,11 @@ function Listing(props) {
                                                 {Object.values(fields)
                                                     .filter(field => field.listing === true)
                                                     .map((field, i) => {
-                                                        return <TableCell key={i} className="p-2 md:p-16 text-md" component="th" scope="row">{customizedRowValue(n, field)}</TableCell>
+                                                        return (
+                                                            field.db_name === 'username' ?
+                                                            <TableCell key={i} className="p-2 md:p-16 text-md" component="th" scope="row">{customizedRowValue(n, field)}</TableCell> :
+                                                            <TableCell key={i} className="p-2 md:p-16 text-md" component="th" scope="row" onClick={(event) => handleClick(n)}>{customizedRowValue(n, field)}</TableCell>
+                                                        )
                                                     })
                                                 }
                                             </TableRow>
