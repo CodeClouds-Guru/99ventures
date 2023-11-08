@@ -17,6 +17,7 @@ const {
   CompanyPortal,
   WithdrawalRequest,
   Member,
+  Widget,
 } = require('../../models/index');
 const { QueryTypes, Op } = require('sequelize');
 const db = require('../../models/index');
@@ -126,6 +127,13 @@ class AuthController {
           id: new_user.id,
         },
       });
+
+      /* Store Widget choices */
+      let all_widgets = await Widget.findAll({ where: { status: 'active' } });
+      if (all_widgets.length > 0)
+        await Widget.createUserWidgetOptions(new_user.id, all_widgets);
+      /* Store Widget choices */
+
       res.status(200).json({
         status: true,
         user: new_user,
@@ -146,7 +154,7 @@ class AuthController {
         .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required()
         .messages({
-          "string.pattern.base": `Not a valid Password`,
+          'string.pattern.base': `Not a valid Password`,
         }),
       email: Joi.string().email().required(),
     });
@@ -243,7 +251,26 @@ class AuthController {
 
     const userResourcesObj = new UserResources(user);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-
+    // add widget user choices
+    let all_widgets = await Widget.findAll({
+      attributes: ['id'],
+      where: { status: 'active' },
+    });
+    console.log(all_widgets);
+    if (all_widgets.length > 0) {
+      let all_users = await User.findAll({
+        attributes: ['id'],
+        where: { status: 1 },
+      });
+      console.log(all_users);
+      all_users.forEach(async function (record, key) {
+        await Widget.createUserWidgetOptions({
+          user_id: record.id,
+          widget_ids: all_widgets,
+        });
+      });
+    }
+    // add widget user choices
     res.status(200).json({
       status: true,
       access_token: token,
@@ -309,8 +336,7 @@ class AuthController {
 
     res.status(200).json({
       status: true,
-      reset_link:
-        req.get('Origin') + '/reset-password?hash=' + base64String,
+      reset_link: req.get('Origin') + '/reset-password?hash=' + base64String,
       message: 'Reset password mail has been sent to your email',
     });
   }
