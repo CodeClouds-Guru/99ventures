@@ -8,12 +8,22 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
-if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
-  router.get('/robots.txt', (req, res) => {
-    res.type('text/plain');
+
+/**
+ * Robots.txt
+ */
+router.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
     res.send('User-agent: *\nDisallow: /');
-  });
-}
+  } else {
+    res.send('User-agent: *\nAllow: /\nSitemap: https://moresurveys.com/sitemap.xml');
+  }
+});
+
+/**
+ * Sitemap
+ */
 router.get('/sitemap.xml', async (req, res) => {
   const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
   const SiteMapController = new SiteMapControllerClass();
