@@ -93,9 +93,10 @@ class ScriptParser {
               if (script.module == 'MemberTransaction') {
                 data.forEach(function (transaction, key) {
                   if (
-                    ['withdrawal', 'Withdrawal', 'survey', 'Survey'].includes(
+                    ['withdrawal', 'Withdrawal'].includes(
                       transaction.amount_action
-                    )
+                    ) ||
+                    transaction.status == 5
                   ) {
                     var status_arr = [3, 4];
                     if (transaction.status == 3 || transaction.status == 4) {
@@ -134,7 +135,7 @@ class ScriptParser {
 
                     if (
                       transaction.status == 5 &&
-                      transaction.type == 'credited'
+                      transaction.type === 'credited'
                     ) {
                       console.log('transaction_status_display reversal', 2);
                       data[key].setDataValue(transaction.status, 2);
@@ -371,7 +372,7 @@ class ScriptParser {
         }
       }
     }
-    // console.log(JSON.parse(JSON.stringify(data)));
+    console.log(JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
