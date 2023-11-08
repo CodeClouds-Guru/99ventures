@@ -913,7 +913,7 @@ function List(props) {
 												</div>
 											) : (<div></div>)
 										}
-										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3 w-full sm:w-auto">
+										<FormControl variant="outlined" className="xl:w-4/12 lg:w-4/12 md:w-3/6 p-3 w-full sm:w-auto mb-5 sm:mb-0">
 											<OutlinedInput
 												id="outlined-adornment-datepicker"
 												type="text"
@@ -953,7 +953,7 @@ function List(props) {
 											/>
 										</FormControl>
 										{(module === 'member-transactions' && location.pathname.includes('history')) &&
-											<FormControl sx={{ minWidth: 150 }} size="small" className="w-full sm:w-auto p-3">
+											<FormControl sx={{ minWidth: 150 }} size="small" className="w-full sm:w-auto p-3 mb-5 sm:mb-0">
 												<InputLabel id="demo-simple-select-label">Type</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"
@@ -980,7 +980,7 @@ function List(props) {
 												</Select>
 											</FormControl>}
 										{module === 'withdrawal-requests' &&
-											<FormControl sx={{ minWidth: 120 }} size="small" className="p-3 sm:w-auto w-full">
+											<FormControl sx={{ minWidth: 120 }} size="small" className="p-3 sm:w-auto w-full mb-5 sm:mb-0">
 												<InputLabel id="demo-simple-select-label">Status</InputLabel>
 												<Select
 													labelId="demo-simple-select-label"

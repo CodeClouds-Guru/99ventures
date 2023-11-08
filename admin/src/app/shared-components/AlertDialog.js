@@ -7,12 +7,15 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 export default function AlertDialog(props) {
+    const [disabledBtn, setDisabledBtn] = useState(false);
     let open = props.open;
     const handleClose = () => {
         props.onClose();
+        setDisabledBtn(false);
     };
     const handleConfirmation = () => {
         props.onConfirm();
+        setDisabledBtn(true);
     }
 
     return (
@@ -33,7 +36,7 @@ export default function AlertDialog(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Disagree</Button>
-                    <Button onClick={handleConfirmation} autoFocus>
+                    <Button onClick={handleConfirmation} autoFocus disabled={disabledBtn}>
                         Agree
                     </Button>
                 </DialogActions>

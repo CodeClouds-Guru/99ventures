@@ -8,6 +8,28 @@ function CompletedSurveyChart(props) {
             labels: [],
             legend: {
                 position: 'bottom'
+            },
+            plotOptions:{
+                pie:{
+                    donut: {
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '16px',
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '16px',
+                            },
+                            total: {
+                                show: true,
+                                showAlways: true,
+                                fontSize: '16px',
+                            }
+                        }
+                    }
+                }
             }
         },
         series: []
@@ -16,7 +38,7 @@ function CompletedSurveyChart(props) {
         setState({
             options: {
                 ...state.options,
-                labels: (props.completedSurveys).hasOwnProperty('survey_names') ? props.completedSurveys.survey_names : [],
+                labels: (props.completedSurveys).hasOwnProperty('survey_names') ? props.completedSurveys.survey_names : []
             },
             series: (props.completedSurveys).hasOwnProperty('survey_count') ? props.completedSurveys.survey_count : []
         })

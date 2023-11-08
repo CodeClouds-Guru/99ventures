@@ -74,7 +74,7 @@ class ReportController {
     //get total active surveys
     let survey_list = await Survey.count({ where: { status: 'active' } })
     //no of active members
-    let member_list = await Member.count({ where: { company_portal_id: company_portal_id } })
+    let member_list = await Member.count({ where: { company_portal_id: company_portal_id }, paranoid: false })
     //no of verified members
     let verified_member = await Member.count({ where: { admin_status: 'verified', company_portal_id: company_portal_id } })
     //total withdrawal amount 

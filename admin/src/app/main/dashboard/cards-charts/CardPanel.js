@@ -36,12 +36,12 @@ const CardPanel = (props) => {
                     <Typography variant="subtitle1" component="p">Members</Typography>
                 </CardContent>
             </Card>
-            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#E8F5E9', color: '#2E7D32' }} onClick={() => navigate('/app/members')}>
+            {/* <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#E8F5E9', color: '#2E7D32' }} onClick={() => navigate('/app/members')}>
                 <CardContent>
                     <Typography variant="h4" component="p">{props.verifiedUsers}</Typography>
                     <Typography variant="subtitle1" component="p">Verified Members</Typography>
                 </CardContent>
-            </Card>
+            </Card> */}
             <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#edb2ff', color: '#77298e' }} onClick={() => navigate('/app/survey-providers?completed-surveys=1')}>
                 <CardContent>
                     <Typography variant="h4" component="p">{props.completedSurveys}</Typography>
