@@ -89,7 +89,11 @@ class MemberTransactionController extends Controller {
       }
       record.dataValues.new_status = '';
       //status manipulation
-      if (record.dataValues.amount_action === 'member_withdrawal') {
+
+      if (
+        record.dataValues.amount_action === 'member_withdrawal' ||
+        record.dataValues.status == 5
+      ) {
         var status_arr = [3, 4];
         if (record.dataValues.status == 3 || record.dataValues.status == 4) {
           record.dataValues.new_status = 'pending';
@@ -104,6 +108,12 @@ class MemberTransactionController extends Controller {
         if (record.dataValues.status == 1) {
           record.dataValues.new_status =
             record.dataValues.WithdrawalRequest.status;
+        }
+        if (
+          record.dataValues.status == 5 &&
+          record.dataValues.type === 'credited'
+        ) {
+          record.dataValues.new_status = 2;
         }
       }
       if (
@@ -153,6 +163,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'initiated';
           break;
       }
+      console.log('record.dataValues.new_status', record.dataValues.new_status);
       switch (record.dataValues.new_status) {
         case 1:
           record.dataValues.new_status = 'processing';
@@ -179,7 +190,10 @@ class MemberTransactionController extends Controller {
           record.dataValues.new_status = record.dataValues.status;
           break;
       }
-
+      console.log(
+        'record.dataValues.new_status formatted',
+        record.dataValues.new_status
+      );
       transaction_list.push(record);
     });
 
