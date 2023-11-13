@@ -8,6 +8,32 @@ function MembersChart(props) {
             labels: [],
             legend: {
                 position: 'bottom'
+            },
+            plotOptions:{
+                pie:{
+                    donut: {
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '16px',
+                                fontWeight: 600,
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '16px',
+                                fontWeight: 600,
+                            },
+                            total: {
+                                show: true,
+                                showAlways: true,
+                                fontSize: '18px',
+                                fontWeight: 600,
+                                color: '#373d3f',
+                            }
+                        }
+                    }
+                }
             }
         },
         series: []
