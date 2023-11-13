@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         otherKey: 'group_id',
       });
+      User.belongsToMany(models.Widget, {
+        through: 'user_widget',
+        foreignKey: 'user_id',
+        otherKey: 'widget_id',
+        timestamps: false,
+      });
     }
   }
   User.validate = function (req) {
