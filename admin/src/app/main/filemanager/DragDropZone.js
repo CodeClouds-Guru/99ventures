@@ -52,6 +52,18 @@ const centerStyle = {
     justifyContent: 'center'
 }
 
+function nameLengthValidator(file) {
+	if (file.name.length > 2) {
+	  return {
+		code: "name-too-large",
+		message: `Name is larger than 2 characters`
+	  };
+	}
+  
+	return null
+  }
+  
+
 function DragDropzone(props) {
 	const dispatch = useDispatch();
     const listing = props.listing;
@@ -77,6 +89,16 @@ function DragDropzone(props) {
 		maxSize: selectConfig.max_file_size ? selectConfig.max_file_size * Math.pow(1024, 2) : 1024,	// Bytes convert
 		maxFiles: selectConfig.max_no_of_uploads ?? 0,
 		accept: selectConfig.accept ?? {},
+		validator: (file) =>{
+			const checkFile = listing.some(row => row.name === file.name);
+			if (checkFile) {
+				return {
+					code: "file-already-exists",
+					message: file.name + ' already exists!'
+				};
+			}
+			return null;
+		},
 		onDrop: acceptedFiles => {
 			// console.log(acceptedFiles)
 			setFiles(acceptedFiles.map(file => Object.assign(file, {
@@ -107,19 +129,26 @@ function DragDropzone(props) {
 		},
 		onDropRejected: (files) => {
 			const msgs = [];
-			files.every(el => {				
-				if(el.errors[0]['code'] === 'file-too-large'){
-					msgs.push(`${el.file.name} is too large! Maximum file size is ${selectConfig.max_file_size ? selectConfig.max_file_size : 1} MB!`);
+			const warning = [];
+			for(let i=0; i<files.length; i++) {
+				if(files[i].errors[0]['code'] === 'file-too-large'){
+					msgs.push(`${files[i].file.name} is too large! Maximum file size is ${selectConfig.max_file_size ? selectConfig.max_file_size : 1} MB!`);
 				}
-				if(el.errors[0]['code'] === 'file-invalid-type'){
-					msgs.push(`${el.file.name} is not supported!`);
+				if(files[i].errors[0]['code'] === 'file-invalid-type'){
+					msgs.push(`${files[i].file.name} is not supported!`);
 				}
-				if(el.errors[0]['code'] === 'too-many-files'){
-					msgs.push(`${el.errors[0]['message']}. Maximum ${selectConfig.max_no_of_uploads} files can be uploaded at a time!`);
-					return false;
+				if(files[i].errors[0]['code'] === 'too-many-files'){
+					msgs.push(`${files[i].errors[0]['message']}. Maximum ${selectConfig.max_no_of_uploads} files can be uploaded at a time!`);
+					break
 				}
-			});
-			dispatch(showMessage({ variant: 'error', message: msgs.join('. ') }));
+				if(files[i].errors[0]['code'] === 'file-already-exists'){
+					warning.push(files[i].errors[0]['message']);
+				}
+			}
+			if(msgs.length !=0)
+				dispatch(showMessage({ variant: 'error', message: msgs.join('. ') }));
+			else 
+				dispatch(showMessage({ variant: 'warning', message: warning.join('. ') }));
 		}
 	});
 
