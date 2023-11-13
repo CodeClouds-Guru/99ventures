@@ -252,24 +252,24 @@ class AuthController {
     const userResourcesObj = new UserResources(user);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
     // add widget user choices
-    let all_widgets = await Widget.findAll({
-      attributes: ['id'],
-      where: { status: 'active' },
-    });
-    console.log(all_widgets);
-    if (all_widgets.length > 0) {
-      let all_users = await User.findAll({
-        attributes: ['id'],
-        where: { status: 1 },
-      });
-      console.log(all_users);
-      all_users.forEach(async function (record, key) {
-        await Widget.createUserWidgetOptions({
-          user_id: record.id,
-          widget_ids: all_widgets,
-        });
-      });
-    }
+    // let all_widgets = await Widget.findAll({
+    //   attributes: ['id'],
+    //   where: { status: 'active' },
+    // });
+    // console.log(all_widgets);
+    // if (all_widgets.length > 0) {
+    //   let all_users = await User.findAll({
+    //     attributes: ['id'],
+    //     where: { status: 1 },
+    //   });
+    //   console.log(all_users);
+    //   all_users.forEach(async function (record, key) {
+    //     await Widget.createUserWidgetOptions({
+    //       user_id: record.id,
+    //       widget_ids: all_widgets,
+    //     });
+    //   });
+    // }
     // add widget user choices
     res.status(200).json({
       status: true,
