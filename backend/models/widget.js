@@ -38,10 +38,9 @@ module.exports = (sequelize, DataTypes) => {
 
     let user_id = data.user_id;
     let save_data = data.widget_ids.map((widget_id) => {
-      console.log('data', widget_id.id);
       return {
         user_id: user_id,
-        widget_id: widget_id.id,
+        widget_id: widget_id,
       };
     });
     //delete previous record
@@ -50,7 +49,8 @@ module.exports = (sequelize, DataTypes) => {
     });
     console.log('save_data', save_data);
     //update user widget table
-    await queryInterface.bulkInsert('user_widget', save_data);
+    if (data.widget_ids.length > 0)
+      await queryInterface.bulkInsert('user_widget', save_data);
     return true;
   };
   return Widget;

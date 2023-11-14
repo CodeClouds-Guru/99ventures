@@ -5,6 +5,9 @@
 
 const Joi = require('joi');
 const { User } = require('../../models/index');
+const db = require('../../models/index');
+const { QueryTypes, Op } = require('sequelize');
+
 const {
   Invitation,
   GroupRole,
@@ -19,8 +22,6 @@ const {
   Member,
   Widget,
 } = require('../../models/index');
-const { QueryTypes, Op } = require('sequelize');
-const db = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../../helpers/global');
 const permission = require('../../models/permission');
@@ -37,6 +38,7 @@ class AuthController {
     this.profileUpdate = this.profileUpdate.bind(this);
     this.profile = this.profile.bind(this);
     this.profileDetails = this.profileDetails.bind(this);
+    this.updateWidgetPreference = this.updateWidgetPreference.bind(this);
   }
 
   async signup(req, res) {
@@ -590,6 +592,29 @@ class AuthController {
         status: false,
         errors: 'Unable to get data',
       });
+    }
+  }
+
+  async updateWidgetPreference(req, res) {
+    try {
+      const resp = await Widget.createUserWidgetOptions({
+        user_id: req.user.id,
+        widget_ids: req.body.widget_ids
+      });
+      if (resp) {
+        return res.json({
+          status: true,
+          message: 'Your preference has been saved'
+        })
+      } else {
+        throw new Error("Unable to save data")
+      }
+    } catch (e) {
+      console.error(e)
+      return res.status(500).json({
+        status: false,
+        message: e.message
+      })
     }
   }
 }
