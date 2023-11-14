@@ -58,6 +58,7 @@ const Widgets = (props) => {
             if(res.status === 200){
                 props.updateSelectedWidgets(selectedWidgetIds);
             }
+            handleMenuClose();
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong!' }))
