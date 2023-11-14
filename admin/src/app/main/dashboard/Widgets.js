@@ -1,44 +1,17 @@
-import { Typography, IconButton, Tooltip, ListItemText, Menu, MenuItem, Button } from '@mui/material';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import axios from "axios";
 import Switch from '@mui/material/Switch';
 import { useState, useEffect } from 'react';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Typography, IconButton, Tooltip, ListItemText, Menu, MenuItem, Button } from '@mui/material';
 
-const widgetsArry = [
-    {
-        slug: 'login_analytics',
-        title: 'Login Analytics',
-        checked: true
-    },
-    {
-        slug: 'completed_surveys',
-        title: 'Completed Surveys',
-        checked: false
-    },
-    {
-        slug: 'top_performing_surveys',
-        title: 'Top Performing Surveys',
-        checked: false
-    },
-    {
-        slug: 'members_chart',
-        title: 'Member\'s Chart',
-        checked: false
-    },
-    {
-        slug: 'tickets_chart',
-        title: 'Ticket\'s Chart',
-        checked: false
-    },
-    {
-        slug: 'top_performers',
-        title: 'Top Performers',
-        checked: false
-    }
-];
 
-const Widgets = () => {
+const Widgets = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
-
+    const [widgets, setWidgets] = useState([]);
+    const [selectedWidgets, setSelectedWidgets] = useState([]);
+    const [loading, setLoading] = useState(false);
+    
     const handleMenuClick = (event) => {
         setAnchorEl(event.target);
     }
@@ -46,6 +19,51 @@ const Widgets = () => {
     const handleMenuClose = () => {
         setAnchorEl(null);
     }
+    
+    useEffect(()=>{
+        if(props.all_widgets && props.all_widgets.length){
+            widgetsConfiguration();
+        }
+    }, [props]);
+
+    const widgetsConfiguration = () => {
+        const allWidgets = props.all_widgets.map(row => {
+            return {
+                id: row.id,
+                name: row.name,
+                checked: props.selected_widgets.includes(row.id)
+            }
+        });
+        setWidgets(allWidgets);
+    }
+
+    const updateSwitch = (id) => {
+        const allWidgets = widgets.map(row => {
+            return {
+                ...row,
+                checked: id === row.id ? !row.checked : row.checked
+            }
+        });
+        setWidgets(allWidgets);
+    }
+
+    const updateWidget = () => {
+        const selectedWidgetIds = widgets.filter(row => row.checked === true).map(el=> el.id);
+
+        const payload = {
+            "widget_ids": selectedWidgetIds
+        }
+        axios.post('/update-widget-preference', payload)
+        .then((res) => {
+            if(res.status === 200){
+                props.updateSelectedWidgets(selectedWidgetIds);
+            }
+        }).catch(e => {
+            console.error(e)
+            dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong!' }))
+        });
+    }
+
     return (
         <>
             <Tooltip placement="right" title="Widget Configurations">
@@ -55,7 +73,7 @@ const Widgets = () => {
                     component="label"
                     onClick={handleMenuClick}
                 >
-                    <FuseSvgIcon className="text-48" size={26} color="action">material-outline:settings</FuseSvgIcon>
+                    <FuseSvgIcon className="text-48" size={22} color="action">material-outline:settings</FuseSvgIcon>
                 </IconButton>
             </Tooltip>
             <Menu
@@ -70,26 +88,26 @@ const Widgets = () => {
                 }}
             >
                 {
-                    widgetsArry.map(row => {
+                    widgets.map(row => {
                         return(
-                            <MenuItem className="border ">
+                            <MenuItem key={row.id} className="border ">
                                 <div className='flex items-center justify-between w-full'>
                                     <ListItemText primary={
-                                        <Typography className="text-base" variant="body2">{row.title}</Typography>
+                                        <Typography className="text-base" variant="body2">{row.name}</Typography>
                                     } />
-                                    <Switch aria-label='Switch demo' size="small" checked={row.checked}/>
+                                    <Switch aria-label={row.name} size="small" onChange={()=>updateSwitch(row.id)} checked={row.checked} />
                                 </div>
                             </MenuItem>
                         )
                     })
-                }  
+                }
                 <MenuItem className="flex w-full justify-between mt-10">
                     <Button variant="outlined" color="primary" size="small" onClick={handleMenuClose}>
                         Close
                     </Button>
-                    <Button variant="contained" color="primary" size="small">
+                    <LoadingButton loading={loading} variant="contained" color="primary" size="small" onClick={updateWidget}>
                         Update
-                    </Button>
+                    </LoadingButton>
                 </MenuItem>   
             </Menu>
         </>

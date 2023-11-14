@@ -9,11 +9,11 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import CardPanel from './cards-charts/CardPanel';
 import TicketsChart from './cards-charts/TicketsChart';
-import LoginPerDay from './cards-charts/LoginPerDay';
-import CompletedSurveyChart from './cards-charts/CompletedSurveyChart';
+import LoginPerDay from './cards-charts/LoginAnalytics';
+import CompletedSurveyChart from './cards-charts/CompletedSurveys';
 import MembersChart from './cards-charts/MembersChart';
 import BestPerformingSurveys from './cards-charts/BestPerformingSurveys';
-import BestPerformers from './cards-charts/BestPerformers';
+import BestPerformers from './cards-charts/TopPerformers';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
 const types = [
