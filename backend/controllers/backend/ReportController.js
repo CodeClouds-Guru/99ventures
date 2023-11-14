@@ -44,19 +44,19 @@ class ReportController {
         case 'completed_surveys':
           report = await this.completedSurveys(start_date, end_date);
           break;
-        case 'open_vs_closed_tickets':
+        case 'tickets_chart':
           report = await this.openVsClosedTickets(start_date, end_date, company_portal_id, query_string, total_days);
           break;
-        case 'members':
+        case 'members_chart':
           report = await this.membersReport(start_date, end_date, company_portal_id, query_string, total_days);
           break;
-        case 'login_per_day':
+        case 'login_analytics':
           report = await this.loginPerDay(start_date, end_date, company_portal_id, query_string, total_days);
           break;
-        case 'top_surveys':
+        case 'top_performing_surveys':
           report = await this.topSurveys(start_date, end_date, query_string, total_days);
           break;
-        case 'top_members':
+        case 'top_performers':
           report = await this.topMembers(start_date, end_date, company_portal_id, query_string, total_days);
           break;
         default:

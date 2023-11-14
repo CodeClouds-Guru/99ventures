@@ -109,27 +109,27 @@ const DashboardContent = (props) => {
                     setCompletedSurveys(results);
                 }
             } 
-            else if(payload.type === 'login_per_day') {
+            else if(payload.type === 'login_analytics') {
                 if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
                     setLoginPerDay(results);
                 }
             }
-            else if(payload.type === 'members') {
+            else if(payload.type === 'members_chart') {
                 if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
                     setMembersChart(results);
                 }
             }
-            else if(payload.type === 'open_vs_closed_tickets') {
+            else if(payload.type === 'tickets_chart') {
                 if (results.hasOwnProperty('names') && results.hasOwnProperty('values')) {
                     setTicketsChart(results);
                 }
             }
-            else if(payload.type === 'top_surveys') {
+            else if(payload.type === 'top_performing_surveys') {
                 if (results.hasOwnProperty('names')) {
                     setBestPerformingSurveys(results);
                 }
             }
-            else if(payload.type === 'top_members') {
+            else if(payload.type === 'top_performers') {
                 if (results.hasOwnProperty('names')) {
                     setBestPerformers(results);
                 }
