@@ -73,5 +73,8 @@ export default {
       .replaceAll(/&#039;/g, "'")
       .replaceAll(/&amp;/g, '&')
       .replaceAll(/&quot;/g, '"')
+  },
+  snaketoPascalCase(text) {
+    return text.replace(/(^\w|_\w)/g, (text) => text.replace(/_/, "").toUpperCase());
   }
 }
