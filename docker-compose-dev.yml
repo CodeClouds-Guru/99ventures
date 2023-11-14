@@ -21,6 +21,7 @@ services:
     container_name: phpadmin_container
     environment:
       PMA_HOST: mysqldb
+      UPLOAD_LIMIT: 100000000
     links:
       - mysqldb:mysqldb
     ports:

@@ -37,6 +37,7 @@ router.get('/refresh-token', [AuthMiddleware], AuthController.refreshToken);
 router.get('/companies', [AuthMiddleware], AuthController.getCompanyAndSites);
 router.post('/forgot-password', AuthController.forgotPassword);
 router.post('/reset-password', AuthController.resetPassword);
+router.post('/update-widget-preference', [AuthMiddleware], AuthController.updateWidgetPreference);
 router.get(
   '/resend-invitation/:id',
   [AuthMiddleware],
