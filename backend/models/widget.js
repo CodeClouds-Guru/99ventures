@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       };
     });
     //delete previous record
-    await queryInterface.bulkDelete('user_widget', null, {
+    await queryInterface.bulkDelete('user_widget', {
       user_id: user_id,
     });
     console.log('save_data', save_data);
