@@ -1,6 +1,6 @@
 // 'use strict'
 
-const { Role, Permission, Group, CompanyUser } = require("../models/index");
+const { Role, Permission, Group, CompanyUser, Widget } = require("../models/index");
 const { QueryTypes } = require("sequelize");
 const db = require("../models/index");
 
@@ -26,7 +26,7 @@ module.exports = class UserResources {
       companies = await CompanyUser.findAll({
         where: { company_id: this.company_id, user_id: user.id },
       });
-      
+
       if (companies && companies.length > 0) {
         const group = await Group.findOne({
           where: {
@@ -62,10 +62,15 @@ module.exports = class UserResources {
         });
         permissions = [...new Set(permissions)];
       }
+
+      const all_widgets = await Widget.findAll({});
+      const widgets = await user.getWidgets({ attributes: ['id'] });
+      user.setDataValue('all_widgets', all_widgets);
+      user.setDataValue('choosen_widgets', widgets);
       user.setDataValue("roles", roles);
     } else {
       companies = await CompanyUser.findAll();
-     
+
     }
     // console.log("from user resource", this.company_id, user.id, companies);
 

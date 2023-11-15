@@ -5,6 +5,9 @@
 
 const Joi = require('joi');
 const { User } = require('../../models/index');
+const db = require('../../models/index');
+const { QueryTypes, Op } = require('sequelize');
+
 const {
   Invitation,
   GroupRole,
@@ -17,9 +20,8 @@ const {
   CompanyPortal,
   WithdrawalRequest,
   Member,
+  Widget,
 } = require('../../models/index');
-const { QueryTypes, Op } = require('sequelize');
-const db = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../../helpers/global');
 const permission = require('../../models/permission');
@@ -36,6 +38,7 @@ class AuthController {
     this.profileUpdate = this.profileUpdate.bind(this);
     this.profile = this.profile.bind(this);
     this.profileDetails = this.profileDetails.bind(this);
+    this.updateWidgetPreference = this.updateWidgetPreference.bind(this);
   }
 
   async signup(req, res) {
@@ -126,6 +129,13 @@ class AuthController {
           id: new_user.id,
         },
       });
+
+      /* Store Widget choices */
+      let all_widgets = await Widget.findAll({ where: { status: 'active' } });
+      if (all_widgets.length > 0)
+        await Widget.createUserWidgetOptions(new_user.id, all_widgets);
+      /* Store Widget choices */
+
       res.status(200).json({
         status: true,
         user: new_user,
@@ -146,7 +156,7 @@ class AuthController {
         .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
         .required()
         .messages({
-          "string.pattern.base": `Not a valid Password`,
+          'string.pattern.base': `Not a valid Password`,
         }),
       email: Joi.string().email().required(),
     });
@@ -243,7 +253,26 @@ class AuthController {
 
     const userResourcesObj = new UserResources(user);
     const userResourcesData = await userResourcesObj.getUserFormattedData();
-
+    // add widget user choices
+    // let all_widgets = await Widget.findAll({
+    //   attributes: ['id'],
+    //   where: { status: 'active' },
+    // });
+    // console.log(all_widgets);
+    // if (all_widgets.length > 0) {
+    //   let all_users = await User.findAll({
+    //     attributes: ['id'],
+    //     where: { status: 1 },
+    //   });
+    //   console.log(all_users);
+    //   all_users.forEach(async function (record, key) {
+    //     await Widget.createUserWidgetOptions({
+    //       user_id: record.id,
+    //       widget_ids: all_widgets,
+    //     });
+    //   });
+    // }
+    // add widget user choices
     res.status(200).json({
       status: true,
       access_token: token,
@@ -309,8 +338,7 @@ class AuthController {
 
     res.status(200).json({
       status: true,
-      reset_link:
-        req.get('Origin') + '/reset-password?hash=' + base64String,
+      reset_link: req.get('Origin') + '/reset-password?hash=' + base64String,
       message: 'Reset password mail has been sent to your email',
     });
   }
@@ -564,6 +592,29 @@ class AuthController {
         status: false,
         errors: 'Unable to get data',
       });
+    }
+  }
+
+  async updateWidgetPreference(req, res) {
+    try {
+      const resp = await Widget.createUserWidgetOptions({
+        user_id: req.user.id,
+        widget_ids: req.body.widget_ids
+      });
+      if (resp) {
+        return res.json({
+          status: true,
+          message: 'Your preference has been saved'
+        })
+      } else {
+        throw new Error("Unable to save data")
+      }
+    } catch (e) {
+      console.error(e)
+      return res.status(500).json({
+        status: false,
+        message: e.message
+      })
     }
   }
 }

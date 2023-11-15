@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card, CardContent, Typography } from '@mui/material';
 
-function LoginPerDay(props) {
+function LoginAnalytics(props) {
     const [state, setState] = useState({
         options: {
             stroke: {
@@ -56,4 +56,4 @@ function LoginPerDay(props) {
     );
 }
 
-export default LoginPerDay;
+export default LoginAnalytics;

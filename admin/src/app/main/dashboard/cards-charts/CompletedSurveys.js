@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card, CardContent, Typography } from '@mui/material';
 
-function CompletedSurveyChart(props) {
+function CompletedSurveys(props) {
     const [state, setState] = useState({
         options: {
             labels: [],
@@ -65,4 +65,4 @@ function CompletedSurveyChart(props) {
     );
 }
 
-export default CompletedSurveyChart;
+export default CompletedSurveys;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Divider } from '@mui/material';
 
-const BestPerformers = (props) => {
+const TopPerformers = (props) => {
     const [data, setData] = useState([]);
     useEffect(() => {
         (props.bestPerformers).hasOwnProperty('names') ? setData(props.bestPerformers.names) : '';
@@ -34,4 +34,4 @@ const BestPerformers = (props) => {
         </div>
     )
 }
-export default BestPerformers;
+export default TopPerformers;
