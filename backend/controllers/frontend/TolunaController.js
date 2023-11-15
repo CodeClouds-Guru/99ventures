@@ -92,6 +92,18 @@ class TolunaController {
 						}
 					}
 				} else {
+					// This block of code will be removed later when quality survey attemption completed.
+					const surveyAttempted = await Survey.checkSurveyAttemption(
+						member.username,
+						provider.id
+					);
+					if (surveyAttempted.length !== 0) {
+						return {
+							status: false,
+							message: 'You have successfully completed Toluna’s quality survey therefore no more surveys will appear. MoreSurveys will announce when Toluna’s full survey inventory is available. Please ensure that your email marketing preferences are switched on.',
+						};
+					}
+					//****************** */
 					return {
 						status: false,
 						message: 'Sorry! There are no more surveys right now.',
