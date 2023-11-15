@@ -36,6 +36,7 @@ class CintController {
             member.Country !== null && member.Country.cint_country_code
               ? member.Country.cint_country_code
               : null;
+          const ssi = member.username+'_'+Date.now();
           const params = {
             basic: 1,
             limit: perPage,
@@ -44,7 +45,7 @@ class CintController {
             zip_code: member.zip_code.replace(/\s/g, ''),
             date_of_birth: member.dob,
             ip_address: req.ip,
-            ssi: member.username,
+            ssi,
             country,
             gender,
           };
@@ -70,7 +71,7 @@ class CintController {
               const entryLink = survey.entry_link;
               const rebuildEntryLink = entryLink.replace(
                 'SUBID',
-                member.username
+                ssi + survey.project_id
               );
               let cpiValue = (+survey.cpi * +provider.currency_percent)/100;
               let temp_survey = {
