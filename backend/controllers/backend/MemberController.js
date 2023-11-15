@@ -367,8 +367,15 @@ class MemberController extends Controller {
         delete req.body.type;
       } else if (req.body.type === 'email_alerts') {
         let member_id = req.params.id;
-        let email_alerts = req.body.email_alerts;
-        result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
+        if ('is_shoutbox_blocked' in req.body) {
+          let model = await this.model.update({ is_shoutbox_blocked: req.body.is_shoutbox_blocked }, {
+            where: { id: req.params.id },
+          });
+          result = true;
+        } else {
+          let email_alerts = req.body.email_alerts;
+          result = await EmailAlert.saveEmailAlerts(member_id, email_alerts);
+        }
         delete req.body.type;
       } else if (req.body.type === 'payment_email') {
         result = await MemberPaymentInformation.updatePaymentInformation({
