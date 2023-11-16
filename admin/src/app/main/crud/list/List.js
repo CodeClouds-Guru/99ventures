@@ -23,6 +23,19 @@ import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBal
 import AlertDialog from 'app/shared-components/AlertDialog';
 import LoadingButton from '@mui/lab/LoadingButton';
 
+const iplogsColumns = {
+	'geo_location': 'Geo Location',
+	'ip': 'IP',
+	'isp': 'ISP',
+	'browser': 'Browser',
+	'browser_language': 'Browser Language',
+	'fraud_score': 'Fraud Score',
+	'tor': 'Tor',
+	'vpn': 'VPN',
+	'proxy': 'Proxy'
+}
+
+
 function List(props) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -79,6 +92,7 @@ function List(props) {
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
 	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score']);
 
 	const display_column_object = {
 		'id': 'ID',
@@ -128,6 +142,12 @@ function List(props) {
 		if (module === 'withdrawal-requests') {
 			var ordered_fields = displayColumnArray.sort((a, b) =>
 				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
+			)
+			params.fields = ordered_fields
+		}
+		if (module === 'ip-logs') {
+			var ordered_fields = iplogsColumnArray.sort((a, b) =>
+				Object.keys(iplogsColumns).indexOf(a) - Object.keys(iplogsColumns).indexOf(b)
 			)
 			params.fields = ordered_fields
 		}
@@ -749,7 +769,12 @@ function List(props) {
 		)
 	}
 	const handleConfigurColumn = (e) => {
-		e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
+		if (module === 'withdrawal-requests') {
+			e.target.checked ? setDisplayColumnArray(prev => [...prev, e.target.value]) : setDisplayColumnArray(prev => prev.filter(item => item !== e.target.value))
+		}
+		if (module === 'ip-logs') {
+			e.target.checked ? setIplogsColumnArray(prev => [...prev, e.target.value]) : setIplogsColumnArray(prev => prev.filter(item => item !== e.target.value))
+		}
 	}
 	const modifyList = () => {
 		setApplyLoading(true)
@@ -827,17 +852,29 @@ function List(props) {
 				<DialogTitle id="scroll-dialog-title">Select Fields</DialogTitle>
 				<DialogContent>
 					<div className="flex flex-wrap w-full justify-between my-10">
-						{Object.keys(display_column_object).map((val, index) => {
-							return (
-								<FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
-							)
-						})
+						{
+							(module === 'withdrawal-requests') && Object.keys(display_column_object).map((val, index) => {
+								return (
+									<FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
+								)
+							}) 
+						}
+						{
+							(module === 'ip-logs') && Object.keys(iplogsColumns).map((val, index) => {
+								return (
+									<FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={iplogsColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={iplogsColumns[val]} />
+								)
+							})
 						}
 					</div>
 				</DialogContent>
 				<DialogActions className="mx-16 mb-16">
 					<LoadingButton loading={applyLoading} variant="contained" color="secondary" onClick={(e) => { e.preventDefault(); modifyList() }}>Modify List</LoadingButton>
-					<LoadingButton loading={exportLoading} variant="contained" color="primary" onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</LoadingButton>
+					{
+						(module === 'withdrawal-requests') && (
+							<LoadingButton loading={exportLoading} variant="contained" color="primary" onClick={(e) => { e.preventDefault(); exportAll() }}>Export to CSV</LoadingButton>
+						)
+					}					
 				</DialogActions>
 			</Dialog>
 			{/* End */}
@@ -882,7 +919,7 @@ function List(props) {
 							)
 						}
 						<div className="flex items-center justify-end space-x-8 w-full lg:w-2/3 ml-auto flex-wrap sm:flex-nowrap">
-							{module === 'withdrawal-requests' &&
+							{(module === 'withdrawal-requests' || module === 'ip-logs') &&
 								<Tooltip title="Configure" placement="top">
 									<Button
 										className="p-0 m-0"
