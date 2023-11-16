@@ -163,7 +163,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.status = 'initiated';
           break;
       }
-      console.log('record.dataValues.new_status', record.dataValues.new_status);
+      // console.log('record.dataValues.new_status', record.dataValues.new_status);
       switch (record.dataValues.new_status) {
         case 1:
           record.dataValues.new_status = 'processing';
@@ -190,10 +190,10 @@ class MemberTransactionController extends Controller {
           record.dataValues.new_status = record.dataValues.status;
           break;
       }
-      console.log(
-        'record.dataValues.new_status formatted',
-        record.dataValues.new_status
-      );
+      // console.log(
+      //   'record.dataValues.new_status formatted',
+      //   record.dataValues.new_status
+      // );
       transaction_list.push(record);
     });
 
@@ -202,11 +202,11 @@ class MemberTransactionController extends Controller {
       'type' in query_where &&
       query_where.type === 'withdraw'
     );
-    fields.note.listing = !(
-      query_where &&
-      'type' in query_where &&
-      query_where.type === 'withdraw'
-    );
+    // fields.note.listing = !(
+    //   query_where &&
+    //   'type' in query_where &&
+    //   query_where.type === 'withdraw'
+    // );
     return {
       result: {
         data: transaction_list,
