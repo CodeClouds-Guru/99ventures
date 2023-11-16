@@ -185,6 +185,7 @@ module.exports = (sequelize, DataTypes) => {
           else this.setDataValue('country_id', value);
         },
       },
+      is_shoutbox_blocked: DataTypes.TINYINT,
       gender: DataTypes.ENUM('male', 'female', 'other'),
       name: {
         type: DataTypes.VIRTUAL,

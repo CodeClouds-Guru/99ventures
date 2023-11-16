@@ -48,8 +48,8 @@ const Widgets = (props) => {
     }
 
     const updateWidget = () => {
+        setLoading(true);
         const selectedWidgetIds = widgets.filter(row => row.checked === true).map(el=> el.id);
-
         const payload = {
             "widget_ids": selectedWidgetIds
         }
@@ -59,6 +59,7 @@ const Widgets = (props) => {
                 props.updateSelectedWidgets(selectedWidgetIds);
             }
             handleMenuClose();
+            setLoading(false);
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Something went wrong!' }))

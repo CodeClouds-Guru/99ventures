@@ -16,6 +16,7 @@ import AlertsContent from './AlertsContent';
 
 const Pages = ()=>{
     const [ username, setUsername ] = useState('');
+    const [ userdata, setUserdata ] = useState({});
     const dispatch = useDispatch();
     const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const { moduleId } = useParams();
@@ -25,7 +26,8 @@ const Pages = ()=>{
         axios.get(jwtServiceConfig.getSingleMember + '/' + moduleId)
             .then(res => {
                 const result = res.data.results.data;
-                setUsername(result.username)
+                setUsername(result.username);
+                setUserdata(result);
             })
             .catch(errors => {
                 console.log(errors);
@@ -43,7 +45,7 @@ const Pages = ()=>{
         } else if(module === 'withdraws'){
             return <Withdraws/>
         } else if(module === 'alerts'){
-            return <AlertsContent/>
+            return <AlertsContent userdata={userdata} getmember={getMember}/>
         }
     }
 

@@ -1,19 +1,29 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, } from 'react';
-import { Box, Divider, Button, Switch } from '@mui/material';
+import { Box, Button, Switch, List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@mui/material';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios'
 import CustomerLoader from '../../shared-components/customLoader/Index'
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 
-const AlertsContent = () => {
+
+const AlertsContent = (props) => {
     const { moduleId } = useParams();
     const location = useLocation();
     const dispatch = useDispatch();
     const [loader, setLoader] = useState(true);
     const [alertsData, setAlertsdata] = useState([]);
     const [switchValues, setSwitchValues] = useState({});
+    const [shoutboxBlocked, setShoutboxBlocked] = useState(false);   
+
+    useEffect(()=>{
+        if(props.userdata.is_shoutbox_blocked !== undefined) {
+            console.log(props.userdata.is_shoutbox_blocked)
+            setShoutboxBlocked(props.userdata.is_shoutbox_blocked);
+        }
+    }, [props]);
 
     const getEmailAlerts = () => {
         axios.get(jwtServiceConfig.getSingleMember + '/' + moduleId, { params: { type: 'email_alert' } })
@@ -67,31 +77,78 @@ const AlertsContent = () => {
                 dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
             });
     }
+    
+
+    const shoutboxSettings = () => {
+        axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, {
+            is_shoutbox_blocked: shoutboxBlocked,
+            type: 'email_alerts',
+        })
+        .then(res => {
+            if (res.data.results.message) {
+                props.getmember();
+                dispatch(showMessage({ variant: 'success', message: res.data.results.message }));
+            }
+        })
+        .catch(errors => {
+            dispatch(showMessage({ variant: 'error', message: errors.response.data.errors }));
+        });
+    }
 
     return (
-        <div className="lg:w-full">
-            <Divider textAlign="left"><h3>E-mail Alerts</h3></Divider>
-            <Box className="mt-10 p-16 w-full border-2 rounded-2xl">
-                <div className="w-full pt-10 flex flex-col">
-                    {alertsData.map((row) => {
-                        return (
-                            <div className="w-full md:w-1/3 px-28 py-10 flex justify-between" key={row.id}>
-                                <div className="w-auto">
-                                    <b>{row.name}</b>
-                                </div>
-                                <div className="w-auto mr-32">
+        <div className="lg:w-full flex flex-wrap">
+            <Box className="mt-10 p-16 w-full md:w-1/3 border-2 rounded-2xl mr-10">
+                <List
+                    sx={{ width: '100%' }}
+                    subheader={<ListSubheader>Email Alerts Settings</ListSubheader>}
+                >
+                    {
+                        alertsData.map((row) => {
+                            return (
+                                <ListItem key={row.id}>
+                                    <ListItemIcon sx={{minWidth: '35px'}}>
+                                        <FuseSvgIcon className="text-48" size={20} color="action">material-outline:double_arrow</FuseSvgIcon>
+                                    </ListItemIcon>
+                                    <ListItemText id={`switch-list-label-${row.name}`} primary={row.name} />                                   
                                     <Switch
-                                        sx={{ marginTop: '-1rem' }}
+                                        edge="end"
                                         checked={switchValues[row.id]}
                                         onChange={(event) => handleSwitch(event, row.id)}
+                                        inputProps={{
+                                            'aria-labelledby': `switch-list-label-${row.name}`,
+                                        }}
                                     />
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
+                                </ListItem>
+                            )
+                        })
+                    }
+                </List>
                 <div className="flex w-full justify-end">
-                    <Button className="mr-20" variant="contained" color="secondary" size="large" onClick={(event) => { event.preventDefault(); updateEmailAlerts() }}>Save</Button>
+                    <Button className="mr-20" variant="contained" color="secondary" size="large" onClick={(event) => { event.preventDefault(); updateEmailAlerts() }}>Update</Button>
+                </div>
+            </Box>
+            <Box className="mt-10 p-16 w-full md:w-1/3 border-2 rounded-2xl">
+                <List
+                    sx={{ width: '100%', minHeight: '326px' }}
+                    subheader={<ListSubheader>Shoutbox Settings</ListSubheader>}
+                >
+                    <ListItem>
+                        <ListItemIcon sx={{minWidth: '35px'}}>
+                            <FuseSvgIcon className="text-48" size={20} color="action">material-outline:double_arrow</FuseSvgIcon>
+                        </ListItemIcon>
+                        <ListItemText id={`switch-list-label-shoutbox-blocked`} primary="Block Shoutbox" />                                   
+                        <Switch
+                            edge="end"
+                            checked={Boolean(shoutboxBlocked)}
+                            onChange={()=>setShoutboxBlocked(!shoutboxBlocked)}
+                            inputProps={{
+                                'aria-labelledby': `switch-list-label-shoutbox-blocked`,
+                            }}
+                        />
+                    </ListItem>
+                </List>
+                <div className="flex w-full justify-end">
+                    <Button className="mr-20" variant="contained" color="secondary" size="large" onClick={shoutboxSettings}>Update</Button>
                 </div>
             </Box>
         </div>
