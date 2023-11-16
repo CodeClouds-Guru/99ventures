@@ -20,7 +20,6 @@ const AlertsContent = (props) => {
 
     useEffect(()=>{
         if(props.userdata.is_shoutbox_blocked !== undefined) {
-            console.log(props.userdata.is_shoutbox_blocked)
             setShoutboxBlocked(props.userdata.is_shoutbox_blocked);
         }
     }, [props]);
