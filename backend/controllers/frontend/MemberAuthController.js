@@ -211,7 +211,7 @@ class MemberAuthController {
           //   const file_name = await fileHelper.upload();
           //   req.body.avatar = file_name.files[0].filename;
           // }
-          
+
           let data = {
             first_name: req.body.first_name.trim(),
             last_name: req.body.last_name.trim(),
@@ -453,10 +453,8 @@ class MemberAuthController {
       );
       req.session.member = member_details;
       //set member eligibility
-      if(member_details.profile_completed_on){
-        await this.setMemberEligibility(
-          member_details.id
-        );
+      if (member_details.profile_completed_on) {
+        await this.setMemberEligibility(member_details.id);
       }
       // await this.setMemberEligibility(
       //   member_details.id,
@@ -470,11 +468,24 @@ class MemberAuthController {
         member_id: member_details.id,
         action: 'Member Logged In',
       });
-      req.session.flash = {
-        message:
-          'Welcome to Moresurveys! Your email has been verified successfully.',
-        success_status: true,
-      };
+      // req.session.flash = {
+      //   message:
+      //     'Welcome to Moresurveys! Your email has been verified successfully.',
+      //   success_status: true,
+      // };
+      let bonus = await Setting.findOne({
+        where: {
+          settings_key: 'registration_bonus',
+          company_portal_id: member_details.company_portal_id,
+        },
+      });
+      res.cookie('email_verified', true, {
+        maxAge: 900000,
+      });
+      res.cookie('registration_bonus', bonus.settings_value, {
+        maxAge: 900000,
+      });
+
       let redirect_page = '';
       if (!member_details.profile_completed_on) redirect_page = '/profile';
       else {
@@ -557,6 +568,7 @@ class MemberAuthController {
         }
 
         if (member_status) {
+          req.headers.site_id = member.company_portal_id;
           if (!member.profile_completed_on) {
             await Member.creditBonusByType(
               member,
@@ -568,16 +580,28 @@ class MemberAuthController {
               member_id: member.id,
               action: 'Profile Completed',
             });
-          }
 
+            let bonus = await Setting.findOne({
+              where: {
+                settings_key: 'complete_profile_bonus',
+                company_portal_id: member.company_portal_id,
+              },
+            });
+            res.cookie('member_profile_update', true, {
+              maxAge: 900000,
+            });
+            res.cookie('profile_completed_bonus', bonus.settings_value, {
+              maxAge: 900000,
+            });
+          }
           req.body.country_id = req.body.country;
-          if(req.body.zipcode){
-            req.body.zip_code = req.body.zipcode.trim();
-          }
+          req.body.zip_code = req.body.zipcode
+            ? req.body.zipcode.trim()
+            : member.zip_code;
           request_data = req.body;
-          if(req.body.city ){
-            request_data.city = req.body.city.trim();
-          }
+          request_data.city = req.body.city
+            ? req.body.city.trim()
+            : member.city;
           request_data.updated_by = member_id;
 
           // request_data.username = member.username;
@@ -591,16 +615,14 @@ class MemberAuthController {
           });
 
           //set eligibility
-          const getmember = await Member.findOne({ 
+          const getmember = await Member.findOne({
             attributes: ['id', 'profile_completed_on'],
-            where: { 
-              id: member_id
-            } 
+            where: {
+              id: member_id,
+            },
           });
-          if(getmember.profile_completed_on !== null) {
-            await this.setMemberEligibility(
-              member_id
-            );
+          if (getmember.profile_completed_on !== null) {
+            await this.setMemberEligibility(member_id);
           }
           // await this.setMemberEligibility(
           //   member_id,
@@ -631,12 +653,12 @@ class MemberAuthController {
           req.session.member.avatar =
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
         } else req.session.member.avatar = member.avatar;
-
-        req.session.flash = { message: member_message, success_status: true };
+        if (member.profile_completed_on)
+          req.session.flash = { message: member_message, success_status: true };
       } else {
         req.session.flash = { error: member_message };
       }
-      // console.log(req);
+      // console.log(req.session.flash);
       if (method === 'POST') {
         res.redirect('back');
       } else {
@@ -658,10 +680,10 @@ class MemberAuthController {
         deleted_at: null,
         country_id: 226,
         created_at: {
-          [Op.lt]: '2023-10-01'
-        }
+          [Op.lt]: '2023-10-01',
+        },
       },
-      limit: 10
+      limit: 10,
     });
 
     for (const member of members) {
@@ -892,7 +914,7 @@ class MemberAuthController {
   }*/
 
   async setMemberEligibility(member_id) {
-    try {      
+    try {
       let member_details = await Member.findOne({
         where: { id: member_id },
         include: {
@@ -923,7 +945,7 @@ class MemberAuthController {
         'STANDARD_UK_REGION_PLACE',
         'city',
         'PostalCodeVal',
-        'City of residence'
+        'City of residence',
       ];
 
       let questions = await SurveyQuestion.findAll({
@@ -938,8 +960,8 @@ class MemberAuthController {
         where: {
           name: { [Op.in]: name_list },
           question_type: {
-            [Op.ne]: 'ComputedType'   // Computed Type questions are not supported by Toluna
-          }
+            [Op.ne]: 'ComputedType', // Computed Type questions are not supported by Toluna
+          },
         },
         include: [
           {
@@ -983,7 +1005,7 @@ class MemberAuthController {
                 //   });
                 // }
                 // if (record.survey_provider_id !== 6)
-                  precode_id = pre ? pre.id : '';
+                precode_id = pre ? pre.id : '';
 
                 if (record.survey_provider_id === 6 && pre !== undefined) {
                   toluna_questions.push({
@@ -1043,10 +1065,11 @@ class MemberAuthController {
                 }
                 break;
               case 'STATE':
-                if(member_details.state !== null) {
+                if (member_details.state !== null) {
                   var pre = record.SurveyAnswerPrecodes.find((element) => {
                     return (
-                      element.option_text.toLowerCase() == member_details.state.toLowerCase()
+                      element.option_text.toLowerCase() ==
+                      member_details.state.toLowerCase()
                     );
                   });
                   precode_id = pre ? pre.id : '';
@@ -1056,7 +1079,7 @@ class MemberAuthController {
                       Answers: [{ AnswerId: pre.option }],
                     });
                   }
-                }                
+                }
                 break;
             }
 
@@ -1075,12 +1098,14 @@ class MemberAuthController {
           where: { member_id: member_id },
           force: true,
         });
-        
+
         await MemberEligibilities.bulkCreate(member_eligibility);
         if (toluna_questions.length) {
-          MemberAuthController.prototype.tolunaProfileCreateAndUpdate(member_details, toluna_questions);
+          MemberAuthController.prototype.tolunaProfileCreateAndUpdate(
+            member_details,
+            toluna_questions
+          );
         }
-        
       }
       return;
     } catch (error) {
@@ -1638,33 +1663,30 @@ class MemberAuthController {
 
   /**
    * To create an account on Toluna.
-   * The idea behind this, first of all we checked if the member account has created or not. 
+   * The idea behind this, first of all we checked if the member account has created or not.
    * If created, we are updating the account otherwise create an account
-   * 
-   * @param {Object} member 
-   * @param {Array of Object} questionAnswer 
+   *
+   * @param {Object} member
+   * @param {Array of Object} questionAnswer
    */
-  async tolunaProfileCreateAndUpdate(member, questionAnswer){
+  async tolunaProfileCreateAndUpdate(member, questionAnswer) {
     const tolunaHelper = new TolunaHelper();
     var envType = '_';
-    if(process.env.DEV_MODE == "0")
-      envType = '_live_';
-    else if(process.env.DEV_MODE == "1")
-      envType = '_development_';
-    else if(process.env.DEV_MODE == "2")
-      envType = '_staging_';
+    if (process.env.DEV_MODE == '0') envType = '_live_';
+    else if (process.env.DEV_MODE == '1') envType = '_development_';
+    else if (process.env.DEV_MODE == '2') envType = '_staging_';
 
-    const memberCode = member.CompanyPortal.name + envType +  member.id;
-    if(member.country_id === 226)   // US Country
-    {
+    const memberCode = member.CompanyPortal.name + envType + member.id;
+    if (member.country_id === 226) {
+      // US Country
       var dob = new Date(member.dob);
-      dob = new Date(new Date() - dob).getFullYear() - 1970;  
+      dob = new Date(new Date() - dob).getFullYear() - 1970;
       let ageData = TolunaAge.find((element) => {
         return element.option == dob;
       });
-      if(ageData !== undefined){
+      if (ageData !== undefined) {
         questionAnswer.push({
-          QuestionID: 1001538,  // Age
+          QuestionID: 1001538, // Age
           Answers: [{ AnswerId: ageData.answer_id }],
         });
       }
@@ -1673,29 +1695,30 @@ class MemberAuthController {
     const payload = {
       MemberCountryId: member.country_id,
       MemberCode: memberCode,
-      Email: (member.email).toLowerCase(),
+      Email: member.email.toLowerCase(),
       BirthDate: moment(member.dob).format('MM/DD/YYYY'),
       PostalCode: member.zip_code,
       // "IsActive": true,  // Default is True
-      RegistrationAnswers: questionAnswer
+      RegistrationAnswers: questionAnswer,
     };
-    if(process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
+    if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
       payload.IsTest = true;
     }
-    
+
     try {
-      let checkMember = await tolunaHelper.getMember(memberCode, member.country_id);
-      if('MemberCode' in checkMember) {
+      let checkMember = await tolunaHelper.getMember(
+        memberCode,
+        member.country_id
+      );
+      if ('MemberCode' in checkMember) {
         await tolunaHelper.updateMember(payload);
       }
     } catch (error) {
-      if('status' in error.response && error.response.status === 400) {
-        try{
+      if ('status' in error.response && error.response.status === 400) {
+        try {
           await tolunaHelper.addMemebr(payload);
-        } catch(err){
-          const logger = require('../../helpers/Logger')(
-            `toluna-errror.log`
-          );
+        } catch (err) {
+          const logger = require('../../helpers/Logger')(`toluna-errror.log`);
           logger.error(err);
           logger.error(JSON.stringify(payload));
         }
