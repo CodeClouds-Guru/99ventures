@@ -63,6 +63,7 @@ class MemberAuthController {
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
+    this.getCompanyPortal = this.getCompanyPortal.bind(this);
   }
   //login
   async login(req, res) {
@@ -153,7 +154,7 @@ class MemberAuthController {
       // let company_id = req.session.company_portal.company_id;
 
       //rewritting the company portal ids
-      const companyPortal = await getCompanyPortal(req);
+      const companyPortal = await this.getCompanyPortal(req);
       let company_portal_id = companyPortal.id;
       req.headers.site_id = company_portal_id;
       let company_id = companyPortal.company_id;
