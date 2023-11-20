@@ -91,7 +91,7 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
 	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score']);
 
 	const display_column_object = {
@@ -416,6 +416,8 @@ function List(props) {
 			value = Helper.parseTimeStamp(value)
 		} else if ((['updated_at','requested_on'].includes(fieldConfig.field_name)) && value) {
 			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
+		} else if ((['created_at'].includes(fieldConfig.field_name)) && value) {
+			value = moment(value).format('DD-MMM-YYYY HH:mm');
 		}
 		return value;
 	}
