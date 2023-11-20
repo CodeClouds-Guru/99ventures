@@ -325,13 +325,13 @@ const MemberDetails = (props) => {
                         setStatuslessNote(false);
                         setBtnLoading(false);
                         setSkipBtnLoading(false);
-                        getMemberData(false);
-                    } else if (type !== 'unlink_referrer') {
+                    } else {
                         setEditMode(false);
                         setEditPaymentEmail(false);
                         setEditAdminStatus(false);
-                        getMemberData(false);
                     }
+                    // Get latest data from API
+                    getMemberData(false);
                 }
             })
             .catch(errors => {
