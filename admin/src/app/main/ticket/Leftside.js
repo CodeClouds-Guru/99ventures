@@ -16,6 +16,7 @@ import WYSIWYGEditor from 'app/shared-components/WYSIWYGEditor';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { EditorState, convertFromHTML, ContentState } from 'draft-js';
 import { FormControl, InputLabel, Button, Typography, Select, MenuItem, IconButton, Stack, Tooltip, ImageList, ImageListItem } from '@mui/material';
+import {stateFromHTML} from 'draft-js-import-html';
 
 const Leftside = (props) => {
     const theme = useTheme();
@@ -43,7 +44,6 @@ const Leftside = (props) => {
         });
     };
     const handleChatField = (event) => {
-        // console.log(event)
         setChatField(event);
     }
     const handleFiles = (e) => {
@@ -126,7 +126,9 @@ const Leftside = (props) => {
     };
 
     const setEditorValue = (value) => {
-        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
+        value = value.replace('<br/>', '').replaceAll('<p></p>', '<p>&nbsp;</p>');
+        wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(stateFromHTML(value)));
+        // wysiwygEditorRef.current.props.onEditorStateChange(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(value))))
     }
 
     // Conversation Delete feature
