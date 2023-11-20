@@ -44,6 +44,7 @@ const Leftside = (props) => {
         });
     };
     const handleChatField = (event) => {
+        event = event.replace('<br/>', '').replaceAll('<p></p>', '<p>&nbsp;</p>');
         setChatField(event);
     }
     const handleFiles = (e) => {
