@@ -642,6 +642,7 @@ $(() => {
     });
   }
 
+  //Get Cookie to show popup in profile update and email verify login
   function readCookie(name) {
     var nameEQ = name + '=';
     var ca = document.cookie.split(';');
@@ -652,7 +653,6 @@ $(() => {
     }
     return null;
   }
-  //Cookie to show popup in profile update and email verify login
   var profile_update_flag = readCookie('member_profile_update') || null;
   var profile_update_bonus = readCookie('profile_completed_bonus') || null;
 

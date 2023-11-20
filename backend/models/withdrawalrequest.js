@@ -625,12 +625,12 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    console.log(
-      '------approvedAndCompletedReqs',
-      transaction_ids,
-      withdrawal_ids,
-      req_body
-    );
+    // console.log(
+    //   '------approvedAndCompletedReqs',
+    //   transaction_ids,
+    //   withdrawal_ids,
+    //   req_body
+    // );
     if (transaction_ids.length > 0) {
       await MemberTransaction.update(
         {

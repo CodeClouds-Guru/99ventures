@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     await queryInterface.bulkDelete('user_widget', {
       user_id: user_id,
     });
-    console.log('save_data', save_data);
+    // console.log('save_data', save_data);
     //update user widget table
     if (data.widget_ids.length > 0)
       await queryInterface.bulkInsert('user_widget', save_data);

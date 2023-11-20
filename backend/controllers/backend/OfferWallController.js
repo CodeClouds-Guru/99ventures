@@ -207,6 +207,19 @@ class OfferWallController extends Controller {
     if (model.dataValues.Campaign != null) {
       model.dataValues.campaign_name = model.dataValues.Campaign.name;
     }
+
+    let postback_url_example =
+      model.postback_url +
+      '/callback/postback/' +
+      model.name +
+      '?' +
+      model.sub_id_variable +
+      '={sub}&' +
+      model.campaign_id_variable +
+      '={offerid}&' +
+      model.campaign_name_variable +
+      '={offername}';
+    model.setDataValue('postback_url_example', postback_url_example);
     return { status: true, result: model, fields };
   }
   //override delete function
