@@ -172,7 +172,7 @@ class MemberController extends Controller {
             'dob',
             'state',
             'created_at',
-            'is_shoutbox_blocked'
+            'is_shoutbox_blocked',
           ];
           options.paranoid = false;
           options.where = { id: member_id };
@@ -294,10 +294,7 @@ class MemberController extends Controller {
           result.setDataValue('member_referrer', member_referrer);
           result.setDataValue('referral_link', referral_link);
           result.setDataValue('MemberReferral', referral_row);
-          result.setDataValue(
-            'is_deleted',
-            result.deleted_at ? true : false
-          );
+          result.setDataValue('is_deleted', result.deleted_at ? true : false);
           result.setDataValue(
             'impersonation_link',
             `${domain}/impersonate?hashKey=${impersonation_token}`
@@ -368,9 +365,12 @@ class MemberController extends Controller {
       } else if (req.body.type === 'email_alerts') {
         let member_id = req.params.id;
         if ('is_shoutbox_blocked' in req.body) {
-          let model = await this.model.update({ is_shoutbox_blocked: req.body.is_shoutbox_blocked }, {
-            where: { id: req.params.id },
-          });
+          let model = await this.model.update(
+            { is_shoutbox_blocked: req.body.is_shoutbox_blocked },
+            {
+              where: { id: req.params.id },
+            }
+          );
           result = true;
         } else {
           let email_alerts = req.body.email_alerts;
@@ -407,6 +407,9 @@ class MemberController extends Controller {
         });
         delete req.body.type;
         result = true;
+      } else if (req.body.type === 'unlink_referrer') {
+        result = await this.unlinkReferrer(req);
+        delete req.body.type;
       } else {
         // console.error(error);
         this.throwCustomError('Type is required', 401);
@@ -517,8 +520,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
     };
 
     // Dynamically generating Model Relationships
@@ -850,7 +853,7 @@ class MemberController extends Controller {
     // result.total_adjustment = total_adjustment
     result.total_adjustment =
       total_adjustment[0].total_adjustment &&
-        total_adjustment[0].total_adjustment == null
+      total_adjustment[0].total_adjustment == null
         ? 0
         : total_adjustment[0].total_adjustment;
 
@@ -862,7 +865,6 @@ class MemberController extends Controller {
       let member_id = req.params.id;
       let admin_amount = req.body.admin_amount || 0;
       let admin_note = req.body.admin_note || '';
-
 
       //get total earnings of member
       let total_earnings = await db.sequelize.query(
@@ -1123,8 +1125,8 @@ class MemberController extends Controller {
       ...(temp && { [Op.and]: temp }),
       ...(query_where.status &&
         query_where.status.length > 0 && {
-        status: { [Op.in]: query_where.status },
-      }),
+          status: { [Op.in]: query_where.status },
+        }),
       company_portal_id: site_id,
     };
 
@@ -1146,6 +1148,30 @@ class MemberController extends Controller {
       };
     }
     return relationShipModels;
+  }
+
+  //unlinkReferrer
+  async unlinkReferrer(req) {
+    try {
+      const member_id = req.params.id;
+      let result = await this.model.findOne({
+        attributes: ['member_referral_id'],
+        where: { id: member_id },
+      });
+      await this.model.update(
+        { member_referral_id: null },
+        {
+          where: { id: member_id },
+        }
+      );
+      await MemberReferral.destroy({
+        where: { referral_id: member_id, member_id: result.member_referral_id },
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError('Unable to update data', 500);
+    }
   }
 }
 
