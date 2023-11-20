@@ -647,5 +647,40 @@ module.exports = (sequelize, DataTypes) => {
     );
     // }
   };
+  //Approved and completed withdrawal req
+  WithdrawalRequest.checkIfDifferentPaymentMethod = async (
+    payment_method,
+    member_id
+  ) => {
+    const { Op } = require('sequelize');
+    const { PaymentMethod } = require('../models/index');
+    var resp = {
+      member_status: true,
+      member_message: '',
+    };
+    let if_any = await WithdrawalRequest.findOne({
+      logging: console.log,
+      where: {
+        member_id: member_id,
+        withdrawal_type_id: { [Op.ne]: payment_method.id },
+      },
+      include: {
+        model: PaymentMethod,
+        attributes: ['name'],
+      },
+      order: [['created_at', 'DESC']],
+    });
+    console.log('------if_any', if_any, payment_method);
+    if (if_any) {
+      resp.member_status = false;
+      resp.member_message =
+        'You can not use ' +
+        payment_method.name +
+        ' as you have already used ' +
+        if_any.PaymentMethod.name +
+        ' before. Please contact to admin.';
+    }
+    return resp;
+  };
   return WithdrawalRequest;
 };

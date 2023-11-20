@@ -517,6 +517,7 @@ class MemberAuthController {
   async profileUpdate(req, res) {
     let member_status = true;
     let member_message = 'Successfully updated!';
+    const getmember = {};
     const method = req.method;
     let request_data = {};
     let member = {};
@@ -623,7 +624,7 @@ class MemberAuthController {
           });
 
           //set eligibility
-          const getmember = await Member.findOne({
+          getmember = await Member.findOne({
             attributes: ['id', 'profile_completed_on'],
             where: {
               id: member_id,
@@ -1275,6 +1276,7 @@ class MemberAuthController {
     let payment_method_details = await PaymentMethod.findOne({
       where: { id: request_data.payment_method_id },
       attributes: [
+        'id',
         'name',
         'slug',
         'type_user_info_again',
@@ -1326,7 +1328,15 @@ class MemberAuthController {
     if (!samePaymentInfoResp.member_status) {
       return samePaymentInfoResp;
     }
-
+    //check If Different Payment Method
+    var checkIfDifferentPaymentMethodResp =
+      await WithdrawalRequest.checkIfDifferentPaymentMethod(
+        payment_method_details,
+        request_data.member_id
+      );
+    if (!checkIfDifferentPaymentMethodResp.member_status) {
+      return checkIfDifferentPaymentMethodResp;
+    }
     //withdrawal process
     if (fieldValidationResp.member_payment_info.length > 0) {
       await MemberPaymentInformation.updatePaymentInformation({
