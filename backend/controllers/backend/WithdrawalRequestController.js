@@ -98,7 +98,7 @@ class WithdrawalRequestController extends Controller {
               type: QueryTypes.SELECT,
             })
           : null;
-      console.log(reversal_transactions);
+      // console.log(reversal_transactions);
       results.rows.map((row, key) => {
         let [payment_method_name, username, status, admin_status] = [
           '',
@@ -135,7 +135,7 @@ class WithdrawalRequestController extends Controller {
                 o.member_id === row.member_id && o.created_at > row.created_at
             )
           : null;
-        console.log('obj', obj);
+        // console.log('obj', obj);
         let warning_text =
           obj && row.status == 'pending'
             ? 'This user received a reversed transaction. Please be carefull before approving the request!'
@@ -326,7 +326,7 @@ class WithdrawalRequestController extends Controller {
         fields['$Member.username$'].searchable = false;
       }
       */
-      console.log(fields);
+      // console.log(fields);
       return {
         result: { data: results.rows, pages, total: results.count },
         fields: this.generateFields(fields),
@@ -613,11 +613,7 @@ class WithdrawalRequestController extends Controller {
       replacements: [row.member_id, row.member_id],
       type: QueryTypes.SELECT,
     });
-    console.log(
-      'reversal_transaction',
-      reversal_transaction.length,
-      reversal_transaction[0].reverse_count
-    );
+
     row.setDataValue('reverse_count', '');
     let warning_text =
       reversal_transaction.length > 0 &&

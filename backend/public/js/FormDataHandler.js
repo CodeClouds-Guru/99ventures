@@ -349,7 +349,10 @@ $(() => {
         message: 'Password mismatched',
       });
     }
-    if($(signupForm).find('input[name=more_survey_terms]').is(':checked') === false) {
+    if (
+      $(signupForm).find('input[name=more_survey_terms]').is(':checked') ===
+      false
+    ) {
       errorsArray.push({
         field: $(terms_checkbox),
         message: 'Please check the terms & conditions',
@@ -518,13 +521,13 @@ $(() => {
     $('#scripteed_logout_form').submit();
   });
 
-  $('.more_survey_terms').on('change', function(){
-    if($(this).is(':checked') === true) {
-      $('.btn-submit').removeAttr('disabled')
+  $('.more_survey_terms').on('change', function () {
+    if ($(this).is(':checked') === true) {
+      $('.btn-submit').removeAttr('disabled');
     } else {
-      $('.btn-submit').attr('disabled', true)
+      $('.btn-submit').attr('disabled', true);
     }
-  })
+  });
 
   var pathname = window.location.pathname;
   pathname = pathname.replace('/', '');
@@ -557,6 +560,7 @@ $(() => {
     str += '</div></div>';
     $('#header_streak_or_refresh').append(str);
   }
+
   // if (pathname === 'contest') {
   //   str +=
   //     '<div class="row"><div class="col-md-12 mb-3 mb-lg-4"><div class="cash-contest-sec bg-primary text-white rounded-4 px-3 px-md-4 px-lg-5 py-3 mb-2"><div class="row align-items-center"><div class="col-md-8"><h1 class="mb-2 heading">CASH CONTEST</h1><p class="m-0">The Top 20 members who earn the most by 31st June 2023 will win a prize.</p></div><div class="col-md-4"><div class="d-flex justify-content-end mt-3 mt-md-0"><figure class="m-0 text-center"><img src="images/cash-contest-img.svg" alt="Cash Contest Image" class="img-fluid"></figure></div></div></div></div><div class="cash-contest-info text-white d-flex align-items-center mt-2"><i class="fa-solid fa-circle-info"></i><p class="m-0 ms-2 lh-base">Moresurveys.com<strong>$1000</strong>Cash Contest Description. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p></div></div></div>';
@@ -632,9 +636,43 @@ $(() => {
   });
 
   // To remove space from all input type of email field
-  if($('input[name=email]').length) {
-    $('input[name=email]').on('keyup', function(){
+  if ($('input[name=email]').length) {
+    $('input[name=email]').on('keyup', function () {
       $(this).val($(this).val().replace(/\s+/g, ''));
-    })
+    });
+  }
+
+  function readCookie(name) {
+    var nameEQ = name + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+  //Cookie to show popup in profile update and email verify login
+  var profile_update_flag = readCookie('member_profile_update') || null;
+  var profile_update_bonus = readCookie('profile_completed_bonus') || null;
+
+  if (profile_update_flag === 'true') {
+    var profile_update_popup_html = `<div id="profile_update_popup" tabindex="-1" aria-hidden="true" aria-labelledby="paypalModalLabel" class="modal fade payment-popup survey-popup"> <div class="modal-dialog"><div class="modal-content bg-white"><button id="paypal-popup-close" type="button" aria-label="Close" data-bs-dismiss="modal" class="btn-close position-absolute top-0 small start-100 translate-middle rounded-circle shadow bg-white p-2"></button> <div class="modal-body"><figure class="m-0 pb-2 mb-2 border-bottom border-primary mx-md-5"><img id="withdrawal_type_img" src="https://99-ventures-bucket.s3.us-east-2.amazonaws.com/99ventures/1/file-manager/images/logo.png" class="img-fluid d-block" /></figure><div class="survey-popup-cntnt text-center pb-3 mx-md-4 px-md-2"><h2 class="heading">Start Sharing Your Opinion</h2><p class="lh-base">You are now ready to begin exploring MoreSurveys! We have also credited your account with an extra $${profile_update_bonus} for completing your profile.</p><h4>Happy Surveying!</h4></div><div class="d-grid"><a href="/paid-surveys" class="btn btn-info rounded-1 py-2">Start Taking Surveys</a></div></div></div></div></div>`;
+    $('body').append(profile_update_popup_html);
+    $('#profile_update_popup').modal('show');
+
+    document.cookie =
+      'member_profile_update=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+  var email_verified_flag = readCookie('email_verified') || null;
+  var registration_bonus = readCookie('registration_bonus') || null;
+
+  if (email_verified_flag === 'true') {
+    var email_verified_popup_html = `<div id="email_verified_popup" tabindex="-1" aria-hidden="true" aria-labelledby="paypalModalLabel" class="modal fade payment-popup survey-popup"> <div class="modal-dialog"><div class="modal-content bg-white"><button id="paypal-popup-close" type="button" aria-label="Close" data-bs-dismiss="modal" class="btn-close position-absolute top-0 small start-100 translate-middle rounded-circle shadow bg-white p-2"></button><div class="modal-body"><figure class="m-0 pb-2 mb-2 border-bottom border-primary mx-md-5"><img id="withdrawal_type_img" src="https://99-ventures-bucket.s3.us-east-2.amazonaws.com/99ventures/1/file-manager/images/logo.png" class="img-fluid d-block" /></figure><div class="survey-popup-cntnt text-center pb-3 mx-md-4 px-md-2"><h2 class="heading">Congratulations</h2><p class="lh-base">You have been rewarded $${registration_bonus} for successfully registering your MoreSurveys account. It's now time to complete your profile to receive your next bonus!</p><h4>Happy Surveying!</h4></div><div class="d-grid"><a href="/profile" class="btn btn-info rounded-1 py-2">Complete Your Profile</a></div></div></div></div></div>`;
+    $('body').append(email_verified_popup_html);
+    $('#email_verified_popup').modal('show');
+
+    document.cookie =
+      'email_verified=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
 });

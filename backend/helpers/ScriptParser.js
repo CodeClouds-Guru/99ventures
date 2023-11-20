@@ -137,7 +137,7 @@ class ScriptParser {
                       transaction.status == 5 &&
                       transaction.type === 'credited'
                     ) {
-                      console.log('transaction_status_display reversal', 2);
+                      // console.log('transaction_status_display reversal', 2);
                       data[key].setDataValue(transaction.status, 2);
                       transaction.status = 2;
                       data[key].setDataValue('transaction_status_display', 2);
@@ -372,7 +372,7 @@ class ScriptParser {
         }
       }
     }
-    console.log(JSON.parse(JSON.stringify(data)));
+    // console.log(JSON.parse(JSON.stringify(data)));
     return {
       data: JSON.parse(JSON.stringify(data)),
       script_html,
