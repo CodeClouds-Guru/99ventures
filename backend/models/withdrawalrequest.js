@@ -670,7 +670,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       order: [['created_at', 'DESC']],
     });
-    console.log('------if_any', if_any, payment_method);
+    // console.log('------if_any', if_any, payment_method);
     if (if_any) {
       resp.member_status = false;
       resp.member_message =
@@ -678,7 +678,7 @@ module.exports = (sequelize, DataTypes) => {
         payment_method.name +
         ' as you have already used ' +
         if_any.PaymentMethod.name +
-        ' before. Please contact to admin.';
+        ' before. In order to switch payment method from the one that you used previously, please contact our support team <a href="/support-ticket" >here</a>.”';
     }
     return resp;
   };
