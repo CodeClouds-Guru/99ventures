@@ -218,7 +218,8 @@ class OfferWallController extends Controller {
       model.campaign_id_variable +
       '={offerid}&' +
       model.campaign_name_variable +
-      '={offername}';
+      '={offername}' +
+      '&status=1';
     model.setDataValue('postback_url_example', postback_url_example);
     return { status: true, result: model, fields };
   }
