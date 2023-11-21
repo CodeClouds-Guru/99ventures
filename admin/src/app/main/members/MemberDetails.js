@@ -1,6 +1,6 @@
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig.js';
 import { useState, useEffect, } from 'react';
-import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip, Popover } from '@mui/material';
+import { Box, Divider, IconButton, Typography, TextField, Autocomplete, Chip, Dialog, DialogTitle, DialogActions, DialogContent, Button, List, ListItem, ListItemText, TextareaAutosize, Tooltip, Popover, Link as AnchorLink } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import AlertDialog from 'app/shared-components/AlertDialog';
@@ -192,9 +192,11 @@ const MemberDetails = (props) => {
         else if (type === 'save_profile')
             msg = 'Do you want to save the changes?';
         else if (type === 'adjustment')
-            msg = 'Do you want to adjust the amount?'
+            msg = 'Do you want to adjust the amount?';
         else if (type === 'impersonate')
-            msg = 'Please note that this action will cause termination to any active session on the front-end. Do you really want to proceed?'
+            msg = 'Please note that this action will cause termination to any active session on the front-end. Do you really want to proceed?';
+        else if (type === 'unlink_referrer')
+            msg = 'Do you want to unlink referrer?';
 
         setAlertType(type);
         setMsg(msg);
@@ -212,8 +214,11 @@ const MemberDetails = (props) => {
             handleFormSubmit();
         } else if (alertType === 'delete') {
             deleteAccount();
-        } else if (alertType === 'impersonate')
+        } else if (alertType === 'impersonate'){
             impersonateAccount();
+        } else if (alertType === 'unlink_referrer') {
+            removeReferrer();
+        }
     }
 
     const memberNoteDeleted = () => {
@@ -303,6 +308,9 @@ const MemberDetails = (props) => {
         updateMemberData(formdata, 'basic_details');
     }
 
+    /**
+     * Update member info
+     */
     const updateMemberData = (formdata, type) => {
         setActionLoader(true);
         axios.post(jwtServiceConfig.memberUpdate + '/' + moduleId, formdata)
@@ -322,6 +330,7 @@ const MemberDetails = (props) => {
                         setEditPaymentEmail(false);
                         setEditAdminStatus(false);
                     }
+                    // Get latest data from API
                     getMemberData(false);
                 }
             })
@@ -471,6 +480,14 @@ const MemberDetails = (props) => {
         onCloseAlertDialogHandle();
         window.open('//'+memberData.impersonation_link, "_blank");
     };
+
+    /**
+     * Unlink Referrer
+     */
+    const removeReferrer = () => {
+        onCloseAlertDialogHandle();
+        updateMemberData({ type: 'unlink_referrer', member_id: moduleId }, 'unlink_referrer');
+    }
 
     if (loader) {
         return (
@@ -872,14 +889,28 @@ const MemberDetails = (props) => {
                                     <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
                                         (memberData.MemberReferral && memberData.member_referral_id && memberData.member_referrer) ? (
                                             <div className='flex items-center'>
-                                                <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base  text-sm break-all">
-                                                    {memberData.member_referrer} ({memberData.MemberReferral.ip})
-                                                </Typography>
-                                                <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
-                                                    <IconButton color="primary" aria-label="Filter" component="span">
-                                                        <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                                <AnchorLink href={`/app/members/${memberData.member_referral_id}`} target="_blank">
+                                                    <Typography variant="body1" className="sm:text-lg lg:text-sm xl:text-base  text-sm break-all">
+                                                        {memberData.member_referrer} {/** ({memberData.MemberReferral.ip}) */}
+                                                    </Typography>
+                                                </AnchorLink>
+                                                <Tooltip title={'IP Address: ' + memberData.MemberReferral.ip} placement="right">
+                                                    <IconButton color="primary" aria-label="show-ip" sx={iconLabel} component="span">
+                                                        <FuseSvgIcon className="text-48" size={16} color="action">material-outline:info</FuseSvgIcon>
                                                     </IconButton>
-                                                </Link>
+                                                </Tooltip>
+                                                {/* <Tooltip title="Go to referrer account" placement="right">
+                                                    <Link to={`/app/members/${memberData.member_referral_id}`} style={{ textDecoration: 'none', color: '#1e293b' }}>
+                                                        <IconButton color="primary" aria-label="external-link" sx={iconLabel} component="span">
+                                                            <FuseSvgIcon className="text-48" size={16} color="action">heroicons-outline:external-link</FuseSvgIcon>
+                                                        </IconButton>
+                                                    </Link>
+                                                </Tooltip> */}
+                                                <Tooltip title="Unlink referrer" placement="right">
+                                                    <IconButton color="primary" aria-label="unlink_referrer" sx={iconLabel} component="span" className="cursor-pointer" onClick={() => onOpenAlertDialogHandle('unlink_referrer')}>
+                                                        <FuseSvgIcon className="text-48" sx={iconStyle} size={16} color="action" >material-solid:link_off</FuseSvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
                                             </div>
                                         ) : '--'
                                     } />

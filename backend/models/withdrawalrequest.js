@@ -112,6 +112,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    '$Member.username$': {
+      field_name: 'Member.username',
+      db_name: '`Member`.`username`',
+      type: 'text',
+      placeholder: 'Username',
+      listing: false,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
     payment_email: {
       field_name: 'payment_email',
       db_name: 'payment_email',
@@ -125,11 +138,37 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    requested_on: {
+      field_name: 'requested_on',
+      db_name: 'requested_on',
+      type: 'text',
+      placeholder: 'Requested on',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
     amount: {
       field_name: 'amount',
       db_name: 'amount',
       type: 'text',
       placeholder: 'Amount',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
+    status: {
+      field_name: 'status',
+      db_name: 'status',
+      type: 'text',
+      placeholder: 'Status',
       listing: true,
       show_in_form: true,
       sort: true,
@@ -163,32 +202,6 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
-    },
-    requested_on: {
-      field_name: 'requested_on',
-      db_name: 'requested_on',
-      type: 'text',
-      placeholder: 'Requested on',
-      listing: true,
-      show_in_form: false,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: false,
-    },
-    status: {
-      field_name: 'status',
-      db_name: 'status',
-      type: 'text',
-      placeholder: 'Status',
-      listing: true,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: true,
     },
     note: {
       field_name: 'note',
@@ -242,19 +255,7 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    '$Member.username$': {
-      field_name: 'Member.username',
-      db_name: '`Member`.`username`',
-      type: 'text',
-      placeholder: 'Username',
-      listing: false,
-      show_in_form: false,
-      sort: true,
-      required: false,
-      value: '',
-      width: '50',
-      searchable: true,
-    },
+
     '$Member.admin_status$': {
       field_name: 'Member.admin_status',
       db_name: '`Member`.`admin_status`',
@@ -625,12 +626,12 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    console.log(
-      '------approvedAndCompletedReqs',
-      transaction_ids,
-      withdrawal_ids,
-      req_body
-    );
+    // console.log(
+    //   '------approvedAndCompletedReqs',
+    //   transaction_ids,
+    //   withdrawal_ids,
+    //   req_body
+    // );
     if (transaction_ids.length > 0) {
       await MemberTransaction.update(
         {
@@ -646,6 +647,41 @@ module.exports = (sequelize, DataTypes) => {
       { where: { id: withdrawal_ids } }
     );
     // }
+  };
+  //Approved and completed withdrawal req
+  WithdrawalRequest.checkIfDifferentPaymentMethod = async (
+    payment_method,
+    member_id
+  ) => {
+    const { Op } = require('sequelize');
+    const { PaymentMethod } = require('../models/index');
+    var resp = {
+      member_status: true,
+      member_message: '',
+    };
+    let if_any = await WithdrawalRequest.findOne({
+      logging: console.log,
+      where: {
+        member_id: member_id,
+        withdrawal_type_id: { [Op.ne]: payment_method.id },
+      },
+      include: {
+        model: PaymentMethod,
+        attributes: ['name'],
+      },
+      order: [['created_at', 'DESC']],
+    });
+    // console.log('------if_any', if_any, payment_method);
+    if (if_any) {
+      resp.member_status = false;
+      resp.member_message =
+        'You can not use ' +
+        payment_method.name +
+        ' as you have already used ' +
+        if_any.PaymentMethod.name +
+        ' before. In order to switch payment method from the one that you used previously, please contact our support team.”';
+    }
+    return resp;
   };
   return WithdrawalRequest;
 };

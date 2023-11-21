@@ -40,6 +40,7 @@ function List(props) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const user = useSelector(selectUser);
+	const routerParams = useParams();
 
 	const { module } = props;
 	const searchable = props.searchable ?? true;
@@ -91,19 +92,19 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [displayColumnArray, setDisplayColumnArray] = useState([]);
 	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score']);
 
 	const display_column_object = {
 		'id': 'ID',
-		'payment_email': 'Email',
 		'Member.username': 'Username',
-		'Member.admin_status': 'Admin Status',
-		'PaymentMethod.name': 'Method',
-		'Member.status': 'Account',
+		'payment_email': 'Email',
+		'created_at': 'Date',
 		'amount_with_currency': 'Cash',
 		'status': 'Status',
-		'created_at': 'Date',
+		'Member.status': 'Account',
+		'Member.admin_status': 'Admin Status',
+		'PaymentMethod.name': 'Method',
 	}
 
 	const handlePopoverOpen = (event) => {
@@ -140,7 +141,14 @@ function List(props) {
 			...queryParams
 		}
 		if (module === 'withdrawal-requests') {
-			var ordered_fields = displayColumnArray.sort((a, b) =>
+			var withdrawCoulmns = [];
+			if(routerParams.moduleId && routerParams.module === 'withdraws'){
+				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+			} else {
+				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+			}
+			setDisplayColumnArray(withdrawCoulmns);
+			var ordered_fields = withdrawCoulmns.sort((a, b) =>
 				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
 			)
 			params.fields = ordered_fields
@@ -416,6 +424,8 @@ function List(props) {
 			value = Helper.parseTimeStamp(value)
 		} else if ((['updated_at','requested_on'].includes(fieldConfig.field_name)) && value) {
 			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
+		} else if ((['created_at'].includes(fieldConfig.field_name)) && value) {
+			value = moment(value).format('DD-MMM-YYYY HH:mm');
 		}
 		return value;
 	}

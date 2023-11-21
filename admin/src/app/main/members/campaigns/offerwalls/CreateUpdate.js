@@ -691,7 +691,8 @@ const CreateUpdate = () => {
                                         <b className="pr-10"> PostBack URL :</b> {singleOfferwallData.postback_url}
                                     </div>
                                     <div className="flex  justify-center">
-                                        <b className="pr-10"> PostBack URL Example :</b> {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'}
+                                    {/* <b className="pr-10"> PostBack URL Example :</b> {singleOfferwallData.postback_url}?{urlObject.subIdVariable + '={sub}&' + urlObject.campaignIdVariable + '={offerid}&' + urlObject.campaignNameVariable + '={offername}'} */}
+                                    <b className="pr-10"> PostBack URL Example :</b> {singleOfferwallData.postback_url_example}
                                     </div>
                                     <div className="flex justify-center" variant="error">
                                         <Typography variant={'body1'} color="error">

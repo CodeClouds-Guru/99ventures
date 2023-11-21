@@ -63,6 +63,7 @@ class MemberAuthController {
     // this.updatePaymentInformation = this.updatePaymentInformation.bind(this);
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
+    this.getCompanyPortal = this.getCompanyPortal.bind(this);
   }
   //login
   async login(req, res) {
@@ -148,9 +149,17 @@ class MemberAuthController {
   //signup
   async signup(req, res) {
     try {
-      let company_portal_id = req.session.company_portal.id;
+      // let company_portal_id = req.session.company_portal.id;
+      // req.headers.site_id = company_portal_id;
+      // let company_id = req.session.company_portal.company_id;
+
+      //rewritting the company portal ids
+      const companyPortal = await this.getCompanyPortal(req);
+      let company_portal_id = companyPortal.id;
       req.headers.site_id = company_portal_id;
-      let company_id = req.session.company_portal.company_id;
+      let company_id = companyPortal.company_id;
+      //rewritting the company portal ids
+
       let ip = req.ip;
       if (Array.isArray(ip)) {
         ip = ip[0];
@@ -509,6 +518,7 @@ class MemberAuthController {
   async profileUpdate(req, res) {
     let member_status = true;
     let member_message = 'Successfully updated!';
+    const getmember = {};
     const method = req.method;
     let request_data = {};
     let member = {};
@@ -615,7 +625,7 @@ class MemberAuthController {
           });
 
           //set eligibility
-          const getmember = await Member.findOne({
+          getmember = await Member.findOne({
             attributes: ['id', 'profile_completed_on'],
             where: {
               id: member_id,
@@ -649,6 +659,7 @@ class MemberAuthController {
       // res.redirect('back');
     } finally {
       if (member_status) {
+        req.session.member = getmember;
         if (request_data.avatar) {
           req.session.member.avatar =
             process.env.S3_BUCKET_OBJECT_URL + request_data.avatar;
@@ -1266,6 +1277,7 @@ class MemberAuthController {
     let payment_method_details = await PaymentMethod.findOne({
       where: { id: request_data.payment_method_id },
       attributes: [
+        'id',
         'name',
         'slug',
         'type_user_info_again',
@@ -1317,7 +1329,15 @@ class MemberAuthController {
     if (!samePaymentInfoResp.member_status) {
       return samePaymentInfoResp;
     }
-
+    //check If Different Payment Method
+    var checkIfDifferentPaymentMethodResp =
+      await WithdrawalRequest.checkIfDifferentPaymentMethod(
+        payment_method_details,
+        request_data.member_id
+      );
+    if (!checkIfDifferentPaymentMethodResp.member_status) {
+      return checkIfDifferentPaymentMethodResp;
+    }
     //withdrawal process
     if (fieldValidationResp.member_payment_info.length > 0) {
       await MemberPaymentInformation.updatePaymentInformation({
@@ -1727,6 +1747,19 @@ class MemberAuthController {
       }
     }
     return true;
+  }
+
+  // get Company Portal details for signup
+  async getCompanyPortal(req) {
+    var company_portal_id = await CompanyPortal.findOne({ where: { id: 1 } });
+    const existing_portal = await CompanyPortal.findOne({
+      where: {
+        domain: {
+          [Op.substring]: req.get('host'),
+        },
+      },
+    });
+    return existing_portal ? existing_portal : company_portal_id;
   }
 
   /**
