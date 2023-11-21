@@ -40,6 +40,7 @@ function List(props) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const user = useSelector(selectUser);
+	const routerParams = useParams();
 
 	const { module } = props;
 	const searchable = props.searchable ?? true;
@@ -91,7 +92,7 @@ function List(props) {
 	const stateUser = useSelector(state => state.user);
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
-	const [displayColumnArray, setDisplayColumnArray] = useState(['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at']);
+	const [displayColumnArray, setDisplayColumnArray] = useState([]);
 	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score']);
 
 	const display_column_object = {
@@ -140,7 +141,14 @@ function List(props) {
 			...queryParams
 		}
 		if (module === 'withdrawal-requests') {
-			var ordered_fields = displayColumnArray.sort((a, b) =>
+			var withdrawCoulmns = [];
+			if(routerParams.moduleId && routerParams.module === 'withdraws'){
+				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+			} else {
+				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+			}
+			setDisplayColumnArray(withdrawCoulmns);
+			var ordered_fields = withdrawCoulmns.sort((a, b) =>
 				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
 			)
 			params.fields = ordered_fields
