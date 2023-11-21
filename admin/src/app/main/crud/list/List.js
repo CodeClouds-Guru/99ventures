@@ -97,14 +97,14 @@ function List(props) {
 
 	const display_column_object = {
 		'id': 'ID',
-		'payment_email': 'Email',
 		'Member.username': 'Username',
-		'Member.admin_status': 'Admin Status',
-		'PaymentMethod.name': 'Method',
-		'Member.status': 'Account',
+		'payment_email': 'Email',
+		'created_at': 'Date',
 		'amount_with_currency': 'Cash',
 		'status': 'Status',
-		'created_at': 'Date',
+		'Member.status': 'Account',
+		'Member.admin_status': 'Admin Status',
+		'PaymentMethod.name': 'Method',
 	}
 
 	const handlePopoverOpen = (event) => {
