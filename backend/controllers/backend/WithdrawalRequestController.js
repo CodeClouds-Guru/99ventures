@@ -69,10 +69,11 @@ class WithdrawalRequestController extends Controller {
       let limit = parseInt(req.query.show) || 10;
 
       let fields = req.query.fields || ['id', 'first_name', 'username'];
-      const index = req.query.fields.indexOf('Member.status');
+      let fields_temp = req.query.fields || ['id', 'first_name', 'username'];
+      const index = fields_temp.indexOf('Member.status');
 
       if (index > 0)
-        req.query.fields[index] = '`Member.status` AS `Member.member_status`';
+        fields_temp[index] = '`Member.status` AS `Member.member_status`';
       const options = this.getQueryOptions(req);
       options.include = [
         {
@@ -93,7 +94,7 @@ class WithdrawalRequestController extends Controller {
         'amount',
         'currency',
         'member_id',
-        ...req.query.fields,
+        ...fields_temp,
       ];
 
       let programsList = await this.getProgramList(req);
