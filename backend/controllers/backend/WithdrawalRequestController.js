@@ -68,12 +68,11 @@ class WithdrawalRequestController extends Controller {
     } else {
       let limit = parseInt(req.query.show) || 10;
 
+      let fields = req.query.fields || ['id', 'first_name', 'username'];
       const index = req.query.fields.indexOf('Member.status');
 
       if (index > 0)
         req.query.fields[index] = '`Member.status` AS `Member.member_status`';
-
-      let fields = req.query.fields || ['id', 'first_name', 'username'];
       const options = this.getQueryOptions(req);
       options.include = [
         {
@@ -89,7 +88,13 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['id', 'amount', 'currency', 'member_id', ...fields];
+      options.attributes = [
+        'id',
+        'amount',
+        'currency',
+        'member_id',
+        ...req.query.fields,
+      ];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);

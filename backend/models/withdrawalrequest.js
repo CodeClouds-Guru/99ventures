@@ -685,7 +685,7 @@ module.exports = (sequelize, DataTypes) => {
         payment_method.name +
         ' as you have already used ' +
         if_any[0].PaymentMethod.name +
-        ' before. In order to switch payment method from the one that you used previously, please contact our support team.”';
+        ' before. In order to switch payment method from the one that you used previously, please contact our support team <a href="/create-ticket">here</a>.”';
     }
     return resp;
   };
