@@ -49,12 +49,13 @@ class WithdrawalRequestController extends Controller {
   generateFields(header_fields) {
     var fields = {};
     for (const key of header_fields) {
-      fields[key] = {
-        field_name: key,
-        db_name: key,
+      let k = (key === '`Member.status` AS `Member.member_status`') ? 'Member.status' : key;
+      fields[k] = {
+        field_name: k,
+        db_name: k,
         listing: true,
         placeholder:
-          key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col',
+          key in this.fieldConfig ? this.fieldConfig[key] : ((key === '`Member.status` AS `Member.member_status`') ? 'Account' : 'Unknown Col'),
       };
     }
     return fields;
