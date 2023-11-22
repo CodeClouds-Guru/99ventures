@@ -142,12 +142,17 @@ function List(props) {
 		}
 		if (module === 'withdrawal-requests') {
 			var withdrawCoulmns = [];
-			if(routerParams.moduleId && routerParams.module === 'withdraws'){
-				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+			if(firstCall){
+				if(routerParams.moduleId && routerParams.module === 'withdraws'){
+					withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+				} else {
+					withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+				}
+				setDisplayColumnArray(withdrawCoulmns);
 			} else {
-				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+				withdrawCoulmns = displayColumnArray
 			}
-			setDisplayColumnArray(withdrawCoulmns);
+			
 			var ordered_fields = withdrawCoulmns.sort((a, b) =>
 				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
 			)
