@@ -67,6 +67,12 @@ class WithdrawalRequestController extends Controller {
       return await this.getPaymentMethods();
     } else {
       let limit = parseInt(req.query.show) || 10;
+
+      const index = req.query.fields.indexOf('Member.status');
+
+      if (index > 0)
+        req.query.fields[index] = '`Member.status` AS `Member.member_status`';
+
       let fields = req.query.fields || ['id', 'first_name', 'username'];
       const options = this.getQueryOptions(req);
       options.include = [

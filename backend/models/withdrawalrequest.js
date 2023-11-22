@@ -677,7 +677,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       order: [['created_at', 'DESC']],
     });
-    console.log('------if_any', if_any, payment_method);
+    // console.log('------if_any', if_any, payment_method);
     if (if_any.length > 0) {
       resp.member_status = false;
       resp.member_message =
