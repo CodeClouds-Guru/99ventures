@@ -518,7 +518,7 @@ class MemberAuthController {
   async profileUpdate(req, res) {
     let member_status = true;
     let member_message = 'Successfully updated!';
-    const getmember = {};
+    let getmember = {};
     const method = req.method;
     let request_data = {};
     let member = {};
