@@ -659,7 +659,7 @@ module.exports = (sequelize, DataTypes) => {
       member_status: true,
       member_message: '',
     };
-    let if_any = await WithdrawalRequest.findOne({
+    let if_any = await WithdrawalRequest.findAll({
       logging: console.log,
       where: {
         member_id: member_id,
@@ -667,19 +667,25 @@ module.exports = (sequelize, DataTypes) => {
       },
       include: {
         model: PaymentMethod,
+        where: {
+          parent_payment_method_id: {
+            [Op.ne]: payment_method.parent_payment_method_id,
+          },
+        },
         attributes: ['name'],
+        required: true,
       },
       order: [['created_at', 'DESC']],
     });
     // console.log('------if_any', if_any, payment_method);
-    if (if_any) {
+    if (if_any.length > 0) {
       resp.member_status = false;
       resp.member_message =
         'You can not use ' +
         payment_method.name +
         ' as you have already used ' +
-        if_any.PaymentMethod.name +
-        ' before. In order to switch payment method from the one that you used previously, please contact our support team.”';
+        if_any[0].PaymentMethod.name +
+        ' before. In order to switch payment method from the one that you used previously, please contact our support team <a href="/create-ticket">here</a>.”';
     }
     return resp;
   };

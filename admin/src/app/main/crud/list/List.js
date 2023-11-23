@@ -142,12 +142,17 @@ function List(props) {
 		}
 		if (module === 'withdrawal-requests') {
 			var withdrawCoulmns = [];
-			if(routerParams.moduleId && routerParams.module === 'withdraws'){
-				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+			if(firstCall){
+				if(routerParams.moduleId && routerParams.module === 'withdraws'){
+					withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.username', 'amount_with_currency', 'created_at'];
+				} else {
+					withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+				}
+				setDisplayColumnArray(withdrawCoulmns);
 			} else {
-				withdrawCoulmns = ['PaymentMethod.name', 'payment_email', 'status', 'Member.status', 'Member.admin_status', 'Member.username', 'amount_with_currency', 'created_at'];
+				withdrawCoulmns = displayColumnArray
 			}
-			setDisplayColumnArray(withdrawCoulmns);
+			
 			var ordered_fields = withdrawCoulmns.sort((a, b) =>
 				Object.keys(display_column_object).indexOf(a) - Object.keys(display_column_object).indexOf(b)
 			)
@@ -524,6 +529,7 @@ function List(props) {
 					<>	<div className="flex items-center">					
 						<a className='whitespace-nowrap' onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n.Member.id}`}>{n['Member.username']}</a>
 						{
+							n.reverse_count && (
 							
 								<Tooltip title={n.reverse_count} placement="top">
 									<IconButton color="primary" aria-label="Filter" component="span" >
@@ -531,6 +537,7 @@ function List(props) {
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="15" width="15" fill="#34385f" className="text-48" ><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
 									</IconButton>
 								</Tooltip>
+							)
 							
 						}
 						</div>

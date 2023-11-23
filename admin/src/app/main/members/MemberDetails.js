@@ -987,7 +987,7 @@ const MemberDetails = (props) => {
                                         ) : (
                                             <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                                 {
-                                                    memberData.country_code && `(${phoneCountryCode()}) ` + memberData.phone_no
+                                                    (memberData.country_code && memberData.phone_no) ? `(${phoneCountryCode()}) ` + memberData.phone_no : '--'
                                                 }
                                             </Typography>
                                         )
@@ -1024,7 +1024,7 @@ const MemberDetails = (props) => {
                                             </div>
                                         ) : (
                                             <Typography variant="body1" className="capitalize sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
-                                                {memberData.gender}
+                                                {memberData.gender ?? '--'}
                                             </Typography>
                                         )
                                     } />
@@ -1165,7 +1165,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.address_1}</Typography>
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.address_1 ?? '--'}</Typography>
                                                         )
                                                     }
                                                 </>
@@ -1244,7 +1244,7 @@ const MemberDetails = (props) => {
                                                                 }
                                                             />
                                                         ) : (
-                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.zip_code}</Typography>
+                                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.zip_code ??  '--'}</Typography>
                                                         )
                                                     }
                                                 </>
@@ -1275,7 +1275,7 @@ const MemberDetails = (props) => {
 
                                                         ) : (
                                                             <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
-                                                                {memberData.country_id && getCountryName(memberData.country_id)}
+                                                                {memberData.country_id ? getCountryName(memberData.country_id) : '--'}
                                                             </Typography>
                                                         )
                                                     }

@@ -518,7 +518,7 @@ class MemberAuthController {
   async profileUpdate(req, res) {
     let member_status = true;
     let member_message = 'Successfully updated!';
-    const getmember = {};
+    let getmember = {};
     const method = req.method;
     let request_data = {};
     let member = {};
@@ -1290,6 +1290,7 @@ class MemberAuthController {
         'payment_type',
         'api_username',
         'api_password',
+        'parent_payment_method_id',
       ],
       include: {
         model: PaymentMethodFieldOption,

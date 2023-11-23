@@ -49,12 +49,13 @@ class WithdrawalRequestController extends Controller {
   generateFields(header_fields) {
     var fields = {};
     for (const key of header_fields) {
-      fields[key] = {
-        field_name: key,
-        db_name: key,
+      let k = (key === '`Member.status` AS `Member.member_status`') ? 'Member.status' : key;
+      fields[k] = {
+        field_name: k,
+        db_name: k,
         listing: true,
         placeholder:
-          key in this.fieldConfig ? this.fieldConfig[key] : 'Unknown Col',
+          key in this.fieldConfig ? this.fieldConfig[key] : ((key === '`Member.status` AS `Member.member_status`') ? 'Account' : 'Unknown Col'),
       };
     }
     return fields;
@@ -67,7 +68,13 @@ class WithdrawalRequestController extends Controller {
       return await this.getPaymentMethods();
     } else {
       let limit = parseInt(req.query.show) || 10;
+
       let fields = req.query.fields || ['id', 'first_name', 'username'];
+      let fields_temp = req.query.fields || ['id', 'first_name', 'username'];
+      const index = fields_temp.indexOf('Member.status');
+
+      if (index > 0)
+        fields_temp[index] = '`Member.status` AS `Member.member_status`';
       const options = this.getQueryOptions(req);
       options.include = [
         {
@@ -83,7 +90,13 @@ class WithdrawalRequestController extends Controller {
       ];
       options.subQuery = false;
       options.distinct = true;
-      options.attributes = ['id', 'amount', 'currency', 'member_id', ...fields];
+      options.attributes = [
+        'id',
+        'amount',
+        'currency',
+        'member_id',
+        ...fields_temp,
+      ];
 
       let programsList = await this.getProgramList(req);
       let results = await this.model.findAndCountAll(options);
