@@ -516,14 +516,14 @@ class ReportController {
   async withdrawCount(start_date, end_date, company_portal_id) {
     //total withdrawal amount
     let query =
-      "SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status in ('approved', 'completed') AND withdrawal_requests.created_at BETWEEN ? AND ?";
+      "SELECT IFNULL(SUM(amount), 0) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status in ('approved', 'completed') AND withdrawal_requests.created_at BETWEEN ? AND ?";
 
     let total_withdrawn = await db.sequelize.query(query, {
       replacements: [company_portal_id, start_date, end_date],
       type: QueryTypes.SELECT,
     });
     return {
-      values: total_withdrawn,
+      amount: total_withdrawn[0].amount,
     };
   }
 }
