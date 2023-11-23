@@ -121,23 +121,23 @@ class ReportController {
       where: { admin_status: 'verified', company_portal_id: company_portal_id },
     });
     //total withdrawal amount
-    let query =
-      "SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status in ('approved', 'completed')";
+    // let query =
+    //   "SELECT SUM(amount) AS `amount` FROM `withdrawal_requests` JOIN `members` ON withdrawal_requests.member_id = members.id WHERE members.company_portal_id = ? AND withdrawal_requests.status in ('approved', 'completed')";
 
-    let total_withdrawn = await db.sequelize.query(query, {
-      replacements: [company_portal_id],
-      type: QueryTypes.SELECT,
-    });
+    // let total_withdrawn = await db.sequelize.query(query, {
+    //   replacements: [company_portal_id],
+    //   type: QueryTypes.SELECT,
+    // });
     let completed_surveys = await MemberSurvey.count();
-    total_withdrawn = total_withdrawn[0].amount ?? 0;
+    // total_withdrawn = total_withdrawn[0].amount ?? 0;
     return {
       results: {
         no_of_surveys: survey_list,
         no_of_members: member_list,
         no_of_verified_members: verified_member,
-        total_withdrawn: total_withdrawn
-          ? parseFloat(total_withdrawn).toFixed(2)
-          : 0,
+        // total_withdrawn: total_withdrawn
+        //   ? parseFloat(total_withdrawn).toFixed(2)
+        //   : 0,
         completed_surveys: completed_surveys,
       },
     };
@@ -522,8 +522,9 @@ class ReportController {
       replacements: [company_portal_id, start_date, end_date],
       type: QueryTypes.SELECT,
     });
+    total_withdrawn = total_withdrawn[0].amount ?? 0;
     return {
-      amount: total_withdrawn[0].amount,
+      amount: total_withdrawn ? parseFloat(total_withdrawn).toFixed(2) : 0,
     };
   }
 }
