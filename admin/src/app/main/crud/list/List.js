@@ -874,7 +874,7 @@ function List(props) {
 						{
 							(module === 'withdrawal-requests') && Object.keys(display_column_object).map((val, index) => {
 								return (
-									<FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
+									val !== 'status' && <FormControlLabel className="w-3/12" key={index} control={<Checkbox checked={displayColumnArray.includes(val)} value={val} onClick={(e) => { handleConfigurColumn(e); }} />} label={display_column_object[val]} />
 								)
 							}) 
 						}
