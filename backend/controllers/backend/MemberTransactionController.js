@@ -106,8 +106,9 @@ class MemberTransactionController extends Controller {
             record.dataValues.ParentTransaction.status;
         }
         if (record.dataValues.status == 1) {
-          record.dataValues.new_status =
-            record.dataValues.WithdrawalRequest.status;
+          record.dataValues.new_status = record.dataValues.WithdrawalRequest
+            ? record.dataValues.WithdrawalRequest.status
+            : record.dataValues.status;
         }
         if (
           record.dataValues.status == 5 &&
@@ -325,10 +326,12 @@ class MemberTransactionController extends Controller {
       }
     );
 
+    let parent_transaction = await this.model.findByPk(data.transaction_id);
+    let note = 'Reverse transaction - ' + parent_transaction.note;
     await this.model.insertTransaction({
       type: 'withdraw',
       amount: parseFloat(data.transaction_amount),
-      note: 'Reverse transaction',
+      note: note,
       member_id: data.member_id,
       amount_action: 'reversed_transaction',
       status: 5,
@@ -337,12 +340,6 @@ class MemberTransactionController extends Controller {
       created_by: data.created_by,
     });
 
-    // await this.model.updateMemberBalance({
-    //   amount: updated_balance,
-    //   member_id: data.member_id,
-    //   action: 'reversed_transaction',
-    //   transaction_amount: parseFloat(data.transaction_amount),
-    // });
     await MemberBalance.update(
       { amount: updated_balance },
       {

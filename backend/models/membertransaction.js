@@ -220,19 +220,7 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
-    note: {
-      field_name: 'note',
-      db_name: 'note',
-      type: 'text',
-      placeholder: 'Note',
-      listing: false,
-      show_in_form: true,
-      sort: true,
-      required: true,
-      value: '',
-      width: '50',
-      searchable: true,
-    },
+
     amount_action: {
       field_name: 'amount_action',
       db_name: 'amount_action',
@@ -310,6 +298,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    note: {
+      field_name: 'note',
+      db_name: 'note',
+      type: 'text',
+      placeholder: 'Note',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: true,
     },
   };
   sequelizePaginate.paginate(MemberTransaction);
