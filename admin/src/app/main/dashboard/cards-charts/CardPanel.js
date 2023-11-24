@@ -48,12 +48,12 @@ const CardPanel = (props) => {
                     <Typography variant="subtitle1" component="p">Completed Surveys</Typography>
                 </CardContent>
             </Card>
-            <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#f2dfb0', color: '#6d634d' }} onClick={() => navigate('/app/withdrawal-requests')}>
+            {/* <Card className="flex items-center justify-center cursor-pointer" sx={{  ...cardStyle, backgroundColor: '#f2dfb0', color: '#6d634d' }} onClick={() => navigate('/app/withdrawal-requests')}>
                 <CardContent>
                     <Typography variant="h4" component="p">${props.withdrawn}</Typography>
                     <Typography variant="subtitle1" component="p">Withdrawn</Typography>
                 </CardContent>
-            </Card>
+            </Card> */}
         </div>
     )
 }

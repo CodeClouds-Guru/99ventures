@@ -14,6 +14,7 @@ import CompletedSurveys from './cards-charts/CompletedSurveys';
 import BestPerformingSurveys from './cards-charts/BestPerformingSurveys';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import { IconButton, Tooltip, OutlinedInput, InputAdornment, FormControl } from '@mui/material';
+import Withdrawn from "./cards-charts/Withdrawn";
 
 
 const DashboardContent = (props) => {
@@ -27,6 +28,7 @@ const DashboardContent = (props) => {
     const [bestPerformingSurveys, setBestPerformingSurveys] = useState({});
     const [bestPerformers, setBestPerformers] = useState({});
     const [widgets, setWidgets] = useState([]);
+    const [withdrawn, setWithdrawn] = useState([]);
 
     const [dateRange, setDateRange] = useState({
         startDate: moment().subtract(7, 'd').startOf('day'),
@@ -134,6 +136,12 @@ const DashboardContent = (props) => {
                     setBestPerformers(results);
                 }
             }
+            else if(payload.type === 'withdraw_count') {
+                if (res.data.hasOwnProperty('amount')) {
+                    console.log(res.data.amount)
+                    setWithdrawn(res.data.amount);
+                }
+            }
         }).catch(e => {
             console.error(e)
             dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to fetch' }))
@@ -154,13 +162,16 @@ const DashboardContent = (props) => {
              }
             if(widget.slug ===  'members_chart'){
                 compoent.push(<MembersChart key={widget.slug} membersChart={membersChart} />);
-             }
+            }
             if(widget.slug ===  'tickets_chart'){
                 compoent.push(<TicketsChart key={widget.slug} ticketsChart={ticketsChart} />);
-             }
+            }
             if(widget.slug ===  'top_performers'){
                 compoent.push(<TopPerformers key={widget.slug} bestPerformers={bestPerformers} />);
-             }
+            }
+            if(widget.slug ===  'withdraw_count'){
+                compoent.push(<Withdrawn key={widget.slug} amount={withdrawn}/>);
+            }
         }
         return compoent;
     }
