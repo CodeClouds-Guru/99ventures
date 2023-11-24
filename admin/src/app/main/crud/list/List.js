@@ -1138,17 +1138,16 @@ function List(props) {
 						</TableBody> :
 							<TableBody>
 								{data
-									.map((n) => {
+									.map((n, indx) => {
 										const isSelected = selected.indexOf(n.id) !== -1;
 										return (
-
 											<TableRow
 												className="h-60 cursor-pointer"
 												hover
 												role="checkbox"
 												aria-checked={isSelected}
 												tabIndex={-1}
-												key={n.id}
+												key={indx}
 												selected={isSelected}
 												onClick={(event) => handleClick(n, event)}
 											>
