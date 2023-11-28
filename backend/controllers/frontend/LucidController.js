@@ -7,10 +7,11 @@ const {
   SurveyQualification,
   SurveyAnswerPrecodes,
   MemberEligibilities,
+  CompanyPortal
 } = require('../../models');
 const { Op, QueryTypes } = require('sequelize');
 const LucidHelper = require('../../helpers/Lucid');
-const { generateHashForLucid } = require('../../helpers/global');
+const { generateHashForLucid, generateUserIdForSurveyProviders } = require('../../helpers/global');
 const Sequelize = require('sequelize');
 
 class LucidController {
@@ -28,6 +29,10 @@ class LucidController {
           where: {
             id: memberId,
           },
+          include: {
+            model: CompanyPortal,
+            attributes: ['name'],
+          }
         });
   
         if (!memberId || member === null) {
@@ -122,7 +127,8 @@ class LucidController {
                 surveyQual,
                 eligibilities
               );
-              let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${eligibilityStr}`;
+              let uid = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id);
+              let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${uid}&${eligibilityStr}`;
               let cpiValue = (+survey.cpi * +provider.currency_percent) / 100;
               let temp_survey = {
                 survey_number: survey.survey_number,
