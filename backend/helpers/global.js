@@ -134,3 +134,15 @@ exports.generateHashForLucid = (url) => {
   // const hash = crypto.createHmac('sha1', process.env.LUCID_API_KEY).update(url, 'utf-8').digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
   return encodeURIComponent(hash);
 }
+
+exports.generateUserIdForSurveyProviders = (companyPortalName, memberId) => {
+  var envType = '_';
+  if (process.env.DEV_MODE == "0")
+    envType = '_live_';
+  else if (process.env.DEV_MODE == "1")
+    envType = '_development_';
+  else if (process.env.DEV_MODE == "2")
+    envType = '_staging_';
+
+  return companyPortalName + envType + memberId;
+}
