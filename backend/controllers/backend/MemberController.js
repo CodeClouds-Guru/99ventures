@@ -19,6 +19,7 @@ const {
   Company,
   WithdrawalRequest,
   MemberNotification,
+  AdminMemberPaymentMethodApproval,
   sequelize,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
@@ -173,6 +174,7 @@ class MemberController extends Controller {
             'state',
             'created_at',
             'is_shoutbox_blocked',
+            'primary_payment_method_id',
           ];
           options.paranoid = false;
           options.where = { id: member_id };
@@ -237,6 +239,10 @@ class MemberController extends Controller {
               where: { status: [1, '1'] },
               limit: 1,
             },
+            {
+              model: PaymentMethod,
+              attributes: ['name', 'slug', 'id'],
+            },
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
@@ -285,6 +291,12 @@ class MemberController extends Controller {
             });
           }
 
+          //
+          let all_payment_methods = await PaymentMethod.findAll({
+            attributes: ['id', 'name', 'slug'],
+            where: { id: { [Op.ne]: result.primary_payment_method_id } },
+          });
+
           var referral_link =
             req.headers.host + '?referral_code=' + result.referral_code;
           result.setDataValue('country_list', country_list);
@@ -299,6 +311,7 @@ class MemberController extends Controller {
             'impersonation_link',
             `${domain}/impersonate?hashKey=${impersonation_token}`
           );
+          result.setDataValue('all_payment_methods', all_payment_methods);
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -409,6 +422,9 @@ class MemberController extends Controller {
         result = true;
       } else if (req.body.type === 'unlink_referrer') {
         result = await this.unlinkReferrer(req);
+        delete req.body.type;
+      } else if (req.body.type === 'change_payment_method') {
+        result = await this.changePaymentMethod(req);
         delete req.body.type;
       } else {
         // console.error(error);
@@ -1167,6 +1183,22 @@ class MemberController extends Controller {
       await MemberReferral.destroy({
         where: { referral_id: member_id, member_id: result.member_referral_id },
       });
+      return true;
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError('Unable to update data', 500);
+    }
+  }
+
+  //change Payment Method
+  async changePaymentMethod(req) {
+    try {
+      await AdminMemberPaymentMethodApproval.insertPaymentMethodForAdminApproval(
+        {
+          payment_method_id: req.body.payment_method_id,
+          member_id: req.params.id,
+        }
+      );
       return true;
     } catch (error) {
       console.error(error);

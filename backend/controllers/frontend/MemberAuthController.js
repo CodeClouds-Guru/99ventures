@@ -1331,14 +1331,14 @@ class MemberAuthController {
       return samePaymentInfoResp;
     }
     //check If Different Payment Method
-    // var checkIfDifferentPaymentMethodResp =
-    //   await WithdrawalRequest.checkIfDifferentPaymentMethod(
-    //     payment_method_details,
-    //     request_data.member_id
-    //   );
-    // if (!checkIfDifferentPaymentMethodResp.member_status) {
-    //   return checkIfDifferentPaymentMethodResp;
-    // }
+    var checkIfDifferentPaymentMethodResp =
+      await WithdrawalRequest.checkIfDifferentPaymentMethod(
+        payment_method_details,
+        request_data.member_id
+      );
+    if (!checkIfDifferentPaymentMethodResp.member_status) {
+      return checkIfDifferentPaymentMethodResp;
+    }
     //withdrawal process
     if (fieldValidationResp.member_payment_info.length > 0) {
       await MemberPaymentInformation.updatePaymentInformation({
