@@ -294,7 +294,8 @@ class MemberController extends Controller {
           //
           let all_payment_methods = await PaymentMethod.findAll({
             attributes: ['id', 'name', 'slug'],
-            where: { id: { [Op.ne]: result.primary_payment_method_id } },
+            // where: { id: { [Op.ne]: result.primary_payment_method_id } },
+            where: { status: 1 },
           });
 
           var referral_link =
@@ -432,19 +433,28 @@ class MemberController extends Controller {
       }
       // console.error(result);
       if (result) {
-        var message =
-          type === 'resend_verify_email'
-            ? 'Email sent successfully'
-            : 'Record has been updated successfully';
+        var message = 'Record has been updated successfully';
+        if (type === 'resend_verify_email') message = 'Email sent successfully';
+        if (type === 'change_payment_method')
+          message = 'Payment method approved.';
+        // var message =
+        //   type === 'resend_verify_email'
+        //     ? 'Email sent successfully'
+        //     : 'Record has been updated successfully';
         return {
           status: true,
           message: message,
         };
       } else {
-        var message =
-          type === 'resend_verify_email'
-            ? 'Unable to send email'
-            : 'Unable to save data';
+        var message = 'Unable to save data';
+        if (type === 'resend_verify_email') message = 'Unable to send email';
+        if (type === 'change_payment_method')
+          message =
+            'Unable to save. This member already has approved payment methods.';
+        // var message =
+        //   type === 'resend_verify_email'
+        //     ? 'Unable to send email'
+        //     : 'Unable to save data';
         this.throwCustomError(message, 500);
       }
     } catch (error) {
@@ -1193,13 +1203,14 @@ class MemberController extends Controller {
   //change Payment Method
   async changePaymentMethod(req) {
     try {
-      await AdminMemberPaymentMethodApproval.insertPaymentMethodForAdminApproval(
-        {
-          payment_method_id: req.body.payment_method_id,
-          member_id: req.params.id,
-        }
-      );
-      return true;
+      let resp =
+        await AdminMemberPaymentMethodApproval.insertPaymentMethodForAdminApproval(
+          {
+            payment_method_id: req.body.payment_method_id,
+            member_id: req.params.id,
+          }
+        );
+      return resp;
     } catch (error) {
       console.error(error);
       this.throwCustomError('Unable to update data', 500);

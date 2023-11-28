@@ -39,17 +39,29 @@ module.exports = (sequelize, DataTypes) => {
   AdminMemberPaymentMethodApproval.insertPaymentMethodForAdminApproval = async (
     data
   ) => {
-    // console.log(data);
-    let insert_data = {
-      member_id: data.member_id,
-      payment_method_id: data.payment_method_id,
-      created_by: data.member_id,
-      status: 'pending',
-    };
-
-    return await AdminMemberPaymentMethodApproval.create(insert_data, {
-      silent: true,
+    console.log(data);
+    let checkAlreadyApproved = await AdminMemberPaymentMethodApproval.findOne({
+      where: {
+        member_id: data.member_id,
+        is_used: 0,
+        status: 'approved',
+      },
+      order: [['created_at', 'desc']],
     });
+    if (!checkAlreadyApproved) {
+      let insert_data = {
+        member_id: data.member_id,
+        payment_method_id: data.payment_method_id,
+        created_by: data.member_id,
+        status: 'approved',
+      };
+
+      return await AdminMemberPaymentMethodApproval.create(insert_data, {
+        silent: true,
+      });
+    } else {
+      return false;
+    }
   };
   //insert For Admin Approval for different payment method use
   AdminMemberPaymentMethodApproval.updateAdminApprovalStatus = async (data) => {
