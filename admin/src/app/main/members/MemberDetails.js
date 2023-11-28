@@ -20,6 +20,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from"moment";
 import { selectUser } from 'app/store/userSlice';
+import PaymentMethodUpdate from './components/PaymentMethodUpdate';
 
 const labelStyling = {
     '@media screen and (max-width: 1400px)': {
@@ -148,6 +149,8 @@ const MemberDetails = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { moduleId } = useParams();
+    const user = useSelector(selectUser);
+
     const [msg, setMsg] = useState('');
     const [avatar, setAvatar] = useState('');
     const [status, setStatus] = useState('');
@@ -175,7 +178,7 @@ const MemberDetails = (props) => {
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [editAdminStatus, setEditAdminStatus] = useState(false);
     const [editPaymentEmail, setEditPaymentEmail] = useState(false);
-    const user = useSelector(selectUser);
+    
     
     const clickToCopy = (text) => {
         Helper.copyTextToClipboard(text).then(res => {
@@ -1074,6 +1077,19 @@ const MemberDetails = (props) => {
                                         <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">
                                             { moment(memberData.created_at).format('MMMM Do YYYY, HH:mm:ss') }
                                         </Typography>
+                                    } />
+                                </ListItem>
+                                <ListItem disablePadding>
+                                    <ListItemText className="w-1/5 sm:w-1/4 md:w-1/4 lg:w-1/3 xl:w-3/12" sx={listItemTextStyle} primary={
+                                        <Typography variant="subtitle" className="font-semibold" sx={labelStyling}>Primary <br/>Payment Method:</Typography>
+                                    } />
+                                    <ListItemText className="w-1/2 sm:w-3/4 lg:w-2/3 xl:w-9/12" sx={listItemTextStyle} primary={
+                                        <PaymentMethodUpdate 
+                                            memberData={memberData} 
+                                            iconStyle={iconStyle} 
+                                            iconLabel={iconLabel} 
+                                            updateMemberData={updateMemberData} 
+                                        />
                                     } />
                                 </ListItem>
                             </List>
