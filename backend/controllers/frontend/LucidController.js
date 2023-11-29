@@ -27,11 +27,7 @@ class LucidController {
         const member = await Member.findOne({
           attributes: ['username', 'country_id'],
           where: {
-            id: memberId,
-          },
-          include: {
-            model: CompanyPortal,
-            attributes: ['name'],
+            id: memberId
           }
         });
   
@@ -127,8 +123,8 @@ class LucidController {
                 surveyQual,
                 eligibilities
               );
-              let uid = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id);
-              let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${uid}&${eligibilityStr}`;
+              
+              let link = `/lucid/entrylink?survey_number=${survey.survey_number}&uid=${member.username}&${eligibilityStr}`;
               let cpiValue = (+survey.cpi * +provider.currency_percent) / 100;
               let temp_survey = {
                 survey_number: survey.survey_number,
@@ -361,6 +357,23 @@ class LucidController {
       return;
     }
     try {
+      const member = await Member.findOne({
+        attributes: ['id'],
+        where: {
+          username: req.query.uid,
+        },
+        include: {
+          model: CompanyPortal,
+          attributes: ['name'],
+        }
+      });
+      if (member === null) {
+        res.json({
+          staus: false,
+          message: 'Member not found!',
+        });
+        return;
+      }
       const lcObj = new LucidHelper();
       const surveyNumber = req.query.survey_number;
       // This block will check whether the member has already attempted to this survey or not
@@ -375,10 +388,11 @@ class LucidController {
       const quota = await lcObj.showQuota(surveyNumber);
       if (quota.SurveyStillLive == true || quota.SurveyStillLive == 'true') {
         const queryParams = req.query;
+        const pid = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id);
         const params = {
           MID: Date.now(),
-          PID: req.query.uid,
-          ...queryParams,
+          PID: pid,
+          ...queryParams
         };
         delete params.survey_number;
         delete params.uid;
@@ -429,7 +443,8 @@ class LucidController {
         }
         let URL = this.rebuildEntryLink(entryLink, params);
         // console.log('Lucid entry link', URL);
-        res.redirect(URL);
+        // res.redirect(URL);
+        res.send(URL);
         return;
       } else {
         throw {
@@ -458,6 +473,7 @@ class LucidController {
   /**
    * Rebuild the entry link with hash
    * NOTE: When hashing URLs the base string should include the entire URL, up to and including the `&` preceding the hashing parameter.
+   * For more details visit https://partners.lucidhq.com/s/security-sha-1-hashing
    */
   rebuildEntryLink = (url, queryParams) => {
     if (process.env.DEV_MODE == '0') {
