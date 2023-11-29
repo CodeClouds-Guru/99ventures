@@ -443,8 +443,7 @@ class LucidController {
         }
         let URL = this.rebuildEntryLink(entryLink, params);
         // console.log('Lucid entry link', URL);
-        // res.redirect(URL);
-        res.send(URL);
+        res.redirect(URL);
         return;
       } else {
         throw {
