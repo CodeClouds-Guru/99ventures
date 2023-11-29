@@ -150,6 +150,6 @@ exports.generateUserIdForSurveyProviders = (companyPortalName, memberId) => {
 
 exports.extractUserIdForSurveyProviders = (userId) => {
   let strArry = userId.split('_');
-  let memberId = strArry[3];
+  let memberId = strArry[2];
   return memberId;
 }
