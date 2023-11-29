@@ -40,6 +40,7 @@ const Paypal = require('../../helpers/Paypal');
 const moment = require('moment');
 const TolunaHelper = require('../../helpers/Toluna');
 const TolunaAge = require('../../config/toluna_age.json');
+const { generateUserIdForSurveyProviders } = require('../../helpers/global');
 // const IpQualityScoreClass = require('../helpers/IpQualityScore');
 class MemberAuthController {
   constructor() {
@@ -1028,16 +1029,16 @@ class MemberAuthController {
               case 'ZIP':
               case 'ZIPCODE':
               case 'POSTAL CODE':
-              case 'STANDARD_POSTAL_CODE_GB':
               case 'STANDARD_POSTAL_AREA':
               case 'SAMPLECUBE_ZIP_UK':
               case 'STANDARD_POSTAL_CODE_GB':
               case 'POSTALCODEVAL':
-                if (record.SurveyProvider.name === 'Purespectrum') {
-                  precode = member_details.zip_code.split(' ')[0];
-                } else {
-                  precode = member_details.zip_code.replaceAll(/ /g, '');
-                }
+                precode = member_details.zip_code.split(' ')[0];
+                // if (record.SurveyProvider.name === 'Purespectrum') {
+                //   precode = member_details.zip_code.split(' ')[0];
+                // } else {
+                //   precode = member_details.zip_code.replaceAll(/ /g, '');
+                // }
                 break;
               case 'REGION':
               case 'REGION 1':
@@ -1692,12 +1693,7 @@ class MemberAuthController {
    */
   async tolunaProfileCreateAndUpdate(member, questionAnswer) {
     const tolunaHelper = new TolunaHelper();
-    var envType = '_';
-    if (process.env.DEV_MODE == '0') envType = '_live_';
-    else if (process.env.DEV_MODE == '1') envType = '_development_';
-    else if (process.env.DEV_MODE == '2') envType = '_staging_';
-
-    const memberCode = member.CompanyPortal.name + envType + member.id;
+    const memberCode = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id);
     if (member.country_id === 226) {
       // US Country
       var dob = new Date(member.dob);
