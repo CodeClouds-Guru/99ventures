@@ -136,6 +136,7 @@ exports.generateHashForLucid = (url) => {
 }
 
 exports.generateUserIdForSurveyProviders = (companyPortalName, memberId) => {
+  var companyPortalName = companyPortalName.replaceAll(' ', '');
   var envType = '_';
   if (process.env.DEV_MODE == "0")
     envType = '_live_';
@@ -145,4 +146,10 @@ exports.generateUserIdForSurveyProviders = (companyPortalName, memberId) => {
     envType = '_staging_';
 
   return companyPortalName + envType + memberId;
+}
+
+exports.extractUserIdForSurveyProviders = (userId) => {
+  let strArry = userId.split('_');
+  let memberId = strArry[3];
+  return memberId;
 }
