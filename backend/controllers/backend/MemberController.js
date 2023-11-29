@@ -19,7 +19,6 @@ const {
   Company,
   WithdrawalRequest,
   MemberNotification,
-  AdminMemberPaymentMethodApproval,
   sequelize,
 } = require('../../models/index');
 const queryInterface = sequelize.getQueryInterface();
@@ -450,7 +449,7 @@ class MemberController extends Controller {
         if (type === 'resend_verify_email') message = 'Unable to send email';
         if (type === 'change_payment_method')
           message =
-            'Unable to save. This member already has approved payment methods.';
+            'Unable to save. This member already has approved and unused payment methods.';
         // var message =
         //   type === 'resend_verify_email'
         //     ? 'Unable to send email'
@@ -1203,13 +1202,10 @@ class MemberController extends Controller {
   //change Payment Method
   async changePaymentMethod(req) {
     try {
-      let resp =
-        await AdminMemberPaymentMethodApproval.insertPaymentMethodForAdminApproval(
-          {
-            payment_method_id: req.body.payment_method_id,
-            member_id: req.params.id,
-          }
-        );
+      let resp = await Member.update(
+        { primary_payment_method_id: req.body.payment_method_id },
+        { where: { id: req.params.id } }
+      );
       return resp;
     } catch (error) {
       console.error(error);
