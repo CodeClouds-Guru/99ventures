@@ -1,5 +1,6 @@
 const Cint = require('../../helpers/Cint');
-const { Member, Country, SurveyProvider } = require('../../models');
+const { Member, Country, SurveyProvider, CompanyPortal } = require('../../models');
+const { generateUserIdForSurveyProviders } = require('../../helpers/global');
 class CintController {
   surveys = async (userId, params, req) => {
     if (!userId) {
@@ -25,10 +26,13 @@ class CintController {
           where: {
             id: userId,
           },
-          include: {
+          include: [{
             model: Country,
             attributes: ['cint_country_code'],
-          },
+          }, {
+            model: CompanyPortal,
+				    attributes: ['name'],
+          }],
         });
         if (member) {
           let gender = member.gender === 'male' ? 'm' : 'f';
@@ -36,7 +40,7 @@ class CintController {
             member.Country !== null && member.Country.cint_country_code
               ? member.Country.cint_country_code
               : null;
-          const ssi = member.username+'_'+Date.now();
+          var ssi = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id)+'_'+Date.now();
           const params = {
             basic: 1,
             limit: perPage,
@@ -47,7 +51,8 @@ class CintController {
             ip_address: req.ip,
             ssi,
             country,
-            gender,
+            gender
+            // ssi2: member.id
           };
 
           const provider = await SurveyProvider.findOne({
@@ -69,10 +74,11 @@ class CintController {
           if (surveys.length) {
             for (let survey of surveys) {
               const entryLink = survey.entry_link;
-              const rebuildEntryLink = entryLink.replace(
+              var rebuildEntryLink = entryLink.replace(
                 'SUBID',
                 ssi + survey.project_id
               );
+              // rebuildEntryLink += '&ss2='+member.id;
               let cpiValue = (+survey.cpi * +provider.currency_percent)/100;
               let temp_survey = {
                 survey_number: '',
