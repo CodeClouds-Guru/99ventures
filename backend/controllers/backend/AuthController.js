@@ -190,7 +190,29 @@ class AuthController {
         id: user.id,
       },
     });
+    //adding primary payment method to all members
+    // const all_members = await Member.findAll({
+    //   where: { status: 'member', primary_payment_method_id: null },
+    //   // where: { id: 208 },
+    //   include: {
+    //     model: WithdrawalRequest,
+    //     order: [['created_at', 'desc']],
+    //     limit: 1,
+    //     required: true,
+    //   },
+    // });
 
+    // all_members.forEach(async (model) => {
+    //   if (model.WithdrawalRequests.length > 0) {
+    //     await Member.update(
+    //       {
+    //         primary_payment_method_id:
+    //           model.WithdrawalRequests[0].withdrawal_type_id,
+    //       },
+    //       { where: { id: model.id } }
+    //     );
+    //   }
+    // });
     const companies = await user.getCompanies({ include: ['CompanyPortals'] });
 
     const userResourcesObj = new UserResources(user);
@@ -599,22 +621,22 @@ class AuthController {
     try {
       const resp = await Widget.createUserWidgetOptions({
         user_id: req.user.id,
-        widget_ids: req.body.widget_ids
+        widget_ids: req.body.widget_ids,
       });
       if (resp) {
         return res.json({
           status: true,
-          message: 'Your preference has been saved'
-        })
+          message: 'Your preference has been saved',
+        });
       } else {
-        throw new Error("Unable to save data")
+        throw new Error('Unable to save data');
       }
     } catch (e) {
-      console.error(e)
+      console.error(e);
       return res.status(500).json({
         status: false,
-        message: e.message
-      })
+        message: e.message,
+      });
     }
   }
 }

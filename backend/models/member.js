@@ -82,6 +82,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'deleted_by',
         as: 'deleted_by_admin',
       });
+      Member.belongsTo(models.PaymentMethod, {
+        foreignKey: 'primary_payment_method_id',
+      });
     }
   }
   Member.validate = function (req) {
@@ -197,8 +200,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
-            }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${
+                this.city || ''
+              }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -215,6 +219,7 @@ module.exports = (sequelize, DataTypes) => {
         //     .replace(/\s+/g, ' ');
         // },
       },
+      primary_payment_method_id: DataTypes.TINYINT,
     },
     {
       sequelize,
@@ -426,8 +431,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -441,23 +446,20 @@ module.exports = (sequelize, DataTypes) => {
         [field_name]: value,
       };
       if (value === 'deleted' && field_name === 'status') {
-        update_data = { ...update_data, deleted_at: new Date() }
+        update_data = { ...update_data, deleted_at: new Date() };
       } else if (field_name === 'status' && value !== 'deleted') {
-        update_data = { ...update_data, deleted_at: null }
+        update_data = { ...update_data, deleted_at: null };
       }
       console.log('updated_data', update_data);
-      let result = await Member.update(
-        update_data,
-        {
-          where: {
-            id: {
-              [Op.in]: member_ids,
-            },
+      let result = await Member.update(update_data, {
+        where: {
+          id: {
+            [Op.in]: member_ids,
           },
-          return: true,
-          paranoid: false,
         },
-      );
+        return: true,
+        paranoid: false,
+      });
       if (notes) {
         let data = [];
         members.forEach((element) => {
@@ -487,8 +489,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let result = await Member.update(
         {
