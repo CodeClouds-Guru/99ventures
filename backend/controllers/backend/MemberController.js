@@ -173,6 +173,7 @@ class MemberController extends Controller {
             'state',
             'created_at',
             'is_shoutbox_blocked',
+            'primary_payment_method_id',
           ];
           options.paranoid = false;
           options.where = { id: member_id };
@@ -237,6 +238,10 @@ class MemberController extends Controller {
               where: { status: [1, '1'] },
               limit: 1,
             },
+            {
+              model: PaymentMethod,
+              attributes: ['name', 'slug', 'id'],
+            },
           ];
           result = await this.model.findOne(options);
           country_list = await Country.getAllCountryList();
@@ -285,6 +290,13 @@ class MemberController extends Controller {
             });
           }
 
+          //
+          let all_payment_methods = await PaymentMethod.findAll({
+            attributes: ['id', 'name', 'slug'],
+            // where: { id: { [Op.ne]: result.primary_payment_method_id } },
+            where: { status: 1 },
+          });
+
           var referral_link =
             req.headers.host + '?referral_code=' + result.referral_code;
           result.setDataValue('country_list', country_list);
@@ -299,6 +311,7 @@ class MemberController extends Controller {
             'impersonation_link',
             `${domain}/impersonate?hashKey=${impersonation_token}`
           );
+          result.setDataValue('all_payment_methods', all_payment_methods);
           // result.setDataValue('admin_status', admin_status.toLowerCase());
         } else {
           //get all email alerts
@@ -410,25 +423,37 @@ class MemberController extends Controller {
       } else if (req.body.type === 'unlink_referrer') {
         result = await this.unlinkReferrer(req);
         delete req.body.type;
+      } else if (req.body.type === 'change_payment_method') {
+        result = await this.changePaymentMethod(req);
+        delete req.body.type;
       } else {
         // console.error(error);
         this.throwCustomError('Type is required', 401);
       }
       // console.error(result);
       if (result) {
-        var message =
-          type === 'resend_verify_email'
-            ? 'Email sent successfully'
-            : 'Record has been updated successfully';
+        var message = 'Record has been updated successfully';
+        if (type === 'resend_verify_email') message = 'Email sent successfully';
+        if (type === 'change_payment_method')
+          message = 'Payment method approved.';
+        // var message =
+        //   type === 'resend_verify_email'
+        //     ? 'Email sent successfully'
+        //     : 'Record has been updated successfully';
         return {
           status: true,
           message: message,
         };
       } else {
-        var message =
-          type === 'resend_verify_email'
-            ? 'Unable to send email'
-            : 'Unable to save data';
+        var message = 'Unable to save data';
+        if (type === 'resend_verify_email') message = 'Unable to send email';
+        if (type === 'change_payment_method')
+          message =
+            'Unable to save. This member already has approved and unused payment methods.';
+        // var message =
+        //   type === 'resend_verify_email'
+        //     ? 'Unable to send email'
+        //     : 'Unable to save data';
         this.throwCustomError(message, 500);
       }
     } catch (error) {
@@ -1168,6 +1193,20 @@ class MemberController extends Controller {
         where: { referral_id: member_id, member_id: result.member_referral_id },
       });
       return true;
+    } catch (error) {
+      console.error(error);
+      this.throwCustomError('Unable to update data', 500);
+    }
+  }
+
+  //change Payment Method
+  async changePaymentMethod(req) {
+    try {
+      let resp = await Member.update(
+        { primary_payment_method_id: req.body.payment_method_id },
+        { where: { id: req.params.id } }
+      );
+      return resp;
     } catch (error) {
       console.error(error);
       this.throwCustomError('Unable to update data', 500);

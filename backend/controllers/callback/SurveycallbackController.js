@@ -18,6 +18,7 @@ const PurespectrumHelper = require('../../helpers/Purespectrum');
 const SqsHelper = require('../../helpers/SqsHelper');
 const eventBus = require('../../eventBus');
 const LucidHelper = require('../../helpers/Lucid');
+const { extractUserIdForSurveyProviders } = require('../../helpers/global');
 
 class SurveycallbackController {
   constructor() {
@@ -415,7 +416,8 @@ class SurveycallbackController {
    */
   async lucidPostback(req, res) {
     const requestParam = req.query;
-    const member = await this.getMember({ username: requestParam.pid });
+    const memberId = extractUserIdForSurveyProviders(requestParam.pid);
+    const member = await this.getMember({ id: memberId });
     if (member === null) {
       const logger = require('../../helpers/Logger')(
         `lucid-postback-errror.log`
