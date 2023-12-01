@@ -217,13 +217,12 @@ class SurveycallbackController {
       const ssiValue = req.query.ssi;
       const reward = req.query.reward;
       const txnId = req.query.txn_id;
-      const strArry = ssiValue.split('_');
-      const username = strArry[0];
-      
-      const memberSurveys = await Survey.checkMemberSurvey(username, txnId, 2);
-      if (memberSurveys.length < 1) {
-        let member = await this.getMember({ username });
-        if (member) {
+
+      const memberId = extractUserIdForSurveyProviders(ssiValue);
+      let member = await this.getMember({ id: memberId });
+      if (member) {
+        const memberSurveys = await Survey.checkMemberSurvey(member.username, txnId, 2);
+        if (memberSurveys.length < 1) {
           const survey = {
             cpi: reward,
           };
@@ -236,11 +235,18 @@ class SurveycallbackController {
             req
           );
         }
-      } else {
+        else {
+          const logger = require('../../helpers/Logger')(
+            `cint-postback-errror.log`
+          );
+          logger.error(`Already attempted (#${txnId}) - (${ssiValue})`);
+        }
+      }
+      else {
         const logger = require('../../helpers/Logger')(
           `cint-postback-errror.log`
         );
-        logger.error(`Already attempted (#${txnId}) - (${username})`);
+        logger.error(`${ssiValue} - not found`);
       }
     } catch (error) {
       const logger = require('../../helpers/Logger')(
