@@ -719,11 +719,7 @@ module.exports = (sequelize, DataTypes) => {
     } else {
       resp.member_status = false;
       resp.member_message =
-        'You can not use ' +
-        payment_method.name +
-        ' as you have already used ' +
-        checkMemberPaymentMethod.PaymentMethod.name +
-        ' before. In order to switch payment method from the one that you used previously, please contact our support team <a href="/create-ticket">here</a>.”';
+        'You are attempting to request a withdrawal through a different payment method to the one used previously. In order to do so, please contact our support team <a href="/create-ticket">here</a>.”';
       // }
     }
     return resp;
