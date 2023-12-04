@@ -653,75 +653,46 @@ module.exports = (sequelize, DataTypes) => {
     payment_method,
     member_id
   ) => {
-    const { Op } = require('sequelize');
     const { PaymentMethod, Member } = require('../models/index');
     var resp = {
       member_status: true,
       member_message: '',
     };
-    // let if_any = await WithdrawalRequest.findAll({
-    //   logging: console.log,
-    //   where: {
-    //     member_id: member_id,
-    //     withdrawal_type_id: { [Op.ne]: payment_method.id },
-    //   },
-    //   include: {
-    //     model: PaymentMethod,
-    //     where: {
-    //       parent_payment_method_id: {
-    //         [Op.ne]: payment_method.parent_payment_method_id,
-    //       },
-    //     },
-    //     attributes: ['name'],
-    //     required: true,
-    //   },
-    //   order: [['created_at', 'DESC']],
-    // });
-    console.log('payment_method', payment_method);
+
     let checkMemberPaymentMethod = await Member.findOne({
       attributes: ['primary_payment_method_id'],
       where: { id: member_id },
       include: {
         model: PaymentMethod,
         attributes: ['name', 'parent_payment_method_id'],
-        required: true,
+        // required: true,
       },
     });
-    console.log(
-      'checkMemberPaymentMethod.PaymentMethod',
-      checkMemberPaymentMethod.PaymentMethod.dataValues.parent_payment_method_id
-    );
-    console.log(
-      checkMemberPaymentMethod.PaymentMethod.dataValues
-        .parent_payment_method_id,
-      payment_method.parent_payment_method_id,
-      'checkMemberPaymentMethod',
-      checkMemberPaymentMethod.primary_payment_method_id != payment_method.id
-    );
-    if (
-      checkMemberPaymentMethod.PaymentMethod.dataValues
-        .parent_payment_method_id == payment_method.parent_payment_method_id ||
-      checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
-    ) {
-      // let checkForPaymentMethodAdminApproved =
-      //   await AdminMemberPaymentMethodApproval.findOne({
-      //     where: {
-      //       member_id: member_id,
-      //       payment_method_id: payment_method.id,
-      //       is_used: { [Op.ne]: 1 },
-      //       status: 'approved',
-      //     },
-      //     order: [['created_at', 'desc']],
-      //   });
-      // if (!checkForPaymentMethodAdminApproved) {
+    if (checkMemberPaymentMethod.primary_payment_method_id) {
+      if (
+        checkMemberPaymentMethod.PaymentMethod.dataValues
+          .parent_payment_method_id ==
+          payment_method.parent_payment_method_id ||
+        checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
+      ) {
+        resp.member_status = true;
+        resp.member_message = '';
+      } else {
+        resp.member_status = false;
+        resp.member_message =
+          'You are attempting to request a withdrawal through a different payment method to the one used previously. In order to do so, please contact our support team <a href="/create-ticket">here</a>.”';
+      }
+    } else {
+      await Member.update(
+        { primary_payment_method_id: payment_method.id },
+        {
+          where: { id: member_id },
+        }
+      );
       resp.member_status = true;
       resp.member_message = '';
-    } else {
-      resp.member_status = false;
-      resp.member_message =
-        'You are attempting to request a withdrawal through a different payment method to the one used previously. In order to do so, please contact our support team <a href="/create-ticket">here</a>.”';
-      // }
     }
+
     return resp;
   };
   return WithdrawalRequest;
