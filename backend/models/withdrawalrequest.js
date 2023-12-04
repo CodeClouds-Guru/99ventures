@@ -669,17 +669,17 @@ module.exports = (sequelize, DataTypes) => {
         // required: true,
       },
     });
-    console.log(
-      'checkMemberPaymentMethod.PaymentMethod',
-      checkMemberPaymentMethod.PaymentMethod.dataValues.parent_payment_method_id
-    );
-    console.log(
-      checkMemberPaymentMethod.PaymentMethod.dataValues
-        .parent_payment_method_id,
-      payment_method.parent_payment_method_id,
-      'checkMemberPaymentMethod',
-      checkMemberPaymentMethod.primary_payment_method_id != payment_method.id
-    );
+    // console.log(
+    //   'checkMemberPaymentMethod.PaymentMethod',
+    //   checkMemberPaymentMethod.PaymentMethod.dataValues.parent_payment_method_id
+    // );
+    // console.log(
+    //   checkMemberPaymentMethod.PaymentMethod.dataValues
+    //     .parent_payment_method_id,
+    //   payment_method.parent_payment_method_id,
+    //   'checkMemberPaymentMethod',
+    //   checkMemberPaymentMethod.primary_payment_method_id != payment_method.id
+    // );
     if (
       checkMemberPaymentMethod.PaymentMethod.dataValues
         .parent_payment_method_id == payment_method.parent_payment_method_id ||
