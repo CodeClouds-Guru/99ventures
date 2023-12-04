@@ -22,7 +22,7 @@ class SiteMapController {
                 status: 'published',
                 auth_required: 0,
                 slug: {
-                    [Op.notIn]: ['404', '500', '503']
+                    [Op.notIn]: ['404', '500', '503', 'survey-complete', 'survey-quota', 'survey-security', 'survey-termination', 'notice', 'survey-reached', 'survey-taken', 'no-cookies', 'survey-notavailable', 'survey-notqualified']
                 }
             }
         })
