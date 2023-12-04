@@ -669,35 +669,41 @@ module.exports = (sequelize, DataTypes) => {
         // required: true,
       },
     });
-    // console.log('checkMemberPaymentMethod', checkMemberPaymentMethod);
-    if (checkMemberPaymentMethod.primary_payment_method_id) {
-      if (
-        checkMemberPaymentMethod.PaymentMethod.dataValues
-          .parent_payment_method_id ==
-          payment_method.parent_payment_method_id ||
-        checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
-      ) {
-        resp.member_status = true;
-        resp.member_message = '';
-      } else {
-        resp.member_status = false;
-        resp.member_message =
-          'You can not use ' +
-          payment_method.name +
-          ' as you have already used ' +
-          checkMemberPaymentMethod.PaymentMethod.name +
-          ' before. In order to switch payment method from the one that you used previously, please contact our support team <a href="/create-ticket">here</a>.”';
-      }
-    } else {
-      //update member primary payment method id
-      await Member.update(
-        { primary_payment_method_id: payment_method.id },
-        { where: { id: member_id } }
-      );
+    console.log(
+      'checkMemberPaymentMethod.PaymentMethod',
+      checkMemberPaymentMethod.PaymentMethod.dataValues.parent_payment_method_id
+    );
+    console.log(
+      checkMemberPaymentMethod.PaymentMethod.dataValues
+        .parent_payment_method_id,
+      payment_method.parent_payment_method_id,
+      'checkMemberPaymentMethod',
+      checkMemberPaymentMethod.primary_payment_method_id != payment_method.id
+    );
+    if (
+      checkMemberPaymentMethod.PaymentMethod.dataValues
+        .parent_payment_method_id == payment_method.parent_payment_method_id ||
+      checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
+    ) {
+      // let checkForPaymentMethodAdminApproved =
+      //   await AdminMemberPaymentMethodApproval.findOne({
+      //     where: {
+      //       member_id: member_id,
+      //       payment_method_id: payment_method.id,
+      //       is_used: { [Op.ne]: 1 },
+      //       status: 'approved',
+      //     },
+      //     order: [['created_at', 'desc']],
+      //   });
+      // if (!checkForPaymentMethodAdminApproved) {
       resp.member_status = true;
       resp.member_message = '';
+    } else {
+      resp.member_status = false;
+      resp.member_message =
+        'You are attempting to request a withdrawal through a different payment method to the one used previously. In order to do so, please contact our support team <a href="/create-ticket">here</a>.”';
+      // }
     }
-
     return resp;
   };
   return WithdrawalRequest;
