@@ -16,24 +16,32 @@ const { detect } = require('detect-browser');
 const messageBox = {
   IP_BLACKLISTED: {
     error_code: 'ACCX001',
-    error_message: 'IP is blacklisted',
+    error_message: 'You have been denied access to MoreSurveys due to failing our security checks. If you would like to discuss this further, please send an emails to support@moresurveys.com',
   },
   ISP_BLACKLISTED: {
     error_code: 'ACCX002',
-    error_message: 'ISP is blacklisted',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   UNAVAILABLE_COUNTRY: {
     error_code: 'ACCX003',
     error_message:
-      'Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
+      'Unfortunately, MoreSurveys is currently unavailable in your country. Do not worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
   },
   VPN_DETECTED: {
     error_code: 'ACCX004',
-    error_message: 'Please turn off your VPN to access this site',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   TOR_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'Please turn off Tor to access this site',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+  },
+  BOT_DETECTED: {
+    error_code: 'ACCX005',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+  },
+  PROXY_DETECTED: {
+    error_code: 'ACCX005',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   COUNTRY_CHANGED: {
     error_code: 'ACCX006',
@@ -91,7 +99,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
     error_code in messageBox
       ? messageBox[error_code].error_message
       : 'Some unexpected error occured';
-  if (['VPN_DETECTED', 'TOR_DETECTED'].includes(error_code) && member) {
+  if (['VPN_DETECTED', 'TOR_DETECTED', 'BOT_DETECTED', 'PROXY_DETECTED'].includes(error_code) && member) {
     //&& member.status !== 'suspended'
     await MemberNote.create({
       user_id: 0,
@@ -240,6 +248,14 @@ module.exports = async function (req, res, next) {
     }
     if ('active_tor' in geo.report && geo.report.active_tor) {
       await redirectWithErrorMessage(req, res, 'TOR_DETECTED');
+      return;
+    }
+    if ('proxy' in geo.report && geo.report.proxy) {
+      await redirectWithErrorMessage(req, res, 'PROXY_DETECTED');
+      return;
+    }
+    if ('bot_status' in geo.report && geo.report.bot_status) {
+      await redirectWithErrorMessage(req, res, 'BOT_DETECTED');
       return;
     }
     const is_country_changed = await checkIfCountryChanged(
