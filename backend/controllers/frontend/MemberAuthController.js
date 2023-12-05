@@ -143,7 +143,7 @@ class MemberAuthController {
       });
       await Member.update(
         { last_active_on: new Date() },
-        { where: { member_id: member.id } }
+        { where: { id: member.id } }
       );
       res.redirect(redirect_page);
     } else {
