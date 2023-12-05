@@ -352,7 +352,7 @@ function Listing(props) {
     }
 
     const processFieldValue = (value, fieldConfig) => {
-        if (value && (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at')) {
+        if (value && (fieldConfig.field_name === 'created_at' || fieldConfig.field_name === 'updated_at' || fieldConfig.field_name === 'last_active_on')) {
             value = moment(value).format('DD-MMM-YYYY')
         }
         return value;
