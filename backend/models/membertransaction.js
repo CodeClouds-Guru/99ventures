@@ -399,7 +399,7 @@ module.exports = (sequelize, DataTypes) => {
     const { sequelize } = require('../models/index');
     const moment = require('moment');
     const { QueryTypes } = require('sequelize');
-    const db = require('../../models/index');
+    const db = require('../models/index');
     let option = {};
 
     option.attributes = [
