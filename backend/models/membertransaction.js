@@ -443,13 +443,21 @@ module.exports = (sequelize, DataTypes) => {
         ),
         'total_referral_amount',
       ],
-      [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN parent_transaction_id IS NULL THEN MemberTransaction.amount ELSE 0.00 END)`
+        ),
+        'total',
+      ],
     ];
     option.where = {
       member_id: member_id,
       type: 'credited',
       // status: 2,
     };
+    option.logging = console.log;
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
     // console.log(response);
