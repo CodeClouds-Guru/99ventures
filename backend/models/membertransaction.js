@@ -459,7 +459,7 @@ module.exports = (sequelize, DataTypes) => {
       type: 'credited',
       // status: 2,
     };
-    option.logging = console.log;
+    // option.logging = console.log;
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
     let total_reversed = await db.sequelize.query(
