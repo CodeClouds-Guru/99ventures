@@ -141,6 +141,10 @@ class MemberAuthController {
         member_id: member.id,
         action: 'Member Logged In',
       });
+      await Member.update(
+        { last_active_on: new Date() },
+        { where: { member_id: member.id } }
+      );
       res.redirect(redirect_page);
     } else {
       req.session.flash = { error: member_message };
@@ -1693,7 +1697,10 @@ class MemberAuthController {
    */
   async tolunaProfileCreateAndUpdate(member, questionAnswer) {
     const tolunaHelper = new TolunaHelper();
-    const memberCode = generateUserIdForSurveyProviders(member.CompanyPortal.name, member.id);
+    const memberCode = generateUserIdForSurveyProviders(
+      member.CompanyPortal.name,
+      member.id
+    );
     if (member.country_id === 226) {
       // US Country
       var dob = new Date(member.dob);
