@@ -144,6 +144,9 @@ module.exports = (sequelize, DataTypes) => {
 				ON (ms.member_transaction_id = mt.id) 
 				WHERE mt.member_id = :member_id
               )
+			  AND s.survey_number NOT IN (
+				SELECT survey_number FROM survey_attempts WHERE member_id = :member_id AND survey_provider_id = 1
+			  )
           GROUP BY
               sq.survey_id
           HAVING
@@ -198,6 +201,20 @@ module.exports = (sequelize, DataTypes) => {
 		});
 
 		return memberSurveys;
+	}
+
+	// Check a particular Survey Attempted or Not From survey_attempt table
+	Survey.surveyAttemptedByUser = async(membeId, surveyNumber, surveyProviderId) => {
+		const sqlQuery = `SELECT id FROM survey_attempts WHERE survey_provider_id = :survey_provider_id AND member_id = :member_id AND survey_number = :survey_number;`;
+		const result = await sequelize.query(sqlQuery, {
+			type: QueryTypes.SELECT,
+			replacements: { 
+				member_id: membeId,
+				survey_number: surveyNumber,
+				survey_provider_id: surveyProviderId
+			}
+		});
+		return result;
 	}
 
 	// Check Survey Attempted or Not
