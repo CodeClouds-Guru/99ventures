@@ -398,6 +398,8 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.getTransactionCount = async (member_id) => {
     const { sequelize } = require('../models/index');
     const moment = require('moment');
+    const { QueryTypes } = require('sequelize');
+    const db = require('../models/index');
     let option = {};
 
     option.attributes = [
@@ -443,15 +445,35 @@ module.exports = (sequelize, DataTypes) => {
         ),
         'total_referral_amount',
       ],
-      [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+      [
+        sequelize.literal(
+          `SUM(CASE WHEN parent_transaction_id IS NULL THEN MemberTransaction.amount ELSE 0.00 END)`
+        ),
+        'total',
+      ],
     ];
     option.where = {
       member_id: member_id,
       type: 'credited',
       // status: 2,
     };
+    // option.logging = console.log;
     // console.log(option);
     let response = await MemberTransaction.findOne(option);
+    let total_reversed = await db.sequelize.query(
+      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    var total_credited_minus_reversed =
+      parseFloat(response.total) - parseFloat(total_reversed[0].total);
+
+    // result.total = total_earnings_credited[0].total;
+    response.total = total_credited_minus_reversed.toFixed(2);
     // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };

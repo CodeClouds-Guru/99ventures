@@ -450,7 +450,7 @@ module.exports = (sequelize, DataTypes) => {
       } else if (field_name === 'status' && value !== 'deleted') {
         update_data = { ...update_data, deleted_at: null };
       }
-      console.log('updated_data', update_data);
+      // console.log('updated_data', update_data);
       let result = await Member.update(update_data, {
         where: {
           id: {

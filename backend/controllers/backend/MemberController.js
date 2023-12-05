@@ -663,7 +663,6 @@ class MemberController extends Controller {
 
     options.attributes = [...options.attributes, ...relationCols];
 
-    options.logging = console.log;
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count.length / limit);
     // console.log('result.rows=', result.rows);
@@ -853,12 +852,13 @@ class MemberController extends Controller {
       }
     );
     let total_earnings_credited = await db.sequelize.query(
-      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='credited' AND member_id=?",
+      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='credited' AND parent_transaction_id IS NULL AND member_id=?",
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
       }
     );
+
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
       {
@@ -866,7 +866,7 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-    // console.log(total_reversed, total_earnings_credited);
+
     var total_credited_minus_reversed =
       parseFloat(total_earnings_credited[0].total) -
       parseFloat(total_reversed[0].total);
