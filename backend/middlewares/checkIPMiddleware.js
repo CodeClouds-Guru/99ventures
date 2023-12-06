@@ -250,14 +250,14 @@ module.exports = async function (req, res, next) {
       await redirectWithErrorMessage(req, res, 'TOR_DETECTED');
       return;
     }
-    if ('proxy' in geo.report && geo.report.proxy) {
-      await redirectWithErrorMessage(req, res, 'PROXY_DETECTED');
-      return;
-    }
-    if ('bot_status' in geo.report && geo.report.bot_status) {
-      await redirectWithErrorMessage(req, res, 'BOT_DETECTED');
-      return;
-    }
+    // if ('proxy' in geo.report && geo.report.proxy) {
+    //   await redirectWithErrorMessage(req, res, 'PROXY_DETECTED');
+    //   return;
+    // }
+    // if ('bot_status' in geo.report && geo.report.bot_status) {
+    //   await redirectWithErrorMessage(req, res, 'BOT_DETECTED');
+    //   return;
+    // }
     const is_country_changed = await checkIfCountryChanged(
       req,
       geo.report.country_code || ''
