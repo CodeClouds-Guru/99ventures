@@ -471,6 +471,11 @@ class LucidController {
 						},
 					}
 				);
+			} else {
+				const logger = require('../../helpers/Logger')(
+					`lucid-errror.log`
+				);
+				logger.error(error);
 			}
 			res.redirect('/survey-notavailable');
 		} finally {
