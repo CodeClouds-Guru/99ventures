@@ -29,19 +29,19 @@ const messageBox = {
   },
   VPN_DETECTED: {
     error_code: 'ACCX004',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   TOR_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   BOT_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   PROXY_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   COUNTRY_CHANGED: {
     error_code: 'ACCX006',
