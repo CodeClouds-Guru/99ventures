@@ -253,7 +253,7 @@ module.exports = (sequelize, DataTypes) => {
       required: false,
       value: '',
       width: '50',
-      searchable: true,
+      searchable: false,
     },
 
     '$Member.admin_status$': {
