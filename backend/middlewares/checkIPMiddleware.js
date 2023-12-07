@@ -29,19 +29,19 @@ const messageBox = {
   },
   VPN_DETECTED: {
     error_code: 'ACCX004',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   TOR_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   BOT_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   PROXY_DETECTED: {
     error_code: 'ACCX005',
-    error_message: 'You have been prevented from accessing MoreSurveys for security reasons.Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
+    error_message: 'You have been prevented from accessing MoreSurveys for security reasons. <br /> Please note that we do not allow the use of  VPN, TOR, BOTS or PROXY. These are the most common reasons as to why our system would prohibit your access.<br /> If you would like to discuss this with our support team please contact us via email at support@moresurveys.com',
   },
   COUNTRY_CHANGED: {
     error_code: 'ACCX006',
@@ -250,14 +250,14 @@ module.exports = async function (req, res, next) {
       await redirectWithErrorMessage(req, res, 'TOR_DETECTED');
       return;
     }
-    if ('proxy' in geo.report && geo.report.proxy) {
-      await redirectWithErrorMessage(req, res, 'PROXY_DETECTED');
-      return;
-    }
-    if ('bot_status' in geo.report && geo.report.bot_status) {
-      await redirectWithErrorMessage(req, res, 'BOT_DETECTED');
-      return;
-    }
+    // if ('proxy' in geo.report && geo.report.proxy) {
+    //   await redirectWithErrorMessage(req, res, 'PROXY_DETECTED');
+    //   return;
+    // }
+    // if ('bot_status' in geo.report && geo.report.bot_status) {
+    //   await redirectWithErrorMessage(req, res, 'BOT_DETECTED');
+    //   return;
+    // }
     const is_country_changed = await checkIfCountryChanged(
       req,
       geo.report.country_code || ''
