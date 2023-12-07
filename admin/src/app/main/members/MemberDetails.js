@@ -18,7 +18,7 @@ import BackdropLoader from 'app/shared-components/BackdropLoader';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import moment from"moment";
+import moment from "moment";
 import { selectUser } from 'app/store/userSlice';
 import PaymentMethodUpdate from './components/PaymentMethodUpdate';
 

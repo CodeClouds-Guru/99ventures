@@ -256,7 +256,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'created_at',
       type: 'text',
       placeholder: 'Created at',
-      listing: false,
+      listing: true,
       show_in_form: false,
       sort: true,
       required: true,
