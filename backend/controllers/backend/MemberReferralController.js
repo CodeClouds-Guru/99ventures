@@ -19,6 +19,7 @@ class MemberReferralController extends Controller {
     options.include = {
       model: Member,
       required: false,
+      paranoid: false,
       // as: "referee",
       attributes: [
         'id',
