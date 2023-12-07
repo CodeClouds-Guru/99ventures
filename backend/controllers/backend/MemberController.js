@@ -785,7 +785,7 @@ class MemberController extends Controller {
   async export(req, res) {
     req.query.show = 100000;
     let { fields, result } = await this.list(req);
-    console.log('export result=', result);
+    // console.log('export result=', result);
     // return;
     var header = [];
     for (const head of Object.values(fields)) {
