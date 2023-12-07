@@ -23,6 +23,9 @@ import { selectUser } from 'app/store/userSlice';
 import PaymentMethodUpdate from './components/PaymentMethodUpdate';
 
 const labelStyling = {
+    '@media screen and (max-width: 1500px)': {
+        fontSize: '1.18rem'
+    },
     '@media screen and (max-width: 1400px)': {
         fontSize: '1.2rem'
     },
@@ -116,7 +119,7 @@ const selectStyle = {
 }
 
 const listItemTextStyle = {
-    wordBreak: 'break-all',
+    wordBreak: 'break-word',
     margin: '2px 0',
     '& .MuiListItemText-primary': {
         display: 'flex',
