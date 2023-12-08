@@ -6,12 +6,13 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { position } from "stylis";
 import moment from 'moment';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon'
-import { selectUser } from 'app/store/userSlice';
+// import { selectUser } from 'app/store/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 function ConfigurationContent() {
-    const user = useSelector(selectUser);
-    const unreadTicketCount = user.unread_tickets;
+    // const user = useSelector(selectUser);
+    // const unreadTicketCount = user.unread_tickets;
+    const selectTicket = useSelector(state => state.tickets);
     const [selectedStatus, setSelectedStatus] = useState('open');
     const [open, setOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
@@ -70,7 +71,7 @@ function ConfigurationContent() {
                         className="flex font-extrabold tracking-tight capitalize"
                         variant="h5"
                     >
-                        Tickets {unreadTicketCount ? `(${unreadTicketCount})` : ''}
+                        Tickets {selectTicket.total_unread_ticket ? `(${selectTicket.total_unread_ticket})` : ''}
                     </Typography>
                 </div>
                 <div className="flex items-center justify-end space-x-8 w-full w-2/3 ml-auto relativex">
