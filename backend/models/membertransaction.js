@@ -480,7 +480,7 @@ module.exports = (sequelize, DataTypes) => {
       parseFloat(total_reversed[0].total);
 
     // result.total = total_earnings_credited[0].total;
-    response.setDataValue(total, total_credited_minus_reversed.toFixed(2));
+    response.setDataValue('total', total_credited_minus_reversed.toFixed(2));
     response.total = total_credited_minus_reversed.toFixed(2);
     // console.log(response);
     return JSON.parse(JSON.stringify(response));
