@@ -22,6 +22,7 @@ import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { updateUnreadTicketCount } from 'app/store/tickets';
 
 const iplogsColumns = {
 	'geo_location': 'Geo Location',
@@ -193,7 +194,7 @@ function List(props) {
 			setApplyLoading(false);
 			setExportLoading(false);
 			setFirstCall(false);
-			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
+			module === 'tickets' ? ticketsReadCount(res.data.results.result.opended_ticket) : '';
 			if (res.data.results.programs) {
 				setProgramList(res.data.results.programs)
 			}
@@ -209,7 +210,8 @@ function List(props) {
 	}
 
 	const ticketsReadCount = (values) => {
-		let unread = 0;
+		dispatch(updateUnreadTicketCount(values))
+		/*let unread = 0;
 		let user_obj = {};
 		Object.keys(user).forEach((val, key) => {
 			user_obj[val] = user[val];
@@ -218,7 +220,7 @@ function List(props) {
 			val.is_read === 0 ? unread++ : '';
 		});
 		user_obj.unread_tickets = unread;
-		// dispatch(setUser(user_obj));
+		// dispatch(setUser(user_obj));*/
 	}
 
 	useEffect(() => {
