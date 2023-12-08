@@ -472,11 +472,12 @@ module.exports = (sequelize, DataTypes) => {
     );
     console.log(
       'total_credited_minus_reversed_front',
-      parseFloat(response.total),
+      parseFloat(response.dataValues.total),
       parseFloat(total_reversed[0].total)
     );
     var total_credited_minus_reversed =
-      parseFloat(response.total) - parseFloat(total_reversed[0].total);
+      parseFloat(response.dataValues.total) -
+      parseFloat(total_reversed[0].total);
 
     // result.total = total_earnings_credited[0].total;
     response.total = total_credited_minus_reversed.toFixed(2);
