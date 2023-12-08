@@ -461,8 +461,8 @@ module.exports = (sequelize, DataTypes) => {
       // status: 2,
     };
     option.logging = console.log;
-    console.log('option', option);
     let response = await MemberTransaction.findOne(option);
+    console.log('response', response);
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
       {
@@ -471,7 +471,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
     console.log(
-      'total_credited_minus_reversed',
+      'total_credited_minus_reversed_front',
       parseFloat(response.total),
       parseFloat(total_reversed[0].total)
     );
