@@ -195,6 +195,7 @@ class MemberController extends Controller {
                 'isp',
                 'browser',
                 'browser_language',
+                'created_at',
               ],
               limit: 1,
               order: [['created_at', 'DESC']],

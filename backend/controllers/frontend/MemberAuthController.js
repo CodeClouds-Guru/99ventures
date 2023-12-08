@@ -128,9 +128,7 @@ class MemberAuthController {
         if (member.status != 'member' && member.status != 'suspended') {
           member_status = false;
           member_message =
-            'Your account status is ' +
-            member.status +
-            '. Please contact to our admin!';
+            'Your account has been suspended. Please contact our admin via support ticket';
         }
       }
     }

@@ -1,27 +1,28 @@
-const Controller = require("./Controller");
-const { Op } = require("sequelize");
+const Controller = require('./Controller');
+const { Op } = require('sequelize');
 class IpLogController extends Controller {
   constructor() {
-    super("IpLog");
+    super('IpLog');
     this.generateFields = this.generateFields.bind(this);
     this.fieldConfig = {
-      'id': 'ID',
-      'geo_location': 'Geo Location',
-      'ip': 'IP',
-      'isp': 'ISP',
-      'browser': 'Browser',
-      'browser_language': 'Browser Language',
-      'fraud_score': 'Fraud Score',
-      'tor': 'Tor',
-      'vpn': 'VPN',
-      'proxy': 'Proxy'
+      id: 'ID',
+      geo_location: 'Geo Location',
+      ip: 'IP',
+      isp: 'ISP',
+      browser: 'Browser',
+      browser_language: 'Browser Language',
+      fraud_score: 'Fraud Score',
+      tor: 'Tor',
+      vpn: 'VPN',
+      proxy: 'Proxy',
+      created_at: 'Created At',
     };
   }
   //get list
   async list(req, res) {
     const options = this.getQueryOptions(req);
-    options.attributes = req.query.fields ;
-    options.paranoid = false
+    options.attributes = req.query.fields;
+    options.paranoid = false;
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },

@@ -33,7 +33,8 @@ const iplogsColumns = {
 	'fraud_score': 'Fraud Score',
 	'tor': 'Tor',
 	'vpn': 'VPN',
-	'proxy': 'Proxy'
+	'proxy': 'Proxy',
+	'created_at':'Created At'
 }
 
 
@@ -94,7 +95,7 @@ function List(props) {
 
 	const [listConfigDialog, setListConfigDialog] = useState(false);
 	const [displayColumnArray, setDisplayColumnArray] = useState([]);
-	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score']);
+	const [iplogsColumnArray, setIplogsColumnArray] = useState(['geo_location', 'ip', 'isp', 'browser', 'browser_language', 'fraud_score','created_at']);
 
 	const display_column_object = {
 		'id': 'ID',
