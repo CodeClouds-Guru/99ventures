@@ -470,6 +470,11 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
+    console.log(
+      'total_credited_minus_reversed',
+      parseFloat(response.total),
+      parseFloat(total_reversed[0].total)
+    );
     var total_credited_minus_reversed =
       parseFloat(response.total) - parseFloat(total_reversed[0].total);
 
