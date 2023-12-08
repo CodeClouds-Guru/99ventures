@@ -447,9 +447,10 @@ module.exports = (sequelize, DataTypes) => {
       ],
       // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
       // [sequelize.fn('sum', sequelize.col('amount')), 'total'],
+
       [
         sequelize.literal(
-          `SUM(CASE WHEN parent_transaction_id IS NULL THEN MemberTransaction.amount ELSE 0.00 END)`
+          `SUM(CASE WHEN parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END)`
         ),
         'total',
       ],
@@ -459,8 +460,8 @@ module.exports = (sequelize, DataTypes) => {
       type: 'credited',
       // status: 2,
     };
-    // option.logging = console.log;
-    // console.log(option);
+    option.logging = console.log;
+    console.log('option', option);
     let response = await MemberTransaction.findOne(option);
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
