@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
 module.exports = (sequelize, DataTypes) => {
   class PromoCode extends Model {
     /**
@@ -28,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
       status: DataTypes.ENUM('active', 'expired'),
+      company_portal_id: DataTypes.TINYINT,
     },
     {
       sequelize,
@@ -48,6 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       cash: Joi.string().label('Cash'),
       point: Joi.string().label('Point'),
       note: Joi.string().optional().label('Note'),
+      company_portal_id: Joi.number().optional().label('Company Portal'),
     });
     return schema.validate(req.body);
   };

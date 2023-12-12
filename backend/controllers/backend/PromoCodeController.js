@@ -19,7 +19,7 @@ class PromoCodeController extends Controller {
     let response = await super.save(req);
     return {
       status: true,
-      message: 'Page added.',
+      message: 'Promo code added.',
       id: response.result.id,
     };
   }
@@ -42,7 +42,7 @@ class PromoCodeController extends Controller {
     let response = await super.update(req);
     return {
       status: true,
-      message: 'Page updated.',
+      message: 'Promo code updated.',
     };
   }
 }
