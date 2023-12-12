@@ -23,7 +23,10 @@ class PromoCodeController extends Controller {
         value: '',
         width: '50',
         searchable: false,
-        options: ['auto', 'custom'],
+        options: [
+          { key: 'auto', value: 'Auto Generated Codes' },
+          { key: 'custom', value: 'Enter Custom Code' },
+        ],
       },
       ...fields,
     };
