@@ -17,7 +17,9 @@ router.get('/robots.txt', (req, res) => {
   if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
     res.send('User-agent: *\nDisallow: /');
   } else {
-    res.send('User-agent: *\nAllow: /\nSitemap: https://moresurveys.com/sitemap.xml');
+    res.send(
+      'User-agent: *\nAllow: /\nSitemap: https://moresurveys.com/sitemap.xml'
+    );
   }
 });
 
@@ -152,6 +154,9 @@ router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 
 //test api for manual insertion of member survye eligibilities
 router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
+
+//test api for manual insertion of member survye eligibilities
+router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

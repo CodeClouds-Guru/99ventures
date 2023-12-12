@@ -44,16 +44,22 @@ module.exports = (sequelize, DataTypes) => {
   );
   PromoCode.validate = function (req) {
     const schema = Joi.object({
-      code: Joi.string().required().max(12).label('Code'),
+      code: Joi.string()
+        .regex(/[a-zA-Z0-9]/)
+        .required()
+        .max(12)
+        .label('Code'),
       slug: Joi.string().required().label('Slug'),
       max_uses: Joi.required().label('Max Uses'),
       cash: Joi.string().label('Cash'),
       point: Joi.string().label('Point'),
       note: Joi.string().optional().label('Note'),
       company_portal_id: Joi.number().optional().label('Company Portal'),
+      type: Joi.string().optional().label('Type'),
     });
     return schema.validate(req.body);
   };
+
   PromoCode.fields = {
     id: {
       field_name: 'id',
@@ -99,26 +105,65 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'used',
       type: 'text',
       placeholder: 'Uses',
-      listing: true,
+      listing: false,
       show_in_form: false,
-      sort: true,
+      sort: false,
       required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    max_uses: {
+      field_name: 'max_uses',
+      db_name: 'max_uses',
+      type: 'text',
+      placeholder: 'Uses',
+      listing: true,
+      show_in_form: true,
+      sort: true,
+      required: true,
       value: '',
       width: '50',
       searchable: true,
     },
     cash: {
       field_name: 'cash',
-      db_name: 'cash m',
+      db_name: 'cash',
       type: 'text',
       placeholder: 'Amount',
       listing: true,
-      show_in_form: false,
+      show_in_form: true,
       sort: true,
       required: false,
       value: '',
       width: '50',
       searchable: true,
+    },
+    point: {
+      field_name: 'point',
+      db_name: 'point',
+      type: 'text',
+      placeholder: 'Point',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    note: {
+      field_name: 'note',
+      db_name: 'note',
+      type: 'text',
+      placeholder: 'Note',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
     },
   };
   sequelizePaginate.paginate(PromoCode);

@@ -25,6 +25,7 @@ const {
   SurveyProvider,
   CountryConfiguration,
   State,
+  PromoCode,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -1965,5 +1966,109 @@ class MemberAuthController {
       // res.redirect('back');
     }
   }*/
+
+  //Promo code redeem by member
+  async redeemPromoCode(req, res) {
+    let member_status = false;
+    let member_message = 'Unable to save data';
+    let response = [];
+    console.log(req.body);
+    req.headers.site_id = req.session.company_portal.id;
+    req.headers.company_id = req.session.company_portal.company_id;
+
+    // req.body.member_id = req.session.member.id;
+    req.body.member_id = 1;
+    let request_data = req.body;
+    var promo_code_slug = request_data.promo_code_slug;
+    try {
+      //get member
+      let member = await Member.findOne({
+        where: { id: request_data.member_id },
+        include: [
+          {
+            model: MemberBalance,
+            as: 'member_amounts',
+            attributes: ['amount'],
+            where: { amount_type: 'cash' },
+          },
+        ],
+      });
+
+      let promo_code = await PromoCode.findOne({
+        where: {
+          slug: { [Op.like]: promo_code_slug },
+          company_portal_id: req.headers.site_id,
+        },
+      });
+      console.log('promo_code', promo_code);
+      if (promo_code) {
+        let checkIfAlreadyUsed = await db.sequelize.query(
+          'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
+          {
+            replacements: [request_data.member_id, promo_code.id],
+            type: QueryTypes.SELECT,
+          }
+        );
+        console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
+        if (checkIfAlreadyUsed.length > 0) {
+          member_status = false;
+          member_message = 'Promo Code already used';
+        }
+        let modified_balance =
+          parseFloat(member.member_amounts[0].amount) +
+          parseFloat(promo_code.cash);
+        let transaction_data = {
+          member_id: request_data.member_id,
+          amount: promo_code.cash,
+          note: 'Promo Code - ' + promo_code.code,
+          type: 'credited',
+          amount_action: 'promo_code',
+          created_by: request_data.member_id,
+          modified_total_earnings: modified_balance,
+          status: 2,
+        };
+        var transaction_resp = await MemberTransaction.insertTransaction(
+          transaction_data
+        );
+
+        await MemberBalance.update(
+          { amount: modified_balance },
+          {
+            where: {
+              member_id: data.member_id,
+              amount_type: 'cash',
+            },
+          }
+        );
+        await db.sequelize.query(
+          'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
+          {
+            type: QueryTypes.INSERT,
+            replacements: [promo_code.id, request_data.member_id],
+          }
+        );
+      } else {
+        member_status = false;
+        member_message = "Promo Code doesn't exist";
+      }
+    } catch (error) {
+      console.error(error);
+      member_status = false;
+      member_message = 'Error occured';
+    } finally {
+      if (member_status === true) {
+        req.session.flash = {
+          message: member_message,
+          success_status: true,
+        };
+        // res.redirect('/paid-surveys');
+      }
+      res.json({
+        status: member_status,
+        message: member_message,
+        data: response,
+      });
+    }
+  }
 }
 module.exports = MemberAuthController;
