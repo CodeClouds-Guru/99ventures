@@ -315,6 +315,16 @@ const modules = [
     deleted_by: null,
     created_at: new Date(),
   },
+  //new feature modules
+  {
+    slug: 'promocodes',
+    name: 'Promo Codes',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
 ];
 module.exports = {
   async up(queryInterface, Sequelize) {

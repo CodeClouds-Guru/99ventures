@@ -31,13 +31,10 @@ module.exports = {
         type: 'TIMESTAMP',
       },
     });
-    await queryInterface.addIndex(
-      'survey_number_member_id_survey_provider_id',
-      {
-        fields: ['survey_number', 'member_id', 'survey_provider_id'],
-        unique: true,
-      }
-    );
+    await queryInterface.addIndex('survey_attempts', {
+      fields: ['survey_number', 'member_id', 'survey_provider_id'],
+      unique: true,
+    });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.removeIndex(
