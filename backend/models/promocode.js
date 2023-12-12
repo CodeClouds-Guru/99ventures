@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
   PromoCode.validate = function (req) {
     const schema = Joi.object({
       code: Joi.string()
-        .regex(/[a-zA-Z0-9]/)
+        .regex(/[a-zA-Z0-9 ]/)
         .required()
         .max(12)
         .label('Code'),

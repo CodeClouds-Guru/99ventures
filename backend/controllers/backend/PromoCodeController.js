@@ -11,7 +11,6 @@ class PromoCodeController extends Controller {
     let fields = response.fields;
     // let email_actions = await EmailAction.findAll()
     fields = {
-      ...fields,
       type: {
         field_name: 'type',
         db_name: 'type',
@@ -26,6 +25,7 @@ class PromoCodeController extends Controller {
         searchable: false,
         options: ['auto', 'custom'],
       },
+      ...fields,
     };
     return {
       status: true,
