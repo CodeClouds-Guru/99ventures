@@ -32,10 +32,28 @@ const navigationConfig = [
     id: 'members',
     title: 'Members',
     translate: 'Members',
-    type: 'item',
+    type: 'collapse',
     icon: 'heroicons-outline:user-group',
-    url: 'app/members',
-    end: true,
+    // url: 'app/members',
+    // end: true,
+    children: [
+      {
+        id: 'members',
+        title: 'Members List',
+        type: 'item',
+        icon: 'heroicons-outline:user-group',
+        url: 'app/members',
+        end: true,
+      },
+      {
+        id: 'promocodes',
+        title: 'Promo codes',
+        type: 'item',
+        icon: 'material-outline:local_atm',
+        url: 'app/promo-codes',
+        end: true,
+      }
+    ]
   },
   // {
   //   id: 'membersMenu',
