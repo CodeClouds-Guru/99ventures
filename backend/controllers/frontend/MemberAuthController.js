@@ -2047,6 +2047,10 @@ class MemberAuthController {
             replacements: [promo_code.id, request_data.member_id],
           }
         );
+        await PromoCode.update(
+          { used: parseInt(promo_code.used) - 1 },
+          { id: promo_code.id }
+        );
       } else {
         member_status = false;
         member_message = "Promo Code doesn't exist";
