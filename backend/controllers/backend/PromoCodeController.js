@@ -76,6 +76,10 @@ class PromoCodeController extends Controller {
       where: { id: req.params.id },
     });
     req.body.slug = findCode.slug;
+    req.body.cash =
+      req.body.cash == '' ? findCode.cash : parseFloat(req.body.cash);
+    req.body.point =
+      req.body.point == '' ? findCode.point : parseInt(req.body.point);
     delete req.body.type;
     let response = await super.update(req);
     return response;
