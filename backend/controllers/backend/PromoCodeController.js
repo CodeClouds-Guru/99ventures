@@ -56,26 +56,25 @@ class PromoCodeController extends Controller {
     }
     delete req.body.type;
     let response = await super.save(req);
-    return {
-      status: true,
-      message: 'Promo code added.',
-      id: response.result.id,
-    };
+
+    return response;
   }
   //override update function
   async update(req, res) {
+    console.log(req);
     req.body.company_portal_id = req.headers.site_id;
 
     var type = req.body.type || 'custom';
     if (type === 'auto') {
       req.body.code = Math.random().toString(36).slice(2);
     }
+    let findCode = await this.model.findOne({
+      where: { id: req.params.id },
+    });
+    req.body.slug = findCode.slug;
     delete req.body.type;
     let response = await super.update(req);
-    return {
-      status: true,
-      message: 'Promo code updated.',
-    };
+    return response;
   }
 }
 
