@@ -51,9 +51,9 @@ module.exports = (sequelize, DataTypes) => {
         .label('Code'),
       slug: Joi.string().required().label('Slug'),
       max_uses: Joi.required().label('Max Uses'),
-      cash: Joi.string().optional().label('Cash'),
-      point: Joi.string().optional().label('Point'),
-      note: Joi.string().optional().label('Note'),
+      cash: Joi.optional().label('Cash'),
+      point: Joi.optional().label('Point'),
+      note: Joi.optional().label('Note'),
       company_portal_id: Joi.number().optional().label('Company Portal'),
       type: Joi.string().optional().label('Type'),
     });
