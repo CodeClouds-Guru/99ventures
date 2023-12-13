@@ -37,6 +37,7 @@ class PromoCodeController extends Controller {
   }
   //override save function
   async save(req, res) {
+    console.log(req);
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
@@ -48,13 +49,16 @@ class PromoCodeController extends Controller {
       new Date().getTime();
 
     //unique code checking
-    let check_code = await this.model.findOne({
-      where: { slug: req.body.slug, company_portal_id: req.headers.site_id },
-    });
-    if (check_code) {
-      this.throwCustomError('Slug already in use.', 409);
-    }
+    // let check_code = await this.model.findOne({
+    //   where: { slug: req.body.slug, company_portal_id: req.headers.site_id },
+    // });
+    // if (check_code) {
+    //   this.throwCustomError('Slug already in use.', 409);
+    // }
+    req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
+    req.body.point = req.body.point == '' ? 0 : parseInt(req.body.point);
     delete req.body.type;
+    console.log('before save', req.body);
     let response = await super.save(req);
 
     return response;
