@@ -31,11 +31,9 @@ import PaypalConfig from '../main/paypal/PaypalConfig';
 import WithdrawalRequestsConfig from '../main/members/withdrawal-requests/WithdrawalRequestsConfig';
 import SurveyProvidersConfig from '../main/survey-providers/SurveyProvidersConfig';
 import PaymentGatewayConfig from '../main/configuration/payment-gateway/PaymentGatewayConfig';
-import PromocodesConfig from '../main/members/promocodes/PromocodesConfig';
 
 
-
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig, SurveyProvidersConfig, PaymentGatewayConfig, PromocodesConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig, SurveyProvidersConfig, PaymentGatewayConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
