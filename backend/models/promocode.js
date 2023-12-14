@@ -2,6 +2,7 @@
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
 const Joi = require('joi');
+const { response } = require('express');
 module.exports = (sequelize, DataTypes) => {
   class PromoCode extends Model {
     /**
@@ -195,5 +196,39 @@ module.exports = (sequelize, DataTypes) => {
     },
   };
   sequelizePaginate.paginate(PromoCode);
+  PromoCode.redeemPromoValidation = async (data) => {
+    const { MemberBalance, MemberNotification } = require('../models/index');
+    let resp = { resp_status: true, resp_message: '' };
+    let promo_code_details = await PromoCode.findOne({
+      where: {
+        slug: { [Op.like]: data.promo_code },
+        company_portal_id: data.company_portal_id,
+      },
+    });
+    console.log('promo_code', promo_code_details);
+    if (promo_code_details) {
+      if (promo_code_details.used == promo_code_details.max_uses) {
+        resp.resp_status = false;
+        resp.resp_message = 'Promo Code expired';
+      } else {
+        let checkIfAlreadyUsed = await db.sequelize.query(
+          'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
+          {
+            replacements: [data.member_id, promo_code_details.id],
+            type: QueryTypes.SELECT,
+          }
+        );
+        console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
+        if (checkIfAlreadyUsed.length > 0) {
+          resp.resp_status = false;
+          resp.resp_message = 'Promo Code already used';
+        }
+      }
+    } else {
+      resp.resp_status = false;
+      resp.resp_message = 'Promo Code does not exist!';
+    }
+    return resp;
+  };
   return PromoCode;
 };
