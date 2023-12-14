@@ -688,15 +688,22 @@ $(() => {
       if(promoInput) {
         $.ajax({
           type: 'POST',
-          url: '',
+          url: '/redeem-promo-code',
           data: formData,
           beforeSend: function() {
             submitBtn.attr('disabled', true).text('Please wait...');
           },
-          success: function(data) {
+          success: function(res) {
             submitBtn.removeAttr('disabled', true).text('Redeem');
+            if(res.status === true) {
+              resMsg.html(`<p class="m-0 p-0 text-success small">${res.message}</p>`);
+            }else {
+              resMsg.html(`<p class="m-0 p-0 text-danger small">${res.message}</p>`);
+            }
           },
-          error: function(xhr) { }
+          error: function(xhr) { 
+            console.log(xhr)
+          }
         })
       } else {
         resMsg.html(`<p class="m-0 p-0 text-danger small">Please enter promo code!</p>`);
