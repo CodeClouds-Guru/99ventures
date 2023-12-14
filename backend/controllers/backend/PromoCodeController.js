@@ -1,4 +1,5 @@
 const Controller = require('./Controller');
+const { Op } = require('sequelize');
 
 class PromoCodeController extends Controller {
   constructor() {
@@ -41,18 +42,25 @@ class PromoCodeController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
-      req.body.code =
-        req.body.name.replace(' ', '_').toLowerCase() +
-        '-' +
-        new Date().getTime();
+      req.body.code = req.body.name
+        .split(' ')
+        .reduce((response, word) => (response += word.slice(0, 1)), '');
+      var random_int = String(
+        Math.floor(Math.random() * 99999999999)
+      ).substring(0, 12 - String(req.body.code).length);
+      req.body.code = req.body.code + random_int;
     }
+    console.log(req.body.code);
     let existingCode = await this.model.findOne({
       where: { code: req.body.code },
       company_portal_id: req.body.company_portal_id,
     });
     if (existingCode) {
       if (existingCode.max_uses != existingCode.used) {
-        this.throwCustomError('Duplicated entry', 500);
+        return {
+          status: false,
+          message: 'Duplicate Entry',
+        };
       }
     }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
@@ -60,7 +68,6 @@ class PromoCodeController extends Controller {
     delete req.body.type;
     console.log('before save', req.body);
     let response = await super.save(req);
-
     return response;
   }
   //override update function
@@ -69,11 +76,15 @@ class PromoCodeController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
-      req.body.code =
-        req.body.name.replace(' ', '_').toLowerCase() +
-        '-' +
-        new Date().getTime();
+      req.body.code = req.body.name
+        .split(' ')
+        .reduce((response, word) => (response += word.slice(0, 1)), '');
+      var random_int = String(
+        Math.floor(Math.random() * 99999999999)
+      ).substring(0, 12 - String(req.body.code).length);
+      req.body.code = req.body.code + random_int;
     }
+    console.log(req.body);
     let existingCode = await this.model.findOne({
       where: {
         code: req.body.code,
@@ -83,7 +94,10 @@ class PromoCodeController extends Controller {
     });
     if (existingCode) {
       if (existingCode.max_uses != existingCode.used) {
-        this.throwCustomError('Duplicated entry', 500);
+        return {
+          status: false,
+          message: 'Duplicate Entry',
+        };
       }
     }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);

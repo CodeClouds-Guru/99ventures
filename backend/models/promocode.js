@@ -50,11 +50,7 @@ module.exports = (sequelize, DataTypes) => {
         .required()
         .max(12)
         .label('Code'),
-      name: Joi.string()
-        .regex(/^[a-zA-Z0-9]*$/)
-        .required()
-        .max(12)
-        .label('Code'),
+      name: Joi.string().required().label('name'),
       max_uses: Joi.required().label('Max Uses'),
       description: Joi.optional().label('Description'),
       cash: Joi.optional().label('Cash'),
