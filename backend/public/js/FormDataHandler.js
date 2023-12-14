@@ -675,4 +675,39 @@ $(() => {
     document.cookie =
       'email_verified=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
+
+  // Redeem Promocode
+  if($('#promocode-redeem-popup').length) {
+    $('#promocode-redeem-popup').on('submit', function(e){
+      e.preventDefault();
+      const formData = $(this).serialize();
+      const resMsg = $(this).find('.response-msg')
+      resMsg.html('').show();
+      const submitBtn = $(this).find('button[type=submit]');
+      const promoInput = $(this).find('input[name=promocode]').val().trim();
+      if(promoInput) {
+        $.ajax({
+          type: 'POST',
+          url: '',
+          data: formData,
+          beforeSend: function() {
+            submitBtn.attr('disabled', true).text('Please wait...');
+          },
+          success: function(data) {
+            submitBtn.removeAttr('disabled', true).text('Redeem');
+          },
+          error: function(xhr) { }
+        })
+      } else {
+        resMsg.html(`<p class="m-0 p-0 text-danger small">Please enter promo code!</p>`);
+        responseMsgToggle(resMsg);
+      }
+    })
+  }
 });
+
+function responseMsgToggle(el){
+  setTimeout(()=>{
+    el.fadeOut();
+  }, 5000);
+}
