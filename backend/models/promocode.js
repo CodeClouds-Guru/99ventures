@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   PromoCode.init(
     {
       code: DataTypes.STRING,
-      slug: DataTypes.STRING,
+      name: DataTypes.STRING,
+      description: DataTypes.TEXT,
       max_uses: DataTypes.TINYINT,
       cash: DataTypes.FLOAT,
       point: DataTypes.TINYINT,
@@ -45,12 +46,17 @@ module.exports = (sequelize, DataTypes) => {
   PromoCode.validate = function (req) {
     const schema = Joi.object({
       code: Joi.string()
-        .regex(/[a-zA-Z0-9 ]/)
+        .regex(/^[a-zA-Z0-9]*$/)
         .required()
         .max(12)
         .label('Code'),
-      slug: Joi.string().required().label('Slug'),
+      name: Joi.string()
+        .regex(/^[a-zA-Z0-9]*$/)
+        .required()
+        .max(12)
+        .label('Code'),
       max_uses: Joi.required().label('Max Uses'),
+      description: Joi.optional().label('Description'),
       cash: Joi.optional().label('Cash'),
       point: Joi.optional().label('Point'),
       note: Joi.optional().label('Note'),
@@ -86,6 +92,32 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: true,
+    },
+    name: {
+      field_name: 'name',
+      db_name: 'name',
+      type: 'text',
+      placeholder: 'Name',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    description: {
+      field_name: 'description',
+      db_name: 'description',
+      type: 'text',
+      placeholder: 'Description',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: false,
     },
     created_at: {
       field_name: 'created_at',

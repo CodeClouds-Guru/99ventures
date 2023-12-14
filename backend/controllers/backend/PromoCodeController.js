@@ -41,20 +41,20 @@ class PromoCodeController extends Controller {
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
-      req.body.code = Math.random().toString(36).slice(2);
+      req.body.code =
+        req.body.name.replace(' ', '_').toLowerCase() +
+        '-' +
+        new Date().getTime();
     }
-    req.body.slug =
-      req.body.code.replace(' ', '_').toLowerCase() +
-      '-' +
-      new Date().getTime();
-
-    //unique code checking
-    // let check_code = await this.model.findOne({
-    //   where: { slug: req.body.slug, company_portal_id: req.headers.site_id },
-    // });
-    // if (check_code) {
-    //   this.throwCustomError('Slug already in use.', 409);
-    // }
+    let existingCode = await this.model.findOne({
+      where: { code: req.body.code },
+      company_portal_id: req.body.company_portal_id,
+    });
+    if (existingCode) {
+      if (existingCode.max_uses != existingCode.used) {
+        this.throwCustomError('Duplicated entry', 500);
+      }
+    }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
     req.body.point = req.body.point == '' ? 0 : parseInt(req.body.point);
     delete req.body.type;
@@ -67,15 +67,25 @@ class PromoCodeController extends Controller {
   async update(req, res) {
     console.log(req);
     req.body.company_portal_id = req.headers.site_id;
-
     var type = req.body.type || 'custom';
     if (type === 'auto') {
-      req.body.code = Math.random().toString(36).slice(2);
+      req.body.code =
+        req.body.name.replace(' ', '_').toLowerCase() +
+        '-' +
+        new Date().getTime();
     }
-    let findCode = await this.model.findOne({
-      where: { id: req.params.id },
+    let existingCode = await this.model.findOne({
+      where: {
+        code: req.body.code,
+        id: { [Op.ne]: req.params.id },
+        company_portal_id: req.body.company_portal_id,
+      },
     });
-    req.body.slug = findCode.slug;
+    if (existingCode) {
+      if (existingCode.max_uses != existingCode.used) {
+        this.throwCustomError('Duplicated entry', 500);
+      }
+    }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
     req.body.point = req.body.point == '' ? 0 : parseInt(req.body.point);
     delete req.body.type;
