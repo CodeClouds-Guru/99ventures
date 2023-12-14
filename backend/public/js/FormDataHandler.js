@@ -697,6 +697,10 @@ $(() => {
             submitBtn.removeAttr('disabled', true).text('Redeem');
             if(res.status === true) {
               resMsg.html(`<p class="m-0 p-0 text-success small">${res.message}</p>`);
+              setTimeout(()=>{
+                // $('#promocode-popup').modal('hide');
+                location.reload();
+              }, 3000);
             }else {
               resMsg.html(`<p class="m-0 p-0 text-danger small">${res.message}</p>`);
             }
