@@ -38,7 +38,7 @@ class PromoCodeController extends Controller {
   }
   //override save function
   async save(req, res) {
-    console.log(req);
+    // console.log(req);
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
@@ -50,7 +50,7 @@ class PromoCodeController extends Controller {
       ).substring(0, 12 - String(req.body.code).length);
       req.body.code = req.body.code + random_int;
     }
-    console.log(req.body.code);
+    // console.log(req.body.code);
     let existingCode = await this.model.findOne({
       where: { code: req.body.code },
       company_portal_id: req.body.company_portal_id,
@@ -66,13 +66,13 @@ class PromoCodeController extends Controller {
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
     req.body.point = req.body.point == '' ? 0 : parseInt(req.body.point);
     delete req.body.type;
-    console.log('before save', req.body);
+    // console.log('before save', req.body);
     let response = await super.save(req);
     return response;
   }
   //override update function
   async update(req, res) {
-    console.log(req);
+    // console.log(req);
     req.body.company_portal_id = req.headers.site_id;
     var type = req.body.type || 'custom';
     if (type === 'auto') {
@@ -84,7 +84,7 @@ class PromoCodeController extends Controller {
       ).substring(0, 12 - String(req.body.code).length);
       req.body.code = req.body.code + random_int;
     }
-    console.log(req.body);
+    // console.log(req.body);
     let existingCode = await this.model.findOne({
       where: {
         code: req.body.code,

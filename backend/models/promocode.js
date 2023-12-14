@@ -197,11 +197,12 @@ module.exports = (sequelize, DataTypes) => {
   };
   sequelizePaginate.paginate(PromoCode);
   PromoCode.redeemPromoValidation = async (data) => {
-    const { MemberBalance, MemberNotification } = require('../models/index');
-    let resp = { resp_status: true, resp_message: '' };
+    const db = require('../models/index');
+    const { QueryTypes, Op } = require('sequelize');
+    let resp = { resp_status: true, resp_message: '', data: {} };
     let promo_code_details = await PromoCode.findOne({
       where: {
-        slug: { [Op.like]: data.promo_code },
+        code: { [Op.like]: data.promo_code },
         company_portal_id: data.company_portal_id,
       },
     });
@@ -223,6 +224,7 @@ module.exports = (sequelize, DataTypes) => {
           resp.resp_status = false;
           resp.resp_message = 'Promo Code already used';
         }
+        resp.data = promo_code_details;
       }
     } else {
       resp.resp_status = false;

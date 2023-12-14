@@ -66,6 +66,7 @@ class MemberAuthController {
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
+    this.redeemPromoCode = this.redeemPromoCode.bind(this);
   }
   //login
   async login(req, res) {
@@ -1969,17 +1970,22 @@ class MemberAuthController {
 
   //Promo code redeem by member
   async redeemPromoCode(req, res) {
+    console.log('redeemPromoCode', req);
     let resp_status = false;
     let resp_message = 'Unable to save data';
     let response = [];
-    console.log(req.body);
-    req.headers.site_id = req.session.company_portal.id;
-    req.headers.company_id = req.session.company_portal.company_id;
+    // console.log(req.body);
+    const companyPortal = await this.getCompanyPortal(req);
+    let company_portal_id = companyPortal.id;
+    req.headers.site_id = company_portal_id;
+    let company_id = companyPortal.company_id;
+    req.headers.site_id = company_portal_id;
+    req.headers.company_id = company_id;
 
-    // req.body.member_id = req.session.member.id;
-    req.body.member_id = 1;
+    req.body.member_id = req.session.member.id;
+    // req.body.member_id = 1;
     let request_data = req.body;
-    var promo_code = request_data.promo_code;
+    var promo_code = request_data.promocode;
     try {
       //get member
       let member = await Member.findOne({
@@ -1996,50 +2002,63 @@ class MemberAuthController {
 
       //validation
       let promocode_validation = await PromoCode.redeemPromoValidation({
-        promo_code: request_data.promo_code,
-        company_portal_id: req.headers.site_id,
+        promo_code: request_data.promocode,
+        company_portal_id: company_portal_id,
         member_id: req.body.member_id,
       });
+      console.log('promocode_validation', promocode_validation.data.dataValues);
       if (!promocode_validation.resp_status) {
         resp_status = promocode_validation.resp_status;
         resp_message = promocode_validation.resp_message;
       }
-      let modified_balance =
-        parseFloat(member.member_amounts[0].amount) +
-        parseFloat(promo_code.cash);
-      let transaction_data = {
-        member_id: request_data.member_id,
-        amount: promo_code.cash,
-        note: 'Promo Code - ' + promo_code.code,
-        type: 'credited',
-        amount_action: 'promo_code',
-        created_by: request_data.member_id,
-        modified_total_earnings: modified_balance,
-        status: 2,
-      };
-      var transaction_resp = await MemberTransaction.insertTransaction(
-        transaction_data
-      );
-      await MemberBalance.update(
-        { amount: modified_balance },
-        {
-          where: {
-            member_id: data.member_id,
-            amount_type: 'cash',
+      if (promocode_validation.data.dataValues) {
+        let modified_balance =
+          parseFloat(member.member_amounts[0].amount) +
+          parseFloat(promocode_validation.data.dataValues.cash);
+        let transaction_data = {
+          member_id: request_data.member_id,
+          amount: parseFloat(promocode_validation.data.dataValues.cash),
+          note: 'Promo Code - ' + promocode_validation.data.dataValues.code,
+          type: 'credited',
+          amount_action: 'promo_code',
+          created_by: request_data.member_id,
+          modified_total_earnings: modified_balance,
+          status: 2,
+        };
+        var transaction_resp = await MemberTransaction.insertTransaction(
+          transaction_data
+        );
+        await MemberBalance.update(
+          { amount: modified_balance },
+          {
+            where: {
+              member_id: request_data.member_id,
+              amount_type: 'cash',
+            },
+          }
+        );
+        await db.sequelize.query(
+          'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
+          {
+            type: QueryTypes.INSERT,
+            replacements: [
+              promocode_validation.data.dataValues.id,
+              request_data.member_id,
+            ],
+          }
+        );
+        await PromoCode.update(
+          {
+            used:
+              promocode_validation.data.dataValues.used > 0
+                ? parseInt(promocode_validation.data.dataValues.used) - 1
+                : 1,
           },
-        }
-      );
-      await db.sequelize.query(
-        'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
-        {
-          type: QueryTypes.INSERT,
-          replacements: [promo_code.id, request_data.member_id],
-        }
-      );
-      await PromoCode.update(
-        { used: parseInt(promo_code.used) - 1 },
-        { id: promo_code.id }
-      );
+          { where: { id: promocode_validation.data.dataValues.id } }
+        );
+        resp_status = true;
+        resp_message = 'Promo code successfully applied';
+      }
     } catch (error) {
       console.error(error);
       resp_status = false;
@@ -2055,7 +2074,6 @@ class MemberAuthController {
       res.json({
         status: resp_status,
         message: resp_message,
-        data: response,
       });
     }
   }
