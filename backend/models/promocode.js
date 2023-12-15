@@ -106,7 +106,7 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       field_name: 'description',
       db_name: 'description',
-      type: 'text',
+      type: 'textarea',
       placeholder: 'Description',
       listing: false,
       show_in_form: true,

@@ -2057,7 +2057,9 @@ class MemberAuthController {
           { where: { id: promocode_validation.data.dataValues.id } }
         );
         resp_status = true;
-        resp_message = 'Promo code successfully applied';
+        resp_message =
+          'You have been credited for the promotional code entered. Below are your earnings : ' +
+          promocode_validation.data.dataValues.cash;
       }
     } catch (error) {
       console.error(error);
