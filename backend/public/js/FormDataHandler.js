@@ -694,18 +694,19 @@ $(() => {
             submitBtn.attr('disabled', true).text('Please wait...');
           },
           success: function(res) {
-            submitBtn.removeAttr('disabled', true).text('Redeem');
+            submitBtn.removeAttr('disabled').text('Redeem');
             if(res.status === true) {
               resMsg.html(`<p class="m-0 p-0 text-success small">${res.message}</p>`);
               setTimeout(()=>{
                 // $('#promocode-popup').modal('hide');
                 location.reload();
-              }, 3000);
+              }, 1500);
             }else {
               resMsg.html(`<p class="m-0 p-0 text-danger small">${res.message}</p>`);
             }
           },
           error: function(xhr) { 
+            submitBtn.removeAttr('disabled').text('Redeem');
             console.log(xhr)
           }
         })
