@@ -12,6 +12,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      PromoCode.belongsToMany(models.Member, {
+        as: 'MemberPromoCode',
+        through: 'member_promo_codes',
+        foreignKey: 'promo_code_id',
+        otherKey: 'member_id',
+        timestamps: false,
+      });
     }
   }
   PromoCode.init(
@@ -56,12 +63,14 @@ module.exports = (sequelize, DataTypes) => {
             'string.max': 'You can use upto 12 letters',
           },
           {
-            'string.pattern.base':
+            'object.pattern.base':
               'You can use upto 12 letters which only consist characters and numbers',
           }
         ),
       name: Joi.string().required().label('name'),
-      max_uses: Joi.required().label('Max Uses'),
+      max_uses: Joi.number().min(1).required().label('Max Uses').messages({
+        'number.min': 'You can not create a promo code that has 0 use',
+      }),
       description: Joi.optional().label('Description'),
       cash: Joi.optional().label('Cash'),
       point: Joi.optional().label('Point'),
@@ -142,8 +151,8 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'used',
       db_name: 'used',
       type: 'text',
-      placeholder: 'Uses',
-      listing: false,
+      placeholder: 'Used',
+      listing: true,
       show_in_form: false,
       sort: false,
       required: false,
@@ -154,7 +163,7 @@ module.exports = (sequelize, DataTypes) => {
     max_uses: {
       field_name: 'max_uses',
       db_name: 'max_uses',
-      type: 'text',
+      type: 'number',
       placeholder: 'Uses',
       listing: true,
       show_in_form: true,
@@ -167,7 +176,7 @@ module.exports = (sequelize, DataTypes) => {
     cash: {
       field_name: 'cash',
       db_name: 'cash',
-      type: 'text',
+      type: 'number',
       placeholder: 'Amount',
       listing: true,
       show_in_form: true,
@@ -180,7 +189,7 @@ module.exports = (sequelize, DataTypes) => {
     point: {
       field_name: 'point',
       db_name: 'point',
-      type: 'text',
+      type: 'number',
       placeholder: 'Point',
       listing: false,
       show_in_form: true,
@@ -202,6 +211,19 @@ module.exports = (sequelize, DataTypes) => {
       value: '',
       width: '50',
       searchable: false,
+    },
+    status: {
+      field_name: 'status',
+      db_name: 'status',
+      type: 'text',
+      placeholder: 'Status',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
     },
   };
   sequelizePaginate.paginate(PromoCode);

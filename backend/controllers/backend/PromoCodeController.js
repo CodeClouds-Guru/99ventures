@@ -1,5 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
+const { Member } = require('../../models/index');
 
 class PromoCodeController extends Controller {
   constructor() {
@@ -94,10 +95,11 @@ class PromoCodeController extends Controller {
     });
     if (existingCode) {
       if (existingCode.max_uses != existingCode.used) {
-        return {
-          status: false,
-          message: 'Duplicate Entry',
-        };
+        // return {
+        //   status: false,
+        //   message: 'Duplicate Entry',
+        // };
+        return this.throwCustomError('Duplicate Entry', 500);
       }
     }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
@@ -105,6 +107,31 @@ class PromoCodeController extends Controller {
     delete req.body.type;
     let response = await super.update(req);
     return response;
+  }
+
+  async list(req, res) {
+    var options = super.getQueryOptions(req);
+    if ('where' in options) {
+      console.log(options);
+    }
+    const { docs, pages, total } = await this.model.paginate(options);
+
+    return {
+      result: { data: docs, pages, total },
+      fields: this.model.fields,
+    };
+  }
+
+  async view(req, res) {
+    let model = await this.model.findOne({
+      where: { id: req.params.id },
+      include: {
+        model: Member,
+        as: 'MemberPromoCode',
+        attributes: ['id', 'username', 'first_name', 'last_name', 'status'],
+      },
+    });
+    return { status: true, result: model };
   }
 }
 

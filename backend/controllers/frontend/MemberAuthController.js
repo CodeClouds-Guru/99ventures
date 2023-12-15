@@ -2018,7 +2018,7 @@ class MemberAuthController {
           let transaction_data = {
             member_id: request_data.member_id,
             amount: parseFloat(promocode_validation.data.dataValues.cash),
-            note: 'Promo Code - ' + promocode_validation.data.dataValues.code,
+            note: promocode_validation.data.dataValues.code,
             type: 'credited',
             amount_action: 'promo_code',
             created_by: request_data.member_id,
@@ -2047,12 +2047,20 @@ class MemberAuthController {
               ],
             }
           );
+          let promo_code_used_count =
+            promocode_validation.data.dataValues.used > 0
+              ? parseInt(promocode_validation.data.dataValues.used) + 1
+              : 1;
+          let promo_code_status =
+            promocode_validation.data.dataValues.max_uses ==
+            promo_code_used_count
+              ? 'expired'
+              : 'active';
+
           await PromoCode.update(
             {
-              used:
-                promocode_validation.data.dataValues.used > 0
-                  ? parseInt(promocode_validation.data.dataValues.used) - 1
-                  : 1,
+              used: promo_code_used_count,
+              status: promo_code_status,
             },
             { where: { id: promocode_validation.data.dataValues.id } }
           );
