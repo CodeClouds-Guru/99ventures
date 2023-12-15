@@ -2006,60 +2006,61 @@ class MemberAuthController {
         company_portal_id: company_portal_id,
         member_id: req.body.member_id,
       });
-      console.log('promocode_validation', promocode_validation.data.dataValues);
+      console.log('promocode_validation', promocode_validation);
       if (!promocode_validation.resp_status) {
         resp_status = promocode_validation.resp_status;
         resp_message = promocode_validation.resp_message;
-      }
-      if (promocode_validation.data.dataValues) {
-        let modified_balance =
-          parseFloat(member.member_amounts[0].amount) +
-          parseFloat(promocode_validation.data.dataValues.cash);
-        let transaction_data = {
-          member_id: request_data.member_id,
-          amount: parseFloat(promocode_validation.data.dataValues.cash),
-          note: 'Promo Code - ' + promocode_validation.data.dataValues.code,
-          type: 'credited',
-          amount_action: 'promo_code',
-          created_by: request_data.member_id,
-          modified_total_earnings: modified_balance,
-          status: 2,
-        };
-        var transaction_resp = await MemberTransaction.insertTransaction(
-          transaction_data
-        );
-        await MemberBalance.update(
-          { amount: modified_balance },
-          {
-            where: {
-              member_id: request_data.member_id,
-              amount_type: 'cash',
+      } else {
+        if (promocode_validation.data.dataValues) {
+          let modified_balance =
+            parseFloat(member.member_amounts[0].amount) +
+            parseFloat(promocode_validation.data.dataValues.cash);
+          let transaction_data = {
+            member_id: request_data.member_id,
+            amount: parseFloat(promocode_validation.data.dataValues.cash),
+            note: 'Promo Code - ' + promocode_validation.data.dataValues.code,
+            type: 'credited',
+            amount_action: 'promo_code',
+            created_by: request_data.member_id,
+            modified_total_earnings: modified_balance,
+            status: 2,
+          };
+          var transaction_resp = await MemberTransaction.insertTransaction(
+            transaction_data
+          );
+          await MemberBalance.update(
+            { amount: modified_balance },
+            {
+              where: {
+                member_id: request_data.member_id,
+                amount_type: 'cash',
+              },
+            }
+          );
+          await db.sequelize.query(
+            'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
+            {
+              type: QueryTypes.INSERT,
+              replacements: [
+                promocode_validation.data.dataValues.id,
+                request_data.member_id,
+              ],
+            }
+          );
+          await PromoCode.update(
+            {
+              used:
+                promocode_validation.data.dataValues.used > 0
+                  ? parseInt(promocode_validation.data.dataValues.used) - 1
+                  : 1,
             },
-          }
-        );
-        await db.sequelize.query(
-          'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
-          {
-            type: QueryTypes.INSERT,
-            replacements: [
-              promocode_validation.data.dataValues.id,
-              request_data.member_id,
-            ],
-          }
-        );
-        await PromoCode.update(
-          {
-            used:
-              promocode_validation.data.dataValues.used > 0
-                ? parseInt(promocode_validation.data.dataValues.used) - 1
-                : 1,
-          },
-          { where: { id: promocode_validation.data.dataValues.id } }
-        );
-        resp_status = true;
-        resp_message =
-          'You have been credited for the promotional code entered. Below are your earnings : ' +
-          promocode_validation.data.dataValues.cash;
+            { where: { id: promocode_validation.data.dataValues.id } }
+          );
+          resp_status = true;
+          resp_message =
+            'You have been credited for the promotional code entered. Below are your earnings : ' +
+            promocode_validation.data.dataValues.cash;
+        }
       }
     } catch (error) {
       console.error(error);

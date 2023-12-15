@@ -50,7 +50,16 @@ module.exports = (sequelize, DataTypes) => {
         .regex(/^[a-zA-Z0-9]*$/)
         .required()
         .max(12)
-        .label('Code'),
+        .label('Code')
+        .messages(
+          {
+            'string.max': 'You can use upto 12 letters',
+          },
+          {
+            'string.pattern.base':
+              'You can use upto 12 letters which only consist characters and numbers',
+          }
+        ),
       name: Joi.string().required().label('name'),
       max_uses: Joi.required().label('Max Uses'),
       description: Joi.optional().label('Description'),
