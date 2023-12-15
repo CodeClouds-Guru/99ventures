@@ -703,6 +703,7 @@ $(() => {
               }, 1500);
             }else {
               resMsg.html(`<p class="m-0 p-0 text-danger small">${res.message}</p>`);
+              responseMsgToggle(resMsg);
             }
           },
           error: function(xhr) { 
