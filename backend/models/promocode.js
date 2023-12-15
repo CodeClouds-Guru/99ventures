@@ -204,6 +204,7 @@ module.exports = (sequelize, DataTypes) => {
       where: {
         code: { [Op.like]: data.promo_code },
         company_portal_id: data.company_portal_id,
+        status: 'active',
       },
     });
     console.log('promo_code', promo_code_details);
