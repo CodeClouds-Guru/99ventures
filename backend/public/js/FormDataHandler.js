@@ -720,6 +720,13 @@ $(() => {
       }
     })
   }
+  // promocode popup close
+  if($('#promocode-popup-close').length) {
+    $('#promocode-popup-close').on('click', function(){
+      $('#promocode-redeem-popup')[0].reset();
+      $('#promocode-popup').modal('hide');
+    })
+  }
 });
 
 function responseMsgToggle(el){
