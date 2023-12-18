@@ -62,10 +62,9 @@ module.exports = (sequelize, DataTypes) => {
           {
             'string.max': 'You can use upto 12 letters',
           },
-          {
-            'object.pattern.base':
-              'You can use upto 12 letters which only consist characters and numbers',
-          }
+
+          { 'object.regex': 'Must have at least 8 characters' },
+          { 'string.pattern.base': 'enter your custom error here...' }
         ),
       name: Joi.string().required().label('name'),
       max_uses: Joi.number().min(1).required().label('Max Uses').messages({
