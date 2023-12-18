@@ -548,8 +548,8 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (['campaigns', 'member-transactions', 'completed-surveys', 'promo-codes'].includes(module)) {
-			if (['campaigns', 'promo-codes'].includes(module)) {
+		} else if (['campaigns', 'member-transactions', 'completed-surveys', 'promo-codes', 'scripts'].includes(module)) {
+			if (['campaigns', 'promo-codes', 'scripts'].includes(module)) {
 				if(field.field_name === 'status'){
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 				}
@@ -602,6 +602,19 @@ function List(props) {
 						</Tooltip>
 					)
 				} 
+				else if ((copyScriptId && field.field_name === 'code') || (module === 'promo-codes' && field.field_name === 'code'))  {
+					return (
+						<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
+							<span className="flex cursor-pointer" style={{
+								width
+									: 'fit-content'
+							}} onClick={(e) => { e.stopPropagation(); Helper.copyTextToClipboard(processFieldValue(n[field.field_name], field)); dispatch(showMessage({ variant: 'success', message: processFieldValue(n[field.field_name], field) + ' Copied' })); }}>
+								{processFieldValue(n[field.field_name], field)}
+								<FuseSvgIcon className="text-48 pt-2 pl-2" size={18} color="action">material-solid:content_copy</FuseSvgIcon>
+							</span>
+						</Tooltip>
+					)
+				}
 			}
 			if (field.field_name === 'MemberTransaction->Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
@@ -696,7 +709,8 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (copyScriptId && field.field_name === 'code') {
+		} 
+		/*else if (copyScriptId && field.field_name === 'code') {
 			return (
 				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
 					<span className="flex cursor-pointer" style={{
@@ -708,7 +722,7 @@ function List(props) {
 					</span>
 				</Tooltip>
 			)
-		}
+		}*/
 		// else if (module === 'scripts' && field.field_name === 'description') {
 
 		// 	return (
