@@ -2066,8 +2066,8 @@ class MemberAuthController {
           );
           resp_status = true;
           resp_message =
-            'You have been credited for the promotional code entered. Below are your earnings : ' +
-            promocode_validation.data.dataValues.cash;
+            'Great news! Your Promo Code was a hit. Your account has been successfully credited: ' +
+            promocode_validation.data.dataValues.cash.toFixed(2);
         }
       }
     } catch (error) {
@@ -2076,10 +2076,10 @@ class MemberAuthController {
       resp_message = 'Error occured';
     } finally {
       if (resp_status === true) {
-        req.session.flash = {
-          message: resp_message,
-          success_status: true,
-        };
+        // req.session.flash = {
+        //   message: resp_message,
+        //   success_status: true,
+        // };
         // res.redirect('/paid-surveys');
       }
       res.json({
