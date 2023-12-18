@@ -680,17 +680,16 @@ $(() => {
   if($('#promocode-redeem-popup').length) {
     $('#promocode-redeem-popup').on('submit', function(e){
       e.preventDefault();
-      const formData = $(this).serialize(),
-            resMsg = $(this).find('.response-msg'),
+      const resMsg = $(this).find('.response-msg'),
             submitBtn = $(this).find('button[type=submit]'),
             sbmtBtnTxt = submitBtn.text(),
             promoInput = $(this).find('input[name=promocode]').val().trim(),
-            closeBtn = $('#paypal-popup-close');
+            closeBtn = $(this).find('#paypal-popup-close');
       if(promoInput) {
         $.ajax({
           type: 'POST',
           url: '/redeem-promo-code',
-          data: formData,
+          data: {promocode: promoInput},
           beforeSend: function() {
             submitBtn.attr('disabled', true).text('Please wait...');
           },
