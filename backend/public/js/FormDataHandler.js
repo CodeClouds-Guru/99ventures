@@ -680,11 +680,12 @@ $(() => {
   if($('#promocode-redeem-popup').length) {
     $('#promocode-redeem-popup').on('submit', function(e){
       e.preventDefault();
-      const formData = $(this).serialize();
-      const resMsg = $(this).find('.response-msg')
-      resMsg.html('').show();
-      const submitBtn = $(this).find('button[type=submit]');
-      const promoInput = $(this).find('input[name=promocode]').val().trim();
+      const formData = $(this).serialize(),
+            resMsg = $(this).find('.response-msg'),
+            submitBtn = $(this).find('button[type=submit]'),
+            sbmtBtnTxt = submitBtn.text(),
+            promoInput = $(this).find('input[name=promocode]').val().trim(),
+            closeBtn = $('#paypal-popup-close');
       if(promoInput) {
         $.ajax({
           type: 'POST',
@@ -694,25 +695,28 @@ $(() => {
             submitBtn.attr('disabled', true).text('Please wait...');
           },
           success: function(res) {
-            submitBtn.removeAttr('disabled').text('Redeem');
             if(res.status === true) {
-              resMsg.html(`<p class="m-0 p-0 text-success small">${res.message}</p>`);
+              $('#promocode-redeem-popup')[0].reset();
+              closeBtn.hide();
+              resMsg.html(`<p class="m-0 p-0 text-success small lh-sm">${res.message}</p>`);
               setTimeout(()=>{
                 // $('#promocode-popup').modal('hide');
                 location.reload();
-              }, 1500);
+              }, 2500);
             }else {
-              resMsg.html(`<p class="m-0 p-0 text-danger small">${res.message}</p>`);
+              resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">${res.message}</p>`);
               responseMsgToggle(resMsg);
             }
           },
           error: function(xhr) { 
-            submitBtn.removeAttr('disabled').text('Redeem');
             console.log(xhr)
+          },
+          complete: function(xhr){
+            submitBtn.removeAttr('disabled').text(sbmtBtnTxt);
           }
         })
       } else {
-        resMsg.html(`<p class="m-0 p-0 text-danger small">Please enter promo code!</p>`);
+        resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">Please enter your promo code!</p>`);
         responseMsgToggle(resMsg);
       }
     })
@@ -721,6 +725,7 @@ $(() => {
 
 function responseMsgToggle(el){
   setTimeout(()=>{
-    el.fadeOut();
+    el.html('').fadeOut()
+    el.fadeIn();
   }, 5000);
 }
