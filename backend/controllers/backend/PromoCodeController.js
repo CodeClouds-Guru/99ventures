@@ -133,7 +133,22 @@ class PromoCodeController extends Controller {
 
     return {
       result: { data: docs, pages, total },
-      fields: this.model.fields,
+      fields: {
+        ...this.model.fields,
+        report: {   // Added this object to show the Report Option in the table
+          field_name: 'report',
+          db_name: 'report',
+          type: 'text',
+          placeholder: 'Report',
+          listing: true,
+          show_in_form: false,
+          sort: false,
+          required: false,
+          value: '',
+          width: '50',
+          searchable: false
+        },
+      }
     };
   }
 
