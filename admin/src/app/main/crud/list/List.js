@@ -548,8 +548,8 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
-			if (module === 'campaigns') {
+		} else if (['campaigns', 'member-transactions', 'completed-surveys', 'promo-codes'].includes(module)) {
+			if (['campaigns', 'promo-codes'].includes(module)) {
 				if(field.field_name === 'status'){
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 				}
@@ -593,6 +593,15 @@ function List(props) {
 						</>
 					)
 				}
+				else if(field.field_name === 'report'){            
+					return (
+						<Tooltip title="View Report" placement="top-start" >
+							<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/redeemed`)}}>
+								<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
+							</IconButton>
+						</Tooltip>
+					)
+				} 
 			}
 			if (field.field_name === 'MemberTransaction->Member.username') {
 				return <a onClick={(e) => e.stopPropagation()} target="_blank" href={`/app/members/${n['MemberTransaction->Member.id']}`}>{n['MemberTransaction->Member.username']}</a>
