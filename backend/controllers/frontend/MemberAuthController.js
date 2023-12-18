@@ -2066,7 +2066,7 @@ class MemberAuthController {
           );
           resp_status = true;
           resp_message =
-            'Great news! Your Promo Code was a hit. Your account has been successfully credited: ' +
+            'Great news! Your Promo Code was a hit. Your account has been successfully credited: $' +
             promocode_validation.data.dataValues.cash.toFixed(2);
         }
       }
