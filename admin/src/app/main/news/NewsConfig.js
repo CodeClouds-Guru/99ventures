@@ -28,7 +28,7 @@ const NewsConfig = {
     },
     routes: [
         {
-            path: 'app/news/create',
+            path: 'app/news/:moduleId',
             element: <CreateEdit />,
             auth: settingsConfig.defaultAuth
         }
