@@ -56,10 +56,10 @@ module.exports = (sequelize, DataTypes) => {
       searchable: false,
     },
     subject: {
-      field_name: 'code',
-      db_name: 'code',
+      field_name: 'subject',
+      db_name: 'subject',
       type: 'text',
-      placeholder: 'Code',
+      placeholder: 'Subject',
       listing: true,
       show_in_form: true,
       sort: true,
