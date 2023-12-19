@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { Member } = require('../../models/index');
+const { Member, MemberTransaction } = require('../../models/index');
 
 class PromoCodeController extends Controller {
   constructor() {
@@ -116,7 +116,8 @@ class PromoCodeController extends Controller {
       result: { data: docs, pages, total },
       fields: {
         ...this.model.fields,
-        report: {   // Added this object to show the Report Option in the table
+        report: {
+          // Added this object to show the Report Option in the table
           field_name: 'report',
           db_name: 'report',
           type: 'text',
@@ -127,21 +128,31 @@ class PromoCodeController extends Controller {
           required: false,
           value: '',
           width: '50',
-          searchable: false
+          searchable: false,
         },
-      }
+      },
     };
   }
 
   async view(req, res) {
+    let get_model = await this.model.findOne({
+      where: { id: req.params.id },
+    });
     let model = await this.model.findOne({
       where: { id: req.params.id },
+      logging: console.log,
       include: {
         model: Member,
         as: 'MemberPromoCode',
         attributes: ['id', 'username', 'first_name', 'last_name', 'status'],
+        include: {
+          model: MemberTransaction,
+          attributes: ['created_at'],
+          where: { note: { [Op.like]: `%${get_model.code}%` } },
+        },
       },
     });
+
     return { status: true, result: model };
   }
 }
