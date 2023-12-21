@@ -16,6 +16,7 @@ import { Stack, Switch, Typography, FormControl, TextField, InputLabel, Button, 
 import MainHeader from 'app/shared-components/MainHeader';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import { customCodeEditor } from '../../grapesjs/editorPlugins'
+import Helper from 'src/app/helper';
 
 const CreateEdit = () =>{
     const dispatch = useDispatch();
@@ -96,6 +97,13 @@ const CreateEdit = () =>{
 
     }, []);
 
+    useEffect(()=>{
+        if(Object.keys(editor).length){
+            loadEditorData(editor);                
+        }
+    }, [editor]);
+
+
     const loadEditorData = async (editor) => {
         if (moduleId !== 'create' && !isNaN(moduleId)) {
             getSingleRecordById(moduleId, editor);
@@ -113,40 +121,23 @@ const CreateEdit = () =>{
 
     const generatedHTMLValue = (editor) => {
         let generatedHTML = '';
-
         if (editor.getHtml()) {
             const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';
-            generatedHTML +=`${css} \n ${editor.getHtml()}`;
+            const reg = /\<body[^>]*\>([^]*)\<\/body/m; // Removed body tag
+            var htmlData = editor.getHtml().match(reg)[1];
+            htmlData = Helper.replaceSpecialCharacters(htmlData);
+            generatedHTML +=`${css}\n${htmlData}`;
         }
         return generatedHTML;
     }
 
     const getSingleRecordById = () => {
-        axios.get(jwtServiceConfig.news + `/${id}`)
+        axios.get(jwtServiceConfig.news + `/edit/${moduleId}`)
             .then((response) => {
                 if (response.data.results.result) {
-                    setLayoutOptions(response.data.results.fields.layouts.options);
                     const record = response.data.results.result;
-                    // setAllData(allData => ({
-                    //     ...allData,
-                    //     layout_id: record.layout_id,
-                    //     status: record.status,
-                    //     name: record.name,
-                    //     slug: record.slug === '/' ? '' : record.slug,
-                    //     permalink: record.permalink === domain ? domain : record.permalink !== domain + record.slug ? domain + record.slug : record.permalink,
-                    //     html: record.html,
-                    //     page_json: record.page_json,
-                    //     keywords: record.keywords,
-                    //     descriptions: record.descriptions,
-                    //     meta_code: record.meta_code,
-                    //     auth_required: !!record.auth_required,
-                    // }));
-
-                    //-- Whenever all the custom async components & Blocks will be loaded, the canvas data will be set
-                    // const storageManager = editor.Storage;
-                    // storageManager.getStorageOptions()['key'] = `gjs-pages-${moduleId}`;
-                    // setStorageKey(`gjs-pages-${moduleId}`);
-                    editor.loadProjectData(record.page_json);
+                    setAllData({...allData, ...record});                   
+                    editor.loadProjectData(JSON.parse(record.content_json));
 
                     //-- Set to chnage state value to 0 because edior values fetched from DB and not done any changes by the user actually.
                     // setChangeCount(changeCount => changeCount - 1);
@@ -171,8 +162,17 @@ const CreateEdit = () =>{
     }
 
     const handleFormSubmit = () => {
+        const subject = allData.subject.trim();
+        if(subject === '') {
+            dispatch(showMessage({ variant: 'error', message: 'Subject field is required!' }));
+            return;            
+        }
+        if(allData.status === '') {
+            dispatch(showMessage({ variant: 'error', message: 'Status is required!' }));
+            return;            
+        }
         const formData = new FormData();
-        formData.append('subject', allData.subject);
+        formData.append('subject', subject);
         formData.append('status', allData.status);
         formData.append('content', generatedHTMLValue(editor));
         formData.append('content_json', JSON.stringify(editor.getProjectData()));
@@ -187,7 +187,6 @@ const CreateEdit = () =>{
             formData.append('image', null);
             formData.append('image_type', null);
         }
-        
 
         setLoading(true);
         const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.newsUpdate + `/${moduleId}` : jwtServiceConfig.newsSave;
@@ -197,15 +196,10 @@ const CreateEdit = () =>{
                 if (response.data.results.status) {
                     // setChangeCount(0);
                     localStorage.removeItem(storageKey);
-
-                    setAllData({
-                        ...allData,
-                        ...params
-                    });
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
-                    navigate(`/app/${module}`);
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.data.message }));
+                    navigate(`/app/news`);
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.data.message }))
                 }
             })
             .catch((error) => {
@@ -237,13 +231,13 @@ const CreateEdit = () =>{
                     <FormControl className="w-1/5 mb-24 pr-10">
                         <InputLabel id="demo-simple-select-standard-label">Status</InputLabel>
                         <Select
-                        labelId="demo-simple-select-standard-label"
-                        id="demo-simple-select-standard"
-                        value={allData.status}
-                        onChange={(e)=>{
-                            setAllData({...allData, status: e.target.value})
-                        }}
-                        label="Status"
+                            labelId="demo-simple-select-standard-label"
+                            id="demo-simple-select-standard"
+                            value={allData.status}
+                            onChange={(e)=>{
+                                setAllData({...allData, status: e.target.value})
+                            }}
+                            label="Status"
                         >
                         <MenuItem value=""> <em>None</em> </MenuItem>
                         <MenuItem value="pending"> Pending</MenuItem>
@@ -259,7 +253,7 @@ const CreateEdit = () =>{
                             placeholder="Add meta tags"
                             multiline
                             rows={4}
-                            value={allData.additional_header}
+                            value={allData.news ?? ''}
                             onChange={(e)=> {
                                 setAllData({...allData, additional_header: e.target.value})
                             }}
@@ -268,21 +262,6 @@ const CreateEdit = () =>{
                     <FormControl className="w-full mb-24">
                         <div id="gjs" />
                     </FormControl>
-                    {
-                        (moduleId !== 'create' && parseInt(moduleId)) && (
-                            <FormControl className="w-1/2 mb-10">
-                                <div>
-                                    {/* <img
-                                        src="?w=164&h=164&fit=crop&auto=format`"
-                                        srcSet="?w=164&h=164&fit=crop&auto=format&dpr=2 2x`"
-                                        alt=""
-                                        loading="lazy"
-                                    /> */}
-                                </div>
-                            </FormControl>
-                        )
-                    }
-                    
                     <FormControl className="w-1/2 mb-24">
                         <Stack direction="row" spacing={1} alignItems="center">
                             <Typography>Upload Image URL</Typography>
@@ -309,7 +288,20 @@ const CreateEdit = () =>{
                                 />
                             )
                         }
+                        {
+                            (moduleId !== 'create' && parseInt(moduleId)) && (
+                                <div className='mt-10'>
+                                    <img
+                                        src={`${allData.image}?w=50&h=50&fit=crop&auto=format`}
+                                        srcSet={`${allData.image}?w=50&h=50&fit=crop&auto=format&dpr=2 2x`}
+                                        loading="lazy"
+                                        width={200}
+                                    />
+                                </div>
+                            )
+                        }
                     </FormControl>
+                    
                     <motion.div
                         className="flex"
                         initial={{ opacity: 0, x: 20 }}
