@@ -214,15 +214,20 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       field_name: 'status',
       db_name: 'status',
-      type: 'text',
+      type: 'select',
       placeholder: 'Status',
       listing: true,
-      show_in_form: false,
+      show_in_form: !false,
       sort: true,
       required: false,
       value: '',
       width: '50',
       searchable: true,
+      options: [
+        { key: 'active', value: 'active', label: 'Active' },
+        { key: 'inactive', value: 'inactive', label: 'Inactive' },
+        { key: 'expired', value: 'expired', label: 'Expired' },
+      ],
     },
   };
   sequelizePaginate.paginate(PromoCode);
