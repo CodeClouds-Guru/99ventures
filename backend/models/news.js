@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
 module.exports = (sequelize, DataTypes) => {
   class News extends Model {
     /**
@@ -12,6 +13,20 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
+  News.validate = function (req) {
+    const schema = Joi.object({
+      subject: Joi.string().required().label('Subject'),
+      slug: Joi.string().required().label('Slug'),
+      content: Joi.optional().label('Content'),
+      content_json: Joi.optional().label('Content JSON'),
+      additional_header: Joi.optional().label('Addition Header'),
+      status: Joi.string().required().label('Status'),
+      image: Joi.optional().label('Image'),
+      company_portal_id: Joi.optional().label('Company Portal Id'),
+      published_at: Joi.optional().label('Published At'),
+    });
+    return schema.validate(req.body);
+  };
   News.init(
     {
       subject: DataTypes.TEXT,
@@ -20,7 +35,34 @@ module.exports = (sequelize, DataTypes) => {
       content_json: DataTypes.JSON,
       additional_header: DataTypes.TEXT,
       status: DataTypes.ENUM('pending, draft, published, archived'),
-      image: DataTypes.TEXT,
+      // image: DataTypes.TEXT,
+      image: {
+        type: DataTypes.TEXT,
+        get() {
+          let rawValue = this.getDataValue('image') || null;
+          if (!rawValue || rawValue === '') {
+            const publicURL =
+              process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+            rawValue = `${publicURL}/images/demo-user.png`;
+          } else {
+            let check_url = '';
+            try {
+              new URL(string);
+              check_url = true;
+            } catch (err) {
+              check_url = false;
+            }
+            if (!check_url)
+              rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          }
+          return rawValue;
+        },
+        set(value) {
+          if (value == '' || value == null) this.setDataValue('image', null);
+          else this.setDataValue('image', value);
+        },
+      },
+      company_portal_id: DataTypes.TINYINT,
       published_at: 'TIMESTAMP',
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
