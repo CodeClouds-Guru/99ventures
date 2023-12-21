@@ -125,8 +125,7 @@ function RedemptionReport() {
                             <TableRow>
                                 <TableCell>ID</TableCell>
                                 <TableCell align="left">Username</TableCell>
-                                <TableCell align="left">First Name</TableCell>
-                                <TableCell align="left">Last Name</TableCell>
+                                <TableCell align="left">Country</TableCell>
                                 <TableCell align="left">Redeemed At</TableCell>
                             </TableRow>
                         </TableHead>
@@ -150,8 +149,7 @@ function RedemptionReport() {
                                             </Tooltip>
                                         </div>
                                     </TableCell>
-                                    <TableCell align="left">{row.first_name}</TableCell>
-                                    <TableCell align="left">{row.last_name}</TableCell>
+                                    <TableCell align="left">{row.Country?.nicename}</TableCell>
                                     <TableCell align="left">{ moment(row.MemberTransactions[0].created_at).format('Do MMM YYYY, HH:mm')}</TableCell>
                                 </TableRow>
                             )) : (
