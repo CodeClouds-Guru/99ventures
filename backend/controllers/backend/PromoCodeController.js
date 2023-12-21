@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { Member, MemberTransaction } = require('../../models/index');
+const { Member, MemberTransaction, Country } = require('../../models/index');
 
 class PromoCodeController extends Controller {
   constructor() {
@@ -140,19 +140,20 @@ class PromoCodeController extends Controller {
     });
     let model = await this.model.findOne({
       where: { id: req.params.id },
-      logging: console.log,
       include: {
         model: Member,
         as: 'MemberPromoCode',
-        attributes: ['id', 'username', 'first_name', 'last_name', 'status'],
-        include: {
+        attributes: ['id', 'username'],
+        include: [{
           model: MemberTransaction,
           attributes: ['created_at'],
           where: { note: { [Op.like]: `%${get_model.code}%` } },
-        },
+        },{
+          model: Country,
+          attributes: ['nicename']
+        }],
       },
     });
-
     return { status: true, result: model };
   }
 }
