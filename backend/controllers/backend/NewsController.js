@@ -27,7 +27,7 @@ class NewsController extends Controller {
     req.body.slug = req.body.subject.replace(' ', '_').toLowerCase();
     if (request_data.status == 'published') req.body.published_at = new Date();
     let response = await super.save(req);
-    return response;
+    return { status: true, data: response };
   }
 
   //overridding update api
@@ -50,9 +50,10 @@ class NewsController extends Controller {
       }
     }
     req.body.slug = model.slug;
+    if (request_data.status !== 'published') req.body.published_at = null;
     delete req.body.image_type;
     let response = await super.update(req);
-    return response;
+    return { status: true, data: response };
   }
 }
 

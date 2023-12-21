@@ -47,11 +47,13 @@ module.exports = (sequelize, DataTypes) => {
           } else {
             let check_url = '';
             try {
-              new URL(string);
+              new URL(rawValue);
+              console.log(new URL(rawValue));
               check_url = true;
             } catch (err) {
               check_url = false;
             }
+            console.log(check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
@@ -167,6 +169,19 @@ module.exports = (sequelize, DataTypes) => {
         { key: 'published', value: 'Published', label: 'Published' },
         { key: 'archived', value: 'Archived', label: 'Archived' },
       ],
+    },
+    image: {
+      field_name: 'image',
+      db_name: 'image',
+      type: 'text',
+      placeholder: 'image',
+      listing: true,
+      show_in_form: true,
+      sort: false,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
     },
   };
   sequelizePaginate.paginate(News);
