@@ -189,7 +189,7 @@ function CreateEditForm(props) {
     setSwitchField(e.target.checked);
   }
   const onSubmit = async data => {
-    if (data.hasOwnProperty('status')) {
+    if (data.hasOwnProperty('status') && module !== 'promo-codes') {
       data.status = switchField ? 1 : 0
     }
     if (moduleId == 'create') {
