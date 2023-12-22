@@ -1,5 +1,6 @@
 import settingsConfig from 'app/configs/settingsConfig';
 import CreateEdit from './CreateEdit';
+import Create from './Create';
 
 const NewsConfig = {
     settings: {
@@ -29,7 +30,7 @@ const NewsConfig = {
     routes: [
         {
             path: 'app/news/:moduleId',
-            element: <CreateEdit />,
+            element: <Create />,
             auth: settingsConfig.defaultAuth
         }
     ],

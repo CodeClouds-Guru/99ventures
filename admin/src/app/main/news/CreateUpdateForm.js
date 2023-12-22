@@ -1,25 +1,26 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'
-import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import grapesjs from 'grapesjs'
-import { useDispatch } from 'react-redux';
-import { showMessage } from 'app/store/fuse/messageSlice';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { FormControl, TextField, Paper, FormHelperText, Stack, Select,  MenuItem, TextareaAutosize, Switch, InputLabel, Button, Tooltip, IconButton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
+import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { showMessage } from 'app/store/fuse/messageSlice';
+import { useParams, useNavigate } from 'react-router-dom';
+import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
+import AlertDialog from 'app/shared-components/AlertDialog';
+import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
-import { Stack, Switch, Typography, FormControl, TextField, InputLabel, Button, Select, MenuItem, TextareaAutosize} from '@mui/material';
-import FusePageCarded from '@fuse/core/FusePageCarded';
-import { customCodeEditor } from '../../grapesjs/editorPlugins'
+import '../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
-import CreateEditHeader from '../crud/create-edit/CreateEditHeader';
-import FuseLoading from '@fuse/core/FuseLoading';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import { getComponentData, setRevisionData } from 'app/store/components'
+import { customCodeEditor } from '../../grapesjs/editorPlugins'
 
 
-const CreateEdit = () =>{
+const CreateUpdateForm = (props) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const {moduleId} = useParams();
@@ -206,28 +207,33 @@ const CreateEdit = () =>{
             .catch((error) => {
                 console.log(error)
                 setLoading(false)
-                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+                dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
             })
     }
 
-    // if(loader) {
-    //     return <FuseLoading />
-    // }
+    const handleSubject = (e) => {
+        setAllData({...allData, subject: e.target.value});
+    }
 
+    const handleStatus = (e) => {
+        setAllData({...allData, status: e.target.value});
+    }
+
+    const handleAdditionalHeader = (e) => {
+        setAllData({...allData, additional_header: e.target.value});
+    }
     return (
-        <FusePageCarded
-            header={
-                <CreateEditHeader module="news" moduleId={moduleId} />
-            }
-            content={
-                <div className='p-20 w-full'>
+        <div className="flex w-full p-20">                                   
+            <div className='flex flex-col w-full'>
+                <div className='flex'>
                     <FormControl className="w-4/5 mb-24 pr-10">
                         <TextField
                             label="Subject"
                             type="text"
                             variant="outlined"
                             required
-                            
+                            value={allData.subject}
+                            onChange={handleSubject}
                         />
                     </FormControl>
                     <FormControl className="w-1/5 mb-24 pr-10">
@@ -235,8 +241,9 @@ const CreateEdit = () =>{
                         <Select
                             labelId="demo-simple-select-standard-label"
                             id="demo-simple-select-standard"
-                            
+                            value={allData.status}                            
                             label="Status"
+                            onChange={handleStatus}
                         >
                             <MenuItem value=""> <em>None</em> </MenuItem>
                             <MenuItem value="pending"> Pending</MenuItem>
@@ -245,24 +252,23 @@ const CreateEdit = () =>{
                             <MenuItem value="archived">Archived </MenuItem>
                         </Select>
                     </FormControl>
-                    <FormControl className="w-full mb-24">
-                        <pre>
-                            <code>
-                                <TextareaAutosize
-                                    maxRows={10}
-                                    label="Additional Header Script"
-                                    aria-label="Addtional Header Script"
-                                    placeholder="#Add your external Meta details as needed"
-                                    style={{ minHeight: '100px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
-                                    
-                                />
-                            </code>
-                        </pre>
-                    </FormControl>
-                    <FormControl className="w-full mb-24">
-                        <div id="gjs" />
-                    </FormControl>
-                    <FormControl className="w-1/2 mb-24">
+                </div>
+                <div className='flex justify-betweenx'>
+                    <FormControl className="mb-24 mr-10">
+                        {
+                            (moduleId !== 'create' && parseInt(moduleId) && allData.image) && (
+                                <div className='mt-10'>
+                                    <img
+                                        src={`${allData.image}?w=50&h=50&fit=crop&auto=format`}
+                                        srcSet={`${allData.image}?w=50&h=50&fit=crop&auto=format&dpr=2 2x`}
+                                        loading="lazy"
+                                        width={200}
+                                    />
+                                </div>
+                            )
+                        }
+                    </FormControl >
+                    <FormControl className="w-1/3 mb-24">
                         <Stack direction="row" spacing={1} alignItems="center">
                             <Typography>Upload Image URL</Typography>
                             <Switch className="switch" checked={imageType} onChange={ handleSwicth } name="image_type" />
@@ -287,51 +293,58 @@ const CreateEdit = () =>{
                                     }}
                                 />
                             )
-                        }
-                        {
-                            (moduleId !== 'create' && parseInt(moduleId) && allData.image) && (
-                                <div className='mt-10'>
-                                    <img
-                                        src={`${allData.image}?w=50&h=50&fit=crop&auto=format`}
-                                        srcSet={`${allData.image}?w=50&h=50&fit=crop&auto=format&dpr=2 2x`}
-                                        loading="lazy"
-                                        width={200}
-                                    />
-                                </div>
-                            )
-                        }
+                        }                    
                     </FormControl>
-                    
-                    <motion.div
-                        className="flex"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
-                    >
-                        <LoadingButton
-                            variant="contained"
-                            color="secondary"
-                            aria-label="Register"
-                            type="submit"
-                            loading={loading}
-                            onClick={ handleFormSubmit }
-                            disabled={false}
-                        >
-                            {moduleId === 'create' ? 'Save' : 'Update'}
-                        </LoadingButton>
-                        <Button
-                            className="whitespace-nowrap mx-4"
-                            variant="contained"
-                            color="error"
-                            onClick={handleCancel}
-                        >
-                            Cancel
-                        </Button>
-                    </motion.div>
                 </div>
-            }
-            scroll="page"
-        />
+                <FormControl className="w-full mb-24">
+                    <pre>
+                        <code>
+                            <TextareaAutosize
+                                maxRows={10}
+                                label="Additional Header Script"
+                                aria-label="Addtional Header Script"
+                                placeholder="#Add your external Meta details as needed"
+                                value={allData.additional_header ?? ''}
+                                style={{ minHeight: '100px', width: '100%', padding: '15px', backgroundColor: '#000', color: '#ffeeba' }}
+                                onChange={handleAdditionalHeader}
+                            />
+                        </code>
+                    </pre>
+                </FormControl>
+                <FormControl className="w-full mb-24">
+                    <div id="gjs" />
+                </FormControl>
+               
+
+                <motion.div
+                    className="flex"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
+                >
+                    <LoadingButton
+                        variant="contained"
+                        color="secondary"
+                        aria-label="Register"
+                        type="submit"
+                        loading={loading}
+                        onClick={handleFormSubmit}
+                        
+                    >
+                        {moduleId === 'create' ? 'Save' : 'Update'}
+                    </LoadingButton>
+                    <Button
+                        className="whitespace-nowrap mx-4"
+                        variant="contained"
+                        color="error"
+                        onClick={handleCancel}
+                    >
+                        Cancel
+                    </Button>
+                </motion.div>
+            </div>              
+        </div>
+           
     )
 }
 
-export default CreateEdit;
+export default CreateUpdateForm;
