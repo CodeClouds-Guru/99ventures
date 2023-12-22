@@ -117,25 +117,22 @@ class PromoCodeController extends Controller {
       if (Op.or in options['where']) {
         options['where'][Op.or].forEach((val, i) => {
           if ('cash' in val) {
-            console.log(options['where'][Op.or][i].cash);
             options['where'][Op.or][i].cash = {
               [Op.eq]: `%${parseFloat(req.query.search)}%`,
             };
-            console.log('after', options['where'][Op.or][i].cash);
           }
         });
-        console.log(options['where'][Op.or]);
       }
-      console.log(options.where);
     }
-    options.logging = console.log;
+    // options.logging = console.log;
     const { docs, pages, total } = await this.model.paginate(options);
 
     return {
       result: { data: docs, pages, total },
       fields: {
         ...this.model.fields,
-        report: {   // Added this object to show the Report Option in the table
+        report: {
+          // Added this object to show the Report Option in the table
           field_name: 'report',
           db_name: 'report',
           type: 'text',
@@ -146,9 +143,9 @@ class PromoCodeController extends Controller {
           required: false,
           value: '',
           width: '50',
-          searchable: false
+          searchable: false,
         },
-      }
+      },
     };
   }
 
