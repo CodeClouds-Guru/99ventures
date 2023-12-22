@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      NewsReaction.hasMany(models.Member, {
+        foreignKey: 'id',
+        otherKey: 'member_id',
+        // as: "credentials",
+      });
     }
   }
   NewsReaction.init(
@@ -20,11 +25,11 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'NewsReaction',
-      timestamps: true,
-      paranoid: true,
-      createdAt: 'created_at', // alias createdAt as created_date
-      updatedAt: 'updated_at',
-      deletedAt: 'deleted_at',
+      timestamps: false,
+      // paranoid: true,
+      // createdAt: 'created_at', // alias createdAt as created_date
+      // updatedAt: 'updated_at',
+      // deletedAt: 'deleted_at',
       tableName: 'news_reactions',
     }
   );

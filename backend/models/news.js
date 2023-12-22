@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      News.hasMany(models.NewsReaction, {
+        foreignKey: 'news_id',
+        // as: "credentials",
+      });
     }
   }
   News.validate = function (req) {
@@ -40,10 +44,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         get() {
           let rawValue = this.getDataValue('image') || null;
-
+          console.log(rawValue);
           if (
             rawValue == null ||
-            rawValue ||
+            !rawValue ||
             rawValue == '' ||
             rawValue == 'null'
           ) {
@@ -56,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
+            console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }

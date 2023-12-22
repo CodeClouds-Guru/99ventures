@@ -43,7 +43,8 @@ class NewsController extends Controller {
       request_data.image = file_name.files[0].filename;
 
       let prev_image = model.image;
-      if (prev_image != '') {
+      //console.log('prev_image', prev_image);
+      if (prev_image && prev_image != '') {
         let file_delete = await fileHelper.deleteFile(
           prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
         );

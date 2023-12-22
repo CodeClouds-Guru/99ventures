@@ -14,10 +14,12 @@ const {
   SurveyQualification,
   SurveyProvider,
   MemberTransaction,
+  NewsReaction,
 } = require('../models/index');
 const axios = require('axios');
 const { json } = require('body-parser');
 const { required } = require('joi');
+const newsreaction = require('../models/newsreaction');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -640,6 +642,30 @@ class ScriptParser {
         return {
           where: {
             status: 1,
+          },
+        };
+      case 'News':
+        return {
+          where: {
+            status: 'published',
+          },
+          attributes: [
+            'image',
+            'id',
+            'subject',
+            'slug',
+            'content',
+            'content_json',
+            'additional_header',
+            'status',
+            'company_portal_id',
+            'published_at',
+          ],
+          include: {
+            model: Models.NewsReaction,
+            include: {
+              model: Models.Member,
+            },
           },
         };
       default:
