@@ -76,6 +76,7 @@ module.exports = (sequelize, DataTypes) => {
       note: Joi.optional().label('Note'),
       company_portal_id: Joi.number().optional().label('Company Portal'),
       type: Joi.string().optional().label('Type'),
+      status: Joi.string().required().label('Status'),
     });
     return schema.validate(req.body);
   };
