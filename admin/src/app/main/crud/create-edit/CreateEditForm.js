@@ -42,6 +42,9 @@ function CreateEditForm(props) {
   const processFormFields = (field, fieldConfig) => {
     let fieldType = fieldConfig.type
     let fieldOptions = fieldConfig.options || []
+    if(module === 'promo-codes') {
+      fieldOptions = fieldConfig.options || '';
+    }
     let renderVal = (selected) => {
       let selectedOptions = fieldOptions
         .filter(fo => selected.includes(fo.value))
@@ -191,6 +194,8 @@ function CreateEditForm(props) {
   const onSubmit = async data => {
     if (data.hasOwnProperty('status') && module !== 'promo-codes') {
       data.status = switchField ? 1 : 0
+    } else if(data.hasOwnProperty('status') && module === 'promo-codes') {
+      data.status = ((typeof data.status == 'object' || typeof data.status == 'array') && data.status.length < 1) ? '' : data.status;
     }
     if (moduleId == 'create') {
       let res = await dispatch(saveModule({ ...data, module }));
