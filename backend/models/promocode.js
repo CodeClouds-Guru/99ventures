@@ -239,12 +239,15 @@ module.exports = (sequelize, DataTypes) => {
       where: {
         code: { [Op.like]: data.promo_code },
         company_portal_id: data.company_portal_id,
-        status: 'active',
+        // status: 'active',
       },
     });
     console.log('promo_code', promo_code_details);
     if (promo_code_details) {
       if (promo_code_details.used == promo_code_details.max_uses) {
+        resp.resp_status = false;
+        resp.resp_message = 'Promo Code expired';
+      } else if (promo_code_details.status == 'expired') {
         resp.resp_status = false;
         resp.resp_message = 'Promo Code expired';
       } else {

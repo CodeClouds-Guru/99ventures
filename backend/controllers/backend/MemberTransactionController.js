@@ -205,10 +205,10 @@ class MemberTransactionController extends Controller {
         record.dataValues.amount_action === 'reversed_transaction' &&
         record.dataValues.ParentTransaction
       ) {
-        console.log(
-          'record.dataValues.amount_action',
-          record.dataValues.ParentTransaction.dataValues
-        );
+        // console.log(
+        //   'record.dataValues.amount_action',
+        //   record.dataValues.ParentTransaction.dataValues
+        // );
         record.dataValues.amount_action =
           record.dataValues.ParentTransaction.dataValues.amount_action ==
           'promo_code'
@@ -221,6 +221,7 @@ class MemberTransactionController extends Controller {
           record.dataValues.amount_action
         );
       }
+
       transaction_list.push(record);
     });
 
