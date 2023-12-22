@@ -20,29 +20,29 @@ router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticCo
 /**
  * Sitemap
  */
-router.get('/sitemap.xml', async (req, res) => {
-  const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
-  const SiteMapController = new SiteMapControllerClass();
-  res.header('Content-Type', 'application/xml');
-  res.header('Content-Encoding', 'gzip');
-  console.log('baseurl', `${req.protocol}://${req.hostname}`);
-  try {
-    const smStream = await SiteMapController.generate(
-      process.env.DEV_MODE === '1'
-        ? 'https://moresurveys.com'
-        : `https://${req.hostname}`
-    );
-    const pipeline = smStream.pipe(createGzip());
-    streamToPromise(pipeline).then((sm) => (sitemap = sm));
-    smStream.end();
-    pipeline.pipe(res).on('error', (e) => {
-      throw e;
-    });
-  } catch (e) {
-    console.error('Sitemap generation error', e);
-    res.status(500).send('Something went wrong');
-  }
-});
+// router.get('/sitemap.xml', async (req, res) => {
+//   const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
+//   const SiteMapController = new SiteMapControllerClass();
+//   res.header('Content-Type', 'application/xml');
+//   res.header('Content-Encoding', 'gzip');
+//   console.log('baseurl', `${req.protocol}://${req.hostname}`);
+//   try {
+//     const smStream = await SiteMapController.generate(
+//       process.env.DEV_MODE === '1'
+//         ? 'https://moresurveys.com'
+//         : `https://${req.hostname}`
+//     );
+//     const pipeline = smStream.pipe(createGzip());
+//     streamToPromise(pipeline).then((sm) => (sitemap = sm));
+//     smStream.end();
+//     pipeline.pipe(res).on('error', (e) => {
+//       throw e;
+//     });
+//   } catch (e) {
+//     console.error('Sitemap generation error', e);
+//     res.status(500).send('Something went wrong');
+//   }
+// });
 
 
 /**

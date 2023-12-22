@@ -190,7 +190,7 @@ class StaticPageController {
   async newsDetails(req, res) {
     let company_portal_id = await this.getCompanyPortalId(req);
     req.headers.site_id = company_portal_id;
-    let company_id = companyPortal.company_id;
+    let company_id = company_portal_id;
     req.headers.site_id = company_portal_id;
     req.headers.company_id = company_id;
 
@@ -271,7 +271,7 @@ class StaticPageController {
         },
       },
     });
-    return existing_portal ? existing_portal : company_portal_id;
+    return existing_portal ? existing_portal.id : company_portal_id;
   }
 
   //format news image path
