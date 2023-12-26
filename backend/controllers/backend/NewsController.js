@@ -24,7 +24,10 @@ class NewsController extends Controller {
       request_data.image = file_name.files[0].filename;
     }
     delete req.body.image_type;
-    req.body.slug = req.body.subject.replace(' ', '_').toLowerCase();
+    req.body.slug =
+      req.body.subject.replace(' ', '-').toLowerCase() +
+      '-' +
+      new Date().getTime();
     if (request_data.status == 'published') req.body.published_at = new Date();
     let response = await super.save(req);
     return { status: true, data: response };
