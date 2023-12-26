@@ -245,9 +245,12 @@ module.exports = (sequelize, DataTypes) => {
     });
     // console.log('promo_code', promo_code_details);
     if (promo_code_details) {
-      if (promo_code_details.status == 'expired' || 'inactive') {
+      if (
+        promo_code_details.status === 'expired' ||
+        promo_code_details.status === 'inactive'
+      ) {
         resp.resp_status = false;
-        resp.resp_message = 'Promo Code ' + promo_code_details.status;
+        resp.resp_message = 'Promo code ' + promo_code_details.status;
       } else {
         if (promo_code_details.used == promo_code_details.max_uses) {
           resp.resp_status = false;
