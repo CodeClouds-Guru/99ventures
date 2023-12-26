@@ -85,6 +85,13 @@ module.exports = (sequelize, DataTypes) => {
       Member.belongsTo(models.PaymentMethod, {
         foreignKey: 'primary_payment_method_id',
       });
+      Member.belongsToMany(models.PromoCode, {
+        as: 'MemberPromoCode',
+        through: 'member_promo_codes',
+        foreignKey: 'member_id',
+        otherKey: 'promo_code_id',
+        timestamps: false,
+      });
     }
   }
   Member.validate = function (req) {

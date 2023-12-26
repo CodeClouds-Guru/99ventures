@@ -56,7 +56,13 @@ class MemberTransactionController extends Controller {
       {
         model: this.model,
         as: 'ParentTransaction',
-        attributes: ['member_id', 'status', 'created_at'],
+        attributes: [
+          'member_id',
+          'status',
+          'created_at',
+          'note',
+          'amount_action',
+        ],
         include: [
           {
             model: Member,
@@ -195,6 +201,27 @@ class MemberTransactionController extends Controller {
       //   'record.dataValues.new_status formatted',
       //   record.dataValues.new_status
       // );
+      if (
+        record.dataValues.amount_action === 'reversed_transaction' &&
+        record.dataValues.ParentTransaction
+      ) {
+        // console.log(
+        //   'record.dataValues.amount_action',
+        //   record.dataValues.ParentTransaction.dataValues
+        // );
+        record.dataValues.amount_action =
+          record.dataValues.ParentTransaction.dataValues.amount_action ==
+          'promo_code'
+            ? record.dataValues.amount_action +
+              '-' +
+              record.dataValues.ParentTransaction.dataValues.note
+            : record.dataValues.amount_action;
+        console.log(
+          'record.dataValues.amount_action',
+          record.dataValues.amount_action
+        );
+      }
+
       transaction_list.push(record);
     });
 

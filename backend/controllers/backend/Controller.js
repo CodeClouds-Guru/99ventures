@@ -54,7 +54,7 @@ class Controller {
       options['where'] = {
         [Op.or]: searchable_fields.map((key) => {
           let obj = {};
-          obj[key] = { [Op.like]: `%${search}%` };
+          obj[key] = { [Op.substring]: search };
           return obj;
         }),
       };

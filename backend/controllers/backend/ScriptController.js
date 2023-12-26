@@ -2,9 +2,8 @@ const Controller = require('./Controller');
 const { stringToSlug } = require('../../helpers/global');
 const { Script } = require('../../models/index');
 const models = require('../../models/index');
-const fs = require("fs")
-const path = require('path')
-
+const fs = require('fs');
+const path = require('path');
 
 const { Op } = require('sequelize');
 
@@ -105,7 +104,7 @@ class ScriptController extends Controller {
   async add(req, res) {
     return {
       fields: this.model.fields,
-      modules: this.fetchAllModelsName()
+      modules: this.fetchAllModelsName(),
     };
   }
 
@@ -120,7 +119,7 @@ class ScriptController extends Controller {
   }
 
   fetchAllModelsName() {
-    const { sequelize, Sequelize, ...rest } = models
+    const { sequelize, Sequelize, ...rest } = models;
     return Object.keys(rest);
   }
 }
