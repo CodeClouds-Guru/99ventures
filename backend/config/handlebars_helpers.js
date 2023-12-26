@@ -190,4 +190,25 @@ module.exports = [
       return Math.abs(value)
     },
   },
+  {
+    name: 'stripScripts',
+    fn: function (value) {
+      var regex = /(<([^>]+)>)/ig
+      return value.replace(regex, "");
+    },
+  },
+  {
+    name: 'stripAndSubstrString',
+    fn: function (str, start, limit) {
+      var regex = /(<([^>]+)>)/ig
+      var str = str.replace(regex, "");
+      return str.substring(start, limit)
+    },
+  },
+  {
+    name: 'newsDateFormat',
+    fn: function (value, format) {
+      return moment(new Date(value)).format(format);
+    },
+  }
 ];
