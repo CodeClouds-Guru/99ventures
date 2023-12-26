@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
-      status: DataTypes.ENUM('active', 'expired'),
+      status: DataTypes.ENUM('active', 'expired', 'inactive'),
       company_portal_id: DataTypes.TINYINT,
     },
     {
@@ -245,9 +245,9 @@ module.exports = (sequelize, DataTypes) => {
     });
     // console.log('promo_code', promo_code_details);
     if (promo_code_details) {
-      if (promo_code_details.status == 'expired') {
+      if (promo_code_details.status == 'expired' || 'inactive') {
         resp.resp_status = false;
-        resp.resp_message = 'Promo Code expired';
+        resp.resp_message = 'Promo Code ' + promo_code_details.status;
       } else {
         if (promo_code_details.used == promo_code_details.max_uses) {
           resp.resp_status = false;
