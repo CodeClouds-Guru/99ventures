@@ -22,6 +22,7 @@ import { DateRangePicker, DateRange } from "mui-daterange-picker";
 import VirtualIncentivesBalance from 'app/shared-components/VirtualIncentivesBalance';
 import AlertDialog from 'app/shared-components/AlertDialog';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { updateUnreadTicketCount } from 'app/store/tickets';
 
 const iplogsColumns = {
 	'geo_location': 'Geo Location',
@@ -194,7 +195,7 @@ function List(props) {
 			setApplyLoading(false);
 			setExportLoading(false);
 			setFirstCall(false);
-			module === 'tickets' ? ticketsReadCount(res.data.results.result.data) : '';
+			module === 'tickets' ? ticketsReadCount(res.data.results.result.opended_ticket) : '';
 			if (res.data.results.programs) {
 				setProgramList(res.data.results.programs)
 			}
@@ -210,7 +211,8 @@ function List(props) {
 	}
 
 	const ticketsReadCount = (values) => {
-		let unread = 0;
+		dispatch(updateUnreadTicketCount(values))
+		/*let unread = 0;
 		let user_obj = {};
 		Object.keys(user).forEach((val, key) => {
 			user_obj[val] = user[val];
@@ -219,7 +221,7 @@ function List(props) {
 			val.is_read === 0 ? unread++ : '';
 		});
 		user_obj.unread_tickets = unread;
-		// dispatch(setUser(user_obj));
+		// dispatch(setUser(user_obj));*/
 	}
 
 	useEffect(() => {
@@ -359,7 +361,7 @@ function List(props) {
 	}
 
 	function handleClick(item, e) {
-		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root'))) {
+		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root') || e.target.nodeName === "use" )) {
 			handelNavigate(item)
 		} else {
 			e.stopPropagation();
@@ -546,8 +548,8 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (['campaigns', 'member-transactions', 'completed-surveys'].includes(module)) {
-			if (module === 'campaigns') {
+		} else if (['campaigns', 'member-transactions', 'completed-surveys', 'promo-codes', 'scripts'].includes(module)) {
+			if (['campaigns', 'promo-codes', 'scripts'].includes(module)) {
 				if(field.field_name === 'status'){
 					return <Chip label={processFieldValue(n[field.field_name], field)} className="capitalize" size="small" color={processFieldValue(n[field.field_name], field) === 'active' ? 'success' : 'error'} />
 				}
@@ -589,6 +591,28 @@ function List(props) {
 								</MenuList>
 							</Menu>
 						</>
+					)
+				}
+				else if(field.field_name === 'report'){            
+					return (
+						<Tooltip title="View Report" placement="top-start" >
+							<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/redemption-report`)}}>
+								<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
+							</IconButton>
+						</Tooltip>
+					)
+				} 
+				else if ((copyScriptId && field.field_name === 'code') || (module === 'promo-codes' && field.field_name === 'code'))  {
+					return (
+						<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
+							<span className="flex cursor-pointer" style={{
+								width
+									: 'fit-content'
+							}} onClick={(e) => { e.stopPropagation(); Helper.copyTextToClipboard(processFieldValue(n[field.field_name], field)); dispatch(showMessage({ variant: 'success', message: processFieldValue(n[field.field_name], field) + ' Copied' })); }}>
+								{processFieldValue(n[field.field_name], field)}
+								<FuseSvgIcon className="text-48 pt-2 pl-2" size={18} color="action">material-solid:content_copy</FuseSvgIcon>
+							</span>
+						</Tooltip>
 					)
 				}
 			}
@@ -685,7 +709,8 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if (copyScriptId && field.field_name === 'code') {
+		} 
+		/*else if (copyScriptId && field.field_name === 'code') {
 			return (
 				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
 					<span className="flex cursor-pointer" style={{
@@ -697,7 +722,7 @@ function List(props) {
 					</span>
 				</Tooltip>
 			)
-		}
+		}*/
 		// else if (module === 'scripts' && field.field_name === 'description') {
 
 		// 	return (

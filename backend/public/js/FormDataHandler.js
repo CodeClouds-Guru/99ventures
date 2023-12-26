@@ -675,4 +675,65 @@ $(() => {
     document.cookie =
       'email_verified=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
+
+  // Redeem Promocode
+  if($('#promocode-redeem-popup').length) {
+    $('#promocode-redeem-popup').on('submit', function(e){
+      e.preventDefault();
+      const resMsg = $(this).find('.response-msg'),
+            submitBtn = $(this).find('button[type=submit]'),
+            sbmtBtnTxt = submitBtn.text(),
+            promoInput = $(this).find('input[name=promocode]').val().trim(),
+            closeBtn = $(this).find('#paypal-popup-close');
+      if(promoInput) {
+        $.ajax({
+          type: 'POST',
+          url: '/redeem-promo-code',
+          data: {promocode: promoInput},
+          beforeSend: function() {
+            submitBtn.attr('disabled', true).text('Please wait...');
+          },
+          success: function(res) {
+            if(res.status === true) {
+              $('#promocode-redeem-popup')[0].reset();
+              closeBtn.hide();
+              resMsg.html(`<p class="m-0 p-0 text-success small lh-sm">${res.message}</p>`);
+              setTimeout(()=>{
+                // $('#promocode-popup').modal('hide');
+                location.reload();
+              }, 5000);
+            }else {
+              resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">${res.message}</p>`);
+              responseMsgToggle(resMsg);
+            }
+          },
+          error: function(xhr) { 
+            console.log(xhr)
+          },
+          complete: function(xhr){
+            submitBtn.removeAttr('disabled').text(sbmtBtnTxt);
+          }
+        })
+      } else {
+        resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">Please enter your promo code!</p>`);
+        responseMsgToggle(resMsg);
+      }
+    })
+  }
+
+  // Popup close event captured
+  if($("#promocode-popup").length){
+    $("#promocode-popup").on("hidden.bs.modal", function () {
+      $('#promocode-redeem-popup')[0].reset();
+      $('#promocode-popup').modal('hide');
+    });
+  }
+
 });
+
+function responseMsgToggle(el){
+  setTimeout(()=>{
+    el.html('').fadeOut()
+    el.fadeIn();
+  }, 5000);
+}

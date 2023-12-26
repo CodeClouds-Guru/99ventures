@@ -853,7 +853,7 @@ class MemberController extends Controller {
       }
     );
     let total_earnings_credited = await db.sequelize.query(
-      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='credited' AND parent_transaction_id IS NULL AND member_id=?",
+      "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE ((type='credited' and parent_transaction_id IS NULL) OR (type='credited' AND amount_action = 'referral')) AND member_id=?",
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
@@ -867,7 +867,11 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-
+    console.log(
+      'total_credited_minus_reversed',
+      parseFloat(total_earnings_credited[0].total),
+      parseFloat(total_reversed[0].total)
+    );
     var total_credited_minus_reversed =
       parseFloat(total_earnings_credited[0].total) -
       parseFloat(total_reversed[0].total);

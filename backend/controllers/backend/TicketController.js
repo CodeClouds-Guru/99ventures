@@ -94,9 +94,11 @@ class TicketController extends Controller {
         );
       else result.rows[i].setDataValue('username', '');
     }
-
+    //Count Unread Tickets
+    let opended_ticket = await TicketController.prototype.getTotalOpenedTicket();
+    
     return {
-      result: { data: result.rows, pages, total: result.count },
+      result: { data: result.rows, pages, total: result.count, opended_ticket },
       fields: this.model.fields,
     };
   }
@@ -212,10 +214,7 @@ class TicketController extends Controller {
         });
 
         //Count Opened Tickets
-        let count_opened_tkt = await sequelize.query(
-          'SELECT COUNT(id) AS total_ticket FROM `tickets` WHERE status = ? AND deleted_at IS NULL',
-          { replacements: ['open'], type: QueryTypes.SELECT }
-        );
+        let count_opened_tkt = await TicketController.prototype.getTotalOpenedTicket();
 
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
@@ -224,7 +223,7 @@ class TicketController extends Controller {
         // console.log(auto_responders);
         result.setDataValue('previous_tickets', prev_tickets);
         result.setDataValue('auto_responders', auto_responders);
-        result.setDataValue('opended_ticket', count_opened_tkt[0].total_ticket);
+        result.setDataValue('opended_ticket', count_opened_tkt);
 
         return {
           status: true,
@@ -523,6 +522,15 @@ class TicketController extends Controller {
       status: true,
       message: 'Action executed successfully',
     };
+  }
+
+  async getTotalOpenedTicket() {
+    let ticketData = await sequelize.query(
+      'SELECT COUNT(id) AS total_open_ticket FROM `tickets` WHERE status = ? AND deleted_at IS NULL',
+      { replacements: ['open'], type: QueryTypes.SELECT }
+    );
+    console.log(ticketData[0].total_open_ticket)
+    return ticketData[0].total_open_ticket
   }
 }
 

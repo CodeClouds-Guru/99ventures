@@ -25,6 +25,7 @@ const {
   SurveyProvider,
   CountryConfiguration,
   State,
+  PromoCode,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -65,6 +66,7 @@ class MemberAuthController {
     this.password_regex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
+    this.redeemPromoCode = this.redeemPromoCode.bind(this);
   }
   //login
   async login(req, res) {
@@ -1965,5 +1967,126 @@ class MemberAuthController {
       // res.redirect('back');
     }
   }*/
+
+  //Promo code redeem by member
+  async redeemPromoCode(req, res) {
+    console.log('redeemPromoCode', req);
+    let resp_status = false;
+    let resp_message = 'Unable to save data';
+    let response = [];
+    // console.log(req.body);
+    const companyPortal = await this.getCompanyPortal(req);
+    let company_portal_id = companyPortal.id;
+    req.headers.site_id = company_portal_id;
+    let company_id = companyPortal.company_id;
+    req.headers.site_id = company_portal_id;
+    req.headers.company_id = company_id;
+
+    req.body.member_id = req.session.member.id;
+    // req.body.member_id = 1;
+    let request_data = req.body;
+    var promo_code = request_data.promocode;
+    try {
+      //get member
+      let member = await Member.findOne({
+        where: { id: request_data.member_id },
+        include: [
+          {
+            model: MemberBalance,
+            as: 'member_amounts',
+            attributes: ['amount'],
+            where: { amount_type: 'cash' },
+          },
+        ],
+      });
+
+      //validation
+      let promocode_validation = await PromoCode.redeemPromoValidation({
+        promo_code: request_data.promocode,
+        company_portal_id: company_portal_id,
+        member_id: req.body.member_id,
+      });
+      console.log('promocode_validation', promocode_validation);
+      if (!promocode_validation.resp_status) {
+        resp_status = promocode_validation.resp_status;
+        resp_message = promocode_validation.resp_message;
+      } else {
+        if (promocode_validation.data.dataValues) {
+          let modified_balance =
+            parseFloat(member.member_amounts[0].amount) +
+            parseFloat(promocode_validation.data.dataValues.cash);
+          let transaction_data = {
+            member_id: request_data.member_id,
+            amount: parseFloat(promocode_validation.data.dataValues.cash),
+            note: promocode_validation.data.dataValues.code,
+            type: 'credited',
+            amount_action: 'promo_code',
+            created_by: request_data.member_id,
+            modified_total_earnings: modified_balance,
+            status: 2,
+          };
+          var transaction_resp = await MemberTransaction.insertTransaction(
+            transaction_data
+          );
+          await MemberBalance.update(
+            { amount: modified_balance },
+            {
+              where: {
+                member_id: request_data.member_id,
+                amount_type: 'cash',
+              },
+            }
+          );
+          await db.sequelize.query(
+            'INSERT INTO member_promo_codes (promo_code_id, member_id) VALUES (?, ?)',
+            {
+              type: QueryTypes.INSERT,
+              replacements: [
+                promocode_validation.data.dataValues.id,
+                request_data.member_id,
+              ],
+            }
+          );
+          let promo_code_used_count =
+            promocode_validation.data.dataValues.used > 0
+              ? parseInt(promocode_validation.data.dataValues.used) + 1
+              : 1;
+          let promo_code_status =
+            promocode_validation.data.dataValues.max_uses ==
+            promo_code_used_count
+              ? 'expired'
+              : 'active';
+
+          await PromoCode.update(
+            {
+              used: promo_code_used_count,
+              status: promo_code_status,
+            },
+            { where: { id: promocode_validation.data.dataValues.id } }
+          );
+          resp_status = true;
+          resp_message =
+            'Great news! Your Promo Code was a hit. Your account has been successfully credited: $' +
+            promocode_validation.data.dataValues.cash.toFixed(2);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      resp_status = false;
+      resp_message = 'Error occured';
+    } finally {
+      if (resp_status === true) {
+        // req.session.flash = {
+        //   message: resp_message,
+        //   success_status: true,
+        // };
+        // res.redirect('/paid-surveys');
+      }
+      res.json({
+        status: resp_status,
+        message: resp_message,
+      });
+    }
+  }
 }
 module.exports = MemberAuthController;

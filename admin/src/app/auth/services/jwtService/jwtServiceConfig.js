@@ -69,6 +69,7 @@ const jwtServiceConfig = {
   getWithdrawalRequests: 'withdrawal-requests',
   deleteMemberNotes: 'members/delete',
   dashboardReport: 'report',
+  promocode: 'promo-codes'
 };
 
 export default jwtServiceConfig;
