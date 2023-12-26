@@ -243,28 +243,30 @@ module.exports = (sequelize, DataTypes) => {
         // status: 'active',
       },
     });
-    console.log('promo_code', promo_code_details);
+    // console.log('promo_code', promo_code_details);
     if (promo_code_details) {
-      if (promo_code_details.used == promo_code_details.max_uses) {
-        resp.resp_status = false;
-        resp.resp_message = 'Promo Code expired';
-      } else if (promo_code_details.status == 'expired') {
+      if (promo_code_details.status == 'expired') {
         resp.resp_status = false;
         resp.resp_message = 'Promo Code expired';
       } else {
-        let checkIfAlreadyUsed = await db.sequelize.query(
-          'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
-          {
-            replacements: [data.member_id, promo_code_details.id],
-            type: QueryTypes.SELECT,
-          }
-        );
-        console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
-        if (checkIfAlreadyUsed.length > 0) {
+        if (promo_code_details.used == promo_code_details.max_uses) {
           resp.resp_status = false;
-          resp.resp_message = 'Promo Code already used';
+          resp.resp_message = 'Promo Code expired';
+        } else {
+          let checkIfAlreadyUsed = await db.sequelize.query(
+            'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
+            {
+              replacements: [data.member_id, promo_code_details.id],
+              type: QueryTypes.SELECT,
+            }
+          );
+          console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
+          if (checkIfAlreadyUsed.length > 0) {
+            resp.resp_status = false;
+            resp.resp_message = 'Promo Code already used';
+          }
+          resp.data = promo_code_details;
         }
-        resp.data = promo_code_details;
       }
     } else {
       resp.resp_status = false;
