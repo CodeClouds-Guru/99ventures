@@ -155,8 +155,11 @@ router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 //test api for manual insertion of member survye eligibilities
 router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 
-//test api for manual insertion of member survye eligibilities
+//api for redeem-promo-code
 router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
+
+//api for redeem-promo-code
+router.post('/news-like-dislike', MemberAuthController.newsReaction);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

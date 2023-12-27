@@ -26,6 +26,8 @@ const {
   CountryConfiguration,
   State,
   PromoCode,
+  NewsReaction,
+  News,
 } = require('../../models/index');
 const bcrypt = require('bcryptjs');
 const IpHelper = require('../../helpers/IpHelper');
@@ -67,6 +69,7 @@ class MemberAuthController {
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
     this.redeemPromoCode = this.redeemPromoCode.bind(this);
+    this.newsReaction = this.newsReaction.bind(this);
   }
   //login
   async login(req, res) {
@@ -1970,7 +1973,7 @@ class MemberAuthController {
 
   //Promo code redeem by member
   async redeemPromoCode(req, res) {
-    console.log('redeemPromoCode', req);
+    // console.log('redeemPromoCode', req);
     let resp_status = false;
     let resp_message = 'Unable to save data';
     let response = [];
@@ -2006,7 +2009,7 @@ class MemberAuthController {
         company_portal_id: company_portal_id,
         member_id: req.body.member_id,
       });
-      console.log('promocode_validation', promocode_validation);
+      // console.log('promocode_validation', promocode_validation);
       if (!promocode_validation.resp_status) {
         resp_status = promocode_validation.resp_status;
         resp_message = promocode_validation.resp_message;
@@ -2082,6 +2085,65 @@ class MemberAuthController {
         // };
         // res.redirect('/paid-surveys');
       }
+      res.json({
+        status: resp_status,
+        message: resp_message,
+      });
+    }
+  }
+
+  //newsReaction
+  async newsReaction(req, res) {
+    let resp_status = false;
+    let resp_message = 'Unable to save data';
+    let response = [];
+    // console.log(req.body);
+    const companyPortal = await this.getCompanyPortal(req);
+    let company_portal_id = companyPortal.id;
+    req.headers.site_id = company_portal_id;
+    let company_id = companyPortal.company_id;
+    req.headers.site_id = company_portal_id;
+    req.headers.company_id = company_id;
+    // req.body.member_id = req.session.member.id;
+    req.body.member_id = 1;
+    let request_data = req.body;
+    try {
+      //get news
+      let news = await News.findOne({
+        id: request_data.news_id,
+        company_portal_id: company_portal_id,
+        include: {
+          model: NewsReaction,
+          where: {
+            member_id: req.body.member_id,
+            news_id: request_data.news_id,
+          },
+        },
+      });
+      // console.log('news.NewsReactions', news.dataValues.NewsReactions);
+      if (news && news.NewsReactions) {
+        await NewsReaction.destroy({
+          where: {
+            news_id: request_data.news_id,
+            member_id: req.body.member_id,
+          },
+        });
+        resp_status = true;
+        resp_message = 'Reaction removed';
+      } else {
+        await NewsReaction.create({
+          news_id: request_data.news_id,
+          member_id: req.body.member_id,
+          reaction: '1',
+        });
+        resp_status = true;
+        resp_message = 'News liked';
+      }
+    } catch (error) {
+      console.error(error);
+      resp_status = false;
+      resp_message = 'Error occured';
+    } finally {
       res.json({
         status: resp_status,
         message: resp_message,

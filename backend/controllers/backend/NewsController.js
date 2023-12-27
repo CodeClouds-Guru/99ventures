@@ -13,6 +13,19 @@ class NewsController extends Controller {
     let request_data = req.body;
     let company_portal_id = req.headers.site_id;
     req.body.company_portal_id = company_portal_id;
+
+    // console.log(req.body.code);
+    let existingSubject = await this.model.findOne({
+      where: { subject: req.body.subject },
+      company_portal_id: req.body.company_portal_id,
+    });
+    if (existingSubject) {
+      return {
+        status: false,
+        message: 'Duplicate Subject',
+      };
+    }
+
     if (request_data.image_type == 'file' && req.files) {
       // console.log(req.files);
       let files = [];
