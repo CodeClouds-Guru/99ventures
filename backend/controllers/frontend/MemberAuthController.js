@@ -2105,8 +2105,8 @@ class MemberAuthController {
     let company_id = companyPortal.company_id;
     req.headers.site_id = company_portal_id;
     req.headers.company_id = company_id;
-    req.body.member_id = req.session.member.id;
-    // req.body.member_id = 1;/
+    // req.body.member_id = req.session.member.id;
+    req.body.member_id = 1;
     let request_data = req.body;
     try {
       //get news
@@ -2131,6 +2131,7 @@ class MemberAuthController {
         });
         resp_status = true;
         resp_message = 'Reaction removed';
+        resp_type = 'removed';
       } else {
         await NewsReaction.create({
           news_id: request_data.news_id,
