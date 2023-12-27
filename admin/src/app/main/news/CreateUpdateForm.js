@@ -293,7 +293,8 @@ const CreateUpdateForm = (props) => {
                                     }}
                                 />
                             )
-                        }                    
+                        }               
+                        <small>** For best result please use image in 390px*357px dimension</small>     
                     </FormControl>
                 </div>
                 <FormControl className="w-full mb-24">
