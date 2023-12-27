@@ -68,6 +68,7 @@ class NewsController extends Controller {
     }
     req.body.slug = model.slug;
     if (request_data.status !== 'published') req.body.published_at = null;
+    if (request_data.status == 'published') req.body.published_at = new Date();
     delete req.body.image_type;
     let response = await super.update(req);
     return { status: true, data: response };

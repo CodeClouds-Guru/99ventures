@@ -158,8 +158,11 @@ router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 //api for redeem-promo-code
 router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
 
-//api for redeem-promo-code
+//api for news-reaction
 router.post('/news-like-dislike', MemberAuthController.newsReaction);
+
+//api
+router.get('/news/:subject', StaticPageController.newDetails);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

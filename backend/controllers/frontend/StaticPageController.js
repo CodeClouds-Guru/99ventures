@@ -1,12 +1,13 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member, SurveyProvider } = require('../../models');
+const { Member, SurveyProvider, News, NewsReaction } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
+const newsreaction = require('../../models/newsreaction');
 
 class StaticPageController {
-  constructor() { }
+  constructor() {}
 
   /**
    * Show Survey Status
@@ -116,33 +117,32 @@ class StaticPageController {
     }
   }
 
-
   /**
    * Validate Admin User Token Passed for Impersonation
    * Starts Member Auth By Using Session
    * Sets Impersonation Mode
-   * @param {} req 
-   * @param {*} res 
+   * @param {} req
+   * @param {*} res
    */
   async validateImpersonation(req, res) {
     try {
       var token = req.query.hashKey || null;
       if (token) {
         try {
-          const decoded = jwt.verify(token, process.env.APP_SECRET)
+          const decoded = jwt.verify(token, process.env.APP_SECRET);
           const member_id = decoded.member_id;
           const member = await Member.findOne({ where: { id: member_id } });
           if (!member) {
-            throw new Error("Member Not Found or Soft Deleted")
+            throw new Error('Member Not Found or Soft Deleted');
           }
           req.session.member = member;
           req.session.impersonation = 1;
           return res.redirect('/dashboard');
         } catch (e) {
-          throw new Error("Invalid hashKey");
+          throw new Error('Invalid hashKey');
         }
       } else {
-        throw new Error("hashKey missing in the query");
+        throw new Error('hashKey missing in the query');
       }
     } catch (e) {
       console.error('Impersonation error', e);
@@ -156,22 +156,78 @@ class StaticPageController {
       attributes: ['id', 'name'],
       where: {
         name: provider,
-        status: 1
-      }
+        status: 1,
+      },
     });
-    if(getProvider === null) {
+    if (getProvider === null) {
       res.redirect('/404');
       return;
     }
 
-    try{
+    try {
       var pagePerser = new PageParser(getProvider.name, '');
       var page_content = await pagePerser.preview(req);
       res.render('page', { page_content });
+    } catch (error) {
+      console.error(error);
+      if ('statusCode' in error && error.statusCode === 401) {
+        res.redirect('/login');
+      }
     }
-    catch(error){
-      console.error(error)
-      if('statusCode' in error && error.statusCode === 401) {
+  }
+
+  //news details
+  async newDetails(req, res) {
+    const subject = req.params.subject;
+    const getNews = await News.findOne({
+      where: {
+        subject: subject,
+        status: 'pubished',
+      },
+      attributes: [
+        'image',
+        'id',
+        'subject',
+        'slug',
+        'content',
+        'content_json',
+        'additional_header',
+        'status',
+        'company_portal_id',
+        'published_at',
+      ],
+      include: {
+        model: Models.NewsReaction,
+        include: {
+          model: Models.Member,
+        },
+      },
+    });
+    if (getNews === null) {
+      res.redirect('/404');
+      return;
+    }
+
+    try {
+      var pagePerser = new PageParser('news', '');
+      var page_content = await pagePerser.preview(req);
+      //subject
+      page_content.replaceAll('{{news_subject}}', getNews.subject);
+      //content
+      page_content.replaceAll('{{news_content}}', getNews.content);
+      //published date
+      page_content.replaceAll('{{news_published_at}}', getNews.published_at);
+      //like count
+      page_content.replaceAll(
+        '{{news_like_count}}',
+        getNews.NewsReactions.length() + 1
+      );
+      //news image
+      page_content.replaceAll('{{news_image}}', getNews.image);
+      res.render('page', { page_content });
+    } catch (error) {
+      console.error(error);
+      if ('statusCode' in error && error.statusCode === 401) {
         res.redirect('/login');
       }
     }
