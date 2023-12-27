@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { Member } = require('../../models/index');
+const { Member, NewsReaction } = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 
 class NewsController extends Controller {
@@ -66,12 +66,45 @@ class NewsController extends Controller {
         );
       }
     }
+
+    if (model.subject !== req.body.subject) {
+      let existingSubject = await this.model.findOne({
+        where: { subject: req.body.subject },
+        company_portal_id: req.body.company_portal_id,
+      });
+      if (existingSubject) {
+        return {
+          status: false,
+          message: 'Duplicate Subject',
+        };
+      }
+    }
+
     req.body.slug = model.slug;
     if (request_data.status !== 'published') req.body.published_at = null;
     if (request_data.status == 'published') req.body.published_at = new Date();
     delete req.body.image_type;
     let response = await super.update(req);
     return { status: true, data: response };
+  }
+
+  //member notification for news publish
+  async memberNotificationOnNewsPunlish(news) {
+    const all_members = await Member.findAll({
+      attributes: ['id'],
+      where: { status: 'member' },
+    });
+    let notification_verbose = 'News published - ' + news.subject;
+    let notification_action = 'news';
+
+    let notify_obj = all_members.map((member) => {
+      return {
+        member_id: member.member_id,
+        verbose: notification_verbose,
+        action: notification_action,
+        is_read: 0,
+      };
+    });
   }
 }
 

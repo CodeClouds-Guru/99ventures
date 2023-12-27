@@ -1,5 +1,6 @@
 'use strict';
 const { Model } = require('sequelize');
+const news = require('./news');
 module.exports = (sequelize, DataTypes) => {
   class MemberNotification extends Model {
     /**
@@ -64,6 +65,9 @@ module.exports = (sequelize, DataTypes) => {
             case 'message_received':
             case 'ticket_reply':
               return '/support-tickets';
+            case 'news':
+              let news_subject = this.verbose.split('-')[1];
+              return '/news-details?' + news_subject;
             default:
               return '#';
           }

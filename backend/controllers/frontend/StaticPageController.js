@@ -178,11 +178,20 @@ class StaticPageController {
 
   //news details
   async newDetails(req, res) {
+    //get companyportal id
+    const companyPortal = await this.getCompanyPortal(req);
+    let company_portal_id = companyPortal.id;
+    req.headers.site_id = company_portal_id;
+    let company_id = companyPortal.company_id;
+    req.headers.site_id = company_portal_id;
+    req.headers.company_id = company_id;
+
     const subject = req.params.subject;
     const getNews = await News.findOne({
       where: {
         subject: subject,
         status: 'pubished',
+        company_portal_id: company_portal_id,
       },
       attributes: [
         'image',
@@ -231,6 +240,19 @@ class StaticPageController {
         res.redirect('/login');
       }
     }
+  }
+
+  // get Company Portal details
+  async getCompanyPortal(req) {
+    var company_portal_id = await CompanyPortal.findOne({ where: { id: 1 } });
+    const existing_portal = await CompanyPortal.findOne({
+      where: {
+        domain: {
+          [Op.substring]: req.get('host'),
+        },
+      },
+    });
+    return existing_portal ? existing_portal : company_portal_id;
   }
 }
 

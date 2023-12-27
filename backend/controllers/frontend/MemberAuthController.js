@@ -1756,7 +1756,7 @@ class MemberAuthController {
     return true;
   }
 
-  // get Company Portal details for signup
+  // get Company Portal details
   async getCompanyPortal(req) {
     var company_portal_id = await CompanyPortal.findOne({ where: { id: 1 } });
     const existing_portal = await CompanyPortal.findOne({
