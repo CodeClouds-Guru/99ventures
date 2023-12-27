@@ -71,7 +71,7 @@ module.exports = [
         // console.log('timezone',timezone)
         if (timezone) date = moment(new Date(date)).clone().tz(timezone);
         else date = moment(new Date(date));
-        // console.log(date)
+        console.log(date)
         return format ? date.format(format) : date.format('DD/MM/YYYY hh:mm a');
       } else {
         return '';
@@ -202,13 +202,7 @@ module.exports = [
     fn: function (str, start, limit) {
       var regex = /(<([^>]+)>)/ig
       var str = str.replace(regex, "");
-      return str.substring(start, limit)
-    },
-  },
-  {
-    name: 'newsDateFormat',
-    fn: function (value, format) {
-      return moment(new Date(value)).format(format);
+      return str.substring(start, limit);
     },
   }
 ];
