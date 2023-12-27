@@ -58,10 +58,11 @@ class PromoCodeController extends Controller {
     });
     if (existingCode) {
       if (existingCode.max_uses != existingCode.used) {
-        return {
-          status: false,
-          message: 'Duplicate Entry',
-        };
+        // return {
+        //   status: false,
+        //   message: 'Duplicate Entry',
+        // };
+        return this.throwCustomError('Duplicate Entry', 500);
       }
     }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
@@ -144,14 +145,17 @@ class PromoCodeController extends Controller {
         model: Member,
         as: 'MemberPromoCode',
         attributes: ['id', 'username'],
-        include: [{
-          model: MemberTransaction,
-          attributes: ['created_at'],
-          where: { note: { [Op.like]: `%${get_model.code}%` } },
-        },{
-          model: Country,
-          attributes: ['nicename']
-        }],
+        include: [
+          {
+            model: MemberTransaction,
+            attributes: ['created_at'],
+            where: { note: { [Op.like]: `%${get_model.code}%` } },
+          },
+          {
+            model: Country,
+            attributes: ['nicename'],
+          },
+        ],
       },
     });
     return { status: true, result: model };
