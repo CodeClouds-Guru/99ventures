@@ -661,8 +661,11 @@ class ScriptParser {
             'company_portal_id',
             'published_at',
           ],
+          // logging: console.log,
           include: {
             model: Models.NewsReaction,
+            required: false,
+            where: user ? { member_id: user.id } : 1,
             include: {
               model: Models.Member,
             },
