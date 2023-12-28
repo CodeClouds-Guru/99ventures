@@ -203,6 +203,29 @@ module.exports = [
       var regex = /(<([^>]+)>)/ig
       var str = str.replace(regex, "");
       return str.substring(start, limit);
-    },
+    }
+  },
+  {
+    name: 'newsClass',
+    fn: function(indx) {
+      var className = '';
+      var indxNum = +indx;
+      if(indxNum%3 === 0)
+        className = 'bg-primary';
+      else if(indxNum > 3 && (indxNum-2)%3 === 0)
+        className = 'bg-success';
+      else if(indxNum%2 === 0 ){
+        if(indxNum > 3 && (indxNum-1)%3 === 0)
+          className = 'bg-info';
+        else if(indxNum < 3)
+          className = 'bg-success';
+      }
+      else 
+        className = 'bg-info';
+
+      return className;
+    }
   }
+
+
 ];
