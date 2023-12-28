@@ -92,6 +92,10 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'promo_code_id',
         timestamps: false,
       });
+      Member.hasMany(models.NewsReaction, {
+        foreignKey: 'member_id',
+        // as: "credentials",
+      });
     }
   }
   Member.validate = function (req) {

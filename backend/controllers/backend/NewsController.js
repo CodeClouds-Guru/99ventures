@@ -38,10 +38,10 @@ class NewsController extends Controller {
       files[0] = req.files.image;
       const fileHelper = new FileHelper(files, 'news', req);
       const file_name = await fileHelper.upload();
-      request_data.image = file_name.files[0].filename;
+      req.body.image = file_name.files[0].filename;
     }
     delete req.body.image_type;
-    req.body.slug = req.body.subject.replace(' ', '-').toLowerCase();
+    req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
@@ -64,7 +64,7 @@ class NewsController extends Controller {
       files[0] = req.files.image;
       const fileHelper = new FileHelper(files, 'news', req);
       const file_name = await fileHelper.upload();
-      request_data.image = file_name.files[0].filename;
+      req.body.image = file_name.files[0].filename;
 
       let prev_image = model.image;
       if (prev_image && prev_image != '') {
@@ -72,7 +72,13 @@ class NewsController extends Controller {
           prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
         );
       }
+    } else {
+      req.body.image = model.image.replace(
+        process.env.S3_BUCKET_OBJECT_URL,
+        ''
+      );
     }
+
     if (req.body.subject !== '' && req.body.subject !== model.subject) {
       let existingSubject = await this.model.findOne({
         where: {
@@ -87,7 +93,7 @@ class NewsController extends Controller {
           message: 'Duplicate subject',
         };
       }
-      req.body.slug = req.body.subject.replace(' ', '-').toLowerCase();
+      req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
     } else req.body.slug = model.slug;
 
     if (request_data.status !== 'published') req.body.published_at = null;

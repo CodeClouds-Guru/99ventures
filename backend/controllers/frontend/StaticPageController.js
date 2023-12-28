@@ -1,13 +1,24 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member, SurveyProvider, News, NewsReaction } = require('../../models');
+const {
+  Member,
+  SurveyProvider,
+  News,
+  NewsReaction,
+  CompanyPortal,
+} = require('../../models');
+const { Op } = require('sequelize');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
-const newsreaction = require('../../models/newsreaction');
+const moment = require('moment');
 
 class StaticPageController {
-  constructor() {}
+  constructor() {
+    this.newsDetails = this.newsDetails.bind(this);
+    this.getCompanyPortal = this.getCompanyPortal.bind(this);
+    this.getNewsImagePath = this.getNewsImagePath.bind(this);
+  }
 
   /**
    * Show Survey Status
@@ -177,7 +188,7 @@ class StaticPageController {
   }
 
   //news details
-  async newDetails(req, res) {
+  async newsDetails(req, res) {
     //get companyportal id
     const companyPortal = await this.getCompanyPortal(req);
     let company_portal_id = companyPortal.id;
@@ -186,53 +197,42 @@ class StaticPageController {
     req.headers.site_id = company_portal_id;
     req.headers.company_id = company_id;
 
-    const subject = req.params.subject;
+    const slug = req.params.slug;
     const getNews = await News.findOne({
       where: {
-        subject: subject,
-        status: 'pubished',
+        slug: { [Op.like]: slug },
+        status: 'published',
         company_portal_id: company_portal_id,
       },
-      attributes: [
-        'image',
-        'id',
-        'subject',
-        'slug',
-        'content',
-        'content_json',
-        'additional_header',
-        'status',
-        'company_portal_id',
-        'published_at',
-      ],
       include: {
-        model: Models.NewsReaction,
+        model: NewsReaction,
         include: {
-          model: Models.Member,
+          model: Member,
+          attributes: ['id', 'username'],
         },
+        require: false,
       },
+      // logging: console.log,
     });
     if (getNews === null) {
       res.redirect('/404');
       return;
     }
+    getNews.setDataValue(
+      'published_at',
+      moment(getNews.published_at).format('Do MMM, YYYY')
+    );
+    let imageRawValue = await this.getNewsImagePath(getNews.image || null);
 
+    getNews.setDataValue('image', imageRawValue);
+    getNews.setDataValue(
+      'likes_count',
+      getNews.NewsReactions.length > 0 ? getNews.NewsReactions.length : 'No'
+    );
+    req.news = getNews;
     try {
       var pagePerser = new PageParser('news', '');
       var page_content = await pagePerser.preview(req);
-      //subject
-      page_content.replaceAll('{{news_subject}}', getNews.subject);
-      //content
-      page_content.replaceAll('{{news_content}}', getNews.content);
-      //published date
-      page_content.replaceAll('{{news_published_at}}', getNews.published_at);
-      //like count
-      page_content.replaceAll(
-        '{{news_like_count}}',
-        getNews.NewsReactions.length() + 1
-      );
-      //news image
-      page_content.replaceAll('{{news_image}}', getNews.image);
       res.render('page', { page_content });
     } catch (error) {
       console.error(error);
@@ -253,6 +253,31 @@ class StaticPageController {
       },
     });
     return existing_portal ? existing_portal : company_portal_id;
+  }
+
+  //format news image path
+  async getNewsImagePath(imageRawValue) {
+    console.log(imageRawValue);
+    if (
+      imageRawValue == null ||
+      !imageRawValue ||
+      imageRawValue == '' ||
+      imageRawValue == 'null'
+    ) {
+      imageRawValue = imageRawValue;
+    } else {
+      let check_url = '';
+      try {
+        new URL(imageRawValue);
+        check_url = true;
+      } catch (err) {
+        check_url = false;
+      }
+      console.log('check_url', check_url);
+      if (!check_url)
+        imageRawValue = process.env.S3_BUCKET_OBJECT_URL + imageRawValue;
+    }
+    return imageRawValue;
   }
 }
 
