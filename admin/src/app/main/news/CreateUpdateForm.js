@@ -201,7 +201,7 @@ const CreateUpdateForm = (props) => {
                     dispatch(showMessage({ variant: 'success', message: response.data.results.data.message }));
                     navigate(`/app/news`);
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.data.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
             })
             .catch((error) => {
