@@ -225,10 +225,7 @@ class StaticPageController {
     let imageRawValue = await this.getNewsImagePath(getNews.image || null);
 
     getNews.setDataValue('image', imageRawValue);
-    getNews.setDataValue(
-      'likes_count',
-      getNews.NewsReactions.length > 0 ? getNews.NewsReactions.length : 'No'
-    );
+    getNews.setDataValue('likes_count', getNews.NewsReactions.length);
     req.news = getNews;
     try {
       var pagePerser = new PageParser('news-details', '');
