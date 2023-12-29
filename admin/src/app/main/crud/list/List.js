@@ -709,7 +709,23 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} 
+		} else if(module === 'news' && field.field_name === 'likes') {
+			return (
+				<>
+					{processFieldValue(n['likes_count'], field)}
+					{
+						processFieldValue(n['likes_count'], field) ? (
+							<Tooltip title="View Report" placement="top-start" >
+								<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/report`)}}>
+									<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
+								</IconButton>
+							</Tooltip>
+						) : ''
+					}
+					
+				</>
+			)
+		}
 		/*else if (copyScriptId && field.field_name === 'code') {
 			return (
 				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
@@ -1191,7 +1207,7 @@ function List(props) {
 													.filter(field => field.listing === true)
 													.map((field, i) => {
 														return <Fragment key={i}>
-															<TableCell className="p-2 md:p-16 text-md" component="th" scope="row">
+															<TableCell className="p-2 md:p-16 text-md capitalize" component="td" scope="row">
 																{
 																	customizedField(module, n, field)
 																}

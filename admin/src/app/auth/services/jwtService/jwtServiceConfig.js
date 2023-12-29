@@ -72,7 +72,8 @@ const jwtServiceConfig = {
   promocode: 'promo-codes',
   news: 'news',
   newsSave: 'news/save',
-  newsUpdate: 'news/update'
+  newsUpdate: 'news/update',
+  newsView: 'news/view',
 };
 
 export default jwtServiceConfig;
