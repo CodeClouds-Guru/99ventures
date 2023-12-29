@@ -32,6 +32,7 @@ if (process.env.DEV_MODE === '0') {
       scripted_99_like: Sequelize.Op.like,
       scripted_99_substring: Sequelize.Op.substring,
       scripted_99_or: Sequelize.Op.or,
+      scripted_99_op_ne: Sequelize.Op.ne,
     },
     replication: {
       write: {
@@ -61,7 +62,7 @@ if (process.env.DEV_MODE === '0') {
         scripted_99_like: Sequelize.Op.like,
         scripted_99_substring: Sequelize.Op.substring,
         scripted_99_or: Sequelize.Op.or,
-        scripted_99_or: Sequelize.Op.or,
+        scripted_99_op_ne: Sequelize.Op.ne,
       },
     }
   );

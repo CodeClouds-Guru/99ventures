@@ -162,7 +162,7 @@ router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
 router.post('/news-like-dislike', MemberAuthController.newsReaction);
 
 //api
-router.get('/news-details/:slug', StaticPageController.newsDetails);
+router.get('/news/:slug', StaticPageController.newsDetails);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;
