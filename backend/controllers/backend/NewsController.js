@@ -12,6 +12,9 @@ class NewsController extends Controller {
     super('News');
     this.save = this.save.bind(this);
     this.update = this.update.bind(this);
+    this.list = this.list.bind(this);
+    this.edit = this.edit.bind(this);
+    this.view = this.view.bind(this);
     this.memberNotificationOnNewsPublish =
       this.memberNotificationOnNewsPublish.bind(this);
   }
@@ -130,6 +133,79 @@ class NewsController extends Controller {
     let model = await MemberNotification.bulkCreate(notify_obj, {
       ignoreDuplicates: true,
     });
+  }
+
+  //overridding list api
+  async list(req, res) {
+    var options = super.getQueryOptions(req);
+    options.include = {
+      model: NewsReaction,
+      include: {
+        model: Member,
+        attributes: ['id', 'username'],
+      },
+      require: false,
+    };
+    // options.logging = console.log;
+    // console.log(options);
+    const { docs, pages, total } = await this.model.paginate(options);
+    docs.forEach(async function (record, key) {
+      record.dataValues.likes_count = record.dataValues.NewsReactions.length;
+    });
+    return {
+      result: { data: docs, pages, total },
+      fields: {
+        ...this.model.fields,
+        // Added this object to show the Report Option in the table
+        likes: {
+          field_name: 'likes',
+          db_name: 'likes',
+          type: 'text',
+          placeholder: 'Likes',
+          listing: true,
+          show_in_form: false,
+          sort: false,
+          required: false,
+          value: '',
+          width: '50',
+          searchable: false,
+        },
+      },
+    };
+  }
+
+  //override edit function
+  // async edit(req, res) {
+  //   let model = await this.model.findOne({ where: { id: req.params.id } });
+  //   console.log('model', model);
+  //   let fields = this.model.fields;
+
+  //   const imageURL =
+  //     process.env.CLIENT_API_PUBLIC_URL ||
+  //     'http://127.0.0.1:4000' + '/images/no-img.jpg';
+  //   if (model.image.includes(imageURL)) {
+  //     console.log('console before', model.dataValues.image);
+
+  //     model.setDataValue('image', '');
+  //     console.log('console after', model.dataValues.image);
+  //   }
+  //   return { result: model, fields };
+  // }
+
+  //override view function
+  async view(req, res) {
+    let model = await this.model.findOne({
+      where: { id: req.params.id },
+      include: {
+        model: NewsReaction,
+        include: {
+          model: Member,
+          attributes: ['id', 'username'],
+        },
+        require: false,
+      },
+    });
+    return { status: true, result: model };
   }
 }
 
