@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         get() {
           let rawValue = this.getDataValue('image') || null;
-          // console.log(rawValue);
+          console.log(rawValue);
           if (
             rawValue == null ||
             !rawValue ||
@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
-            // console.log('check_url', check_url);
+            console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
