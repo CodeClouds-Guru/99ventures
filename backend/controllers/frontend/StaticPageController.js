@@ -231,7 +231,7 @@ class StaticPageController {
     );
     req.news = getNews;
     try {
-      var pagePerser = new PageParser('news', '');
+      var pagePerser = new PageParser('news-details', '');
       var page_content = await pagePerser.preview(req);
       res.render('page', { page_content });
     } catch (error) {

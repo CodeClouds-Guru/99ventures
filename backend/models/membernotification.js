@@ -66,8 +66,9 @@ module.exports = (sequelize, DataTypes) => {
             case 'ticket_reply':
               return '/support-tickets';
             case 'news':
-              let news_subject = this.verbose.split('-')[1];
-              return '/news-details?' + news_subject;
+              let slug = this.verbose.split('-')[1];
+              slug = slug.toLowerCase().replaceAll(' ', '-');
+              return '/news-details/' + slug;
             default:
               return '#';
           }

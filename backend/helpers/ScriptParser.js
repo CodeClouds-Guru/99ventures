@@ -56,6 +56,7 @@ class ScriptParser {
       if (script.module) {
         switch (script.action_type) {
           case 'list':
+            // console.log('params', params);
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
