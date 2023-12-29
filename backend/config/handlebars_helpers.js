@@ -200,9 +200,10 @@ module.exports = [
   {
     name: 'stripAndSubstrString',
     fn: function (str, start, limit) {
-      var regex = /(<([^>]+)>)/ig
-      var str = str.replace(regex, "");
-      return str.substring(start, limit);
+      let strArry = str.split('\n');
+      let regex = /(<([^>]+)>)/ig
+      let newStr = strArry[1].replace(regex, "");
+      return newStr.substring(start, limit);
     }
   },
   {
