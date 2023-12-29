@@ -62,6 +62,8 @@ class NewsController extends Controller {
     let company_portal_id = req.headers.site_id;
     req.body.company_portal_id = company_portal_id;
     let model = await this.model.findByPk(req.params.id);
+    model = JSON.parse(JSON.stringify(model));
+    console.log('req', req);
     if (request_data.image_type == 'file' && req.files) {
       let files = [];
       files[0] = req.files.image;
@@ -76,10 +78,10 @@ class NewsController extends Controller {
         );
       }
     } else {
-      req.body.image = model.image.replace(
-        process.env.S3_BUCKET_OBJECT_URL,
-        ''
-      );
+      req.body.image =
+        req.body.image !== 'null'
+          ? req.body.image
+          : model.image.replaceAll(process.env.S3_BUCKET_OBJECT_URL, '');
     }
 
     if (req.body.subject !== '' && req.body.subject !== model.subject) {
@@ -175,22 +177,19 @@ class NewsController extends Controller {
   }
 
   //override edit function
-  // async edit(req, res) {
-  //   let model = await this.model.findOne({ where: { id: req.params.id } });
-  //   console.log('model', model);
-  //   let fields = this.model.fields;
+  async edit(req, res) {
+    let model = await this.model.findOne({ where: { id: req.params.id } });
 
-  //   const imageURL =
-  //     process.env.CLIENT_API_PUBLIC_URL ||
-  //     'http://127.0.0.1:4000' + '/images/no-img.jpg';
-  //   if (model.image.includes(imageURL)) {
-  //     console.log('console before', model.dataValues.image);
-
-  //     model.setDataValue('image', '');
-  //     console.log('console after', model.dataValues.image);
-  //   }
-  //   return { result: model, fields };
-  // }
+    let fields = this.model.fields;
+    model = JSON.parse(JSON.stringify(model));
+    const imageURL =
+      process.env.CLIENT_API_PUBLIC_URL ||
+      'http://127.0.0.1:4000' + '/images/no-img.jpg';
+    if (model.image.includes(imageURL)) {
+      model.image = '';
+    }
+    return { result: model, fields };
+  }
 
   //override view function
   async view(req, res) {
