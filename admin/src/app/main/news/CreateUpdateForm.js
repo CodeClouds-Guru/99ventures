@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Paper, FormHelperText, Stack, Select,  MenuItem, TextareaAutosize, Switch, InputLabel, Button, Tooltip, IconButton, Typography } from '@mui/material';
+import { FormControl, TextField, Stack, Select,  MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import AlertDialog from 'app/shared-components/AlertDialog';
 import grapesjs from 'grapesjs'
 import 'grapesjs/dist/css/grapes.min.css'
 import 'grapesjs/dist/grapes.min.js'
@@ -15,12 +14,10 @@ import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css'
 import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 import '../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { getComponentData, setRevisionData } from 'app/store/components'
 import { customCodeEditor } from '../../grapesjs/editorPlugins'
 
 
-const CreateUpdateForm = (props) => {
+const CreateUpdateForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const {moduleId} = useParams();
@@ -175,6 +172,7 @@ const CreateUpdateForm = (props) => {
         }
         const formData = new FormData();
         formData.append('subject', subject);
+        formData.append('additional_header', allData.additional_header);
         formData.append('status', allData.status);
         formData.append('content', generatedHTMLValue(editor));
         formData.append('content_json', JSON.stringify(editor.getProjectData()));

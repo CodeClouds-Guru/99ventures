@@ -1,5 +1,4 @@
 import settingsConfig from 'app/configs/settingsConfig';
-import CreateEdit from './CreateEdit';
 import Create from './Create';
 import Report from './Report';
 
