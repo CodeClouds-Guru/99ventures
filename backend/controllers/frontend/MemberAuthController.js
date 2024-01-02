@@ -2097,6 +2097,7 @@ class MemberAuthController {
     let resp_status = false;
     let resp_message = 'Unable to save data';
     let resp_type = req.body.type || 'like';
+    let likes_count = 0;
     let response = [];
     // console.log(req.body);
     const companyPortal = await this.getCompanyPortal(req);
@@ -2105,24 +2106,24 @@ class MemberAuthController {
     let company_id = companyPortal.company_id;
     req.headers.site_id = company_portal_id;
     req.headers.company_id = company_id;
-    req.body.member_id = req.session.member.id;
-    // req.body.member_id = 1;
+    // req.body.member_id = req.session.member.id;
+    req.body.member_id = 1;
     let request_data = req.body;
     try {
       //get news
       let news = await News.findOne({
-        id: request_data.news_id,
-        company_portal_id: company_portal_id,
+        where: {
+          id: request_data.news_id,
+        },
         include: {
           model: NewsReaction,
           where: {
             member_id: req.body.member_id,
-            news_id: request_data.news_id,
           },
         },
       });
-      // console.log('news.NewsReactions', news.dataValues.NewsReactions);
-      if (news && news.NewsReactions) {
+
+      if (news && news.NewsReactions.length > 0) {
         await NewsReaction.destroy({
           where: {
             news_id: request_data.news_id,
@@ -2141,6 +2142,11 @@ class MemberAuthController {
         resp_status = true;
         resp_message = 'News liked';
       }
+      likes_count = await NewsReaction.count({
+        where: {
+          news_id: request_data.news_id,
+        },
+      });
     } catch (error) {
       console.error(error);
       resp_status = false;
@@ -2150,6 +2156,7 @@ class MemberAuthController {
         status: resp_status,
         message: resp_message,
         type: resp_type,
+        likes_count: likes_count + ' Like(s)',
       });
     }
   }
