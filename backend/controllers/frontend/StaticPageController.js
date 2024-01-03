@@ -1,6 +1,13 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member, SurveyProvider, StaticContent, CompanyPortal, News, NewsReaction } = require('../../models');
+const {
+  Member,
+  SurveyProvider,
+  StaticContent,
+  CompanyPortal,
+  News,
+  NewsReaction,
+} = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
@@ -223,7 +230,7 @@ class StaticPageController {
 
     getNews.setDataValue('image', imageRawValue);
     getNews.setDataValue('likes_count', getNews.NewsReactions.length);
-    req.news = getNews;
+    req.news = JSON.parse(JSON.stringify(getNews));
     try {
       var pagePerser = new PageParser('news-details', '');
       var page_content = await pagePerser.preview(req);
@@ -235,19 +242,19 @@ class StaticPageController {
 
   /**
    * Function to render Static contents like robots and sitemap
-   * @param {*} req 
-   * @param {*} res 
+   * @param {*} req
+   * @param {*} res
    */
   async renderStaticContents(req, res) {
     var company_portal_id = await this.getCompanyPortalId(req);
     const content = await StaticContent.findOne({
       where: {
         company_portal_id,
-        slug: req.params.type
-      }
+        slug: req.params.type,
+      },
     });
     if (!content) {
-      return res.redirect("/404");
+      return res.redirect('/404');
     }
     // res.header('Content-Type', 'application/xml');
     // res.header('Content-Encoding', 'gzip');
@@ -259,7 +266,7 @@ class StaticPageController {
 
   /**
    * Function to determine company portal
-   * @param {} req 
+   * @param {} req
    * @returns int
    */
   async getCompanyPortalId(req) {
@@ -296,7 +303,8 @@ class StaticPageController {
       if (!check_url)
         imageRawValue = process.env.S3_BUCKET_OBJECT_URL + imageRawValue;
     }
-    const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+    const publicURL =
+      process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
     console.log('imageRawValue', imageRawValue);
     return imageRawValue ? imageRawValue : `${publicURL}/images/no-img.jpg`;
   }
