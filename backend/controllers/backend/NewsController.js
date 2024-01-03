@@ -158,12 +158,26 @@ class NewsController extends Controller {
       result: { data: docs, pages, total },
       fields: {
         ...this.model.fields,
-        // Added this object to show the Report Option in the table
+        // Added this object to show the likes Count in the table
         likes: {
           field_name: 'likes',
           db_name: 'likes',
           type: 'text',
           placeholder: 'Likes',
+          listing: true,
+          show_in_form: false,
+          sort: false,
+          required: false,
+          value: '',
+          width: '50',
+          searchable: false,
+        },
+        // Added this object to show the likes Report in the table
+        report: {
+          field_name: 'report',
+          db_name: 'report',
+          type: 'text',
+          placeholder: 'Report',
           listing: true,
           show_in_form: false,
           sort: false,
