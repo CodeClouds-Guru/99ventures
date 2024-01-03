@@ -709,22 +709,22 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} else if(module === 'news' && field.field_name === 'likes') {
-			return (
-				<>
-					{processFieldValue(n['likes_count'], field)}
-					{
-						processFieldValue(n['likes_count'], field) ? (
-							<Tooltip title="View Report" placement="top-start" >
-								<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/report`)}}>
-									<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
-								</IconButton>
-							</Tooltip>
-						) : ''
-					}
-					
-				</>
-			)
+		} else if(module === 'news') {
+			if(field.field_name === 'likes'){
+				return processFieldValue(n['likes_count'], field);
+			}
+			else if(field.field_name === 'report'){
+				return (
+					<Tooltip title="View Report" placement="top-start" >
+						<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/report`)}}>
+							<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
+						</IconButton>
+					</Tooltip>
+				)
+			}
+			else {
+				return processFieldValue(n[field.field_name], field)
+			}
 		}
 		/*else if (copyScriptId && field.field_name === 'code') {
 			return (
