@@ -16,7 +16,6 @@ class StaticPageController {
     this.renderStaticContents = this.renderStaticContents.bind(this);
     this.getCompanyPortalId = this.getCompanyPortalId.bind(this);
     this.newsDetails = this.newsDetails.bind(this);
-    this.getCompanyPortal = this.getCompanyPortal.bind(this);
     this.getNewsImagePath = this.getNewsImagePath.bind(this);
   }
 
@@ -189,9 +188,7 @@ class StaticPageController {
 
   //news details
   async newsDetails(req, res) {
-    //get companyportal id
-    const companyPortal = await this.getCompanyPortal(req);
-    let company_portal_id = companyPortal.id;
+    let company_portal_id = await this.getCompanyPortalId(req);
     req.headers.site_id = company_portal_id;
     let company_id = companyPortal.company_id;
     req.headers.site_id = company_portal_id;
