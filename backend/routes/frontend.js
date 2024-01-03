@@ -56,7 +56,7 @@ const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddlew
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
 //commented for testing uk/us surveys, should be uncommented later
-router.use(checkIPMiddleware);
+// router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
@@ -152,8 +152,14 @@ router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 //test api for manual insertion of member survye eligibilities
 router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 
-//test api for manual insertion of member survye eligibilities
+//api for redeem-promo-code
 router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
+
+//api for news-reaction
+router.post('/news-like-dislike', MemberAuthController.newsReaction);
+
+//api
+router.get('/news/:slug', StaticPageController.newsDetails);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

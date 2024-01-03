@@ -112,6 +112,18 @@ class PromoCodeController extends Controller {
 
   async list(req, res) {
     var options = super.getQueryOptions(req);
+    if ('where' in options) {
+      // console.log(options.where);
+      if (Op.or in options['where']) {
+        options['where'][Op.or].forEach((val, i) => {
+          if ('cash' in val) {
+            options['where'][Op.or][i].cash = {
+              [Op.eq]: `%${parseFloat(req.query.search)}%`,
+            };
+          }
+        });
+      }
+    }
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },

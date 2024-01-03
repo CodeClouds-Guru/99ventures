@@ -71,7 +71,7 @@ module.exports = [
         // console.log('timezone',timezone)
         if (timezone) date = moment(new Date(date)).clone().tz(timezone);
         else date = moment(new Date(date));
-        // console.log(date)
+        console.log(date)
         return format ? date.format(format) : date.format('DD/MM/YYYY hh:mm a');
       } else {
         return '';
@@ -190,4 +190,43 @@ module.exports = [
       return Math.abs(value)
     },
   },
+  {
+    name: 'stripScripts',
+    fn: function (value) {
+      var regex = /(<([^>]+)>)/ig
+      return value.replace(regex, "");
+    },
+  },
+  {
+    name: 'stripAndSubstrString',
+    fn: function (str, start, limit) {
+      let strArry = str.split('\n');
+      let regex = /(<([^>]+)>)/ig
+      let newStr = strArry[1].replace(regex, "");
+      return newStr.substring(start, limit);
+    }
+  },
+  {
+    name: 'newsClass',
+    fn: function(indx) {
+      var className = '';
+      var indxNum = +indx;
+      if(indxNum%3 === 0)
+        className = 'bg-primary';
+      else if(indxNum > 3 && (indxNum-2)%3 === 0)
+        className = 'bg-success';
+      else if(indxNum%2 === 0 ){
+        if(indxNum > 3 && (indxNum-1)%3 === 0)
+          className = 'bg-info';
+        else if(indxNum < 3)
+          className = 'bg-success';
+      }
+      else 
+        className = 'bg-info';
+
+      return className;
+    }
+  }
+
+
 ];

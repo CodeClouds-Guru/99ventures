@@ -14,10 +14,12 @@ const {
   SurveyQualification,
   SurveyProvider,
   MemberTransaction,
+  NewsReaction,
 } = require('../models/index');
 const axios = require('axios');
 const { json } = require('body-parser');
 const { required } = require('joi');
+const newsreaction = require('../models/newsreaction');
 class ScriptParser {
   constructor() {
     this.parseScript = this.parseScript.bind(this);
@@ -54,6 +56,7 @@ class ScriptParser {
       if (script.module) {
         switch (script.action_type) {
           case 'list':
+            // console.log('params', params);
             const perPage = 'perpage' in params ? parseInt(params.perpage) : 12;
             const orderBy = 'orderby' in params ? params.orderby : 'id';
             const order = 'order' in params ? params.order : 'desc';
@@ -646,6 +649,33 @@ class ScriptParser {
         return {
           where: {
             status: 1,
+          },
+        };
+      case 'News':
+        return {
+          where: {
+            status: 'published',
+          },
+          attributes: [
+            'image',
+            'id',
+            'subject',
+            'slug',
+            'content',
+            'content_json',
+            'additional_header',
+            'status',
+            'company_portal_id',
+            'published_at',
+          ],
+          // logging: console.log,
+          include: {
+            model: Models.NewsReaction,
+            required: false,
+            where: user ? { member_id: user.id } : 1,
+            include: {
+              model: Models.Member,
+            },
           },
         };
       default:
