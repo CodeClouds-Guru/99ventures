@@ -1,20 +1,20 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const {
-  Member,
-  SurveyProvider,
-  News,
-  NewsReaction,
-  CompanyPortal,
-} = require('../../models');
-const { Op } = require('sequelize');
+const { Member, SurveyProvider, StaticContent, CompanyPortal, News, NewsReaction } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const moment = require('moment');
 
 class StaticPageController {
   constructor() {
+    this.showStatus = this.showStatus.bind(this);
+    this.getScripts = this.getScripts.bind(this);
+    this.validateImpersonation = this.validateImpersonation.bind(this);
+    this.getsurveys = this.getsurveys.bind(this);
+    this.renderStaticContents = this.renderStaticContents.bind(this);
+    this.getCompanyPortalId = this.getCompanyPortalId.bind(this);
     this.newsDetails = this.newsDetails.bind(this);
     this.getCompanyPortal = this.getCompanyPortal.bind(this);
     this.getNewsImagePath = this.getNewsImagePath.bind(this);
@@ -233,15 +233,40 @@ class StaticPageController {
       res.render('page', { page_content });
     } catch (error) {
       console.error(error);
-      if ('statusCode' in error && error.statusCode === 401) {
-        res.redirect('/login');
-      }
     }
   }
 
-  // get Company Portal details
-  async getCompanyPortal(req) {
-    var company_portal_id = await CompanyPortal.findOne({ where: { id: 1 } });
+  /**
+   * Function to render Static contents like robots and sitemap
+   * @param {*} req 
+   * @param {*} res 
+   */
+  async renderStaticContents(req, res) {
+    var company_portal_id = await this.getCompanyPortalId(req);
+    const content = await StaticContent.findOne({
+      where: {
+        company_portal_id,
+        slug: req.params.type
+      }
+    });
+    if (!content) {
+      return res.redirect("/404");
+    }
+    // res.header('Content-Type', 'application/xml');
+    // res.header('Content-Encoding', 'gzip');
+    console.log(content.configuration.response_type);
+    res.type(content.configuration.response_type);
+
+    return res.send(content.content);
+  }
+
+  /**
+   * Function to determine company portal
+   * @param {} req 
+   * @returns int
+   */
+  async getCompanyPortalId(req) {
+    var company_portal_id = 1;
     const existing_portal = await CompanyPortal.findOne({
       where: {
         domain: {
@@ -274,8 +299,7 @@ class StaticPageController {
       if (!check_url)
         imageRawValue = process.env.S3_BUCKET_OBJECT_URL + imageRawValue;
     }
-    const publicURL =
-      process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+    const publicURL = process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
     console.log('imageRawValue', imageRawValue);
     return imageRawValue ? imageRawValue : `${publicURL}/images/no-img.jpg`;
   }

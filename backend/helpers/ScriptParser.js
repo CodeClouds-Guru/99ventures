@@ -461,7 +461,13 @@ class ScriptParser {
             {
               model: Models.MemberTransaction,
               as: 'ParentTransaction',
-              attributes: ['member_id', 'status', 'created_at'],
+              attributes: [
+                'member_id',
+                'status',
+                'created_at',
+                'note',
+                'amount_action',
+              ],
               include: [
                 {
                   model: Models.Member,

@@ -1,5 +1,6 @@
 
 import axios from 'axios'
+import moment from "moment";
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -17,7 +18,7 @@ const chipStyle = {
     }
 }
 
-function Redeemed() {
+function RedemptionReport() {
     const { moduleId } = useParams();
     const [promocodeDetails, setPromocodeDetails] = React.useState([]);
 
@@ -40,7 +41,7 @@ function Redeemed() {
     return (    
         <FusePageSimple
         header={
-            <MainHeader module="Redeemed Report" backUrl="/app/promo-codes" />
+            <MainHeader module="Redemption Report" backUrl="/app/promo-codes" />
         }
         content={
         <>  
@@ -124,8 +125,8 @@ function Redeemed() {
                             <TableRow>
                                 <TableCell>ID</TableCell>
                                 <TableCell align="left">Username</TableCell>
-                                <TableCell align="left">First Name</TableCell>
-                                <TableCell align="left">Last Name</TableCell>
+                                <TableCell align="left">Country</TableCell>
+                                <TableCell align="left">Redeemed At</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -148,8 +149,8 @@ function Redeemed() {
                                             </Tooltip>
                                         </div>
                                     </TableCell>
-                                    <TableCell align="left">{row.first_name}</TableCell>
-                                    <TableCell align="left">{row.last_name}</TableCell>
+                                    <TableCell align="left">{row.Country?.nicename}</TableCell>
+                                    <TableCell align="left">{ moment(row.MemberTransactions[0].created_at).format('Do MMM YYYY, HH:mm')}</TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow
@@ -174,4 +175,4 @@ function Redeemed() {
 }
 
 
-export default Redeemed;
+export default RedemptionReport;

@@ -26,10 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       code: DataTypes.STRING,
       name: DataTypes.STRING,
       description: DataTypes.TEXT,
-      max_uses: DataTypes.TINYINT,
+      max_uses: DataTypes.INTEGER,
       cash: DataTypes.FLOAT,
-      point: DataTypes.TINYINT,
-      used: DataTypes.TINYINT,
+      point: DataTypes.INTEGER,
+      used: DataTypes.INTEGER,
       note: DataTypes.TEXT,
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
-      status: DataTypes.ENUM('active', 'expired'),
+      status: DataTypes.ENUM('active', 'expired', 'inactive'),
       company_portal_id: DataTypes.TINYINT,
     },
     {
@@ -76,6 +76,7 @@ module.exports = (sequelize, DataTypes) => {
       note: Joi.optional().label('Note'),
       company_portal_id: Joi.number().optional().label('Company Portal'),
       type: Joi.string().optional().label('Type'),
+      status: Joi.string().required().label('Status'),
     });
     return schema.validate(req.body);
   };
@@ -214,15 +215,20 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       field_name: 'status',
       db_name: 'status',
-      type: 'text',
+      type: 'select',
       placeholder: 'Status',
       listing: true,
-      show_in_form: false,
+      show_in_form: !false,
       sort: true,
       required: false,
       value: '',
       width: '50',
       searchable: true,
+      options: [
+        { key: 'active', value: 'active', label: 'Active' },
+        { key: 'inactive', value: 'inactive', label: 'Inactive' },
+        { key: 'expired', value: 'expired', label: 'Expired' },
+      ],
     },
   };
   sequelizePaginate.paginate(PromoCode);
@@ -234,28 +240,36 @@ module.exports = (sequelize, DataTypes) => {
       where: {
         code: { [Op.like]: data.promo_code },
         company_portal_id: data.company_portal_id,
-        status: 'active',
+        // status: 'active',
       },
     });
-    console.log('promo_code', promo_code_details);
+    // console.log('promo_code', promo_code_details);
     if (promo_code_details) {
-      if (promo_code_details.used == promo_code_details.max_uses) {
+      if (
+        promo_code_details.status === 'expired' ||
+        promo_code_details.status === 'inactive'
+      ) {
         resp.resp_status = false;
-        resp.resp_message = 'Promo Code expired';
+        resp.resp_message = 'Promo code ' + promo_code_details.status;
       } else {
-        let checkIfAlreadyUsed = await db.sequelize.query(
-          'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
-          {
-            replacements: [data.member_id, promo_code_details.id],
-            type: QueryTypes.SELECT,
-          }
-        );
-        console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
-        if (checkIfAlreadyUsed.length > 0) {
+        if (promo_code_details.used == promo_code_details.max_uses) {
           resp.resp_status = false;
-          resp.resp_message = 'Promo Code already used';
+          resp.resp_message = 'Promo Code expired';
+        } else {
+          let checkIfAlreadyUsed = await db.sequelize.query(
+            'SELECT * FROM member_promo_codes WHERE member_id = ? AND promo_code_id = ?',
+            {
+              replacements: [data.member_id, promo_code_details.id],
+              type: QueryTypes.SELECT,
+            }
+          );
+          console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
+          if (checkIfAlreadyUsed.length > 0) {
+            resp.resp_status = false;
+            resp.resp_message = 'Promo Code already used';
+          }
+          resp.data = promo_code_details;
         }
-        resp.data = promo_code_details;
       }
     } else {
       resp.resp_status = false;

@@ -1,6 +1,6 @@
 const Controller = require('./Controller');
 const { Op } = require('sequelize');
-const { Member } = require('../../models/index');
+const { Member, MemberTransaction, Country } = require('../../models/index');
 
 class PromoCodeController extends Controller {
   constructor() {
@@ -58,10 +58,11 @@ class PromoCodeController extends Controller {
     });
     if (existingCode) {
       if (existingCode.max_uses != existingCode.used) {
-        return {
-          status: false,
-          message: 'Duplicate Entry',
-        };
+        // return {
+        //   status: false,
+        //   message: 'Duplicate Entry',
+        // };
+        return this.throwCustomError('Duplicate Entry', 500);
       }
     }
     req.body.cash = req.body.cash == '' ? 0 : parseFloat(req.body.cash);
@@ -111,7 +112,6 @@ class PromoCodeController extends Controller {
 
   async list(req, res) {
     var options = super.getQueryOptions(req);
-    // console.log(options);
     if ('where' in options) {
       // console.log(options.where);
       if (Op.or in options['where']) {
@@ -124,9 +124,7 @@ class PromoCodeController extends Controller {
         });
       }
     }
-    // options.logging = console.log;
     const { docs, pages, total } = await this.model.paginate(options);
-
     return {
       result: { data: docs, pages, total },
       fields: {
@@ -150,12 +148,26 @@ class PromoCodeController extends Controller {
   }
 
   async view(req, res) {
+    let get_model = await this.model.findOne({
+      where: { id: req.params.id },
+    });
     let model = await this.model.findOne({
       where: { id: req.params.id },
       include: {
         model: Member,
         as: 'MemberPromoCode',
-        attributes: ['id', 'username', 'first_name', 'last_name', 'status'],
+        attributes: ['id', 'username'],
+        include: [
+          {
+            model: MemberTransaction,
+            attributes: ['created_at'],
+            where: { note: { [Op.like]: `%${get_model.code}%` } },
+          },
+          {
+            model: Country,
+            attributes: ['nicename'],
+          },
+        ],
       },
     });
     return { status: true, result: model };

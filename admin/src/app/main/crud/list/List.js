@@ -361,7 +361,7 @@ function List(props) {
 	}
 
 	function handleClick(item, e) {
-		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root'))) {
+		if (editable && !(e.target.classList.contains('listingExtraMenu') || e.target.classList.contains('MuiBackdrop-root') || e.target.nodeName === "use" )) {
 			handelNavigate(item)
 		} else {
 			e.stopPropagation();
@@ -596,7 +596,7 @@ function List(props) {
 				else if(field.field_name === 'report'){            
 					return (
 						<Tooltip title="View Report" placement="top-start" >
-							<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/redeemed`)}}>
+							<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/redemption-report`)}}>
 								<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
 							</IconButton>
 						</Tooltip>

@@ -701,7 +701,7 @@ $(() => {
               setTimeout(()=>{
                 // $('#promocode-popup').modal('hide');
                 location.reload();
-              }, 2500);
+              }, 5000);
             }else {
               resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">${res.message}</p>`);
               responseMsgToggle(resMsg);
@@ -720,13 +720,15 @@ $(() => {
       }
     })
   }
-  // promocode popup close
-  if($('#promocode-popup-close').length) {
-    $('#promocode-popup-close').on('click', function(){
+
+  // Popup close event captured
+  if($("#promocode-popup").length){
+    $("#promocode-popup").on("hidden.bs.modal", function () {
       $('#promocode-redeem-popup')[0].reset();
       $('#promocode-popup').modal('hide');
-    })
+    });
   }
+
 });
 
 function responseMsgToggle(el){

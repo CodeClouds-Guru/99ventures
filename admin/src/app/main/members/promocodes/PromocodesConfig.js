@@ -1,5 +1,5 @@
 import settingsConfig from 'app/configs/settingsConfig';
-import Redeemed from './Redeemed';
+import RedemptionReport from './RedemptionReport';
 
 const PromocodesConfig = {
     settings: {
@@ -28,8 +28,8 @@ const PromocodesConfig = {
     },
     routes: [
         {
-            path: 'app/promo-codes/:moduleId/redeemed',
-            element: <Redeemed />,
+            path: 'app/promo-codes/:moduleId/redemption-report',
+            element: <RedemptionReport />,
             auth: settingsConfig.defaultAuth
         }
     ],
