@@ -8,20 +8,14 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
+const { StaticContent, CompanyPortal } = require("../models")
+const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
+const StaticPageController = new StaticPageControllerClass();
 
 /**
  * Robots.txt
  */
-router.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
-    res.send('User-agent: *\nDisallow: /');
-  } else {
-    res.send(
-      'User-agent: *\nAllow: /\nSitemap: https://moresurveys.com/sitemap.xml'
-    );
-  }
-});
+router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticContents);
 
 /**
  * Sitemap
@@ -50,6 +44,12 @@ router.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+
+/**
+ * For scripts
+ */
+router.get('/get-scripts', StaticPageController.getScripts);
+
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
 const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddleware');
@@ -62,8 +62,6 @@ const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthCon
 const MemberAuthController = new MemberAuthControllerClass();
 const SurveyControllerClass = require('../controllers/frontend/SurveyController');
 const SurveyController = new SurveyControllerClass();
-const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
-const StaticPageController = new StaticPageControllerClass();
 const PureSpectrumControllerClass = require('../controllers/frontend/PureSpectrumController');
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SchlesingerControllerClass = require('../controllers/frontend/SchlesingerController');
@@ -82,7 +80,6 @@ router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
 // router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
-router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
 router.get('/purespectrum/entrylink', PureSpectrumController.generateEntryLink);

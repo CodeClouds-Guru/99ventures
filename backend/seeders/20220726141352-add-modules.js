@@ -100,6 +100,15 @@ const modules = [
     created_at: new Date(),
   },
   {
+    slug: 'staticcontents',
+    name: 'SEO Configurations',
+    parent_module: 'Configurations',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
+  {
     slug: 'paymentconfigurations',
     name: 'Payment Configurations',
     parent_module: 'Configurations',
