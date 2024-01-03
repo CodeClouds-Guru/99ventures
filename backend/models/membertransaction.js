@@ -419,7 +419,7 @@ module.exports = (sequelize, DataTypes) => {
         sequelize.literal(
           `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             // .subtract(6, 'days')
-            .startOf('week')
+            .startOf('isoWeek')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
             .endOf('day')
             .format(
