@@ -1,12 +1,20 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member, SurveyProvider } = require('../../models');
+const { Member, SurveyProvider, StaticContent, CompanyPortal } = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 
 class StaticPageController {
-  constructor() { }
+  constructor() {
+    this.showStatus = this.showStatus.bind(this);
+    this.getScripts = this.getScripts.bind(this);
+    this.validateImpersonation = this.validateImpersonation.bind(this);
+    this.getsurveys = this.getsurveys.bind(this);
+    this.renderStaticContents = this.renderStaticContents.bind(this);
+    this.getCompanyPortalId = this.getCompanyPortalId.bind(this);
+  }
 
   /**
    * Show Survey Status
@@ -159,22 +167,63 @@ class StaticPageController {
         status: 1
       }
     });
-    if(getProvider === null) {
+    if (getProvider === null) {
       res.redirect('/404');
       return;
     }
 
-    try{
+    try {
       var pagePerser = new PageParser(getProvider.name, '');
       var page_content = await pagePerser.preview(req);
       res.render('page', { page_content });
     }
-    catch(error){
+    catch (error) {
       console.error(error)
-      if('statusCode' in error && error.statusCode === 401) {
+      if ('statusCode' in error && error.statusCode === 401) {
         res.redirect('/login');
       }
     }
+  }
+
+  /**
+   * Function to render Static contents like robots and sitemap
+   * @param {*} req 
+   * @param {*} res 
+   */
+  async renderStaticContents(req, res) {
+    var company_portal_id = await this.getCompanyPortalId(req);
+    const content = await StaticContent.findOne({
+      where: {
+        company_portal_id,
+        slug: req.params.type
+      }
+    });
+    if (!content) {
+      return res.redirect("/404");
+    }
+    // res.header('Content-Type', 'application/xml');
+    // res.header('Content-Encoding', 'gzip');
+    console.log(content.configuration.response_type);
+    res.type(content.configuration.response_type);
+
+    return res.send(content.content);
+  }
+
+  /**
+   * Function to determine company portal
+   * @param {} req 
+   * @returns int
+   */
+  async getCompanyPortalId(req) {
+    var company_portal_id = 1;
+    const existing_portal = await CompanyPortal.findOne({
+      where: {
+        domain: {
+          [Op.substring]: req.get('host'),
+        },
+      },
+    });
+    return existing_portal ? existing_portal.id : company_portal_id;
   }
 }
 
