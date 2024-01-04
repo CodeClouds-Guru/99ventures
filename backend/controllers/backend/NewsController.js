@@ -204,7 +204,7 @@ class NewsController extends Controller {
     if (model.image.includes(imageURL)) {
       model.image = '';
     }
-    return { result: model, fields, company_portal };
+    return { result: model, fields };
   }
 
   //override view function
