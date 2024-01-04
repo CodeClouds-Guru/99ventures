@@ -49,7 +49,7 @@ class NewsController extends Controller {
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
-        subject: req.body.subject,
+        slug: req.body.slug,
         company_portal_id,
       });
     }
@@ -107,7 +107,7 @@ class NewsController extends Controller {
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
-        subject: req.body.subject,
+        slug: req.body.slug,
         company_portal_id,
       });
     }
@@ -123,7 +123,7 @@ class NewsController extends Controller {
       where: { status: 'member' },
       company_portal_id: news.company_portal_id,
     });
-    let notification_verbose = 'News published-' + news.subject;
+    let notification_verbose = 'News published-' + news.slug;
     let notification_action = 'news';
 
     let notify_obj = all_members.map((member) => {
