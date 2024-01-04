@@ -1064,7 +1064,15 @@ function List(props) {
 														(e) => {
 															setTxnType(e.target.value);
 															if (e.target.value) {
-																setWhere({ ...where, type: e.target.value });
+																if(e.target.value === 'withdraw'){
+																	setWhere({ ...where, type: e.target.value, status: {scripted_99_op_ne: 5} });
+																} else if(e.target.value === 'reversal') {
+																	delete where.type;
+																	setWhere({ ...where,  status: 5 });
+																} else {
+																	delete where.status;
+																	setWhere({ ...where, type: e.target.value });
+																}
 															} else {
 																setWhere(props.where);
 															}
