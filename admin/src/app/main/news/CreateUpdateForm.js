@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Stack, Select,  MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography } from '@mui/material';
+import { FormControl, TextField, Stack, Select,  MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
@@ -15,10 +15,11 @@ import 'grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.js'
 import '../scripts/ScriptStyle.css';
 import Helper from 'src/app/helper';
 import { customCodeEditor } from '../../grapesjs/editorPlugins'
-
+import { selectUser } from 'app/store/userSlice';
 
 const CreateUpdateForm = () => {
     const dispatch = useDispatch();
+    const user = useSelector(selectUser);
     const navigate = useNavigate();
     const {moduleId} = useParams();
     const [editor, setEditor] = useState({});
@@ -26,10 +27,12 @@ const CreateUpdateForm = () => {
     const [imageType, setImageType] = useState(true);
     const [loading, setLoading] = useState(false);
     const [imgUrl, setImgUrl] = useState('');
-    const [imageFile, setImageFile] = useState({})
+    const [imageFile, setImageFile] = useState({});
+    const domain = `https://${user.loggedin_portal.domain}/news/`;
     const storageKey = (moduleId !== 'create' && !isNaN(moduleId)) ? `gjs-news-${moduleId}` : `gjs-news-new`;
     const [allData, setAllData] = useState({
         subject: '',
+        slug: '',
         status: '',
         additional_header: '',
         content: '',
@@ -172,6 +175,7 @@ const CreateUpdateForm = () => {
         }
         const formData = new FormData();
         formData.append('subject', subject);
+        formData.append('slug', allData.slug);
         formData.append('additional_header', allData.additional_header);
         formData.append('status', allData.status);
         formData.append('content', generatedHTMLValue(editor));
@@ -210,7 +214,15 @@ const CreateUpdateForm = () => {
     }
 
     const handleSubject = (e) => {
-        setAllData({...allData, subject: e.target.value});
+        let val = e.target.value.trim();
+        let slugVal = val.replace(/[^\w\s]/gi, '').replaceAll(' ', '-').toLowerCase()
+        setAllData({...allData, subject: e.target.value, slug: slugVal});
+    }
+
+    const handleSlug = (e) => {
+        let val = e.target.value.toLowerCase();
+        let slugVal = val.replaceAll(' ', '-')
+        setAllData({...allData, slug: slugVal});
     }
 
     const handleStatus = (e) => {
@@ -251,7 +263,23 @@ const CreateUpdateForm = () => {
                         </Select>
                     </FormControl>
                 </div>
-                <div className='flex justify-betweenx'>
+                <div className='flex'>
+                    <FormControl className="w-4/5 mb-24 pr-10">
+                        <TextField
+                            label="Slug"
+                            type="text"
+                            variant="outlined"
+                            required
+                            value={allData.slug}
+                            onChange={handleSlug}    
+                            sx={{'& .MuiFormHelperText-contained': {margin: 0, padding: '1rem 0'}}}   
+                            helperText={
+                                <Typography variant="body1" component="span">{domain + allData.slug}</Typography>
+                            }
+                        />
+                    </FormControl>
+                </div>
+                <div className='flex'>
                     <FormControl className="mb-24 mr-10">
                         {
                             (moduleId !== 'create' && parseInt(moduleId) && allData.image) && (
@@ -292,7 +320,7 @@ const CreateUpdateForm = () => {
                                 />
                             )
                         }               
-                        <small>** For best result please use image in 390px*357px dimension</small>     
+                        <small className='text-red-500 font-bold'>** For best result please use image in 780px*714px dimension</small>     
                     </FormControl>
                 </div>
                 <FormControl className="w-full mb-24">
@@ -312,8 +340,7 @@ const CreateUpdateForm = () => {
                 </FormControl>
                 <FormControl className="w-full mb-24">
                     <div id="gjs" />
-                </FormControl>
-               
+                </FormControl>               
 
                 <motion.div
                     className="flex"
