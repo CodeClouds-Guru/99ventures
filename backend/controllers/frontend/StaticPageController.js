@@ -211,14 +211,25 @@ class StaticPageController {
     newsOptions.include = {
       model: NewsReaction,
       require: false,
+      ...(req.session.member && {
+        include: {
+          model: Member,
+          attributes: ['id', 'username'],
+          where: { id: req.session.member.id },
+          require: false,
+        },
+      }),
     };
-    if (req.session.member) {
-      newsOptions.include.include = {
-        model: Member,
-        attributes: ['id', 'username'],
-        where: { id: req.session.member.id },
-      };
-    }
+    newsOptions.subQuery = false;
+    // if (req.session.member) {
+    //   newsOptions.include.include = {
+    //     model: Member,
+    //     attributes: ['id', 'username'],
+    //     where: { id: req.session.member.id },
+    //     require: false,
+    //   };
+    // }
+    newsOptions.logging = console.log;
     const getNews = await News.findOne(newsOptions);
     if (getNews === null) {
       res.redirect('/404');

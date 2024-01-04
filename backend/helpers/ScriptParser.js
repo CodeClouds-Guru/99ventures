@@ -467,6 +467,7 @@ class ScriptParser {
                 'created_at',
                 'note',
                 'amount_action',
+                'transaction_id',
               ],
               include: [
                 {
