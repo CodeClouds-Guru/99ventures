@@ -216,10 +216,15 @@ class MemberTransactionController extends Controller {
               '-' +
               record.dataValues.ParentTransaction.dataValues.note
             : record.dataValues.amount_action;
-        console.log(
-          'record.dataValues.amount_action',
-          record.dataValues.amount_action
-        );
+        record.dataValues.amount_action =
+          record.dataValues.ParentTransaction.dataValues.amount_action ==
+          'survey'
+            ? record.dataValues.note
+            : record.dataValues.amount_action;
+        // console.log(
+        //   'record.dataValues.amount_action',
+        //   record.dataValues.amount_action
+        // );
       }
 
       transaction_list.push(record);
