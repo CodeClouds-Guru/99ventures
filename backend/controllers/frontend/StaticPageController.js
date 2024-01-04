@@ -240,9 +240,13 @@ class StaticPageController {
       moment(getNews.published_at).format('Do MMM, YYYY')
     );
     let imageRawValue = await this.getNewsImagePath(getNews.image || null);
-
+    let likes_count = await NewsReaction.count({
+      where: {
+        news_id: getNews.id,
+      },
+    });
     getNews.setDataValue('image', imageRawValue);
-    getNews.setDataValue('likes_count', getNews.NewsReactions.length);
+    getNews.setDataValue('likes_count', likes_count);
     req.news = JSON.parse(JSON.stringify(getNews));
     try {
       var pagePerser = new PageParser('news-details', '');
