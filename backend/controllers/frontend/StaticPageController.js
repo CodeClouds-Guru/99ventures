@@ -202,27 +202,24 @@ class StaticPageController {
     req.headers.company_id = company_id;
 
     const slug = req.params.slug;
-    const getNews = await News.findOne({
-      where: {
-        slug: { [Op.like]: slug },
-        status: 'published',
-        company_portal_id: company_portal_id,
-      },
-      include: {
-        model: NewsReaction,
-        include: {
-          model: Member,
-          attributes: ['id', 'username'],
-          where: req.session.member
-            ? {
-                id: req.session.member.id,
-              }
-            : 1,
-        },
-        require: false,
-      },
-      // logging: console.log,
-    });
+    let newsOptions = {};
+    newsOptions.where = {
+      slug: { [Op.like]: slug },
+      status: 'published',
+      company_portal_id: company_portal_id,
+    };
+    newsOptions.include = {
+      model: NewsReaction,
+      require: false,
+    };
+    if (req.session.member) {
+      newsOptions.include.include = {
+        model: Member,
+        attributes: ['id', 'username'],
+        where: { id: req.session.member.id },
+      };
+    }
+    const getNews = await News.findOne(newsOptions);
     if (getNews === null) {
       res.redirect('/404');
       return;
