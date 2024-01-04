@@ -49,7 +49,7 @@ class NewsController extends Controller {
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
-        subject: req.body.subject,
+        slug: req.body.slug,
         company_portal_id,
       });
     }
@@ -107,7 +107,7 @@ class NewsController extends Controller {
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
-        subject: req.body.subject,
+        slug: req.body.slug,
         company_portal_id,
       });
     }
