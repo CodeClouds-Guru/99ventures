@@ -4,6 +4,7 @@ const {
   Member,
   NewsReaction,
   MemberNotification,
+  CompanyPortal,
 } = require('../../models/index');
 const FileHelper = require('../../helpers/fileHelper');
 
@@ -26,13 +27,13 @@ class NewsController extends Controller {
     req.body.company_portal_id = company_portal_id;
 
     let existingSubject = await this.model.findOne({
-      where: { subject: req.body.subject },
+      where: { slug: req.body.slug },
       company_portal_id: req.body.company_portal_id,
     });
     if (existingSubject) {
       return {
         status: false,
-        message: 'Duplicate subject',
+        message: 'Duplicate slug',
       };
     }
 
@@ -44,7 +45,7 @@ class NewsController extends Controller {
       req.body.image = file_name.files[0].filename;
     }
     delete req.body.image_type;
-    req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
+    // req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
     if (request_data.status == 'published') {
       req.body.published_at = new Date();
       this.memberNotificationOnNewsPublish({
@@ -63,7 +64,7 @@ class NewsController extends Controller {
     req.body.company_portal_id = company_portal_id;
     let model = await this.model.findByPk(req.params.id);
     model = JSON.parse(JSON.stringify(model));
-    console.log('req', req);
+    // console.log('req', req);
     if (request_data.image_type == 'file' && req.files) {
       let files = [];
       files[0] = req.files.image;
@@ -84,10 +85,10 @@ class NewsController extends Controller {
           : model.image.replaceAll(process.env.S3_BUCKET_OBJECT_URL, '');
     }
 
-    if (req.body.subject !== '' && req.body.subject !== model.subject) {
+    if (req.body.slug !== '' && req.body.slug !== model.slug) {
       let existingSubject = await this.model.findOne({
         where: {
-          subject: req.body.subject,
+          slug: req.body.slug,
           company_portal_id: req.body.company_portal_id,
           id: { [Op.ne]: req.params.id },
         },
@@ -95,11 +96,12 @@ class NewsController extends Controller {
       if (existingSubject) {
         return {
           status: false,
-          message: 'Duplicate subject',
+          message: 'Duplicate slug',
         };
       }
-      req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
-    } else req.body.slug = model.slug;
+      // req.body.slug = req.body.subject.toLowerCase().replaceAll(' ', '-');
+    }
+    // else req.body.slug = model.slug;
 
     if (request_data.status !== 'published') req.body.published_at = null;
     if (request_data.status == 'published') {
@@ -202,7 +204,7 @@ class NewsController extends Controller {
     if (model.image.includes(imageURL)) {
       model.image = '';
     }
-    return { result: model, fields };
+    return { result: model, fields, company_portal };
   }
 
   //override view function
