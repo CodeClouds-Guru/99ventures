@@ -213,9 +213,11 @@ class StaticPageController {
         include: {
           model: Member,
           attributes: ['id', 'username'],
-          where: {
-            id: req.session.member.id,
-          },
+          where: req.session.member
+            ? {
+                id: req.session.member.id,
+              }
+            : 1,
         },
         require: false,
       },
