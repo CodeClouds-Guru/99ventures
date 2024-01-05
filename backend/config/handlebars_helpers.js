@@ -203,7 +203,8 @@ module.exports = [
       let strArry = str.split('\n');
       let regex = /(<([^>]+)>)/ig
       let newStr = strArry[1].replace(regex, "");
-      return newStr.substring(start, limit);
+      newStr = newStr.substring(start, limit);
+      return newStr += '...';
     }
   },
   {
