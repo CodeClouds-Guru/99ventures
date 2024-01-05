@@ -208,6 +208,19 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    published_at: {
+      field_name: 'published_at',
+      db_name: 'published_at',
+      type: 'text',
+      placeholder: 'Published At',
+      listing: true,
+      show_in_form: false,
+      sort: true,
+      required: false,
+      value: '',
+      width: '50',
+      searchable: true,
+    },
   };
   sequelizePaginate.paginate(News);
   return News;
