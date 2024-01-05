@@ -204,7 +204,10 @@ module.exports = [
       let regex = /(<([^>]+)>)/ig
       let newStr = strArry[1].replace(regex, "");
       newStr = newStr.substring(start, limit);
-      return newStr += '...';
+      if(newStr.length >= limit){
+        newStr += '...';
+      }
+      return newStr;
     }
   },
   {
