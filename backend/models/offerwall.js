@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       postback_url: DataTypes.STRING,
       currency_max: DataTypes.STRING,
       logo: DataTypes.STRING,
+      display_name: DataTypes.STRING,
       description: DataTypes.TEXT,
       rating: DataTypes.TINYINT,
       created_by: DataTypes.BIGINT,

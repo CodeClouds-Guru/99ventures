@@ -34,11 +34,15 @@ class MemberTransactionController extends Controller {
       new_option[Op.and] = {
         ...option_where,
         ...and_query,
+        ...(query_where.status &&
+          query_where.status == 5 && {
+            parent_transaction_id: { [Op.ne]: null },
+          }),
       };
     }
     options.where = new_option;
     options.attributes.push('type', 'parent_transaction_id', 'amount_action');
-    // options.logging = console.log;
+    options.logging = console.log;
     options.include = [
       {
         model: Member,
