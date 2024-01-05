@@ -432,7 +432,7 @@ function List(props) {
 			value = Helper.parseTimeStamp(value)
 		} else if ((['updated_at','requested_on'].includes(fieldConfig.field_name)) && value) {
 			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
-		} else if ((['created_at'].includes(fieldConfig.field_name)) && value) {
+		} else if ((['created_at', 'published_at'].includes(fieldConfig.field_name)) && value) {
 			value = moment(value).format('DD-MMM-YYYY HH:mm');
 		}
 		return value;
