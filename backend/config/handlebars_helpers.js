@@ -200,9 +200,15 @@ module.exports = [
   {
     name: 'stripAndSubstrString',
     fn: function (str, start, limit) {
-      let strArry = str.split('\n');
       let regex = /(<([^>]+)>)/ig
-      let newStr = strArry[1].replace(regex, "");
+      var newStr = '';
+      if(str.includes('</style>')){
+        let index = str.indexOf('</style>');
+        str = str.substring((index+8), 100000); // 8 is the length of </style>
+        newStr = str.replace(regex, "");
+      } else {
+        newStr = str.replace(regex, "");
+      }
       newStr = newStr.substring(start, limit);
       if(newStr.length >= limit){
         newStr += '...';
