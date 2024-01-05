@@ -67,8 +67,9 @@ class ScriptParser {
               profile_completed = false;
             }
             if (profile_completed) {
+              var paramsWhere = params.where?.replaceAll('|', '"');
               const param_where =
-                'where' in params ? JSON.parse(params.where) : null;
+                'where' in params ? JSON.parse(paramsWhere) : null;
 
               // other_details = {
               //     ...other_details,
