@@ -432,7 +432,7 @@ function List(props) {
 			value = Helper.parseTimeStamp(value)
 		} else if ((['updated_at','requested_on'].includes(fieldConfig.field_name)) && value) {
 			value = module === 'withdrawal-requests' ? moment(value).format('DD-MMM-YYYY h:mm a') : moment(value).format('DD-MMM-YYYY')
-		} else if ((['created_at'].includes(fieldConfig.field_name)) && value) {
+		} else if ((['created_at', 'published_at'].includes(fieldConfig.field_name)) && value) {
 			value = moment(value).format('DD-MMM-YYYY HH:mm');
 		}
 		return value;
@@ -709,7 +709,23 @@ function List(props) {
 				)
 			}
 			return processFieldValue(n[field.field_name], field)
-		} 
+		} else if(module === 'news') {
+			if(field.field_name === 'likes'){
+				return processFieldValue(n['likes_count'], field);
+			}
+			else if(field.field_name === 'report'){
+				return (
+					<Tooltip title="View Report" placement="top-start" >
+						<IconButton color="primary" aria-label="External Link" component="span" className="listingExtraMenu" onClick={()=>{navigate(`/app/${module}/${n['id']}/report`)}}>
+							<FuseSvgIcon className="text-48 listingExtraMenu" size={14} color="action">heroicons-outline:eye</FuseSvgIcon>
+						</IconButton>
+					</Tooltip>
+				)
+			}
+			else {
+				return processFieldValue(n[field.field_name], field)
+			}
+		}
 		/*else if (copyScriptId && field.field_name === 'code') {
 			return (
 				<Tooltip title={`Copy ` + processFieldValue(n[field.field_name], field)} placement="right">
@@ -1048,7 +1064,15 @@ function List(props) {
 														(e) => {
 															setTxnType(e.target.value);
 															if (e.target.value) {
-																setWhere({ ...where, type: e.target.value });
+																if(e.target.value === 'withdraw'){
+																	setWhere({ ...where, type: e.target.value, status: {scripted_99_op_ne: 5} });
+																} else if(e.target.value === 'reversal') {
+																	delete where.type;
+																	setWhere({ ...where,  status: 5 });
+																} else {
+																	delete where.status;
+																	setWhere({ ...where, type: e.target.value });
+																}
 															} else {
 																setWhere(props.where);
 															}
@@ -1191,7 +1215,7 @@ function List(props) {
 													.filter(field => field.listing === true)
 													.map((field, i) => {
 														return <Fragment key={i}>
-															<TableCell className="p-2 md:p-16 text-md" component="th" scope="row">
+															<TableCell className="p-2 md:p-16 text-md capitalize" component="td" scope="row">
 																{
 																	customizedField(module, n, field)
 																}

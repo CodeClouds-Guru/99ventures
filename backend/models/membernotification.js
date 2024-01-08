@@ -1,5 +1,6 @@
 'use strict';
 const { Model } = require('sequelize');
+const news = require('./news');
 module.exports = (sequelize, DataTypes) => {
   class MemberNotification extends Model {
     /**
@@ -64,6 +65,10 @@ module.exports = (sequelize, DataTypes) => {
             case 'message_received':
             case 'ticket_reply':
               return '/support-tickets';
+            case 'news':
+              let slug = this.verbose.split('News published')[1];
+              slug = slug.substr(1);
+              return '/news/' + slug;
             default:
               return '#';
           }

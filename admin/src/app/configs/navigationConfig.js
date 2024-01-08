@@ -93,6 +93,15 @@ const navigationConfig = [
     end: true,
   },
   {
+    id: 'news',
+    title: 'News',
+    translate: 'News',
+    type: 'item',
+    icon: 'material-outline:feed',
+    url: 'app/news',
+    end: true,
+  },
+  {
     id: 'surveyproviders',
     title: 'Survey Providers',
     type: 'item',

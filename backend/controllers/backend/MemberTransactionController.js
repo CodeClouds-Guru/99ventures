@@ -34,6 +34,10 @@ class MemberTransactionController extends Controller {
       new_option[Op.and] = {
         ...option_where,
         ...and_query,
+        ...(query_where.status &&
+          query_where.status == 5 && {
+            parent_transaction_id: { [Op.ne]: null },
+          }),
       };
     }
     options.where = new_option;
@@ -216,10 +220,15 @@ class MemberTransactionController extends Controller {
               '-' +
               record.dataValues.ParentTransaction.dataValues.note
             : record.dataValues.amount_action;
-        console.log(
-          'record.dataValues.amount_action',
-          record.dataValues.amount_action
-        );
+        record.dataValues.amount_action =
+          record.dataValues.ParentTransaction.dataValues.amount_action ==
+          'survey'
+            ? record.dataValues.note
+            : record.dataValues.amount_action;
+        // console.log(
+        //   'record.dataValues.amount_action',
+        //   record.dataValues.amount_action
+        // );
       }
 
       transaction_list.push(record);

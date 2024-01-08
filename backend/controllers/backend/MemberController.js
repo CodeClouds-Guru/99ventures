@@ -867,11 +867,11 @@ class MemberController extends Controller {
         type: QueryTypes.SELECT,
       }
     );
-    console.log(
-      'total_credited_minus_reversed',
-      parseFloat(total_earnings_credited[0].total),
-      parseFloat(total_reversed[0].total)
-    );
+    // console.log(
+    //   'total_credited_minus_reversed',
+    //   parseFloat(total_earnings_credited[0].total),
+    //   parseFloat(total_reversed[0].total)
+    // );
     var total_credited_minus_reversed =
       parseFloat(total_earnings_credited[0].total) -
       parseFloat(total_reversed[0].total);

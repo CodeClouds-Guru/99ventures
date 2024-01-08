@@ -405,37 +405,39 @@ module.exports = (sequelize, DataTypes) => {
     option.attributes = [
       [
         sequelize.literal(
-          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+          `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .startOf('day')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
       [
         sequelize.literal(
-          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
-            .subtract(6, 'days')
+          `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+            // .subtract(6, 'days')
+            .startOf('isoWeek')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
       [
         sequelize.literal(
-          `SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
-            .subtract(30, 'days')
+          `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
+            // .subtract(30, 'days')
+            .startOf('month')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END)`
+            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
@@ -470,11 +472,11 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
-    console.log(
-      'total_credited_minus_reversed_front',
-      parseFloat(response.dataValues.total),
-      parseFloat(total_reversed[0].total)
-    );
+    // console.log(
+    //   'total_credited_minus_reversed_front',
+    //   parseFloat(response.dataValues.total),
+    //   parseFloat(total_reversed[0].total)
+    // );
     var total_credited_minus_reversed =
       parseFloat(response.dataValues.total) -
       parseFloat(total_reversed[0].total);

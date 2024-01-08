@@ -30,6 +30,8 @@ const jwtServiceConfig = {
   updatePaymentMethodConfiguration: 'payment-configurations/update',
   addPaymentMethodConfiguration: 'payment-configurations/add',
   editPaymentMethodConfiguration: 'payment-configurations/edit',
+  getSeoConguration: 'static-contents',
+  updateSeoConguration: 'static-contents/update',
   getScriptFieldData: 'scripts/add',
   saveScriptsData: 'scripts/save',
   updateScriptsData: 'scripts/update',
@@ -69,7 +71,11 @@ const jwtServiceConfig = {
   getWithdrawalRequests: 'withdrawal-requests',
   deleteMemberNotes: 'members/delete',
   dashboardReport: 'report',
-  promocode: 'promo-codes'
+  promocode: 'promo-codes',
+  news: 'news',
+  newsSave: 'news/save',
+  newsUpdate: 'news/update',
+  newsView: 'news/view',
 };
 
 export default jwtServiceConfig;

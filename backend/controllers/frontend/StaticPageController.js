@@ -1,12 +1,30 @@
 const PageParser = require('../../helpers/PageParser');
 const ScriptParser = require('../../helpers/ScriptParser');
-const { Member, SurveyProvider } = require('../../models');
+const {
+  Member,
+  SurveyProvider,
+  StaticContent,
+  CompanyPortal,
+  News,
+  NewsReaction,
+} = require('../../models');
 const Handlebars = require('handlebars');
 const util = require('util');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
+const moment = require('moment');
 
 class StaticPageController {
-  constructor() { }
+  constructor() {
+    this.showStatus = this.showStatus.bind(this);
+    this.getScripts = this.getScripts.bind(this);
+    this.validateImpersonation = this.validateImpersonation.bind(this);
+    this.getsurveys = this.getsurveys.bind(this);
+    this.renderStaticContents = this.renderStaticContents.bind(this);
+    this.getCompanyPortalId = this.getCompanyPortalId.bind(this);
+    this.newsDetails = this.newsDetails.bind(this);
+    this.getNewsImagePath = this.getNewsImagePath.bind(this);
+  }
 
   /**
    * Show Survey Status
@@ -116,33 +134,32 @@ class StaticPageController {
     }
   }
 
-
   /**
    * Validate Admin User Token Passed for Impersonation
    * Starts Member Auth By Using Session
    * Sets Impersonation Mode
-   * @param {} req 
-   * @param {*} res 
+   * @param {} req
+   * @param {*} res
    */
   async validateImpersonation(req, res) {
     try {
       var token = req.query.hashKey || null;
       if (token) {
         try {
-          const decoded = jwt.verify(token, process.env.APP_SECRET)
+          const decoded = jwt.verify(token, process.env.APP_SECRET);
           const member_id = decoded.member_id;
           const member = await Member.findOne({ where: { id: member_id } });
           if (!member) {
-            throw new Error("Member Not Found or Soft Deleted")
+            throw new Error('Member Not Found or Soft Deleted');
           }
           req.session.member = member;
           req.session.impersonation = 1;
           return res.redirect('/dashboard');
         } catch (e) {
-          throw new Error("Invalid hashKey");
+          throw new Error('Invalid hashKey');
         }
       } else {
-        throw new Error("hashKey missing in the query");
+        throw new Error('hashKey missing in the query');
       }
     } catch (e) {
       console.error('Impersonation error', e);
@@ -156,25 +173,157 @@ class StaticPageController {
       attributes: ['id', 'name'],
       where: {
         name: provider,
-        status: 1
-      }
+        status: 1,
+      },
     });
-    if(getProvider === null) {
+    if (getProvider === null) {
       res.redirect('/404');
       return;
     }
 
-    try{
+    try {
       var pagePerser = new PageParser(getProvider.name, '');
       var page_content = await pagePerser.preview(req);
       res.render('page', { page_content });
-    }
-    catch(error){
-      console.error(error)
-      if('statusCode' in error && error.statusCode === 401) {
+    } catch (error) {
+      console.error(error);
+      if ('statusCode' in error && error.statusCode === 401) {
         res.redirect('/login');
       }
     }
+  }
+
+  //news details
+  async newsDetails(req, res) {
+    let company_portal_id = await this.getCompanyPortalId(req);
+    req.headers.site_id = company_portal_id;
+    let company_id = company_portal_id;
+    req.headers.site_id = company_portal_id;
+    req.headers.company_id = company_id;
+
+    const slug = req.params.slug;
+    let newsOptions = {};
+    newsOptions.where = {
+      slug: { [Op.like]: slug },
+      status: 'published',
+      company_portal_id: company_portal_id,
+    };
+    newsOptions.include = {
+      model: NewsReaction,
+      require: false,
+      ...(req.session.member && {
+        include: {
+          model: Member,
+          attributes: ['id', 'username'],
+          where: { id: req.session.member.id },
+          require: false,
+        },
+      }),
+    };
+    newsOptions.subQuery = false;
+    // if (req.session.member) {
+    //   newsOptions.include.include = {
+    //     model: Member,
+    //     attributes: ['id', 'username'],
+    //     where: { id: req.session.member.id },
+    //     require: false,
+    //   };
+    // }
+    newsOptions.logging = console.log;
+    const getNews = await News.findOne(newsOptions);
+    if (getNews === null) {
+      res.redirect('/404');
+      return;
+    }
+    getNews.setDataValue(
+      'published_at',
+      moment(getNews.published_at).format('Do MMM, YYYY')
+    );
+    let imageRawValue = await this.getNewsImagePath(getNews.image || null);
+    let likes_count = await NewsReaction.count({
+      where: {
+        news_id: getNews.id,
+      },
+    });
+    getNews.setDataValue('image', imageRawValue);
+    getNews.setDataValue('likes_count', likes_count);
+    req.news = JSON.parse(JSON.stringify(getNews));
+    try {
+      var pagePerser = new PageParser('news-details', '');
+      var page_content = await pagePerser.preview(req);
+      res.render('page', { page_content });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * Function to render Static contents like robots and sitemap
+   * @param {*} req
+   * @param {*} res
+   */
+  async renderStaticContents(req, res) {
+    var company_portal_id = await this.getCompanyPortalId(req);
+    const content = await StaticContent.findOne({
+      where: {
+        company_portal_id,
+        slug: req.params.type,
+      },
+    });
+    if (!content) {
+      return res.redirect('/404');
+    }
+    // res.header('Content-Type', 'application/xml');
+    // res.header('Content-Encoding', 'gzip');
+    console.log(content.configuration.response_type);
+    res.type(content.configuration.response_type);
+
+    return res.send(content.content);
+  }
+
+  /**
+   * Function to determine company portal
+   * @param {} req
+   * @returns int
+   */
+  async getCompanyPortalId(req) {
+    var company_portal_id = 1;
+    const existing_portal = await CompanyPortal.findOne({
+      where: {
+        domain: {
+          [Op.substring]: req.get('host'),
+        },
+      },
+    });
+    return existing_portal ? existing_portal.id : company_portal_id;
+  }
+
+  //format news image path
+  async getNewsImagePath(imageRawValue) {
+    // console.log(imageRawValue);
+    if (
+      imageRawValue == null ||
+      !imageRawValue ||
+      imageRawValue == '' ||
+      imageRawValue == 'null'
+    ) {
+      imageRawValue = imageRawValue;
+    } else {
+      let check_url = '';
+      try {
+        new URL(imageRawValue);
+        check_url = true;
+      } catch (err) {
+        check_url = false;
+      }
+      console.log('check_url', check_url);
+      if (!check_url)
+        imageRawValue = process.env.S3_BUCKET_OBJECT_URL + imageRawValue;
+    }
+    const publicURL =
+      process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+    console.log('imageRawValue', imageRawValue);
+    return imageRawValue ? imageRawValue : `${publicURL}/images/no-img.jpg`;
   }
 }
 

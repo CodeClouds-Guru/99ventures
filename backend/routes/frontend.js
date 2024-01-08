@@ -8,47 +8,47 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
+const { StaticContent, CompanyPortal } = require("../models")
+const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
+const StaticPageController = new StaticPageControllerClass();
 
 /**
  * Robots.txt
  */
-router.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  if (process.env.DEV_MODE === '1' || process.env.DEV_MODE === '2') {
-    res.send('User-agent: *\nDisallow: /');
-  } else {
-    res.send(
-      'User-agent: *\nAllow: /\nSitemap: https://moresurveys.com/sitemap.xml'
-    );
-  }
-});
+router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticContents);
 
 /**
  * Sitemap
  */
-router.get('/sitemap.xml', async (req, res) => {
-  const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
-  const SiteMapController = new SiteMapControllerClass();
-  res.header('Content-Type', 'application/xml');
-  res.header('Content-Encoding', 'gzip');
-  console.log('baseurl', `${req.protocol}://${req.hostname}`);
-  try {
-    const smStream = await SiteMapController.generate(
-      process.env.DEV_MODE === '1'
-        ? 'https://moresurveys.com'
-        : `https://${req.hostname}`
-    );
-    const pipeline = smStream.pipe(createGzip());
-    streamToPromise(pipeline).then((sm) => (sitemap = sm));
-    smStream.end();
-    pipeline.pipe(res).on('error', (e) => {
-      throw e;
-    });
-  } catch (e) {
-    console.error('Sitemap generation error', e);
-    res.status(500).send('Something went wrong');
-  }
-});
+// router.get('/sitemap.xml', async (req, res) => {
+//   const SiteMapControllerClass = require('../controllers/frontend/SiteMapController');
+//   const SiteMapController = new SiteMapControllerClass();
+//   res.header('Content-Type', 'application/xml');
+//   res.header('Content-Encoding', 'gzip');
+//   console.log('baseurl', `${req.protocol}://${req.hostname}`);
+//   try {
+//     const smStream = await SiteMapController.generate(
+//       process.env.DEV_MODE === '1'
+//         ? 'https://moresurveys.com'
+//         : `https://${req.hostname}`
+//     );
+//     const pipeline = smStream.pipe(createGzip());
+//     streamToPromise(pipeline).then((sm) => (sitemap = sm));
+//     smStream.end();
+//     pipeline.pipe(res).on('error', (e) => {
+//       throw e;
+//     });
+//   } catch (e) {
+//     console.error('Sitemap generation error', e);
+//     res.status(500).send('Something went wrong');
+//   }
+// });
+
+
+/**
+ * For scripts
+ */
+router.get('/get-scripts', StaticPageController.getScripts);
 
 const checkIPMiddleware = require('../middlewares/checkIPMiddleware');
 const checkMemberAuth = require('../middlewares/checkMemberAuth');
@@ -56,14 +56,12 @@ const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddlew
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
 //commented for testing uk/us surveys, should be uncommented later
-router.use(checkIPMiddleware);
+// router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();
 const SurveyControllerClass = require('../controllers/frontend/SurveyController');
 const SurveyController = new SurveyControllerClass();
-const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
-const StaticPageController = new StaticPageControllerClass();
 const PureSpectrumControllerClass = require('../controllers/frontend/PureSpectrumController');
 const PureSpectrumController = new PureSpectrumControllerClass();
 const SchlesingerControllerClass = require('../controllers/frontend/SchlesingerController');
@@ -82,7 +80,6 @@ router.get('/email-verify/:hash', MemberAuthController.emailVerify);
 router.post('/logout', MemberAuthController.logout);
 // router.get('/survey', SurveyController.getSurvey);
 router.get('/survey/:status', StaticPageController.showStatus);
-router.get('/get-scripts', StaticPageController.getScripts);
 router.post('/ticket/create', TicketController.createTicket);
 router.post('/ticket/update', TicketController.update);
 router.get('/purespectrum/entrylink', PureSpectrumController.generateEntryLink);
@@ -155,8 +152,14 @@ router.get('/get-login-streak', MemberAuthController.getLoginStreak);
 //test api for manual insertion of member survye eligibilities
 router.get('/member-eligibility', MemberAuthController.manualMemberEligibility);
 
-//test api for manual insertion of member survye eligibilities
+//api for redeem-promo-code
 router.post('/redeem-promo-code', MemberAuthController.redeemPromoCode);
+
+//api for news-reaction
+router.post('/news-like-dislike', MemberAuthController.newsReaction);
+
+//api
+router.get('/news/:slug', StaticPageController.newsDetails);
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;

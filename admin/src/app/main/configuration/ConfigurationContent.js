@@ -13,6 +13,7 @@ import DowntimeConfiguration from './downtime-configuration/DowntimeConfiguratio
 import PaymentGateway from './payment-gateway/GatewayList';
 import MetatagConfiguration from './metatags-configuration/MetatagConfiguration';
 import { usePermission } from '@fuse/hooks';
+import SEO from './seo-configuration';
 
 function TabPanel(props) {
     const { children, value, panel, index, panelIndx, ...other } = props;
@@ -90,14 +91,19 @@ const tabs = [
         name: "Payment Gateway",
         component: PaymentGateway,
         module: 'paymentconfigurations'
-    }
+    },
+    {
+        name: "SEO Configuration",
+        component: SEO,
+        module: 'staticcontents'
+    },
 ];
 
- 
+
 function ConfigurationContent() {
     const [value, setValue] = useState(0);
     const [selectedTab, setSelectedTab] = useState('');
-    const [param, setParam]  = useSearchParams();
+    const [param, setParam] = useSearchParams();
 
     const tabPanel = () => {
         let initialIndx = 0;
@@ -120,11 +126,11 @@ function ConfigurationContent() {
         param.set('tab', event.target.dataset.module);
         setParam(param)
     };
-    
-    useEffect(()=>{
-        if(param.has('tab')) {
-            const tabIndx = tabs.findIndex(tab=> tab.module === param.get('tab'));
-            if(tabIndx !== -1){
+
+    useEffect(() => {
+        if (param.has('tab')) {
+            const tabIndx = tabs.findIndex(tab => tab.module === param.get('tab'));
+            if (tabIndx !== -1) {
                 setSelectedTab(`simple-tab-${param.get('tab')}`);
                 setValue(tabIndx);
             }
