@@ -562,11 +562,14 @@ module.exports = (sequelize, DataTypes) => {
     let transaction_ids = [];
     let withdrawal_ids = [];
     for (let record of withdrawal_reqs) {
+      let get_member_balance = await MemberBalance.findOne({
+        where: { member_id: record.member_id, amount_type: 'cash' },
+        attributes: ['amount'],
+      });
       // console.log(record);
       // console.log(record.Member.member_amounts);
       let updated_amount =
-        parseFloat(record.Member.member_amounts[0].amount) +
-        parseFloat(record.amount);
+        parseFloat(get_member_balance.amount) + parseFloat(record.amount);
       // console.log(updated_amount);
       withdrawal_ids.push(record.id);
       transaction_ids.push(record.member_transaction_id);
@@ -627,7 +630,7 @@ module.exports = (sequelize, DataTypes) => {
   ) => {
     const { MemberTransaction } = require('../models/index');
     // console.log(
-    //   '------approvedAndCompletedReqs',
+    //   '------approvedAndCompletedReq s',
     //   transaction_ids,
     //   withdrawal_ids,
     //   req_body

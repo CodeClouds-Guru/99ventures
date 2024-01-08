@@ -42,7 +42,7 @@ class MemberTransactionController extends Controller {
     }
     options.where = new_option;
     options.attributes.push('type', 'parent_transaction_id', 'amount_action');
-    options.logging = console.log;
+    // options.logging = console.log;
     options.include = [
       {
         model: Member,
