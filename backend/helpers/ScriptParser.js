@@ -88,7 +88,7 @@ class ScriptParser {
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
-                // logging: console.log,
+                logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
@@ -674,11 +674,16 @@ class ScriptParser {
           include: {
             model: Models.NewsReaction,
             required: false,
-            where: user ? { member_id: user.id } : 1,
+            where: user ? { member_id: user.id } : {},
             include: {
               model: Models.Member,
+              attributes: ['id', 'first_name', 'last_name', 'email', 'status'],
+              required: false,
             },
           },
+          subQuery: false,
+          // logging: console.log,
+          group: '`News`.`id`',
         };
       default:
         return { where: {} };
