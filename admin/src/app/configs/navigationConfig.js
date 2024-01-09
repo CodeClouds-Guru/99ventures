@@ -52,6 +52,14 @@ const navigationConfig = [
         icon: 'material-outline:local_atm',
         url: 'app/promo-codes',
         end: true,
+      },
+      {
+        id: 'promocodes',
+        title: 'Membership',
+        type: 'item',
+        icon: 'material-outline:badge',
+        url: 'app/promo-codes',
+        end: true,
       }
     ]
   },
