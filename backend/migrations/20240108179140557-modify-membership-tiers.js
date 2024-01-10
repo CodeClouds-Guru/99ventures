@@ -6,6 +6,19 @@ module.exports = {
       type: Sequelize.TEXT,
       allowNull: true,
     });
+    await queryInterface.addColumn('membership_tiers', 'status', {
+      type: Sequelize.ENUM('active', 'inactive', 'archived'),
+      allowNull: false,
+      defaultValue: 'active',
+    });
+    await queryInterface.addColumn('membership_tiers', 'reward_point', {
+      type: Sequelize.NUMBER,
+      defaultValue: 0,
+    });
+    await queryInterface.addColumn('membership_tiers', 'reward_cash', {
+      type: Sequelize.FLOAT,
+      defaultValue: 0,
+    });
     await queryInterface.addColumn('membership_tiers', 'created_at', {
       type: 'TIMESTAMP',
     });
