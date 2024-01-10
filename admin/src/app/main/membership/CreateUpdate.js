@@ -186,21 +186,22 @@ const CreateUpdate = () => {
     const handleSelectRules = (e) =>{
         setSelectRules(e.target.value)
         if(e.target.value !== '') {
-            // setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
-            handleRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
+            setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
+            // handleRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
             handleHelperText(e.target.value, 'rules')
         }
     }
 
     const handleLogicalOperator = (e) => {
         setLogicalOperator(e.target.value)
-        // setRulesCreate(rulesCreate=> rulesCreate+e.target.value)
-        handleRulesCreate(rulesCreate=> rulesCreate+e.target.value)
+        setRulesCreate(rulesCreate=> rulesCreate+e.target.value)
+        // handleRulesCreate(rulesCreate=> rulesCreate+e.target.value)
         handleHelperText(e.target.value, 'operator')
     }
 
     const handleRulesCreate = (val) => {
         setRulesCreate(val)
+        handleHelperText(val, '')
     }
 
     const handleHelperText = (val, type) => {
@@ -208,6 +209,8 @@ const CreateUpdate = () => {
         if(type === 'rules'){
             str = str +' '+ rulesArry[val].action +' '+ operators[rulesArry[val].operator] +' '+ rulesArry[val].value 
         }else if(type === 'operator') {
+            str = str +' '+ val
+        }else {
             str = str +' '+ val
         }
         setHelpertext(helpertext=>helpertext+str)
@@ -290,7 +293,7 @@ const CreateUpdate = () => {
                                     {rulesHtml()}
                                 </div>
                                 <div className='flex items-center mb-20'>
-                                    <FormControl className="w-4/6">
+                                    <FormControl className="w-4/6" sx={{'& .MuiInputBase-formControl': {borderTopRightRadius: 0, borderBottomRightRadius: 0}}}>
                                         <TextField
                                             required
                                             id="outlined-required"
@@ -312,7 +315,7 @@ const CreateUpdate = () => {
                                             }: ''}
                                         />
                                     </FormControl>
-                                    <FormControl className="w-1/6 bg-gray-300">
+                                    <FormControl className="w-1/6 bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
                                         <InputLabel id="action-select-label">Rules</InputLabel>
                                         <Select
                                             labelId="action-select-label"
@@ -329,7 +332,7 @@ const CreateUpdate = () => {
                                             }
                                         </Select>
                                     </FormControl>
-                                    <FormControl className="w-1/6  bg-gray-300">
+                                    <FormControl className="w-1/6  bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
                                         <InputLabel id="action-select-label">Operators</InputLabel>
                                         <Select
                                             labelId="action-select-label"
