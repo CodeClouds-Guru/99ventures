@@ -1,5 +1,6 @@
 import settingsConfig from 'app/configs/settingsConfig';
 import CreateUpdate from './CreateUpdate';
+import CreateUpdateNew from './CreateUpdateNew';
 import Autocomplete from './Autocomplete';
 // import Report from './Report';
 
@@ -31,14 +32,14 @@ const MembershipConfig = {
     routes: [
         {
             path: 'app/promo-codes/create',
-            element: <CreateUpdate />,
+            element: <CreateUpdate/>,
             auth: settingsConfig.defaultAuth
         },
         // {
         //     path: 'app/membership/:moduleId',
         //     element: <Create />,
         //     auth: settingsConfig.defaultAuth
-        // }        
+        // }
     ],
 };
 

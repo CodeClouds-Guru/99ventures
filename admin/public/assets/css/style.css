@@ -79,6 +79,15 @@ textarea.custom-code-editor-fullscreen::-webkit-scrollbar-thumb{background: #fff
 .ticket-conversation .muiltr-1i4cxnc-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input {
     padding: 4.5px 4px 4.5px 6px;
 }
+.rule-main-delete{
+    position: absolute !important;
+    background-color: #fff !important;
+    left: auto;
+    right: 40px;
+    top: -42px;
+}
+
+
 @media screen and (max-width: 950px) {
     .ticket-leftside{width: 100%;}
     .ticket-rightside{width: 100%;}

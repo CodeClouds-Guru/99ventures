@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Autocomplete, Chip, FormControl, TextField, Stack, Select, Card, CardContent, IconButton, MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
+import { Autocomplete, Chip, FormControl, TextField, Stack, Select, Card, CardContent, IconButton, MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -60,92 +60,164 @@ const Accordion = styled((props) => (
     borderTop: '1px solid rgba(0, 0, 0, .125)',
   }));
 
-const operators = {
-    'eq_to': 'Equal To',
-    'not_eq_to': 'Not Equal To',
-    'gt_than': 'Greater Than',
-    'lt_than': 'Less Than',
-    'gt_eq': 'Greater Than and Equal To',
-    'lt_eq': 'Less Than and Equal To'
-}
-
-
-const CreateUpdate = () => {
+const CreateUpdateNew = () => {
     const [expanded, setExpanded] = useState('panel1');
     const [rules, setRules] = useState(['Rule1']);
+    const [subrules, setSubrules] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [logicalOperator, setLogicalOperator] = useState('');
-    const [rulesCreate, setRulesCreate] = useState('');
-    const [selectRules, setSelectRules] = useState('');
-    const [rulesArry, setRulesArry] = useState({});
-    const [helpertext, setHelpertext] = useState('');
-    const [rewardsType, setRewardsType] = useState(true);
     const {moduleId} = useParams();
 
-    const handleSetRewards = (e) => {
-        setRewardsType(!rewardsType)
-    }
 
     const handleChange =
       (panel) => (event, newExpanded) => {
         setExpanded(newExpanded ? panel : false);
-    };
+      };
 
-    const handleBuildRules = (indx, type, value) => {
-        let arry = {...rulesArry};
-        indx = 'Rule'+indx;
-        arry[indx] = {
-            ...rulesArry[indx],
-            [type]: value
-        };
-        setRulesArry(arry);
-    }
-    
-    useEffect(()=>{
-          console.log(rulesArry)
-        // rulesHtml();
-      }, [rulesArry])
+    //   useEffect(()=>{
+    //     rulesHtml();
+    //   }, [rules])
 
     const rulesHtml = () => {
         var htmlContent = [];
         for(let i=0; i<rules.length; i++){
             htmlContent.push(
+                <div>
+                    {
+                        i ? (
+                            <div className='flex justify-center my-20'>
+                                <FormControl className="w-1/4 ">
+                                    <InputLabel id="operator-select-label">Operator</InputLabel>
+                                    <Select
+                                        label="Operator"
+                                        labelId="operator-select-label"
+                                        id="operator-select"
+                                        value={10}
+                                    >
+                                        <MenuItem value={10}>OR</MenuItem>
+                                        <MenuItem value={20}>AND</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        ) : ''
+                    }
+                    <fieldset className='border-2 p-20 relative'>
+                        <legend className='p-10'>Rule {i+1}</legend>
+                        {
+                            i ? (
+                                <Tooltip placement="top" title="Delete Rule">
+                                    <IconButton className="rule-main-delete" aria-label="delete" size="large" onClick={()=>handleDeleteRule(i)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            ) : ''
+                        }
+                        <div className='flex items-center justify-between mb-20'>
+                            {/* <div className='w-1/12'>
+                                <Typography variant="subtitle1">Rule {i+1}</Typography>
+                            </div> */}
+                            <FormControl className="w-1/4 ">
+                                <InputLabel id="action-select-label">Action</InputLabel>
+                                <Select
+                                    labelId="action-select-label"
+                                    id="action-select"
+                                    value={10}
+                                    label="Action"
+                                >
+                                    <MenuItem value="">None</MenuItem>
+                                    <MenuItem value={10}>Days From Registration</MenuItem>
+                                    <MenuItem value={20}>No. of Withdrawal</MenuItem>
+                                    <MenuItem value={20}>Total Withdrawal</MenuItem>
+                                    <MenuItem value={30}>Email Verification</MenuItem>
+                                    <MenuItem value={30}>Signed Up</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl className="w-1/4 ">
+                                <InputLabel id="operator-select-label">Operator</InputLabel>
+                                <Select
+                                    label="Operator"
+                                    labelId="operator-select-label"
+                                    id="operator-select"
+                                    value={10}
+                                >
+                                    <MenuItem value={10}>Equal</MenuItem>
+                                    <MenuItem value={20}>Not Equal</MenuItem>
+                                    <MenuItem value={30}>Greater Than</MenuItem>
+                                    <MenuItem value={30}>Less Than</MenuItem>
+                                    <MenuItem value={30}>Greater Than and Equal</MenuItem>
+                                    <MenuItem value={30}>Less Than and Equal</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl className="w-1/4 ">
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    label="Value"
+                                />
+                            </FormControl>
+                            <div className='w-1/12'>
+                                <Tooltip placement="top" title="Add Sub Rule">
+                                    <IconButton aria-label="delete" size="large" onClick={()=>handleAddSubRule(i)}>
+                                        <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:plus</FuseSvgIcon>
+                                    </IconButton>
+                                </Tooltip>
+                                {
+                                    i ? (
+                                        <Tooltip placement="top" title="Delete Sub Rule">
+                                            <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(i)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    ) : ''
+                                }
+                            </div>
+                        </div>
+                        {subRules()}
+                    </fieldset>
+                    
+                </div>
+            )
+        }
+        return htmlContent;
+    }
+
+    const subRules = () => {
+        var htmlContent = [];
+        for(let i=0; i<subrules.length; i++){
+            htmlContent.push(
                 <div className='flex items-center justify-between mb-20'>
-                    <div className='w-1/12'>
+                    {/* <div className='w-1/12'>
                         <Typography variant="subtitle1">Rule {i+1}</Typography>
-                    </div>
+                    </div> */}
                     <FormControl className="w-1/4 ">
-                        <InputLabel id="action-select-label">Actions</InputLabel>
+                        <InputLabel id="action-select-label">Action</InputLabel>
                         <Select
                             labelId="action-select-label"
                             id="action-select"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('action') ? rulesArry['Rule'+(i+1)].action : ''}
+                            value={10}
                             label="Action"
-                            onChange={(e)=>handleBuildRules(i+1, 'action', e.target.value)}
                         >
                             <MenuItem value="">None</MenuItem>
-                            <MenuItem value="Days From Registration">Days From Registration</MenuItem>
-                            <MenuItem value="No. of Withdrawal">No. of Withdrawal</MenuItem>
-                            <MenuItem value="Total Withdrawal">Total Withdrawal</MenuItem>
-                            <MenuItem value="Email Verification">Email Verification</MenuItem>
-                            <MenuItem value="Signed Up">Signed Up</MenuItem>
+                            <MenuItem value={10}>Days From Registration</MenuItem>
+                            <MenuItem value={20}>No. of Withdrawal</MenuItem>
+                            <MenuItem value={20}>Total Withdrawal</MenuItem>
+                            <MenuItem value={30}>Email Verification</MenuItem>
+                            <MenuItem value={30}>Signed Up</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl className="w-1/4 ">
-                        <InputLabel id="operator-select-label">Operators</InputLabel>
+                        <InputLabel id="operator-select-label">Operator</InputLabel>
                         <Select
                             label="Operator"
                             labelId="operator-select-label"
                             id="operator-select"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('operator') ? rulesArry['Rule'+(i+1)].operator : ''}
-                            onChange={(e)=>handleBuildRules(i+1, 'operator', e.target.value)}
+                            value={10}
                         >
-                            <MenuItem value="">None</MenuItem>
-                            {
-                                Object.keys(operators).map(op=> {
-                                    return <MenuItem value={op}>{operators[op]}</MenuItem>
-                                })
-                            }
+                            <MenuItem value={10}>Equal</MenuItem>
+                            <MenuItem value={20}>Not Equal</MenuItem>
+                            <MenuItem value={30}>Greater Than</MenuItem>
+                            <MenuItem value={30}>Less Than</MenuItem>
+                            <MenuItem value={30}>Greater Than and Equal</MenuItem>
+                            <MenuItem value={30}>Less Than and Equal</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl className="w-1/4 ">
@@ -153,16 +225,21 @@ const CreateUpdate = () => {
                             required
                             id="outlined-required"
                             label="Value"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('value') ? rulesArry['Rule'+(i+1)].value : ''}
-                            onChange={(e)=>handleBuildRules(i+1, 'value', e.target.value)}
                         />
                     </FormControl>
                     <div className='w-1/12'>
+                        <Tooltip placement="top" title="Add Sub Rule">
+                            <IconButton aria-label="delete" size="large" onClick={()=>handleAddSubRule(i)}>
+                                <FuseSvgIcon className="text-48" size={24} color="action">heroicons-outline:plus</FuseSvgIcon>
+                            </IconButton>
+                        </Tooltip>
                         {
                             i ? (
-                                <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(i)}>
-                                    <DeleteIcon />
-                                </IconButton>
+                                <Tooltip placement="top" title="Delete Sub Rule">
+                                    <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(i)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Tooltip>
                             ) : ''
                         }
                     </div>
@@ -176,51 +253,16 @@ const CreateUpdate = () => {
         setRules([...rules, `Rule${rules.length+1}`]);
     }
 
+    const handleAddSubRule = () => {
+        setSubrules([...subrules, `Subrule${rules.length+1}`]);
+    }
+
     const handleDeleteRule = (indx) => {
         rules.splice(indx, 1);
         setRules([...rules]);
-        handleRulesCreate('');
-        setHelpertext('');
-    }
-
-    const handleSelectRules = (e) =>{
-        setSelectRules(e.target.value)
-        if(e.target.value !== '') {
-            // setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
-            handleRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
-            handleHelperText(e.target.value, 'rules')
-        }
-    }
-
-    const handleLogicalOperator = (e) => {
-        setLogicalOperator(e.target.value)
-        // setRulesCreate(rulesCreate=> rulesCreate+e.target.value)
-        handleRulesCreate(rulesCreate=> rulesCreate+e.target.value)
-        handleHelperText(e.target.value, 'operator')
-    }
-
-    const handleRulesCreate = (val) => {
-        setRulesCreate(val)
-    }
-
-    const handleHelperText = (val, type) => {
-        var str = '';
-        if(type === 'rules'){
-            str = str +' '+ rulesArry[val].action +' '+ operators[rulesArry[val].operator] +' '+ rulesArry[val].value 
-        }else if(type === 'operator') {
-            str = str +' '+ val
-        }
-        setHelpertext(helpertext=>helpertext+str)
     }
 
     const handleFormSubmit = () => {}
-
-    const handleClearRulesConfig = () => {
-        handleRulesCreate('');
-        setHelpertext('');
-        setLogicalOperator('');
-        setSelectRules('');
-    }
     return (
         <FusePageCardSimple
             header={
@@ -235,41 +277,19 @@ const CreateUpdate = () => {
                                 <Typography>Membership</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <div className='flex py-10 items-center flex-col justify-left'>
-                                    <FormControl className="w-1/2 pr-10 mb-10">
+                                <div className='flex py-10 items-center'>
+                                    <FormControl className="w-1/2 pr-10">
                                         <TextField
                                             required
                                             id="outlined-required"
                                             label="Name"
                                         />
-                                    </FormControl> 
-                                    <FormControl className="w-1/2 mb-10">
-                                        <Stack direction="row" spacing={1} alignItems="center">
-                                            <Typography>Points</Typography>
-                                            <Switch className="switch" checked={rewardsType} onChange={handleSetRewards}  name="rewards_type" />
-                                            <Typography>Cash</Typography>
-                                        </Stack>
-                                        {
-                                            rewardsType ? (
-                                                <TextField
-                                                    required
-                                                    id="outlined-required"
-                                                    label="Cash"
-                                                />
-                                            ) : (
-                                                <TextField
-                                                    required
-                                                    id="outlined-required"
-                                                    label="Points"
-                                                />
-                                            )
-                                        }
                                     </FormControl>
-                                    <FormControl className="w-1/2 mb-10">
+                                    <FormControl className="w-1/2">
                                         <TextField
                                             required
                                             id="outlined-required"
-                                            type="file"
+                                            label="Logo"
                                         />
                                     </FormControl>
                                 </div>                                
@@ -289,62 +309,45 @@ const CreateUpdate = () => {
                                 <div className='my-40'>
                                     {rulesHtml()}
                                 </div>
-                                <div className='flex items-center mb-20'>
-                                    <FormControl className="w-4/6">
+                                {/* <div className='flex items-center mb-20'>
+                                    <FormControl className="w-1/2">
                                         <TextField
                                             required
                                             id="outlined-required"
-                                            label="Rule Configuration"
-                                            onChange={(e)=>handleRulesCreate(e.target.value)}
-                                            value={rulesCreate}
-                                            InputProps={rulesCreate !== '' ? {
-                                                endAdornment :(
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            edge="end"
-                                                            onClick={handleClearRulesConfig}
-                                                        >
-                                                            <FuseSvgIcon className="text-48" size={24} color="action">material-outline:cancel</FuseSvgIcon>
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                )
-                                            }: ''}
+                                            label="Rules"
                                         />
                                     </FormControl>
-                                    <FormControl className="w-1/6 bg-gray-300">
+                                    <FormControl className="w-1/4 ">
                                         <InputLabel id="action-select-label">Rules</InputLabel>
                                         <Select
                                             labelId="action-select-label"
                                             id="action-select"
-                                            value={selectRules}
+                                            value={10}
                                             label="Action"
-                                            onChange={handleSelectRules}
                                         >
                                             <MenuItem value="">None</MenuItem>
                                             {
                                                 rules.map(el => {
                                                     return <MenuItem key={el} value={el}>{el}</MenuItem>
                                                 })
-                                            }
+                                            }                                            
                                         </Select>
                                     </FormControl>
-                                    <FormControl className="w-1/6  bg-gray-300">
-                                        <InputLabel id="action-select-label">Operators</InputLabel>
+                                    <FormControl className="w-1/4 ">
+                                        <InputLabel id="action-select-label">Operator</InputLabel>
                                         <Select
                                             labelId="action-select-label"
                                             id="action-select"
-                                            value={logicalOperator}
-                                            label="Operator"
-                                            onChange={handleLogicalOperator}
+                                            value={''}
+                                            label="Action"
                                         >
                                             <MenuItem value="">None</MenuItem>
-                                            <MenuItem value="AND">AND</MenuItem>
-                                            <MenuItem value="OR">OR</MenuItem>
+                                            <MenuItem value={10}>AND</MenuItem>
+                                            <MenuItem value={20}>OR</MenuItem>
+                                            
                                         </Select>
                                     </FormControl>
-                                </div>
-                                <strong>{helpertext}</strong>
+                                </div> */}
                             </AccordionDetails>
                         </Accordion>
                         <motion.div
@@ -378,4 +381,4 @@ const CreateUpdate = () => {
     )
 }
 
-export default CreateUpdate;
+export default CreateUpdateNew;
