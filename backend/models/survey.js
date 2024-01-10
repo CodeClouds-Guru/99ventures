@@ -188,13 +188,13 @@ module.exports = (sequelize, DataTypes) => {
 	}
 
 	// Check a particular Survey Attempted or Not
-	Survey.checkMemberSurvey =  async(memberId, surveyNumber, surveyProviderId) => {
+	Survey.checkMemberSurvey =  async(username, surveyNumber, surveyProviderId) => {
 		const sqlQuery = `SELECT survey_number FROM member_surveys AS ms JOIN member_transactions AS mt ON 
-		(ms.member_transaction_id = mt.id) WHERE mt.member_id = :memberId AND ms.survey_number = :survey_number AND ms.survey_provider_id = :survey_provider_id`;
+		(ms.member_transaction_id = mt.id) JOIN members AS m ON (m.id = mt.member_id) WHERE m.username = :username AND ms.survey_number = :survey_number AND ms.survey_provider_id = :survey_provider_id`;
 		const memberSurveys = await sequelize.query(sqlQuery, {
 			type: QueryTypes.SELECT,
 			replacements: { 
-				memberId,
+				username,
 				survey_number: surveyNumber,
 				survey_provider_id: surveyProviderId
 			},
@@ -202,20 +202,6 @@ module.exports = (sequelize, DataTypes) => {
 
 		return memberSurveys;
 	}
-	// Survey.checkMemberSurvey =  async(username, surveyNumber, surveyProviderId) => {
-	// 	const sqlQuery = `SELECT survey_number FROM member_surveys AS ms JOIN member_transactions AS mt ON 
-	// 	(ms.member_transaction_id = mt.id) JOIN members AS m ON (m.id = mt.member_id) WHERE m.username = :username AND ms.survey_number = :survey_number AND ms.survey_provider_id = :survey_provider_id`;
-	// 	const memberSurveys = await sequelize.query(sqlQuery, {
-	// 		type: QueryTypes.SELECT,
-	// 		replacements: { 
-	// 			username,
-	// 			survey_number: surveyNumber,
-	// 			survey_provider_id: surveyProviderId
-	// 		},
-	// 	});
-
-	// 	return memberSurveys;
-	// }
 
 	// Check a particular Survey Attempted or Not From survey_attempt table
 	Survey.surveyAttemptedByUser = async(membeId, surveyNumber, surveyProviderId) => {

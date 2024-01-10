@@ -449,7 +449,6 @@ class SurveycallbackController {
             surveyNumber,
             1
           );
-          console.log('memberSurveys lucid', memberSurveys)
           if (memberSurveys.length < 1) {
             await this.memberTransaction(
               survey,
