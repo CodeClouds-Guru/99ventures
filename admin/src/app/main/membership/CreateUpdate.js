@@ -8,7 +8,6 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import Helper from 'src/app/helper';
-import { customCodeEditor } from '../../grapesjs/editorPlugins'
 import { selectUser } from 'app/store/userSlice';
 import FusePageCardSimple from '@fuse/core/FusePageCarded';
 import MainHeader from 'app/shared-components/MainHeader';
@@ -55,10 +54,10 @@ const Accordion = styled((props) => (
     },
   }));
   
-  const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
     padding: theme.spacing(2),
     borderTop: '1px solid rgba(0, 0, 0, .125)',
-  }));
+}));
 
 const operators = {
     'eq_to': 'Equal To',
@@ -71,44 +70,55 @@ const operators = {
 
 
 const CreateUpdate = () => {
-    const [expanded, setExpanded] = useState('panel1');
-    const [rules, setRules] = useState(['Rule1']);
+    const {moduleId} = useParams();
+    const [symbol, setSymbol] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [logicalOperator, setLogicalOperator] = useState('');
+    const [helpertext, setHelpertext] = useState('');
+    // const [rules, setRules] = useState(['Rule1']);
     const [rulesCreate, setRulesCreate] = useState('');
     const [selectRules, setSelectRules] = useState('');
-    const [rulesArry, setRulesArry] = useState({});
-    const [helpertext, setHelpertext] = useState('');
     const [rewardsType, setRewardsType] = useState(true);
-    const {moduleId} = useParams();
+    const [rulesStatement, setRulesStatement] = useState([]);
+    const [rulesJson, setRulesJson] = useState({'Rule1':{}});
+    const [logicalOperator, setLogicalOperator] = useState('');
+    const [expanded, setExpanded] = useState(['panel1', 'panel2']);
+
 
     const handleSetRewards = (e) => {
         setRewardsType(!rewardsType)
     }
 
-    const handleChange =
-      (panel) => (event, newExpanded) => {
-        setExpanded(newExpanded ? panel : false);
+    const handleChange = (panel) => (event, newExpanded) => {
+        if(newExpanded){
+            setExpanded([...expanded, panel]);
+        } else {
+            let data = expanded.filter(r=> r !== panel);
+            setExpanded(data);
+        }
     };
 
     const handleBuildRules = (indx, type, value) => {
-        let arry = {...rulesArry};
+        let arry = {...rulesJson};
         indx = 'Rule'+indx;
         arry[indx] = {
-            ...rulesArry[indx],
+            ...rulesJson[indx],
             [type]: value
         };
-        setRulesArry(arry);
+        setRulesJson(arry);
+        console.log(arry);
     }
     
     useEffect(()=>{
-          console.log(rulesArry)
-        // rulesHtml();
-      }, [rulesArry])
+          if(rulesStatement.length){
+            handleHelperText()
+          }
+      }, [rulesStatement])
 
     const rulesHtml = () => {
         var htmlContent = [];
-        for(let i=0; i<rules.length; i++){
+        // for(let i=0; i<rules.length; i++){
+        let totalRules = Object.keys(rulesJson).length;
+        for(let i=0; i<totalRules; i++){
             htmlContent.push(
                 <div className='flex items-center justify-between mb-20'>
                     <div className='w-1/12'>
@@ -119,7 +129,7 @@ const CreateUpdate = () => {
                         <Select
                             labelId="action-select-label"
                             id="action-select"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('action') ? rulesArry['Rule'+(i+1)].action : ''}
+                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('action') ? rulesJson['Rule'+(i+1)].action : ''}
                             label="Action"
                             onChange={(e)=>handleBuildRules(i+1, 'action', e.target.value)}
                         >
@@ -137,7 +147,7 @@ const CreateUpdate = () => {
                             label="Operator"
                             labelId="operator-select-label"
                             id="operator-select"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('operator') ? rulesArry['Rule'+(i+1)].operator : ''}
+                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('operator') ? rulesJson['Rule'+(i+1)].operator : ''}
                             onChange={(e)=>handleBuildRules(i+1, 'operator', e.target.value)}
                         >
                             <MenuItem value="">None</MenuItem>
@@ -153,14 +163,14 @@ const CreateUpdate = () => {
                             required
                             id="outlined-required"
                             label="Value"
-                            value={rulesArry['Rule'+(i+1)] !== undefined && rulesArry['Rule'+(i+1)].hasOwnProperty('value') ? rulesArry['Rule'+(i+1)].value : ''}
+                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('value') ? rulesJson['Rule'+(i+1)].value : ''}
                             onChange={(e)=>handleBuildRules(i+1, 'value', e.target.value)}
                         />
                     </FormControl>
                     <div className='w-1/12'>
                         {
-                            i ? (
-                                <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(i)}>
+                            ((totalRules-1) === i) ? (
+                                <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(Object.keys(rulesJson)[i])}>
                                     <DeleteIcon />
                                 </IconButton>
                             ) : ''
@@ -173,12 +183,24 @@ const CreateUpdate = () => {
     }
 
     const handleAddRules = () => {
-        setRules([...rules, `Rule${rules.length+1}`]);
+        console.log(rulesJson)
+        // setRules([...rules, `Rule${rules.length+1}`]);
+        setRulesJson({
+            ...rulesJson, 
+            [`Rule${Object.keys(rulesJson).length+1}`]: {}
+        });
+        console.log({
+            ...rulesJson, 
+            [`Rule${Object.keys(rulesJson).length+1}`]: {}
+        })
     }
 
     const handleDeleteRule = (indx) => {
-        rules.splice(indx, 1);
-        setRules([...rules]);
+        console.log(indx)
+        // rules.splice(indx, 1);
+        // setRules([...rules]);
+        delete rulesJson[indx];
+        setRulesJson({...rulesJson});
         handleRulesCreate('');
         setHelpertext('');
     }
@@ -186,34 +208,44 @@ const CreateUpdate = () => {
     const handleSelectRules = (e) =>{
         setSelectRules(e.target.value)
         if(e.target.value !== '') {
-            setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
-            // handleRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>')
-            handleHelperText(e.target.value, 'rules')
+            setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>');
+            setRulesStatement([...rulesStatement, e.target.value]);
         }
     }
 
     const handleLogicalOperator = (e) => {
-        setLogicalOperator(e.target.value)
-        setRulesCreate(rulesCreate=> rulesCreate+e.target.value)
-        // handleRulesCreate(rulesCreate=> rulesCreate+e.target.value)
-        handleHelperText(e.target.value, 'operator')
+        setLogicalOperator(e.target.value);
+        setRulesCreate(rulesCreate=> rulesCreate+e.target.value);
+        setRulesStatement([...rulesStatement, e.target.value]);
+    }
+
+    const handleSymbol = (e) => {
+        setSymbol(e.target.value);
+        setRulesCreate(rulesCreate=> rulesCreate+e.target.value);
+        setRulesStatement([...rulesStatement, e.target.value]);
     }
 
     const handleRulesCreate = (val) => {
-        setRulesCreate(val)
-        handleHelperText(val, '')
+        setRulesCreate(val);
+        handleHelperText('');
     }
 
-    const handleHelperText = (val, type) => {
-        var str = '';
-        if(type === 'rules'){
-            str = str +' '+ rulesArry[val].action +' '+ operators[rulesArry[val].operator] +' '+ rulesArry[val].value 
-        }else if(type === 'operator') {
-            str = str +' '+ val
-        }else {
-            str = str +' '+ val
-        }
-        setHelpertext(helpertext=>helpertext+str)
+    const handleHelperText = () => {
+        const ruleKeys = Object.keys(rulesJson);
+        const finalArry = rulesStatement.map(el => {
+            console.log(el)
+            if(ruleKeys.includes(el)){
+                let json = {
+                    ...rulesJson[el],
+                    operator: operators[rulesJson[el]['operator']]
+                }
+                return Object.values(json).join(' ');
+            } else {
+                return el;
+            }
+        });
+        let statement = finalArry.join(' ');
+        setHelpertext(statement);
     }
 
     const handleFormSubmit = () => {}
@@ -224,6 +256,8 @@ const CreateUpdate = () => {
         setLogicalOperator('');
         setSelectRules('');
     }
+
+    
     return (
         <FusePageCardSimple
             header={
@@ -232,8 +266,7 @@ const CreateUpdate = () => {
             content={
                 <>
                     <div className="mb-10 w-full p-20">
-                       
-                        <Accordion expanded={true} onChange={handleChange('panel1')}>
+                        <Accordion expanded={expanded.includes('panel1')} onChange={handleChange('panel1')}>
                             <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
                                 <Typography>Membership</Typography>
                             </AccordionSummary>
@@ -278,7 +311,7 @@ const CreateUpdate = () => {
                                 </div>                                
                             </AccordionDetails>
                         </Accordion>
-                        <Accordion expanded={true} onChange={handleChange('panel2')}>
+                        <Accordion expanded={expanded.includes('panel2')} onChange={handleChange('panel2')}>
                             <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
                                 <Typography>Rules</Typography>
                             </AccordionSummary>
@@ -300,19 +333,22 @@ const CreateUpdate = () => {
                                             label="Rule Configuration"
                                             onChange={(e)=>handleRulesCreate(e.target.value)}
                                             value={rulesCreate}
-                                            InputProps={rulesCreate !== '' ? {
-                                                endAdornment :(
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            edge="end"
-                                                            onClick={handleClearRulesConfig}
-                                                        >
-                                                            <FuseSvgIcon className="text-48" size={24} color="action">material-outline:cancel</FuseSvgIcon>
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                )
-                                            }: ''}
+                                            InputProps={{
+                                                readOnly: true,
+                                                ...rulesCreate !== '' ? {
+                                                    endAdornment :(
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                aria-label="toggle password visibility"
+                                                                edge="end"
+                                                                onClick={handleClearRulesConfig}
+                                                            >
+                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:cancel</FuseSvgIcon>
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    )
+                                                }: ''
+                                            }}
                                         />
                                     </FormControl>
                                     <FormControl className="w-1/6 bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
@@ -326,8 +362,8 @@ const CreateUpdate = () => {
                                         >
                                             <MenuItem value="">None</MenuItem>
                                             {
-                                                rules.map(el => {
-                                                    return <MenuItem key={el} value={el}>{el}</MenuItem>
+                                                Object.keys(rulesJson).length && Object.keys(rulesJson).sort().map(el => {
+                                                    return (rulesJson[el].action && rulesJson[el].operator) ? <MenuItem key={el} value={el}>{el}</MenuItem> : ''
                                                 })
                                             }
                                         </Select>
@@ -346,8 +382,22 @@ const CreateUpdate = () => {
                                             <MenuItem value="OR">OR</MenuItem>
                                         </Select>
                                     </FormControl>
+                                    <FormControl className="w-1/6  bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
+                                        <InputLabel id="action-select-label">Symbols</InputLabel>
+                                        <Select
+                                            labelId="action-select-label"
+                                            id="action-select"
+                                            value={symbol}
+                                            label="Operator"
+                                            onChange={handleSymbol}
+                                        >
+                                            <MenuItem value="">None</MenuItem>
+                                            <MenuItem value="(">(</MenuItem>
+                                            <MenuItem value=")">)</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </div>
-                                <strong>{helpertext}</strong>
+                                {helpertext && <strong>Statement: <em>{helpertext}</em></strong>}
                             </AccordionDetails>
                         </Accordion>
                         <motion.div
