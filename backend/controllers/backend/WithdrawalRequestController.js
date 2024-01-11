@@ -459,7 +459,7 @@ class WithdrawalRequestController extends Controller {
         break;
       case 'rejected':
         // response = await paypal_class.successPayment(req, res);
-        response = await this.changeStatus(model_ids, note, action_type);
+        // response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request rejected';
         await this.model.rejectedOrFailedRequest(
           model_ids,
@@ -468,13 +468,15 @@ class WithdrawalRequestController extends Controller {
         );
         break;
       case 'approved':
-        response = await this.changeStatus(model_ids, note, action_type);
+        // console.log(model_ids);
+        // response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request approved';
         let all_withdrawal_req = await this.model.findAll({
           where: {
             id: {
               [Op.in]: model_ids,
             },
+            status: 'pending',
           },
           attributes: [
             'id',
@@ -506,7 +508,9 @@ class WithdrawalRequestController extends Controller {
               ],
             },
           ],
+          logging: console.log,
         });
+        // console.log(all_withdrawal_req);
         var items = [];
         var transaction_ids = [];
         var transaction_ids_without_creds = [];
@@ -524,8 +528,8 @@ class WithdrawalRequestController extends Controller {
             transaction_ids_without_creds.push(record.member_transaction_id);
             withdrawal_ids_without_creds.push(record.id);
             await this.model.approvedAndCompletedReqs(
-              transaction_ids_without_creds,
-              withdrawal_ids_without_creds
+              record.member_transaction_id,
+              record.id
             );
           }
 

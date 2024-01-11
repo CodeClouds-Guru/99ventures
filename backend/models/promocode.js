@@ -263,7 +263,7 @@ module.exports = (sequelize, DataTypes) => {
               type: QueryTypes.SELECT,
             }
           );
-          console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
+          // console.log('checkIfAlreadyUsed', checkIfAlreadyUsed);
           if (checkIfAlreadyUsed.length > 0) {
             resp.resp_status = false;
             resp.resp_message = 'Promo Code already used';

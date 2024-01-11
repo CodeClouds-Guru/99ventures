@@ -396,6 +396,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   MemberTransaction.getTransactionCount = async (member_id) => {
+    // console.log('getTransactionCount');
     const { sequelize } = require('../models/index');
     const moment = require('moment');
     const { QueryTypes } = require('sequelize');
@@ -411,7 +412,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
@@ -424,7 +425,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
@@ -437,7 +438,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
@@ -464,7 +465,7 @@ module.exports = (sequelize, DataTypes) => {
     };
     option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
-    console.log('response', response);
+    // console.log('response', response);
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
       {

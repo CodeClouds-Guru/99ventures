@@ -71,7 +71,7 @@ module.exports = [
         // console.log('timezone',timezone)
         if (timezone) date = moment(new Date(date)).clone().tz(timezone);
         else date = moment(new Date(date));
-        console.log(date)
+        // console.log(date)
         return format ? date.format(format) : date.format('DD/MM/YYYY hh:mm a');
       } else {
         return '';
@@ -112,7 +112,7 @@ module.exports = [
   {
     name: 'default',
     fn: function (value, options) {
-      return true
+      return true;
     },
   },
   {
@@ -187,56 +187,48 @@ module.exports = [
   {
     name: 'amountDisplay',
     fn: function (value) {
-      return Math.abs(value)
+      return Math.abs(value);
     },
   },
   {
     name: 'stripScripts',
     fn: function (value) {
-      var regex = /(<([^>]+)>)/ig
-      return value.replace(regex, "");
+      var regex = /(<([^>]+)>)/gi;
+      return value.replace(regex, '');
     },
   },
   {
     name: 'stripAndSubstrString',
     fn: function (str, start, limit) {
-      let regex = /(<([^>]+)>)/ig
+      let regex = /(<([^>]+)>)/gi;
       var newStr = '';
-      if(str.includes('</style>')){
+      if (str.includes('</style>')) {
         let index = str.indexOf('</style>');
-        str = str.substring((index+8), 100000); // 8 is the length of </style>
-        newStr = str.replace(regex, "");
+        str = str.substring(index + 8, 100000); // 8 is the length of </style>
+        newStr = str.replace(regex, '');
       } else {
-        newStr = str.replace(regex, "");
+        newStr = str.replace(regex, '');
       }
       newStr = newStr.substring(start, limit);
-      if(newStr.length >= limit){
+      if (newStr.length >= limit) {
         newStr += '...';
       }
       return newStr;
-    }
+    },
   },
   {
     name: 'newsClass',
-    fn: function(indx) {
+    fn: function (indx) {
       var className = '';
       var indxNum = +indx;
-      if(indxNum%3 === 0)
-        className = 'bg-primary';
-      else if(indxNum > 3 && (indxNum-2)%3 === 0)
-        className = 'bg-success';
-      else if(indxNum%2 === 0 ){
-        if(indxNum > 3 && (indxNum-1)%3 === 0)
-          className = 'bg-info';
-        else if(indxNum < 3)
-          className = 'bg-success';
-      }
-      else 
-        className = 'bg-info';
+      if (indxNum % 3 === 0) className = 'bg-primary';
+      else if (indxNum > 3 && (indxNum - 2) % 3 === 0) className = 'bg-success';
+      else if (indxNum % 2 === 0) {
+        if (indxNum > 3 && (indxNum - 1) % 3 === 0) className = 'bg-info';
+        else if (indxNum < 3) className = 'bg-success';
+      } else className = 'bg-info';
 
       return className;
-    }
-  }
-
-
+    },
+  },
 ];

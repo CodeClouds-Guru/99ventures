@@ -316,13 +316,13 @@ class StaticPageController {
       } catch (err) {
         check_url = false;
       }
-      console.log('check_url', check_url);
+      // console.log('check_url', check_url);
       if (!check_url)
         imageRawValue = process.env.S3_BUCKET_OBJECT_URL + imageRawValue;
     }
     const publicURL =
       process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-    console.log('imageRawValue', imageRawValue);
+    // console.log('imageRawValue', imageRawValue);
     return imageRawValue ? imageRawValue : `${publicURL}/images/no-img.jpg`;
   }
 }

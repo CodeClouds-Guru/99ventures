@@ -537,6 +537,7 @@ module.exports = (sequelize, DataTypes) => {
         id: {
           [Op.in]: model_ids,
         },
+        status: 'pending',
       },
       attributes: [
         'id',
@@ -546,6 +547,7 @@ module.exports = (sequelize, DataTypes) => {
         'payment_email',
         'member_transaction_id',
         'withdrawal_type_id',
+        'status',
       ],
       include: {
         model: Member,
@@ -558,39 +560,69 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     });
+    // console.log('withdrawal_reqs', withdrawal_reqs);
     let transaction_data = [];
     let transaction_ids = [];
     let withdrawal_ids = [];
-    for (let record of withdrawal_reqs) {
-      let get_member_balance = await MemberBalance.findOne({
-        where: { member_id: record.member_id, amount_type: 'cash' },
-        attributes: ['amount'],
-      });
-      // console.log(record);
-      // console.log(record.Member.member_amounts);
-      let updated_amount =
-        parseFloat(get_member_balance.amount) + parseFloat(record.amount);
-      // console.log(updated_amount);
-      withdrawal_ids.push(record.id);
-      transaction_ids.push(record.member_transaction_id);
-      transaction_data.push({
-        member_id: record.member_id,
-        amount: record.amount,
-        note: 'Rejected Withdrawal request for $' + record.amount,
-        type: 'credited',
-        amount_action: 'member_withdrawal',
-        created_by: user_id || '',
-        status: withdrawal_status == 'rejected' ? 2 : 3,
-        parent_transaction_id: record.member_transaction_id,
-        completed_at: new Date(),
-        balance: updated_amount,
-        payload: null,
-        currency: 'USD',
-      });
-      await MemberBalance.update(
-        { amount: updated_amount },
-        { where: { member_id: record.member_id, amount_type: 'cash' } }
-      );
+    if (withdrawal_reqs.length > 0) {
+      for (let record of withdrawal_reqs) {
+        if (record.status == 'pending') {
+          let get_member_balance = await MemberBalance.findOne({
+            where: { member_id: record.member_id, amount_type: 'cash' },
+            attributes: ['amount'],
+          });
+          // console.log(record);
+          // console.log(record.Member.member_amounts);
+          let updated_amount =
+            parseFloat(get_member_balance.amount) + parseFloat(record.amount);
+          // console.log(updated_amount);
+          withdrawal_ids.push(record.id);
+          transaction_ids.push(record.member_transaction_id);
+          transaction_data.push({
+            member_id: record.member_id,
+            amount: record.amount,
+            note: 'Rejected Withdrawal request for $' + record.amount,
+            type: 'credited',
+            amount_action: 'member_withdrawal',
+            created_by: user_id || '',
+            status: withdrawal_status == 'rejected' ? 2 : 3,
+            parent_transaction_id: record.member_transaction_id,
+            completed_at: new Date(),
+            balance: updated_amount,
+            payload: null,
+            currency: 'USD',
+          });
+          await MemberBalance.update(
+            { amount: updated_amount },
+            { where: { member_id: record.member_id, amount_type: 'cash' } }
+          );
+
+          var transaction_resp = await MemberTransaction.create({
+            member_id: record.member_id,
+            amount: record.amount,
+            note: 'Rejected Withdrawal request for $' + record.amount,
+            type: 'credited',
+            amount_action: 'member_withdrawal',
+            created_by: user_id || '',
+            status: withdrawal_status == 'rejected' ? 2 : 3,
+            parent_transaction_id: record.member_transaction_id,
+            completed_at: new Date(),
+            balance: updated_amount,
+            payload: null,
+            currency: 'USD',
+          });
+
+          await MemberTransaction.update(
+            { status: 4 },
+            { where: { id: record.member_transaction_id } }
+          );
+
+          await WithdrawalRequest.update(
+            { status: withdrawal_status },
+            { where: { id: record.id } }
+          );
+        }
+      }
     }
     // console.log(
     //   '-------------------------',
@@ -604,23 +636,23 @@ module.exports = (sequelize, DataTypes) => {
     //   transaction_ids.length,
     //   withdrawal_ids.length
     // );
-    if (transaction_data.length > 0) {
-      var transaction_resp = await MemberTransaction.bulkCreate(
-        transaction_data
-      );
-    }
-    if (transaction_ids.length > 0) {
-      await MemberTransaction.update(
-        { status: 4 },
-        { where: { id: transaction_ids } }
-      );
-    }
-    if (withdrawal_ids.length > 0) {
-      await WithdrawalRequest.update(
-        { status: withdrawal_status },
-        { where: { id: withdrawal_ids } }
-      );
-    }
+    // if (transaction_data.length > 0) {
+    //   var transaction_resp = await MemberTransaction.bulkCreate(
+    //     transaction_data
+    //   );
+    // }
+    // if (transaction_ids.length > 0) {
+    //   await MemberTransaction.update(
+    //     { status: 4 },
+    //     { where: { id: transaction_ids, status: 1 } }
+    //   );
+    // }
+    // if (withdrawal_ids.length > 0) {
+    //   await WithdrawalRequest.update(
+    //     { status: withdrawal_status },
+    //     { where: { id: withdrawal_ids, status: 'pending' } }
+    //   );
+    // }
   };
   //Approved and completed withdrawal req
   WithdrawalRequest.approvedAndCompletedReqs = async (
@@ -635,20 +667,39 @@ module.exports = (sequelize, DataTypes) => {
     //   withdrawal_ids,
     //   req_body
     // );
-    if (transaction_ids.length > 0) {
+
+    let get_transactions = await MemberTransaction.findAll({
+      where: { id: transaction_ids, status: 1 },
+    });
+    for (let records of get_transactions) {
       await MemberTransaction.update(
         {
           status: 2,
           payload: req_body,
         },
-        { where: { id: transaction_ids } }
+        { where: { id: records.id } }
       );
     }
+    // if (transaction_ids.length > 0) {
+    //   await MemberTransaction.update(
+    //     {
+    //       status: 2,
+    //       payload: req_body,
+    //     },
+    //     { where: { id: transaction_ids, status: 1 } }
+    //   );
+    // }
     // if (withdrawal_ids.length > 0) {
-    await WithdrawalRequest.update(
-      { status: 'completed' },
-      { where: { id: withdrawal_ids } }
-    );
+    let get_withdrawals = await WithdrawalRequest.findAll({
+      where: { id: withdrawal_ids, status: 'pending' },
+    });
+    for (let records of get_withdrawals) {
+      await WithdrawalRequest.update(
+        { status: 'completed' },
+        { where: { id: records.id } }
+      );
+    }
+
     // }
   };
   //Approved and completed withdrawal req
