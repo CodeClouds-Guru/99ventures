@@ -412,7 +412,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
@@ -425,7 +425,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
@@ -438,7 +438,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
