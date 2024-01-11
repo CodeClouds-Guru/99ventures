@@ -463,7 +463,7 @@ module.exports = (sequelize, DataTypes) => {
       type: 'credited',
       // status: 2,
     };
-    option.logging = console.log;
+    // option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
     // console.log('response', response);
     let total_reversed = await db.sequelize.query(
@@ -485,7 +485,7 @@ module.exports = (sequelize, DataTypes) => {
     // result.total = total_earnings_credited[0].total;
     response.setDataValue('total', total_credited_minus_reversed.toFixed(2));
     response.total = total_credited_minus_reversed.toFixed(2);
-    console.log(response);
+    // console.log(response);
     return JSON.parse(JSON.stringify(response));
   };
 

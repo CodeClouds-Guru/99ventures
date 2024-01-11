@@ -88,7 +88,7 @@ class ScriptParser {
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
-                logging: console.log,
+                // logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();

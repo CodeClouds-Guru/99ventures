@@ -508,7 +508,7 @@ class WithdrawalRequestController extends Controller {
               ],
             },
           ],
-          logging: console.log,
+          // logging: console.log,
         });
         // console.log(all_withdrawal_req);
         var items = [];
