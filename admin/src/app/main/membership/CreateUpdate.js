@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Autocomplete, Chip, FormControl, TextField, Stack, Select, Card, CardContent, IconButton, MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
+import { Autocomplete, Chip, FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -83,7 +83,7 @@ const CreateUpdate = () => {
     const [rulesJson, setRulesJson] = useState({'Rule1':{}});
     const [logicalOperator, setLogicalOperator] = useState('');
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
-
+    const [monetoryBenefit, setMonetoryBenefit] = useState(false);
 
     const handleSetRewards = (e) => {
         setRewardsType(!rewardsType)
@@ -284,27 +284,34 @@ const CreateUpdate = () => {
                                         />
                                     </FormControl> 
                                     <FormControl className="w-1/2 mb-10">
-                                        <Stack direction="row" spacing={1} alignItems="center">
-                                            <Typography>Points</Typography>
-                                            <Switch className="switch" checked={rewardsType} onChange={handleSetRewards}  name="rewards_type" />
-                                            <Typography>Cash</Typography>
-                                        </Stack>
-                                        {
-                                            rewardsType ? (
-                                                <TextField
-                                                    required
-                                                    id="outlined-required"
-                                                    label="Cash"
-                                                />
-                                            ) : (
-                                                <TextField
-                                                    required
-                                                    id="outlined-required"
-                                                    label="Points"
-                                                />
-                                            )
-                                        }
+                                        <FormControlLabel control={<Switch checked={monetoryBenefit} onChange={()=>setMonetoryBenefit(!monetoryBenefit)} />} label="Do you want to add moneytary benefit?" />
                                     </FormControl>
+                                    {
+                                        monetoryBenefit && (
+                                            <FormControl className="w-1/2 mb-10">
+                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                    <Typography>Points</Typography>
+                                                    <Switch className="switch" checked={rewardsType} onChange={handleSetRewards}  name="rewards_type" />
+                                                    <Typography>Cash</Typography>
+                                                </Stack>
+                                                {
+                                                    rewardsType ? (
+                                                        <TextField
+                                                            required
+                                                            id="outlined-required"
+                                                            label="Cash"
+                                                        />
+                                                    ) : (
+                                                        <TextField
+                                                            required
+                                                            id="outlined-required"
+                                                            label="Points"
+                                                        />
+                                                    )
+                                                }
+                                            </FormControl>
+                                        )
+                                    }
                                     <FormControl className="w-1/2 mb-10">
                                         <TextField
                                             required
