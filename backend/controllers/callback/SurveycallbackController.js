@@ -221,8 +221,8 @@ class SurveycallbackController {
       const memberId = extractUserIdForSurveyProviders(ssiValue);
       let member = await this.getMember({ id: memberId });
       if (member) {
-        const memberSurveys = await Survey.checkMemberSurvey(member.username, txnId, 2);
-        if (memberSurveys.length < 1) {
+        const memberSurveys = await Survey.checkMemberSurveyByMemberId(member.id, txnId, 2);
+        if (memberSurveys < 1) {
           const survey = {
             cpi: reward,
           };
