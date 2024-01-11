@@ -469,7 +469,7 @@ class WithdrawalRequestController extends Controller {
         break;
       case 'approved':
         // console.log(model_ids);
-        response = await this.changeStatus(model_ids, note, action_type);
+
         response_message = 'Withdrawal request approved';
         let all_withdrawal_req = await this.model.findAll({
           where: {
@@ -557,7 +557,7 @@ class WithdrawalRequestController extends Controller {
             });
           }
         }
-
+        response = await this.changeStatus(model_ids, note, action_type);
         if (items.length > 0) {
           let company_portal_id = req.headers.site_id;
           //do bulk payment
