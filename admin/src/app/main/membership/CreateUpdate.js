@@ -71,6 +71,7 @@ const operators = {
 
 const CreateUpdate = () => {
     const {moduleId} = useParams();
+    const dispatch = useDispatch();
     const [symbol, setSymbol] = useState([]);
     const [loading, setLoading] = useState(false);
     const [helpertext, setHelpertext] = useState('');
@@ -105,7 +106,6 @@ const CreateUpdate = () => {
             [type]: value
         };
         setRulesJson(arry);
-        console.log(arry);
     }
     
     useEffect(()=>{
@@ -116,7 +116,6 @@ const CreateUpdate = () => {
 
     const rulesHtml = () => {
         var htmlContent = [];
-        // for(let i=0; i<rules.length; i++){
         let totalRules = Object.keys(rulesJson).length;
         for(let i=0; i<totalRules; i++){
             htmlContent.push(
@@ -169,7 +168,7 @@ const CreateUpdate = () => {
                     </FormControl>
                     <div className='w-1/12'>
                         {
-                            ((totalRules-1) === i) ? (
+                            ((totalRules-1) === i && i) ? (
                                 <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(Object.keys(rulesJson)[i])}>
                                     <DeleteIcon />
                                 </IconButton>
@@ -183,22 +182,26 @@ const CreateUpdate = () => {
     }
 
     const handleAddRules = () => {
-        console.log(rulesJson)
-        // setRules([...rules, `Rule${rules.length+1}`]);
+        var flag = true;
+        let rules = Object.keys(rulesJson);
+        rules.forEach(el=>{
+            if(rulesJson[el].hasOwnProperty('action') && rulesJson[el].hasOwnProperty('operator')){
+                flag = true;
+            } else {
+                flag = false
+            }
+        })
+        if(!flag){
+            dispatch(showMessage({ variant: 'error', message: 'Existing rules have not created properly!' }));
+            return;
+        }
         setRulesJson({
             ...rulesJson, 
             [`Rule${Object.keys(rulesJson).length+1}`]: {}
         });
-        console.log({
-            ...rulesJson, 
-            [`Rule${Object.keys(rulesJson).length+1}`]: {}
-        })
     }
 
     const handleDeleteRule = (indx) => {
-        console.log(indx)
-        // rules.splice(indx, 1);
-        // setRules([...rules]);
         delete rulesJson[indx];
         setRulesJson({...rulesJson});
         handleRulesCreate('');
@@ -233,7 +236,6 @@ const CreateUpdate = () => {
     const handleHelperText = () => {
         const ruleKeys = Object.keys(rulesJson);
         const finalArry = rulesStatement.map(el => {
-            console.log(el)
             if(ruleKeys.includes(el)){
                 let json = {
                     ...rulesJson[el],
@@ -255,6 +257,8 @@ const CreateUpdate = () => {
         setHelpertext('');
         setLogicalOperator('');
         setSelectRules('');
+        setSymbol('');
+        setRulesStatement([]);
     }
 
     
