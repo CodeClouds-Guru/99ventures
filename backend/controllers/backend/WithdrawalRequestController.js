@@ -469,7 +469,7 @@ class WithdrawalRequestController extends Controller {
         break;
       case 'approved':
         // console.log(model_ids);
-        // response = await this.changeStatus(model_ids, note, action_type);
+        response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request approved';
         let all_withdrawal_req = await this.model.findAll({
           where: {
@@ -595,22 +595,32 @@ class WithdrawalRequestController extends Controller {
     };
   }
   async changeStatus(model_ids, note, action_type) {
-    let response = [];
-    if (model_ids.length) {
-      let update_data = {
-        note: note,
-        status: action_type,
-      };
-      response = await this.model.update(update_data, {
-        where: {
-          id: {
-            [Op.in]: model_ids,
-          },
-        },
-        return: true,
-      });
+    let get_withdrawals = await this.model.findAll({
+      where: { id: model_ids, status: 'pending' },
+    });
+    for (let records of get_withdrawals) {
+      await this.model.update(
+        { status: action_type, note: note },
+        { where: { id: records.id } }
+      );
     }
-    return response;
+    return true;
+
+    // if (model_ids.length) {
+    //   let update_data = {
+    //     note: note,
+    //     status: action_type,
+    //   };
+    //   response = await this.model.update(update_data, {
+    //     where: {
+    //       id: {
+    //         [Op.in]: model_ids,
+    //         status: 'pending',
+    //       },
+    //     },
+    //     return: true,
+    //   });
+    // }
   }
 
   //format
