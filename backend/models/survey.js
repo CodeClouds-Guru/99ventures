@@ -204,7 +204,7 @@ module.exports = (sequelize, DataTypes) => {
 	}
 
 	Survey.checkMemberSurveyByMemberId = async(memberId, surveyNumber, providerId)=> {
-		const sqlQuery = `SELECT COUNT(survey_number) AS total_survey FROM member_surveys AS ms JOIN member_transactions AS mt ON 
+		const sqlQuery = `SELECT COUNT(survey_number) AS total_attempted FROM member_surveys AS ms JOIN member_transactions AS mt ON 
 		(ms.member_transaction_id = mt.id) WHERE mt.member_id = :memberId AND ms.survey_number = :survey_number AND ms.survey_provider_id = :survey_provider_id`;
 		const result = await sequelize.query(sqlQuery, {
 			type: QueryTypes.SELECT,
@@ -214,7 +214,7 @@ module.exports = (sequelize, DataTypes) => {
 				survey_provider_id: providerId
 			},
 		});
-		return result.length ? result[0].total_survey : 0;
+		return result.length ? result[0].total_attempted : 0;
 	}
 
 	// Check a particular Survey Attempted or Not From survey_attempt table
