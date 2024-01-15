@@ -1,5 +1,9 @@
 const Controller = require('./Controller');
-const { Rule, MemberShipTierAction } = require('../../models/index');
+const {
+  Rule,
+  MemberShipTierAction,
+  MemberShipTierRule,
+} = require('../../models/index');
 
 const FileHelper = require('../../helpers/fileHelper');
 
@@ -31,43 +35,79 @@ class MembershipTierController extends Controller {
   }
 
   //override list api
-  // async save(req, res) {
-  //   let company_portal_id = req.headers.site_id;
-  //   req.body.company_portal_id = company_portal_id;
+  async save(req, res) {
+    let company_portal_id = req.headers.site_id;
+    req.body.company_portal_id = company_portal_id;
+    // req.body.tier_details.logo = '';
+    if (req.files) {
+      let files = [];
+      files[0] = req.files.image;
+      const fileHelper = new FileHelper(files, 'membership-tiers', req);
+      const file_name = await fileHelper.upload();
+      req.body.tier_details.logo = file_name.files[0].filename;
+    }
+    //tier store
+    const { error, value } = this.model.validate(req);
+    if (error) {
+      const errorObj = new Error('Validation failed.');
+      errorObj.statusCode = 422;
+      errorObj.data = error.details.map((err) => err.message);
+      throw errorObj;
+    }
+    let request_data = req.body.tier_details;
+    request_data.created_by = req.user.id;
+    try {
+      let tier_save = await this.model.create(request_data, { silent: true });
 
-  //   if (req.files) {
-  //     let files = [];
-  //     files[0] = req.files.image;
-  //     const fileHelper = new FileHelper(files, 'membership-tiers', req);
-  //     const file_name = await fileHelper.upload();
-  //     req.body.image = file_name.files[0].filename;
-  //   }
-  //   //tier store
-  //   let tier_save = await super.save(req.body);
-  //   let membership_tier_id = tier_save.result.id;
+      //rule action store
+      let membership_tier_rules = await this.formatTierRulesAndSave(
+        req.body,
+        tier_save.id
+      );
+      return {
+        status: true,
+        message: 'Record has been created successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  //   //rule action store
-  //   let membership_tier_rules = this.formatTierRulesAndSave(
-  //     rule_obj,
-  //     membership_tier_id
-  //   );
+  async formatTierRulesAndSave(rule_obj, membership_tier_id) {
+    let rule_save_obj = [];
+    let rule_used = [];
 
-  // }
+    let rule_keys = Object.keys(rule_obj.rules_used);
+    rule_keys.forEach(function async(record, key) {
+      rule_save_obj.push({
+        membership_tier_action_id: rule_obj.rules_used[record].action,
+        operator: rule_obj.rules_used[record].operator,
+        value: rule_obj.rules_used[record].value,
+      });
+      rule_used.push(rule_obj.rules_used[record].action);
+      rule_obj.rules_config = rule_obj.rules_config.replace(
+        '<<' + [record] + '>>',
+        rule_obj.rules_used[record].variable
+      );
+    });
 
-  // async formatTierRulesAndSave(rule_obj, membership_tier_id) {
-  //   rule_obj.forEach(function (record, key) {
+    let rule = await Rule.bulkCreate(rule_save_obj);
 
-  //     let rule = await Rule.create(req.body.rule_actions);
-  //     let membership_tier_rules = await Rule.create(req.body.rule_actions);
+    let config_json_obj = {
+      rule_used: rule_used,
+      rule_config: rule_obj.rules_config,
+      rule_statement: rule_obj.rules_statement,
+    };
+    let membership_tier_rule_obj = {
+      membership_tier_id,
+      config_json: JSON.stringify(config_json_obj),
+    };
 
-  //     delete req.body.rule_actions;
-
-  //     let membership_tier_rule_obj = {
-  //       membership_tier_id,
-  //       config_json: {},
-  //     };
-  //   })
-  // }
+    let membership_tier_rules = await MemberShipTierRule.create(
+      membership_tier_rule_obj
+    );
+    return true;
+  }
 }
 
 module.exports = MembershipTierController;

@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
+const Joi = require('joi');
 module.exports = (sequelize, DataTypes) => {
   class MembershipTier extends Model {
     /**
@@ -15,8 +16,10 @@ module.exports = (sequelize, DataTypes) => {
   MembershipTier.init(
     {
       name: DataTypes.STRING,
-      logo: DataTypes.STRING,
+      logo: DataTypes.TEXT,
       status: DataTypes.STRING,
+      reward_point: DataTypes.INTEGER,
+      reward_cash: DataTypes.FLOAT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,
       deleted_by: DataTypes.BIGINT,
@@ -35,6 +38,16 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'membership_tiers',
     }
   );
+  MembershipTier.validate = function (req) {
+    const schema = Joi.object({
+      name: Joi.string().required().label('Name'),
+      logo: Joi.string().optional().label('Logo'),
+      status: Joi.string().required().label('Status'),
+      reward_point: Joi.optional().label('Reward Point'),
+      reward_cash: Joi.optional().label('Reward Cash'),
+    });
+    return schema.validate(req.body.tier_details);
+  };
   MembershipTier.fields = {
     id: {
       field_name: 'id',
