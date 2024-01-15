@@ -87,7 +87,7 @@ class MembershipTierController extends Controller {
       rule_used.push(rule_obj.rules_used[record].action);
       rule_obj.rules_config = rule_obj.rules_config.replace(
         '<<' + [record] + '>>',
-        rule_obj.rules_used[record].variable
+        rule_obj.rules_used[record].action_variable
       );
     });
 
