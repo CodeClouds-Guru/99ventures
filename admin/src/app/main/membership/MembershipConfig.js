@@ -31,7 +31,7 @@ const MembershipConfig = {
     },
     routes: [
         {
-            path: 'app/promo-codes/create',
+            path: 'app/membership-tiers/:moduleId',
             element: <CreateUpdate/>,
             auth: settingsConfig.defaultAuth
         },

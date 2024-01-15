@@ -54,11 +54,11 @@ const navigationConfig = [
         end: true,
       },
       {
-        id: 'promocodes',
+        id: 'membershiptiers',
         title: 'Membership',
         type: 'item',
         icon: 'material-outline:badge',
-        url: 'app/promo-codes',
+        url: 'app/membership-tiers',
         end: true,
       }
     ]

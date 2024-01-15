@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Autocomplete, Chip, FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, TextareaAutosize, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
+import { FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -8,17 +8,13 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
 import Helper from 'src/app/helper';
-import { selectUser } from 'app/store/userSlice';
 import FusePageCardSimple from '@fuse/core/FusePageCarded';
 import MainHeader from 'app/shared-components/MainHeader';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordion from '@mui/material/Accordion';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import { styled } from '@mui/material/styles';
 
@@ -60,32 +56,40 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 const operators = {
-    'eq_to': 'Equal To',
-    'not_eq_to': 'Not Equal To',
-    'gt_than': 'Greater Than',
-    'lt_than': 'Less Than',
-    'gt_eq': 'Greater Than and Equal To',
-    'lt_eq': 'Less Than and Equal To'
+    '===': 'Equal To',
+    '!==': 'Not Equal To',
+    '>': 'Greater Than',
+    '<': 'Less Than',
+    '>=': 'Greater Than and Equal To',
+    '<=': 'Less Than and Equal To'
 }
 
+const logicalOp = {
+    '&&': 'AND',
+    '||': 'OR'
+}
 
 const CreateUpdate = () => {
     const {moduleId} = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [symbol, setSymbol] = useState([]);
     const [loading, setLoading] = useState(false);
     const [helpertext, setHelpertext] = useState('');
-    // const [rules, setRules] = useState(['Rule1']);
     const [rulesCreate, setRulesCreate] = useState('');
     const [selectRules, setSelectRules] = useState('');
     const [rewardsType, setRewardsType] = useState(true);
     const [rulesStatement, setRulesStatement] = useState([]);
+    const [rulesAction, setRulesAction] = useState([]);
     const [rulesJson, setRulesJson] = useState({'Rule1':{}});
     const [logicalOperator, setLogicalOperator] = useState('');
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
     const [monetoryBenefit, setMonetoryBenefit] = useState(false);
+    const [membershipName, setMembershipName] = useState('');
+    const [membershipLogo, setMembershipLogo] = useState('');
+    const [membershipRewards, setMembershipRewards] = useState(0);
 
-    const handleSetRewards = (e) => {
+    const handleSetRewardsType = (e) => {
         setRewardsType(!rewardsType)
     }
 
@@ -105,6 +109,10 @@ const CreateUpdate = () => {
             ...rulesJson[indx],
             [type]: value
         };
+        if(type === 'action') {
+            let act = rulesAction.find(act=> act.id === value);
+            arry[indx]['action_variable'] = act.variable;
+        }
         setRulesJson(arry);
     }
     
@@ -112,14 +120,25 @@ const CreateUpdate = () => {
           if(rulesStatement.length){
             handleHelperText()
           }
-      }, [rulesStatement])
+      }, [rulesStatement]);
+
+    const getActionsData = ()=> {
+        axios.get(jwtServiceConfig.membershipAdd)
+        .then((response) => {
+            setRulesAction(response.data.results.rule_actions)
+        })
+        .catch((error) => {
+            console.log(error)
+            dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+        })
+    } 
 
     const rulesHtml = () => {
         var htmlContent = [];
         let totalRules = Object.keys(rulesJson).length;
         for(let i=0; i<totalRules; i++){
             htmlContent.push(
-                <div className='flex items-center justify-between mb-20'>
+                <div className='flex items-center justify-between mb-20' key={i}>
                     <div className='w-1/12'>
                         <Typography variant="subtitle1">Rule {i+1}</Typography>
                     </div>
@@ -133,11 +152,11 @@ const CreateUpdate = () => {
                             onChange={(e)=>handleBuildRules(i+1, 'action', e.target.value)}
                         >
                             <MenuItem value="">None</MenuItem>
-                            <MenuItem value="Days From Registration">Days From Registration</MenuItem>
-                            <MenuItem value="No. of Withdrawal">No. of Withdrawal</MenuItem>
-                            <MenuItem value="Total Withdrawal">Total Withdrawal</MenuItem>
-                            <MenuItem value="Email Verification">Email Verification</MenuItem>
-                            <MenuItem value="Signed Up">Signed Up</MenuItem>
+                            {
+                                rulesAction.length ? rulesAction.map(row => {
+                                    return <MenuItem key={row.id} value={row.id}>{row.name}</MenuItem>
+                                }) : ''
+                            }
                         </Select>
                     </FormControl>
                     <FormControl className="w-1/4 ">
@@ -151,8 +170,8 @@ const CreateUpdate = () => {
                         >
                             <MenuItem value="">None</MenuItem>
                             {
-                                Object.keys(operators).map(op=> {
-                                    return <MenuItem value={op}>{operators[op]}</MenuItem>
+                                Object.keys(operators).map((op, i)=> {
+                                    return <MenuItem value={op} key={i}>{operators[op]}</MenuItem>
                                 })
                             }
                         </Select>
@@ -209,17 +228,19 @@ const CreateUpdate = () => {
     }
 
     const handleSelectRules = (e) =>{
-        setSelectRules(e.target.value)
-        if(e.target.value !== '') {
-            setRulesCreate(rulesCreate=> rulesCreate+'<'+e.target.value+'>');
-            setRulesStatement([...rulesStatement, e.target.value]);
+        let val = e.target.value;
+        setSelectRules(val)
+        if(val !== '') {
+            setRulesCreate(rulesCreate=> rulesCreate+'<<'+val+'>>');
+            setRulesStatement([...rulesStatement, val]);
         }
     }
 
     const handleLogicalOperator = (e) => {
-        setLogicalOperator(e.target.value);
-        setRulesCreate(rulesCreate=> rulesCreate+e.target.value);
-        setRulesStatement([...rulesStatement, e.target.value]);
+        let val = e.target.value;
+        setLogicalOperator(val);
+        setRulesCreate(rulesCreate=> rulesCreate+val);
+        setRulesStatement([...rulesStatement, logicalOp[val]]);
     }
 
     const handleSymbol = (e) => {
@@ -236,9 +257,11 @@ const CreateUpdate = () => {
     const handleHelperText = () => {
         const ruleKeys = Object.keys(rulesJson);
         const finalArry = rulesStatement.map(el => {
-            if(ruleKeys.includes(el)){
+            if(ruleKeys.includes(el)){                
+                let findAct = rulesAction.find(act=> act.id === rulesJson[el]['action']);
                 let json = {
                     ...rulesJson[el],
+                    action: findAct.name,
                     operator: operators[rulesJson[el]['operator']]
                 }
                 return Object.values(json).join(' ');
@@ -250,7 +273,79 @@ const CreateUpdate = () => {
         setHelpertext(statement);
     }
 
-    const handleFormSubmit = () => {}
+    const handleSetRewards = (e) => {
+        setMembershipRewards(e.target.value)
+    }
+
+    const handleFormSubmit = () => {
+        if(membershipName === '') {
+            dispatch(showMessage({ variant: 'error', message: 'Please add membership name!' }));
+            return;
+        }
+        if(monetoryBenefit){
+            if(membershipRewards === 0) {
+                dispatch(showMessage({ variant: 'error', message: 'Please enter '+(rewardsType ? 'cash': 'points')+'!' }));
+                return;
+            }
+        }
+        const params = new FormData();
+        params.append('name', membershipName);
+        params.append('logo', membershipLogo);
+        if(monetoryBenefit) {
+            params.append('cash', rewardsType ? membershipRewards : 0 );
+            params.append('points', !rewardsType ? membershipRewards : 0 )
+        }
+        else {
+            params.append('cash', 0);
+            params.append('points', 0);
+        }
+        params.append('configuration', JSON.stringify({
+            rules_used: rulesJson,
+            rules_config: rulesCreate,
+            rules_statement: helpertext
+        }));
+
+        setLoading(true);
+        const endPoint = (moduleId !== 'create' && !isNaN(moduleId)) ? jwtServiceConfig.membershipUpdate + `/${moduleId}` : jwtServiceConfig.membershipSave;
+        axios.post(endPoint, params)
+            .then((response) => {
+                setLoading(false);
+                if (response.data.results.status) {                 
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.data.message }));
+                    // navigate(`/app/news`);
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+                setLoading(false)
+                dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+            })
+    }
+
+    useEffect(()=>{
+        if(moduleId !== 'create' && !isNaN(moduleId)){
+            getSingleRecordById();
+        }
+        getActionsData();
+    }, []);
+
+    const getSingleRecordById = () => {
+        axios.get(jwtServiceConfig.membershipEdit + `/${moduleId}`)
+            .then((response) => {
+                setLoader(false)
+                if (response.data.results.result) {
+                    const record = response.data.results.result;
+                    
+                } else {
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                }
+            })
+            .catch((error) => {
+                dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
+            })
+    }
 
     const handleClearRulesConfig = () => {
         handleRulesCreate('');
@@ -265,7 +360,7 @@ const CreateUpdate = () => {
     return (
         <FusePageCardSimple
             header={
-                <MainHeader module="Membership" backUrl="/app/membership" />
+                <MainHeader module="Membership Tiers" backUrl="/app/membership-tiers" />
             }
             content={
                 <>
@@ -281,6 +376,8 @@ const CreateUpdate = () => {
                                             required
                                             id="outlined-required"
                                             label="Name"
+                                            value={membershipName}
+                                            onChange={(e)=>setMembershipName(e.target.value)}
                                         />
                                     </FormControl> 
                                     <FormControl className="w-1/2 mb-10">
@@ -291,21 +388,23 @@ const CreateUpdate = () => {
                                             <FormControl className="w-1/2 mb-10">
                                                 <Stack direction="row" spacing={1} alignItems="center">
                                                     <Typography>Points</Typography>
-                                                    <Switch className="switch" checked={rewardsType} onChange={handleSetRewards}  name="rewards_type" />
+                                                    <Switch className="switch" checked={rewardsType} onChange={handleSetRewardsType}  name="rewards_type" />
                                                     <Typography>Cash</Typography>
                                                 </Stack>
                                                 {
                                                     rewardsType ? (
                                                         <TextField
-                                                            required
                                                             id="outlined-required"
                                                             label="Cash"
+                                                            onChange={handleSetRewards}
+                                                            value={rewardsType ? membershipRewards : 0}
                                                         />
                                                     ) : (
                                                         <TextField
-                                                            required
                                                             id="outlined-required"
                                                             label="Points"
+                                                            onChange={handleSetRewards}
+                                                            value={!rewardsType ? membershipRewards : 0}
                                                         />
                                                     )
                                                 }
@@ -317,9 +416,10 @@ const CreateUpdate = () => {
                                             required
                                             id="outlined-required"
                                             type="file"
+                                            onChange={(e)=>setMembershipLogo(e.target.files[0])}
                                         />
                                     </FormControl>
-                                </div>                                
+                                </div>
                             </AccordionDetails>
                         </Accordion>
                         <Accordion expanded={expanded.includes('panel2')} onChange={handleChange('panel2')}>
@@ -389,8 +489,11 @@ const CreateUpdate = () => {
                                             onChange={handleLogicalOperator}
                                         >
                                             <MenuItem value="">None</MenuItem>
-                                            <MenuItem value="AND">AND</MenuItem>
-                                            <MenuItem value="OR">OR</MenuItem>
+                                            {
+                                                Object.keys(logicalOp).map(el=>{
+                                                    return <MenuItem key={el} value={el}>{logicalOp[el]}</MenuItem>
+                                                })
+                                            }
                                         </Select>
                                     </FormControl>
                                     <FormControl className="w-1/6  bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
@@ -430,6 +533,7 @@ const CreateUpdate = () => {
                                 className="whitespace-nowrap mx-4"
                                 variant="contained"
                                 color="error"
+                                onClick={()=>navigate('/app/membership-tiers')}
                             >
                                 Cancel
                             </Button>

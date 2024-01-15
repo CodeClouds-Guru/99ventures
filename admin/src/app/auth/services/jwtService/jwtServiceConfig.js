@@ -76,6 +76,10 @@ const jwtServiceConfig = {
   newsSave: 'news/save',
   newsUpdate: 'news/update',
   newsView: 'news/view',
+  membershipSave: 'membership-tiers/save',
+  membershipUpdate: 'membership-tiers/update',
+  membershipEdit: 'membership-tiers/edit',
+  membershipAdd: 'membership-tiers/add',
 };
 
 export default jwtServiceConfig;
