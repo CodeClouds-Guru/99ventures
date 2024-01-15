@@ -264,6 +264,7 @@ const CreateUpdate = () => {
                     action: findAct.name,
                     operator: operators[rulesJson[el]['operator']]
                 }
+                delete json.action_variable;
                 return Object.values(json).join(' ');
             } else {
                 return el;
