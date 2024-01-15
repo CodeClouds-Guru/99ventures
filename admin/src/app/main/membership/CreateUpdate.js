@@ -78,16 +78,16 @@ const CreateUpdate = () => {
     const [helpertext, setHelpertext] = useState('');
     const [rulesCreate, setRulesCreate] = useState('');
     const [selectRules, setSelectRules] = useState('');
+    const [rulesAction, setRulesAction] = useState([]);
     const [rewardsType, setRewardsType] = useState(true);
     const [rulesStatement, setRulesStatement] = useState([]);
-    const [rulesAction, setRulesAction] = useState([]);
     const [rulesJson, setRulesJson] = useState({'Rule1':{}});
-    const [logicalOperator, setLogicalOperator] = useState('');
-    const [expanded, setExpanded] = useState(['panel1', 'panel2']);
-    const [monetoryBenefit, setMonetoryBenefit] = useState(false);
     const [membershipName, setMembershipName] = useState('');
     const [membershipLogo, setMembershipLogo] = useState('');
+    const [logicalOperator, setLogicalOperator] = useState('');
+    const [monetoryBenefit, setMonetoryBenefit] = useState(false);
     const [membershipRewards, setMembershipRewards] = useState(0);
+    const [expanded, setExpanded] = useState(['panel1', 'panel2']);
 
     const handleSetRewardsType = (e) => {
         setRewardsType(!rewardsType)
@@ -312,8 +312,8 @@ const CreateUpdate = () => {
             .then((response) => {
                 setLoading(false);
                 if (response.data.results.status) {                 
-                    dispatch(showMessage({ variant: 'success', message: response.data.results.data.message }));
-                    // navigate(`/app/news`);
+                    dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
+                    navigate(`/app/membership-tiers`);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
                 }
@@ -321,7 +321,7 @@ const CreateUpdate = () => {
             .catch((error) => {
                 console.log(error)
                 setLoading(false)
-                dispatch(showMessage({ variant: 'error', message: error.response.data.message }))
+                dispatch(showMessage({ variant: 'error', message: 'Something went wrong!' }))
             })
     }
 
@@ -528,7 +528,7 @@ const CreateUpdate = () => {
                                 loading={loading}
                                 onClick={handleFormSubmit}
                             >
-                                {moduleId === 'create' ? 'Save' : 'Save'}
+                                {moduleId === 'create' ? 'Save' : 'Update'}
                             </LoadingButton>
                             <Button
                                 className="whitespace-nowrap mx-4"
