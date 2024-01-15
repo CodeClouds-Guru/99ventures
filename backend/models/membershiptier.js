@@ -88,6 +88,32 @@ module.exports = (sequelize, DataTypes) => {
       width: '50',
       searchable: true,
     },
+    reward_point: {
+      field_name: 'reward_point',
+      db_name: 'reward_point',
+      type: 'text',
+      placeholder: 'Reward Point',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
+    reward_cash: {
+      field_name: 'reward_cash',
+      db_name: 'reward_cash',
+      type: 'text',
+      placeholder: 'Reward Cash',
+      listing: false,
+      show_in_form: true,
+      sort: false,
+      required: true,
+      value: '',
+      width: '50',
+      searchable: false,
+    },
   };
 
   sequelizePaginate.paginate(MembershipTier);
