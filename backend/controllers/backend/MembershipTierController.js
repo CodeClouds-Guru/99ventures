@@ -38,13 +38,13 @@ class MembershipTierController extends Controller {
   async save(req, res) {
     let company_portal_id = req.headers.site_id;
     req.body.company_portal_id = company_portal_id;
-    // req.body.tier_details.logo = '';
+
     if (req.files) {
       let files = [];
-      files[0] = req.files.image;
+      files[0] = req.files.logo;
       const fileHelper = new FileHelper(files, 'membership-tiers', req);
       const file_name = await fileHelper.upload();
-      req.body.tier_details.logo = file_name.files[0].filename;
+      req.body.logo = file_name.files[0].filename;
     }
     //tier store
     const { error, value } = this.model.validate(req);
@@ -54,14 +54,19 @@ class MembershipTierController extends Controller {
       errorObj.data = error.details.map((err) => err.message);
       throw errorObj;
     }
-    let request_data = req.body.tier_details;
+    let request_data = req.body;
     request_data.created_by = req.user.id;
+    request_data.reward_cash = req.body.cash || 0;
+    request_data.reward_point = req.body.point || 0;
+    request_data.status = 'active';
+
+    // console.log(req.body);
     try {
       let tier_save = await this.model.create(request_data, { silent: true });
 
       //rule action store
       let membership_tier_rules = await this.formatTierRulesAndSave(
-        req.body,
+        JSON.parse(req.body.configuration),
         tier_save.id
       );
       return {
@@ -76,7 +81,7 @@ class MembershipTierController extends Controller {
   async formatTierRulesAndSave(rule_obj, membership_tier_id) {
     let rule_save_obj = [];
     let rule_used = [];
-
+    // console.log(rule_obj.rules_used);
     let rule_keys = Object.keys(rule_obj.rules_used);
     rule_keys.forEach(function async(record, key) {
       rule_save_obj.push({
@@ -86,8 +91,8 @@ class MembershipTierController extends Controller {
       });
       rule_used.push(rule_obj.rules_used[record].action);
       rule_obj.rules_config = rule_obj.rules_config.replace(
-        '<<' + [record] + '>>',
-        rule_obj.rules_used[record].action_variable
+        `<<${[record]}>>`,
+        ` ${rule_obj.rules_used[record].action_variable} `
       );
     });
 
@@ -95,7 +100,7 @@ class MembershipTierController extends Controller {
 
     let config_json_obj = {
       rule_used: rule_used,
-      rule_config: rule_obj.rules_config,
+      rule_config: rule_obj.rules_config.trim(),
       rule_statement: rule_obj.rules_statement,
     };
     let membership_tier_rule_obj = {
