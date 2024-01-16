@@ -91,10 +91,14 @@ class MembershipTierController extends Controller {
           model: MemberShipTierRule,
         },
       });
+      console.log(model);
       let rule_id = model.MemberShipTierRule
         ? model.MemberShipTierRule.config_json.rule_used
         : '';
-      let get_rules = await Rule.findAll({ where: { id: rule_id } });
+      let get_rules = await Rule.findAll({
+        where: { id: rule_id },
+        // include: { model: MemberShipTierAction },
+      });
 
       model.setDataValue('rules', get_rules);
       let all_actions = await MemberShipTierAction.findAll({
