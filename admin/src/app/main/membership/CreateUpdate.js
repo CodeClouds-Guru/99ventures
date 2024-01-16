@@ -17,7 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import { styled } from '@mui/material/styles';
-
+import _ from 'lodash';
 
 const Accordion = styled((props) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -103,6 +103,7 @@ const CreateUpdate = () => {
     };
 
     const handleBuildRules = (indx, type, value) => {
+        console.log(rulesJson)
         let arry = {...rulesJson};
         indx = 'Rule'+indx;
         arry[indx] = {
@@ -135,8 +136,8 @@ const CreateUpdate = () => {
 
     const rulesHtml = () => {
         var htmlContent = [];
-        let totalRules = Object.keys(rulesJson).length;
-        for(let i=0; i<totalRules; i++){
+        let rulesArry = Object.keys(rulesJson);
+        rulesArry.map((row, i)=>{
             htmlContent.push(
                 <div className='flex items-center justify-between mb-20' key={i}>
                     <div className='w-1/12'>
@@ -147,14 +148,14 @@ const CreateUpdate = () => {
                         <Select
                             labelId="action-select-label"
                             id="action-select"
-                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('action') ? rulesJson['Rule'+(i+1)].action : ''}
+                            value={rulesJson[row].hasOwnProperty('action') ? rulesJson[row]['action']: ''}
                             label="Action"
                             onChange={(e)=>handleBuildRules(i+1, 'action', e.target.value)}
                         >
-                            <MenuItem value="">None</MenuItem>
+                            <MenuItem value="0">None</MenuItem>
                             {
-                                rulesAction.length ? rulesAction.map(row => {
-                                    return <MenuItem key={row.id} value={row.id}>{row.name}</MenuItem>
+                                rulesAction.length ? rulesAction.map(act => {
+                                    return <MenuItem key={act.id} value={act.id}>{act.name}</MenuItem>
                                 }) : ''
                             }
                         </Select>
@@ -165,7 +166,7 @@ const CreateUpdate = () => {
                             label="Operator"
                             labelId="operator-select-label"
                             id="operator-select"
-                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('operator') ? rulesJson['Rule'+(i+1)].operator : ''}
+                            value={rulesJson[row].hasOwnProperty('operator') ? rulesJson[row]['operator']: ''}
                             onChange={(e)=>handleBuildRules(i+1, 'operator', e.target.value)}
                         >
                             <MenuItem value="">None</MenuItem>
@@ -181,13 +182,13 @@ const CreateUpdate = () => {
                             required
                             id="outlined-required"
                             label="Value"
-                            value={rulesJson['Rule'+(i+1)] !== undefined && rulesJson['Rule'+(i+1)].hasOwnProperty('value') ? rulesJson['Rule'+(i+1)].value : ''}
+                            value={rulesJson[row].hasOwnProperty('value') ? rulesJson[row]['value']: ''}
                             onChange={(e)=>handleBuildRules(i+1, 'value', e.target.value)}
                         />
                     </FormControl>
                     <div className='w-1/12'>
                         {
-                            ((totalRules-1) === i && i) ? (
+                            ((rulesArry.length-1) === i && i) ? (
                                 <IconButton aria-label="delete" size="large" onClick={()=>handleDeleteRule(Object.keys(rulesJson)[i])}>
                                     <DeleteIcon />
                                 </IconButton>
@@ -196,7 +197,7 @@ const CreateUpdate = () => {
                     </div>
                 </div>
             )
-        }
+        })
         return htmlContent;
     }
 
@@ -328,19 +329,48 @@ const CreateUpdate = () => {
     useEffect(()=>{
         if(moduleId !== 'create' && !isNaN(moduleId)){
             getSingleRecordById();
+        } else {
+            getActionsData();
         }
-        getActionsData();
     }, []);
+
+    const convertExpressionToRule = (expression, rules, rulesAction) =>{
+        let arry = expression.split(' ');
+        let ruleConfig = [];
+        arry.forEach(r=>{
+            let findAct = rulesAction.find(act=> act.variable === r);
+            if(findAct !== undefined){
+                let indx = rules.findIndex(row=> row.membership_tier_action_id === findAct.id);
+                if(indx !== -1){
+                    ruleConfig.push('<<Rule'+(indx+1)+'>>');
+                }
+            }else {
+                ruleConfig.push(r)
+            }
+        })
+        setRulesCreate(ruleConfig.join(''));
+    }
 
     const getSingleRecordById = () => {
         axios.get(jwtServiceConfig.membershipEdit + `/${moduleId}`)
             .then((response) => {
-                setLoader(false)
                 if (response.data.results.result) {
                     const record = response.data.results.result;
-                    
+                    let preparedRules = {}
+                    record.rules.map((r,i)=>{
+                        preparedRules['Rule'+(i+1)] = {
+                            action: r.membership_tier_action_id,
+                            operator: r.operator,
+                            value: r.value
+                        }
+                    });
+                    setRulesAction(record.rule_actions);
+                    setMembershipName(record.name);
+                    setRulesJson(preparedRules);
+                    convertExpressionToRule(record.MemberShipTierRule.config_json.rule_config, record.rules, record.rule_actions);
+                    setHelpertext(record.MemberShipTierRule.config_json.rule_statement);
                 } else {
-                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }))
+                    dispatch(showMessage({ variant: 'error', message: response.data.results.message }));
                 }
             })
             .catch((error) => {
