@@ -55,7 +55,7 @@ const navigationConfig = [
       },
       {
         id: 'membershiptiers',
-        title: 'Membership',
+        title: 'Membership Tier',
         type: 'item',
         icon: 'material-outline:badge',
         url: 'app/membership-tiers',

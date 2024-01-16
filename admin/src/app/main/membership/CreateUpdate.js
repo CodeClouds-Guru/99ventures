@@ -56,12 +56,12 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 const operators = {
-    '===': 'Equal To',
-    '!==': 'Not Equal To',
+    '===': 'Equals To',
+    '!==': 'Not Equals To',
     '>': 'Greater Than',
     '<': 'Less Than',
-    '>=': 'Greater Than and Equal To',
-    '<=': 'Less Than and Equal To'
+    '>=': 'Greater Than and Equals To',
+    '<=': 'Less Than and Equals To'
 }
 
 const logicalOp = {
@@ -391,7 +391,7 @@ const CreateUpdate = () => {
     return (
         <FusePageCardSimple
             header={
-                <MainHeader module="Membership Tiers" backUrl="/app/membership-tiers" />
+                <MainHeader module="Membership Tier" backUrl="/app/membership-tiers" />
             }
             content={
                 <>
