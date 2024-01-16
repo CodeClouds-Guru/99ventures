@@ -88,6 +88,7 @@ const CreateUpdate = () => {
     const [monetoryBenefit, setMonetoryBenefit] = useState(false);
     const [membershipRewards, setMembershipRewards] = useState(0);
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
+    const [logo, setLogo] = useState('');
 
     const handleSetRewardsType = (e) => {
         setRewardsType(!rewardsType)
@@ -103,7 +104,6 @@ const CreateUpdate = () => {
     };
 
     const handleBuildRules = (indx, type, value) => {
-        console.log(rulesJson)
         let arry = {...rulesJson};
         indx = 'Rule'+indx;
         arry[indx] = {
@@ -232,7 +232,8 @@ const CreateUpdate = () => {
         let val = e.target.value;
         setSelectRules(val)
         if(val !== '') {
-            setRulesCreate(rulesCreate=> rulesCreate+'<<'+val+'>>');
+            let str = rulesCreate ? rulesCreate+' <<'+val+'>>' : rulesCreate+'<<'+val+'>>'
+            setRulesCreate(str);
             setRulesStatement([...rulesStatement, val]);
         }
     }
@@ -240,13 +241,13 @@ const CreateUpdate = () => {
     const handleLogicalOperator = (e) => {
         let val = e.target.value;
         setLogicalOperator(val);
-        setRulesCreate(rulesCreate=> rulesCreate+val);
+        setRulesCreate(rulesCreate=> rulesCreate+' '+val);
         setRulesStatement([...rulesStatement, logicalOp[val]]);
     }
 
     const handleSymbol = (e) => {
         setSymbol(e.target.value);
-        setRulesCreate(rulesCreate=> rulesCreate+e.target.value);
+        setRulesCreate(rulesCreate=> rulesCreate+' '+e.target.value);
         setRulesStatement([...rulesStatement, e.target.value]);
     }
 
@@ -290,6 +291,12 @@ const CreateUpdate = () => {
                 return;
             }
         }
+        if(rulesCreate === ''){
+            dispatch(showMessage({ variant: 'error', message: 'Rules configuration is empty!' }));
+            return;
+        }
+
+        return;
         const params = new FormData();
         params.append('name', membershipName);
         params.append('logo', membershipLogo);
@@ -343,9 +350,11 @@ const CreateUpdate = () => {
                 let indx = rules.findIndex(row=> row.membership_tier_action_id === findAct.id);
                 if(indx !== -1){
                     ruleConfig.push('<<Rule'+(indx+1)+'>>');
+                    // setRulesStatement([...rulesStatement, 'Rule'+(indx+1)]);
                 }
-            }else {
+            } else {
                 ruleConfig.push(r)
+                // setRulesStatement([...rulesStatement, r]);
             }
         })
         setRulesCreate(ruleConfig.join(''));
@@ -363,7 +372,11 @@ const CreateUpdate = () => {
                             operator: r.operator,
                             value: r.value
                         }
+                        let act = record.rule_actions.find(act=> act.id === r.membership_tier_action_id);
+                        preparedRules['Rule'+(i+1)]['action_variable'] = act.variable;
                     });
+                    
+                    setLogo(record.logo);
                     setRulesAction(record.rule_actions);
                     setMembershipName(record.name);
                     setRulesJson(preparedRules);
@@ -450,6 +463,18 @@ const CreateUpdate = () => {
                                             onChange={(e)=>setMembershipLogo(e.target.files[0])}
                                         />
                                     </FormControl>
+                                    {
+                                        logo && (
+                                            <div className='mt-10 text-center w-1/2'>
+                                                <img
+                                                    src={logo}
+                                                    srcSet={`${logo}?w=50&h=50&fit=crop&auto=format&dpr=2 2x`}
+                                                    loading="lazy"
+                                                    width={200}
+                                                />
+                                            </div>
+                                        )
+                                    }                                    
                                 </div>
                             </AccordionDetails>
                         </Accordion>
