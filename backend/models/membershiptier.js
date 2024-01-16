@@ -19,7 +19,42 @@ module.exports = (sequelize, DataTypes) => {
   MembershipTier.init(
     {
       name: DataTypes.STRING,
-      logo: DataTypes.TEXT,
+      logo: {
+        type: DataTypes.TEXT,
+        get() {
+          let rawValue = this.getDataValue('logo') || null;
+          console.log(rawValue);
+          if (
+            rawValue == null ||
+            !rawValue ||
+            rawValue == '' ||
+            rawValue == 'null'
+          ) {
+            rawValue = rawValue;
+          } else {
+            let check_url = '';
+            try {
+              new URL(rawValue);
+              check_url = true;
+            } catch (err) {
+              check_url = false;
+            }
+            console.log('check_url', check_url);
+            if (!check_url)
+              rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
+          }
+          const publicURL =
+            process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
+          // console.log('imageRawValue', rawValue);
+          return rawValue ? rawValue : `${publicURL}/images/no-img.jpg`;
+        },
+        set(value) {
+          // console.log(value, value === 'null');
+          if (value == '' || value == null || value === 'null')
+            this.setDataValue('logo', null);
+          else this.setDataValue('logo', value);
+        },
+      },
       status: DataTypes.STRING,
       reward_point: DataTypes.INTEGER,
       reward_cash: DataTypes.FLOAT,

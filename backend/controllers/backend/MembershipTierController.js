@@ -13,6 +13,7 @@ class MembershipTierController extends Controller {
     this.save = this.save.bind(this);
     this.update = this.update.bind(this);
     this.formatTierRulesAndSave = this.formatTierRulesAndSave.bind(this);
+    this.removeRulesOnUpdate = this.removeRulesOnUpdate.bind(this);
   }
 
   //override list api
@@ -81,6 +82,84 @@ class MembershipTierController extends Controller {
     }
   }
 
+  //override edit api
+  async edit(req, res) {
+    try {
+      let model = await this.model.findOne({
+        where: { id: req.params.id },
+        include: {
+          model: MemberShipTierRule,
+        },
+      });
+      let rule_id = model.MemberShipTierRule
+        ? model.MemberShipTierRule.config_json.rule_used
+        : '';
+      let get_rules = await Rule.findAll({ where: { id: rule_id } });
+
+      model.setDataValue('rules', get_rules);
+      let all_actions = await MemberShipTierAction.findAll({
+        attributes: ['id', 'name', 'variable'],
+      });
+      model.setDataValue('rule_actions', all_actions);
+      // console.log(model);
+      let fields = this.model.fields;
+      return { result: model, fields };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //override update api
+  async update(req, res) {
+    let company_portal_id = req.headers.site_id;
+    req.body.company_portal_id = company_portal_id;
+    let model = await this.model.findOne({
+      where: { id: req.params.id },
+      include: {
+        model: MemberShipTierRule,
+      },
+    });
+    // console.log(model);
+    if (req.files) {
+      let files = [];
+      files[0] = req.files.logo;
+      const fileHelper = new FileHelper(files, 'membership-tiers', req);
+      const file_name = await fileHelper.upload();
+      req.body.logo = file_name.files[0].filename;
+
+      let prev_image = model.logo;
+      if (prev_image && prev_image != '') {
+        let file_delete = await fileHelper.deleteFile(
+          prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+        );
+      }
+    }
+    try {
+      let request_data = req.body;
+      request_data.updated_by = req.user.id;
+      request_data.reward_cash = req.body.cash || 0;
+      request_data.reward_point = req.body.point || 0;
+      request_data.status = 'active';
+      let model_update = await this.model.update(request_data, {
+        where: { id },
+      });
+
+      //destroy tier rule config
+      let remove_rules = await this.formatTierRulesAndSave(req.params.id);
+
+      let membership_tier_rules = await this.formatTierRulesAndSave(
+        JSON.parse(req.body.configuration),
+        tier_save.id
+      );
+      return {
+        status: true,
+        message: 'Record has been updated successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async formatTierRulesAndSave(rule_obj, membership_tier_id) {
     let rule_save_obj = [];
     // console.log(rule_obj.rules_used);
@@ -118,60 +197,15 @@ class MembershipTierController extends Controller {
     return true;
   }
 
-  async edit(req, res) {
-    try {
-      let model = await this.model.findOne({
-        where: { id: req.params.id },
-        include: {
-          model: MemberShipTierRule,
-        },
-      });
-      let rule_id = model.MemberShipTierRule
-        ? model.MemberShipTierRule.config_json.rule_used
-        : '';
-      let get_rules = await Rule.findAll({ where: { id: rule_id } });
-
-      model.setDataValue('rules', get_rules);
-      console.log(model);
-      let fields = this.model.fields;
-      return { result: model, fields };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  //override update api
-  async update(req, res) {
-    let company_portal_id = req.headers.site_id;
-    req.body.company_portal_id = company_portal_id;
-    let model = await this.model.findOne({
-      where: { id: req.params.id },
-      include: {
-        model: MemberShipTierRule,
-      },
-    });
-    console.log(model);
-    if (req.files) {
-      let files = [];
-      files[0] = req.files.logo;
-      const fileHelper = new FileHelper(files, 'membership-tiers', req);
-      const file_name = await fileHelper.upload();
-      req.body.logo = file_name.files[0].filename;
-
-      let prev_image = model.logo;
-      if (prev_image && prev_image != '') {
-        let file_delete = await fileHelper.deleteFile(
-          prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
-        );
-      }
-    }
-
-    //destroy tier rule config
+  async removeRulesOnUpdate(membership_tier_id) {
     await MemberShipTierRule.destroy({
-      where: { membership_tier_id: req.params.id },
+      where: { membership_tier_id: membership_tier_id },
     });
     //destroy rules
-    // await this.model.destroy({ where: { id: modelIds } });
+    let rule_id = model.MemberShipTierRule
+      ? model.MemberShipTierRule.config_json.rule_used
+      : '';
+    await Rule.destroy({ where: { id: rule_id } });
   }
 }
 
