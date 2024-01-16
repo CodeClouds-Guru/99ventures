@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Rule.hasMany(models.MemberShipTierAction, {
+        foreignKey: 'membership_tier_action_id',
+      });
     }
   }
   Rule.init(
