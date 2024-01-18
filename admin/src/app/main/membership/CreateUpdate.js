@@ -296,7 +296,7 @@ const CreateUpdate = () => {
             return;
         }
 
-        return;
+        // return;
         const params = new FormData();
         params.append('name', membershipName);
         params.append('logo', membershipLogo);

@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      MemberShipTierRule.belongsTo(models.MembershipTier, {
+        foreignKey: 'membership_tier_id',
+      });
     }
   }
   MemberShipTierRule.init(
