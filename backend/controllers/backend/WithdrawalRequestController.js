@@ -564,6 +564,13 @@ class WithdrawalRequestController extends Controller {
           const paypal_class = new Paypal(company_portal_id);
           const create_resp = await paypal_class.payout(items);
           // console.log('------------create_resp', create_resp);
+          const logger1 = require('../helpers/Logger')(`paypal-log.log`);
+          logger1.info(
+            JSON.stringify({
+              items,
+              create_resp,
+            })
+          );
           if (create_resp.status) {
             await MemberTransaction.update(
               { batch_id: create_resp.batch_id },
