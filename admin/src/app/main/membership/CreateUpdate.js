@@ -137,8 +137,8 @@ const CreateUpdate = () => {
     const rulesHtml = () => {
         var htmlContent = [];
         let rulesArry = Object.keys(rulesJson);
-        rulesArry.map((row, i)=>{
-            htmlContent.push(
+        return rulesArry.map((row, i)=>{
+            return (
                 <div className='flex items-center justify-between mb-20' key={i}>
                     <div className='w-1/12'>
                         <Typography variant="subtitle1">Rule {i+1}</Typography>
@@ -198,7 +198,6 @@ const CreateUpdate = () => {
                 </div>
             )
         })
-        return htmlContent;
     }
 
     const handleAddRules = () => {
@@ -228,7 +227,11 @@ const CreateUpdate = () => {
         setHelpertext('');
     }
 
-    const handleSelectRules = (e) =>{
+    const handleSelectRules = (e) => {
+        if(rulesStatement.length && !['AND', 'OR', '('].includes(rulesStatement[rulesStatement.length -1])){
+            dispatch(showMessage({ variant: 'error', message: 'Operator needs to add!' }));
+            return;
+        }
         let val = e.target.value;
         setSelectRules(val)
         if(val !== '') {
@@ -239,6 +242,10 @@ const CreateUpdate = () => {
     }
 
     const handleLogicalOperator = (e) => {
+        if(!rulesStatement.length || ['AND', 'OR', '('].includes(rulesStatement[rulesStatement.length -1])){
+            dispatch(showMessage({ variant: 'error', message: 'Operand needs to add!' }));
+            return;
+        }
         let val = e.target.value;
         setLogicalOperator(val);
         setRulesCreate(rulesCreate=> rulesCreate+' '+val);
@@ -296,7 +303,7 @@ const CreateUpdate = () => {
             return;
         }
 
-        return;
+        
         const params = new FormData();
         params.append('name', membershipName);
         params.append('logo', membershipLogo);
@@ -375,7 +382,18 @@ const CreateUpdate = () => {
                         let act = record.rule_actions.find(act=> act.id === r.membership_tier_action_id);
                         preparedRules['Rule'+(i+1)]['action_variable'] = act.variable;
                     });
-                    
+                    if(!record.reward_cash && !record.reward_point){
+                        setMonetoryBenefit(false);
+                    } else {
+                        setMonetoryBenefit(true);
+                        if(record.reward_cash){
+                            setMembershipRewards(record.reward_cash);
+                            setRewardsType(true);
+                        } else {
+                            setRewardsType(false);
+                            setMembershipRewards(record.reward_point);
+                        }
+                    }
                     setLogo(record.logo);
                     setRulesAction(record.rule_actions);
                     setMembershipName(record.name);
@@ -399,7 +417,6 @@ const CreateUpdate = () => {
         setSymbol('');
         setRulesStatement([]);
     }
-
     
     return (
         <FusePageCardSimple
