@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         get() {
           let rawValue = this.getDataValue('logo') || null;
-          console.log(rawValue);
+          // console.log('get rawValue==', rawValue);
           if (
             rawValue == null ||
             !rawValue ||
@@ -39,17 +39,17 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
-            console.log('check_url', check_url);
+            // console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
           // console.log('imageRawValue', rawValue);
-          return rawValue ? rawValue : `${publicURL}/images/no-img.jpg`;
+          return rawValue ? rawValue : null;
         },
         set(value) {
-          // console.log(value, value === 'null');
+          // console.log('set value===', value, value === 'null');
           if (value == '' || value == null || value === 'null')
             this.setDataValue('logo', null);
           else this.setDataValue('logo', value);

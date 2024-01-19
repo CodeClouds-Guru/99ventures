@@ -175,7 +175,7 @@ class MembershipTierController extends Controller {
 
         let membership_tier_rules = await this.formatTierRulesAndSave(
           rule_config,
-          tier_save.id
+          req.params.id
         );
         return {
           status: true,
