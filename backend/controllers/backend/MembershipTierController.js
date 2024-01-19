@@ -154,6 +154,14 @@ class MembershipTierController extends Controller {
       req.body.logo = model.logo;
     }
     try {
+      //tier store
+      const { error, value } = this.model.validate(req);
+      if (error) {
+        const errorObj = new Error('Validation failed.');
+        errorObj.statusCode = 422;
+        errorObj.data = error.details.map((err) => err.message);
+        throw errorObj;
+      }
       let request_data = req.body;
       let rule_config = JSON.parse(req.body.configuration);
 
@@ -180,6 +188,11 @@ class MembershipTierController extends Controller {
         return {
           status: true,
           message: 'Record has been updated successfully',
+        };
+      } else {
+        return {
+          status: false,
+          message: 'Config rule is not set properly',
         };
       }
     } catch (error) {
