@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, Switch, InputLabel, Button, Typography, InputAdornment } from '@mui/material';
+import { FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, Switch, InputLabel, Button, Typography, InputAdornment, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
@@ -116,12 +116,6 @@ const CreateUpdate = () => {
         }
         setRulesJson(arry);
     }
-    
-    useEffect(()=>{
-          if(rulesStatement.length){
-            handleHelperText()
-          }
-      }, [rulesStatement]);
 
     const getActionsData = ()=> {
         axios.get(jwtServiceConfig.membershipAdd)
@@ -233,10 +227,7 @@ const CreateUpdate = () => {
             return;
         }
         let val = e.target.value;
-        setSelectRules(val)
         if(val !== '') {
-            let str = rulesCreate ? rulesCreate+' <<'+val+'>>' : rulesCreate+'<<'+val+'>>'
-            setRulesCreate(str);
             setRulesStatement([...rulesStatement, val]);
         }
     }
@@ -247,14 +238,23 @@ const CreateUpdate = () => {
             return;
         }
         let val = e.target.value;
-        setLogicalOperator(val);
-        setRulesCreate(rulesCreate=> rulesCreate+' '+val);
         setRulesStatement([...rulesStatement, logicalOp[val]]);
     }
 
     const handleSymbol = (e) => {
-        setSymbol(e.target.value);
-        setRulesCreate(rulesCreate=> rulesCreate+' '+e.target.value);
+        let val = e.target.value;
+        if(
+            (val === '(' && rulesStatement.length &&
+                (
+                    [')'].includes(rulesStatement[rulesStatement.length -1]) || 
+                    !['AND', 'OR'].includes(rulesStatement[rulesStatement.length -1])
+                )
+            ) ||
+            (val === ')' && (!rulesStatement.length || ['(', 'AND', 'OR'].includes(rulesStatement[rulesStatement.length -1])))
+        ){
+            dispatch(showMessage({ variant: 'error', message: 'Please check your entry!' }));
+            return;
+        }
         setRulesStatement([...rulesStatement, e.target.value]);
     }
 
@@ -263,10 +263,17 @@ const CreateUpdate = () => {
         handleHelperText('');
     }
 
+    useEffect(()=>{
+        handleHelperText();
+    }, [rulesStatement]);
+
     const handleHelperText = () => {
         const ruleKeys = Object.keys(rulesJson);
+        var rulesConfig = '';
         const finalArry = rulesStatement.map(el => {
-            if(ruleKeys.includes(el)){                
+            rulesConfig = rulesConfig !== '' ? rulesConfig+' ' : rulesConfig;
+            if(ruleKeys.includes(el)){
+                rulesConfig += `<<${el}>>`;
                 let findAct = rulesAction.find(act=> act.id === rulesJson[el]['action']);
                 let json = {
                     ...rulesJson[el],
@@ -276,11 +283,13 @@ const CreateUpdate = () => {
                 delete json.action_variable;
                 return Object.values(json).join(' ');
             } else {
+                rulesConfig += el;
                 return el;
             }
         });
         let statement = finalArry.join(' ');
         setHelpertext(statement);
+        setRulesCreate(rulesConfig);
     }
 
     const handleSetRewards = (e) => {
@@ -303,6 +312,7 @@ const CreateUpdate = () => {
             return;
         }
 
+        // return;
         
         const params = new FormData();
         params.append('name', membershipName);
@@ -350,21 +360,18 @@ const CreateUpdate = () => {
 
     const convertExpressionToRule = (expression, rules, rulesAction) =>{
         let arry = expression.split(' ');
-        let ruleConfig = [];
-        arry.forEach(r=>{
+        let statementArry = arry.map(r=>{
             let findAct = rulesAction.find(act=> act.variable === r);
             if(findAct !== undefined){
                 let indx = rules.findIndex(row=> row.membership_tier_action_id === findAct.id);
-                if(indx !== -1){
-                    ruleConfig.push('<<Rule'+(indx+1)+'>>');
-                    // setRulesStatement([...rulesStatement, 'Rule'+(indx+1)]);
+                if(indx !== -1){                    
+                    return 'Rule'+(indx+1);
                 }
             } else {
-                ruleConfig.push(r)
-                // setRulesStatement([...rulesStatement, r]);
+                return r;
             }
-        })
-        setRulesCreate(ruleConfig.join(''));
+        });
+        setRulesStatement(statementArry);
     }
 
     const getSingleRecordById = () => {
@@ -405,6 +412,7 @@ const CreateUpdate = () => {
                 }
             })
             .catch((error) => {
+                console.log(error)
                 dispatch(showMessage({ variant: 'error', message: error.response.data.errors }))
             })
     }
@@ -418,6 +426,10 @@ const CreateUpdate = () => {
         setRulesStatement([]);
     }
     
+    const handleRuleConfigDelete = () => {
+        rulesStatement.pop();
+        setRulesStatement([...rulesStatement]);
+    }
     return (
         <FusePageCardSimple
             header={
@@ -509,9 +521,10 @@ const CreateUpdate = () => {
                                 <div className='my-40'>
                                     {rulesHtml()}
                                 </div>
-                                <div className='flex items-center mb-20'>
+                                <div className='flex items-center mb-32'>
                                     <FormControl className="w-4/6" sx={{'& .MuiInputBase-formControl': {borderTopRightRadius: 0, borderBottomRightRadius: 0}}}>
                                         <TextField
+                                            sx={{'& .MuiFormHelperText-sizeMedium': {position: 'absolute', top: '100%', width: '100%'}}}
                                             required
                                             id="outlined-required"
                                             label="Rule Configuration"
@@ -522,17 +535,24 @@ const CreateUpdate = () => {
                                                 ...rulesCreate !== '' ? {
                                                     endAdornment :(
                                                         <InputAdornment position="end">
-                                                            <IconButton
-                                                                aria-label="toggle password visibility"
-                                                                edge="end"
-                                                                onClick={handleClearRulesConfig}
-                                                            >
-                                                                <FuseSvgIcon className="text-48" size={24} color="action">material-outline:cancel</FuseSvgIcon>
-                                                            </IconButton>
+                                                            <Tooltip placement="top" title="Delete">
+                                                                <IconButton
+                                                                    aria-label="toggle password visibility"
+                                                                    edge="end"
+                                                                    onClick={handleRuleConfigDelete}
+                                                                >
+                                                                    <FuseSvgIcon className="text-48" size={24} color="action">material-outline:arrow_back</FuseSvgIcon>
+                                                                </IconButton>
+                                                            </Tooltip>
                                                         </InputAdornment>
                                                     )
                                                 }: ''
                                             }}
+                                            helperText={
+                                                rulesCreate !== '' ? (
+                                                    <span className='cursor-pointer' onClick={handleClearRulesConfig}>Clear Rule</span>
+                                                ) : ''
+                                            }
                                         />
                                     </FormControl>
                                     <FormControl className="w-1/6 bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
@@ -584,7 +604,7 @@ const CreateUpdate = () => {
                                         </Select>
                                     </FormControl>
                                 </div>
-                                {helpertext && <strong>Statement: <em>{helpertext}</em></strong>}
+                                {helpertext && <p><strong>Statement: <em>{helpertext}</em></strong></p>}
                             </AccordionDetails>
                         </Accordion>
                         <motion.div
