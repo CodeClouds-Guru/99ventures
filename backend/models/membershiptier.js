@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         get() {
           let rawValue = this.getDataValue('logo') || null;
-          console.log(rawValue);
+          // console.log('get rawValue==', rawValue);
           if (
             rawValue == null ||
             !rawValue ||
@@ -39,17 +39,17 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
-            console.log('check_url', check_url);
+            // console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
           // console.log('imageRawValue', rawValue);
-          return rawValue ? rawValue : `${publicURL}/images/no-img.jpg`;
+          return rawValue ? rawValue : null;
         },
         set(value) {
-          // console.log(value, value === 'null');
+          // console.log('set value===', value, value === 'null');
           if (value == '' || value == null || value === 'null')
             this.setDataValue('logo', null);
           else this.setDataValue('logo', value);
@@ -104,7 +104,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'name',
       db_name: 'name',
       type: 'text',
-      placeholder: 'name',
+      placeholder: 'Name',
       listing: true,
       show_in_form: true,
       sort: true,
@@ -117,8 +117,8 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'logo',
       db_name: 'logo',
       type: 'text',
-      placeholder: 'logo',
-      listing: true,
+      placeholder: 'Logo',
+      listing: false,
       show_in_form: true,
       sort: true,
       required: true,
@@ -130,7 +130,7 @@ module.exports = (sequelize, DataTypes) => {
       field_name: 'status',
       db_name: 'status',
       type: 'text',
-      placeholder: 'status',
+      placeholder: 'Status',
       listing: true,
       show_in_form: true,
       sort: true,
@@ -157,7 +157,7 @@ module.exports = (sequelize, DataTypes) => {
       db_name: 'reward_cash',
       type: 'text',
       placeholder: 'Reward Cash',
-      listing: false,
+      listing: true,
       show_in_form: true,
       sort: false,
       required: true,
