@@ -219,6 +219,7 @@ const CreateUpdate = () => {
         setRulesJson({...rulesJson});
         handleRulesCreate('');
         setHelpertext('');
+        setRulesStatement([]);
     }
 
     const handleSelectRules = (e) => {
@@ -311,8 +312,6 @@ const CreateUpdate = () => {
             dispatch(showMessage({ variant: 'error', message: 'Rules configuration is empty!' }));
             return;
         }
-
-        // return;
         
         const params = new FormData();
         params.append('name', membershipName);
@@ -454,7 +453,7 @@ const CreateUpdate = () => {
                                         />
                                     </FormControl> 
                                     <FormControl className="w-1/2 mb-10">
-                                        <FormControlLabel control={<Switch checked={monetoryBenefit} onChange={()=>setMonetoryBenefit(!monetoryBenefit)} />} label="Do you want to add moneytary benefit?" />
+                                        <FormControlLabel control={<Switch checked={monetoryBenefit} onChange={()=>setMonetoryBenefit(!monetoryBenefit)} />} label="Do you want to add monetary benefit?" />
                                     </FormControl>
                                     {
                                         monetoryBenefit && (
