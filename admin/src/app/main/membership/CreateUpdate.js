@@ -294,7 +294,12 @@ const CreateUpdate = () => {
     }
 
     const handleSetRewards = (e) => {
-        setMembershipRewards(e.target.value)
+        let str = e.target.value;
+        if(isNaN(str)){
+            return;
+        }
+        str = str.replace(/\s/g, '');
+        setMembershipRewards(str);
     }
 
     const handleFormSubmit = () => {
@@ -303,7 +308,7 @@ const CreateUpdate = () => {
             return;
         }
         if(monetoryBenefit){
-            if(membershipRewards === 0) {
+            if(membershipRewards === 0 || !membershipRewards) {
                 dispatch(showMessage({ variant: 'error', message: 'Please enter '+(rewardsType ? 'cash': 'points')+'!' }));
                 return;
             }
@@ -466,6 +471,7 @@ const CreateUpdate = () => {
                                                 {
                                                     rewardsType ? (
                                                         <TextField
+                                                            type="tel"
                                                             id="outlined-required"
                                                             label="Cash"
                                                             onChange={handleSetRewards}
@@ -473,6 +479,7 @@ const CreateUpdate = () => {
                                                         />
                                                     ) : (
                                                         <TextField
+                                                            type="tel"
                                                             id="outlined-required"
                                                             label="Points"
                                                             onChange={handleSetRewards}
