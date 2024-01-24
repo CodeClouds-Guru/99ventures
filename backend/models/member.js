@@ -211,9 +211,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${
-                this.city || ''
-              }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
+            }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -443,8 +442,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -501,8 +500,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let result = await Member.update(
         {
@@ -612,6 +611,7 @@ module.exports = (sequelize, DataTypes) => {
    */
 
   Member.getMemberTierData = async (member_id) => {
+    const moment = require("moment");
     let member = await Member.findOne({
       where: { id: member_id, status: 'member' },
     });
@@ -624,15 +624,10 @@ module.exports = (sequelize, DataTypes) => {
     let phone_no_verified_on = 0;
     if (member) {
       signup = 1;
-      email_verified = member.email_verified_on !== null ? 1 : 0;
-      profile_completed = member.profile_completed_on !== null ? 1 : 0;
-      phone_no_verified_on = member.phone_no_verified_on !== null ? 1 : 0;
-
-      var curr_date = new Date();
-      var member_signedup_date = new Date(member.created_at);
-      var diff = curr_date.getTime() - member_signedup_date.getTime();
-      var daydiff = diff / (1000 * 60 * 60 * 24);
-      registered_days = Math.floor(daydiff);
+      email_verified = !member.email_verified_on ? 1 : 0;
+      profile_completed = !member.profile_completed_on ? 1 : 0;
+      phone_no_verified_on = !member.phone_no_verified_on ? 1 : 0;
+      registered_days = moment().diff(moment(member.created_at), 'days');
 
       let get_total_withdrawal_data = await Member.getTotalWithdrawalData(
         member_id

@@ -2,11 +2,9 @@ class MembershipTierShiftListner {
   constructor() {
     this.listen = this.listen.bind(this);
   }
-  async listen(payload) {
-    const util = require('util');
-    const { Member } = require('./models/index');
-
-    return await Member.tierUpgrade(payload);
+  async listen(payload = null) {
+    console.log(await this.membershipTierRule());
+    // return await Member.tierUpgrade(payload);
   }
 
   /**
@@ -15,7 +13,7 @@ class MembershipTierShiftListner {
    * @returns Member Tier rule array
    */
   async membershipTierRule() {
-    const { MembershipTier, MemberShipTierRule } = require('../models/index');
+    const { MembershipTier, MemberShipTierRule } = require('./models');
     let model = await MembershipTier.findAll({
       where: { status: 'active' },
       include: {
