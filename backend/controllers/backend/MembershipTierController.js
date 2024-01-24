@@ -3,6 +3,7 @@ const {
   Rule,
   MemberShipTierAction,
   MemberShipTierRule,
+  MembershipTier,
 } = require('../../models/index');
 
 const FileHelper = require('../../helpers/fileHelper');
@@ -20,6 +21,10 @@ class MembershipTierController extends Controller {
   //override list api
   async list(req, res) {
     const options = this.getQueryOptions(req);
+    console.log(req);
+    let type = req.query.type || null;
+    if (type === 'chronology_update')
+      options.attributes = [...options.attributes, 'chronology'];
     console.log(options);
     const { docs, pages, total } = await this.model.paginate(options);
     return {
@@ -137,70 +142,91 @@ class MembershipTierController extends Controller {
   async update(req, res) {
     let company_portal_id = req.headers.site_id;
     req.body.company_portal_id = company_portal_id;
-    let model = await this.model.findOne({
-      where: { id: req.params.id },
-      include: {
-        model: MemberShipTierRule,
-      },
-    });
-    console.log('update', model);
-    if (req.files) {
-      let files = [];
-      files[0] = req.files.logo;
-      const fileHelper = new FileHelper(files, 'membership-tiers', req);
-      const file_name = await fileHelper.upload();
-      req.body.logo = file_name.files[0].filename;
+    let type = req.body.type || null;
 
-      let prev_image = model.logo;
-      if (prev_image && prev_image != '') {
-        let file_delete = await fileHelper.deleteFile(
-          prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
-        );
-      }
-    } else {
-      req.body.logo = model.logo;
-    }
+    // console.log('update', model);
     try {
-      //tier store
-      const { error, value } = this.model.validate(req);
-      if (error) {
-        const errorObj = new Error('Validation failed.');
-        errorObj.statusCode = 422;
-        errorObj.data = error.details.map((err) => err.message);
-        throw errorObj;
-      }
-      let request_data = req.body;
-      let rule_config = JSON.parse(req.body.configuration);
-
-      let valid_parentheses = await this.isValidParentheses(
-        rule_config.rules_config
-      );
-      if (valid_parentheses) {
-        request_data.updated_by = req.user.id;
-        request_data.reward_cash = req.body.cash || 0;
-        request_data.reward_point = req.body.point || 0;
-        request_data.status = 'active';
-        let model_update = await this.model.update(request_data, {
-          where: { id: req.params.id },
+      if (type === 'chronology_update') {
+        req.body.chronology_list.forEach(async function (record) {
+          let model_update = await MembershipTier.update(
+            { chronology: record.chronology },
+            {
+              where: { id: record.id },
+            }
+          );
         });
-        // console.log('request_data', rule_config);
-        // return;
-        //destroy tier rule config
-        let remove_rules = await this.removeRulesOnUpdate(req.params.id, model);
-
-        let membership_tier_rules = await this.formatTierRulesAndSave(
-          rule_config,
-          req.params.id
-        );
         return {
           status: true,
           message: 'Record has been updated successfully',
         };
       } else {
-        return {
-          status: false,
-          message: 'Config rule is not set properly',
-        };
+        let model = await this.model.findOne({
+          where: { id: req.params.id },
+          include: {
+            model: MemberShipTierRule,
+          },
+        });
+        if (req.files) {
+          let files = [];
+          files[0] = req.files.logo;
+          const fileHelper = new FileHelper(files, 'membership-tiers', req);
+          const file_name = await fileHelper.upload();
+          req.body.logo = file_name.files[0].filename;
+
+          let prev_image = model.logo;
+          if (prev_image && prev_image != '') {
+            let file_delete = await fileHelper.deleteFile(
+              prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
+            );
+          }
+        } else {
+          req.body.logo = model.logo;
+        }
+
+        //tier store
+        const { error, value } = this.model.validate(req);
+        if (error) {
+          const errorObj = new Error('Validation failed.');
+          errorObj.statusCode = 422;
+          errorObj.data = error.details.map((err) => err.message);
+          throw errorObj;
+        }
+        let request_data = req.body;
+        let rule_config = JSON.parse(req.body.configuration);
+
+        let valid_parentheses = await this.isValidParentheses(
+          rule_config.rules_config
+        );
+        if (valid_parentheses) {
+          request_data.updated_by = req.user.id;
+          request_data.reward_cash = req.body.cash || 0;
+          request_data.reward_point = req.body.point || 0;
+          request_data.status = 'active';
+          let model_update = await this.model.update(request_data, {
+            where: { id: req.params.id },
+          });
+          // console.log('request_data', rule_config);
+          // return;
+          //destroy tier rule config
+          let remove_rules = await this.removeRulesOnUpdate(
+            req.params.id,
+            model
+          );
+
+          let membership_tier_rules = await this.formatTierRulesAndSave(
+            rule_config,
+            req.params.id
+          );
+          return {
+            status: true,
+            message: 'Record has been updated successfully',
+          };
+        } else {
+          return {
+            status: false,
+            message: 'Config rule is not set properly',
+          };
+        }
       }
     } catch (error) {
       throw error;
@@ -212,7 +238,7 @@ class MembershipTierController extends Controller {
     // console.log('rule_obj', rule_obj);
 
     let rule_keys = Object.keys(rule_obj.rules_used);
-    rule_keys.forEach(function async(record, key) {
+    rule_keys.forEach(function (record, key) {
       rule_save_obj.push({
         membership_tier_action_id: rule_obj.rules_used[record].action,
         operator: rule_obj.rules_used[record].operator,
@@ -248,13 +274,13 @@ class MembershipTierController extends Controller {
   async removeRulesOnUpdate(membership_tier_id, model) {
     await MemberShipTierRule.destroy({
       where: { membership_tier_id: membership_tier_id },
-      truncate: true,
+      force: true,
     });
     //destroy rules
     let rule_id = model.MemberShipTierRule
       ? model.MemberShipTierRule.config_json.rule_used
       : '';
-    await Rule.destroy({ where: { id: rule_id }, truncate: true });
+    await Rule.destroy({ where: { id: rule_id }, force: true });
   }
 
   async isValidRuleConfigString(str) {
