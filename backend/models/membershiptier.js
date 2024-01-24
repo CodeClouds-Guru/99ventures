@@ -57,6 +57,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       status: DataTypes.STRING,
       reward_point: DataTypes.INTEGER,
+      chronology: DataTypes.INTEGER,
       reward_cash: DataTypes.FLOAT,
       created_by: DataTypes.BIGINT,
       updated_by: DataTypes.BIGINT,

@@ -73,6 +73,13 @@ class MembershipTierController extends Controller {
 
         // console.log(req.body);
 
+        let highest_chronology = await this.model.findOne({
+          attributes: ['chronology'],
+          order: [['id', 'desc']],
+          limit: 1,
+        });
+        // console.log('highest_chronology', highest_chronology);
+        request_data.chronology = highest_chronology.chronology + 1;
         let tier_save = await this.model.create(request_data, { silent: true });
         //rule action store
         let membership_tier_rules = await this.formatTierRulesAndSave(
@@ -241,12 +248,13 @@ class MembershipTierController extends Controller {
   async removeRulesOnUpdate(membership_tier_id, model) {
     await MemberShipTierRule.destroy({
       where: { membership_tier_id: membership_tier_id },
+      truncate: true,
     });
     //destroy rules
     let rule_id = model.MemberShipTierRule
       ? model.MemberShipTierRule.config_json.rule_used
       : '';
-    await Rule.destroy({ where: { id: rule_id } });
+    await Rule.destroy({ where: { id: rule_id }, truncate: true });
   }
 
   async isValidRuleConfigString(str) {
