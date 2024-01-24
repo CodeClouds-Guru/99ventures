@@ -223,7 +223,7 @@ const CreateUpdate = () => {
     }
 
     const handleSelectRules = (e) => {
-        if(rulesStatement.length && !['AND', 'OR', '('].includes(rulesStatement[rulesStatement.length -1])){
+        if(rulesStatement.length && !['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
             dispatch(showMessage({ variant: 'error', message: 'Operator needs to add!' }));
             return;
         }
@@ -234,12 +234,14 @@ const CreateUpdate = () => {
     }
 
     const handleLogicalOperator = (e) => {
-        if(!rulesStatement.length || ['AND', 'OR', '('].includes(rulesStatement[rulesStatement.length -1])){
+        if(!rulesStatement.length || ['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
             dispatch(showMessage({ variant: 'error', message: 'Operand needs to add!' }));
             return;
         }
         let val = e.target.value;
-        setRulesStatement([...rulesStatement, logicalOp[val]]);
+        console.log(val)
+        // setRulesStatement([...rulesStatement, logicalOp[val]]);
+        setRulesStatement([...rulesStatement, val]);
     }
 
     const handleSymbol = (e) => {
@@ -248,10 +250,10 @@ const CreateUpdate = () => {
             (val === '(' && rulesStatement.length &&
                 (
                     [')'].includes(rulesStatement[rulesStatement.length -1]) || 
-                    !['AND', 'OR'].includes(rulesStatement[rulesStatement.length -1])
+                    !['&&', '||'].includes(rulesStatement[rulesStatement.length -1])
                 )
             ) ||
-            (val === ')' && (!rulesStatement.length || ['(', 'AND', 'OR'].includes(rulesStatement[rulesStatement.length -1])))
+            (val === ')' && (!rulesStatement.length || ['(', '&&', '||'].includes(rulesStatement[rulesStatement.length -1])))
         ){
             dispatch(showMessage({ variant: 'error', message: 'Please check your entry!' }));
             return;
@@ -283,7 +285,11 @@ const CreateUpdate = () => {
                 }
                 delete json.action_variable;
                 return Object.values(json).join(' ');
-            } else {
+            } else if(Object.keys(logicalOp).includes(el)) {
+                rulesConfig += el;
+                return logicalOp[el];
+            } 
+            else {
                 rulesConfig += el;
                 return el;
             }
