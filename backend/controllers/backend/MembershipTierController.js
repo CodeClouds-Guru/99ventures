@@ -202,7 +202,7 @@ class MembershipTierController extends Controller {
 
   async formatTierRulesAndSave(rule_obj, membership_tier_id) {
     let rule_save_obj = [];
-    console.log('rule_obj', rule_obj);
+    // console.log('rule_obj', rule_obj);
 
     let rule_keys = Object.keys(rule_obj.rules_used);
     rule_keys.forEach(function async(record, key) {
@@ -214,7 +214,7 @@ class MembershipTierController extends Controller {
 
       rule_obj.rules_config = rule_obj.rules_config.replaceAll(
         `<<${[record]}>>`,
-        `${rule_obj.rules_used[record].action_variable}`
+        `${rule_obj.rules_used[record].action_variable} ${rule_obj.rules_used[record].operator} ${rule_obj.rules_used[record].value}`
       );
     });
 

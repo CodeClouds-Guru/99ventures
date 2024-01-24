@@ -12,7 +12,7 @@ module.exports = {
       defaultValue: 'active',
     });
     await queryInterface.addColumn('membership_tiers', 'reward_point', {
-      type: Sequelize.NUMBER,
+      type: Sequelize.INTEGER,
       defaultValue: 0,
     });
     await queryInterface.addColumn('membership_tiers', 'reward_cash', {
