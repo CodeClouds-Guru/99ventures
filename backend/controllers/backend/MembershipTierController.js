@@ -116,7 +116,6 @@ class MembershipTierController extends Controller {
           attributes: ['config_json'],
         },
       });
-      console.log(model);
       let rule_id = model.MemberShipTierRule
         ? model.MemberShipTierRule.config_json.rule_used
         : '';

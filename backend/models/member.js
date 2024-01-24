@@ -680,13 +680,23 @@ module.exports = (sequelize, DataTypes) => {
   Member.tierUpgrade = async (data) => {
     const db = require('../models/index');
     const { QueryTypes } = require('sequelize');
-    await db.sequelize.query(
-      'INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES (?, ?)',
-      {
-        type: QueryTypes.INSERT,
-        replacements: [data.membership_tier_id, data.member_id],
-      }
-    );
+    if (data.length > 0) {
+      var value_string = '';
+      const replacements = [];
+      data.forEach(item => {
+        value_string += '(?, ?),';
+        replacements.push(item.membership_tier_id)
+        replacements.push(item.member_id);
+      });
+      value_string = value_string.replace(/,*$/, '') + ';';
+      await db.sequelize.query(
+        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+        {
+          type: QueryTypes.INSERT,
+          replacements
+        }
+      );
+    }
     return true;
   };
 
