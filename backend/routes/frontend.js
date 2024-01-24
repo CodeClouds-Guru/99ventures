@@ -12,7 +12,7 @@ const { StaticContent, CompanyPortal } = require("../models")
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
 
-router.get('/panda', async (req, res) => {
+router.get('/test-membership-tier', async (req, res) => {
   const eventBus = require('../eventBus');
   eventBus.emit('membership_tier_shift', {});
 });

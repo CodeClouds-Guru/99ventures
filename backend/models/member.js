@@ -678,17 +678,27 @@ module.exports = (sequelize, DataTypes) => {
    * @returns Total Withdrawal Data object
    */
   Member.tierUpgrade = async (data) => {
-    const db = require('../models/index');
+    const db = require('../models');
     const { QueryTypes } = require('sequelize');
     if (data.length > 0) {
       var value_string = '';
       const replacements = [];
+      const tier_ids = [];
+      var member_id = null;
+
+      //generating query to insert data in bridge table
       data.forEach(item => {
         value_string += '(?, ?),';
+        tier_ids.push(item.membership_tier_id);
         replacements.push(item.membership_tier_id)
         replacements.push(item.member_id);
+        if (!member_id) {
+          member_id = item.member_id;
+        }
       });
       value_string = value_string.replace(/,*$/, '') + ';';
+
+      //executing query to insert data in bridge table
       await db.sequelize.query(
         `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
         {
@@ -696,6 +706,23 @@ module.exports = (sequelize, DataTypes) => {
           replacements
         }
       );
+
+      //determining top order membership level to assign in member row
+      const final_tier = await db.MembershipTier.findAll({
+        where: { id: tier_ids },
+        limit: 1,
+        order: [['chronology', 'desc']]
+      });
+      if (final_tier.length > 0 && member_id) {
+        await db.Member.update(
+          { membership_tier_id: final_tier[0].id },
+          {
+            where: {
+              id: member_id
+            }
+          }
+        )
+      }
     }
     return true;
   };
