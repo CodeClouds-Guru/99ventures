@@ -38,6 +38,11 @@ module.exports = {
           variable: 'registered_days',
           created_at: new Date(),
         },
+        {
+          name: 'Phone Number Verified',
+          variable: 'phone_no_verified_on',
+          created_at: new Date(),
+        },
       ],
       {}
     );

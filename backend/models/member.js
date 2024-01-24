@@ -231,6 +231,7 @@ module.exports = (sequelize, DataTypes) => {
         // },
       },
       primary_payment_method_id: DataTypes.TINYINT,
+      phone_no_verified_on: 'TIMESTAMP',
     },
     {
       sequelize,
@@ -601,6 +602,97 @@ module.exports = (sequelize, DataTypes) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  /**
+   * Get Member Tier Data.
+   * This Fn is to get member data according to membership tier rules
+   * @param {*} member_id
+   * @returns Member Tier Data object
+   */
+
+  Member.getMemberTierData = async (member_id) => {
+    let member = await Member.findOne({
+      where: { id: member_id, status: 'member' },
+    });
+    let signup = 0;
+    let email_verified = 0;
+    let profile_completed = 0;
+    let withdrawal_count = 0;
+    let withdrawn_amount = 0.0;
+    let registered_days = 0;
+    let phone_no_verified_on = 0;
+    if (member) {
+      signup = 1;
+      email_verified = member.email_verified_on !== null ? 1 : 0;
+      profile_completed = member.profile_completed_on !== null ? 1 : 0;
+      phone_no_verified_on = member.phone_no_verified_on !== null ? 1 : 0;
+
+      var curr_date = new Date();
+      var member_signedup_date = new Date(member.created_at);
+      var diff = curr_date.getTime() - member_signedup_date.getTime();
+      var daydiff = diff / (1000 * 60 * 60 * 24);
+      registered_days = Math.floor(daydiff);
+
+      let get_total_withdrawal_data = await Member.getTotalWithdrawalData(
+        member_id
+      );
+      withdrawal_count = get_total_withdrawal_data.total_paid_count;
+      withdrawn_amount = get_total_withdrawal_data.total_paid;
+    }
+
+    return {
+      signup,
+      email_verified,
+      profile_completed,
+      phone_no_verified_on,
+      withdrawal_count,
+      withdrawn_amount,
+      registered_days,
+    };
+  };
+
+  /**
+   * Get Total Withdrawal Data.
+   * This Fn is to get member withdrawal amount and count
+   * @param {*} member_id
+   * @returns Total Withdrawal Data object
+   */
+
+  Member.getTotalWithdrawalData = async (member_id) => {
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    //total paid
+    let total_paid = await db.sequelize.query(
+      "SELECT sum(member_transactions.amount) as total, count(member_transactions.id) as total_count FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'completed'",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    return {
+      total_paid: Math.abs(total_paid[0].total) || 0.0,
+      total_paid_count: total_paid[0].total_count || 0.0,
+    };
+  };
+
+  /**
+   * Tier Change.
+   * This Fn is upgrade membership tier
+   * @param {*} member_id
+   * @returns Total Withdrawal Data object
+   */
+  Member.tierUpgrade = async (data) => {
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    await db.sequelize.query(
+      'INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES (?, ?)',
+      {
+        type: QueryTypes.INSERT,
+        replacements: [data.membership_tier_id, data.member_id],
+      }
+    );
+    return true;
   };
 
   return Member;
