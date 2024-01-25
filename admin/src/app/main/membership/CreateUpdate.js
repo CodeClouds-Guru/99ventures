@@ -239,7 +239,6 @@ const CreateUpdate = () => {
             return;
         }
         let val = e.target.value;
-        console.log(val)
         // setRulesStatement([...rulesStatement, logicalOp[val]]);
         setRulesStatement([...rulesStatement, val]);
     }

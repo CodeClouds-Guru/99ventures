@@ -1,5 +1,6 @@
 import settingsConfig from 'app/configs/settingsConfig';
 import CreateUpdate from './CreateUpdate';
+import MembershipList from './MembershipList';
 
 const MembershipConfig = {
     settings: {
@@ -27,6 +28,11 @@ const MembershipConfig = {
         },
     },
     routes: [
+        {
+            path: 'app/membership-tiers/',
+            element: <MembershipList />,
+            auth: settingsConfig.defaultAuth
+        },
         {
             path: 'app/membership-tiers/:moduleId',
             element: <CreateUpdate/>,
