@@ -13,6 +13,7 @@ class IpLogController extends Controller {
       browser_language: 'Browser Language',
       fraud_score: 'Fraud Score',
       tor: 'Tor',
+      bot_status: 'Bot Status',
       vpn: 'VPN',
       proxy: 'Proxy',
       created_at: 'Created At',
