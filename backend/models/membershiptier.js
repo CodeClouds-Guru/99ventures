@@ -210,6 +210,7 @@ module.exports = (sequelize, DataTypes) => {
         limit: 1,
         order: [['chronology', 'desc']],
       });
+      // console.log('final_tier', final_tier);
       if (final_tier.length > 0 && member_id) {
         await db.Member.update(
           { membership_tier_id: final_tier[0].id },
@@ -220,6 +221,10 @@ module.exports = (sequelize, DataTypes) => {
           }
         );
       }
+      await db.MembershipTier.transactionUpdateOnTierUpgrade(
+        tier_ids,
+        member_id
+      );
     }
     return true;
   };
@@ -239,6 +244,7 @@ module.exports = (sequelize, DataTypes) => {
       where: { id: tier_ids },
       attributes: ['id', 'reward_cash', 'name'],
     });
+    console.log('updated_tiers', updated_tiers);
     let transaction_data = [];
     if (updated_tiers.length > 0) {
       for (let item of updated_tiers) {
@@ -269,7 +275,7 @@ module.exports = (sequelize, DataTypes) => {
         await db.MemberNotification.addMemberNotification({
           member_id,
           action: 'membership_tier_shift',
-          verbose: `Your tier has been upgraded to ${final_tier[0].name}`,
+          verbose: `Your tier has been upgraded to ${item.name}`,
         });
       }
       if (transaction_data.length > 0) {

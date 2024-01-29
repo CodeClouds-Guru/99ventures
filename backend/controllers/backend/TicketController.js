@@ -95,8 +95,9 @@ class TicketController extends Controller {
       else result.rows[i].setDataValue('username', '');
     }
     //Count Unread Tickets
-    let opended_ticket = await TicketController.prototype.getTotalOpenedTicket();
-    
+    let opended_ticket =
+      await TicketController.prototype.getTotalOpenedTicket();
+
     return {
       result: { data: result.rows, pages, total: result.count, opended_ticket },
       fields: this.model.fields,
@@ -214,7 +215,8 @@ class TicketController extends Controller {
         });
 
         //Count Opened Tickets
-        let count_opened_tkt = await TicketController.prototype.getTotalOpenedTicket();
+        let count_opened_tkt =
+          await TicketController.prototype.getTotalOpenedTicket();
 
         //all auto responders
         let auto_responders = await AutoResponder.findAll({
@@ -507,7 +509,10 @@ class TicketController extends Controller {
     let ticket_conv_ids = [];
     result.forEach(function (record, key) {
       if (record.TicketConversations.length > 0) {
-        ticket_conv_ids = [...ticket_conv_ids, ...record.TicketConversations.map((record) => record.id)];
+        ticket_conv_ids = [
+          ...ticket_conv_ids,
+          ...record.TicketConversations.map((record) => record.id),
+        ];
       }
     });
 
@@ -529,8 +534,8 @@ class TicketController extends Controller {
       'SELECT COUNT(id) AS total_open_ticket FROM `tickets` WHERE status = ? AND deleted_at IS NULL',
       { replacements: ['open'], type: QueryTypes.SELECT }
     );
-    console.log(ticketData[0].total_open_ticket)
-    return ticketData[0].total_open_ticket
+    // console.log(ticketData[0].total_open_ticket)
+    return ticketData[0].total_open_ticket;
   }
 }
 

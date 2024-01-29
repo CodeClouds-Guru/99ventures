@@ -5,8 +5,8 @@ class MembershipTierShiftListner {
     this.listen = this.listen.bind(this);
     this.assignMembershipLevel = this.assignMembershipLevel.bind(this);
   }
-  async listen(member_id = null) {
-    await this.assignMembershipLevel(member_id);
+  async listen(data) {
+    await this.assignMembershipLevel(data.member_id);
     // return await Member.tierUpgrade(payload);
   }
 
@@ -31,6 +31,7 @@ class MembershipTierShiftListner {
         continue;
       }
       const dataset = await db.Member.getMemberTierData(member_id);
+
       if (safeEval(rule_set[membership_tier], dataset)) {
         member_membership_tier_data.push({
           member_id,
@@ -38,6 +39,7 @@ class MembershipTierShiftListner {
         });
       }
     }
+
     if (member_membership_tier_data.length > 0) {
       await db.MembershipTier.tierUpgrade(member_membership_tier_data);
     }
@@ -78,9 +80,6 @@ class MembershipTierShiftListner {
 
     let member_tier_data = await Member.getMemberTierData(member_id);
     let membership_tier_rule = await this.membershipTierRule();
-
-    console.log(member_tier_data);
-    console.log(membership_tier_rule);
   }
 }
 

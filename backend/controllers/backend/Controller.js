@@ -9,7 +9,6 @@ class Controller {
 
   async list(req, res) {
     const options = this.getQueryOptions(req);
-    console.log(options);
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },
