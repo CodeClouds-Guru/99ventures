@@ -5,8 +5,8 @@ class MembershipTierShiftListner {
     this.listen = this.listen.bind(this);
     this.assignMembershipLevel = this.assignMembershipLevel.bind(this);
   }
-  async listen(payload = null) {
-    await this.assignMembershipLevel(1);
+  async listen(member_id = null) {
+    await this.assignMembershipLevel(member_id);
     // return await Member.tierUpgrade(payload);
   }
 
@@ -23,7 +23,9 @@ class MembershipTierShiftListner {
         replacements: [member_id],
       }
     );
-    member_membership_tier_ids = member_membership_tier_ids.map(tier => tier.membership_tier_id);
+    member_membership_tier_ids = member_membership_tier_ids.map(
+      (tier) => tier.membership_tier_id
+    );
     for (const membership_tier in rule_set) {
       if (member_membership_tier_ids.includes(parseInt(membership_tier, 10))) {
         continue;
@@ -32,12 +34,12 @@ class MembershipTierShiftListner {
       if (safeEval(rule_set[membership_tier], dataset)) {
         member_membership_tier_data.push({
           member_id,
-          membership_tier_id: membership_tier
-        })
+          membership_tier_id: membership_tier,
+        });
       }
     }
     if (member_membership_tier_data.length > 0) {
-      await db.Member.tierUpgrade(member_membership_tier_data);
+      await db.MembershipTier.tierUpgrade(member_membership_tier_data);
     }
   }
 
@@ -57,8 +59,10 @@ class MembershipTierShiftListner {
     });
     let rule_statement = {};
     model.forEach((record) => {
-      rule_statement[record.id.toString()] = (record.MemberShipTierRule && record.MemberShipTierRule.config_json) ? record.MemberShipTierRule.config_json.rule_config
-        : '';
+      rule_statement[record.id.toString()] =
+        record.MemberShipTierRule && record.MemberShipTierRule.config_json
+          ? record.MemberShipTierRule.config_json.rule_config
+          : '';
     });
     return rule_statement;
   }

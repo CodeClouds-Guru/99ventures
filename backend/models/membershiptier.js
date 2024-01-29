@@ -168,6 +168,118 @@ module.exports = (sequelize, DataTypes) => {
     },
   };
 
+  /**
+   * Tier Change.
+   * This Fn is upgrade membership tier
+   * @param {*} member_id
+   * @returns Total Withdrawal Data object
+   */
+  MembershipTier.tierUpgrade = async (data) => {
+    const db = require('../models');
+    const { QueryTypes } = require('sequelize');
+    if (data.length > 0) {
+      var value_string = '';
+      const replacements = [];
+      const tier_ids = [];
+      var member_id = null;
+
+      //generating query to insert data in bridge table
+      data.forEach((item) => {
+        value_string += '(?, ?),';
+        tier_ids.push(item.membership_tier_id);
+        replacements.push(item.membership_tier_id);
+        replacements.push(item.member_id);
+        if (!member_id) {
+          member_id = item.member_id;
+        }
+      });
+      value_string = value_string.replace(/,*$/, '') + ';';
+
+      //executing query to insert data in bridge table
+      await db.sequelize.query(
+        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+        {
+          type: QueryTypes.INSERT,
+          replacements,
+        }
+      );
+
+      //determining top order membership level to assign in member row
+      const final_tier = await db.MembershipTier.findAll({
+        where: { id: tier_ids },
+        limit: 1,
+        order: [['chronology', 'desc']],
+      });
+      if (final_tier.length > 0 && member_id) {
+        await db.Member.update(
+          { membership_tier_id: final_tier[0].id },
+          {
+            where: {
+              id: member_id,
+            },
+          }
+        );
+      }
+    }
+    return true;
+  };
+
+  /**
+   * Tier Change.
+   * This Fn is to update Transaction Data On Tier Upgrade
+   * @param {*} member_id
+   * @returns Tier ids
+   */
+  MembershipTier.transactionUpdateOnTierUpgrade = async (
+    tier_ids,
+    member_id
+  ) => {
+    const db = require('../models');
+    const updated_tiers = await db.MembershipTier.findAll({
+      where: { id: tier_ids },
+      attributes: ['id', 'reward_cash', 'name'],
+    });
+    let transaction_data = [];
+    if (updated_tiers.length > 0) {
+      for (let item of updated_tiers) {
+        let get_member_balance = await db.MemberBalance.findOne({
+          where: { member_id: member_id, amount_type: 'cash' },
+          attributes: ['amount'],
+        });
+
+        let updated_amount =
+          parseFloat(get_member_balance.amount) + parseFloat(item.reward_cash);
+        transaction_data.push({
+          member_id: member_id,
+          amount: item.reward_cash,
+          note: `Membership Tier Upgraded to ${item.name}`,
+          type: 'credited',
+          amount_action: 'membership_tier_shift',
+          created_by: member_id || '',
+          status: 2,
+          completed_at: new Date(),
+          balance: updated_amount,
+          payload: null,
+          currency: 'USD',
+        });
+        await db.MemberBalance.update(
+          { amount: updated_amount },
+          { where: { member_id: member_id, amount_type: 'cash' } }
+        );
+        await db.MemberNotification.addMemberNotification({
+          member_id,
+          action: 'membership_tier_shift',
+          verbose: `Your tier has been upgraded to ${final_tier[0].name}`,
+        });
+      }
+      if (transaction_data.length > 0) {
+        var transaction_resp = await db.MemberTransaction.bulkCreate(
+          transaction_data
+        );
+      }
+    }
+    return true;
+  };
   sequelizePaginate.paginate(MembershipTier);
   return MembershipTier;
 };

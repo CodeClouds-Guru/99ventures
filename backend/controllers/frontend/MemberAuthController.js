@@ -144,6 +144,13 @@ class MemberAuthController {
         member_id: member.id,
         action: 'Member Logged In',
       });
+      //Event For Membership Tier Shift
+      let membership_tier_shift_event_bus = eventBus.emit(
+        'membership_tier_shift',
+        {
+          member_id: member.id,
+        }
+      );
       await Member.update(
         { last_active_on: new Date() },
         { where: { id: member.id } }
@@ -302,6 +309,14 @@ class MemberAuthController {
             member_id: member_details.id,
             action: 'Member Sign Up',
           });
+
+          //Event For Membership Tier Shift
+          let membership_tier_shift_event_bus = eventBus.emit(
+            'membership_tier_shift',
+            {
+              member_id: member_details.id,
+            }
+          );
           req.session.flash = {
             message: 'Registered successfully!',
             success_status: true,
@@ -485,6 +500,13 @@ class MemberAuthController {
         member_id: member_details.id,
         action: 'Member Logged In',
       });
+      //Event For Membership Tier Shift
+      let membership_tier_shift_event_bus = eventBus.emit(
+        'membership_tier_shift',
+        {
+          member_id: member_details.id,
+        }
+      );
       // req.session.flash = {
       //   message:
       //     'Welcome to Moresurveys! Your email has been verified successfully.',
@@ -599,6 +621,13 @@ class MemberAuthController {
               action: 'Profile Completed',
             });
 
+            //Event For Membership Tier Shift
+            let membership_tier_shift_event_bus = eventBus.emit(
+              'membership_tier_shift',
+              {
+                member_id: member.id,
+              }
+            );
             let bonus = await Setting.findOne({
               where: {
                 settings_key: 'complete_profile_bonus',

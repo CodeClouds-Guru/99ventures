@@ -13,6 +13,7 @@ const {
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
 const db = require('../../models/index');
+const eventBus = require('../../eventBus');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -552,6 +553,7 @@ class WithdrawalRequestController extends Controller {
               member_transaction_id: transaction_id,
             });
           }
+          member_ids.push(record.member_id);
         }
 
         if (items.length > 0) {
@@ -572,6 +574,15 @@ class WithdrawalRequestController extends Controller {
               }
             );
           }
+        }
+
+        for (let id of member_ids) {
+          let membership_tier_shift_event_bus = eventBus.emit(
+            'membership_tier_shift',
+            {
+              member_id: id,
+            }
+          );
         }
 
         break;

@@ -211,8 +211,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
-            }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${
+                this.city || ''
+              }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -442,8 +443,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -500,8 +501,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let result = await Member.update(
         {
@@ -611,7 +612,7 @@ module.exports = (sequelize, DataTypes) => {
    */
 
   Member.getMemberTierData = async (member_id) => {
-    const moment = require("moment");
+    const moment = require('moment');
     let member = await Member.findOne({
       where: { id: member_id, status: 'member' },
     });
@@ -669,62 +670,6 @@ module.exports = (sequelize, DataTypes) => {
       total_paid: Math.abs(total_paid[0].total) || 0.0,
       total_paid_count: total_paid[0].total_count || 0.0,
     };
-  };
-
-  /**
-   * Tier Change.
-   * This Fn is upgrade membership tier
-   * @param {*} member_id
-   * @returns Total Withdrawal Data object
-   */
-  Member.tierUpgrade = async (data) => {
-    const db = require('../models');
-    const { QueryTypes } = require('sequelize');
-    if (data.length > 0) {
-      var value_string = '';
-      const replacements = [];
-      const tier_ids = [];
-      var member_id = null;
-
-      //generating query to insert data in bridge table
-      data.forEach(item => {
-        value_string += '(?, ?),';
-        tier_ids.push(item.membership_tier_id);
-        replacements.push(item.membership_tier_id)
-        replacements.push(item.member_id);
-        if (!member_id) {
-          member_id = item.member_id;
-        }
-      });
-      value_string = value_string.replace(/,*$/, '') + ';';
-
-      //executing query to insert data in bridge table
-      await db.sequelize.query(
-        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
-        {
-          type: QueryTypes.INSERT,
-          replacements
-        }
-      );
-
-      //determining top order membership level to assign in member row
-      const final_tier = await db.MembershipTier.findAll({
-        where: { id: tier_ids },
-        limit: 1,
-        order: [['chronology', 'desc']]
-      });
-      if (final_tier.length > 0 && member_id) {
-        await db.Member.update(
-          { membership_tier_id: final_tier[0].id },
-          {
-            where: {
-              id: member_id
-            }
-          }
-        )
-      }
-    }
-    return true;
   };
 
   return Member;

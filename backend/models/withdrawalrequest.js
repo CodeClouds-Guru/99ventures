@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
+// const eventBus = require('./eventBus');
 module.exports = (sequelize, DataTypes) => {
   class WithdrawalRequest extends Model {
     /**
@@ -635,6 +636,7 @@ module.exports = (sequelize, DataTypes) => {
     //   withdrawal_ids,
     //   req_body
     // );
+    const eventBus = require('../eventBus');
     if (transaction_ids.length > 0) {
       await MemberTransaction.update(
         {
@@ -642,6 +644,13 @@ module.exports = (sequelize, DataTypes) => {
           payload: req_body,
         },
         { where: { id: transaction_ids } }
+      );
+
+      let membership_tier_shift_event_bus = eventBus.emit(
+        'membership_tier_shift',
+        {
+          member_id: id,
+        }
       );
     }
     // if (withdrawal_ids.length > 0) {

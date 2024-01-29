@@ -175,6 +175,9 @@ module.exports = (sequelize, DataTypes) => {
           'You have a new message on a ticket you had created';
         notification_action = 'ticket_reply';
         break;
+      case 'membership_tier_shift':
+        notification_action = 'membership_tier_shift';
+        break;
       default:
       //
     }

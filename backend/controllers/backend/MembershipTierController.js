@@ -21,11 +21,9 @@ class MembershipTierController extends Controller {
   //override list api
   async list(req, res) {
     const options = this.getQueryOptions(req);
-    console.log(req);
     let type = req.query.type || null;
     if (type === 'chronology_update')
       options.attributes = [...options.attributes, 'chronology'];
-    console.log(options);
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },
@@ -234,19 +232,24 @@ class MembershipTierController extends Controller {
 
   async formatTierRulesAndSave(rule_obj, membership_tier_id) {
     let rule_save_obj = [];
-    // console.log('rule_obj', rule_obj);
 
     let rule_keys = Object.keys(rule_obj.rules_used);
+    let rules_config = rule_obj.rules_config;
+
     rule_keys.forEach(function (record, key) {
       rule_save_obj.push({
         membership_tier_action_id: rule_obj.rules_used[record].action,
         operator: rule_obj.rules_used[record].operator,
         value: rule_obj.rules_used[record].value,
       });
-
       rule_obj.rules_config = rule_obj.rules_config.replaceAll(
         `<<${[record]}>>`,
         `${rule_obj.rules_used[record].action_variable} ${rule_obj.rules_used[record].operator} ${rule_obj.rules_used[record].value}`
+      );
+
+      rules_config = rules_config.replaceAll(
+        `<<${[record]}>>`,
+        `${rule_obj.rules_used[record].action_variable}`
       );
     });
 
@@ -254,9 +257,11 @@ class MembershipTierController extends Controller {
     rule = rule.map((info) => {
       return info.id;
     });
+
     let config_json_obj = {
       rule_used: rule,
       rule_config: rule_obj.rules_config.trim(),
+      rules_config_admin: rules_config.trim(),
       rule_statement: rule_obj.rules_statement,
     };
     let membership_tier_rule_obj = {
