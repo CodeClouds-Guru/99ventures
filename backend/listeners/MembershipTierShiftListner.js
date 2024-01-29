@@ -6,7 +6,7 @@ class MembershipTierShiftListner {
     this.assignMembershipLevel = this.assignMembershipLevel.bind(this);
   }
   async listen(data) {
-    await this.assignMembershipLevel(data.member_id);
+    return await this.assignMembershipLevel(data.member_id);
     // return await Member.tierUpgrade(payload);
   }
 
@@ -43,6 +43,7 @@ class MembershipTierShiftListner {
     if (member_membership_tier_data.length > 0) {
       await db.MembershipTier.tierUpgrade(member_membership_tier_data);
     }
+    return true;
   }
 
   /**
