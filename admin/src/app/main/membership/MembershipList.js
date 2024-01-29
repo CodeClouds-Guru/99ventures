@@ -54,11 +54,14 @@ const MembershipList = () => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        console.log(newValue)
     };
 
     React.useEffect(()=>{
-        getMembershipLevelData()
-    }, []);
+        if(value === 1){
+            getMembershipLevelData();
+        }
+    }, [value]);
 
     const getMembershipLevelData = () => {
         axios.get(`membership-tiers?type=chronology_update`)
@@ -127,7 +130,7 @@ const MembershipList = () => {
                             customHeading="Membership Tiers"
                         />
                     }
-                    scroll={isMobile ? 'normal' : 'page'}
+                    scroll="content"
                 />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
@@ -169,7 +172,7 @@ const MembershipList = () => {
                             </div>       
                         </>              
                     } 
-                    scroll="normal" 
+                    scroll="content" 
                 />
             </CustomTabPanel>
         </Box>

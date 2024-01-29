@@ -414,7 +414,7 @@ const CreateUpdate = () => {
                     setRulesAction(record.rule_actions);
                     setMembershipName(record.name);
                     setRulesJson(preparedRules);
-                    convertExpressionToRule(record.MemberShipTierRule.config_json.rule_config, record.rules, record.rule_actions);
+                    convertExpressionToRule(record.MemberShipTierRule.config_json.rules_config_admin, record.rules, record.rule_actions);
                     setHelpertext(record.MemberShipTierRule.config_json.rule_statement);
                 } else {
                     dispatch(showMessage({ variant: 'error', message: response.data.results.message }));
