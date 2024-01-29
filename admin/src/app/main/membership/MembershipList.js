@@ -54,7 +54,6 @@ const MembershipList = () => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        console.log(newValue)
     };
 
     React.useEffect(()=>{
