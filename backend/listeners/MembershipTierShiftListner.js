@@ -1,4 +1,4 @@
-const { string } = require('joi');
+// const { string } = require('joi');
 
 class MembershipTierShiftListner {
   constructor() {
@@ -76,12 +76,12 @@ class MembershipTierShiftListner {
    * @param member_id
    * @returns
    */
-  async evaluateMemberTier(member_id) {
-    const { Member } = require('../models/index');
+  // async evaluateMemberTier(member_id) {
+  //   const { Member } = require('../models/index');
 
-    let member_tier_data = await Member.getMemberTierData(member_id);
-    let membership_tier_rule = await this.membershipTierRule();
-  }
+  //   let member_tier_data = await Member.getMemberTierData(member_id);
+  //   let membership_tier_rule = await this.membershipTierRule();
+  // }
 }
 
 module.exports = {
