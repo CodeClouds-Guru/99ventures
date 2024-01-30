@@ -86,6 +86,7 @@ const CreateUpdate = () => {
     const [membershipLogo, setMembershipLogo] = useState('');
     const [logicalOperator, setLogicalOperator] = useState('');
     const [monetoryBenefit, setMonetoryBenefit] = useState(false);
+    const [sendEmail, setSendEmail] = useState(false);
     const [membershipRewards, setMembershipRewards] = useState(0);
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
     const [logo, setLogo] = useState('');
@@ -326,6 +327,7 @@ const CreateUpdate = () => {
         const params = new FormData();
         params.append('name', membershipName);
         params.append('logo', membershipLogo);
+        params.append('send_email', sendEmail);
         if(monetoryBenefit) {
             params.append('cash', rewardsType ? membershipRewards : 0 );
             params.append('points', !rewardsType ? membershipRewards : 0 )
@@ -410,6 +412,7 @@ const CreateUpdate = () => {
                             setMembershipRewards(record.reward_point);
                         }
                     }
+                    setSendEmail(record.send_email);
                     setLogo(record.logo);
                     setRulesAction(record.rule_actions);
                     setMembershipName(record.name);
@@ -514,7 +517,10 @@ const CreateUpdate = () => {
                                                 />
                                             </div>
                                         )
-                                    }                                    
+                                    }      
+                                     <FormControl className="w-1/2 mb-10">
+                                        <FormControlLabel control={<Switch checked={sendEmail} onChange={()=>setSendEmail(!sendEmail)} />} label="Send member an email on reaching this level" />
+                                    </FormControl>                             
                                 </div>
                             </AccordionDetails>
                         </Accordion>
