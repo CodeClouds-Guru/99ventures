@@ -9,6 +9,7 @@ const {
   MemberTransaction,
   WithdrawalRequest,
   MemberBalance,
+  MembershipTier,
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
@@ -94,6 +95,7 @@ class WithdrawalRequestController extends Controller {
           model: Member,
           paranoid: false,
           attributes: ['id', 'username', 'status', 'admin_status'],
+          include: { model: MembershipTier, attributes: ['name'] },
         },
       ];
       options.subQuery = false;
@@ -128,7 +130,10 @@ class WithdrawalRequestController extends Controller {
           '',
         ];
         if (row.Member) {
-          username = row.Member.username;
+          let tier_name = row.Member.MembershipTier
+            ? `(${row.Member.MembershipTier.name})`
+            : '';
+          username = `${row.Member.username} ${tier_name}`;
           status = row.Member.status;
           admin_status = row.Member.admin_status;
         }

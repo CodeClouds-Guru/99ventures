@@ -36,6 +36,7 @@ class TicketController extends Controller {
       {
         model: Member,
         attributes: ['username'],
+        include: { model: MembershipTier, attributes: ['name'] },
         paranoid: false,
       },
     ];
@@ -87,12 +88,15 @@ class TicketController extends Controller {
     let result = await this.model.findAndCountAll(options);
     let pages = Math.ceil(result.count / limit);
     for (let i = 0; i < result.rows.length; i++) {
-      if (result.rows[i].Member)
+      if (result.rows[i].Member) {
+        let tier_name = result.rows[i].Member.MembershipTier
+          ? `(${result.rows[i].Member.MembershipTier.name})`
+          : '';
         result.rows[i].setDataValue(
           'username',
-          result.rows[i].Member.username || ''
+          `${result.rows[i].Member.username} ${tier_name}` || ''
         );
-      else result.rows[i].setDataValue('username', '');
+      } else result.rows[i].setDataValue('username', '');
     }
     //Count Unread Tickets
     let opended_ticket =
