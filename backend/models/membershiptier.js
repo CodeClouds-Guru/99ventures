@@ -248,34 +248,51 @@ module.exports = (sequelize, DataTypes) => {
     let transaction_data = [];
     if (updated_tiers.length > 0) {
       for (let item of updated_tiers) {
-        let get_member_balance = await db.MemberBalance.findOne({
-          where: { member_id: member_id, amount_type: 'cash' },
-          attributes: ['amount'],
+        // let get_member_balance = await db.MemberBalance.findOne({
+        //   where: { member_id: member_id, amount_type: 'cash' },
+        //   attributes: ['amount'],
+        // });
+        let member = await db.Member.findOne({
+          where: { id: member_id },
+          attributes: ['first_name', 'last_name', 'username'],
+          include: {
+            model: db.MemberBalance,
+            as: 'member_amounts',
+            attributes: ['amount'],
+            where: { amount_type: 'cash' },
+          },
         });
+        let verbose = `Congratulations ${member.username}, you're now a ${item.name} MoreSurveys member.`;
+        if (item.reward_cash > 0) {
+          let updated_amount =
+            parseFloat(member.member_amounts[0].amount) +
+            parseFloat(item.reward_cash);
+          transaction_data.push({
+            member_id: member_id,
+            amount: item.reward_cash,
+            note: `Membership Tier Upgraded to ${item.name}`,
+            type: 'credited',
+            amount_action: 'membership_tier_shift',
+            created_by: member_id || '',
+            status: 2,
+            completed_at: new Date(),
+            balance: updated_amount,
+            payload: null,
+            currency: 'USD',
+          });
+          await db.MemberBalance.update(
+            { amount: updated_amount },
+            { where: { member_id: member_id, amount_type: 'cash' } }
+          );
 
-        let updated_amount =
-          parseFloat(get_member_balance.amount) + parseFloat(item.reward_cash);
-        transaction_data.push({
-          member_id: member_id,
-          amount: item.reward_cash,
-          note: `Membership Tier Upgraded to ${item.name}`,
-          type: 'credited',
-          amount_action: 'membership_tier_shift',
-          created_by: member_id || '',
-          status: 2,
-          completed_at: new Date(),
-          balance: updated_amount,
-          payload: null,
-          currency: 'USD',
-        });
-        await db.MemberBalance.update(
-          { amount: updated_amount },
-          { where: { member_id: member_id, amount_type: 'cash' } }
-        );
+          verbose += `You have been rewarded ${item.reward_cash} for reaching this level`;
+        }
+        verbose += `<a href='/dashboard'>Click here</a> to find out more about MoreSurveys membership levels. `;
+
         await db.MemberNotification.addMemberNotification({
           member_id,
           action: 'membership_tier_shift',
-          verbose: `Your tier has been upgraded to ${item.name}`,
+          verbose: verbose,
         });
       }
       if (transaction_data.length > 0) {
