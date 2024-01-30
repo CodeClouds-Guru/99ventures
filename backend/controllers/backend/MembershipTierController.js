@@ -22,8 +22,10 @@ class MembershipTierController extends Controller {
   async list(req, res) {
     const options = this.getQueryOptions(req);
     let type = req.query.type || null;
-    if (type === 'chronology_update')
+    if (type === 'chronology_update') {
       options.attributes = [...options.attributes, 'chronology'];
+      options.order = [['chronology', 'desc']];
+    }
     const { docs, pages, total } = await this.model.paginate(options);
     return {
       result: { data: docs, pages, total },
@@ -82,7 +84,9 @@ class MembershipTierController extends Controller {
           limit: 1,
         });
         // console.log('highest_chronology', highest_chronology);
-        request_data.chronology = highest_chronology.chronology + 1;
+        request_data.chronology = highest_chronology
+          ? highest_chronology.chronology + 1
+          : 1;
         let tier_save = await this.model.create(request_data, { silent: true });
         //rule action store
         let membership_tier_rules = await this.formatTierRulesAndSave(

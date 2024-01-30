@@ -229,7 +229,7 @@ class StaticPageController {
     //     require: false,
     //   };
     // }
-    newsOptions.logging = console.log;
+    // newsOptions.logging = console.log;
     const getNews = await News.findOne(newsOptions);
     if (getNews === null) {
       res.redirect('/404');

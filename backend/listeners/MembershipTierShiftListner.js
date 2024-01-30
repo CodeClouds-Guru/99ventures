@@ -1,4 +1,4 @@
-const { string } = require('joi');
+// const { string } = require('joi');
 
 class MembershipTierShiftListner {
   constructor() {
@@ -6,7 +6,7 @@ class MembershipTierShiftListner {
     this.assignMembershipLevel = this.assignMembershipLevel.bind(this);
   }
   async listen(data) {
-    await this.assignMembershipLevel(data.member_id);
+    return await this.assignMembershipLevel(data.member_id);
     // return await Member.tierUpgrade(payload);
   }
 
@@ -31,6 +31,9 @@ class MembershipTierShiftListner {
         continue;
       }
       const dataset = await db.Member.getMemberTierData(member_id);
+      console.log('dataset', dataset);
+      console.log('rule_set', rule_set);
+      console.log('member_membership_tier_ids', member_membership_tier_ids);
 
       if (safeEval(rule_set[membership_tier], dataset)) {
         member_membership_tier_data.push({
@@ -43,6 +46,7 @@ class MembershipTierShiftListner {
     if (member_membership_tier_data.length > 0) {
       await db.MembershipTier.tierUpgrade(member_membership_tier_data);
     }
+    return true;
   }
 
   /**
@@ -75,12 +79,12 @@ class MembershipTierShiftListner {
    * @param member_id
    * @returns
    */
-  async evaluateMemberTier(member_id) {
-    const { Member } = require('../models/index');
+  // async evaluateMemberTier(member_id) {
+  //   const { Member } = require('../models/index');
 
-    let member_tier_data = await Member.getMemberTierData(member_id);
-    let membership_tier_rule = await this.membershipTierRule();
-  }
+  //   let member_tier_data = await Member.getMemberTierData(member_id);
+  //   let membership_tier_rule = await this.membershipTierRule();
+  // }
 }
 
 module.exports = {
