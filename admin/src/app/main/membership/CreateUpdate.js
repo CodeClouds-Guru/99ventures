@@ -86,7 +86,7 @@ const CreateUpdate = () => {
     const [membershipLogo, setMembershipLogo] = useState('');
     const [logicalOperator, setLogicalOperator] = useState('');
     const [monetoryBenefit, setMonetoryBenefit] = useState(false);
-    const [sendEmail, setSendEmail] = useState(false);
+    const [sendEmail, setSendEmail] = useState(0);
     const [membershipRewards, setMembershipRewards] = useState(0);
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
     const [logo, setLogo] = useState('');
@@ -442,6 +442,11 @@ const CreateUpdate = () => {
         rulesStatement.pop();
         setRulesStatement([...rulesStatement]);
     }
+
+    const handleSendEmail = (e) => {
+        setSendEmail(e.target.checked ? 1 : 0)
+    }
+
     return (
         <FusePageCardSimple
             header={
@@ -519,7 +524,7 @@ const CreateUpdate = () => {
                                         )
                                     }      
                                      <FormControl className="w-1/2 mb-10">
-                                        <FormControlLabel control={<Switch checked={sendEmail} onChange={()=>setSendEmail(!sendEmail)} />} label="Send member an email on reaching this level" />
+                                        <FormControlLabel control={<Switch checked={Boolean(sendEmail)} onChange={handleSendEmail} />} label="Send member an email on reaching this level" />
                                     </FormControl>                             
                                 </div>
                             </AccordionDetails>
