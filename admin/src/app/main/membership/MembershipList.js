@@ -4,7 +4,7 @@ import Tab from '@mui/material/Tab';
 import List from '../crud/list/List';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import DragHandleIcon from '@mui/icons-material/DragIndicator';
 import { motion } from 'framer-motion';
@@ -46,15 +46,12 @@ function a11yProps(index) {
 
 const MembershipList = () => {
     const dispatch = useDispatch();
-    const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('lg'));
     const [value, setValue] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
     const [tiers, setTiers] = React.useState([]);
+    const [initialOrder, setInitialOrder] = React.useState([]);
 
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
+    const handleChange = (event, newValue) => setValue(newValue);
 
     React.useEffect(()=>{
         if(value === 1){
@@ -67,7 +64,8 @@ const MembershipList = () => {
         .then((response) => {
             if (response.data.results.result) {
                 const record = response.data.results.result;
-               setTiers(record.data)
+               setTiers(record.data);
+               setInitialOrder(record.data);
             } else {
                 dispatch(showMessage({ variant: 'error', message: response.data.results.message }));
             }
@@ -107,9 +105,9 @@ const MembershipList = () => {
             })
     }
 
-    const onDrop = ({ removedIndex, addedIndex }) => {
-        setTiers(items => arrayMoveImmutable(items, removedIndex, addedIndex));
-    };
+    const onDrop = ({ removedIndex, addedIndex }) => setTiers(items => arrayMoveImmutable(items, removedIndex, addedIndex));
+    const handleResetOrder = () => setTiers(initialOrder);
+
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -152,11 +150,16 @@ const MembershipList = () => {
                                                 tiers.length ? tiers.map(row => {
                                                     return (
                                                         <Draggable key={Math.random()}>
-                                                            <div className='p-20 bg-gray-50 mb-10 rounded shadow-md flex'>
-                                                                <div className="drag-handle mr-10 cursor-move">
-                                                                    <DragHandleIcon/> 
-                                                                </div> 
-                                                                {row.name}
+                                                            <div className='p-20 bg-gray-50 mb-10 rounded shadow-md flex justify-between items-center'>
+                                                                <div className='flex items-center'>
+                                                                    <div className="drag-handle mr-10 cursor-move">
+                                                                        <DragHandleIcon/> 
+                                                                    </div> 
+                                                                    <Typography variant="body1">{row.name}</Typography>
+                                                                </div>
+                                                                <div className='bg-gray-200 w-24 rounded-full h-24 text-center'>
+                                                                    <Typography variant="caption">{row.chronology}</Typography>
+                                                                </div>
                                                             </div>
                                                         </Draggable>
                                                     )
@@ -165,6 +168,7 @@ const MembershipList = () => {
                                         </Container>
                                     </div>
                                     <div className='mt-24 w-full text-center'>
+                                        <Button color="primary" disabled={JSON.stringify(tiers) === JSON.stringify(initialOrder)} className="w-1/4 mr-20" variant="outlined" onClick={handleResetOrder}>Reset</Button>
                                         <LoadingButton color="primary" className="w-1/4" loading={loading} variant="contained" onClick={updateMembershipLevel}>Save</LoadingButton>
                                     </div>
                                 </div>
