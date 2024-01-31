@@ -24,7 +24,7 @@ class MembershipTierController extends Controller {
     let type = req.query.type || null;
     if (type === 'chronology_update') {
       options.attributes = [...options.attributes, 'chronology'];
-      options.order = [['chronology', 'desc']];
+      options.order = [['chronology', 'asc']];
     }
     const { docs, pages, total } = await this.model.paginate(options);
     return {

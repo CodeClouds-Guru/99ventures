@@ -91,7 +91,8 @@ const MembershipList = () => {
         axios.post(jwtServiceConfig.membershipUpdate, params)
             .then((response) => {
                 setLoading(false);
-                if (response.data.results.status) {                 
+                if (response.data.results.status) {
+                    getMembershipLevelData()
                     dispatch(showMessage({ variant: 'success', message: response.data.results.message }));
 
                 } else {
@@ -141,7 +142,7 @@ const MembershipList = () => {
                             >
                                 <Typography variant="h5" className="font-extrabold tracking-tight capitalize">Configurations</Typography>
                             </motion.div>
-                        
+                            
                             <div className='justify-center flex p-16' >                            
                                 <div className='flex w-1/2 flex-col'>
                                     <div className='border-dashed border-2 border-gray-700 w-full p-16' style={{minHeight: '30rem'}}>
