@@ -625,9 +625,9 @@ module.exports = (sequelize, DataTypes) => {
     let phone_no_verified_on = 0;
     if (member) {
       signup = 1;
-      email_verified = !member.email_verified_on ? 1 : 0;
-      profile_completed = !member.profile_completed_on ? 1 : 0;
-      phone_no_verified_on = !member.phone_no_verified_on ? 1 : 0;
+      email_verified = member.email_verified_on ? 1 : 0;
+      profile_completed = member.profile_completed_on ? 1 : 0;
+      phone_no_verified_on = member.phone_no_verified_on ? 1 : 0;
       registered_days = moment().diff(moment(member.created_at), 'days');
 
       let get_total_withdrawal_data = await Member.getTotalWithdrawalData(
