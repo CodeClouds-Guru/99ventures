@@ -5,8 +5,6 @@ const {
   MemberShipTierRule,
   MembershipTier,
 } = require('../../models/index');
-const mime = require('mime-types');
-const path = require('path');
 const { Op } = require('sequelize');
 const FileHelper = require('../../helpers/fileHelper');
 
@@ -58,9 +56,6 @@ class MembershipTierController extends Controller {
         const fileHelper = new FileHelper(files, 'membership-tiers', req);
         const file_name = await fileHelper.upload();
         req.body.logo = file_name.files[0].filename;
-        req.body.mime_type = mime.lookup(
-          path.basename(file_name.files[0].filename)
-        );
       }
       console.log(' req.body.logo', req.body);
       //tier store
@@ -191,9 +186,6 @@ class MembershipTierController extends Controller {
           const file_name = await fileHelper.upload();
           req.body.logo = file_name.files[0].filename;
 
-          req.body.mime_type = mime.lookup(
-            path.basename(file_name.files[0].filename)
-          );
           let prev_image = model.logo;
           if (prev_image && prev_image != '') {
             let file_delete = await fileHelper.deleteFile(

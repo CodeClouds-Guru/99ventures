@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
-      mime_type: DataTypes.STRING,
+      // mime_type: DataTypes.STRING,
     },
     {
       sequelize,
@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
       reward_point: Joi.optional().label('Reward Point'),
       reward_cash: Joi.optional().label('Reward Cash'),
       send_email: Joi.optional().label('Send Email'),
-      mime_type: Joi.optional().label('Mime Type'),
+      // mime_type: Joi.optional().label('Mime Type'),
     });
     return schema.validate(req.body.tier_details);
   };
