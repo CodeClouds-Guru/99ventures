@@ -41,6 +41,10 @@ module.exports = {
           id: 15,
           action: 'Registration Bonus',
         },
+        {
+          id: 16,
+          action: 'Membership Level Upgrade',
+        },
       ],
       {}
     );
