@@ -84,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       status: Joi.string().required().label('Status'),
       reward_point: Joi.optional().label('Reward Point'),
       reward_cash: Joi.optional().label('Reward Cash'),
+      send_email: Joi.optional().label('Send Email'),
     });
     return schema.validate(req.body.tier_details);
   };
