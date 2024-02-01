@@ -290,6 +290,7 @@ const CreateUpdate = () => {
     }
 
     const handleSelectRules = (val) => {
+        handleClose('rules');
         if(rulesStatement.length && !['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
             dispatch(showMessage({ variant: 'error', message: 'Operator needs to add!' }));
             return;
@@ -300,6 +301,7 @@ const CreateUpdate = () => {
     }
 
     const handleLogicalOperator = (val) => {
+        handleClose('operators');
         if(!rulesStatement.length || ['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
             dispatch(showMessage({ variant: 'error', message: 'Rules needs to add!' }));
             return;
@@ -316,7 +318,7 @@ const CreateUpdate = () => {
             (val === '(' && rulesStatement.length &&
                 (
                     [')'].includes(rulesStatement[rulesStatement.length -1]) || 
-                    !['&&', '||'].includes(rulesStatement[rulesStatement.length -1])
+                    !['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])
                 )
             ) || (val === ')' && (!rulesStatement.length || ['(', '&&', '||'].includes(rulesStatement[rulesStatement.length -1])))
         ){
@@ -387,6 +389,16 @@ const CreateUpdate = () => {
         }
         if(rulesCreate === ''){
             dispatch(showMessage({ variant: 'error', message: 'Rules configuration is empty!' }));
+            return;
+        }
+
+        
+        const countEl = {};
+        for (const element of rulesStatement) {
+            countEl[element] = (countEl[element] || 0) + 1;
+        }
+        if(countEl['('] !== countEl[')']) {
+            dispatch(showMessage({ variant: 'error', message: 'Please check the Rules configuration!' }));
             return;
         }
         
@@ -684,7 +696,7 @@ const CreateUpdate = () => {
                                                 Object.keys(rulesJson).length && Object.keys(rulesJson).sort().map(el => {
                                                     return (rulesJson[el].action && rulesJson[el].operator && rulesJson[el].value) ? <MenuItem key={el} value={el} onClick={()=>handleSelectRules(el)}>{el}</MenuItem> : ''
                                                 })
-                                            }                                           
+                                            }
                                         </StyledMenu>
                                     </FormControl>
                                     <FormControl>
