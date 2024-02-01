@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, Switch, InputLabel, Button, Typography, InputAdornment, Tooltip } from '@mui/material';
+import { FormControl, TextField, Stack, Select, FormControlLabel, IconButton, MenuItem, Switch, InputLabel, Button, Typography, InputAdornment, Tooltip, Menu, Fade, Paper } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoadingButton from '@mui/lab/LoadingButton';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import jwtServiceConfig from 'src/app/auth/services/jwtService/jwtServiceConfig';
-import Helper from 'src/app/helper';
 import FusePageCardSimple from '@fuse/core/FusePageCarded';
 import MainHeader from 'app/shared-components/MainHeader';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
@@ -16,8 +15,10 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import _ from 'lodash';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+
 
 const Accordion = styled((props) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -69,6 +70,47 @@ const logicalOp = {
     '||': 'OR'
 }
 
+
+const StyledMenu = styled((props) => (
+    <Menu
+      elevation={0}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      {...props}
+    />
+  ))(({ theme }) => ({
+    '& .MuiPaper-root': {
+      borderRadius: 6,
+      marginTop: theme.spacing(1),
+      minWidth: 180,
+      color:
+        theme.palette.mode === 'light' ? 'rgb(55, 65, 81)' : theme.palette.grey[300],
+      boxShadow:
+        'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
+      '& .MuiMenu-list': {
+        padding: '4px 0',
+      },
+      '& .MuiMenuItem-root': {
+        '& .MuiSvgIcon-root': {
+          fontSize: 18,
+          color: theme.palette.text.secondary,
+          marginRight: theme.spacing(1.5),
+        },
+        '&:active': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            theme.palette.action.selectedOpacity,
+          ),
+        },
+      },
+    },
+  }));
 const CreateUpdate = () => {
     const {moduleId} = useParams();
     const dispatch = useDispatch();
@@ -90,6 +132,26 @@ const CreateUpdate = () => {
     const [membershipRewards, setMembershipRewards] = useState(0);
     const [expanded, setExpanded] = useState(['panel1', 'panel2']);
     const [logo, setLogo] = useState('');
+    const [dropdowns, setDropdowns] = useState({
+        rules: false,
+        operators: false,
+        symbols: false
+    });
+    const [anchorEl, setAnchorEl] = useState({
+        rules: null,
+        operators: null,
+        symbols: null
+    });
+
+    const handleClick = (event, dropdownType) => {
+        setAnchorEl({...dropdowns, [dropdownType]: event.currentTarget});
+        setDropdowns({...dropdowns, [dropdownType]: !dropdowns[dropdownType]});
+    };
+
+    const handleClose = (dropdownType) => {
+        setAnchorEl({...dropdowns, [dropdownType]: null});
+        setDropdowns({operators: false, rules: false, symbols: false});
+    };
 
     const handleSetRewardsType = (e) => {
         setRewardsType(!rewardsType)
@@ -104,7 +166,7 @@ const CreateUpdate = () => {
         }
     };
 
-    const handleBuildRules = (indx, type, value) => {
+    const handleBuildRules = (indx, type, value) => {        
         let arry = {...rulesJson};
         indx = 'Rule'+indx;
         arry[indx] = {
@@ -130,7 +192,6 @@ const CreateUpdate = () => {
     } 
 
     const rulesHtml = () => {
-        var htmlContent = [];
         let rulesArry = Object.keys(rulesJson);
         return rulesArry.map((row, i)=>{
             return (
@@ -178,7 +239,10 @@ const CreateUpdate = () => {
                             id="outlined-required"
                             label="Value"
                             value={rulesJson[row].hasOwnProperty('value') ? rulesJson[row]['value']: ''}
-                            onChange={(e)=>handleBuildRules(i+1, 'value', e.target.value)}
+                            onChange={(e)=>{
+                                let val = e.target.value.replace(/[^\d]/g,'');
+                                handleBuildRules(i+1, 'value', val);
+                            }}
                         />
                     </FormControl>
                     <div className='w-1/12'>
@@ -199,7 +263,7 @@ const CreateUpdate = () => {
         var flag = true;
         let rules = Object.keys(rulesJson);
         rules.forEach(el=>{
-            if(rulesJson[el].hasOwnProperty('action') && rulesJson[el].hasOwnProperty('operator')){
+            if(rulesJson[el].hasOwnProperty('action') && rulesJson[el].hasOwnProperty('operator') && rulesJson[el].hasOwnProperty('value')){
                 flag = true;
             } else {
                 flag = false
@@ -216,49 +280,51 @@ const CreateUpdate = () => {
     }
 
     const handleDeleteRule = (indx) => {
+        if(rulesJson[indx].action && rulesJson[indx].operator && rulesJson[indx].value) {
+            handleRulesCreate('');
+            setHelpertext('');
+            setRulesStatement([]);
+        } 
         delete rulesJson[indx];
         setRulesJson({...rulesJson});
-        handleRulesCreate('');
-        setHelpertext('');
-        setRulesStatement([]);
     }
 
-    const handleSelectRules = (e) => {
+    const handleSelectRules = (val) => {
         if(rulesStatement.length && !['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
             dispatch(showMessage({ variant: 'error', message: 'Operator needs to add!' }));
             return;
         }
-        let val = e.target.value;
         if(val !== '') {
             setRulesStatement([...rulesStatement, val]);
         }
     }
 
-    const handleLogicalOperator = (e) => {
+    const handleLogicalOperator = (val) => {
         if(!rulesStatement.length || ['&&', '||', '('].includes(rulesStatement[rulesStatement.length -1])){
-            dispatch(showMessage({ variant: 'error', message: 'Operand needs to add!' }));
+            dispatch(showMessage({ variant: 'error', message: 'Rules needs to add!' }));
             return;
         }
-        let val = e.target.value;
-        // setRulesStatement([...rulesStatement, logicalOp[val]]);
         setRulesStatement([...rulesStatement, val]);
     }
 
-    const handleSymbol = (e) => {
-        let val = e.target.value;
+    const handleSymbol = (val) => {
+        handleClose('symbols');
+        if(val === ''){
+            return;
+        }
         if(
             (val === '(' && rulesStatement.length &&
                 (
                     [')'].includes(rulesStatement[rulesStatement.length -1]) || 
                     !['&&', '||'].includes(rulesStatement[rulesStatement.length -1])
                 )
-            ) ||
-            (val === ')' && (!rulesStatement.length || ['(', '&&', '||'].includes(rulesStatement[rulesStatement.length -1])))
+            ) || (val === ')' && (!rulesStatement.length || ['(', '&&', '||'].includes(rulesStatement[rulesStatement.length -1])))
         ){
             dispatch(showMessage({ variant: 'error', message: 'Please check your entry!' }));
             return;
         }
-        setRulesStatement([...rulesStatement, e.target.value]);
+        
+        setRulesStatement([...rulesStatement, val]);
     }
 
     const handleRulesCreate = (val) => {
@@ -304,12 +370,12 @@ const CreateUpdate = () => {
         if(isNaN(str)){
             return;
         }
-        str = str.replace(/\s/g, '');
+        str = str.replace(/[^\d.]/g,'');
         setMembershipRewards(str);
     }
 
     const handleFormSubmit = () => {
-        if(membershipName === '') {
+        if(membershipName.trim() === '') {
             dispatch(showMessage({ variant: 'error', message: 'Please add membership name!' }));
             return;
         }
@@ -325,7 +391,7 @@ const CreateUpdate = () => {
         }
         
         const params = new FormData();
-        params.append('name', membershipName);
+        params.append('name', membershipName.trim());
         params.append('logo', membershipLogo);
         params.append('send_email', sendEmail);
         if(monetoryBenefit) {
@@ -447,6 +513,10 @@ const CreateUpdate = () => {
         setSendEmail(e.target.checked ? 1 : 0)
     }
 
+    const handleMembershipLogo = (e) => {
+        setMembershipLogo(e.target.files[0]);
+    }
+
     return (
         <FusePageCardSimple
             header={
@@ -461,7 +531,7 @@ const CreateUpdate = () => {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <div className='flex py-10 items-center flex-col justify-left'>
-                                    <FormControl className="w-1/2 pr-10 mb-10">
+                                    <FormControl className="w-1/2 pr-10 mb-24">
                                         <TextField
                                             required
                                             id="outlined-required"
@@ -470,12 +540,12 @@ const CreateUpdate = () => {
                                             onChange={(e)=>setMembershipName(e.target.value)}
                                         />
                                     </FormControl> 
-                                    <FormControl className="w-1/2 mb-10">
+                                    <FormControl className="w-1/2 mb-24">
                                         <FormControlLabel control={<Switch checked={monetoryBenefit} onChange={()=>setMonetoryBenefit(!monetoryBenefit)} />} label="Do you want to add monetary benefit?" />
                                     </FormControl>
                                     {
                                         monetoryBenefit && (
-                                            <FormControl className="w-1/2 mb-10">
+                                            <FormControl className="w-1/2 mb-24">
                                                 <Stack direction="row" spacing={1} alignItems="center">
                                                     <Typography>Points</Typography>
                                                     <Switch className="switch" checked={rewardsType} onChange={handleSetRewardsType}  name="rewards_type" />
@@ -489,6 +559,9 @@ const CreateUpdate = () => {
                                                             label="Cash"
                                                             onChange={handleSetRewards}
                                                             value={rewardsType ? membershipRewards : 0}
+                                                            InputProps={{
+                                                                startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                                            }}
                                                         />
                                                     ) : (
                                                         <TextField
@@ -503,12 +576,18 @@ const CreateUpdate = () => {
                                             </FormControl>
                                         )
                                     }
-                                    <FormControl className="w-1/2 mb-10">
+                                    <FormControl className="w-1/2 mb-24">
                                         <TextField
-                                            required
+                                            label="Logo"
                                             id="outlined-required"
                                             type="file"
-                                            onChange={(e)=>setMembershipLogo(e.target.files[0])}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            inputProps={{
+                                                accept: "image/*"                                                
+                                            }}
+                                            onChange={handleMembershipLogo}
                                         />
                                     </FormControl>
                                     {
@@ -523,7 +602,7 @@ const CreateUpdate = () => {
                                             </div>
                                         )
                                     }      
-                                     <FormControl className="w-1/2 mb-10">
+                                     <FormControl className="w-1/2">
                                         <FormControlLabel control={<Switch checked={Boolean(sendEmail)} onChange={handleSendEmail} />} label="Send member an email on reaching this level" />
                                     </FormControl>                             
                                 </div>
@@ -577,53 +656,99 @@ const CreateUpdate = () => {
                                             }
                                         />
                                     </FormControl>
-                                    <FormControl className="w-1/6 bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
-                                        <InputLabel id="action-select-label">Rules</InputLabel>
-                                        <Select
-                                            labelId="action-select-label"
-                                            id="action-select"
-                                            value={selectRules}
-                                            label="Action"
-                                            onChange={handleSelectRules}
+                                    <FormControl>
+                                        <Button
+                                            id="demo-customized-button-rules"
+                                            aria-controls={dropdowns.rules == true ? 'demo-customized-menu' : undefined}
+                                            aria-haspopup="true"
+                                            aria-expanded={dropdowns.rules == true ? 'true' : undefined}
+                                            variant="contained"
+                                            disableElevation
+                                            onClick={(e)=> handleClick(e, 'rules')}
+                                            endIcon={<KeyboardArrowDownIcon />}
+                                            className="rounded-none"
+                                            sx={{padding: '2.66rem'}}
                                         >
-                                            <MenuItem value="">None</MenuItem>
+                                            Rules
+                                        </Button>
+                                        <StyledMenu
+                                            id="demo-customized-menu"
+                                            MenuListProps={{
+                                                'aria-labelledby': 'demo-customized-button-rules',
+                                            }}
+                                            anchorEl={ anchorEl.rules }
+                                            open={ dropdowns.rules }
+                                            onClose={()=>handleClose('rules')}
+                                        >
                                             {
                                                 Object.keys(rulesJson).length && Object.keys(rulesJson).sort().map(el => {
-                                                    return (rulesJson[el].action && rulesJson[el].operator) ? <MenuItem key={el} value={el}>{el}</MenuItem> : ''
+                                                    return (rulesJson[el].action && rulesJson[el].operator && rulesJson[el].value) ? <MenuItem key={el} value={el} onClick={()=>handleSelectRules(el)}>{el}</MenuItem> : ''
                                                 })
-                                            }
-                                        </Select>
+                                            }                                           
+                                        </StyledMenu>
                                     </FormControl>
-                                    <FormControl className="w-1/6  bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
-                                        <InputLabel id="action-select-label">Operators</InputLabel>
-                                        <Select
-                                            labelId="action-select-label"
-                                            id="action-select"
-                                            value={logicalOperator}
-                                            label="Operator"
-                                            onChange={handleLogicalOperator}
+                                    <FormControl>
+                                        <Button
+                                            id="demo-customized-button-operator"
+                                            aria-controls={dropdowns.operators == true ? 'demo-customized-menu' : undefined}
+                                            aria-haspopup="true"
+                                            aria-expanded={dropdowns.operators == true ? 'true' : undefined}
+                                            variant="contained"
+                                            disableElevation
+                                            onClick={(e)=> handleClick(e, 'operators')}
+                                            endIcon={<KeyboardArrowDownIcon />}
+                                            className="rounded-none"
+                                            sx={{padding: '2.66rem'}}
                                         >
-                                            <MenuItem value="">None</MenuItem>
+                                            Operators
+                                        </Button>
+                                        <StyledMenu
+                                            id="demo-customized-menu"
+                                            MenuListProps={{
+                                            'aria-labelledby': 'demo-customized-button-operator',
+                                            }}
+                                            anchorEl={anchorEl.operators}
+                                            open={dropdowns.operators}
+                                            onClose={()=>handleClose('operators')}
+                                        >
                                             {
                                                 Object.keys(logicalOp).map(el=>{
-                                                    return <MenuItem key={el} value={el}>{logicalOp[el]}</MenuItem>
+                                                    return <MenuItem key={el} value={el} onClick={()=>handleLogicalOperator(el)}>{logicalOp[el]}</MenuItem>
                                                 })
-                                            }
-                                        </Select>
+                                            }                                         
+                                        </StyledMenu>
                                     </FormControl>
-                                    <FormControl className="w-1/6  bg-gray-300" sx={{'& .MuiInputBase-formControl': {borderRadius: 0}}}>
-                                        <InputLabel id="action-select-label">Symbols</InputLabel>
-                                        <Select
-                                            labelId="action-select-label"
-                                            id="action-select"
-                                            value={symbol}
-                                            label="Operator"
-                                            onChange={handleSymbol}
+                                    <FormControl>
+                                        <Button
+                                            id="demo-customized-button-symbols"
+                                            aria-controls={dropdowns.symbols == true ? 'demo-customized-menu-symbols' : undefined}
+                                            aria-haspopup="true"
+                                            aria-expanded={dropdowns.symbols == true ? 'true' : undefined}
+                                            variant="contained"
+                                            disableElevation
+                                            onClick={(e)=> handleClick(e, 'symbols')}
+                                            endIcon={<KeyboardArrowDownIcon />}
+                                            className="rounded-none rounded-r"
+                                            sx={{padding: '2.66rem'}}
                                         >
-                                            <MenuItem value="">None</MenuItem>
-                                            <MenuItem value="(">(</MenuItem>
-                                            <MenuItem value=")">)</MenuItem>
-                                        </Select>
+                                            Symbols
+                                        </Button>
+                                        <StyledMenu
+                                            id="demo-customized-menu-symbols"
+                                            MenuListProps={{
+                                            'aria-labelledby': 'demo-customized-button-symbols',
+                                            }}
+                                            anchorEl={anchorEl.symbols}
+                                            open={dropdowns.symbols}
+                                            onClose={()=>handleClose('symbols')}
+                                        >
+                                            <MenuItem onClick={()=>handleSymbol('(')} disableRipple>
+                                            (
+                                            </MenuItem>
+                                            <MenuItem onClick={()=>handleSymbol(')')} disableRipple>
+                                            )
+                                            </MenuItem>                                            
+                                        </StyledMenu>
                                     </FormControl>
                                 </div>
                                 {helpertext && <p><strong>Statement: <em>{helpertext}</em></strong></p>}
