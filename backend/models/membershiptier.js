@@ -39,13 +39,13 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
-            // console.log('check_url', check_url);
+            console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-          // console.log('imageRawValue', rawValue);
+          console.log('imageRawValue', rawValue);
           return rawValue ? rawValue : null;
         },
         set(value) {
@@ -65,6 +65,7 @@ module.exports = (sequelize, DataTypes) => {
       created_at: 'TIMESTAMP',
       updated_at: 'TIMESTAMP',
       deleted_at: 'TIMESTAMP',
+      // mime_type: DataTypes.STRING,
     },
     {
       sequelize,
@@ -80,10 +81,12 @@ module.exports = (sequelize, DataTypes) => {
   MembershipTier.validate = function (req) {
     const schema = Joi.object({
       name: Joi.string().required().label('Name'),
-      logo: Joi.string().optional().label('Logo'),
+      logo: Joi.string().required().label('Logo'),
       status: Joi.string().required().label('Status'),
       reward_point: Joi.optional().label('Reward Point'),
       reward_cash: Joi.optional().label('Reward Cash'),
+      send_email: Joi.optional().label('Send Email'),
+      // mime_type: Joi.optional().label('Mime Type'),
     });
     return schema.validate(req.body.tier_details);
   };
@@ -242,25 +245,26 @@ module.exports = (sequelize, DataTypes) => {
     const db = require('../models');
     const updated_tiers = await db.MembershipTier.findAll({
       where: { id: tier_ids },
-      attributes: ['id', 'reward_cash', 'name'],
+      attributes: ['id', 'reward_cash', 'name', 'send_email', 'logo'],
     });
-    console.log('updated_tiers', updated_tiers);
+    // console.log('updated_tiers', updated_tiers);
     let transaction_data = [];
     if (updated_tiers.length > 0) {
       for (let item of updated_tiers) {
-        // let get_member_balance = await db.MemberBalance.findOne({
-        //   where: { member_id: member_id, amount_type: 'cash' },
-        //   attributes: ['amount'],
-        // });
         let member = await db.Member.findOne({
           where: { id: member_id },
-          attributes: ['first_name', 'last_name', 'username'],
-          include: {
-            model: db.MemberBalance,
-            as: 'member_amounts',
-            attributes: ['amount'],
-            where: { amount_type: 'cash' },
-          },
+          // attributes: ['first_name', 'last_name', 'username'],
+          include: [
+            {
+              model: db.MemberBalance,
+              as: 'member_amounts',
+              attributes: ['amount'],
+              where: { amount_type: 'cash' },
+            },
+            {
+              model: MembershipTier,
+            },
+          ],
         });
         let verbose = `Congratulations ${member.username}, you're now a ${item.name} MoreSurveys member.`;
         if (item.reward_cash > 0) {
@@ -294,6 +298,24 @@ module.exports = (sequelize, DataTypes) => {
           action: 'membership_tier_shift',
           verbose: verbose,
         });
+        console.log('item.send_email', item.dataValues.send_email);
+        let req = {
+          headers: {
+            company_id: member.company_id,
+            site_id: member.company_portal_id,
+          },
+        };
+
+        if (item.dataValues.send_email == 1) {
+          await MembershipTier.sendEmailOnTierUpgrade(
+            {
+              member,
+              current_level: item,
+              prev_level: member.MembershipTier,
+            },
+            req
+          );
+        }
       }
       if (transaction_data.length > 0) {
         var transaction_resp = await db.MemberTransaction.bulkCreate(
@@ -301,6 +323,24 @@ module.exports = (sequelize, DataTypes) => {
         );
       }
     }
+    return true;
+  };
+  MembershipTier.sendEmailOnTierUpgrade = async (data, req) => {
+    //send mail
+    const eventBus = require('../eventBus');
+    let evntbus = eventBus.emit('send_email', {
+      action: 'Membership Level Upgrade',
+      data: {
+        email: 'debosmita.dey@codeclouds.co.in',
+        details: {
+          members: data.member,
+          tier: data.current_level,
+          prev_tier: data.prev_level,
+        },
+      },
+      req: req,
+    });
+
     return true;
   };
   sequelizePaginate.paginate(MembershipTier);

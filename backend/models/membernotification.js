@@ -176,7 +176,7 @@ module.exports = (sequelize, DataTypes) => {
         notification_action = 'ticket_reply';
         break;
       case 'membership_tier_shift':
-        notification_action = 'membership_tier_shift';
+        notification_action = 'membership_level_upgrade';
         break;
       default:
       //

@@ -5,7 +5,7 @@ const {
   MemberShipTierRule,
   MembershipTier,
 } = require('../../models/index');
-
+const { Op } = require('sequelize');
 const FileHelper = require('../../helpers/fileHelper');
 
 class MembershipTierController extends Controller {
@@ -16,6 +16,7 @@ class MembershipTierController extends Controller {
     this.formatTierRulesAndSave = this.formatTierRulesAndSave.bind(this);
     this.removeRulesOnUpdate = this.removeRulesOnUpdate.bind(this);
     this.isValidParentheses = this.isValidParentheses.bind(this);
+    this.checkUniqueForLevelName = this.checkUniqueForLevelName.bind(this);
   }
 
   //override list api
@@ -56,6 +57,7 @@ class MembershipTierController extends Controller {
         const file_name = await fileHelper.upload();
         req.body.logo = file_name.files[0].filename;
       }
+      console.log(' req.body.logo', req.body);
       //tier store
       const { error, value } = this.model.validate(req);
       if (error) {
@@ -65,6 +67,14 @@ class MembershipTierController extends Controller {
         throw errorObj;
       }
       let request_data = req.body;
+
+      let level_name_status = this.checkUniqueForLevelName(request_data.name);
+      if (!level_name_status) {
+        return {
+          status: false,
+          message: 'Duplicate level name',
+        };
+      }
       let rule_config = JSON.parse(req.body.configuration);
 
       let valid_parentheses = await this.isValidParentheses(
@@ -74,9 +84,8 @@ class MembershipTierController extends Controller {
         request_data.created_by = req.user.id;
         request_data.reward_cash = req.body.cash || 0;
         request_data.reward_point = req.body.point || 0;
+        request_data.send_email = req.body.send_email || 0;
         request_data.status = 'active';
-
-        // console.log(req.body);
 
         let highest_chronology = await this.model.findOne({
           attributes: ['chronology'],
@@ -87,6 +96,9 @@ class MembershipTierController extends Controller {
         request_data.chronology = highest_chronology
           ? highest_chronology.chronology + 1
           : 1;
+
+        console.log('request_data', request_data);
+
         let tier_save = await this.model.create(request_data, { silent: true });
         //rule action store
         let membership_tier_rules = await this.formatTierRulesAndSave(
@@ -183,7 +195,7 @@ class MembershipTierController extends Controller {
         } else {
           req.body.logo = model.logo;
         }
-
+        console.log(' req.body.logo', req.body);
         //tier store
         const { error, value } = this.model.validate(req);
         if (error) {
@@ -193,6 +205,18 @@ class MembershipTierController extends Controller {
           throw errorObj;
         }
         let request_data = req.body;
+
+        let level_name_status = this.checkUniqueForLevelName(
+          request_data.name,
+          req.params.id
+        );
+        if (!level_name_status) {
+          return {
+            status: false,
+            message: 'Duplicate level name',
+          };
+        }
+
         let rule_config = JSON.parse(req.body.configuration);
 
         let valid_parentheses = await this.isValidParentheses(
@@ -203,6 +227,8 @@ class MembershipTierController extends Controller {
           request_data.reward_cash = req.body.cash || 0;
           request_data.reward_point = req.body.point || 0;
           request_data.status = 'active';
+
+          request_data.send_email = req.body.send_email || model.send_email;
           let model_update = await this.model.update(request_data, {
             where: { id: req.params.id },
           });
@@ -325,6 +351,19 @@ class MembershipTierController extends Controller {
     }
 
     return stack.length === 0;
+  }
+
+  async checkUniqueForLevelName(level_name, level_id = '') {
+    let existingName = await this.model.findOne({
+      where: {
+        name: level_name,
+        ...(level_id && { [Op.ne]: level_id }),
+      },
+    });
+    if (existingName) {
+      return false;
+    }
+    return true;
   }
 }
 

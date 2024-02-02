@@ -11,27 +11,37 @@ module.exports = {
         {
           name: 'Completed Rewards',
           slug: 'completed_rewards',
-          description:'Yes, please send an email when I have been successfully credited for a survey/offer.'
+          description:
+            'Yes, please send an email when I have been successfully credited for a survey/offer.',
         },
         {
           name: 'Completed Withdraw',
           slug: 'completed_withdraw',
-          description:'Yes, please send an email when my withdrawal has been approved.'
+          description:
+            'Yes, please send an email when my withdrawal has been approved.',
         },
         {
           name: 'Notifications',
           slug: 'notifications',
-          description:' Yes, please send an email when I receive an account notification.'
+          description:
+            ' Yes, please send an email when I receive an account notification.',
         },
         {
           name: 'Referrals',
           slug: 'referrals',
-          description:'Yes, please send an email for each new referral I receive.'
+          description:
+            'Yes, please send an email for each new referral I receive.',
         },
         {
           name: 'Email Marketing',
           slug: 'email_marketting',
-          description:'Yes, please send an e-mail when my reward is approved and processed.'
+          description:
+            'Yes, please send an e-mail when my reward is approved and processed.',
+        },
+        {
+          name: 'Membership Tier Upgrade',
+          slug: 'membership_tier_upgrade',
+          description: 'Yes, please send an e-mail when my level is upgraded',
         },
       ],
       {}
@@ -45,6 +55,9 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete('email_alerts', null, {truncate: true,cascade: true});
+    await queryInterface.bulkDelete('email_alerts', null, {
+      truncate: true,
+      cascade: true,
+    });
   },
 };
