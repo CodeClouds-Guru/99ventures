@@ -141,6 +141,7 @@ const MembershipList = () => {
                                 animate={{ x: 0, transition: { delay: 0.3 } }}
                             >
                                 <Typography variant="h5" className="font-extrabold tracking-tight capitalize">Configurations</Typography>
+                                <Typography variant="caption">(Ascending order)</Typography>
                             </motion.div>
                             
                             <div className='justify-center flex p-16' >                            

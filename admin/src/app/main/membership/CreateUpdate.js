@@ -590,7 +590,7 @@ const CreateUpdate = () => {
                                     }
                                     <FormControl className="w-1/2 mb-24">
                                         <TextField
-                                            label="Logo"
+                                            label="Logo *"
                                             id="outlined-required"
                                             type="file"
                                             InputLabelProps={{
