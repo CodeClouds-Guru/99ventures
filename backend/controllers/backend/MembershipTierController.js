@@ -57,7 +57,6 @@ class MembershipTierController extends Controller {
         const file_name = await fileHelper.upload();
         req.body.logo = file_name.files[0].filename;
       }
-      console.log(' req.body.logo', req.body);
       //tier store
       const { error, value } = this.model.validate(req);
       if (error) {
@@ -92,12 +91,9 @@ class MembershipTierController extends Controller {
           order: [['id', 'desc']],
           limit: 1,
         });
-        // console.log('highest_chronology', highest_chronology);
         request_data.chronology = highest_chronology
           ? highest_chronology.chronology + 1
           : 1;
-
-        console.log('request_data', request_data);
 
         let tier_save = await this.model.create(request_data, { silent: true });
         //rule action store
@@ -143,7 +139,6 @@ class MembershipTierController extends Controller {
         attributes: ['id', 'name', 'variable'],
       });
       model.setDataValue('rule_actions', all_actions);
-      // console.log(model);
       let fields = this.model.fields;
       return { result: model, fields };
     } catch (error) {
@@ -156,8 +151,6 @@ class MembershipTierController extends Controller {
     let company_portal_id = req.headers.site_id;
     req.body.company_portal_id = company_portal_id;
     let type = req.body.type || null;
-
-    // console.log('update', model);
     try {
       if (type === 'chronology_update') {
         req.body.chronology_list.forEach(async function (record) {
@@ -187,15 +180,20 @@ class MembershipTierController extends Controller {
           req.body.logo = file_name.files[0].filename;
 
           let prev_image = model.logo;
-          if (prev_image && prev_image != '') {
-            let file_delete = await fileHelper.deleteFile(
+          if (prev_image && prev_image !== '') {
+            await fileHelper.deleteFile(
               prev_image.replace(process.env.S3_BUCKET_OBJECT_URL, '')
             );
           }
         } else {
+          if (!model.logo) {
+            return {
+              status: false,
+              message: 'Logo is required',
+            };
+          }
           req.body.logo = model.logo;
         }
-        console.log(' req.body.logo', req.body);
         //tier store
         const { error, value } = this.model.validate(req);
         if (error) {
@@ -206,7 +204,7 @@ class MembershipTierController extends Controller {
         }
         let request_data = req.body;
 
-        let level_name_status = this.checkUniqueForLevelName(
+        let level_name_status = await this.checkUniqueForLevelName(
           request_data.name,
           req.params.id
         );
@@ -218,7 +216,6 @@ class MembershipTierController extends Controller {
         }
 
         let rule_config = JSON.parse(req.body.configuration);
-
         let valid_parentheses = await this.isValidParentheses(
           rule_config.rules_config
         );
@@ -228,12 +225,11 @@ class MembershipTierController extends Controller {
           request_data.reward_point = req.body.point || 0;
           request_data.status = 'active';
 
-          request_data.send_email = req.body.send_email || model.send_email;
-          let model_update = await this.model.update(request_data, {
+          request_data.send_email = req.body.send_email || 0;
+
+          await this.model.update(request_data, {
             where: { id: req.params.id },
           });
-          // console.log('request_data', rule_config);
-          // return;
           //destroy tier rule config
           let remove_rules = await this.removeRulesOnUpdate(
             req.params.id,
@@ -357,7 +353,7 @@ class MembershipTierController extends Controller {
     let existingName = await this.model.findOne({
       where: {
         name: level_name,
-        ...(level_id && { [Op.ne]: level_id }),
+        id: { [Op.ne]: level_id },
       },
     });
     if (existingName) {

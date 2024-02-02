@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
           else this.setDataValue('logo', value);
         },
       },
+      send_email: DataTypes.TINYINT,
       status: DataTypes.STRING,
       reward_point: DataTypes.INTEGER,
       chronology: DataTypes.INTEGER,
