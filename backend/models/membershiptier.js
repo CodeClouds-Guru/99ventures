@@ -332,7 +332,7 @@ module.exports = (sequelize, DataTypes) => {
     let evntbus = eventBus.emit('send_email', {
       action: 'Membership Level Upgrade',
       data: {
-        email: 'debosmita.dey@codeclouds.co.in',
+        email: data.member.email,
         details: {
           members: data.member,
           tier: data.current_level,
