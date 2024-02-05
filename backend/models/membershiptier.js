@@ -275,7 +275,7 @@ module.exports = (sequelize, DataTypes) => {
           transaction_data.push({
             member_id: member_id,
             amount: item.reward_cash,
-            note: `Membership Tier Upgraded to ${item.name}`,
+            note: `${item.name}`,
             type: 'credited',
             amount_action: 'membership_tier_shift',
             created_by: member_id || '',
