@@ -69,6 +69,8 @@ module.exports = (sequelize, DataTypes) => {
               let slug = this.verbose.split('News published')[1];
               slug = slug.substr(1);
               return '/news/' + slug;
+            case 'membership_level_upgrade':
+              return '/earning-history';
             default:
               return '#';
           }

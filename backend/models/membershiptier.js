@@ -244,10 +244,12 @@ module.exports = (sequelize, DataTypes) => {
     member_id
   ) => {
     const db = require('../models');
+    console.log('transactionUpdateOnTierUpgrade', tier_ids);
     const updated_tiers = await db.MembershipTier.findAll({
       where: { id: tier_ids },
       attributes: ['id', 'reward_cash', 'name', 'send_email', 'logo'],
       order: [['chronology', 'asc']],
+      logging: console.log,
     });
     // console.log('updated_tiers', updated_tiers);
     let transaction_data = [];
