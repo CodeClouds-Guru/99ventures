@@ -642,7 +642,7 @@ module.exports = (sequelize, DataTypes) => {
         attributes: ['member_id'],
         where: { id: transaction_ids },
       });
-      member_ids = member_ids.map((record) => record.member_id);
+
       await MemberTransaction.update(
         {
           status: 2,
@@ -650,13 +650,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         { where: { id: transaction_ids } }
       );
-
-      let membership_tier_shift_event_bus = eventBus.emit(
-        'membership_tier_shift',
-        {
-          member_id: member_ids,
-        }
-      );
+      for (let id in member_ids) {
+        eventBus.emit('membership_tier_shift', {
+          member_id: id,
+        });
+      }
     }
     // if (withdrawal_ids.length > 0) {
     await WithdrawalRequest.update(

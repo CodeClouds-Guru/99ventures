@@ -267,7 +267,7 @@ module.exports = (sequelize, DataTypes) => {
             },
           ],
         });
-        let verbose = `Congratulations ${member.username}, you're now a ${item.name} MoreSurveys member.`;
+        let verbose = `Congratulations ${member.username}, you're now a ${item.name} MoreSurveys member. `;
         if (item.reward_cash > 0) {
           let updated_amount =
             parseFloat(member.member_amounts[0].amount) +
@@ -290,7 +290,7 @@ module.exports = (sequelize, DataTypes) => {
             { where: { member_id: member_id, amount_type: 'cash' } }
           );
 
-          verbose += `You have been rewarded ${item.reward_cash} for reaching this level`;
+          verbose += `You have been rewarded ${item.reward_cash} for reaching this level. `;
         }
         verbose += `<a href='/dashboard'>Click here</a> to find out more about MoreSurveys membership levels. `;
 
