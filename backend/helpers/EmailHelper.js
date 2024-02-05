@@ -93,7 +93,7 @@ class EmailHelper {
             company_portal_details[0].Company = {};
             all_details['company_portals'] = company_portal_details[0];
             all_details['year'] = new Date().getFullYear();
-            console.log('all_details', all_details);
+            // console.log('all_details', all_details);
             //set user details
             email_body = await this.replaceVariables(
               all_details,
@@ -181,7 +181,7 @@ class EmailHelper {
         if (attachments.length > 0) {
           mailData.attachments = attachments;
         }
-        console.log('mailData=====', mailData);
+        // console.log('mailData=====', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {

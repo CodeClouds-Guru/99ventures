@@ -39,13 +39,13 @@ module.exports = (sequelize, DataTypes) => {
             } catch (err) {
               check_url = false;
             }
-            console.log('check_url', check_url);
+            // console.log('check_url', check_url);
             if (!check_url)
               rawValue = process.env.S3_BUCKET_OBJECT_URL + rawValue;
           }
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-          console.log('imageRawValue', rawValue);
+          // console.log('imageRawValue', rawValue);
           return rawValue ? rawValue : null;
         },
         set(value) {
@@ -244,12 +244,12 @@ module.exports = (sequelize, DataTypes) => {
     member_id
   ) => {
     const db = require('../models');
-    console.log('transactionUpdateOnTierUpgrade', tier_ids);
+    // console.log('transactionUpdateOnTierUpgrade', tier_ids);
     const updated_tiers = await db.MembershipTier.findAll({
       where: { id: tier_ids },
       attributes: ['id', 'reward_cash', 'name', 'send_email', 'logo'],
       order: [['chronology', 'asc']],
-      logging: console.log,
+      // logging: console.log,
     });
     // console.log('updated_tiers', updated_tiers);
     let transaction_data = [];
@@ -302,7 +302,7 @@ module.exports = (sequelize, DataTypes) => {
           action: 'membership_tier_shift',
           verbose: verbose,
         });
-        console.log('item.send_email', item.dataValues.send_email);
+        // console.log('item.send_email', item.dataValues.send_email);
         let req = {
           headers: {
             company_id: member.company_id,
