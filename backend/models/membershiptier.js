@@ -293,7 +293,7 @@ module.exports = (sequelize, DataTypes) => {
             { where: { member_id: member_id, amount_type: 'cash' } }
           );
 
-          verbose += `You have been rewarded ${item.reward_cash} for reaching this level. `;
+          verbose += `You have been rewarded $${item.reward_cash} for reaching this level. `;
         }
         verbose += `<a href='/dashboard'>Click here</a> to find out more about MoreSurveys membership levels. `;
 

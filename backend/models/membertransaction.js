@@ -411,7 +411,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
@@ -424,7 +424,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
@@ -437,7 +437,7 @@ module.exports = (sequelize, DataTypes) => {
             .endOf('day')
             .format(
               'YYYY-MM-DD HH:mm:ss'
-            )}' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
@@ -462,7 +462,7 @@ module.exports = (sequelize, DataTypes) => {
       type: 'credited',
       // status: 2,
     };
-    option.logging = console.log;
+    // option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
     // console.log('response', response);
 
@@ -515,7 +515,7 @@ module.exports = (sequelize, DataTypes) => {
     response.today = today_credited_minus_reversed.toFixed(2);
     response.week = weekly_credited_minus_reversed.toFixed(2);
     response.month = month_credited_minus_reversed.toFixed(2);
-    console.log('response----', response);
+    // console.log('response----', response);
     return JSON.parse(JSON.stringify(response));
   };
 
