@@ -462,9 +462,11 @@ module.exports = (sequelize, DataTypes) => {
       type: 'credited',
       // status: 2,
     };
-    // option.logging = console.log;
+    option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
     // console.log('response', response);
+
+    //total count minus total reverse
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
       {
@@ -472,19 +474,36 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
-    // console.log(
-    //   'total_credited_minus_reversed_front',
-    //   parseFloat(response.dataValues.total),
-    //   parseFloat(total_reversed[0].total)
-    // );
+
     var total_credited_minus_reversed =
       parseFloat(response.dataValues.total) -
       parseFloat(total_reversed[0].total);
 
+    //today count minus today reverse
+    let today_reverse = await MemberTransaction.updateMemberBalance('day');
+    var today_credited_minus_reversed =
+      parseFloat(response.dataValues.today) - parseFloat(today_reverse);
+
+    //weekly count minus weekly reverse
+    let weekly_reverse = await MemberTransaction.updateMemberBalance('isoWeek');
+    var weekly_credited_minus_reversed =
+      parseFloat(response.dataValues.week) - parseFloat(weekly_reverse);
+
+    //monthly count minus monthly reverse
+    let monthly_reverse = await MemberTransaction.updateMemberBalance('month');
+    var month_credited_minus_reversed =
+      parseFloat(response.dataValues.month) - parseFloat(monthly_reverse);
+
     // result.total = total_earnings_credited[0].total;
     response.setDataValue('total', total_credited_minus_reversed.toFixed(2));
+    response.setDataValue('today', today_credited_minus_reversed.toFixed(2));
+    response.setDataValue('week', weekly_credited_minus_reversed.toFixed(2));
+    response.setDataValue('month', month_credited_minus_reversed.toFixed(2));
     response.total = total_credited_minus_reversed.toFixed(2);
-    // console.log(response);
+    response.today = today_credited_minus_reversed.toFixed(2);
+    response.week = weekly_credited_minus_reversed.toFixed(2);
+    response.month = month_credited_minus_reversed.toFixed(2);
+    console.log('response----', response);
     return JSON.parse(JSON.stringify(response));
   };
 
@@ -813,6 +832,25 @@ module.exports = (sequelize, DataTypes) => {
       amount: parseFloat(data.transaction_amount),
     });
     return true;
+  };
+
+  //get count of transaction as given date
+  MemberTransaction.getReverseTransactionCountByDate = async (startOf) => {
+    const moment = require('moment');
+    const { QueryTypes } = require('sequelize');
+    const db = require('../models/index');
+    let total_reversed = await db.sequelize.query(
+      `SELECT IFNULL(SUM(amount), 0) as total FROM member_transactions WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND completed_at BETWEEN ${moment()
+        .startOf(startOf)
+        .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')} member_id=?`,
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    return total_reversed ? total_reversed[0].total : 0;
   };
   return MemberTransaction;
 };
