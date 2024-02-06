@@ -48,19 +48,24 @@ if (process.env.DEV_MODE === '0') {
     },
   });
 } else {
-  sequelize = new Sequelize('nv-db', 'devadmin', '99ventures#2020', {
-    host: 'nv-db.cw40jczte1ng.us-east-2.rds.amazonaws.com',
-    dialect: 'mysql',
-    port: process.env.DB_PORT || 3306,
-    logging: false,
-    operatorsAliases: {
-      scripted_99_between: Sequelize.Op.between,
-      scripted_99_like: Sequelize.Op.like,
-      scripted_99_substring: Sequelize.Op.substring,
-      scripted_99_or: Sequelize.Op.or,
-      scripted_99_op_ne: Sequelize.Op.ne,
-    },
-  });
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST || '127.0.0.1',
+      dialect: 'mysql',
+      port: process.env.DB_PORT || 3306,
+      logging: false,
+      operatorsAliases: {
+        scripted_99_between: Sequelize.Op.between,
+        scripted_99_like: Sequelize.Op.like,
+        scripted_99_substring: Sequelize.Op.substring,
+        scripted_99_or: Sequelize.Op.or,
+        scripted_99_op_ne: Sequelize.Op.ne,
+      },
+    }
+  );
 }
 
 fs.readdirSync(__dirname)
