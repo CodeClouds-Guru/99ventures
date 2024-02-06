@@ -331,6 +331,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   MembershipTier.sendEmailOnTierUpgrade = async (data, req) => {
     //send mail
+    console.log('sendEmailOnTierUpgrade', data.current_level, data.prev_level);
     const eventBus = require('../eventBus');
     let evntbus = eventBus.emit('send_email', {
       action: 'Membership Level Upgrade',

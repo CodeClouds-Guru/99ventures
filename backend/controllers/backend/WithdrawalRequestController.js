@@ -582,12 +582,9 @@ class WithdrawalRequestController extends Controller {
         }
 
         for (let id of member_ids) {
-          let membership_tier_shift_event_bus = eventBus.emit(
-            'membership_tier_shift',
-            {
-              member_id: id,
-            }
-          );
+          eventBus.emit('membership_tier_shift', {
+            member_id: id,
+          });
         }
 
         break;
