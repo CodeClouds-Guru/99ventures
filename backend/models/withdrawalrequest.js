@@ -650,18 +650,21 @@ module.exports = (sequelize, DataTypes) => {
         },
         { where: { id: transaction_ids } }
       );
-      for (let id in member_ids) {
-        eventBus.emit('membership_tier_shift', {
-          member_id: id,
-        });
-      }
     }
     // if (withdrawal_ids.length > 0) {
     await WithdrawalRequest.update(
       { status: 'completed' },
       { where: { id: withdrawal_ids } }
     );
-    // }
+
+    //level upgrade event
+    if (member_ids.length > 0) {
+      for (let id in member_ids) {
+        eventBus.emit('membership_tier_shift', {
+          member_id: id,
+        });
+      }
+    }
   };
   //Approved and completed withdrawal req
   WithdrawalRequest.checkIfDifferentPaymentMethod = async (

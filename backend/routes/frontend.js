@@ -8,19 +8,22 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
-const { StaticContent, CompanyPortal } = require("../models")
+const { StaticContent, CompanyPortal } = require('../models');
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
 
-router.get('/test-membership-tier', async (req, res) => {
-  const eventBus = require('../eventBus');
-  eventBus.emit('membership_tier_shift', {});
-});
+// router.get('/test-membership-tier', async (req, res) => {
+//   const eventBus = require('../eventBus');
+//   eventBus.emit('membership_tier_shift', {});
+// });
 
 /**
  * Robots.txt
  */
-router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticContents);
+router.get(
+  '/:type(robots.txt|sitemap.xml)',
+  StaticPageController.renderStaticContents
+);
 
 /**
  * Sitemap
@@ -48,7 +51,6 @@ router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticCo
 //     res.status(500).send('Something went wrong');
 //   }
 // });
-
 
 /**
  * For scripts
