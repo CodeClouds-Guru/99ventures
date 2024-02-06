@@ -480,17 +480,20 @@ module.exports = (sequelize, DataTypes) => {
       parseFloat(total_reversed[0].total);
 
     //today count minus today reverse
-    let today_reverse = await MemberTransaction.updateMemberBalance('day');
+    let today_reverse =
+      await MemberTransaction.getReverseTransactionCountByDate('day');
     var today_credited_minus_reversed =
       parseFloat(response.dataValues.today) - parseFloat(today_reverse);
 
     //weekly count minus weekly reverse
-    let weekly_reverse = await MemberTransaction.updateMemberBalance('isoWeek');
+    let weekly_reverse =
+      await MemberTransaction.getReverseTransactionCountByDate('isoWeek');
     var weekly_credited_minus_reversed =
       parseFloat(response.dataValues.week) - parseFloat(weekly_reverse);
 
     //monthly count minus monthly reverse
-    let monthly_reverse = await MemberTransaction.updateMemberBalance('month');
+    let monthly_reverse =
+      await MemberTransaction.getReverseTransactionCountByDate('month');
     var month_credited_minus_reversed =
       parseFloat(response.dataValues.month) - parseFloat(monthly_reverse);
 
