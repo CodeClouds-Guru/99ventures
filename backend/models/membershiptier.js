@@ -295,7 +295,7 @@ module.exports = (sequelize, DataTypes) => {
 
           verbose += `You have been rewarded $${item.reward_cash} for reaching this level. `;
         }
-        verbose += `<a href='/dashboard'>Click here</a> to find out more about MoreSurveys membership levels. `;
+        verbose += `<a href='/membership-levels'>Click here</a> to find out more about MoreSurveys membership levels. `;
 
         await db.MemberNotification.addMemberNotification({
           member_id,
