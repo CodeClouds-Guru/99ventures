@@ -481,19 +481,28 @@ module.exports = (sequelize, DataTypes) => {
 
     //today count minus today reverse
     let today_reverse =
-      await MemberTransaction.getReverseTransactionCountByDate('day');
+      await MemberTransaction.getReverseTransactionCountByDate(
+        'day',
+        member_id
+      );
     var today_credited_minus_reversed =
       parseFloat(response.dataValues.today) - parseFloat(today_reverse);
 
     //weekly count minus weekly reverse
     let weekly_reverse =
-      await MemberTransaction.getReverseTransactionCountByDate('isoWeek');
+      await MemberTransaction.getReverseTransactionCountByDate(
+        'isoWeek',
+        member_id
+      );
     var weekly_credited_minus_reversed =
       parseFloat(response.dataValues.week) - parseFloat(weekly_reverse);
 
     //monthly count minus monthly reverse
     let monthly_reverse =
-      await MemberTransaction.getReverseTransactionCountByDate('month');
+      await MemberTransaction.getReverseTransactionCountByDate(
+        'month',
+        member_id
+      );
     var month_credited_minus_reversed =
       parseFloat(response.dataValues.month) - parseFloat(monthly_reverse);
 
@@ -838,7 +847,10 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   //get count of transaction as given date
-  MemberTransaction.getReverseTransactionCountByDate = async (startOf) => {
+  MemberTransaction.getReverseTransactionCountByDate = async (
+    startOf,
+    member_id
+  ) => {
     const moment = require('moment');
     const { QueryTypes } = require('sequelize');
     const db = require('../models/index');
