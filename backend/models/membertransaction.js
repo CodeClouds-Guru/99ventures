@@ -850,6 +850,7 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
+    console.log('total_reversed', total_reversed);
     return total_reversed ? total_reversed[0].total : 0;
   };
   return MemberTransaction;
