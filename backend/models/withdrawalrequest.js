@@ -636,9 +636,10 @@ module.exports = (sequelize, DataTypes) => {
     //   withdrawal_ids,
     //   req_body
     // );
+    let member_ids = [];
     const eventBus = require('../eventBus');
     if (transaction_ids.length > 0) {
-      let member_ids = await MemberTransaction.findAll({
+      member_ids = await MemberTransaction.findAll({
         attributes: ['member_id'],
         where: { id: transaction_ids },
       });
