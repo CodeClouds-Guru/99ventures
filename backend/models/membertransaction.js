@@ -855,11 +855,11 @@ module.exports = (sequelize, DataTypes) => {
     const { QueryTypes } = require('sequelize');
     const db = require('../models/index');
     let total_reversed = await db.sequelize.query(
-      `SELECT IFNULL(SUM(amount), 0) as total FROM member_transactions WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND completed_at BETWEEN ${moment()
+      `SELECT IFNULL(SUM(amount), 0) as total FROM member_transactions WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND completed_at BETWEEN '${moment()
         .startOf(startOf)
         .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
         .endOf('day')
-        .format('YYYY-MM-DD HH:mm:ss')} member_id=?`,
+        .format('YYYY-MM-DD HH:mm:ss')}' AND member_id=?`,
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
