@@ -126,6 +126,8 @@ const CreateUpdate = () => {
     const [rulesJson, setRulesJson] = useState({'Rule1':{}});
     const [membershipName, setMembershipName] = useState('');
     const [membershipLogo, setMembershipLogo] = useState('');
+    const [description, setDescription] = useState('');
+    const [color, setColor] = useState('#ffffff');
     const [logicalOperator, setLogicalOperator] = useState('');
     const [monetoryBenefit, setMonetoryBenefit] = useState(false);
     const [sendEmail, setSendEmail] = useState(0);
@@ -405,7 +407,9 @@ const CreateUpdate = () => {
         const params = new FormData();
         params.append('name', membershipName.trim());
         params.append('logo', membershipLogo);
+        params.append('color', color);
         params.append('send_email', sendEmail);
+        params.append('description', description.trim());
         if(monetoryBenefit) {
             params.append('cash', rewardsType ? membershipRewards : 0 );
             params.append('points', !rewardsType ? membershipRewards : 0 )
@@ -492,6 +496,8 @@ const CreateUpdate = () => {
                     }
                     setSendEmail(record.send_email);
                     setLogo(record.logo);
+                    setDescription(record.description);
+                    setColor(record.color);
                     setRulesAction(record.rule_actions);
                     setMembershipName(record.name);
                     setRulesJson(preparedRules);
@@ -552,6 +558,41 @@ const CreateUpdate = () => {
                                             onChange={(e)=>setMembershipName(e.target.value)}
                                         />
                                     </FormControl> 
+                                    <FormControl className="w-1/2 pr-10 mb-24">
+                                        <TextField
+                                            id="outlined-required"
+                                            label="Description"
+                                            inputProps={{
+                                                maxLength: 200                                               
+                                            }}
+                                            value={description}
+                                            onChange={(e)=>setDescription(e.target.value)}
+                                        />
+                                    </FormControl>
+                                    <FormControl className="w-1/2 pr-10 mb-24 flex flex-row">                                        
+                                        <TextField
+                                            sx={{'& .MuiInputBase-formControl':{borderTopRightRadius: '0', borderBottomRightRadius: '0'}}}
+                                            className="w-4/5"
+                                            id="outlined-required"
+                                            label="Choose Color"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}                                            
+                                            value={color}
+                                            onChange={(e)=>setColor(e.target.value)}
+                                        />
+                                        <TextField
+                                            sx={{'& .MuiInputBase-formControl':{borderTopLeftRadius: '0', borderBottomLeftRadius: '0'}}}
+                                            type="color"
+                                            id="outlined-required"
+                                            className="w-1/5"
+                                            value={color}
+                                            onChange={(e)=>setColor(e.target.value)}
+                                        />
+                                    </FormControl>
+                                    <FormControl className="w-1/2">
+                                        <FormControlLabel control={<Switch checked={Boolean(sendEmail)} onChange={handleSendEmail} />} label="Send member an email on reaching this level" />
+                                    </FormControl>
                                     <FormControl className="w-1/2 mb-24">
                                         <FormControlLabel control={<Switch checked={monetoryBenefit} onChange={()=>setMonetoryBenefit(!monetoryBenefit)} />} label="Do you want to add monetary benefit?" />
                                     </FormControl>
@@ -613,10 +654,7 @@ const CreateUpdate = () => {
                                                 />
                                             </div>
                                         )
-                                    }      
-                                     <FormControl className="w-1/2">
-                                        <FormControlLabel control={<Switch checked={Boolean(sendEmail)} onChange={handleSendEmail} />} label="Send member an email on reaching this level" />
-                                    </FormControl>                             
+                                    }
                                 </div>
                             </AccordionDetails>
                         </Accordion>
