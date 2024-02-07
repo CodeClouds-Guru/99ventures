@@ -407,9 +407,9 @@ const CreateUpdate = () => {
         const params = new FormData();
         params.append('name', membershipName.trim());
         params.append('logo', membershipLogo);
-        params.append('color', color);
+        params.append('color', color ? color : '#ffffff');
         params.append('send_email', sendEmail);
-        params.append('description', description.trim());
+        params.append('description', description ? description.trim() : '');
         if(monetoryBenefit) {
             params.append('cash', rewardsType ? membershipRewards : 0 );
             params.append('points', !rewardsType ? membershipRewards : 0 )
@@ -577,7 +577,10 @@ const CreateUpdate = () => {
                                             label="Choose Color"
                                             InputLabelProps={{
                                                 shrink: true,
-                                            }}                                            
+                                            }}         
+                                            inputProps={{
+                                                readOnly: true                                             
+                                            }}                                   
                                             value={color}
                                             onChange={(e)=>setColor(e.target.value)}
                                         />
