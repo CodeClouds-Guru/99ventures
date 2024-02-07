@@ -8,6 +8,7 @@ const {
   WithdrawalRequest,
   MemberNotification,
   GoogleCaptchaConfiguration,
+  MembershipTier,
 } = require('../models');
 const db = require('../models/index');
 const { sequelize } = require('../models/index');
@@ -36,11 +37,17 @@ module.exports = async function (req, res, next) {
 
     const member = await Member.findOne({
       where: { id: req.session.member.id },
-      include: {
-        model: MemberNotification,
-        where: { is_read: 0 },
-        required: false,
-      },
+      include: [
+        {
+          model: MemberNotification,
+          where: { is_read: 0 },
+          required: false,
+        },
+        {
+          model: MembershipTier,
+          attributes: ['id', 'name'],
+        },
+      ],
     });
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
@@ -66,11 +73,12 @@ module.exports = async function (req, res, next) {
         type: QueryTypes.SELECT,
       }
     );
-    // console.log(total_referred[0].total);
+
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
+    console.log('transaction_stat', transaction_stat);
     member.setDataValue('total_withdraws', total_withdraws.amount);
     member.setDataValue('total_earnings', transaction_stat.total || 0.0);
     member.setDataValue('transaction_today', transaction_stat.today || 0.0);
@@ -88,7 +96,7 @@ module.exports = async function (req, res, next) {
     member.setDataValue('login_ip', ip || '');
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
 
-    // console.log(req.session.member);
+    console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {
