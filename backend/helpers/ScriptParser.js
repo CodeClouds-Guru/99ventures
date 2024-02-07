@@ -511,7 +511,7 @@ class ScriptParser {
           where: { id: user.id },
           include: {
             model: Models.MembershipTier,
-            attributes: ['name', 'logo'],
+            // attributes: ['name', 'logo'],
           },
         };
       case 'Shoutbox':

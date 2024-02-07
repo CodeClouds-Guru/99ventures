@@ -45,7 +45,7 @@ module.exports = async function (req, res, next) {
         },
         {
           model: MembershipTier,
-          attributes: ['id', 'name'],
+          // attributes: ['id', 'name',],
         },
       ],
     });
