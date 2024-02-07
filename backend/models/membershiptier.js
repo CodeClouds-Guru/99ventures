@@ -197,6 +197,7 @@ module.exports = (sequelize, DataTypes) => {
           member_id = item.member_id;
         }
       });
+
       value_string = value_string.replace(/,*$/, '') + ';';
 
       //executing query to insert data in bridge table
@@ -303,21 +304,19 @@ module.exports = (sequelize, DataTypes) => {
           verbose: verbose,
         });
         // console.log('item.send_email', item.dataValues.send_email);
-        let req = {
-          headers: {
-            company_id: member.company_id,
-            site_id: member.company_portal_id,
-          },
-        };
 
         if (item.dataValues.send_email == 1) {
           await MembershipTier.sendEmailOnTierUpgrade(
             {
               member,
               current_level: item,
-              prev_level: member.MembershipTier,
             },
-            req
+            {
+              headers: {
+                company_id: member.company_id,
+                site_id: member.company_portal_id,
+              },
+            }
           );
         }
       }
@@ -331,7 +330,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   MembershipTier.sendEmailOnTierUpgrade = async (data, req) => {
     //send mail
-    console.log('sendEmailOnTierUpgrade', data.current_level, data.prev_level);
+    console.log('sendEmailOnTierUpgrade', data.current_level);
     const eventBus = require('../eventBus');
     let evntbus = eventBus.emit('send_email', {
       action: 'Membership Level Upgrade',
@@ -340,7 +339,6 @@ module.exports = (sequelize, DataTypes) => {
         details: {
           members: data.member,
           tier: data.current_level,
-          prev_tier: data.prev_level,
         },
       },
       req: req,
