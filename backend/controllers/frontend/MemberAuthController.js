@@ -225,7 +225,7 @@ class MemberAuthController {
           member_status = false;
           member_message = 'Sorry! this email has already been taken';
         } else {
-          req.body.membership_tier_id = 1;
+          req.body.membership_tier_id = null;
           // let files = [];
           // if (req.files) {
           //   files[0] = req.files.avatar;
