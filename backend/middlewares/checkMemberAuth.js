@@ -27,12 +27,15 @@ module.exports = async function (req, res, next) {
     where: { company_portal_id: company_portal.id },
   });
   req.session.google_captcha_settings = google_captcha_settings;
-  if ('member' in req.session && req.session.member && dev_mode !== '1') {
-    let ip = req.ip;
-    if (Array.isArray(ip)) {
-      ip = ip[0];
-    } else {
-      ip = ip.replace('::ffff:', '');
+  if ('member' in req.session && req.session.member) {
+    var ip = '127.0.0.1';
+    if (dev_mode !== '1') {
+      ip = req.ip;
+      if (Array.isArray(ip)) {
+        ip = ip[0];
+      } else {
+        ip = ip.replace('::ffff:', '');
+      }
     }
 
     const member = await Member.findOne({
@@ -78,7 +81,6 @@ module.exports = async function (req, res, next) {
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-    console.log('transaction_stat', transaction_stat);
     member.setDataValue('total_withdraws', total_withdraws.amount);
     member.setDataValue('total_earnings', transaction_stat.total || 0.0);
     member.setDataValue('transaction_today', transaction_stat.today || 0.0);
@@ -95,8 +97,6 @@ module.exports = async function (req, res, next) {
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
     member.setDataValue('login_ip', ip || '');
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
-
-    console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {

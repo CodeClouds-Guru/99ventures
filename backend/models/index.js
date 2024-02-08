@@ -49,11 +49,11 @@ if (process.env.DEV_MODE === '0') {
   });
 } else {
   sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
+    'nv-db',//process.env.DB_NAME,
+    'devadmin',
+    '99ventures#2020',
     {
-      host: process.env.DB_HOST || '127.0.0.1',
+      host: 'nv-db.cw40jczte1ng.us-east-2.rds.amazonaws.com',
       dialect: 'mysql',
       port: process.env.DB_PORT || 3306,
       logging: false,
