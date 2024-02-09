@@ -191,13 +191,23 @@ module.exports = (sequelize, DataTypes) => {
       var member_id = null;
 
       //generating query to insert data in bridge table
-      data.forEach((item) => {
-        value_string += '(?, ?),';
-        tier_ids.push(item.membership_tier_id);
-        replacements.push(item.membership_tier_id);
-        replacements.push(item.member_id);
-        if (!member_id) {
-          member_id = item.member_id;
+      data.forEach(async (item) => {
+        const count_if_exist = await db.sequelize.query(
+          `SELECT COUNT(member_id) as cnt FROM member_membership_tier WHERE membership_tier_id = ? AND member_id = ?`,
+          {
+            type: QueryTypes.SELECT,
+            replacements: [item.membership_tier_id, item.member_id]
+          }
+        );
+        console.log('count_if_exist~~~~~~~~~~~~~~~~', count_if_exist);
+        if (count_if_exist[0].cnt === 0) {
+          value_string += '(?, ?),';
+          tier_ids.push(item.membership_tier_id);
+          replacements.push(item.membership_tier_id);
+          replacements.push(item.member_id);
+          if (!member_id) {
+            member_id = item.member_id;
+          }
         }
       });
 
