@@ -302,7 +302,14 @@ function List(props) {
 		setModuleActioned(false);
 	}
 
+	
 	async function handleDeselect(selectedIds) {
+		if(module === 'membership-tiers' && selectedIds.length > 1){
+			dispatch(showMessage({ variant: 'warning', message: 'Oops! Multiple delete not possible!' }))
+			return;
+		}
+		
+		// console.log('saa')
 		// let url = `${module}/delete`;
 		// let params = { data: { modelIds: selectedIds } };
 		// if (module === 'withdrawal-requests') {

@@ -7,6 +7,7 @@ import { darken, lighten } from '@mui/material/styles';
 import { removeModules } from '../store/modulesSlice';
 import { useParams } from 'react-router-dom';
 import AlertDialog from 'app/shared-components/AlertDialog';
+import DeleteAlert from 'app/shared-components/DeleteAlert';
 
 function ListTableHead(props) {
   const { selectedOrderIds } = props;
@@ -142,7 +143,7 @@ function ListTableHead(props) {
                 }
 
               </Menu>
-              <AlertDialog
+              <DeleteAlert
                 open={openAlertDialog}
                 onConfirm={onConfirmAlertDialogHandle}
                 onClose={onCloseAlertDialogHandle}
