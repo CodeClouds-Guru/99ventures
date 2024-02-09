@@ -203,6 +203,7 @@ module.exports = (sequelize, DataTypes) => {
 
       value_string = value_string.replace(/,*$/, '') + ';';
 
+      console.log('membership_tier_upgrade_query', `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`, replacements)
       //executing query to insert data in bridge table
       await db.sequelize.query(
         `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
@@ -259,6 +260,7 @@ module.exports = (sequelize, DataTypes) => {
     let transaction_data = [];
     if (updated_tiers.length > 0) {
       for (let item of updated_tiers) {
+        console.log('updated_tier', item.name);
         let member = await db.Member.findOne({
           where: { id: member_id },
           // attributes: ['first_name', 'last_name', 'username'],
@@ -333,7 +335,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   MembershipTier.sendEmailOnTierUpgrade = async (data, req) => {
     //send mail
-    console.log('sendEmailOnTierUpgrade', data.current_level);
+    // console.log('sendEmailOnTierUpgrade', data.current_level);
     const eventBus = require('../eventBus');
     let evntbus = eventBus.emit('send_email', {
       action: 'Membership Level Upgrade',
