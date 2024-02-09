@@ -239,7 +239,7 @@ class MemberAuthController {
             last_name: req.body.last_name.trim(),
             email: email,
             password: password,
-            membership_tier_id: 1,
+            membership_tier_id: null,
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',

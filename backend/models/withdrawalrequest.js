@@ -659,6 +659,7 @@ module.exports = (sequelize, DataTypes) => {
 
     //level upgrade event
     if (member_ids.length > 0) {
+      member_ids = member_ids.map((item) => item.member_id);
       member_ids = [...new Set(member_ids)];
       console.log('MI=========', member_ids);
       for (let id in member_ids) {
@@ -692,7 +693,7 @@ module.exports = (sequelize, DataTypes) => {
       if (
         checkMemberPaymentMethod.PaymentMethod.dataValues
           .parent_payment_method_id ==
-        payment_method.parent_payment_method_id ||
+          payment_method.parent_payment_method_id ||
         checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
       ) {
         resp.member_status = true;
