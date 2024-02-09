@@ -4,8 +4,10 @@ const {
   MemberShipTierAction,
   MemberShipTierRule,
   MembershipTier,
+  Member,
 } = require('../../models/index');
-const { Op } = require('sequelize');
+const db = require('../../models/index');
+const { QueryTypes, Op } = require('sequelize');
 const FileHelper = require('../../helpers/fileHelper');
 
 class MembershipTierController extends Controller {
@@ -17,6 +19,7 @@ class MembershipTierController extends Controller {
     this.removeRulesOnUpdate = this.removeRulesOnUpdate.bind(this);
     this.isValidParentheses = this.isValidParentheses.bind(this);
     this.checkUniqueForLevelName = this.checkUniqueForLevelName.bind(this);
+    this.delete = this.delete.bind(this);
   }
 
   //override list api
@@ -360,6 +363,75 @@ class MembershipTierController extends Controller {
       return false;
     }
     return true;
+  }
+
+  //override delete api
+  async delete(req, res) {
+    try {
+      let modelIds = req.body.model_ids[0] ?? [];
+      let columns = Object.keys(this.model.rawAttributes);
+      //get to be deleted tier data
+      let model = await this.model.findOne({
+        where: { id: modelIds },
+        include: {
+          model: MemberShipTierRule,
+        },
+      });
+
+      //get lesser chronology tier
+      let down_tier_data = await this.model.findOne({
+        where: {
+          chronology: { [Op.lt]: model.chronology },
+        },
+        limit: 1,
+      });
+
+      //get all members belong to deleting tier
+      let get_all_members = await Member.findAll({
+        where: {
+          status: 'member',
+          membership_tier_id: modelIds,
+        },
+        attributes: ['id'],
+        // logging: console.log,
+      });
+
+      if (get_all_members.length > 0) {
+        get_all_members = get_all_members.map((item) => item.id);
+        //downgrade tiers for the members
+        await Member.update(
+          { membership_tier_id: down_tier_data ? down_tier_data.id : null },
+          {
+            where: {
+              status: 'member',
+              membership_tier_id: modelIds,
+            },
+            logging: console.log,
+          }
+        );
+        await db.sequelize.query(
+          `DELETE FROM member_membership_tier WHERE membership_tier_id = ? AND  member_id IN (?)`,
+          {
+            type: QueryTypes.DELETE,
+            replacements: [model.id, get_all_members],
+          }
+        );
+      }
+
+      if (columns.indexOf('deleted_by') >= 0) {
+        await this.model.update(
+          { deleted_by: req.user.id },
+          { where: { id: modelIds } }
+        );
+      }
+      await this.removeRulesOnUpdate(modelIds, model);
+      let resp = await this.model.destroy({ where: { id: modelIds } });
+      return {
+        message: 'Record(s) has been deleted successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
