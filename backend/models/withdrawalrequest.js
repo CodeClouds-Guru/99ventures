@@ -652,11 +652,14 @@ module.exports = (sequelize, DataTypes) => {
       );
     }
     // if (withdrawal_ids.length > 0) {
-    await WithdrawalRequest.update(
+    let withdraw_req_update = await WithdrawalRequest.update(
       { status: 'completed' },
       { where: { id: withdrawal_ids } }
     );
-
+    console.log(
+      '==========withdraw_req_update=============',
+      withdraw_req_update
+    );
     //level upgrade event
     if (member_ids.length > 0) {
       member_ids = member_ids.map((item) => item.member_id);
