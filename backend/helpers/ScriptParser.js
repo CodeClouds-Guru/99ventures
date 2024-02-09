@@ -202,7 +202,7 @@ class ScriptParser {
             }
             let state_list = await Models.State.getAllStates(clause);
             data.setDataValue('state_list', state_list);
-
+            console.log('data', data);
             let future_tiers = await Models.MembershipTier.findAll({
               where: {
                 ...(data.MembershipTier && {
