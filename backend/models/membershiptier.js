@@ -200,34 +200,32 @@ module.exports = (sequelize, DataTypes) => {
           }
         );
         console.log('count_if_exist~~~~~~~~~~~~~~~~', count_if_exist);
-        if (count_if_exist[0].cnt === 0) {
-          value_string += '(?, ?),';
-          tier_ids.push(item.membership_tier_id);
-          replacements.push(item.membership_tier_id);
-          replacements.push(item.member_id);
-          if (!member_id) {
-            member_id = item.member_id;
-          }
+        // if (count_if_exist[0].cnt === 0) {
+        value_string += '(?, ?),';
+        tier_ids.push(item.membership_tier_id);
+        replacements.push(item.membership_tier_id);
+        replacements.push(item.member_id);
+        if (!member_id) {
+          member_id = item.member_id;
         }
+        // }
       });
 
-      if (value_string.trim().length > 0) {
-        value_string = value_string.replace(/,*$/, '') + ';';
+      value_string = value_string.replace(/,*$/, '') + ';';
 
-        console.log(
-          'membership_tier_upgrade_query',
-          `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
-          replacements
-        );
-        //executing query to insert data in bridge table
-        await db.sequelize.query(
-          `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
-          {
-            type: QueryTypes.INSERT,
-            replacements,
-          }
-        );
-      }
+      console.log(
+        'membership_tier_upgrade_query',
+        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+        replacements
+      );
+      //executing query to insert data in bridge table
+      await db.sequelize.query(
+        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+        {
+          type: QueryTypes.INSERT,
+          replacements,
+        }
+      );
 
       //determining top order membership level to assign in member row
       const final_tier = await db.MembershipTier.findAll({
@@ -246,11 +244,10 @@ module.exports = (sequelize, DataTypes) => {
           }
         );
       }
-      if (tier_ids.length > 0)
-        await db.MembershipTier.transactionUpdateOnTierUpgrade(
-          tier_ids,
-          member_id
-        );
+      await db.MembershipTier.transactionUpdateOnTierUpgrade(
+        tier_ids,
+        member_id
+      );
     }
     return true;
   };
