@@ -30,6 +30,7 @@ class MembershipTierShiftListner {
       if (member_membership_tier_ids.includes(parseInt(membership_tier, 10))) {
         continue;
       }
+      console.log('member_id============', member_id);
       const dataset = await db.Member.getMemberTierData(member_id);
       console.log('dataset', dataset);
       console.log('rule_set', rule_set);

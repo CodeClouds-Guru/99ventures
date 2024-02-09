@@ -616,6 +616,7 @@ module.exports = (sequelize, DataTypes) => {
     let member = await Member.findOne({
       where: { id: member_id, status: 'member' },
     });
+    console.log('getMemberTierData===========', member);
     let signup = 0;
     let email_verified = 0;
     let profile_completed = 0;
@@ -666,6 +667,7 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
+    console.log('getTotalWithdrawalData===============', total_paid);
     return {
       total_paid: Math.abs(total_paid[0].total) || 0.0,
       total_paid_count: total_paid[0].total_count || 0.0,
