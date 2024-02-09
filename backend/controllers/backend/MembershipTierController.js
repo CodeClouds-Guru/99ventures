@@ -383,6 +383,7 @@ class MembershipTierController extends Controller {
         where: {
           chronology: { [Op.lt]: model.chronology },
         },
+        order: [['chronology', 'desc']],
         limit: 1,
       });
 
