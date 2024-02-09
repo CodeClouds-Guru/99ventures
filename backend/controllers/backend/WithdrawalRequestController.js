@@ -63,8 +63,8 @@ class WithdrawalRequestController extends Controller {
           key in this.fieldConfig
             ? this.fieldConfig[key]
             : key === '`Member.status` AS `Member.member_status`'
-              ? 'Account'
-              : 'Unknown Col',
+            ? 'Account'
+            : 'Unknown Col',
       };
     }
     return fields;
@@ -117,9 +117,9 @@ class WithdrawalRequestController extends Controller {
       let reversal_transactions =
         member_ids.length > 0
           ? await db.sequelize.query(query, {
-            replacements: [[member_ids]],
-            type: QueryTypes.SELECT,
-          })
+              replacements: [[member_ids]],
+              type: QueryTypes.SELECT,
+            })
           : null;
       // console.log(reversal_transactions);
       results.rows.map((row, key) => {
@@ -157,9 +157,9 @@ class WithdrawalRequestController extends Controller {
         row.setDataValue('reverse_count', '');
         let obj = reversal_transactions
           ? reversal_transactions.find(
-            (o) =>
-              o.member_id === row.member_id && o.created_at > row.created_at
-          )
+              (o) =>
+                o.member_id === row.member_id && o.created_at > row.created_at
+            )
           : null;
         // console.log('obj', obj);
         let warning_text =
@@ -581,12 +581,12 @@ class WithdrawalRequestController extends Controller {
           }
         }
 
-        member_ids = [...new Set(member_ids)];
-        for (let id of member_ids) {
-          eventBus.emit('membership_tier_shift', {
-            member_id: id,
-          });
-        }
+        // member_ids = [...new Set(member_ids)];
+        // for (let id of member_ids) {
+        //   eventBus.emit('membership_tier_shift', {
+        //     member_id: id,
+        //   });
+        // }
 
         break;
       default:
@@ -656,7 +656,7 @@ class WithdrawalRequestController extends Controller {
     row.setDataValue('reverse_count', '');
     let warning_text =
       reversal_transaction.length > 0 &&
-        reversal_transaction[0].reverse_count > 0
+      reversal_transaction[0].reverse_count > 0
         ? 'This user received a reversed transaction. Please be carefull before approving the request!'
         : '';
     // console.log('reversal_transaction', reversal_transaction);
