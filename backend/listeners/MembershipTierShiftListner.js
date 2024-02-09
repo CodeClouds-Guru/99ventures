@@ -39,7 +39,10 @@ class MembershipTierShiftListner {
         });
       }
     }
-
+    console.log(
+      'member_membership_tier_data ===============',
+      member_membership_tier_data
+    );
     if (member_membership_tier_data.length > 0) {
       await db.MembershipTier.tierUpgrade(member_membership_tier_data);
     }
