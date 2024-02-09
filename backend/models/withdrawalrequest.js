@@ -326,7 +326,6 @@ module.exports = (sequelize, DataTypes) => {
     member_id,
     member
   ) => {
-    // console.log(payment_method_details, withdrawal_amount, member_id, member);
     const { MemberTransaction } = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
     //check all conditions for amount
@@ -660,6 +659,7 @@ module.exports = (sequelize, DataTypes) => {
 
     //level upgrade event
     if (member_ids.length > 0) {
+      member_ids = [...new Set(member_ids)];
       for (let id in member_ids) {
         eventBus.emit('membership_tier_shift', {
           member_id: id,
@@ -691,7 +691,7 @@ module.exports = (sequelize, DataTypes) => {
       if (
         checkMemberPaymentMethod.PaymentMethod.dataValues
           .parent_payment_method_id ==
-          payment_method.parent_payment_method_id ||
+        payment_method.parent_payment_method_id ||
         checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
       ) {
         resp.member_status = true;

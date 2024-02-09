@@ -203,6 +203,7 @@ module.exports = (sequelize, DataTypes) => {
 
       value_string = value_string.replace(/,*$/, '') + ';';
 
+      console.log('membership_tier_upgrade_query', `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`)
       //executing query to insert data in bridge table
       await db.sequelize.query(
         `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,

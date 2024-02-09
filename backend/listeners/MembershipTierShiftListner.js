@@ -31,9 +31,6 @@ class MembershipTierShiftListner {
         continue;
       }
       const dataset = await db.Member.getMemberTierData(member_id);
-      // console.log('dataset', dataset);
-      // console.log('rule_set', rule_set);
-      // console.log('member_membership_tier_ids', member_membership_tier_ids);
 
       if (safeEval(rule_set[membership_tier], dataset)) {
         member_membership_tier_data.push({
