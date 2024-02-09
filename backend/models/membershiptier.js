@@ -196,7 +196,7 @@ module.exports = (sequelize, DataTypes) => {
           `SELECT COUNT(member_id) as cnt FROM member_membership_tier WHERE membership_tier_id = ? AND member_id = ?`,
           {
             type: QueryTypes.SELECT,
-            replacements: [item.membership_tier_id, item.member_id]
+            replacements: [item.membership_tier_id, item.member_id],
           }
         );
         console.log('count_if_exist~~~~~~~~~~~~~~~~', count_if_exist);
@@ -211,17 +211,23 @@ module.exports = (sequelize, DataTypes) => {
         }
       });
 
-      value_string = value_string.replace(/,*$/, '') + ';';
+      if (value_string.trim().length > 0) {
+        value_string = value_string.replace(/,*$/, '') + ';';
 
-      console.log('membership_tier_upgrade_query', `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`, replacements)
-      //executing query to insert data in bridge table
-      await db.sequelize.query(
-        `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
-        {
-          type: QueryTypes.INSERT,
-          replacements,
-        }
-      );
+        console.log(
+          'membership_tier_upgrade_query',
+          `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+          replacements
+        );
+        //executing query to insert data in bridge table
+        await db.sequelize.query(
+          `INSERT INTO member_membership_tier (membership_tier_id, member_id) VALUES ${value_string}`,
+          {
+            type: QueryTypes.INSERT,
+            replacements,
+          }
+        );
+      }
 
       //determining top order membership level to assign in member row
       const final_tier = await db.MembershipTier.findAll({
@@ -240,10 +246,11 @@ module.exports = (sequelize, DataTypes) => {
           }
         );
       }
-      await db.MembershipTier.transactionUpdateOnTierUpgrade(
-        tier_ids,
-        member_id
-      );
+      if (tier_ids.length > 0)
+        await db.MembershipTier.transactionUpdateOnTierUpgrade(
+          tier_ids,
+          member_id
+        );
     }
     return true;
   };
