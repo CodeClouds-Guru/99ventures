@@ -210,9 +210,10 @@ class ScriptParser {
                 }),
                 status: 'active',
               },
-              limit: data.MembershipTier ? 2 : 3,
+              limit: data.membership_tier_id ? 2 : 3,
               // order: [['chronology', 'desc']],
             });
+            console.log('future_tiers', future_tiers);
             data.setDataValue('future_tiers', future_tiers);
             break;
           case 'member_withdrawal':
