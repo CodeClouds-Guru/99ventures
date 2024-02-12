@@ -35,7 +35,7 @@ class MembershipTierShiftListner {
       console.log('dataset', dataset);
       console.log('rule_set', rule_set);
       console.log('member_membership_tier_ids', member_membership_tier_ids);
-      console.log('membership_condition', safeEval(rule_set[membership_tier], dataset));
+      console.log('membership_condition', rule_set[membership_tier], safeEval(rule_set[membership_tier], dataset));
 
       if (safeEval(rule_set[membership_tier], dataset)) {
         member_membership_tier_data.push({
