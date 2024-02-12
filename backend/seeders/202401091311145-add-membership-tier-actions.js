@@ -43,6 +43,11 @@ module.exports = {
           variable: 'phone_no_verified_on',
           created_at: new Date(),
         },
+        {
+          name: 'Number Of Surveys Completed',
+          variable: 'number_of_surveys_completed',
+          created_at: new Date(),
+        },
       ],
       {}
     );

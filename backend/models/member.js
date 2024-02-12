@@ -624,7 +624,7 @@ module.exports = (sequelize, DataTypes) => {
     let withdrawn_amount = 0.0;
     let registered_days = 0;
     let phone_no_verified_on = 0;
-    let survey_completed = 0;
+    let number_of_surveys_completed = 0;
     if (member) {
       signup = 1;
       email_verified = member.email_verified_on ? 1 : 0;
@@ -637,7 +637,9 @@ module.exports = (sequelize, DataTypes) => {
       );
       withdrawal_count = get_total_withdrawal_data.total_paid_count;
       withdrawn_amount = get_total_withdrawal_data.total_paid;
-      survey_completed = await Member.getTotalCompletedSurveyCount(member_id);
+      number_of_surveys_completed = await Member.getTotalCompletedSurveyCount(
+        member_id
+      );
     }
 
     return {
@@ -648,7 +650,7 @@ module.exports = (sequelize, DataTypes) => {
       withdrawal_count,
       withdrawn_amount,
       registered_days,
-      survey_completed,
+      number_of_surveys_completed,
     };
   };
 
