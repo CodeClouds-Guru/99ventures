@@ -262,7 +262,7 @@ class Paypal {
             );
           }
         }
-
+        let member_ids = [];
         //level upgrade trigger
         if (transaction_ids.length > 0) {
           member_ids = await MemberTransaction.findAll({
