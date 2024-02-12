@@ -624,6 +624,7 @@ module.exports = (sequelize, DataTypes) => {
     let withdrawn_amount = 0.0;
     let registered_days = 0;
     let phone_no_verified_on = 0;
+    let survey_completed = 0;
     if (member) {
       signup = 1;
       email_verified = member.email_verified_on ? 1 : 0;
@@ -636,6 +637,7 @@ module.exports = (sequelize, DataTypes) => {
       );
       withdrawal_count = get_total_withdrawal_data.total_paid_count;
       withdrawn_amount = get_total_withdrawal_data.total_paid;
+      survey_completed = await Member.getTotalCompletedSurveyCount(member_id);
     }
 
     return {
@@ -646,6 +648,7 @@ module.exports = (sequelize, DataTypes) => {
       withdrawal_count,
       withdrawn_amount,
       registered_days,
+      survey_completed,
     };
   };
 
@@ -672,6 +675,22 @@ module.exports = (sequelize, DataTypes) => {
       total_paid: Math.abs(total_paid[0].total) || 0.0,
       total_paid_count: total_paid[0].total_count || 0.0,
     };
+  };
+
+  Member.getTotalCompletedSurveyCount = async (member_id) => {
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    //total paid
+    let total_survey_completed = await db.sequelize.query(
+      "SELECT IFNULL(COUNT(id),0) as 'cnt' from member_transactions mt where member_id = ? and amount_action = 'survey' and id not in (SELECT parent_transaction_id id from member_transactions mt2 WHERE  member_id = ? and amount_action = 'revresed_transaction' and parent_transaction_id is not null)",
+      {
+        replacements: [member_id, member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    console.log('total_survey_completed', total_survey_completed);
+    return total_survey_completed[0].cnt;
   };
 
   return Member;
