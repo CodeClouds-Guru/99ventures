@@ -263,83 +263,88 @@ class MemberTransactionController extends Controller {
       if (type === 'revert') {
         try {
           let transaction = await this.model.findByPk(transaction_id);
-
-          let member = await Member.findOne({
-            where: { id: member_id },
-            include: {
-              model: MemberBalance,
-              as: 'member_amounts',
-              where: { amount_type: 'cash' },
-            },
-          });
-          // console.log(member.member_amounts[0].amount);
-          //current transaction
-          await this.reverseTransactionUpdate({
-            member_balance_amount: member.member_amounts[0].amount,
-            transaction_amount: transaction.amount,
-            member_id: member_id,
-            transaction_id: transaction_id,
-            created_by: req.user.id,
-          });
-
-          //Email for member
-          // let member_mail = await this.sendMailEvent({
-          //   action: 'Transaction Reversed',
-          //   data: {
-          //     email: member.email,
-          //     details: {
-          //       members: member,
-          //       transaction,
-          //     },
-          //   },
-          //   req: req,
-          // });
-
-          //referral transaction
-          // if (transaction.parent_transaction_id) {
-          let referral_transactions = await this.model.findOne({
-            where: {
-              parent_transaction_id: transaction_id,
-              amount_action: 'referral',
-            },
-          });
-          if (referral_transactions) {
-            let referral_member = await Member.findOne({
-              where: { id: referral_transactions.member_id },
+          if (transaction.status != 5) {
+            let member = await Member.findOne({
+              where: { id: member_id },
               include: {
                 model: MemberBalance,
                 as: 'member_amounts',
                 where: { amount_type: 'cash' },
               },
             });
-
+            // console.log(member.member_amounts[0].amount);
+            //current transaction
             await this.reverseTransactionUpdate({
-              member_balance_amount: referral_member.member_amounts[0].amount,
-              transaction_amount: referral_transactions.amount,
-              member_id: referral_transactions.member_id,
-              transaction_id: referral_transactions.id,
+              member_balance_amount: member.member_amounts[0].amount,
+              transaction_amount: transaction.amount,
+              member_id: member_id,
+              transaction_id: transaction_id,
               created_by: req.user.id,
             });
 
-            //Email for referral member
-            // let referral_member_mail = await this.sendMailEvent({
+            //Email for member
+            // let member_mail = await this.sendMailEvent({
             //   action: 'Transaction Reversed',
             //   data: {
-            //     email: referral_member.email,
+            //     email: member.email,
             //     details: {
-            //       members: referral_member,
-            //       transaction: referral_transactions,
+            //       members: member,
+            //       transaction,
             //     },
             //   },
             //   req: req,
             // });
-          }
 
-          return {
-            status: true,
-            message: 'Record Updated',
-          };
-          // }
+            //referral transaction
+            // if (transaction.parent_transaction_id) {
+            let referral_transactions = await this.model.findOne({
+              where: {
+                parent_transaction_id: transaction_id,
+                amount_action: 'referral',
+              },
+            });
+            if (referral_transactions) {
+              let referral_member = await Member.findOne({
+                where: { id: referral_transactions.member_id },
+                include: {
+                  model: MemberBalance,
+                  as: 'member_amounts',
+                  where: { amount_type: 'cash' },
+                },
+              });
+
+              await this.reverseTransactionUpdate({
+                member_balance_amount: referral_member.member_amounts[0].amount,
+                transaction_amount: referral_transactions.amount,
+                member_id: referral_transactions.member_id,
+                transaction_id: referral_transactions.id,
+                created_by: req.user.id,
+              });
+
+              //Email for referral member
+              // let referral_member_mail = await this.sendMailEvent({
+              //   action: 'Transaction Reversed',
+              //   data: {
+              //     email: referral_member.email,
+              //     details: {
+              //       members: referral_member,
+              //       transaction: referral_transactions,
+              //     },
+              //   },
+              //   req: req,
+              // });
+            }
+
+            return {
+              status: true,
+              message: 'Record Updated',
+            };
+          } else {
+            return {
+              status: false,
+              message: 'Record Already Reverted',
+            };
+          }
         } catch (e) {
           console.log(e);
           this.throwCustomError(e, 404);

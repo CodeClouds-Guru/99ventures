@@ -218,11 +218,18 @@ class SurveycallbackController {
       const reward = req.query.reward;
       const txnId = req.query.txn_id;
 
+      //--Log
+      const logger = require('../../helpers/Logger')(
+        `cint-postback.log`
+      );
+      logger.info(JSON.stringify(req.query));
+      //--
+
       const memberId = extractUserIdForSurveyProviders(ssiValue);
       let member = await this.getMember({ id: memberId });
       if (member) {
-        const memberSurveys = await Survey.checkMemberSurvey(member.username, txnId, 2);
-        if (memberSurveys.length < 1) {
+        const memberSurveys = await Survey.checkMemberSurveyByMemberId(member.id, txnId, 2);
+        if (memberSurveys < 1) {
           const survey = {
             cpi: reward,
           };
@@ -364,6 +371,12 @@ class SurveycallbackController {
     const queryData = req.query;
     const username = queryData.uid;
     if (queryData.status === 'complete') {
+      //--Log
+      const logger = require('../../helpers/Logger')(
+        `sago-postback.log`
+      );
+      logger.info(JSON.stringify(req.query));
+      //--
       try {
         const tmpVar = queryData.pid.split('-');
         const surveyNumber = tmpVar[1];
@@ -421,6 +434,13 @@ class SurveycallbackController {
    * Lucid Callback details integration & redirect to page
    */
   async lucidPostback(req, res) {
+    //-- Log
+    const logger = require('../../helpers/Logger')(
+      `lucid-postback.log`
+    );
+    logger.info(JSON.stringify(req.query));
+    //--
+
     const requestParam = req.query;
     const memberId = extractUserIdForSurveyProviders(requestParam.pid);
     const member = await this.getMember({ id: memberId });
@@ -435,21 +455,10 @@ class SurveycallbackController {
     try {
       if (requestParam.status === 'complete') {
         const surveyNumber = requestParam.survey_id;
-        /*const survey = await Survey.findOne({
-          attributes: ['cpi'],
-          where: {
-            survey_number: surveyNumber,
-            survey_provider_id: 1,
-          }
-        });*/
         const survey = requestParam;
         if (survey) {
-          const memberSurveys = await Survey.checkMemberSurvey(
-            member.username,
-            surveyNumber,
-            1
-          );
-          if (memberSurveys.length < 1) {
+          const memberSurveys = await Survey.checkMemberSurveyByMemberId(member.id, surveyNumber, 1);
+          if (memberSurveys < 1) {
             await this.memberTransaction(
               survey,
               'Lucid',

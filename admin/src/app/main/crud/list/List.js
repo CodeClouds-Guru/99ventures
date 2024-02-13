@@ -361,7 +361,9 @@ function List(props) {
 			setMemberID(0)
 			closeActionsMenu()
 			fetchModules();
-			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
+			// dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
+			console.log(res)
+			dispatch(showMessage({ variant: 'success', message: res.data.results.message }))
 		}).catch(e => {
 			console.error(e)
 			dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to revert' }))

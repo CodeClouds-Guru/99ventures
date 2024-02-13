@@ -465,7 +465,7 @@ class WithdrawalRequestController extends Controller {
         break;
       case 'rejected':
         // response = await paypal_class.successPayment(req, res);
-        response = await this.changeStatus(model_ids, note, action_type);
+        // response = await this.changeStatus(model_ids, note, action_type);
         response_message = 'Withdrawal request rejected';
         await this.model.rejectedOrFailedRequest(
           model_ids,
@@ -474,13 +474,15 @@ class WithdrawalRequestController extends Controller {
         );
         break;
       case 'approved':
-        response = await this.changeStatus(model_ids, note, action_type);
+        // console.log(model_ids);
+
         response_message = 'Withdrawal request approved';
         let all_withdrawal_req = await this.model.findAll({
           where: {
             id: {
               [Op.in]: model_ids,
             },
+            status: 'pending',
           },
           attributes: [
             'id',
@@ -512,7 +514,9 @@ class WithdrawalRequestController extends Controller {
               ],
             },
           ],
+          // logging: console.log,
         });
+        // console.log(all_withdrawal_req);
         var items = [];
         var transaction_ids = [];
         var transaction_ids_without_creds = [];
@@ -530,8 +534,8 @@ class WithdrawalRequestController extends Controller {
             transaction_ids_without_creds.push(record.member_transaction_id);
             withdrawal_ids_without_creds.push(record.id);
             await this.model.approvedAndCompletedReqs(
-              transaction_ids_without_creds,
-              withdrawal_ids_without_creds
+              record.member_transaction_id,
+              record.id
             );
           }
 
@@ -560,13 +564,22 @@ class WithdrawalRequestController extends Controller {
           }
           member_ids.push(record.member_id);
         }
-
+        response = await this.changeStatus(model_ids, note, action_type);
         if (items.length > 0) {
           let company_portal_id = req.headers.site_id;
           //do bulk payment
           const paypal_class = new Paypal(company_portal_id);
           const create_resp = await paypal_class.payout(items);
           // console.log('------------create_resp', create_resp);
+          const logger1 = require('../../helpers/Logger')(
+            `paypal-payout-log.log`
+          );
+          logger1.info(
+            JSON.stringify({
+              items,
+              create_resp,
+            })
+          );
           if (create_resp.status) {
             await MemberTransaction.update(
               { batch_id: create_resp.batch_id },
@@ -605,22 +618,32 @@ class WithdrawalRequestController extends Controller {
     };
   }
   async changeStatus(model_ids, note, action_type) {
-    let response = [];
-    if (model_ids.length) {
-      let update_data = {
-        note: note,
-        status: action_type,
-      };
-      response = await this.model.update(update_data, {
-        where: {
-          id: {
-            [Op.in]: model_ids,
-          },
-        },
-        return: true,
-      });
+    let get_withdrawals = await this.model.findAll({
+      where: { id: model_ids, status: 'pending' },
+    });
+    for (let records of get_withdrawals) {
+      await this.model.update(
+        { status: action_type, note: note },
+        { where: { id: records.id } }
+      );
     }
-    return response;
+    return true;
+
+    // if (model_ids.length) {
+    //   let update_data = {
+    //     note: note,
+    //     status: action_type,
+    //   };
+    //   response = await this.model.update(update_data, {
+    //     where: {
+    //       id: {
+    //         [Op.in]: model_ids,
+    //         status: 'pending',
+    //       },
+    //     },
+    //     return: true,
+    //   });
+    // }
   }
 
   //format
