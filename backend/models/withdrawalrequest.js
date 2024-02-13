@@ -677,6 +677,7 @@ module.exports = (sequelize, DataTypes) => {
       let get_transactions = await MemberTransaction.findAll({
         where: { id: transaction_ids, status: 1 },
       });
+      console.log('get_transactions', get_transactions);
       for (let records of get_transactions) {
         await MemberTransaction.update(
           {
@@ -700,10 +701,10 @@ module.exports = (sequelize, DataTypes) => {
         { status: 'completed' },
         { where: { id: withdrawal_ids } }
       );
-      // console.log(
-      //   '==========withdraw_req_update=============',
-      //   withdraw_req_update
-      // );
+      console.log(
+        '==========withdraw_req_update=============',
+        withdraw_req_update
+      );
       //level upgrade event
       // if (member_ids.length > 0) {
       //   member_ids = member_ids.map((item) => item.member_id);
