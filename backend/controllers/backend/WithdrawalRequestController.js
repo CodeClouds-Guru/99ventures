@@ -538,6 +538,10 @@ class WithdrawalRequestController extends Controller {
               record.member_transaction_id,
               record.id
             );
+            member_ids.push(record.member_id);
+            eventBus.emit('membership_tier_shift', {
+              member_id: record.member_id,
+            });
           }
 
           if (
@@ -563,7 +567,6 @@ class WithdrawalRequestController extends Controller {
               member_transaction_id: transaction_id,
             });
           }
-          member_ids.push(record.member_id);
         }
 
         if (items.length > 0) {
