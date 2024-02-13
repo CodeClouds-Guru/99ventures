@@ -143,38 +143,45 @@ const MembershipList = () => {
                                 <Typography variant="h5" className="font-extrabold tracking-tight capitalize">Configurations</Typography>
                                 <Typography variant="caption">(Ascending order)</Typography>
                             </motion.div>
-                            
-                            <div className='justify-center flex p-16' >                            
-                                <div className='flex w-1/2 flex-col'>
-                                    <div className='border-dashed border-2 border-gray-700 w-full p-16' style={{minHeight: '30rem'}}>
-                                        <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-                                            {
-                                                tiers.length ? tiers.map(row => {
-                                                    return (
-                                                        <Draggable key={Math.random()}>
-                                                            <div className='p-20 bg-gray-50 mb-10 rounded shadow-md flex justify-between items-center'>
-                                                                <div className='flex items-center'>
-                                                                    <div className="drag-handle mr-10 cursor-move">
-                                                                        <DragHandleIcon/> 
-                                                                    </div> 
-                                                                    <Typography variant="body1">{row.name}</Typography>
-                                                                </div>
-                                                                <div className='bg-gray-200 w-24 rounded-full h-24 text-center'>
-                                                                    <Typography variant="caption">{row.chronology}</Typography>
-                                                                </div>
-                                                            </div>
-                                                        </Draggable>
-                                                    )
-                                                }) : ''
-                                            }
-                                        </Container>
+                            {
+                                tiers.length ? (
+                                    <div className='justify-center flex p-16' >                            
+                                        <div className='flex w-1/2 flex-col'>
+                                            <div className='border-dashed border-2 border-gray-700 w-full p-16' style={{minHeight: '30rem'}}>
+                                                <Container dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+                                                    {
+                                                        tiers.map(row => {
+                                                            return (
+                                                                <Draggable key={Math.random()}>
+                                                                    <div className='p-20 bg-gray-50 mb-10 rounded shadow-md flex justify-between items-center'>
+                                                                        <div className='flex items-center'>
+                                                                            <div className="drag-handle mr-10 cursor-move">
+                                                                                <DragHandleIcon/> 
+                                                                            </div> 
+                                                                            <Typography variant="body1">{row.name}</Typography>
+                                                                        </div>
+                                                                        <div className='bg-gray-200 w-24 rounded-full h-24 text-center'>
+                                                                            <Typography variant="caption">{row.chronology}</Typography>
+                                                                        </div>
+                                                                    </div>
+                                                                </Draggable>
+                                                            )
+                                                        })
+                                                    }
+                                                </Container>
+                                            </div>
+                                            <div className='mt-24 w-full text-center'>
+                                                <Button color="primary" disabled={JSON.stringify(tiers) === JSON.stringify(initialOrder)} className="w-1/4 mr-20" variant="outlined" onClick={handleResetOrder}>Reset</Button>
+                                                <LoadingButton color="primary" className="w-1/4" loading={loading} variant="contained" onClick={updateMembershipLevel}>Save</LoadingButton>
+                                            </div>
+                                        </div>
+                                    </div>   
+                                ) : (
+                                    <div className='p-16' >
+                                        <Typography variant="subtitle" className="italic text-gray-500">No record found!</Typography>
                                     </div>
-                                    <div className='mt-24 w-full text-center'>
-                                        <Button color="primary" disabled={JSON.stringify(tiers) === JSON.stringify(initialOrder)} className="w-1/4 mr-20" variant="outlined" onClick={handleResetOrder}>Reset</Button>
-                                        <LoadingButton color="primary" className="w-1/4" loading={loading} variant="contained" onClick={updateMembershipLevel}>Save</LoadingButton>
-                                    </div>
-                                </div>
-                            </div>       
+                                )
+                            }                                
                         </>              
                     } 
                     scroll="content" 
