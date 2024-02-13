@@ -661,12 +661,12 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    // console.log(
-    //   '------approvedAndCompletedReq s',
-    //   transaction_ids,
-    //   withdrawal_ids,
-    //   req_body
-    // );
+    console.log(
+      '------approvedAndCompletedReq s',
+      transaction_ids,
+      withdrawal_ids,
+      req_body
+    );
     let member_ids = [];
     if (transaction_ids.length > 0) {
       // member_ids = await MemberTransaction.findAll({
