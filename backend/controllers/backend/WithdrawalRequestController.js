@@ -524,6 +524,7 @@ class WithdrawalRequestController extends Controller {
         var member_ids = [];
         let transaction_id = '';
         // var transaction_status = 1;
+        response = await this.changeStatus(model_ids, note, action_type);
         for (let record of all_withdrawal_req) {
           // console.log('-------------record', record);
           if (
@@ -564,7 +565,7 @@ class WithdrawalRequestController extends Controller {
           }
           member_ids.push(record.member_id);
         }
-        response = await this.changeStatus(model_ids, note, action_type);
+
         if (items.length > 0) {
           let company_portal_id = req.headers.site_id;
           //do bulk payment
