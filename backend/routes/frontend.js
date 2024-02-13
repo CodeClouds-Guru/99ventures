@@ -8,14 +8,22 @@ const Paypal = require('../helpers/Paypal');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 const { Readable } = require('stream');
-const { StaticContent, CompanyPortal } = require("../models")
+const { StaticContent, CompanyPortal } = require('../models');
 const StaticPageControllerClass = require('../controllers/frontend/StaticPageController');
 const StaticPageController = new StaticPageControllerClass();
+
+// router.get('/test-membership-tier', async (req, res) => {
+//   const eventBus = require('../eventBus');
+//   eventBus.emit('membership_tier_shift', {});
+// });
 
 /**
  * Robots.txt
  */
-router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticContents);
+router.get(
+  '/:type(robots.txt|sitemap.xml)',
+  StaticPageController.renderStaticContents
+);
 
 /**
  * Sitemap
@@ -44,7 +52,6 @@ router.get('/:type(robots.txt|sitemap.xml)', StaticPageController.renderStaticCo
 //   }
 // });
 
-
 /**
  * For scripts
  */
@@ -56,7 +63,7 @@ const validateCaptchaMiddleware = require('../middlewares/validateCaptchaMiddlew
 router.use(checkMemberAuth);
 router.use(validateCaptchaMiddleware);
 //commented for testing uk/us surveys, should be uncommented later
-// router.use(checkIPMiddleware);
+router.use(checkIPMiddleware);
 
 const MemberAuthControllerClass = require('../controllers/frontend/MemberAuthController');
 const MemberAuthController = new MemberAuthControllerClass();

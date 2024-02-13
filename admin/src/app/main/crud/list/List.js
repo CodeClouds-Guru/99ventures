@@ -32,6 +32,7 @@ const iplogsColumns = {
 	'browser_language': 'Browser Language',
 	'fraud_score': 'Fraud Score',
 	'tor': 'Tor',
+	'bot_status': 'Bot Status',
 	'vpn': 'VPN',
 	'proxy': 'Proxy',
 	'created_at':'Created At'
@@ -301,7 +302,14 @@ function List(props) {
 		setModuleActioned(false);
 	}
 
+	
 	async function handleDeselect(selectedIds) {
+		if(module === 'membership-tiers' && selectedIds.length > 1){
+			dispatch(showMessage({ variant: 'warning', message: 'Oops! Multiple delete not possible!' }))
+			return;
+		}
+		
+		// console.log('saa')
 		// let url = `${module}/delete`;
 		// let params = { data: { modelIds: selectedIds } };
 		// if (module === 'withdrawal-requests') {
@@ -353,7 +361,9 @@ function List(props) {
 			setMemberID(0)
 			closeActionsMenu()
 			fetchModules();
-			dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
+			// dispatch(showMessage({ variant: 'success', message: 'Action executed successfully' }))
+			console.log(res)
+			dispatch(showMessage({ variant: 'success', message: res.data.results.message }))
 		}).catch(e => {
 			console.error(e)
 			dispatch(showMessage({ variant: 'error', message: 'Oops! Unable to revert' }))

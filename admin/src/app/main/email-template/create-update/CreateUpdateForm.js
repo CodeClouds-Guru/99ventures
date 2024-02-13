@@ -175,15 +175,15 @@ const CreateUpdateForm = ({ input, meta }) => {
     }
 
     const generatedHTMLValue = (editor) =>{
-        let generatedHTML = '';
-
+        let generatedHTML = '';        
         if(editor.getHtml()) {
-            // const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
+            const css = (editor.getCss()) ? `<style>${editor.getCss()}</style>` : '';            
             generatedHTML += 
             `<html>
                 <head>
                     <title>${allData.name}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    ${css}
                 </head>
                 ${editor.getHtml()}            
             </html>`;

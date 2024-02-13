@@ -253,7 +253,7 @@ const MemberDetails = (props) => {
                     // updateAvatar params has been set to not to change the avatar url after updating the value. 
                     // Because AWS S3 is taking time to update the image. Until reload the browser, updating avatar value is taking from JS State.
                     updateAvatar && setAvatar(avatarUrl);
-                    setMemberData({ ...result, membership_tier_id: result.MembershipTier.id, avatar: avatarUrl });
+                    setMemberData({ ...result, membership_tier_id: result.MembershipTier?.id, avatar: avatarUrl });
                     // We set the result info to the state. When user click on cancel edit btn then we will set the value on every input fields from this memberinfo state.
                     setMemberinfo(result);
                     /*if (result.deleted_at && result.deleted_by && result.deleted_by_admin) {
@@ -822,7 +822,7 @@ const MemberDetails = (props) => {
                                         ) : (
                                             <div className='flex items-center break-all'>
                                                 <Typography variant="body1" className="flex sm:text-lg lg:text-sm xl:text-base text-sm">
-                                                    {memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
+                                                    {memberData.MemberPaymentInformations && memberData.MemberPaymentInformations.length > 0 ? memberData.MemberPaymentInformations[0].value : '--'}
                                                 </Typography>
                                                 {
                                                     !memberDeleted && (
@@ -969,7 +969,7 @@ const MemberDetails = (props) => {
                                                 </TextField>
                                             </div>
                                         ) : (
-                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.MembershipTier ? memberData.MembershipTier.name : ''}</Typography>
+                                            <Typography variant="body1" className="sm:text-lg md:text-lg lg:text-sm xl:text-base text-sm">{memberData.MembershipTier ? memberData.MembershipTier.name : '--'}</Typography>
                                         )
 
                                     } />

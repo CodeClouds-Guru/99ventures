@@ -52,6 +52,14 @@ const navigationConfig = [
         icon: 'material-outline:local_atm',
         url: 'app/promo-codes',
         end: true,
+      },
+      {
+        id: 'membershiptiers',
+        title: 'Membership Tier',
+        type: 'item',
+        icon: 'material-outline:badge',
+        url: 'app/membership-tiers',
+        end: true,
       }
     ]
   },

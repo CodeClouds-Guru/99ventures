@@ -58,9 +58,6 @@ class FileHelper {
         let s3 = await this.s3Connect();
         const imagePath = file.tempFilePath;
         const blob = fs.readFileSync(imagePath);
-        // const uploadedImage = await s3.upload({
-        // if(this.private_file == '1'){}
-        // console.log(path.concat(new_filename))
         const uploadedImage = await s3
           .putObject({
             Bucket: process.env.S3_BUCKET_NAME,
@@ -77,7 +74,7 @@ class FileHelper {
         };
       } catch (e) {
         this.response.trace = e;
-        console.log(e);
+        console.error(e);
       }
     }
     return this.response;
@@ -105,12 +102,6 @@ class FileHelper {
 
   //s3 bucket connection
   s3Connect() {
-    // console.log({
-    //   accessKeyId: process.env.S3_ACCESS_KEY_ID,
-    //   secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    //   region: process.env.AWS_DEFAULT_REGION,
-    //   signatureVersion: 'v4',
-    // });
     let s3 = new AWS.S3({
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
@@ -263,7 +254,6 @@ class FileHelper {
       MetadataDirective: 'REPLACE',
     };
     let copy_obj = await s3.copyObject(params).promise();
-    // console.log(copy_obj)
     return true;
   }
   //create zip files

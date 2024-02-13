@@ -4,6 +4,7 @@ const { Op, Model } = require('sequelize');
 const safeEval = require('safe-eval');
 const util = require('util');
 const { ceil } = require('lodash');
+const moment = require('moment');
 const {
   sequelize,
   MemberEligibilities,
@@ -88,7 +89,7 @@ class ScriptParser {
                 limit: perPage,
                 offset: (pageNo - 1) * perPage,
                 ...where,
-                logging: console.log,
+                // logging: console.log,
               });
               if (script.module == 'Shoutbox') {
                 data = data.reverse();
@@ -188,6 +189,7 @@ class ScriptParser {
             data = await Models[script.module].findOne({
               ...member_where,
             });
+            data.setDataValue('dob', data.dob ?? moment.parse(data.dob).format('MM/DD/YYYY'));
             let email_alerts = await Models.EmailAlert.getEmailAlertList(
               user.id
             );
@@ -202,6 +204,21 @@ class ScriptParser {
             }
             let state_list = await Models.State.getAllStates(clause);
             data.setDataValue('state_list', state_list);
+            // console.log('data', data);
+            let future_tiers = await Models.MembershipTier.findAll({
+              where: {
+                ...(data.MembershipTier && {
+                  chronology: { [Op.gt]: data.MembershipTier.chronology },
+                }),
+                status: 'active',
+              },
+              limit: data.membership_tier_id ? 2 : 3,
+              // order: [['chronology', 'desc']],
+            });
+            // console.log('future_tiers', future_tiers);
+            data.setDataValue('future_tiers', future_tiers);
+            data = JSON.parse(JSON.stringify(data));
+            data.dob = data.dob ? moment(data.dob).format('MM/DD/YYYY') : data.dob;
             break;
           case 'member_withdrawal':
             let transaction_data = {};
@@ -443,10 +460,10 @@ class ScriptParser {
           where: user
             ? { member_id: user.id }
             : {
-                status: 2,
-                type: 'withdraw',
-                amount_action: { [Op.ne]: 'reversed_transaction' },
-              },
+              status: 2,
+              type: 'withdraw',
+              amount_action: { [Op.ne]: 'reversed_transaction' },
+            },
           include: [
             { model: Models.Member, required: true },
             {
@@ -511,7 +528,7 @@ class ScriptParser {
           where: { id: user.id },
           include: {
             model: Models.MembershipTier,
-            attributes: ['name'],
+            // attributes: ['name', 'logo'],
           },
         };
       case 'Shoutbox':
@@ -556,16 +573,16 @@ class ScriptParser {
             [
               sequelize.literal(
                 `(select count(*) from excluded_member_payment_method where payment_method_id = PaymentMethod.id and member_id = ` +
-                  user.id +
-                  `)`
+                user.id +
+                `)`
               ),
               'disallowed',
             ],
             [
               sequelize.literal(
                 `(select count(*) from allowed_country_payment_method where payment_method_id = PaymentMethod.id and country_id = ` +
-                  user.country_id +
-                  `)`
+                user.country_id +
+                `)`
               ),
               'allowed_country',
             ],
@@ -718,17 +735,15 @@ class ScriptParser {
     }
 
     script_html += `
-            <li data-page="1" class="page-item ${
-              1 === page_no ? 'active' : ''
-            }" data-id="${script_id}-1">
+            <li data-page="1" class="page-item ${1 === page_no ? 'active' : ''
+      }" data-id="${script_id}-1">
               <a href="javascript:void(0)" class="page-link">1</a>
             </li>
         `;
     if (page_no > show) {
       script_html += `
-            <li data-page="2" class="page-item ${
-              2 === page_no ? 'active' : ''
-            }" data-id="${script_id}-2">
+            <li data-page="2" class="page-item ${2 === page_no ? 'active' : ''
+        }" data-id="${script_id}-2">
               <a href="javascript:void(0)" class="page-link">2</a>
             </li>
         `;
@@ -739,9 +754,8 @@ class ScriptParser {
 
     for (let i = start; i <= total_page_count - 1; i++) {
       script_html += `
-            <li data-page="${i}" class="page-item ${
-        i === page_no ? 'active' : ''
-      }" data-id="${script_id}-${i}">
+            <li data-page="${i}" class="page-item ${i === page_no ? 'active' : ''
+        }" data-id="${script_id}-${i}">
               <a href="javascript:void(0)" class="page-link">${i}</a>
             </li>
           `;
@@ -754,9 +768,8 @@ class ScriptParser {
       script_html += `<li><a href="javascript:void(0)" class="page-link pe-none">...</a></li>`;
     }
     script_html += `
-            <li data-page="${total_page_count}" class="page-item ${
-      total_page_count === page_no ? 'active' : ''
-    }" data-id="${script_id}-${total_page_count}">
+            <li data-page="${total_page_count}" class="page-item ${total_page_count === page_no ? 'active' : ''
+      }" data-id="${script_id}-${total_page_count}">
               <a href="javascript:void(0)" class="page-link">${total_page_count}</a>
             </li>
         `;

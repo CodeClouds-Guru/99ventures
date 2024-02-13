@@ -140,14 +140,19 @@ class MemberAuthController {
     if (member_status) {
       req.session.member = member;
       if (!member.profile_completed_on) redirect_page = '/profile';
-      let activityEventbus = eventBus.emit('member_activity', {
-        member_id: member.id,
-        action: 'Member Logged In',
-      });
       await Member.update(
         { last_active_on: new Date() },
         { where: { id: member.id } }
       );
+      eventBus.emit('member_activity', {
+        member_id: member.id,
+        action: 'Member Logged In',
+      });
+      //Event For Membership Tier Shift
+      eventBus.emit('membership_tier_shift', {
+        member_id: member.id,
+      });
+
       res.redirect(redirect_page);
     } else {
       req.session.flash = { error: member_message };
@@ -220,7 +225,7 @@ class MemberAuthController {
           member_status = false;
           member_message = 'Sorry! this email has already been taken';
         } else {
-          req.body.membership_tier_id = 1;
+          req.body.membership_tier_id = null;
           // let files = [];
           // if (req.files) {
           //   files[0] = req.files.avatar;
@@ -234,7 +239,7 @@ class MemberAuthController {
             last_name: req.body.last_name.trim(),
             email: email,
             password: password,
-            membership_tier_id: 1,
+            membership_tier_id: null,
             company_portal_id: company_portal_id,
             company_id: company_id,
             status: 'validating',
@@ -278,7 +283,7 @@ class MemberAuthController {
             req.session.company_portal.domain +
             '/email-verify/' +
             buf;
-          let evntbus = eventBus.emit('send_email', {
+          eventBus.emit('send_email', {
             action: 'Welcome',
             data: {
               email: email,
@@ -298,9 +303,14 @@ class MemberAuthController {
         }
 
         if (member_status) {
-          let activityEventbus = eventBus.emit('member_activity', {
+          eventBus.emit('member_activity', {
             member_id: member_details.id,
             action: 'Member Sign Up',
+          });
+
+          //Event For Membership Tier Shift
+          eventBus.emit('membership_tier_shift', {
+            member_id: member_details.id,
           });
           req.session.flash = {
             message: 'Registered successfully!',
@@ -407,7 +417,7 @@ class MemberAuthController {
       },
       user: member_details,
     };
-    let evntbus = eventBus.emit('send_email', {
+    eventBus.emit('send_email', {
       action: 'Registration Bonus',
       data: {
         email: member_details.email,
@@ -477,13 +487,17 @@ class MemberAuthController {
       //   member_details.id,
       //   member_details.profile_completed_on
       // );
-      let activityEventbus = eventBus.emit('member_activity', {
+      eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Email Verified',
       });
-      let loginActivityEventbus = eventBus.emit('member_activity', {
+      eventBus.emit('member_activity', {
         member_id: member_details.id,
         action: 'Member Logged In',
+      });
+      //Event For Membership Tier Shift
+      eventBus.emit('membership_tier_shift', {
+        member_id: member_details.id,
       });
       // req.session.flash = {
       //   message:
@@ -594,7 +608,7 @@ class MemberAuthController {
               req
             );
             req.body.profile_completed_on = new Date();
-            let activityEventbus = eventBus.emit('member_activity', {
+            eventBus.emit('member_activity', {
               member_id: member.id,
               action: 'Profile Completed',
             });
@@ -630,6 +644,11 @@ class MemberAuthController {
           // console.log('==============request_data==============', request_data);
           let model = await Member.update(request_data, {
             where: { id: member_id },
+          });
+
+          //Event For Membership Tier Shift
+          eventBus.emit('membership_tier_shift', {
+            member_id: member.id,
           });
 
           //set eligibility
@@ -1180,7 +1199,7 @@ class MemberAuthController {
           { password: password },
           { where: { id: member_id } }
         );
-        let activityEventbus = eventBus.emit('member_activity', {
+        eventBus.emit('member_activity', {
           member_id: member.id,
           action: 'Password Changed',
         });
@@ -1459,7 +1478,7 @@ class MemberAuthController {
         transaction_amount: withdrawal_amount,
       });
       //member activity
-      const activityEventbus = eventBus.emit('member_activity', {
+      eventBus.emit('member_activity', {
         member_id: request_data.member_id,
         action: 'Member cash withdrawal request',
       });
@@ -1546,7 +1565,7 @@ class MemberAuthController {
         let base64data = Buffer.from(reset_obj, 'utf8');
         let base64String = base64data.toString('base64');
         //send mail
-        let evntbus = eventBus.emit('send_email', {
+        eventBus.emit('send_email', {
           action: 'Forgot Password',
           data: {
             email: value.email,

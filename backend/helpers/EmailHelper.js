@@ -48,12 +48,12 @@ class EmailHelper {
           where: { company_portal_id: req.headers.site_id },
         },
       });
-      //check for email alert 
-      var member_arr = {}
-      if(all_details.members){
-        member_arr = all_details.members
+      //check for email alert
+      var member_arr = {};
+      if (all_details.members) {
+        member_arr = all_details.members;
       }
-      let email_alert = await this.checkEmailAlert(payload.action,member_arr)
+      let email_alert = await this.checkEmailAlert(payload.action, member_arr);
       if (email_alert && email_action && email_action.EmailTemplates) {
         let email_template = email_action.EmailTemplates[0];
         let email_body = '';
@@ -93,6 +93,7 @@ class EmailHelper {
             company_portal_details[0].Company = {};
             all_details['company_portals'] = company_portal_details[0];
             all_details['year'] = new Date().getFullYear();
+            // console.log('all_details', all_details);
             //set user details
             email_body = await this.replaceVariables(
               all_details,
@@ -178,8 +179,9 @@ class EmailHelper {
           html: body,
         };
         if (attachments.length > 0) {
-          mailData.attachments = attachments
+          mailData.attachments = attachments;
         }
+        // console.log('mailData=====', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {
@@ -189,31 +191,43 @@ class EmailHelper {
     return true;
   }
   //email alert checking
-  async checkEmailAlert(email_action,user){
-    var email_alert_status = true
-    if(user){
+  async checkEmailAlert(email_action, user) {
+    var email_alert_status = true;
+    if (user) {
       let email_alerts = await EmailAlert.getEmailAlertList(user.id);
-      for(let item of email_alerts){
-        let member_email_alert = item.dataValues.MemberEmailAlerts
-        if(member_email_alert && member_email_alert.length === 0){
-          let notifications = ['Withdrawal Approval','Member Profile Completion']
-          let completed_rewards = ['Survey Completed']
-          if(item.dataValues.slug === 'notifications' && notifications.includes(email_action)){
-            email_alert_status = false
-          }
-          else if(item.dataValues.slug === 'completed_rewards' && completed_rewards.includes(email_action)){
-            email_alert_status = false
-          }
-          else if(item.dataValues.slug === 'completed_withdraw' && email_action === 'Payment Confirmation'){
-            email_alert_status = false
-          }
-          else if(item.dataValues.slug === 'referrals' && email_action === 'Referral Bonus'){
-            email_alert_status = false
+      for (let item of email_alerts) {
+        let member_email_alert = item.dataValues.MemberEmailAlerts;
+        if (member_email_alert && member_email_alert.length === 0) {
+          let notifications = [
+            'Withdrawal Approval',
+            'Member Profile Completion',
+          ];
+          let completed_rewards = ['Survey Completed'];
+          if (
+            item.dataValues.slug === 'notifications' &&
+            notifications.includes(email_action)
+          ) {
+            email_alert_status = false;
+          } else if (
+            item.dataValues.slug === 'completed_rewards' &&
+            completed_rewards.includes(email_action)
+          ) {
+            email_alert_status = false;
+          } else if (
+            item.dataValues.slug === 'completed_withdraw' &&
+            email_action === 'Payment Confirmation'
+          ) {
+            email_alert_status = false;
+          } else if (
+            item.dataValues.slug === 'referrals' &&
+            email_action === 'Referral Bonus'
+          ) {
+            email_alert_status = false;
           }
         }
       }
     }
-    return email_alert_status
+    return email_alert_status;
   }
 }
 module.exports = EmailHelper;

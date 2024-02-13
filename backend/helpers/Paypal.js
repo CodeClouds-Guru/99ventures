@@ -262,6 +262,25 @@ class Paypal {
             );
           }
         }
+        let member_ids = [];
+        //level upgrade trigger
+        if (transaction_ids.length > 0) {
+          member_ids = await MemberTransaction.findAll({
+            attributes: ['member_id'],
+            where: { id: transaction_ids },
+          });
+
+          if (member_ids.length > 0) {
+            member_ids = member_ids.map((item) => item.member_id);
+            member_ids = [...new Set(member_ids)];
+            console.log('MI=========', member_ids);
+            for (let id of member_ids) {
+              eventBus.emit('membership_tier_shift', {
+                member_id: id,
+              });
+            }
+          }
+        }
       }
       return {
         status: true,

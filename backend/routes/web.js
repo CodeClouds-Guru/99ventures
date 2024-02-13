@@ -56,15 +56,6 @@ router.get('/offer-wall/list', async (req, res) => {
   }
 });
 
-//socket call
-router.get('/socket-connect', async (req, res) => {
-  global.socket.emit('shoutbox', {
-    name: 'Nandita',
-    place: 'USA',
-    message: 'Socket connected',
-  });
-  res.send('hello');
-});
 
 //SQS
 router.post('/sqs-send-message', async (req, res) => {
