@@ -343,6 +343,15 @@ const modules = [
     deleted_by: null,
     created_at: new Date(),
   },
+  {
+    slug: 'membershiptiers',
+    name: 'Membership Tiers',
+    parent_module: 'Members',
+    created_by: 1,
+    updated_by: null,
+    deleted_by: null,
+    created_at: new Date(),
+  },
 ];
 module.exports = {
   async up(queryInterface, Sequelize) {

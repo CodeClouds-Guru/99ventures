@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const sequelizePaginate = require('sequelize-paginate');
+// const eventBus = require('./eventBus');
 module.exports = (sequelize, DataTypes) => {
   class WithdrawalRequest extends Model {
     /**
@@ -325,7 +326,6 @@ module.exports = (sequelize, DataTypes) => {
     member_id,
     member
   ) => {
-    // console.log(payment_method_details, withdrawal_amount, member_id, member);
     const { MemberTransaction } = require('../models/index');
     const { QueryTypes, Op } = require('sequelize');
     //check all conditions for amount
@@ -667,6 +667,12 @@ module.exports = (sequelize, DataTypes) => {
     //   withdrawal_ids,
     //   req_body
     // );
+    let member_ids = [];
+    if (transaction_ids.length > 0) {
+      // member_ids = await MemberTransaction.findAll({
+      //   attributes: ['member_id'],
+      //   where: { id: transaction_ids },
+      // });
 
     let get_transactions = await MemberTransaction.findAll({
       where: { id: transaction_ids, status: 1 },
@@ -690,15 +696,24 @@ module.exports = (sequelize, DataTypes) => {
     //   );
     // }
     // if (withdrawal_ids.length > 0) {
-    let get_withdrawals = await WithdrawalRequest.findAll({
-      where: { id: withdrawal_ids, status: 'pending' },
-    });
-    for (let records of get_withdrawals) {
-      await WithdrawalRequest.update(
-        { status: 'completed' },
-        { where: { id: records.id } }
-      );
-    }
+    let withdraw_req_update = await WithdrawalRequest.update(
+      { status: 'completed' },
+      { where: { id: withdrawal_ids } }
+    );
+    // console.log(
+    //   '==========withdraw_req_update=============',
+    //   withdraw_req_update
+    // );
+    //level upgrade event
+    // if (member_ids.length > 0) {
+    //   member_ids = member_ids.map((item) => item.member_id);
+    //   member_ids = [...new Set(member_ids)];
+    //   console.log('MI=========', member_ids);
+    //   for (let id of member_ids) {
+    //     eventBus.emit('membership_tier_shift', {
+    //       member_id: id,
+    //     });
+    //   }
 
     // }
   };

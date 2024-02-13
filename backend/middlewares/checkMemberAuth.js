@@ -8,6 +8,7 @@ const {
   WithdrawalRequest,
   MemberNotification,
   GoogleCaptchaConfiguration,
+  MembershipTier,
 } = require('../models');
 const db = require('../models/index');
 const { sequelize } = require('../models/index');
@@ -26,21 +27,30 @@ module.exports = async function (req, res, next) {
     where: { company_portal_id: company_portal.id },
   });
   req.session.google_captcha_settings = google_captcha_settings;
-  if ('member' in req.session && req.session.member && dev_mode !== '1') {
-    let ip = req.ip;
-    if (Array.isArray(ip)) {
-      ip = ip[0];
-    } else {
-      ip = ip.replace('::ffff:', '');
+  if ('member' in req.session && req.session.member) {
+    var ip = '127.0.0.1';
+    if (dev_mode !== '1') {
+      ip = req.ip;
+      if (Array.isArray(ip)) {
+        ip = ip[0];
+      } else {
+        ip = ip.replace('::ffff:', '');
+      }
     }
 
     const member = await Member.findOne({
       where: { id: req.session.member.id },
-      include: {
-        model: MemberNotification,
-        where: { is_read: 0 },
-        required: false,
-      },
+      include: [
+        {
+          model: MemberNotification,
+          where: { is_read: 0 },
+          required: false,
+        },
+        {
+          model: MembershipTier,
+          // attributes: ['id', 'name',],
+        },
+      ],
     });
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
@@ -66,7 +76,7 @@ module.exports = async function (req, res, next) {
         type: QueryTypes.SELECT,
       }
     );
-    // console.log(total_referred[0].total);
+
     //Transaction Stat
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
@@ -87,8 +97,6 @@ module.exports = async function (req, res, next) {
     member.setDataValue('total_paid', Math.abs(total_paid[0].total) || 0.0);
     member.setDataValue('login_ip', ip || '');
     req.session.member = member ? JSON.parse(JSON.stringify(member)) : null;
-
-    // console.log(req.session.member);
     //redirect to dashboard instead of home page if authenticated
     const auth_redirection_page = await Page.findOne({
       where: {

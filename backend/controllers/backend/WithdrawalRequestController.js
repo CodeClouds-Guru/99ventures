@@ -9,10 +9,12 @@ const {
   MemberTransaction,
   WithdrawalRequest,
   MemberBalance,
+  MembershipTier,
 } = require('../../models/index');
 const VirtualIncentive = require('../../helpers/VirtualIncentive');
 const CsvHelper = require('../../helpers/CsvHelper');
 const db = require('../../models/index');
+const eventBus = require('../../eventBus');
 
 class WithdrawalRequestController extends Controller {
   constructor() {
@@ -93,6 +95,7 @@ class WithdrawalRequestController extends Controller {
           model: Member,
           paranoid: false,
           attributes: ['id', 'username', 'status', 'admin_status'],
+          include: { model: MembershipTier, attributes: ['name'] },
         },
       ];
       options.subQuery = false;
@@ -127,7 +130,10 @@ class WithdrawalRequestController extends Controller {
           '',
         ];
         if (row.Member) {
-          username = row.Member.username;
+          let tier_name = row.Member.MembershipTier
+            ? `(${row.Member.MembershipTier.name})`
+            : '';
+          username = `${row.Member.username} ${tier_name}`;
           status = row.Member.status;
           admin_status = row.Member.admin_status;
         }
@@ -556,6 +562,7 @@ class WithdrawalRequestController extends Controller {
               member_transaction_id: transaction_id,
             });
           }
+          member_ids.push(record.member_id);
         }
         response = await this.changeStatus(model_ids, note, action_type);
         if (items.length > 0) {
@@ -586,6 +593,13 @@ class WithdrawalRequestController extends Controller {
             );
           }
         }
+
+        // member_ids = [...new Set(member_ids)];
+        // for (let id of member_ids) {
+        //   eventBus.emit('membership_tier_shift', {
+        //     member_id: id,
+        //   });
+        // }
 
         break;
       default:

@@ -69,6 +69,8 @@ module.exports = (sequelize, DataTypes) => {
               let slug = this.verbose.split('News published')[1];
               slug = slug.substr(1);
               return '/news/' + slug;
+            case 'membership_level_upgrade':
+              return '/earning-history';
             default:
               return '#';
           }
@@ -174,6 +176,9 @@ module.exports = (sequelize, DataTypes) => {
         notification_verbose =
           'You have a new message on a ticket you had created';
         notification_action = 'ticket_reply';
+        break;
+      case 'membership_tier_shift':
+        notification_action = 'membership_level_upgrade';
         break;
       default:
       //

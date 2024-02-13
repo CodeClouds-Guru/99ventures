@@ -229,7 +229,7 @@ class StaticPageController {
     //     require: false,
     //   };
     // }
-    newsOptions.logging = console.log;
+    // newsOptions.logging = console.log;
     const getNews = await News.findOne(newsOptions);
     if (getNews === null) {
       res.redirect('/404');
@@ -275,7 +275,7 @@ class StaticPageController {
     }
     // res.header('Content-Type', 'application/xml');
     // res.header('Content-Encoding', 'gzip');
-    console.log(content.configuration.response_type);
+    // console.log(content.configuration.response_type);
     res.type(content.configuration.response_type);
 
     return res.send(content.content);

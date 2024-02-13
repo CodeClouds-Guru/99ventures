@@ -319,7 +319,6 @@ class MemberController extends Controller {
           email_alerts = await EmailAlert.getEmailAlertList(member_id);
           result.email_alert_list = email_alerts;
         }
-
         return {
           status: true,
           data: result,

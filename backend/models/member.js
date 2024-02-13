@@ -231,6 +231,7 @@ module.exports = (sequelize, DataTypes) => {
         // },
       },
       primary_payment_method_id: DataTypes.TINYINT,
+      phone_no_verified_on: 'TIMESTAMP',
     },
     {
       sequelize,
@@ -601,6 +602,97 @@ module.exports = (sequelize, DataTypes) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  /**
+   * Get Member Tier Data.
+   * This Fn is to get member data according to membership tier rules
+   * @param {*} member_id
+   * @returns Member Tier Data object
+   */
+
+  Member.getMemberTierData = async (member_id) => {
+    const moment = require('moment');
+    let member = await Member.findOne({
+      where: { id: member_id, status: 'member' },
+    });
+    console.log('getMemberTierData===========', member);
+    let signup = 0;
+    let email_verified = 0;
+    let profile_completed = 0;
+    let withdrawal_count = 0;
+    let withdrawn_amount = 0.0;
+    let registered_days = 0;
+    let phone_no_verified_on = 0;
+    let number_of_surveys_completed = 0;
+    if (member) {
+      signup = 1;
+      email_verified = member.email_verified_on ? 1 : 0;
+      profile_completed = member.profile_completed_on ? 1 : 0;
+      phone_no_verified_on = member.phone_no_verified_on ? 1 : 0;
+      registered_days = moment().diff(moment(member.created_at), 'days');
+
+      let get_total_withdrawal_data = await Member.getTotalWithdrawalData(
+        member_id
+      );
+      withdrawal_count = get_total_withdrawal_data.total_paid_count;
+      withdrawn_amount = get_total_withdrawal_data.total_paid;
+      number_of_surveys_completed = await Member.getTotalCompletedSurveyCount(
+        member_id
+      );
+    }
+
+    return {
+      signup,
+      email_verified,
+      profile_completed,
+      phone_no_verified_on,
+      withdrawal_count,
+      withdrawn_amount,
+      registered_days,
+      number_of_surveys_completed,
+    };
+  };
+
+  /**
+   * Get Total Withdrawal Data.
+   * This Fn is to get member withdrawal amount and count
+   * @param {*} member_id
+   * @returns Total Withdrawal Data object
+   */
+
+  Member.getTotalWithdrawalData = async (member_id) => {
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    //total paid
+    let total_paid = await db.sequelize.query(
+      "SELECT sum(member_transactions.amount) as total, count(member_transactions.id) as total_count FROM `member_transactions` LEFT JOIN withdrawal_requests ON withdrawal_requests.member_transaction_id = member_transactions.id WHERE member_transactions.amount_action = 'member_withdrawal' and member_transactions.type = 'withdraw' and member_transactions.member_id=? and member_transactions.status = 2 and withdrawal_requests.status = 'completed'",
+      {
+        replacements: [member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    console.log('getTotalWithdrawalData===============', total_paid);
+    return {
+      total_paid: Math.abs(total_paid[0].total) || 0.0,
+      total_paid_count: total_paid[0].total_count || 0.0,
+    };
+  };
+
+  Member.getTotalCompletedSurveyCount = async (member_id) => {
+    const db = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    //total paid
+    let total_survey_completed = await db.sequelize.query(
+      "SELECT IFNULL(COUNT(id),0) as 'cnt' from member_transactions mt where member_id = ? and amount_action = 'survey' and id not in (SELECT parent_transaction_id id from member_transactions mt2 WHERE  member_id = ? and amount_action = 'revresed_transaction' and parent_transaction_id is not null)",
+      {
+        replacements: [member_id, member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    console.log('total_survey_completed', total_survey_completed);
+    return total_survey_completed[0].cnt;
   };
 
   return Member;

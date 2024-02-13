@@ -204,6 +204,19 @@ class ScriptParser {
             }
             let state_list = await Models.State.getAllStates(clause);
             data.setDataValue('state_list', state_list);
+            // console.log('data', data);
+            let future_tiers = await Models.MembershipTier.findAll({
+              where: {
+                ...(data.MembershipTier && {
+                  chronology: { [Op.gt]: data.MembershipTier.chronology },
+                }),
+                status: 'active',
+              },
+              limit: data.membership_tier_id ? 2 : 3,
+              // order: [['chronology', 'desc']],
+            });
+            // console.log('future_tiers', future_tiers);
+            data.setDataValue('future_tiers', future_tiers);
             data = JSON.parse(JSON.stringify(data));
             data.dob = data.dob ? moment(data.dob).format('MM/DD/YYYY') : data.dob;
             break;
@@ -515,7 +528,7 @@ class ScriptParser {
           where: { id: user.id },
           include: {
             model: Models.MembershipTier,
-            attributes: ['name'],
+            // attributes: ['name', 'logo'],
           },
         };
       case 'Shoutbox':
