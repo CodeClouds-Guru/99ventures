@@ -181,7 +181,7 @@ class SchlesingerController {
             const liveLinkParams = Object.fromEntries(
               new URLSearchParams(liveLinkArry[1])
             );
-            params.pid = Date.now() + '-' + surveyNumber;
+            params.pid = Date.now() + '-' + surveyNumber +'-'+req.session.member.id;
             delete liveLinkParams['zid']; // We dont have any value for zid
             const entryLink =
               liveLinkArry[0] +
