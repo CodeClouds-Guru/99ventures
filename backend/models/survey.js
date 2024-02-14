@@ -139,6 +139,7 @@ module.exports = (sequelize, DataTypes) => {
               AND s.deleted_at IS NULL AND s.survey_provider_id = 1
               AND s.status = :status
               AND s.country_id = :country_id
+			  AND s.cpi < 8
               AND s.survey_number NOT IN (
                 SELECT survey_number FROM member_surveys AS ms JOIN member_transactions AS mt 
 				ON (ms.member_transaction_id = mt.id) 
