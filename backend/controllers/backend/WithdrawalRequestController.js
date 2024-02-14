@@ -524,6 +524,7 @@ class WithdrawalRequestController extends Controller {
         var member_ids = [];
         let transaction_id = '';
         // var transaction_status = 1;
+        response = await this.changeStatus(model_ids, note, action_type);
         for (let record of all_withdrawal_req) {
           // console.log('-------------record', record);
           if (
@@ -537,6 +538,10 @@ class WithdrawalRequestController extends Controller {
               record.member_transaction_id,
               record.id
             );
+            member_ids.push(record.member_id);
+            eventBus.emit('membership_tier_shift', {
+              member_id: record.member_id,
+            });
           }
 
           if (
@@ -562,9 +567,8 @@ class WithdrawalRequestController extends Controller {
               member_transaction_id: transaction_id,
             });
           }
-          member_ids.push(record.member_id);
         }
-        response = await this.changeStatus(model_ids, note, action_type);
+
         if (items.length > 0) {
           let company_portal_id = req.headers.site_id;
           //do bulk payment

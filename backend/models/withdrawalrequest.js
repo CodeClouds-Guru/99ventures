@@ -661,62 +661,64 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    // console.log(
-    //   '------approvedAndCompletedReq s',
-    //   transaction_ids,
-    //   withdrawal_ids,
-    //   req_body
-    // );
+    console.log(
+      '------approvedAndCompletedReq s',
+      transaction_ids,
+      withdrawal_ids,
+      req_body
+    );
     let member_ids = [];
-    if (transaction_ids.length > 0) {
-      // member_ids = await MemberTransaction.findAll({
-      //   attributes: ['member_id'],
-      //   where: { id: transaction_ids },
-      // });
+    // if (transaction_ids.length > 0) {
+    // member_ids = await MemberTransaction.findAll({
+    //   attributes: ['member_id'],
+    //   where: { id: transaction_ids },
+    // });
 
-      let get_transactions = await MemberTransaction.findAll({
-        where: { id: transaction_ids, status: 1 },
-      });
-      for (let records of get_transactions) {
-        await MemberTransaction.update(
-          {
-            status: 2,
-            payload: req_body,
-          },
-          { where: { id: records.id } }
-        );
-      }
-      // if (transaction_ids.length > 0) {
-      //   await MemberTransaction.update(
-      //     {
-      //       status: 2,
-      //       payload: req_body,
-      //     },
-      //     { where: { id: transaction_ids, status: 1 } }
-      //   );
-      // }
-      // if (withdrawal_ids.length > 0) {
-      let withdraw_req_update = await WithdrawalRequest.update(
-        { status: 'completed' },
-        { where: { id: withdrawal_ids } }
+    let get_transactions = await MemberTransaction.findAll({
+      where: { id: transaction_ids, status: 1 },
+    });
+    console.log('get_transactions', get_transactions);
+
+    for (let records of get_transactions) {
+      await MemberTransaction.update(
+        {
+          status: 2,
+          payload: req_body,
+        },
+        { where: { id: records.id } }
       );
-      // console.log(
-      //   '==========withdraw_req_update=============',
-      //   withdraw_req_update
-      // );
-      //level upgrade event
-      // if (member_ids.length > 0) {
-      //   member_ids = member_ids.map((item) => item.member_id);
-      //   member_ids = [...new Set(member_ids)];
-      //   console.log('MI=========', member_ids);
-      //   for (let id of member_ids) {
-      //     eventBus.emit('membership_tier_shift', {
-      //       member_id: id,
-      //     });
-      //   }
-
-      // }
     }
+    // if (transaction_ids.length > 0) {
+    //   await MemberTransaction.update(
+    //     {
+    //       status: 2,
+    //       payload: req_body,
+    //     },
+    //     { where: { id: transaction_ids, status: 1 } }
+    //   );
+    // }
+    // if (withdrawal_ids.length > 0) {
+    let withdraw_req_update = await WithdrawalRequest.update(
+      { status: 'completed' },
+      { where: { id: withdrawal_ids } }
+    );
+    console.log(
+      '==========withdraw_req_update=============',
+      withdraw_req_update
+    );
+    //level upgrade event
+    // if (member_ids.length > 0) {
+    //   member_ids = member_ids.map((item) => item.member_id);
+    //   member_ids = [...new Set(member_ids)];
+    //   console.log('MI=========', member_ids);
+    //   for (let id of member_ids) {
+    //     eventBus.emit('membership_tier_shift', {
+    //       member_id: id,
+    //     });
+    //   }
+
+    // }
+    // }
   };
   //Approved and completed withdrawal req
   WithdrawalRequest.checkIfDifferentPaymentMethod = async (
