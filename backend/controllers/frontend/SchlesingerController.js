@@ -215,6 +215,8 @@ class SchlesingerController {
 						const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({ ...liveLinkParams, ...params }).toString();
 						// res.send(entryLink)
 						res.redirect(entryLink);
+						//Do Not delete return
+						return;	
 					} else {
 						this.updateSurvey(surveyNumber);
 						redirectURL = '/survey-quota';
@@ -236,10 +238,7 @@ class SchlesingerController {
 		finally {
 			// insert survey groups
 			await this.insertSurveyGroupsIds(surveyGroupIds, req.session.member.id);
-		}
-
-		//Do Not delete return
-		return;			
+		}				
 	};
 
 	updateSurvey = async (surveyNumber) => {
