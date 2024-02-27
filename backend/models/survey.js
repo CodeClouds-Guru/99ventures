@@ -66,18 +66,39 @@ module.exports = (sequelize, DataTypes) => {
 	Survey.getSurveysAndCount = async (params) => {
 		const { 
 			Member, 
+			SurveyAttempt,
 			SurveyQuestion,
 			SurveyQualification,
 			SurveyAnswerPrecodes
 		} = require('../models/index');
 
+		const surveyNumberArry = [];
+		// All the completed surveys
 		const acceptedSurveys = await Member.acceptedSurveys(params.member_id, params.provider_id);
 		if (acceptedSurveys.length) {
-			const attemptedSurveysNumber = acceptedSurveys.map(r => r.survey_number);
+			const acceptedSurveysNumber = acceptedSurveys.map(r => r.survey_number);
+			surveyNumberArry.push(...acceptedSurveysNumber);
+		}
+
+		// All the attempted surveys
+		const attemptedSurveys = await SurveyAttempt.findAll({
+			attributes: ['survey_number'],
+			where: {
+				member_id: params.member_id,
+				survey_provider_id: params.provider_id
+			}
+		});
+		if (attemptedSurveys.length) {
+			const attemptedSurveysNumber = attemptedSurveys.map(r => r.survey_number);
+			surveyNumberArry.push(...attemptedSurveysNumber);
+		}
+
+		// Preparing the where clause
+		if(surveyNumberArry.length) {
 			params.clause = {
 				...params.clause,
 				survey_number: {
-					[Op.notIn]: attemptedSurveysNumber
+					[Op.notIn]: surveyNumberArry
 				}
 			}
 		}
@@ -88,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
 				survey_provider_id: params.provider_id,
 				...params.clause
 			},
-			include: {
+			include: [{
 				model: SurveyQualification,
 				attributes: ['id', 'survey_question_id'],
 				required: true,
@@ -109,7 +130,7 @@ module.exports = (sequelize, DataTypes) => {
 						}
 					],
 				}
-			},
+			}],
 			order: [[sequelize.literal(params.order_by), params.order]],
 			limit: params.per_page,
 			offset: (params.pageno - 1) * params.per_page,
