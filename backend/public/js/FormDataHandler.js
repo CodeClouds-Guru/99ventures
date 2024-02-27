@@ -668,7 +668,9 @@ $(() => {
   }
   var email_verified_flag = readCookie('email_verified') || null;
   var registration_bonus = readCookie('registration_bonus') || null;
-
+  registration_bonus = registration_bonus
+    ? parseFloat(registration_bonus).toFixed(2)
+    : null;
   if (email_verified_flag === 'true') {
     var email_verified_popup_html = `<div id="email_verified_popup" tabindex="-1" aria-hidden="true" aria-labelledby="paypalModalLabel" class="modal fade payment-popup survey-popup"> <div class="modal-dialog"><div class="modal-content bg-white"><button id="paypal-popup-close" type="button" aria-label="Close" data-bs-dismiss="modal" class="btn-close position-absolute top-0 small start-100 translate-middle rounded-circle shadow bg-white p-2"></button><div class="modal-body"><figure class="m-0 pb-2 mb-2 border-bottom border-primary mx-md-5"><img id="withdrawal_type_img" src="https://99-ventures-bucket.s3.us-east-2.amazonaws.com/99ventures/1/file-manager/images/logo.png" class="img-fluid d-block" /></figure><div class="survey-popup-cntnt text-center pb-3 mx-md-4 px-md-2"><h2 class="heading">Congratulations</h2><p class="lh-base">You have been rewarded $${registration_bonus} for successfully registering your MoreSurveys account. It's now time to complete your profile to receive your next bonus!</p><h4>Happy Surveying!</h4></div><div class="d-grid"><a href="/profile" class="btn btn-info rounded-1 py-2">Complete Your Profile</a></div></div></div></div></div>`;
     $('body').append(email_verified_popup_html);
