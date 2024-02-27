@@ -119,7 +119,9 @@ module.exports = (sequelize, DataTypes) => {
   MemberNotification.addMemberNotification = async (data) => {
     let notification_verbose = data.verbose || '';
     let notification_action = '';
-    let amount = data.amount ? parseFloat(Math.abs(data.amount)) : null;
+    let amount = data.amount
+      ? parseFloat(Math.abs(data.amount)).toFixed(2)
+      : null;
     let updated_on = new Date().toLocaleDateString();
 
     switch (data.action) {

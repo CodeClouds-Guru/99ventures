@@ -655,7 +655,9 @@ $(() => {
   }
   var profile_update_flag = readCookie('member_profile_update') || null;
   var profile_update_bonus = readCookie('profile_completed_bonus') || null;
-
+  profile_update_bonus = profile_update_bonus
+    ? parseFloat(profile_update_bonus).toFixed(2)
+    : null;
   if (profile_update_flag === 'true') {
     var profile_update_popup_html = `<div id="profile_update_popup" tabindex="-1" aria-hidden="true" aria-labelledby="paypalModalLabel" class="modal fade payment-popup survey-popup"> <div class="modal-dialog"><div class="modal-content bg-white"><button id="paypal-popup-close" type="button" aria-label="Close" data-bs-dismiss="modal" class="btn-close position-absolute top-0 small start-100 translate-middle rounded-circle shadow bg-white p-2"></button> <div class="modal-body"><figure class="m-0 pb-2 mb-2 border-bottom border-primary mx-md-5"><img id="withdrawal_type_img" src="https://99-ventures-bucket.s3.us-east-2.amazonaws.com/99ventures/1/file-manager/images/logo.png" class="img-fluid d-block" /></figure><div class="survey-popup-cntnt text-center pb-3 mx-md-4 px-md-2"><h2 class="heading">Start Sharing Your Opinion</h2><p class="lh-base">You are now ready to begin exploring MoreSurveys! We have also credited your account with an extra $${profile_update_bonus} for completing your profile.</p><h4>Happy Surveying!</h4></div><div class="d-grid"><a href="/paid-surveys" class="btn btn-info rounded-1 py-2">Start Taking Surveys</a></div></div></div></div></div>`;
     $('body').append(profile_update_popup_html);
@@ -677,63 +679,68 @@ $(() => {
   }
 
   // Redeem Promocode
-  if($('#promocode-redeem-popup').length) {
-    $('#promocode-redeem-popup').on('submit', function(e){
+  if ($('#promocode-redeem-popup').length) {
+    $('#promocode-redeem-popup').on('submit', function (e) {
       e.preventDefault();
       const resMsg = $(this).find('.response-msg'),
-            submitBtn = $(this).find('button[type=submit]'),
-            sbmtBtnTxt = submitBtn.text(),
-            promoInput = $(this).find('input[name=promocode]').val().trim(),
-            closeBtn = $(this).find('#paypal-popup-close');
-      if(promoInput) {
+        submitBtn = $(this).find('button[type=submit]'),
+        sbmtBtnTxt = submitBtn.text(),
+        promoInput = $(this).find('input[name=promocode]').val().trim(),
+        closeBtn = $(this).find('#paypal-popup-close');
+      if (promoInput) {
         $.ajax({
           type: 'POST',
           url: '/redeem-promo-code',
-          data: {promocode: promoInput},
-          beforeSend: function() {
+          data: { promocode: promoInput },
+          beforeSend: function () {
             submitBtn.attr('disabled', true).text('Please wait...');
           },
-          success: function(res) {
-            if(res.status === true) {
+          success: function (res) {
+            if (res.status === true) {
               $('#promocode-redeem-popup')[0].reset();
               closeBtn.hide();
-              resMsg.html(`<p class="m-0 p-0 text-success small lh-sm">${res.message}</p>`);
-              setTimeout(()=>{
+              resMsg.html(
+                `<p class="m-0 p-0 text-success small lh-sm">${res.message}</p>`
+              );
+              setTimeout(() => {
                 // $('#promocode-popup').modal('hide');
                 location.reload();
               }, 5000);
-            }else {
-              resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">${res.message}</p>`);
+            } else {
+              resMsg.html(
+                `<p class="m-0 p-0 text-danger small lh-sm">${res.message}</p>`
+              );
               responseMsgToggle(resMsg);
             }
           },
-          error: function(xhr) { 
-            console.log(xhr)
+          error: function (xhr) {
+            console.log(xhr);
           },
-          complete: function(xhr){
+          complete: function (xhr) {
             submitBtn.removeAttr('disabled').text(sbmtBtnTxt);
-          }
-        })
+          },
+        });
       } else {
-        resMsg.html(`<p class="m-0 p-0 text-danger small lh-sm">Please enter your promo code!</p>`);
+        resMsg.html(
+          `<p class="m-0 p-0 text-danger small lh-sm">Please enter your promo code!</p>`
+        );
         responseMsgToggle(resMsg);
       }
-    })
+    });
   }
 
   // Popup close event captured
-  if($("#promocode-popup").length){
-    $("#promocode-popup").on("hidden.bs.modal", function () {
+  if ($('#promocode-popup').length) {
+    $('#promocode-popup').on('hidden.bs.modal', function () {
       $('#promocode-redeem-popup')[0].reset();
       $('#promocode-popup').modal('hide');
     });
   }
-
 });
 
-function responseMsgToggle(el){
-  setTimeout(()=>{
-    el.html('').fadeOut()
+function responseMsgToggle(el) {
+  setTimeout(() => {
+    el.html('').fadeOut();
     el.fadeIn();
   }, 5000);
 }
