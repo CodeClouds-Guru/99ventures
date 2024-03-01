@@ -213,6 +213,12 @@ class SchlesingerController {
 						params.pid = Date.now() + '-' + surveyNumber + '-' +req.session.member.id;
 						delete liveLinkParams['zid']; // We dont have any value for zid
 						const entryLink = liveLinkArry[0] + '?' + new URLSearchParams({ ...liveLinkParams, ...params }).toString();
+						
+						//-- Added log to track the entry links
+						let infoLog = require('../../helpers/Logger')(`sago-entrylinks.log`);
+						infoLog.info(`[${surveyNumber}]: ${entryLink}`);
+						//-- End
+						
 						// res.send(entryLink)
 						res.redirect(entryLink);
 						//Do Not delete return
