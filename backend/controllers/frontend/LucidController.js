@@ -269,7 +269,10 @@ class LucidController {
 					}
 				}
 				let URL = this.rebuildEntryLink(entryLink, params);
-				// console.log('Lucid entry link', URL);
+				//-- Added log to track the entry links
+				let infoLog = require('../../helpers/Logger')(`lucid-entrylinks.log`);
+				infoLog.info(`[${surveyNumber}]: ${URL}`);
+				//-- End
 				res.redirect(URL);
 				return;
 			} else {
