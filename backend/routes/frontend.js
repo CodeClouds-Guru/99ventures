@@ -167,6 +167,16 @@ router.post('/news-like-dislike', MemberAuthController.newsReaction);
 
 //api
 router.get('/news/:slug', StaticPageController.newsDetails);
+// router.get('/survey-check', async (req, res) => {
+//   try {
+//     const SurveySyncClass = require('../controllers/callback/SurveySyncController');
+//     let cronJob = new SurveySyncClass();
+//     console.log('cronJob', cronJob);
+//     res.send(await cronJob.lucidSurveyUpdate());
+//   } catch (e) {
+//     console.log(e.message);
+//   }
+// });
 
 router.get('*', async (req, res) => {
   const slug = req.path.length > 1 ? req.path.substring(1) : req.path;
