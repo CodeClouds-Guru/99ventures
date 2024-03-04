@@ -1644,9 +1644,10 @@ class SurveySyncController {
         where: {
           survey_provider_id: provider.id,
           status: 'active',
+          updated_at: { [Op.ne]: new Date() },
         },
         order: [['loi', 'ASC']],
-        limit: 20,
+        limit: 15,
       });
 
       if (surveys.length < 1) {
