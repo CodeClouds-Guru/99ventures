@@ -24,6 +24,7 @@ class LucidController {
 		// this.surveyGroupCheckAndSurveyAttemptEntry = this.surveyGroupCheckAndSurveyAttemptEntry.bind(this);
 		this.fetchSurveyGroups = this.fetchSurveyGroups.bind(this);
 		this.insertSurveyGroupsIds = this.insertSurveyGroupsIds.bind(this);
+		this.saveSurveyGroupTolog = this.saveSurveyGroupTolog.bind(this);
 	}
 
 	surveys = async (memberId, params, req) => {
@@ -204,6 +205,9 @@ class LucidController {
 		}
 
 		const surveyGroupIds = await this.fetchSurveyGroups(surveyNumber);
+		//Store result to log
+		this.saveSurveyGroupTolog(surveyGroupIds, member.id);
+
 		try {
 			// This block will check whether this survey and survey groups already attempted by the member
 			const recordCount = await SurveyAttempt.count({
@@ -341,6 +345,7 @@ class LucidController {
 		return true;
 	};
 
+	//https://support.lucidhq.com/s/article/Generating-API-Entry-Links
 	generateQueryString = (queryString, qualifications, eligibilities) => {
 		let quesStr = {};
 		let limit = 5; // 5 is set because Lucid have a limitation to set the querystring in the URL.
@@ -436,6 +441,13 @@ class LucidController {
 		await SurveyAttempt.bulkCreate(params, {
 			ignoreDuplicates: true
 		});
+	}
+
+	saveSurveyGroupTolog = (groupIds, member_id) => {
+		const logger = require('../../helpers/Logger')(
+			`lucid-survey-group.log`
+		);
+		logger.info(`[${member_id}]: ${groupIds}`);
 	}
 
 	/*surveysOld = async (memberId, params, req) => {
