@@ -206,7 +206,7 @@ class LucidController {
 
 		const surveyGroupIds = await this.fetchSurveyGroups(surveyNumber);
 		//Store result to log
-		this.saveSurveyGroupTolog(surveyGroupIds, member.id);
+		this.saveSurveyGroupTolog(surveyGroupIds, surveyNumber, member.id);
 
 		try {
 			// This block will check whether this survey and survey groups already attempted by the member
@@ -443,11 +443,11 @@ class LucidController {
 		});
 	}
 
-	saveSurveyGroupTolog = (groupIds, member_id) => {
+	saveSurveyGroupTolog = (groupIds, surveyNumber, member_id) => {
 		const logger = require('../../helpers/Logger')(
 			`lucid-survey-group.log`
 		);
-		logger.info(`[${member_id}]: ${groupIds}`);
+		logger.info(JSON.stringify({member_id: member_id, survey_number: surveyNumber, group_ids: groupIds}));
 	}
 
 	/*surveysOld = async (memberId, params, req) => {
