@@ -7,7 +7,7 @@ const {
 const eventBus = require('../../eventBus');
 
 class OfferwallPostbackController {
-  constructor() {}
+  constructor() { }
   async save(req, res) {
     // console.log(req.query);
     const logger1 = require('../../helpers/Logger')(
@@ -17,7 +17,7 @@ class OfferwallPostbackController {
     logger1.info(JSON.stringify(req.query));
     logger1.info(JSON.stringify(req.body));
 
-    var status_arr = ['1', 'approved'];
+    var status_arr = ['1', '2', 'approved'];
     if (status_arr.includes(req.query.status)) {
       try {
         const offerwall_name = req.params.offerwall;
@@ -71,11 +71,11 @@ class OfferwallPostbackController {
                 offerwall_details.campaign_name_variable
               ]
                 ? parseFloat(
-                    req.query[offerwall_details.campaign_name_variable]
-                  )
+                  req.query[offerwall_details.campaign_name_variable]
+                )
                 : parseFloat(
-                    req.body[offerwall_details.campaign_name_variable]
-                  );
+                  req.body[offerwall_details.campaign_name_variable]
+                );
             }
 
             if (
@@ -89,7 +89,7 @@ class OfferwallPostbackController {
             payout_amount = (payout_amount * currency_percent) / 100;
             // console.log('payout_amount', payout_amount);
             payout_amount = payout_amount.toFixed(2);
-            if(payout_amount <= 0){
+            if (payout_amount <= 0) {
               return res.send('1');
             }
             const transaction_obj = {
