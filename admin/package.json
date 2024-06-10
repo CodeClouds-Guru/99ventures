@@ -4,6 +4,7 @@
   "author": "Sourabh Das (sourabh.das@codeclouds.in)",
   "private": true,
   "dependencies": {
+    "ajv": "^7.0.3",
     "@emotion/cache": "11.7.1",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
