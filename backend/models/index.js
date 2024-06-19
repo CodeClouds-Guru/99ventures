@@ -63,6 +63,7 @@ if (process.env.DEV_MODE === '0') {
         scripted_99_substring: Sequelize.Op.substring,
         scripted_99_or: Sequelize.Op.or,
         scripted_99_op_ne: Sequelize.Op.ne,
+        scripted_99_less_than: Sequelize.Op.lte
       },
     }
   );
