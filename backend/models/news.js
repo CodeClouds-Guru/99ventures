@@ -66,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
           }
           const publicURL =
             process.env.CLIENT_API_PUBLIC_URL || 'http://127.0.0.1:4000';
-          // console.log('imageRawValue', rawValue);
+          console.log('imageRawValue', rawValue);
           return rawValue ? rawValue : `${publicURL}/images/no-img.jpg`;
         },
         set(value) {
