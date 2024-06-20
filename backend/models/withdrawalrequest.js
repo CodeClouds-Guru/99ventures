@@ -661,12 +661,12 @@ module.exports = (sequelize, DataTypes) => {
     req_body = ''
   ) => {
     const { MemberTransaction } = require('../models/index');
-    console.log(
-      '------approvedAndCompletedReq s',
-      transaction_ids,
-      withdrawal_ids,
-      req_body
-    );
+    // console.log(
+    //   '------approvedAndCompletedReq s',
+    //   transaction_ids,
+    //   withdrawal_ids,
+    //   req_body
+    // );
     let member_ids = [];
     // if (transaction_ids.length > 0) {
     // member_ids = await MemberTransaction.findAll({
@@ -677,7 +677,7 @@ module.exports = (sequelize, DataTypes) => {
     let get_transactions = await MemberTransaction.findAll({
       where: { id: transaction_ids, status: 1 },
     });
-    console.log('get_transactions', get_transactions);
+    // console.log('get_transactions', get_transactions);
 
     for (let records of get_transactions) {
       await MemberTransaction.update(
@@ -702,10 +702,10 @@ module.exports = (sequelize, DataTypes) => {
       { status: 'completed' },
       { where: { id: withdrawal_ids } }
     );
-    console.log(
-      '==========withdraw_req_update=============',
-      withdraw_req_update
-    );
+    // console.log(
+    //   '==========withdraw_req_update=============',
+    //   withdraw_req_update
+    // );
     //level upgrade event
     // if (member_ids.length > 0) {
     //   member_ids = member_ids.map((item) => item.member_id);
@@ -744,7 +744,7 @@ module.exports = (sequelize, DataTypes) => {
       if (
         checkMemberPaymentMethod.PaymentMethod.dataValues
           .parent_payment_method_id ==
-          payment_method.parent_payment_method_id ||
+        payment_method.parent_payment_method_id ||
         checkMemberPaymentMethod.primary_payment_method_id == payment_method.id
       ) {
         resp.member_status = true;

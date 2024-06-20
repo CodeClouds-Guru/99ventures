@@ -211,9 +211,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${
-                this.city || ''
-              }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
+            }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -443,8 +442,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -501,8 +500,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-      ? req.body.member_id
-      : [req.body.member_id];
+        ? req.body.member_id
+        : [req.body.member_id];
     try {
       let result = await Member.update(
         {
@@ -616,7 +615,7 @@ module.exports = (sequelize, DataTypes) => {
     let member = await Member.findOne({
       where: { id: member_id, status: 'member' },
     });
-    console.log('getMemberTierData===========', member);
+    // console.log('getMemberTierData===========', member);
     let signup = 0;
     let email_verified = 0;
     let profile_completed = 0;
@@ -672,7 +671,7 @@ module.exports = (sequelize, DataTypes) => {
         type: QueryTypes.SELECT,
       }
     );
-    console.log('getTotalWithdrawalData===============', total_paid);
+    // console.log('getTotalWithdrawalData===============', total_paid);
     return {
       total_paid: Math.abs(total_paid[0].total) || 0.0,
       total_paid_count: total_paid[0].total_count || 0.0,
@@ -691,7 +690,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
 
-    console.log('total_survey_completed', total_survey_completed);
+    // console.log('total_survey_completed', total_survey_completed);
     return total_survey_completed[0].cnt;
   };
 
