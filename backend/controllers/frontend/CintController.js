@@ -53,7 +53,7 @@ class CintController {
             country,
             gender
             // ssi2: member.id
-          };
+          };          
 
           const provider = await SurveyProvider.findOne({
             attributes: ['currency_percent'],
@@ -69,12 +69,15 @@ class CintController {
           const result = await cintObj.fetchAndReturnData(
             `${partUrl}?${queryString}`
           );
-          const surveys = result.surveys;
-          var survey_list = [];
-          if (surveys.length) {
-            for (let survey of surveys) {
+
+          //Filtered CPI Value as per Client's request
+          const filteredSurveys = result.surveys.length ? result.surveys.filter(row=> +row.cpi <= 8) : [];
+
+          let survey_list = [];
+          if (filteredSurveys.length) {
+            for (let survey of filteredSurveys) {
               const entryLink = survey.entry_link;
-              var rebuildEntryLink = entryLink.replace(
+              let rebuildEntryLink = entryLink.replace(
                 'SUBID',
                 ssi + survey.project_id
               );
