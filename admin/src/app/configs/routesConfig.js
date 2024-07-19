@@ -35,7 +35,7 @@ import PromocodesConfig from '../main/members/promocodes/PromocodesConfig'
 import NewsConfig from '../main/news/NewsConfig'
 import MembershipConfig from '../main/membership/MembershipConfig'
 
-const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig, SurveyProvidersConfig, PaymentGatewayConfig, /*PromocodesConfig,*/ NewsConfig, MembershipConfig];
+const routeConfigs = [CompanySiteConfig, DashboardConfig, SignOutConfig, SignInConfig, SignUpConfig, ForgotPasswordConfig, ResetPasswordConfig, CRUDConfig, ConfigurationConfig, ProfileConfig, EmailTemplateConfig, ScriptConfig, TicketConfig, FilemanagerConfig, SettingsConfiguration, ComponentsConfig, LayoutsConfig, PagesConfig, MembersConfig, CampaignsConfig, OfferwallsConfig, ShoutboxConfig, ConfigurationsConfig, PaypalConfig, WithdrawalRequestsConfig, SurveyProvidersConfig, PaymentGatewayConfig, PromocodesConfig, NewsConfig, MembershipConfig];
 
 /*
 * This is to redirect to company-site selection screen if company and site ID is not set
