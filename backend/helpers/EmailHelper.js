@@ -163,7 +163,8 @@ class EmailHelper {
           },
         });
         if (email_configurations.site_name_visible == '1') {
-          subject = email_configurations.from_name + ' - ' + subject;
+          // subject = email_configurations.from_name + ' - ' + subject;
+          subject = subject;
         }
         const mailData = {
           from:
