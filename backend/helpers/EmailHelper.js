@@ -182,7 +182,7 @@ class EmailHelper {
         if (attachments.length > 0) {
           mailData.attachments = attachments;
         }
-        // console.log('mailData=====', mailData);
+        console.log('mailData=====', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {
