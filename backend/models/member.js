@@ -211,8 +211,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.VIRTUAL,
         get() {
           return this.address_1
-            ? `${this.address_1}, ${this.address_2 || ''}, ${this.city || ''
-            }, zipcode - ${this.zip_code || ''}`
+            ? `${this.address_1}, ${this.address_2 || ''}, ${
+                this.city || ''
+              }, zipcode - ${this.zip_code || ''}`
             : '';
         },
       },
@@ -442,8 +443,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let members = await Member.findAll({
         attributes: ['status', 'id'],
@@ -500,8 +501,8 @@ module.exports = (sequelize, DataTypes) => {
     const member_ids = id
       ? [id]
       : Array.isArray(req.body.member_id)
-        ? req.body.member_id
-        : [req.body.member_id];
+      ? req.body.member_id
+      : [req.body.member_id];
     try {
       let result = await Member.update(
         {
@@ -566,6 +567,7 @@ module.exports = (sequelize, DataTypes) => {
       let resp = await MemberTransaction.updateMemberTransactionAndBalance(
         data
       );
+      console.log('profile_completion_bonus', resp);
       if (resp.status) {
         let mailEventbus = eventBus.emit('send_email', {
           action: 'Member Profile Completion',
