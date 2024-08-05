@@ -228,6 +228,11 @@ class EmailHelper {
         }
       }
     }
+    console.log(
+      'checkEmailAlert-------------',
+      email_action,
+      email_alert_status
+    );
     return email_alert_status;
   }
 }
