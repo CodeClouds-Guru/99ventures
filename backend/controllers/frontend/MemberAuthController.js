@@ -602,6 +602,12 @@ class MemberAuthController {
         if (member_status) {
           req.headers.site_id = member.company_portal_id;
           if (!member.profile_completed_on) {
+            let email_alerts = req.body.email_alerts || null;
+
+            member_status = await EmailAlert.saveEmailAlerts(
+              member_id,
+              email_alerts
+            );
             await Member.creditBonusByType(
               member,
               'complete_profile_bonus',
@@ -665,12 +671,6 @@ class MemberAuthController {
           //   member_id,
           //   member.profile_completed_on
           // );
-          let email_alerts = req.body.email_alerts || null;
-
-          member_status = await EmailAlert.saveEmailAlerts(
-            member_id,
-            email_alerts
-          );
         }
       }
       if (method === 'PUT') {
