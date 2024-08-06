@@ -567,7 +567,7 @@ module.exports = (sequelize, DataTypes) => {
       let resp = await MemberTransaction.updateMemberTransactionAndBalance(
         data
       );
-      console.log('profile_completion_bonus', resp);
+      // console.log('profile_completion_bonus', resp);
       if (resp.status) {
         let mailEventbus = eventBus.emit('send_email', {
           action: 'Member Profile Completion',

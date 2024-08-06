@@ -182,7 +182,7 @@ class EmailHelper {
         if (attachments.length > 0) {
           mailData.attachments = attachments;
         }
-        console.log('mailData=====', mailData);
+        // console.log('mailData=====', mailData);
         await transporter.sendMail(mailData);
       }
     } catch (error) {
@@ -228,11 +228,11 @@ class EmailHelper {
         }
       }
     }
-    console.log(
-      'checkEmailAlert-------------',
-      email_action,
-      email_alert_status
-    );
+    // console.log(
+    //   'checkEmailAlert-------------',
+    //   email_action,
+    //   email_alert_status
+    // );
     return email_alert_status;
   }
 }
