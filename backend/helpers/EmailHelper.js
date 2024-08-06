@@ -172,9 +172,9 @@ class EmailHelper {
             '<' +
             email_configurations.from_email +
             '>', //'info@moresurveys.com', // sender address
-          // to: to, // list of receivers
+          to: to, // list of receivers
           // from: 'sourabh.das@codeclouds.in',
-          to: 'debosmita.dey@codeclouds.co.in',
+          // to: 'debosmita.dey@codeclouds.co.in',
           subject: subject,
           //text: 'That was easy!',
           html: body,
