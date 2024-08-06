@@ -164,6 +164,7 @@ class EmailHelper {
         });
         if (email_configurations.site_name_visible == '1') {
           subject = email_configurations.from_name + ' - ' + subject;
+          // subject = subject;
         }
         const mailData = {
           from:
@@ -227,6 +228,11 @@ class EmailHelper {
         }
       }
     }
+    // console.log(
+    //   'checkEmailAlert-------------',
+    //   email_action,
+    //   email_alert_status
+    // );
     return email_alert_status;
   }
 }
