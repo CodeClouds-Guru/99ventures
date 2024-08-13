@@ -73,6 +73,7 @@ class MemberAuthController {
   }
   //login
   async login(req, res) {
+    
     let company_portal_id = req.session.company_portal.id;
     req.headers.site_id = company_portal_id;
     let company_id = req.session.company_portal.company_id;
@@ -93,6 +94,19 @@ class MemberAuthController {
       ip = ip[0];
     } else {
       ip = ip.replace('::ffff:', '');
+    }
+
+    //check if country is blacklisted
+    const balcklisted_country = await this.checkCountryBlacklistedFromIp(
+      ip,
+      company_portal_id
+    );
+    if (balcklisted_country > 0) {
+      req.session.flash = {
+        error:
+          'Unfortunately, MoreSurveys is currently unavailable in your country.Don’t worry, we will be opening up to more countries soon, so please check back regularly. Thank you for your patience.',
+      };
+      return res.redirect('/');
     }
 
     let member_status = true;
@@ -137,6 +151,7 @@ class MemberAuthController {
         }
       }
     }
+    console.log({member_status})
     if (member_status) {
       req.session.member = member;
       if (!member.profile_completed_on) redirect_page = '/profile';
