@@ -116,6 +116,7 @@ async function redirectWithErrorMessage(req, res, error_code) {
     req.session.flash = { error: msg };
     res.redirect('/faq');
   } else {
+    req.session.member = null;
     req.session.flash = { access_error: msg, notice: msg };
     res.redirect('/notice');
   }
@@ -192,7 +193,9 @@ module.exports = async function (req, res, next) {
   let partial_path = req.path;
   const company_portal_id = await getCompanyPortalId(req);
   const excepts = await getExceptRoutes(company_portal_id);
+  console.log('Inside IP Middleware',partial_path);
   if (!excepts.includes(partial_path) && !isImpersonated(req)) {
+    console.log('Inside IP Middleware->if',{partial_path});
     const is_blacklisted_ip = await IpConfiguration.count({
       where: {
         company_portal_id: company_portal_id,
