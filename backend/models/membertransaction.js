@@ -466,7 +466,7 @@ module.exports = (sequelize, DataTypes) => {
     // option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
     // console.log('response', response);
-    
+
     //total count minus total reverse
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
@@ -596,7 +596,7 @@ module.exports = (sequelize, DataTypes) => {
       //update member referral table
       await MemberReferral.update(
         {
-          amount: parseFloat(referral_amount),
+          amount: parseFloat(ref_modified_total_earnings),
         },
         {
           where: {
