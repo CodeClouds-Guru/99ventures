@@ -382,7 +382,8 @@ module.exports = (sequelize, DataTypes) => {
           let referral_data = await MemberTransaction.referralAmountUpdate(
             data.member_id,
             data.amount,
-            transaction.id
+            transaction.id,
+            modified_total_earnings
           );
         }
       }
@@ -523,7 +524,8 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.referralAmountUpdate = async (
     member_id,
     modified_total_earnings,
-    parent_transaction_id
+    parent_transaction_id,
+    member_total_earnings
   ) => {
     const {
       MemberBalance,
@@ -596,7 +598,7 @@ module.exports = (sequelize, DataTypes) => {
       //update member referral table
       await MemberReferral.update(
         {
-          amount: parseFloat(ref_modified_total_earnings),
+          amount: parseFloat(member_total_earnings),
         },
         {
           where: {
