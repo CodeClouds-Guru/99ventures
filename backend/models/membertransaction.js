@@ -596,9 +596,18 @@ module.exports = (sequelize, DataTypes) => {
         )
       );
       //update member referral table
+      let member_referral_data = await MemberReferral.findOne({
+        attributes: ['amount'],
+        where: {
+          member_id: member.member_referral_id,
+          referral_id: member_id,
+        },
+      });
       await MemberReferral.update(
         {
-          amount: parseFloat(member_total_earnings),
+          amount:
+            parseFloat(member_referral_data.dataValues.amount) +
+            parseFloat(member_total_earnings),
         },
         {
           where: {
