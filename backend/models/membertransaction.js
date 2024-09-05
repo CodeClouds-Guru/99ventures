@@ -613,7 +613,7 @@ module.exports = (sequelize, DataTypes) => {
         {
           amount:
             parseFloat(member_referral_data.dataValues.amount) +
-            parseFloat(member_total_earnings),
+            parseFloat(referral_amount),
         },
         {
           where: {
