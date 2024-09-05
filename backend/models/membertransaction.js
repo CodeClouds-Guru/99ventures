@@ -603,6 +603,7 @@ module.exports = (sequelize, DataTypes) => {
           referral_id: member_id,
         },
       });
+      console.log('606 -- member_referral_data', member_referral_data);
       await MemberReferral.update(
         {
           amount:
