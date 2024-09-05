@@ -604,6 +604,11 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
       console.log('606 -- member_referral_data', member_referral_data);
+      console.log('607 -- referral_amount', referral_amount);
+      console.log(
+        '608 -- ref_modified_total_earnings',
+        ref_modified_total_earnings
+      );
       await MemberReferral.update(
         {
           amount:
