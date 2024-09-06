@@ -375,9 +375,12 @@ module.exports = (sequelize, DataTypes) => {
             company_portal_id: member.company_portal_id,
           },
         });
+        const amount_action_arr = ['survey', 'offerwall'];
+
+        //  data.amount_action !== 'admin_adjustment';
         if (
           parseInt(config_data.dataValues.settings_value) == 1 &&
-          data.amount_action !== 'admin_adjustment'
+          amount_action_arr.includes(data.amount_action)
         ) {
           let referral_data = await MemberTransaction.referralAmountUpdate(
             data.member_id,
