@@ -375,14 +375,19 @@ module.exports = (sequelize, DataTypes) => {
             company_portal_id: member.company_portal_id,
           },
         });
+        const amount_action_arr = ['survey', 'offerwall'];
+
+        //  data.amount_action !== 'admin_adjustment';
         if (
           parseInt(config_data.dataValues.settings_value) == 1 &&
-          data.amount_action !== 'admin_adjustment'
+          amount_action_arr.includes(data.amount_action)
+          // data.amount_action !== 'admin_adjustment'
         ) {
           let referral_data = await MemberTransaction.referralAmountUpdate(
             data.member_id,
             data.amount,
-            transaction.id
+            transaction.id,
+            modified_total_earnings
           );
         }
       }
@@ -466,7 +471,7 @@ module.exports = (sequelize, DataTypes) => {
     // option.logging = console.log;
     let response = await MemberTransaction.findOne(option);
     // console.log('response', response);
-    
+
     //total count minus total reverse
     let total_reversed = await db.sequelize.query(
       "SELECT IFNULL(SUM(amount), 0) as total FROM `member_transactions` WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND member_id=?",
@@ -523,7 +528,8 @@ module.exports = (sequelize, DataTypes) => {
   MemberTransaction.referralAmountUpdate = async (
     member_id,
     modified_total_earnings,
-    parent_transaction_id
+    parent_transaction_id,
+    member_total_earnings
   ) => {
     const {
       MemberBalance,
@@ -594,9 +600,24 @@ module.exports = (sequelize, DataTypes) => {
         )
       );
       //update member referral table
+      let member_referral_data = await MemberReferral.findOne({
+        attributes: ['amount'],
+        where: {
+          member_id: member.member_referral_id,
+          referral_id: member_id,
+        },
+      });
+      console.log('606 -- member_referral_data', member_referral_data);
+      console.log('607 -- referral_amount', referral_amount);
+      console.log(
+        '608 -- ref_modified_total_earnings',
+        ref_modified_total_earnings
+      );
       await MemberReferral.update(
         {
-          amount: parseFloat(referral_amount),
+          amount:
+            parseFloat(member_referral_data.dataValues.amount) +
+            parseFloat(referral_amount),
         },
         {
           where: {
