@@ -5,7 +5,7 @@ const {
   MemberBalance,
   WithdrawalRequest,
   PaymentMethod,
-  MemberNotification,
+  MemberNotification, MemberTransaction
 } = require('../../models/index');
 const moment = require('moment');
 const eventBus = require('../../eventBus');
@@ -36,8 +36,8 @@ class MemberTransactionController extends Controller {
         ...and_query,
         ...(query_where.status &&
           query_where.status == 5 && {
-            parent_transaction_id: { [Op.ne]: null },
-          }),
+          parent_transaction_id: { [Op.ne]: null },
+        }),
       };
     }
     options.where = new_option;
@@ -215,14 +215,14 @@ class MemberTransactionController extends Controller {
         // );
         record.dataValues.amount_action =
           record.dataValues.ParentTransaction.dataValues.amount_action ==
-          'promo_code'
+            'promo_code'
             ? record.dataValues.amount_action +
-              '-' +
-              record.dataValues.ParentTransaction.dataValues.note
+            '-' +
+            record.dataValues.ParentTransaction.dataValues.note
             : record.dataValues.amount_action;
         record.dataValues.amount_action =
           record.dataValues.ParentTransaction.dataValues.amount_action ==
-          'survey'
+            'survey'
             ? record.dataValues.note
             : record.dataValues.amount_action;
         // console.log(
@@ -256,6 +256,7 @@ class MemberTransactionController extends Controller {
 
   // override update function
   async update(req, res) {
+
     let transaction_id = req.params.id || null;
     let member_id = req.body.member_id || null;
     let type = req.body.type || null;
@@ -404,5 +405,31 @@ class MemberTransactionController extends Controller {
   async sendMailEvent(mail_data) {
     return eventBus.emit('send_email', mail_data);
   }
+
+  // async hello(req, res) {
+  //   return res.json({
+  //     status: true,
+  //     data: 'hello'
+  //   });
+  // }
+
+  // Api for - Referral amount calculation related changes
+  async referralCalc(req, res) {
+    // console.log(req.params);
+    // console.log(req.query);
+    let response = null;
+    try {
+      response = await MemberTransaction.referralCalculation(req.params.member_id);
+    } catch (e) {
+      console.log(e)
+      response = e.message;
+    }
+
+    return res.json({
+      status: true,
+      data: response
+    });
+  }
+
 }
 module.exports = MemberTransactionController;

@@ -22,6 +22,9 @@ const ReportController = new ReportControllerClass();
 
 const DynamicRouteController = require('../controllers/backend/DynamicRouteController');
 
+const MemberTransactionControllerClass = require('../controllers/backend/MemberTransactionController');
+const MemberTransactionController = new MemberTransactionControllerClass();
+
 const Paypal = require('../helpers/Paypal');
 
 router.get('/', async (req, res) => {
@@ -89,6 +92,13 @@ router.get('/pages/preview/:id?', [AuthMiddleware], PageController.preview);
 //   var capture_payment = await paypal_class.capturePayment(req, res);
 //   res.send(capture_payment);
 // });
+
+/*
+* Api for - Referral amount calculation related changes
+*/
+
+router.get('/referral-calc/:member_id?', MemberTransactionController.referralCalc);
+
 
 router.all(
   '/:module/:action?/:id?',

@@ -329,11 +329,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
 
-    // console.log('before modification', data);
+    console.log('before modification', data);
 
     let modified_total_earnings = parseFloat(total_earnings[0].total_amount);
     data.status = data.status || 0;
-    // console.log('after modification', data);
+    console.log('after modification', data);
     if (parseInt(data.status) == 0 || parseInt(data.status) == 2) {
       modified_total_earnings =
         modified_total_earnings + parseFloat(data.amount);
@@ -376,19 +376,19 @@ module.exports = (sequelize, DataTypes) => {
           },
         });
         const amount_action_arr = ['survey', 'offerwall'];
-
+        console.log('includes', amount_action_arr.includes(data.amount_action));
         //  data.amount_action !== 'admin_adjustment';
         if (
           parseInt(config_data.dataValues.settings_value) == 1 &&
           amount_action_arr.includes(data.amount_action)
           // data.amount_action !== 'admin_adjustment'
         ) {
-          let referral_data = await MemberTransaction.referralAmountUpdate(
-            data.member_id,
-            data.amount,
-            transaction.id,
-            modified_total_earnings
-          );
+          // let referral_data = await MemberTransaction.referralAmountUpdate(
+          //   data.member_id,
+          //   data.amount,
+          //   transaction.id,
+          //   modified_total_earnings
+          // );
         }
       }
     }
@@ -414,10 +414,10 @@ module.exports = (sequelize, DataTypes) => {
           `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             .startOf('day')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
@@ -427,10 +427,10 @@ module.exports = (sequelize, DataTypes) => {
             // .subtract(6, 'days')
             .startOf('isoWeek')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
@@ -440,10 +440,10 @@ module.exports = (sequelize, DataTypes) => {
             // .subtract(30, 'days')
             .startOf('month')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-            .endOf('day')
-            .format(
-              'YYYY-MM-DD HH:mm:ss'
-            )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              .endOf('day')
+              .format(
+                'YYYY-MM-DD HH:mm:ss'
+              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
@@ -880,8 +880,8 @@ module.exports = (sequelize, DataTypes) => {
       `SELECT IFNULL(SUM(amount), 0) as total FROM member_transactions WHERE type='withdraw' AND parent_transaction_id IS NOT NULL AND completed_at BETWEEN '${moment()
         .startOf(startOf)
         .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
-        .endOf('day')
-        .format('YYYY-MM-DD HH:mm:ss')}' AND member_id=?`,
+          .endOf('day')
+          .format('YYYY-MM-DD HH:mm:ss')}' AND member_id=?`,
       {
         replacements: [member_id],
         type: QueryTypes.SELECT,
@@ -889,6 +889,52 @@ module.exports = (sequelize, DataTypes) => {
     );
     // console.log('total_reversed', total_reversed);
     return total_reversed ? total_reversed[0].total : 0;
+  };
+
+
+  //get count of transaction as given date
+  MemberTransaction.referralCalculation = async (member_id) => {
+    console.log('=================================', member_id);
+    // const { MemberReferral } = require('../models/index');
+
+    const { MemberReferral } = require('../models/index');
+    const { QueryTypes } = require('sequelize');
+    const db = require('../models/index');
+
+    let transaction_amounts = await db.sequelize.query(
+      "select * from (SELECT sum(mt.amount) ref_amount, pt.member_id FROM member_transactions as mt left join member_transactions as pt on mt.parent_transaction_id=pt.id where mt.amount_action='referral' and mt.member_id=? group by pt.member_id) as A where A.member_id in (SELECT referral_id FROM member_referrals where member_id=?) order by A.member_id asc",
+      {
+        replacements: [member_id, member_id],
+        type: QueryTypes.SELECT,
+      }
+    );
+    console.log('transaction_amounts', transaction_amounts);
+
+    for (const transaction of transaction_amounts) {
+      let resp = await MemberReferral.update(
+        {
+          amount:
+            parseFloat(transaction.ref_amount),
+        },
+        {
+          where: {
+            member_id: transaction.member_id,
+            referral_id: member_id,
+          },
+        }
+      );
+      const logger = require('../helpers/Logger')(`member-referral.log`);
+      logger.info(JSON.stringify({
+        resp, member_id: member_id,
+        referral_id: transaction.member_id,
+      }));
+    }
+
+
+
+
+
+    return true;
   };
   return MemberTransaction;
 };
