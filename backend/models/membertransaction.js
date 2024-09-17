@@ -895,7 +895,7 @@ module.exports = (sequelize, DataTypes) => {
   //get count of transaction as given date
   MemberTransaction.referralCalculation = async (member_id) => {
     console.log('=================================', member_id);
-    // const { MemberReferral } = require('../models/index');
+    // const { sequelize } = require('../models');
 
     const { MemberReferral } = require('../models/index');
     const { QueryTypes } = require('sequelize');
@@ -918,11 +918,20 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           where: {
-            member_id: transaction.member_id,
-            referral_id: member_id,
+            member_id: member_id,
+            referral_id: transaction.member_id,
           },
         }
       );
+      console.log('replacements:', transaction.ref_amount, transaction.member_id, member_id)
+      // let resp = await db.sequelize.query(
+      //   'UPDATE member_referrals SET amount = ? WHERE member_id = ? AND referral_id = ?',
+      //   {
+      //     replacements: [transaction.ref_amount, transaction.member_id, transaction.member_id],
+      //     type: QueryTypes.UPDATE,
+      //   }
+      // );
+      console.log(resp)
       const logger = require('../helpers/Logger')(`member-referral.log`);
       logger.info(JSON.stringify({
         resp, member_id: member_id,
