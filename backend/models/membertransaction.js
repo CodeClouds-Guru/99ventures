@@ -376,19 +376,19 @@ module.exports = (sequelize, DataTypes) => {
           },
         });
         const amount_action_arr = ['survey', 'offerwall'];
-        console.log('includes', amount_action_arr.includes(data.amount_action));
+        // console.log('includes', amount_action_arr.includes(data.amount_action));
         //  data.amount_action !== 'admin_adjustment';
         if (
           parseInt(config_data.dataValues.settings_value) == 1 &&
           amount_action_arr.includes(data.amount_action)
           // data.amount_action !== 'admin_adjustment'
         ) {
-          // let referral_data = await MemberTransaction.referralAmountUpdate(
-          //   data.member_id,
-          //   data.amount,
-          //   transaction.id,
-          //   modified_total_earnings
-          // );
+          let referral_data = await MemberTransaction.referralAmountUpdate(
+            data.member_id,
+            data.amount,
+            transaction.id,
+            modified_total_earnings
+          );
         }
       }
     }
