@@ -417,7 +417,7 @@ module.exports = (sequelize, DataTypes) => {
               .endOf('day')
               .format(
                 'YYYY-MM-DD HH:mm:ss'
-              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'today',
       ],
@@ -425,12 +425,12 @@ module.exports = (sequelize, DataTypes) => {
         sequelize.literal(
           `IFNULL(SUM(CASE WHEN MemberTransaction.completed_at BETWEEN '${moment()
             // .subtract(6, 'days')
-            .startOf('isoWeek')
+            .startOf('week')
             .format('YYYY-MM-DD HH:mm:ss')}' AND '${moment()
               .endOf('day')
               .format(
                 'YYYY-MM-DD HH:mm:ss'
-              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'week',
       ],
@@ -443,7 +443,7 @@ module.exports = (sequelize, DataTypes) => {
               .endOf('day')
               .format(
                 'YYYY-MM-DD HH:mm:ss'
-              )}' AND parent_transaction_id IS NULL OR amount_action = 'referral' THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
+              )}' AND (parent_transaction_id IS NULL OR amount_action = 'referral') THEN MemberTransaction.amount ELSE 0.00 END),0.00)`
         ),
         'month',
       ],
@@ -607,12 +607,12 @@ module.exports = (sequelize, DataTypes) => {
           referral_id: member_id,
         },
       });
-      console.log('606 -- member_referral_data', member_referral_data);
-      console.log('607 -- referral_amount', referral_amount);
-      console.log(
-        '608 -- ref_modified_total_earnings',
-        ref_modified_total_earnings
-      );
+      // console.log('606 -- member_referral_data', member_referral_data);
+      // console.log('607 -- referral_amount', referral_amount);
+      // console.log(
+      //   '608 -- ref_modified_total_earnings',
+      //   ref_modified_total_earnings
+      // );
       await MemberReferral.update(
         {
           amount:
@@ -894,7 +894,7 @@ module.exports = (sequelize, DataTypes) => {
 
   //get count of transaction as given date
   MemberTransaction.referralCalculation = async (member_id) => {
-    console.log('=================================', member_id);
+    // console.log('=================================', member_id);
     // const { sequelize } = require('../models');
 
     const { MemberReferral } = require('../models/index');
@@ -902,13 +902,13 @@ module.exports = (sequelize, DataTypes) => {
     const db = require('../models/index');
 
     let transaction_amounts = await db.sequelize.query(
-      "select * from (SELECT sum(mt.amount) ref_amount, pt.member_id FROM member_transactions as mt left join member_transactions as pt on mt.parent_transaction_id=pt.id where mt.amount_action='referral' and mt.member_id=? group by pt.member_id) as A where A.member_id in (SELECT referral_id FROM member_referrals where member_id=?) order by A.member_id asc",
+      "select * from (SELECT sum(mt.amount) ref_amount, pt.member_id FROM member_transactions as mt left join member_transactions as pt on mt.parent_transaction_id=pt.id where mt.amount_action='referral' and mt.member_id=? group by pt.mexsmber_id) as A where A.member_id in (SELECT referral_id FROM member_referrals where member_id=?) order by A.member_id asc",
       {
         replacements: [member_id, member_id],
         type: QueryTypes.SELECT,
       }
     );
-    console.log('transaction_amounts', transaction_amounts);
+    // console.log('transaction_amounts', transaction_amounts);
 
     for (const transaction of transaction_amounts) {
       let resp = await MemberReferral.update(
@@ -923,7 +923,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         }
       );
-      console.log('replacements:', transaction.ref_amount, transaction.member_id, member_id)
+      // console.log('replacements:', transaction.ref_amount, transaction.member_id, member_id)
       // let resp = await db.sequelize.query(
       //   'UPDATE member_referrals SET amount = ? WHERE member_id = ? AND referral_id = ?',
       //   {
@@ -931,7 +931,7 @@ module.exports = (sequelize, DataTypes) => {
       //     type: QueryTypes.UPDATE,
       //   }
       // );
-      console.log(resp)
+      // console.log(resp)
       const logger = require('../helpers/Logger')(`member-referral.log`);
       logger.info(JSON.stringify({
         resp, member_id: member_id,
