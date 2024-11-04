@@ -235,9 +235,13 @@ class MemberAuthController {
             email,
           },
           paranoid: false,
+          order: [
+            ['id', 'DESC'],
+          ],
         });
         let member_details = [];
-        console.log('existing_email_or_username', existing_email_or_username);
+        console.log('existing_email_or_username', existing_email_or_username.dataValues.status);
+        console.log('existing_email_or_username', existing_email_or_username.length);
         if (existing_email_or_username.length > 0) {
           if (existing_email_or_username.status == 'deleted') {
             member_status = false;
