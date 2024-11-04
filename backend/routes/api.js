@@ -28,7 +28,7 @@ const MemberTransactionController = new MemberTransactionControllerClass();
 const Paypal = require('../helpers/Paypal');
 
 router.get('/', async (req, res) => {
-  res.json({ message: 'API working', });
+  res.json({ message: 'API working' });
 });
 
 router.post('/signup', AuthController.signup);
@@ -40,7 +40,11 @@ router.get('/refresh-token', [AuthMiddleware], AuthController.refreshToken);
 router.get('/companies', [AuthMiddleware], AuthController.getCompanyAndSites);
 router.post('/forgot-password', AuthController.forgotPassword);
 router.post('/reset-password', AuthController.resetPassword);
-router.post('/update-widget-preference', [AuthMiddleware], AuthController.updateWidgetPreference);
+router.post(
+  '/update-widget-preference',
+  [AuthMiddleware],
+  AuthController.updateWidgetPreference
+);
 router.get(
   '/resend-invitation/:id',
   [AuthMiddleware],

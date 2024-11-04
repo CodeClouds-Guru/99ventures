@@ -73,7 +73,7 @@ class MemberAuthController {
   }
   //login
   async login(req, res) {
-    
+
     let company_portal_id = req.session.company_portal.id;
     req.headers.site_id = company_portal_id;
     let company_id = req.session.company_portal.company_id;
@@ -151,7 +151,7 @@ class MemberAuthController {
         }
       }
     }
-    console.log({member_status})
+    console.log({ member_status })
     if (member_status) {
       req.session.member = member;
       if (!member.profile_completed_on) redirect_page = '/profile';
@@ -229,16 +229,24 @@ class MemberAuthController {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(req.body.password, salt);
         const email = req.body.email.trim().toLowerCase();
-        let existing_email_or_username = await Member.count({
+        let existing_email_or_username = await Member.findOne({
           where: {
             company_portal_id: company_portal_id,
             email,
           },
+          paranoid: false,
         });
         let member_details = [];
-        if (existing_email_or_username > 0) {
-          member_status = false;
-          member_message = 'Sorry! this email has already been taken';
+        console.log('existing_email_or_username', existing_email_or_username);
+        if (existing_email_or_username.length > 0) {
+          if (existing_email_or_username.status == 'deleted') {
+            member_status = false;
+            member_message = 'Sorry! this account has been deleted previously. Please contact to admin if you wish to register again using the ame email.';
+          } else {
+            member_status = false;
+            member_message = 'Sorry! this email has already been taken';
+          }
+
         } else {
           req.body.membership_tier_id = null;
           // let files = [];
@@ -2090,7 +2098,7 @@ class MemberAuthController {
               : 1;
           let promo_code_status =
             promocode_validation.data.dataValues.max_uses ==
-            promo_code_used_count
+              promo_code_used_count
               ? 'expired'
               : 'active';
 
