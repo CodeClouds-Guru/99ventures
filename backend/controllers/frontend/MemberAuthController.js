@@ -245,7 +245,7 @@ class MemberAuthController {
         if (existing_email_or_username) {
           if (existing_email_or_username.dataValues.status == 'deleted') {
             member_status = false;
-            member_message = 'Sorry! this account has been deleted previously. Please contact to admin if you wish to register again using the ame email.';
+            member_message = 'Sorry! this account has been deleted previously. Please contact to admin if you wish to register again using the same email.';
           } else {
             member_status = false;
             member_message = 'Sorry! this email has already been taken';
