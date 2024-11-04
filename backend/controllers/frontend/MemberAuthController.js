@@ -242,8 +242,8 @@ class MemberAuthController {
         let member_details = [];
         console.log('existing_email_or_username', existing_email_or_username.dataValues.status);
         console.log('existing_email_or_username', existing_email_or_username.length);
-        if (existing_email_or_username.length > 0) {
-          if (existing_email_or_username.status == 'deleted') {
+        if (existing_email_or_username) {
+          if (existing_email_or_username.dataValues.status == 'deleted') {
             member_status = false;
             member_message = 'Sorry! this account has been deleted previously. Please contact to admin if you wish to register again using the ame email.';
           } else {
