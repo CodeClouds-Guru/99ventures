@@ -241,7 +241,7 @@ class MemberAuthController {
         });
         let member_details = [];
         console.log('existing_email_or_username', existing_email_or_username.dataValues.status);
-        console.log('existing_email_or_username', existing_email_or_username.length);
+        console.log('existing_email_or_username', existing_email_or_username);
         if (existing_email_or_username) {
           if (existing_email_or_username.dataValues.status == 'deleted') {
             member_status = false;
