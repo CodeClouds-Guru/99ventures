@@ -81,14 +81,14 @@ module.exports = async function (req, res, next) {
     let transaction_stat = await MemberTransaction.getTransactionCount(
       req.session.member.id
     );
-    member.setDataValue('total_withdraws', total_withdraws.amount);
-    member.setDataValue('total_earnings', transaction_stat.total || 0.0);
-    member.setDataValue('transaction_today', transaction_stat.today || 0.0);
-    member.setDataValue('transaction_weekly', transaction_stat.week || 0.0);
-    member.setDataValue('transaction_monthly', transaction_stat.month || 0.0);
+    member.setDataValue('total_withdraws', total_withdraws?.amount || 0.0);
+    member.setDataValue('total_earnings', transaction_stat?.total || 0.0);
+    member.setDataValue('transaction_today', transaction_stat?.today || 0.0);
+    member.setDataValue('transaction_weekly', transaction_stat?.week || 0.0);
+    member.setDataValue('transaction_monthly', transaction_stat?.month || 0.0);
     member.setDataValue(
       'total_referral_amount',
-      transaction_stat.total_referral_amount || 0.0
+      transaction_stat?.total_referral_amount || 0.0
     );
     member.setDataValue(
       'total_referred',
