@@ -40,7 +40,7 @@ module.exports = async function (req, res, next) {
 
     const member = await Member.findOne({
       where: { id: req.session.member.id },
-      // paranoid: false,
+      paranoid: false,
       include: [
         {
           model: MemberNotification,
