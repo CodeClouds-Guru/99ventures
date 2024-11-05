@@ -241,11 +241,11 @@ class MemberAuthController {
         });
         let member_details = [];
         // console.log('existing_email_or_username', existing_email_or_username.dataValues.status);
-        console.log('existing_email_or_username', existing_email_or_username);
+        // console.log('existing_email_or_username', existing_email_or_username);
         if (existing_email_or_username) {
           if (existing_email_or_username.dataValues.status == 'deleted') {
             member_status = false;
-            member_message = 'Sorry! this account has been deleted previously. Please contact to admin if you wish to register again using the same email.';
+            member_message = 'We have detected that you have previously had an account with MoreSurveys which was closed permanently. As a result, you will not be able to use MoreSurveys again, or register any further accounts here in future.';
           } else {
             member_status = false;
             member_message = 'Sorry! this email has already been taken';
