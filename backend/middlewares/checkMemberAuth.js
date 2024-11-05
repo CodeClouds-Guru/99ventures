@@ -53,7 +53,7 @@ module.exports = async function (req, res, next) {
         },
       ],
     });
-
+    console.log('member', member);
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
