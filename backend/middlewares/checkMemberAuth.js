@@ -40,7 +40,7 @@ module.exports = async function (req, res, next) {
 
     const member = await Member.findOne({
       where: { id: req.session.member.id },
-      paranoid: false,
+      // paranoid: false,
       include: [
         {
           model: MemberNotification,
@@ -53,6 +53,7 @@ module.exports = async function (req, res, next) {
         },
       ],
     });
+
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
