@@ -54,12 +54,9 @@ module.exports = async function (req, res, next) {
       ],
     });
     if (!member) {
-      req.session.flash = {
-        error:
-          'Your account has been suspended. Please contact our support team via support ticket. You will find this in our "help" tab.',
-      };
-      res.status(401).redirect('/faq');
-      return;
+      req.session.member = null;
+      req.session.impersonation = null;
+      res.redirect('/');
     }
     // console.log('member', member);
     //get total earnings
