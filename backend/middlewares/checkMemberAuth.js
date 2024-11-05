@@ -40,7 +40,7 @@ module.exports = async function (req, res, next) {
 
     const member = await Member.findOne({
       where: { id: req.session.member.id },
-      paranoid: false,
+      // paranoid: false,
       include: [
         {
           model: MemberNotification,
@@ -53,7 +53,15 @@ module.exports = async function (req, res, next) {
         },
       ],
     });
-    console.log('member', member);
+    if (!member) {
+      req.session.flash = {
+        error:
+          'Your account has been suspended. Please contact our support team via support ticket. You will find this in our "help" tab.',
+      };
+      res.status(401).redirect('/faq');
+      return;
+    }
+    // console.log('member', member);
     //get total earnings
     let total_withdraws = await MemberBalance.findOne({
       where: { amount_type: 'cash', member_id: req.session.member.id },
@@ -117,7 +125,7 @@ module.exports = async function (req, res, next) {
     let req_path = req.path.replaceAll('/', '');
     if (
       req.method === 'GET' &&
-      member.status === 'suspended' &&
+      (member.status === 'suspended') &&
       [
         'dashboard',
         'get-scripts',
