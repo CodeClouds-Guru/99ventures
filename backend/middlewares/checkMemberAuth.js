@@ -56,7 +56,7 @@ module.exports = async function (req, res, next) {
     if (!member) {
       req.session.member = null;
       req.session.impersonation = null;
-      res.redirect('/');
+      return res.redirect('/');
     }
     // console.log('member', member);
     //get total earnings
